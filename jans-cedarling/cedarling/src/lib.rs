@@ -198,7 +198,11 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
+    #[allow(clippy::too_many_lines)]
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+        #[cfg(target_arch = "wasm32")]
+        cedarling_jwt_crypto::install();
+
         // Checked here as well as when decoding, so a `BootstrapConfig` built
         // directly cannot skip it; before any network work, as it needs none.
         if config.trace_config.is_some() {

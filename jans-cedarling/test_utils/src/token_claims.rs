@@ -9,7 +9,9 @@ use std::sync::LazyLock;
 
 use serde::Serialize;
 
-use {jsonwebkey as jwk, jsonwebtoken as jwt};
+use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
+use jsonwebtoken as jwt;
+use p256::pkcs8::EncodePrivateKey;
 
 // Represent meta information about entity from cedar-policy schema.
 static ENCODING_KEYS: LazyLock<GeneratedKeys> = LazyLock::new(generate_keys);
@@ -19,40 +21,25 @@ pub struct GeneratedKeys {
     pub private_encoding_key: jwt::EncodingKey,
 }
 
-/// Generates a set of private and public keys using ES256
-///
-/// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
+/// Generates an ES256 private key
 fn generate_keys() -> GeneratedKeys {
     let kid = 1;
-    // Generate a private key
-    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
-    jwk.set_algorithm(jwk::Algorithm::ES256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some("some_id".to_string());
-
-    // Generate public key
-    let mut public_key =
-        serde_json::to_value(jwk.key.to_public()).expect("should serialize public key");
-    public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
-    let public_key: jwt::jwk::Jwk =
-        serde_json::from_value(public_key).expect("should deserialize public key");
-
-    let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
-        .expect("should generate encoding key");
-
-    let public_keys = jwt::jwk::JwkSet {
-        keys: vec![public_key],
-    };
-    let _public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
+    let private_key = p256::ecdsa::SigningKey::from_slice(&rand::random::<[u8; 32]>())
+        .expect("should generate P-256 key")
+        .to_pkcs8_der()
+        .expect("should encode P-256 key");
 
     GeneratedKeys {
         private_key_id: kid.to_string(),
-        private_encoding_key: private_key,
+        private_encoding_key: jwt::EncodingKey::from_ec_der(private_key.as_bytes()),
     }
 }
 
 /// Generates a token string signed with ES256
 pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
+    #[cfg(target_arch = "wasm32")]
+    cedarling_jwt_crypto::install();
+
     let key_id = ENCODING_KEYS.private_key_id.clone();
     let encoding_key = &ENCODING_KEYS.private_encoding_key;
 
@@ -82,17 +69,10 @@ pub struct KeyPair {
 /// Generates a HS256-signed token using the given claims.
 #[track_caller]
 pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> KeyPair {
-    let mut jwk = jwk::JsonWebKey::new(
-        jwk::Key::try_generate_symmetric(256).expect("invalid symmetric key size"),
-    );
-    jwk.set_algorithm(jwk::Algorithm::HS256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some("some_id".to_string());
+    let secret: [u8; 32] = rand::random();
+    let mut decoding_key =
+        serde_json::json!({"kty": "oct", "k": BASE64_URL_SAFE_NO_PAD.encode(secret)});
 
-    // since this is a symmetric key, the public key is the same as the private
-    let mut decoding_key = serde_json::to_value(jwk.key.clone()).expect("should serialize key");
-
-    // set the key parameters
     if let Some(kid) = &kid {
         decoding_key["kid"] = serde_json::Value::String(kid.to_string());
     }
@@ -100,10 +80,7 @@ pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> KeyPair {
         serde_json::from_value(decoding_key).expect("shold generate decoding key");
     decoding_key.common.key_algorithm = Some(jwt::jwk::KeyAlgorithm::HS256);
 
-    let encoding_key = match *jwk.key {
-        jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
-        _ => panic!("key mismatch"),
-    };
+    let encoding_key = jwt::EncodingKey::from_secret(&secret);
 
     KeyPair {
         kid: kid.map(|s| s.to_string()),
@@ -119,6 +96,9 @@ pub fn generate_token_using_claims_and_keypair(
     claims: &impl Serialize,
     keypair: &KeyPair,
 ) -> String {
+    #[cfg(target_arch = "wasm32")]
+    cedarling_jwt_crypto::install();
+
     let header = jwt::Header {
         alg: keypair.alg,
         kid: keypair.kid.clone(),

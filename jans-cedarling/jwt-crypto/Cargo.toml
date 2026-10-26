@@ -1,0 +1,26 @@
+[package]
+name = "cedarling-jwt-crypto"
+version = "0.0.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+description = "RustCrypto CryptoProvider for jsonwebtoken on targets without aws-lc-rs"
+
+[dependencies]
+jsonwebtoken = { workspace = true }
+p256 = { version = "0.14", default-features = false, features = ["ecdsa", "pkcs8"] }
+p384 = { version = "0.14", default-features = false, features = ["ecdsa", "pkcs8"] }
+ed25519-dalek = { workspace = true, features = ["pkcs8"] }
+hmac = "0.13"
+sha2 = { workspace = true }
+rsa = "0.9.10"
+sha2_010 = { package = "sha2", version = "0.10", features = ["oid"] }
+rand_core_06 = { package = "rand_core", version = "0.6", features = ["getrandom"] }
+
+[dev-dependencies]
+p256 = { version = "0.14", default-features = false, features = ["ecdsa", "pkcs8", "alloc"] }
+p384 = { version = "0.14", default-features = false, features = ["ecdsa", "pkcs8", "alloc"] }
+ed25519-dalek = { workspace = true, features = ["pkcs8", "alloc"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+jsonwebtoken = { workspace = true, features = ["aws_lc_rs"] }
