@@ -15695,17 +15695,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean

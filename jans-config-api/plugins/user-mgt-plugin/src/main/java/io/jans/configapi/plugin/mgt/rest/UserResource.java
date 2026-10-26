@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.mgt.rest;
 
-import io.jans.as.model.common.IntrospectionResponse;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.configapi.core.model.ApiError;
@@ -24,11 +23,9 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -51,6 +48,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
 import org.apache.commons.lang3.StringUtils;
 
 @Path(Constants.CONFIG_USER)
@@ -175,7 +173,6 @@ public class UserResource extends BaseResource {
         }
         CustomUser customUser = null;
         try {
-
             User user = userMgmtSrv.getUserBasedOnInum(inum);
             checkResourceNotNull(user, USER);
             logger.debug(USER_PLACEHOLDER, user);
@@ -190,6 +187,7 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, true);
             logger.info("customUser:{}", customUser);
+
         } catch (ApiApplicationException ae) {
             logger.error(ApiErrorResponse.FETCH_DATA_ERROR.getDescription(), ae);
             throwBadRequestException("FETCH_DATA_ERROR", ae.getMessage());
@@ -259,6 +257,7 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("newly created customUser:{}", customUser);
+
         } catch (ApiApplicationException ae) {
             logger.error(ApiErrorResponse.CREATE_USER_ERROR.getDescription(), ae);
             throwBadRequestException("USER_CREATION_ERROR", ae.getMessage());
@@ -322,14 +321,13 @@ public class UserResource extends BaseResource {
             checkResourceNotNull(user, USER);
             logger.debug(USER_PLACEHOLDER, user);
 
-            // validate user role-permission
+            // validate user permission
             String candidateUserInum = user.getAttribute("inum");
             validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST);
 
             // checking mandatory attributes
             List<String> excludeAttributes = List.of(USER_PWD);
             validateUserData(user, true, removeNonLDAPAttributes, excludeAttributes);
-
             logger.info("Call update user:{}", user);
 
             user = userMgmtSrv.updateUser(user);
@@ -341,6 +339,7 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
+
         } catch (ApiApplicationException ae) {
             logger.error(ApiErrorResponse.UPDATE_USER_ERROR.getDescription(), ae);
             throwBadRequestException("USER_UPDATE_ERROR", ae.getMessage());
@@ -410,11 +409,10 @@ public class UserResource extends BaseResource {
         try {
             // check if user exists
             User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
-
             checkResourceNotNull(existingUser, USER);
             logger.debug(USER_PLACEHOLDER, existingUser);
 
-            // validate user role-permission
+            // validate user permission
             String candidateUserInum = existingUser.getAttribute("inum");
             validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST);
 
@@ -739,112 +737,119 @@ public class UserResource extends BaseResource {
         return user;
     }
 
-    private void validateUserPermission(String userInum, String httpRequestMethod)
-            throws ApiApplicationException {
+    private void validateUserPermission(String userInum, String httpRequestMethod) throws ApiApplicationException {
         if (logger.isInfoEnabled()) {
             logger.info(
-                    "UserResource::validateUserPermission() - userInum:{}, httpRequestMethod:{}, authUtil.isUserPermissionValidationEnabled():{}",
+                    "ValidateUserPermission - userInum:{}, httpRequestMethod:{} authUtil.isUserPermissionValidationEnabled():{}",
                     escapeLog(userInum), httpRequestMethod, authUtil.isUserPermissionValidationEnabled());
         }
 
         if (!authUtil.isUserPermissionValidationEnabled()) {
             return;
         }
-        String loggedInUserInum = authUtil.getUserInum(this.getHttpHeaders());
+
+        // Fetch logged in User details which for permission validation
+        String loggedInUserInum = authUtil.getUserInum(getHttpHeaders());
+        logger.info(" UserResource - Header loggedInUserInum:{}", loggedInUserInum);
+        if (StringUtils.isBlank(loggedInUserInum)) {
+            logger.info("Logged in User details missing");
+        }
 
         if (StringUtils.isBlank(loggedInUserInum)) {
             return;
         }
-        // If user excluded from role-permission check then return
+
         if (isRolePermissionExemptClient(loggedInUserInum)) {
             return;
         }
 
         // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(userInum) && loggedInUserInum.equals(userInum)) {
+        if (StringUtils.isNotBlank(loggedInUserInum) && loggedInUserInum.equals(userInum)) {
             return;
         }
 
         // logged-in user updating other user profile - validate permission
-        validateUser(loggedInUserInum, userInum);
+        validateUserPermission(loggedInUserInum, userInum, httpRequestMethod);
     }
 
-    private void validateUser(String loggedInUserInum, String userInum)
+    private void validateUserPermission(String loggedInUserInum, String userInum, String httpRequestMethod)
             throws ApiApplicationException {
 
         if (logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum {}, userInum:{}",
-                    escapeLog(loggedInUserInum), escapeLog(userInum));
+            logger.info("validateUserPermission - loggedInUserInum {}, userInum:{}, httpRequestMethod:{}",
+                    escapeLog(loggedInUserInum), escapeLog(userInum), httpRequestMethod);
         }
-     
-        if(StringUtils.isBlank(loggedInUserInum)) {
+
+        if (StringUtils.isBlank(loggedInUserInum) && StringUtils.isBlank(userInum)) {
             return;
         }
 
-        // Get User details
-        User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
-        if (loggedInUser == null) {
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
+        // Get logged in User details
+        User loggedInUser = null;
+        if (StringUtils.isNotBlank(loggedInUserInum)) {
+            // Get User details
+            loggedInUser = authUtil.getUserByInum(loggedInUserInum);
+            if (loggedInUser == null) {
+                throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), String.format(
+                        ApiErrorResponse.GENERAL_ERROR.getDescription(),
+                        new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details not found")));
+            }
         }
 
-        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
+        boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser, httpRequestMethod);
         if (logger.isInfoEnabled()) {
             logger.info("validateUserPermission - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum),
                     isAdmin);
         }
 
         if (StringUtils.isNotBlank(userInum) && !isAdmin) {
-            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
-                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("User{").append(loggedInUserInum)
-                                    .append("} does not have 'admin' role to fetch/modify user{")
-                                    .append(userInum).append("}")));
-        }
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(),
+                    (loggedInUserInum != null) ? loggedInUserInum : "", userInum);
+            logger.error("validateUserPermission - errMsg:{}", errMsg);
 
-
-
-        // Return if logged-in user is updating own profile
-        if (StringUtils.isNotBlank(userInum) && !loggedInUserInum.equals(userInum) && !isAdmin) {
-            StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
-                    .append("} has insufficient User role-permission, to view/update details of {")
-                    .append(userInum).append("}");
-            if (logger.isInfoEnabled()) {
-                logger.error("validateUserPermission - UNAUTHORIZED-insufficient-permission - errMsg:{}",
-                        escapeLog(errMsg));
-            }
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
         }
+
     }
 
-    private boolean isAdminUser(String loggedInUserInum, User loggedInUser) throws ApiApplicationException {
-        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
+    private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod)
+            throws ApiApplicationException {
+        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{} httpRequestMethod:{}", loggedInUserInum,
+                loggedInUser, httpRequestMethod);
         boolean isAdmin = false;
 
         if (loggedInUser == null) {
             return isAdmin;
         }
 
-        // validation based role of user-inum header attribute
         List<String> loggedInUserRoleList = authUtil.getUserRole(loggedInUser);
         if (logger.isDebugEnabled()) {
             logger.debug("isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}", escapeLog(loggedInUserInum),
                     loggedInUserRoleList);
         }
 
-        // check if `admin-role
-        if (loggedInUserRoleList != null && !loggedInUserRoleList.isEmpty()) {
-            isAdmin = authUtil.containsAnyElement(loggedInUserRoleList, authUtil.getAdminRoleNames());
+        if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
+            StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
+                    .append(loggedInUserInum).append("}");
+            logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", escapeLog(errMsg));
+
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
+
         }
 
+        // check if `admin-role
+        logger.info("isAdminUser - authUtil.getAdminRoleNames():{}", authUtil.getAdminRoleNames());
+        isAdmin = authUtil.containsAnyElement(loggedInUserRoleList, authUtil.getAdminRoleNames());
+
         if (logger.isInfoEnabled()) {
-            logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
+            logger.info("isAdminUser - loggedInUserInum:{}, loggedInUserRoleList:{}, isAdmin:{}",
+                    escapeLog(loggedInUserInum), loggedInUserRoleList, isAdmin);
         }
         return isAdmin;
     }
-    
+
     private boolean isRolePermissionExemptClient(String inum) {
         logger.debug(
                 " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",

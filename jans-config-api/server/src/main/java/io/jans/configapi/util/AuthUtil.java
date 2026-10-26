@@ -942,21 +942,15 @@ public class AuthUtil {
         return rolePermissionMappingService.getPermissionsMappingByRole(role);
     }
 
-    public IntrospectionResponse getIntrospectionResponse(String token) {
+    public IntrospectionResponse getIntrospectionResponse(String token) throws JsonProcessingException {
         IntrospectionResponse introspectionResponse = null;
-        if(StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token)) {
             return introspectionResponse;
         }
-        try {
-            introspectionResponse = openIdService.getIntrospectionResponse(token,
-                    token.substring("Bearer".length()).trim(), this.getAuthIssuerUrl());
-            log.debug("introspectionResponse:{}", introspectionResponse);
-        } catch (JsonProcessingException ex) {
-            log.error("AuthUtil::getIntrospectionResponse() - Error while token Introspection token:{}, exception:{} ", token, ex);
-            throw new WebApplicationException("AuthUtil::getIntrospectionResponse - Token is Invalid.", ex,
-                    Response.status(Response.Status.UNAUTHORIZED).build());
-        }
-        return introspectionResponse;
+
+        log.debug("this.getAuthIssuerUrl():{}", this.getAuthIssuerUrl());
+        return openIdService.getIntrospectionResponse(token, token.substring("Bearer".length()).trim(),
+                this.getAuthIssuerUrl());
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {
