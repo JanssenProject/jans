@@ -1,6 +1,8 @@
 module github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go
 
-go 1.20
+go 1.21
+
+toolchain go1.26.10
 
 require (
 	github.com/goccy/go-json v0.10.6

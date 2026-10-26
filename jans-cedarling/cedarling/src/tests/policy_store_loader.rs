@@ -255,6 +255,7 @@ fn create_jwt_cedarling_config_with_loader(
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: crate::HttpClientConfig::default(),
+        trace_config: None,
     }
 }
 

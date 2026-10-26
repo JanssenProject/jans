@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.ErrorResponseFactory;
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 

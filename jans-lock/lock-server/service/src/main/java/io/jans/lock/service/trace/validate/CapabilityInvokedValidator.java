@@ -47,7 +47,7 @@ public final class CapabilityInvokedValidator implements EventKindValidator {
 		EventKindValidationSupport.optionalDigests(event, "request_digest", "tool_call_digest", "result_digest");
 
 		if (EventKindValidationSupport.present(trace, "policy")) {
-			AuthorizationDecisionValidator.validatePolicy(trace);
+			out.policy(AuthorizationDecisionValidator.validatePolicy(trace));
 		}
 
 		List<TokenRef> tokenRefs = EventKindValidationSupport.extractTokens(event, "trace.event.tokens");
