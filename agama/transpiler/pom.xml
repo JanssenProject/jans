@@ -35,6 +35,7 @@
                     <failsOnError>false</failsOnError>
                     <failOnViolation>false</failOnViolation>
                     <linkXRef>false</linkXRef>
+                    <resourceIncludes>**/*.properties,**/*.xml</resourceIncludes>
                 </configuration>
             </plugin>
             <plugin>
