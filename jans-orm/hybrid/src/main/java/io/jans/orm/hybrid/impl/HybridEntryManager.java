@@ -157,6 +157,13 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
     }
 
 	@Override
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
+    	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);
+    	return persistenceEntryManager.findEntries(baseDN, entryClass, filter, ldapReturnAttributes, sortBy, sortOrder, start, count, chunkSize);
+    }
+
+	@Override
     public <T> PagedResult<EntryData> findAggregatedEntries(String baseDN, Class<T> entryClass, Filter filter,
             SearchProjection projection, int start, int count) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(baseDN);

@@ -18,6 +18,9 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -164,6 +167,7 @@ class TraceIngestionServiceTest extends BaseLockServiceTest {
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
 		setField(receiptChain, "cryptoProvider", cryptoProvider);
+		setField(receiptChain, "clock", Clock.fixed(Instant.ofEpochMilli(RECEIVED_AT_MS), ZoneOffset.UTC));
 
 		service = new TraceIngestionService();
 		setField(service, "log", LoggerFactory.getLogger(TraceIngestionService.class));
