@@ -149,7 +149,7 @@ Properties:
 - **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with `openssl genpkey -algorithm ed25519 -out trace-key.pem`. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If `CEDARLING_TRACE` == `enabled`, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used.
 - **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Prefer `CEDARLING_TRACE_SIGNING_KEY` where the host can provide a file: a key inlined in the configuration can leak through environment dumps, process listings or configuration files kept under version control. Treat a configuration that contains this property as a secret.
 - **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock, at most 255 UTF-16 code units (Lock counts Java string length). If unset or blank, the `kid` is the RFC 7638 thumbprint of the public key (`sha256:<hex>`). Cedarling logs the producer id, `kid` and thumbprint at startup, so the admin can register the key in Lock.
-- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration. An empty or blank value also means `discovered`.
+- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration. An empty or blank value also means `discovered`. The endpoint, explicit or discovered, must use `https`, or `http` only to a loopback host (`localhost`, `127.0.0.1`, `[::1]`), because every bulk request carries the Lock access token.
 - **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one bulk request. Must be greater than 0. Default is `100`, the Lock Server default.
 - **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size in bytes of one bulk request. Must be at least `262146`: the largest record Lock Server accepts by default (`maxRequestBytes`, `262144` bytes) plus the brackets of the array, so any record fits in a request. Default is `4194304` (4 MiB), the Lock Server default.
 
@@ -179,7 +179,7 @@ If the genesis record of the producer chain is lost (refused or dropped), or Loc
 
 `Cedarling::shut_down` stops the emitter before the log. On shut down the emitter sends every record it still holds once, without retries or pauses, so stopping Cedarling does not wait for Lock Server to come back. Records Lock Server does not take then are logged at `WARN` and counted in `trace.dropped`.
 
-When Lock Server publishes no `trace_bulk_endpoint` and `CEDARLING_TRACE_ENDPOINT` is not set, Cedarling starts, logs a `WARN` once and reports `not_emitted_no_endpoint` for every decision.
+When Lock Server publishes no `trace_bulk_endpoint` and `CEDARLING_TRACE_ENDPOINT` is not set, or the endpoint is plain `http` to a non-loopback host, Cedarling starts, logs a `WARN` once and reports `not_emitted_no_endpoint` for every decision.
 
 #### Record status and metrics
 

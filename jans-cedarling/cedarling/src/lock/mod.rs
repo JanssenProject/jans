@@ -653,14 +653,11 @@ pub enum InitLockServiceError {
     TransportError(#[from] transport::TransportError),
     #[error("failed to parse access token: {0}")]
     InvalidAccessToken(String),
-    /// `CEDARLING_TRACE_ENDPOINT` uses a scheme the bulk request cannot go over.
-    #[error("`CEDARLING_TRACE_ENDPOINT` must use `http` or `https`, not `{0}`")]
-    InvalidTraceEndpointScheme(String),
 }
 
-/// The TRACE sink; `None` when TRACE is off, or with a warning when Lock publishes
-/// no TRACE endpoint: Cedarling still decides, and each decision reports that no
-/// record was sent.
+/// The TRACE sink; `None` when TRACE is off, or with a warning when there is no
+/// endpoint the Lock token may go to: Cedarling still decides, and each decision
+/// reports that no record was sent.
 #[cfg(not(target_arch = "wasm32"))]
 fn create_trace_sink(
     trace: Option<&TraceEndpoint>,
@@ -679,13 +676,14 @@ fn create_trace_sink(
         .trace_bulk
         .as_ref()
         .map(|url| &url.0);
-    let Some(endpoint) = trace_sink::resolve_trace_endpoint(endpoint, discovered)? else {
-        logger.cloned().log_any(LockLogEntry::warn(
-            "Lock Server does not publish trace_bulk_endpoint and CEDARLING_TRACE_ENDPOINT is \
-             not set: TRACE records will not be sent"
-                .to_string(),
-        ));
-        return Ok(None);
+    let endpoint = match trace_sink::resolve_trace_endpoint(endpoint, discovered) {
+        Ok(endpoint) => endpoint,
+        Err(reason) => {
+            logger
+                .cloned()
+                .log_any(LockLogEntry::warn(reason.to_string()));
+            return Ok(None);
+        },
     };
     Ok(Some(Arc::new(TraceSink {
         endpoint,
@@ -1301,33 +1299,59 @@ mod test {
 
     #[cfg(not(target_arch = "wasm32"))]
     #[tokio::test]
-    async fn trace_endpoint_ftp_scheme_fails_startup() {
+    async fn insecure_trace_endpoint_warns_and_starts_without_sink() {
+        use crate::log::LogStrategy;
+        use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
+
         let mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
         let MockedLockConfig {
             uri: config_uri,
             mock: _config_endpoint,
         } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let log = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ));
         let endpoint = TraceEndpoint::Url(
-            "ftp://lock.example.com/audit/trace/bulk"
+            "http://lock.example.com/audit/trace/bulk"
                 .parse()
                 .expect("valid URL"),
         );
 
-        let err = LockService::new(
+        let service = LockService::new(
             PdpID::new(),
             &direct_token_config(config_uri),
-            None,
+            Some(Arc::downgrade(&log)),
             Arc::new(MetricsCollector::new(MetricsMode::Local)),
             None,
             HttpClientConfig::default(),
             Some(&endpoint),
         )
         .await
-        .expect_err("a non-HTTP TRACE endpoint should stop startup");
+        .expect("a misconfigured TRACE endpoint should not stop Cedarling");
+
         assert!(
-            matches!(err, InitLockServiceError::InvalidTraceEndpointScheme(ref scheme) if scheme == "ftp"),
-            "expected InvalidTraceEndpointScheme(\"ftp\"), got {err:?}"
+            service.trace_sink().is_none(),
+            "the Lock token must not go over plain http to a remote host"
+        );
+        let warned = log.pop_logs().iter().any(|entry| {
+            entry["level"] == "WARN"
+                && entry["message"].as_str().is_some_and(|msg| {
+                    msg.contains("CEDARLING_TRACE_ENDPOINT on http://lock.example.com")
+                })
+        });
+        assert!(
+            warned,
+            "startup should warn that the TRACE endpoint is not secure"
         );
     }
 

@@ -39,7 +39,7 @@ CEDARLING_TRACE: "disabled"
 # Defaults to the key thumbprint (sha256:<hex>).
 # CEDARLING_TRACE_SIGNING_KID: null
 # "discovered" (or a blank value) takes trace_bulk_endpoint from the Lock Server well-known
-# configuration.
+# configuration. Must be https, or http only to a loopback host: the Lock token goes with it.
 # CEDARLING_TRACE_ENDPOINT: "discovered"
 # CEDARLING_TRACE_BULK_MAX_RECORDS: 100
 # At least 262146: one record of the Lock Server default maxRequestBytes plus brackets.

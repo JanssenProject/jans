@@ -15,8 +15,8 @@ use reqwest::header::CONTENT_TYPE;
 use serde::Deserialize;
 use tokio::sync::RwLock;
 
+use super::LockAccessToken;
 use super::register_client::{TokenSource, request_access_token};
-use super::{InitLockServiceError, LockAccessToken};
 use crate::TraceEndpoint;
 use crate::http::HttpClient;
 
@@ -233,23 +233,60 @@ impl From<RawItem> for BulkItemResult {
     }
 }
 
-/// The explicit endpoint wins over discovery. `Ok(None)` when Lock publishes
-/// none. Only `http` and `https` carry the bulk request, so any other scheme
-/// stops startup instead of failing every record later.
+/// Why Cedarling has no endpoint to send TRACE records to. TRACE is not needed
+/// to decide, so each is a startup warning rather than a failure.
+#[derive(Debug, thiserror::Error)]
+pub(super) enum NoTraceEndpoint {
+    #[error(
+        "Lock Server does not publish trace_bulk_endpoint and CEDARLING_TRACE_ENDPOINT is not \
+         set: TRACE records will not be sent"
+    )]
+    NotPublished,
+    #[error(
+        "CEDARLING_TRACE_ENDPOINT on {origin} (path, query and credentials are not logged) \
+         must use https, or http only to a loopback host, because the Lock access token goes \
+         with every request: TRACE records will not be sent"
+    )]
+    InsecureExplicit { origin: String },
+    #[error(
+        "Lock Server publishes trace_bulk_endpoint on {origin} (path, query and credentials \
+         are not logged), plain http to a non-loopback host, and the Lock access token goes \
+         with every request: TRACE records will not be sent. Set the Lock Server baseEndpoint \
+         to https, or set CEDARLING_TRACE_ENDPOINT to an https endpoint"
+    )]
+    InsecureDiscovered { origin: String },
+}
+
+/// The explicit endpoint wins over discovery. The bulk request carries the Lock
+/// access token, so it goes over `https`, or over `http` only to a loopback
+/// host, as the log transport does.
 pub(super) fn resolve_trace_endpoint(
     endpoint: &TraceEndpoint,
     discovered: Option<&url::Url>,
-) -> Result<Option<url::Url>, InitLockServiceError> {
+) -> Result<url::Url, NoTraceEndpoint> {
     let url = match endpoint {
         TraceEndpoint::Url(url) => url,
-        TraceEndpoint::Discovered => return Ok(discovered.cloned()),
+        TraceEndpoint::Discovered => discovered.ok_or(NoTraceEndpoint::NotPublished)?,
     };
-    match url.scheme() {
-        "http" | "https" => Ok(Some(url.clone())),
-        scheme => Err(InitLockServiceError::InvalidTraceEndpointScheme(
-            scheme.to_string(),
-        )),
+    let secure = match url.scheme() {
+        "https" => true,
+        "http" => super::is_loopback_host(url),
+        _ => false,
+    };
+    if secure {
+        return Ok(url.clone());
     }
+    // The warning names only where the endpoint points: credentials, a path or a
+    // query may carry what the log must not, and the message says they are left out.
+    let host = url.host_str().unwrap_or_default();
+    let origin = match url.port() {
+        Some(port) => format!("{}://{host}:{port}", url.scheme()),
+        None => format!("{}://{host}", url.scheme()),
+    };
+    Err(match endpoint {
+        TraceEndpoint::Url(_) => NoTraceEndpoint::InsecureExplicit { origin },
+        TraceEndpoint::Discovered => NoTraceEndpoint::InsecureDiscovered { origin },
+    })
 }
 
 #[cfg(test)]
@@ -489,5 +526,90 @@ mod tests {
             "expected Rejected {{ status: 401 }}, got {err:?}"
         );
         token.assert_async().await;
+    }
+
+    fn url(raw: &str) -> url::Url {
+        raw.parse().expect("valid URL")
+    }
+
+    #[test]
+    fn https_and_loopback_http_endpoints_are_used() {
+        for raw in [
+            "https://lock.example.com/audit/trace/bulk",
+            "http://localhost:8080/audit/trace/bulk",
+            "http://127.0.0.1:8080/audit/trace/bulk",
+            "http://[::1]:8080/audit/trace/bulk",
+        ] {
+            let explicit = resolve_trace_endpoint(&TraceEndpoint::Url(url(raw)), None)
+                .expect("an explicit https or loopback endpoint should be used");
+            assert_eq!(explicit, url(raw), "explicit {raw} should be used as is");
+            let discovered = resolve_trace_endpoint(&TraceEndpoint::Discovered, Some(&url(raw)))
+                .expect("a discovered https or loopback endpoint should be used");
+            assert_eq!(
+                discovered,
+                url(raw),
+                "discovered {raw} should be used as is"
+            );
+        }
+    }
+
+    #[test]
+    fn explicit_endpoint_without_tls_to_remote_host_is_refused() {
+        for raw in [
+            "http://lock.example.com/audit/trace/bulk",
+            "ftp://lock.example.com/audit/trace/bulk",
+        ] {
+            let err = resolve_trace_endpoint(
+                &TraceEndpoint::Url(url(raw)),
+                Some(&url("https://lock.example.com/audit/trace/bulk")),
+            )
+            .expect_err("the token must not go to a remote host without TLS");
+            assert!(
+                matches!(err, NoTraceEndpoint::InsecureExplicit { ref origin } if raw.starts_with(origin.as_str())),
+                "expected InsecureExplicit for {raw}, got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn discovered_endpoint_without_tls_to_remote_host_is_refused() {
+        let err = resolve_trace_endpoint(
+            &TraceEndpoint::Discovered,
+            Some(&url("http://lock.example.com/audit/trace/bulk")),
+        )
+        .expect_err("the token must not go to a remote host without TLS");
+        assert!(
+            matches!(err, NoTraceEndpoint::InsecureDiscovered { ref origin } if origin == "http://lock.example.com"),
+            "expected InsecureDiscovered, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn insecure_endpoint_message_hides_path_and_credentials() {
+        let err = resolve_trace_endpoint(
+            &TraceEndpoint::Url(url("http://user:secret@lock.example.com:8080/bulk?key=1")),
+            None,
+        )
+        .expect_err("the token must not go to a remote host without TLS");
+        let message = err.to_string();
+        assert!(
+            !message.contains("secret") && !message.contains("/bulk") && !message.contains("key=1"),
+            "the warning should name the scheme, host and port only, got {message}"
+        );
+        assert!(
+            message.contains("http://lock.example.com:8080")
+                && message.contains("path, query and credentials are not logged"),
+            "the warning should say the shown endpoint is cut, got {message}"
+        );
+    }
+
+    #[test]
+    fn discovery_without_published_endpoint_has_none() {
+        let err = resolve_trace_endpoint(&TraceEndpoint::Discovered, None)
+            .expect_err("Lock publishes no endpoint");
+        assert!(
+            matches!(err, NoTraceEndpoint::NotPublished),
+            "expected NotPublished, got {err:?}"
+        );
     }
 }
