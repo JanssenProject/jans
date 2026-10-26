@@ -187,8 +187,9 @@ class OpenIdProtectionServiceTest {
 
 	@Test
 	void testAuthorize_IntrospectionAnswers401ForMissingIntrospectionScope_Denied403() {
-		String reason = "{\"error\":\"access_denied\",\"error_description\":\"access_token " + OpenIdProtectionService.INTROSPECTION_SCOPE_REASON
-				+ " 'introspection' scope\"}";
+		// Verbatim from jans-auth-server IntrospectionService#validateIntrospectionScopePresence, kept literal so a change to the classifier marker fails this test
+		String reason = "{\"error\":\"access_denied\",\"error_description\":\"access_token used to access introspection endpoint does not have 'introspection' scope, "
+				+ "however in AS configuration 'introspectionAccessTokenMustHaveIntrospectionScope' is true\"}";
 		when(introspectionService.introspectToken("Bearer opaque-8", "opaque-8"))
 				.thenThrow(new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(reason).build()));
 
