@@ -187,7 +187,7 @@ public class AdminUISecurityService {
      * @param adminUIPolicyStore the source of the editable field values
      * @return a {@link GenericResponse} indicating success
      * @throws ApplicationException with HTTP 400 if the request or inum is invalid, HTTP 404 if
-     *         no store exists for the inum, or HTTP 500 if the update fails
+     *                              no store exists for the inum, or HTTP 500 if the update fails
      */
     public GenericResponse editPolicyStore(String inum, AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
@@ -315,7 +315,7 @@ public class AdminUISecurityService {
      * @param inum the inum of the policy store to delete
      * @return a {@link GenericResponse} indicating success
      * @throws ApplicationException with HTTP 400 if the inum is blank, or HTTP 404 if no store
-     *         exists for the inum
+     *                              exists for the inum
      */
     public GenericResponse deletePolicyStore(String inum) throws ApplicationException {
         if (Strings.isNullOrEmpty(inum)) {
@@ -367,13 +367,13 @@ public class AdminUISecurityService {
     /**
      * Validates a policy-store upload request.
      *
-    * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
-    * zip archive Cedarling can initialize, and that every trusted-issuer endpoint matches the
-    * configured Admin UI web-server host before Cedarling is initialized.</p>
+     * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
+     * zip archive Cedarling can initialize, and that every trusted-issuer endpoint matches the
+     * configured Admin UI web-server host before Cedarling is initialized.</p>
      *
      * @param adminUIPolicyStore the policy store to validate
-    * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
-    *         Cedarling cannot initialize with it, or an issuer endpoint does not match the configured host
+     * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
+     *                              Cedarling cannot initialize with it, or an issuer endpoint does not match the configured host
      */
     private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         if (adminUIPolicyStore == null) {
@@ -394,8 +394,8 @@ public class AdminUISecurityService {
         }
         if (base64PolicyStore.length() > MAX_ENTRY_SIZE) {
             throw new ApplicationException(
-                Response.Status.BAD_REQUEST.getStatusCode(),
-                ErrorResponse.POLICY_STORE_UPLOAD_TOO_LARGE.getDescription()
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.POLICY_STORE_UPLOAD_TOO_LARGE.getDescription()
             );
         }
 
@@ -431,7 +431,7 @@ public class AdminUISecurityService {
             archiveBuffer.put(zipBytes);
             archiveBuffer.flip();
             try (Cedarling cedarling = Cedarling.Companion.loadFromJsonWithArchiveBytes(
-                cedarlingConfig.toString(), archiveBuffer)) {
+                    cedarlingConfig.toString(), archiveBuffer)) {
                 cedarling.shutDown();
             }
 
@@ -447,11 +447,11 @@ public class AdminUISecurityService {
     }
 
     /**
-    * Validates every trusted issuer's endpoint host before Cedarling initializes the archive.
+     * Validates every trusted issuer's endpoint host before Cedarling initializes the archive.
      *
-    * @param zipBytes the policy-store archive bytes
+     * @param zipBytes      the policy-store archive bytes
      * @param webServerHost the configured Admin UI web-server URL whose host must match
-    * @throws ApplicationException with HTTP 400 if an endpoint is invalid or its host does not match
+     * @throws ApplicationException with HTTP 400 if an endpoint is invalid or its host does not match
      */
     private void validateTrustedIssuerDomains(byte[] zipBytes, String webServerHost)
             throws ApplicationException {
@@ -483,13 +483,16 @@ public class AdminUISecurityService {
                     }
 
                     JSONObject issuer = new JSONObject(readEntryContentSafely(zis));
-                    if (!issuer.has("configuration_endpoint")) {
+                    String endpointField = issuer.has("openid_configuration_endpoint")
+                            ? "openid_configuration_endpoint"
+                            : "configuration_endpoint";
+                    if (!issuer.has(endpointField)) {
                         throw new ApplicationException(
                                 Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Missing 'configuration_endpoint' in " + entryName
+                                "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName
                         );
                     }
-                    URI endpointUri = new URI(issuer.getString("configuration_endpoint"));
+                    URI endpointUri = new URI(issuer.getString(endpointField));
                     String issuerDomain = endpointUri.getHost();
                     if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
                         log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
@@ -638,7 +641,7 @@ public class AdminUISecurityService {
      * Decodes the base64 policy-store document into a temporary .cjar archive and derives
      * principal-to-scope mappings from it. The temporary file is always removed afterwards.
      *
-     * @param policyStore      the active policy-store whose document should be parsed
+     * @param policyStore        the active policy-store whose document should be parsed
      * @param resourceScopesJson the resource-to-scope mappings used during parsing
      * @return principal-to-scope mappings derived from the policy-store
      * @throws ApplicationException if the document cannot be decoded or parsed
