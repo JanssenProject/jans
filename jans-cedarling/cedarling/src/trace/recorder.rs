@@ -49,6 +49,9 @@ pub(crate) struct TraceRecorder {
 struct QueueState {
     full: AtomicBool,
     turned_away: AtomicU64,
+    /// The emitter does not start again, so its stop is warned once and
+    /// apart from a full queue.
+    stopped: AtomicBool,
 }
 
 impl TraceRecorder {
@@ -143,24 +146,30 @@ impl TraceRecorder {
                 TraceRecordStatus::Emitted
             },
             Err(TrySendError::Full(_)) => {
-                self.turned_away(
-                    request_id,
-                    "the emitter queue is full; records are not emitted until it has room",
-                );
+                self.turned_away(request_id);
                 TraceRecordStatus::NotEmittedQueueFull
             },
             Err(TrySendError::Closed(_)) => {
-                self.turned_away(request_id, "the emitter has stopped");
-                TraceRecordStatus::NotEmittedQueueFull
+                if !self.queue.stopped.swap(true, Ordering::Relaxed) {
+                    self.warn(
+                        request_id,
+                        "the emitter has stopped; records are not emitted until Cedarling \
+                         starts again",
+                    );
+                }
+                TraceRecordStatus::NotEmittedStopped
             },
         }
     }
 
     /// Counts a record the queue turned away and warns only for the first one.
-    fn turned_away(&self, request_id: Uuid, reason: &str) {
+    fn turned_away(&self, request_id: Uuid) {
         self.queue.turned_away.fetch_add(1, Ordering::Relaxed);
         if !self.queue.full.swap(true, Ordering::Relaxed) {
-            self.warn(request_id, reason);
+            self.warn(
+                request_id,
+                "the emitter queue is full; records are not emitted until it has room",
+            );
         }
     }
 
@@ -491,19 +500,43 @@ mod tests {
     }
 
     #[test]
-    fn closed_channel_is_queue_full() {
+    fn closed_channel_is_stopped_and_warned_once() {
         let (tx, rx) = mpsc::channel(1);
         drop(rx);
-        let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
-            gen_uuid7(),
-            Some(&trace()),
-            &minimal_store(),
-            || Ok(facts(Vec::new())),
+        let log = memory_log();
+        let metrics = metrics();
+        let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics.clone());
+        let store = minimal_store();
+        let statuses: Vec<_> = (0..2)
+            .map(|_| {
+                recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                    Ok(facts(Vec::new()))
+                })
+            })
+            .collect();
+
+        assert_eq!(
+            statuses,
+            [TraceRecordStatus::NotEmittedStopped; 2],
+            "a stopped emitter is reported as stopped, not as a full queue"
+        );
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("trace.not_emitted_stopped"),
+            Some(&2),
+            "each decision is counted as not emitted for the stopped emitter"
         );
         assert_eq!(
-            status,
-            TraceRecordStatus::NotEmittedQueueFull,
-            "a stopped emitter takes no records"
+            stats.get("trace.not_emitted_queue_full"),
+            None,
+            "a stopped emitter is not counted as a full queue"
+        );
+        let warnings = messages(&log, "WARN");
+        assert_eq!(warnings.len(), 1, "the stop is warned once: {warnings:?}");
+        assert!(
+            warnings[0].contains("emitter has stopped"),
+            "the warning names the stop: {}",
+            warnings[0]
         );
     }
 

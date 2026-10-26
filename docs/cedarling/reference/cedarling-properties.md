@@ -193,7 +193,8 @@ With TRACE enabled, every decision log entry has a `trace_record_status` field (
 | `not_emitted_missing_context` | The call had no TRACE context, or a required context field was empty. |
 | `not_emitted_over_limit` | A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed facts. |
 | `not_emitted_invalid_field` | A value Lock Server rejects, such as a JWT issuer that is not `https`, or a policy store that cannot back a record: a `.cjar` whose `metadata.json` has no `policy_store.id` or `policy_store.version`. A store like this is reported with one `WARN` when it is loaded. |
-| `not_emitted_queue_full` | The queue to the emitter is full, or the emitter has stopped. |
+| `not_emitted_queue_full` | The queue to the emitter is full. |
+| `not_emitted_stopped` | The emitter has stopped, as after `Cedarling::shut_down`: no record is emitted until Cedarling starts again. Reported with one `WARN`. |
 | `not_emitted_no_endpoint` | There is no TRACE endpoint to send to. |
 
 When TRACE is disabled, the field is absent and no `trace.*` metric is added.

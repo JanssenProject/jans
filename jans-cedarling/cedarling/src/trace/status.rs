@@ -19,20 +19,23 @@ pub(crate) enum TraceRecordStatus {
     NotEmittedOverLimit,
     /// A value Lock rejects, or a policy store that cannot back a record.
     NotEmittedInvalidField,
-    /// The emitter queue is full, or the emitter has stopped.
+    /// The emitter queue is full.
     NotEmittedQueueFull,
+    /// The emitter has stopped, as after `Cedarling::shut_down`.
+    NotEmittedStopped,
     /// There is no TRACE endpoint to send the record to.
     NotEmittedNoEndpoint,
 }
 
 impl TraceRecordStatus {
     /// Every status, each with its own counter.
-    pub(crate) const ALL: [Self; 6] = [
+    pub(crate) const ALL: [Self; 7] = [
         Self::Emitted,
         Self::NotEmittedMissingContext,
         Self::NotEmittedOverLimit,
         Self::NotEmittedInvalidField,
         Self::NotEmittedQueueFull,
+        Self::NotEmittedStopped,
         Self::NotEmittedNoEndpoint,
     ];
 
@@ -44,6 +47,7 @@ impl TraceRecordStatus {
             Self::NotEmittedOverLimit => "trace.not_emitted_over_limit",
             Self::NotEmittedInvalidField => "trace.not_emitted_invalid_field",
             Self::NotEmittedQueueFull => "trace.not_emitted_queue_full",
+            Self::NotEmittedStopped => "trace.not_emitted_stopped",
             Self::NotEmittedNoEndpoint => "trace.not_emitted_no_endpoint",
         }
     }
