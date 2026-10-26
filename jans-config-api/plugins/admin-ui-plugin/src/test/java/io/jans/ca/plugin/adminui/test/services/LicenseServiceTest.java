@@ -1,9 +1,11 @@
 package io.jans.ca.plugin.adminui.test.services;
 
+import io.jans.as.client.TokenRequest;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
 import io.jans.as.model.config.adminui.MainSettings;
 import io.jans.as.model.config.adminui.OIDCClientSettings;
+import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
@@ -20,6 +22,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 import org.slf4j.Logger;
@@ -123,6 +127,8 @@ public class LicenseServiceTest {
         lenient().when(licenseConfiguration.getLicenseDetailsLastUpdatedOn()).thenReturn(LocalDate.now().minusDays(5).toString());
         lenient().when(licenseConfiguration.getIntervalForSyncLicenseDetailsInDays()).thenReturn(10L);
         lenient().when(licenseConfiguration.getLicenseMAUThreshold()).thenReturn(500L);
+        when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN))
+            .thenThrow(new IllegalStateException("Persistence should not be accessed for a current cached license"));
 
         // Call the method under test
         GenericResponse response = licenseDetailsService.checkLicense();
@@ -131,6 +137,70 @@ public class LicenseServiceTest {
         assertNotNull(response);
         assertEquals(response.getResponseCode(), 200);
         assertEquals(response.getResponseMessage(), "Valid license present.");
+        verify(entryManager, never()).find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+    }
+
+    @Test
+    public void testCheckLicense_MissingAdminConfOnSync() {
+        when(licenseConfiguration.getHardwareId()).thenReturn("hardware-key-123");
+        when(licenseConfiguration.getLicenseKey()).thenReturn("valid-license-key");
+        when(licenseConfiguration.getScanApiHostname()).thenReturn("https://scan.api.hostname");
+        when(licenseConfiguration.getLicenseValidUpto()).thenReturn("");
+        when(entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN)).thenReturn(null);
+
+        GenericResponse response = licenseDetailsService.checkLicense();
+
+        assertFalse(response.isSuccess());
+        assertEquals(response.getResponseCode(), 500);
+        assertEquals(response.getResponseMessage(), ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+    }
+
+    @Test
+    public void testCheckLicense_DcrOnlyForInvalidClientAndDoesNotRepeatFailedRetry() {
+        LicenseConfiguration runtimeLicenseConfiguration = new LicenseConfiguration();
+        runtimeLicenseConfiguration.setHardwareId("hardware-key-123");
+        runtimeLicenseConfiguration.setLicenseKey("valid-license-key");
+        runtimeLicenseConfiguration.setScanApiHostname("https://scan.example");
+        runtimeLicenseConfiguration.setScanAuthServerHostname("https://auth.example");
+        runtimeLicenseConfiguration.setScanApiClientId("original-client");
+        runtimeLicenseConfiguration.setScanApiClientSecret("original-secret");
+        runtimeLicenseConfiguration.setLicenseValidUpto("");
+        when(auiConfiguration.getLicenseConfiguration()).thenReturn(runtimeLicenseConfiguration);
+        when(licenseConfig.getSsa()).thenReturn("ssa");
+        MainSettings mainSettings = mock(MainSettings.class);
+        when(adminConf.getMainSettings()).thenReturn(mainSettings);
+        when(mainSettings.getLicenseConfig()).thenReturn(licenseConfig);
+
+        LicenseDetailsService service = spy(licenseDetailsService);
+        DCRResponse dcrResponse = mock(DCRResponse.class);
+        when(dcrResponse.getOpHost()).thenReturn("https://auth.example");
+        when(dcrResponse.getClientId()).thenReturn("replacement-client");
+        when(dcrResponse.getClientSecret()).thenReturn("replacement-secret");
+        when(dcrResponse.getHardwareId()).thenReturn("hardware-key-123");
+        when(dcrResponse.getScanHostname()).thenReturn("https://scan.example");
+        doReturn(dcrResponse).when(service).executeDCR("ssa");
+
+        AtomicInteger tokenCalls = new AtomicInteger();
+        doAnswer(invocation -> {
+            int tokenCall = tokenCalls.incrementAndGet();
+            Consumer<String> errorResponseConsumer = invocation.getArgument(3);
+            if (errorResponseConsumer != null && tokenCall == 1) {
+                errorResponseConsumer.accept("{\"error\":\"temporarily_unavailable\"}");
+            } else if (errorResponseConsumer != null && (tokenCall == 2 || tokenCall == 4)) {
+                errorResponseConsumer.accept("{\"error\":\"invalid_client\"}");
+            }
+            return null;
+        }).when(service).getToken(any(TokenRequest.class), anyString(), isNull(), nullable(Consumer.class));
+
+        service.checkLicense();
+        assertEquals(runtimeLicenseConfiguration.getScanApiClientId(), "original-client");
+        verify(service, never()).executeDCR("ssa");
+
+        service.checkLicense();
+        service.checkLicense();
+
+        verify(service, times(1)).executeDCR("ssa");
+        assertEquals(runtimeLicenseConfiguration.getScanApiClientId(), "replacement-client");
     }
 
     @Test

@@ -35,6 +35,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 @Singleton
 public class LicenseDetailsService extends BaseService {
@@ -47,6 +49,8 @@ public class LicenseDetailsService extends BaseService {
 
     @Inject
     private PersistenceEntryManager entryManager;
+
+    private volatile String dcrRetryFailedClientId;
 
     //constants
     public static final String LICENSE_KEY = "licenseKey";
@@ -220,9 +224,6 @@ public class LicenseDetailsService extends BaseService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
-            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            LicenseConfig licenseConfigurationFromDB = appConf.getMainSettings().getLicenseConfig();
-
             if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
                 log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
@@ -237,23 +238,23 @@ public class LicenseDetailsService extends BaseService {
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseValidUpto())) {
                 log.info(ErrorResponse.LICENSE_EXPIRY_DATE_NOT_PRESENT.getDescription());
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseDetailsLastUpdatedOn())) {
                 log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
             long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
             log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
             if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             //calculate if license is expired
             long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
             if (daysDiffOfLicenseValidity < 0) {
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             if (licenseConfiguration.getLicenseMAUThreshold() == null) {
                 log.error(ErrorResponse.MAU_IS_NULL.getDescription());
@@ -272,6 +273,15 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
         }
+    }
+
+    private GenericResponse syncLicenseDetailsFromAgamaLab(AUIConfiguration auiConfiguration) {
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+        if (appConf == null || appConf.getMainSettings() == null) {
+            log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+        }
+        return syncLicenseDetailsFromAgamaLab(auiConfiguration, appConf.getMainSettings().getLicenseConfig());
     }
 
     /**
@@ -295,9 +305,19 @@ public class LicenseDetailsService extends BaseService {
             //check license-key
             String checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/isActive");
 
-            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            AtomicBoolean invalidClientResponse = new AtomicBoolean();
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(),
+                    licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret(),
+                    errorResponse -> invalidClientResponse.set(isInvalidClientResponse(errorResponse)));
             if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                 log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                if (!invalidClientResponse.get()) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                }
+                String failedClientId = licenseConfiguration.getScanApiClientId();
+                if (!Strings.isNullOrEmpty(failedClientId) && failedClientId.equals(dcrRetryFailedClientId)) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                }
                 if (persistedLicenseConfig == null || Strings.isNullOrEmpty(persistedLicenseConfig.getSsa())) {
                     return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
                 }
@@ -317,9 +337,11 @@ public class LicenseDetailsService extends BaseService {
                 tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
                 if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                     log.info("Unable to get access token after DCR from {}", licenseConfiguration.getScanAuthServerHostname());
+                    dcrRetryFailedClientId = licenseConfiguration.getScanApiClientId();
                     return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
                 }
             }
+            dcrRetryFailedClientId = null;
 
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
                     TLS_ALLOWED_CIPHER_SUITES);
@@ -920,6 +942,11 @@ public class LicenseDetailsService extends BaseService {
      * @returns the TokenResponse containing the access token and related metadata, or `null` if token generation failed.
      */
     private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
+        return generateToken(opHost, clientId, clientSecret, null);
+    }
+
+    private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret,
+                                                          Consumer<String> errorResponseConsumer) {
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(clientId);
@@ -931,11 +958,20 @@ public class LicenseDetailsService extends BaseService {
             String scanLicenseApiHostname = StringUtils.removeEnd(opHost, "/") +
                     "/jans-auth/restv1/token";
             io.jans.as.client.TokenResponse tokenResponse = null;
-            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname, null, errorResponseConsumer);
             return tokenResponse;
         } catch (Exception e) {
             log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             return null;
+        }
+    }
+
+    private boolean isInvalidClientResponse(String responseBody) {
+        try {
+            return "invalid_client".equals(mapper.readTree(responseBody).path("error").asText());
+        } catch (Exception e) {
+            log.debug("Unable to parse token endpoint error response.", e);
+            return false;
         }
     }
 

@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class BaseService {
 
@@ -82,6 +83,20 @@ public class BaseService {
      * @return a TokenResponse populated from the endpoint JSON on HTTP 200; `null` otherwise
      */
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
+        return getToken(tokenRequest, tokenEndpoint, userInfoJwt, null);
+    }
+
+    /**
+     * Sends a token request and optionally exposes the response body for non-successful responses.
+     *
+     * @param tokenRequest values used to build the token request
+     * @param tokenEndpoint URL of the authorization server token endpoint
+     * @param userInfoJwt optional JWT to include in the request
+     * @param errorResponseConsumer receives the response body when the endpoint returns a non-200 status
+     * @return a TokenResponse populated from the endpoint JSON on HTTP 200; {@code null} otherwise
+     */
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt,
+                                                    Consumer<String> errorResponseConsumer) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -126,7 +141,11 @@ public class BaseService {
 
                 return tokenResponse;
             }
-            log.error("Error in getting access token: {}", response.readEntity(String.class));
+            String errorResponse = response.readEntity(String.class);
+            log.error("Error in getting access token: {}", errorResponse);
+            if (errorResponseConsumer != null) {
+                errorResponseConsumer.accept(errorResponse);
+            }
 
         } catch (Exception e) {
             log.error("Problems processing token call", e);
