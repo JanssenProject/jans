@@ -1825,6 +1825,36 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
         performanceMetrics:
           type: object
           additionalProperties:
@@ -1833,47 +1863,17 @@ components:
           type: object
           additionalProperties:
             type: object
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        deviceTypes:
+        period:
+          type: string
+        errorCounts:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         fallbackEvents:
           type: integer
           format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        period:
-          type: string
-        errorCounts:
+        deviceTypes:
           type: object
           additionalProperties:
             type: integer

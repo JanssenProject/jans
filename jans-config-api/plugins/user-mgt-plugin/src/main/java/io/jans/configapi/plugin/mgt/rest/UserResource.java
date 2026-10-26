@@ -187,18 +187,10 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(user, true);
             logger.info("customUser:{}", customUser);
 
-        } catch (ApiApplicationException ae) {
-            logger.error(ApiErrorResponse.FETCH_DATA_ERROR.getDescription(), ae);
-            throwBadRequestException("FETCH_DATA_ERROR", ae.getMessage());
-        } catch (InvalidAttributeException iae) {
-            logger.error("InvalidAttributeException while fetching user is:{}, cause:{}", iae, iae.getCause());
-            throwBadRequestException("FETCH_DATA_ERROR", iae.getMessage());
-        } catch (WebApplicationException wae) {
-            throw wae;
         } catch (Exception ex) {
-            logger.error("Exception while fetching user is - ", ex);
-            throwInternalServerException(ex);
+            handleException(ex, "FETCH_DATA_ERROR");
         }
+        
         return Response.ok(customUser).build();
     }
 
@@ -257,18 +249,10 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("newly created customUser:{}", customUser);
 
-        } catch (ApiApplicationException ae) {
-            logger.error(ApiErrorResponse.CREATE_USER_ERROR.getDescription(), ae);
-            throwBadRequestException("USER_CREATION_ERROR", ae.getMessage());
-        } catch (InvalidAttributeException iae) {
-            logger.error("InvalidAttributeException while creating user is:{}, cause:{}", iae, iae.getCause());
-            throwBadRequestException("USER_CREATION_ERROR", iae.getMessage());
-        } catch (WebApplicationException wae) {
-            throw wae;
         } catch (Exception ex) {
-            logger.error("Exception while creating user is - ", ex);
-            throwInternalServerException(ex);
+            handleException(ex, "CREATE_USER_ERROR");
         }
+        
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
@@ -344,18 +328,10 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(user, removeNonLDAPAttributes);
             logger.info("updated customUser:{}", customUser);
 
-        } catch (ApiApplicationException ae) {
-            logger.error(ApiErrorResponse.UPDATE_USER_ERROR.getDescription(), ae);
-            throwBadRequestException("USER_UPDATE_ERROR", ae.getMessage());
-        } catch (InvalidAttributeException iae) {
-            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
-            throwBadRequestException("USER_UPDATE_ERROR", iae.getMessage());
-        } catch (WebApplicationException wae) {
-            throw wae;
         } catch (Exception ex) {
-            logger.error("Exception while updating user is - ", ex);
-            throwInternalServerException(ex);
+            handleException(ex, "UPDATE_USER_ERROR");
         }
+        
         return Response.ok(customUser).build();
 
     }
@@ -435,15 +411,10 @@ public class UserResource extends BaseResource {
             // get custom user
             customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
             logger.info("patched customUser:{}", customUser);
-        } catch (InvalidAttributeException iae) {
-            logger.error("InvalidAttributeException while updating user is:{}, cause:{}", iae, iae.getCause());
-            throwBadRequestException("USER_PATCH_ERROR", iae.getMessage());
-        } catch (WebApplicationException wae) {
-            throw wae;
         } catch (Exception ex) {
-            logger.error("Exception while pactching user is:{}, cause:{}", ex, ex.getCause());
-            throwInternalServerException(ex);
+            handleException(ex, "UPDATE_USER_PATCH_ERROR");
         }
+        
         return Response.ok(customUser).build();
     }
 
@@ -848,19 +819,18 @@ public class UserResource extends BaseResource {
                     escapeLog(loggedInUserInum), loggedInUserRoleList, isAdmin);
         }
         return isAdmin;
-    }
-
-    private boolean isRolePermissionExemptClient(String inum) {
-        logger.debug(
-                " UserResource::isRolePermissionExemptClient() - inum:{}, StringUtils.isBlank(inum):{}, authUtil.isUserRolePermissionExcluded(inum):{}",
-                inum, StringUtils.isBlank(inum), authUtil.isUserRolePermissionExcluded(inum));
-        if (!authUtil.isUserPermissionValidationEnabled() || authUtil.isUserRolePermissionExcluded(inum)) {
-            logger.debug(
-                    " UserResource::Skip validateUserRolePermission as authUtil.isUserPermissionValidationEnabled() not enabled OR blank inum OR UserRolePermissionExcluded is true ");
-            return true;
+    }    
+    
+    private void handleException(Exception ex, String errorCode) {
+        if (ex instanceof WebApplicationException) {
+            throw (WebApplicationException) ex;
         }
-
-        return false;
+        if (ex instanceof ApiApplicationException || ex instanceof InvalidAttributeException) {
+            logger.error("{} - {}", errorCode, ex.getMessage(), ex);
+            throwBadRequestException(errorCode, ex.getMessage());
+        }
+        logger.error("Exception for {} - ", errorCode, ex);
+        throwInternalServerException(ex);
     }
 
 }

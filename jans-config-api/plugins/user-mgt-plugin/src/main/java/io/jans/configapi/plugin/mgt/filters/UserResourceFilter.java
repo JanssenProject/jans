@@ -182,6 +182,7 @@ public class UserResourceFilter extends BaseFilter {
     
     private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
         log.info(" Verify DataInIntrospectionResponse");
+        
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
             return;
