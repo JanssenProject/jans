@@ -49,6 +49,7 @@ import io.jans.lock.service.OpenIdService;
 import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 
 /**
@@ -124,7 +125,7 @@ class OpenIdProtectionServiceTest {
 	}
 
 	@Test
-	void testAuthorize_OpaqueInactive_Denied403() {
+	void testAuthorize_OpaqueInactive_Denied401() {
 		IntrospectionResponse inactive = new IntrospectionResponse(false);
 		inactive.setScope(Collections.singletonList(SCOPE));
 		when(introspectionService.introspectToken("Bearer opaque-2", "opaque-2")).thenReturn(inactive);
@@ -133,7 +134,32 @@ class OpenIdProtectionServiceTest {
 
 		assertFalse(outcome.isAllowed());
 		assertNull(outcome.getClient());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
+	}
+
+	@Test
+	void testAuthorize_OpaqueInactiveWithoutScope_Denied401() {
+		when(introspectionService.introspectToken("Bearer opaque-4", "opaque-4")).thenReturn(new IntrospectionResponse(false));
+
+		AuthorizationOutcome outcome = service.authorize("Bearer opaque-4", resourceInfo);
+
+		assertFalse(outcome.isAllowed());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
+	}
+
+	@Test
+	void testAuthorize_OpaqueActiveInsufficientScope_Denied403() {
+		IntrospectionResponse active = new IntrospectionResponse(true);
+		active.setScope(Collections.singletonList("other.scope"));
+		when(introspectionService.introspectToken("Bearer opaque-5", "opaque-5")).thenReturn(active);
+
+		AuthorizationOutcome outcome = service.authorize("Bearer opaque-5", resourceInfo);
+
+		assertFalse(outcome.isAllowed());
 		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInsufficientScopeChallenge(outcome);
 	}
 
 	@Test
@@ -152,6 +178,7 @@ class OpenIdProtectionServiceTest {
 
 		assertFalse(outcome.isAllowed());
 		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertEquals("Bearer", outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE));
 	}
 
 	// -- JWT tokens -----------------------------------------------------------------------------
@@ -196,20 +223,68 @@ class OpenIdProtectionServiceTest {
 
 		assertFalse(outcome.isAllowed());
 		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInsufficientScopeChallenge(outcome);
 	}
 
 	@Test
-	void testAuthorize_JwtBadSignature_Denied403() throws Exception {
+	void testAuthorize_JwtBadSignature_Denied401() throws Exception {
 		Jwt jwt = mockJwt("2200.aaaa", null, Collections.singletonList(SCOPE));
 
 		AuthorizationOutcome outcome = authorizeJwt(jwt, false);
 
 		assertFalse(outcome.isAllowed());
 		assertNull(outcome.getClient());
-		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
+	}
+
+	@Test
+	void testAuthorize_JwtBadSignatureAndInsufficientScope_Denied401() throws Exception {
+		Jwt jwt = mockJwt("2200.aaaa", null, Collections.singletonList("other.scope"));
+
+		AuthorizationOutcome outcome = authorizeJwt(jwt, false);
+
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+	}
+
+	@Test
+	void testAuthorize_JwtExpired_Denied401() throws Exception {
+		Jwt jwt = mockJwt("2200.aaaa", null, Collections.singletonList(SCOPE));
+		when(jwt.getClaims().getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).thenReturn((int) (System.currentTimeMillis() / 1000L) - 60);
+
+		AuthorizationOutcome outcome = authorizeJwt(jwt, true);
+
+		assertFalse(outcome.isAllowed());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
+	}
+
+	@Test
+	void testAuthorize_JwtWrongIssuer_Denied401() throws Exception {
+		Jwt jwt = mockJwt("2200.aaaa", null, Collections.singletonList(SCOPE));
+		when(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER)).thenReturn("https://other.example.org");
+
+		AuthorizationOutcome outcome = authorizeJwt(jwt, true);
+
+		assertFalse(outcome.isAllowed());
+		assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertInvalidTokenChallenge(outcome);
 	}
 
 	// -- helpers --------------------------------------------------------------------------------
+
+	private static void assertInvalidTokenChallenge(AuthorizationOutcome outcome) {
+		String challenge = outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE);
+		assertNotNull(challenge);
+		assertTrue(challenge.startsWith("Bearer error=\"invalid_token\""), challenge);
+	}
+
+	private static void assertInsufficientScopeChallenge(AuthorizationOutcome outcome) {
+		String challenge = outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE);
+		assertNotNull(challenge);
+		assertTrue(challenge.startsWith("Bearer error=\"insufficient_scope\""), challenge);
+		assertTrue(challenge.contains("scope=\"" + SCOPE + "\""), challenge);
+	}
 
 	private AuthorizationOutcome authorizeJwt(Jwt jwt, boolean signatureValid) throws Exception {
 		try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class);

@@ -1,8 +1,6 @@
 package io.jans.lock.service.openid;
 
-import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -35,6 +33,7 @@ import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.service.OpenIdService;
 import io.jans.lock.service.security.AuthenticatedClient;
 import io.jans.lock.service.security.AuthorizationOutcome;
+import io.jans.lock.service.security.BearerChallenge;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -83,7 +82,8 @@ public class OpenIdProtectionService implements OpenIdProtection {
      *
      * @param bearerToken Authorization bearer token
      * @param resourceInfo information about the target resource used to determine required scopes
-     * @return a Response describing the authorization failure (UNAUTHORIZED, FORBIDDEN, or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
+     * @return a Response describing the authorization failure (UNAUTHORIZED for a missing, expired, inactive or invalid token, FORBIDDEN for a missing scope,
+     *         or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
      */
     public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
         return authorize(bearerToken, resourceInfo).getErrorResponse();
@@ -104,7 +104,7 @@ public class OpenIdProtectionService implements OpenIdProtection {
             if (!authFound) {
                 log.debug("Request is missing authorization header");
                 // See section 3.12 RFC 7644
-                return AuthorizationOutcome.denied(simpleResponse(UNAUTHORIZED, "No authorization header found"));
+                return AuthorizationOutcome.denied(BearerChallenge.missingCredentials("No authorization header found"));
             }
 
             bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
@@ -135,12 +135,12 @@ public class OpenIdProtectionService implements OpenIdProtection {
             JwtClaims claims = jwt.getClaims();
 
             if (!oidcConfig.getIssuer().equals(claims.getClaimAsString(JwtClaimName.ISSUER))) {
-                return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Invalid token issuer"));
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token issuer", "The access token issuer is invalid"));
             }
 
             int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
             if (1000L * exp < System.currentTimeMillis()) {
-                return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Expired token"));
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Expired token", "The access token expired"));
             }
 
             AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
@@ -156,16 +156,21 @@ public class OpenIdProtectionService implements OpenIdProtection {
             boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                     jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
 
+            if (!valid) {
+                log.error("Invalid token signature");
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token signature", "The access token signature is invalid"));
+            }
+
             List<String> tokenScopes = claims.getClaimAsStringList("scope");    //tokenScopes is never null
-            if (valid && tokenScopes.containsAll(scopes)) {
+            if (tokenScopes.containsAll(scopes)) {
                 return AuthorizationOutcome.allowed(new AuthenticatedClient(clientIdFromClaims(claims), true));
             }
 
-            String msg = "Invalid token signature or insufficient scopes";
+            String msg = "Insufficient scopes";
             log.error("{}. Token scopes: {}", msg, tokenScopes);
 
             // See section 3.12 RFC 7644
-            return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, msg));
+            return AuthorizationOutcome.denied(BearerChallenge.insufficientScope(msg, "The access token lacks a required scope", scopes));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return AuthorizationOutcome.denied(simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage()));
@@ -189,18 +194,26 @@ public class OpenIdProtectionService implements OpenIdProtection {
     }
 
     public Response processIntrospectionResponse(IntrospectionResponse iresponse, List<String> scopes) {
-        Response response = null;
-        List<String> tokenScopes = Optional.ofNullable(iresponse).map(IntrospectionResponse::getScope)
-                .orElse(null);
-
-        if (tokenScopes == null || !iresponse.isActive() || !tokenScopes.containsAll(scopes)) {
-            String msg = "Invalid token or insufficient scopes";
-            log.error("{}. Token scopes: {}", msg, tokenScopes);
-            // See section 3.12 RFC 7644
-            response = simpleResponse(Response.Status.FORBIDDEN, msg);
+        if (iresponse == null) {
+            // Introspection failed: the token was not judged, so a new token would not help
+            log.error("Token introspection returned no response");
+            return simpleResponse(Response.Status.FORBIDDEN, "Invalid token or insufficient scopes");
         }
 
-        return response;
+        if (!iresponse.isActive()) {
+            log.error("Inactive token");
+            return BearerChallenge.invalidToken("Inactive token", "The access token is expired, revoked or invalid");
+        }
+
+        List<String> tokenScopes = iresponse.getScope();
+        if (tokenScopes == null || !tokenScopes.containsAll(scopes)) {
+            String msg = "Insufficient scopes";
+            log.error("{}. Token scopes: {}", msg, tokenScopes);
+            // See section 3.12 RFC 7644
+            return BearerChallenge.insufficientScope(msg, "The access token lacks a required scope", scopes);
+        }
+
+        return null;
     }
 
     private Jwt tokenAsJwt(String token) {
