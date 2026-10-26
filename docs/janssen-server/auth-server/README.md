@@ -35,6 +35,7 @@ FAPI-CIBA OpenID Providers for the latest results.
 * [Draft -  OpenID Connect Native SSO for Mobile Apps 1.0](https://openid.net/specs/openid-connect-native-sso-1_0.html#name-authorization-request)
 * [Initiating User Registration via OpenID Connect 1.0](https://openid.net/specs/openid-connect-prompt-create-1_0.html)
 * [The AuthZEN Authorization API 1.0](https://openid.github.io/authzen/)
+* [OpenID Connect Ephemeral Subject Identifier 1.0](https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html)
 
 **OAuth**
 

@@ -35,6 +35,7 @@ import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport;
 import io.jans.lock.service.trace.receipt.TraceReceiptChain;
+import io.jans.lock.service.trace.receipt.TraceReceiptRepairTimer;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
@@ -87,6 +88,8 @@ public final class TraceTestHarness {
 
 	private final TraceReceiptChain receiptChain = new TraceReceiptChain();
 
+	private final TraceReceiptRepairTimer repairTimer = new TraceReceiptRepairTimer();
+
 	private final TraceIngestionService ingestionService = new TraceIngestionService();
 
 	private final TraceRetrievalService retrievalService = new TraceRetrievalService();
@@ -137,6 +140,11 @@ public final class TraceTestHarness {
 		setField(receiptChain, "appConfiguration", appConfiguration);
 		setField(receiptChain, "cryptoProvider", provider);
 
+		setField(repairTimer, "log", LoggerFactory.getLogger(TraceReceiptRepairTimer.class));
+		setField(repairTimer, "store", store);
+		setField(repairTimer, "appConfiguration", appConfiguration);
+		setField(repairTimer, "receiptChain", receiptChain);
+
 		setField(ingestionService, "log", LoggerFactory.getLogger(TraceIngestionService.class));
 		setField(ingestionService, "verification", verification);
 		setField(ingestionService, "correlation", correlation);
@@ -159,6 +167,19 @@ public final class TraceTestHarness {
 
 	public TraceIngestionService ingestionService() {
 		return ingestionService;
+	}
+
+	public TraceCorrelationService correlation() {
+		return correlation;
+	}
+
+	public TraceReceiptChain receiptChain() {
+		return receiptChain;
+	}
+
+	/** Runs one repair pass directly, bypassing the CDI timer event. */
+	public void repairPendingReceipts() {
+		repairTimer.repairPendingReceipts();
 	}
 
 	public TraceConfiguration traceConfiguration() {

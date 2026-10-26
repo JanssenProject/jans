@@ -13,9 +13,10 @@ import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
+import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.event.TraceReceiptRepairEvent;
 import io.jans.lock.service.trace.correlation.PolicyMismatchCheck;
-import io.jans.lock.service.trace.model.RecordIdentity;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
@@ -125,7 +126,8 @@ public class TraceReceiptRepairTimer {
 
 	/**
 	 * Loads every {@code PENDING} receipt older than {@code pendingReceiptTimeoutSeconds} and
-	 * settles it: {@code COMMITTED} if its record row now exists, {@code VOID} otherwise. Called
+	 * settles it: {@code COMMITTED} if its claim is satisfied (the record row exists and carries this receipt's
+	 * sequence, see {@link TraceReceiptChain#isClaimSatisfied}), {@code VOID} otherwise. Called
 	 * directly by tests, bypassing the CDI timer event.
 	 */
 	public void repairPendingReceipts() {
@@ -135,20 +137,40 @@ public class TraceReceiptRepairTimer {
 
 		int committed = 0;
 		int voided = 0;
+		int alreadySettled = 0;
+		int conflicts = 0;
 		for (TraceReceiptEntry receipt : pending) {
-			RecordIdentity identity = new RecordIdentity(receipt.getDomainId(), receipt.getProducerId(),
-					receipt.getRecordId());
-			if (store.findRecord(identity).isPresent()) {
-				receiptChain.commit(receipt.getDomainId(), receipt.getReceiptSeq());
-				committed++;
-			} else {
-				receiptChain.voidClaim(receipt.getDomainId(), receipt.getReceiptSeq());
-				voided++;
+			TraceReceiptState target = receiptChain.isClaimSatisfied(receipt) ? TraceReceiptState.COMMITTED
+					: TraceReceiptState.VOID;
+			ReceiptSettlement outcome = target == TraceReceiptState.COMMITTED
+					? receiptChain.commit(receipt.getDomainId(), receipt.getReceiptSeq())
+					: receiptChain.voidClaim(receipt.getDomainId(), receipt.getReceiptSeq());
+			switch (outcome) {
+			case SETTLED:
+				if (target == TraceReceiptState.COMMITTED) {
+					committed++;
+				} else {
+					voided++;
+				}
+				break;
+			case ALREADY_SETTLED:
+				alreadySettled++;
+				log.debug("TRACE receipt repair: already settled: domain={}, seq={}, target={}", receipt.getDomainId(),
+						receipt.getReceiptSeq(), target);
+				break;
+			case CONFLICT:
+				conflicts++;
+				log.debug("TRACE receipt repair: conflicting terminal state: domain={}, seq={}, target={}",
+						receipt.getDomainId(), receipt.getReceiptSeq(), target);
+				break;
+			default:
+				break;
 			}
 		}
 
 		if (!pending.isEmpty()) {
-			log.info("TRACE receipt repair: examined={}, committed={}, voided={}", pending.size(), committed, voided);
+			log.info("TRACE receipt repair: examined={}, committed={}, voided={}, already_settled={}, conflicts={}",
+					pending.size(), committed, voided, alreadySettled, conflicts);
 		}
 	}
 

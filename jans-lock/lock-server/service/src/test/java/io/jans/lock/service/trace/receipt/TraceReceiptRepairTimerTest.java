@@ -65,9 +65,10 @@ class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 		setField(timer, "receiptChain", receiptChain);
 	}
 
-	private void insertMatchingRecord(String recordId, String contentDigest) throws DuplicateEntryException {
+	private void insertMatchingRecord(String recordId, String contentDigest, long receiptSequence)
+			throws DuplicateEntryException {
 		StoredTraceRecord record = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
-				.recordId(recordId).contentDigest(contentDigest).build();
+				.recordId(recordId).contentDigest(contentDigest).receiptSequence(receiptSequence).build();
 		store.insertRecord(record);
 	}
 
@@ -77,7 +78,7 @@ class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 		long receivedAtMs = System.currentTimeMillis() - 10_000L;
 		ReceiptClaim claim = receiptChain.claim(DOMAIN, PRODUCER, "rec-1", "rec-1-key", "sha256:" + digest('1'),
 				receivedAtMs, NODE_ID);
-		insertMatchingRecord("rec-1", "sha256:" + digest('1'));
+		insertMatchingRecord("rec-1", "sha256:" + digest('1'), claim.getSeq());
 
 		timer.repairPendingReceipts();
 
@@ -107,6 +108,47 @@ class TraceReceiptRepairTimerTest extends BaseLockServiceTest {
 		timer.repairPendingReceipts();
 
 		assertEquals(TraceReceiptState.PENDING, store.findReceipt(DOMAIN, claim.getSeq()).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testRepairPendingReceipts_AroundTimeoutBoundary_YoungerUntouchedOlderVoided() {
+		traceConfiguration.setPendingReceiptTimeoutSeconds(120);
+		long now = System.currentTimeMillis();
+		ReceiptClaim young = receiptChain.claim(DOMAIN, PRODUCER, "rec-young", "rec-young-key", "sha256:" + digest('4'),
+				now - 100_000L, NODE_ID);
+		ReceiptClaim old = receiptChain.claim(DOMAIN, PRODUCER, "rec-old", "rec-old-key", "sha256:" + digest('5'),
+				now - 130_000L, NODE_ID);
+
+		timer.repairPendingReceipts();
+
+		assertEquals(TraceReceiptState.PENDING, store.findReceipt(DOMAIN, young.getSeq()).get().getReceiptStateEnum());
+		assertEquals(TraceReceiptState.VOID, store.findReceipt(DOMAIN, old.getSeq()).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testRepairPendingReceipts_RecordWithOtherSequence_Voided() throws DuplicateEntryException {
+		traceConfiguration.setPendingReceiptTimeoutSeconds(1);
+		long receivedAtMs = System.currentTimeMillis() - 10_000L;
+		ReceiptClaim claim = receiptChain.claim(DOMAIN, PRODUCER, "rec-6", "rec-6-key", "sha256:" + digest('6'),
+				receivedAtMs, NODE_ID);
+		insertMatchingRecord("rec-6", "sha256:" + digest('6'), claim.getSeq() + 1);
+
+		timer.repairPendingReceipts();
+
+		assertEquals(TraceReceiptState.VOID, store.findReceipt(DOMAIN, claim.getSeq()).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testRepairPendingReceipts_AlreadySettledMeanwhile_NoOverwrite() throws DuplicateEntryException {
+		traceConfiguration.setPendingReceiptTimeoutSeconds(1);
+		long receivedAtMs = System.currentTimeMillis() - 10_000L;
+		ReceiptClaim claim = receiptChain.claim(DOMAIN, PRODUCER, "rec-7", "rec-7-key", "sha256:" + digest('7'),
+				receivedAtMs, NODE_ID);
+		receiptChain.voidClaim(DOMAIN, claim.getSeq());
+
+		timer.repairPendingReceipts();
+
+		assertEquals(TraceReceiptState.VOID, store.findReceipt(DOMAIN, claim.getSeq()).get().getReceiptStateEnum());
 	}
 
 	private static String digest(char c) {
