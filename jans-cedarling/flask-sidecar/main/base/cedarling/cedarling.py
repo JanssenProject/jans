@@ -14,34 +14,76 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import json
+import os
 from dataclasses import asdict
 from cedarling_python import BootstrapConfig
 from cedarling_python import Cedarling
 from cedarling_python import (
     EntityData,
     AuthorizeMultiIssuerRequest,
+    AuthorizeOptions,
     MultiIssuerAuthorizeResult,
     TokenInput,
+    TraceContext,
 )
 from main.logger import logger
 from flask import Flask
 import typing as _t
-from main.domain.entities.authzen import CedarlingRequest, Decision, Resource
+from main.domain.entities.authzen import (
+    CedarlingRequest,
+    Decision,
+    Resource,
+    TraceCorrelation,
+)
 
 DictType = _t.Dict[str, _t.Any]
 KEYS_LIST = ["access_token", "id_token", "userinfo_token"]
+DEFAULT_TRACE_WORKLOAD_ID = "cedarling-sidecar"
+MAX_TRACE_WORKLOAD_ID_LENGTH = 255
+
+
+def application_name(bootstrap_config: str | None) -> str | None:
+    if bootstrap_config is None:
+        return os.getenv("CEDARLING_APPLICATION_NAME")
+    try:
+        config = json.loads(bootstrap_config)
+    except ValueError:
+        return None
+    if not isinstance(config, dict):
+        return None
+    name = config.get("CEDARLING_APPLICATION_NAME")
+    return name if isinstance(name, str) else None
+
+
+def resolve_trace_workload_id(
+    configured: str | None, bootstrap_config: str | None
+) -> str:
+    for candidate in (configured, application_name(bootstrap_config)):
+        value = candidate.strip() if candidate else ""
+        if value and len(value) <= MAX_TRACE_WORKLOAD_ID_LENGTH:
+            return value
+        if value:
+            logger.warning(
+                f"Ignoring TRACE workload id over {MAX_TRACE_WORKLOAD_ID_LENGTH} characters"
+            )
+    return DEFAULT_TRACE_WORKLOAD_ID
 
 
 class CedarlingInstance:
     def __init__(self, app=None):
         self._bootstrap_config: str | None
         self._cedarling: Cedarling
+        self.trace_workload_id = DEFAULT_TRACE_WORKLOAD_ID
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app: Flask):
         self._bootstrap_config = app.config.get("CEDARLING_BOOTSTRAP_CONFIG", None)
         self.debug_response: bool = app.config.get("SIDECAR_DEBUG_RESPONSE", False)
+        self.trace_workload_id = resolve_trace_workload_id(
+            app.config.get("SIDECAR_TRACE_WORKLOAD_ID"), self._bootstrap_config
+        )
         app.extensions = getattr(app, "extensions", {})
         app.extensions["cedarling_client"] = self
         self.initialize_cedarling()
@@ -89,6 +131,20 @@ class CedarlingInstance:
                 result.append(reason)
         return result
 
+    def authorize_options(
+        self, trace: TraceCorrelation | None
+    ) -> AuthorizeOptions | None:
+        if trace is None:
+            return None
+        return AuthorizeOptions(
+            trace=TraceContext(
+                execution_id=trace.trace_execution_id,
+                execution_authority=trace.execution_authority,
+                workload_id=trace.workload_id or self.trace_workload_id,
+                workload_instance_id=trace.workload_instance_id,
+            )
+        )
+
     def authorize(self, request: CedarlingRequest) -> Decision:
         result_dict = {}
         action_entity = request.action
@@ -107,6 +163,7 @@ class CedarlingInstance:
                 action=action_entity,
                 resource=resource_entity,
                 context=context,
+                options=self.authorize_options(request.trace),
             )
             authorize_result = self._cedarling.authorize_multi_issuer(cedarling_request)
         except Exception as e:
@@ -117,6 +174,7 @@ class CedarlingInstance:
         request_id = None
         policy_store_id = None
         policy_store_version = None
+        trace_record_status = None
         try:
             request_id = authorize_result.request_id()
             decision_log = self._cedarling.get_logs_by_request_id_and_tag(
@@ -129,6 +187,14 @@ class CedarlingInstance:
             if entry is not None:
                 policy_store_id = entry.get("policystore_id")
                 policy_store_version = entry.get("policystore_version")
+            trace_record_status = next(
+                (
+                    log["trace_record_status"]
+                    for log in decision_log
+                    if log.get("trace_record_status")
+                ),
+                None,
+            )
         except Exception as e:
             logger.warning(f"Failed to retrieve logs: {e}")
         authorize_bool = authorize_result.is_allowed()
@@ -157,5 +223,7 @@ class CedarlingInstance:
             result_dict["context"]["trace_execution_id"] = (
                 request.trace.trace_execution_id
             )
+        if trace_record_status is not None:
+            result_dict["context"]["trace_record_status"] = str(trace_record_status)
         result = Decision(**result_dict)
         return result
