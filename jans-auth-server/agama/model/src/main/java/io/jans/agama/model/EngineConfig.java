@@ -20,9 +20,6 @@ public class EngineConfig {
     private String scriptsPath = "/scripts";
     
     private int maxItemsLoggedInCollections = 3;
-    
-    //transpiled code hash verification. Boolean preferred over boolean because it helps to keep the property "hidden"
-    private Boolean disableTCHV;
 
     private String pageMismatchErrorPage;
     private String interruptionErrorPage;
@@ -92,14 +89,6 @@ public class EngineConfig {
 
     public void setMaxItemsLoggedInCollections(int maxItemsLoggedInCollections) {
         this.maxItemsLoggedInCollections = maxItemsLoggedInCollections;
-    }
-
-    public Boolean getDisableTCHV() {
-        return disableTCHV;
-    }
-
-    public void setDisableTCHV(Boolean disableTCHV) {
-        this.disableTCHV = disableTCHV;
     }
 
     public String getCrashErrorPage() {
