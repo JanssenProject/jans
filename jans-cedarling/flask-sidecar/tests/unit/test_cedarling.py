@@ -146,6 +146,9 @@ def test_authorize_returns_trace_record_status():
     decision = instance.authorize(request)
 
     assert decision.context["trace_record_status"] == "emitted"
+    instance._cedarling.get_logs_by_request_id_and_tag.assert_called_once_with(
+        "req-7", "Decision"
+    )
 
 
 def test_authorize_omits_missing_trace_record_status():
