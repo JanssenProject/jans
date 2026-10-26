@@ -992,6 +992,34 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testTokens_issuerCustomUrn_accepted() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		remove(root, "trace", "event", "tokens", "0", "jti");
+		set(root, TextNode.valueOf("abcdefghijklmnopqrst"), "trace", "event", "tokens", "0", "fingerprint");
+		set(root, TextNode.valueOf("urn:jans:cedarling:custom-issuer:billing-api"), "trace", "event", "tokens", "0",
+				"issuer");
+
+		ParsedAssertion assertion = parseAndCommonValidate(root);
+		CorrelationInputs result = registry.validate(assertion);
+
+		assertEquals("urn:jans:cedarling:custom-issuer:billing-api", result.getTokenRefs().get(0).getIssuer());
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({ "urn:jans:cedarling:custom-issuer:", "URN:jans:cedarling:custom-issuer:billing-api",
+			"urn:jans:cedarling:other:billing-api", "urn:example:billing-api",
+			"urn:jans:cedarling:custom-issuer:a#b" })
+	void testTokens_issuerInvalidUrn_throwsInvalidAssertion(String issuer) throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf(issuer), "trace", "event", "tokens", "0", "issuer");
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("invalid:trace.event.tokens[0].issuer", ex.getReason());
+	}
+
+	@Test
 	void testTokens_duplicateJtiDifferentIssuer_producesTwoDistinctTokenRefs() throws IOException {
 		ObjectNode root = loadFixture("authorization_decision_valid.json");
 		ArrayNode tokens = (ArrayNode) at(root, "trace", "event", "tokens");

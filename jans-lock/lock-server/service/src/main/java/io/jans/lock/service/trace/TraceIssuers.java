@@ -17,6 +17,8 @@ import java.net.URISyntaxException;
  */
 public final class TraceIssuers {
 
+	static final String CUSTOM_ISSUER_URN_PREFIX = "urn:jans:cedarling:custom-issuer:";
+
 	/**
 	 * An absolute URI with scheme {@code https}, or {@code http} only when the host is
 	 * {@code localhost} (documented MVP relaxation for local/dev producers).
@@ -34,6 +36,28 @@ public final class TraceIssuers {
 		}
 		return "https".equalsIgnoreCase(scheme)
 				|| ("http".equalsIgnoreCase(scheme) && "localhost".equalsIgnoreCase(uri.getHost()));
+	}
+
+	/**
+	 * {@link #isValid(String)}, or a custom-issuer URN {@code urn:jans:cedarling:custom-issuer:<name>}
+	 * for credentials without an issuer URI (opaque tokens, API keys). The prefix is matched
+	 * case-sensitively and {@code <name>} is compared exactly, so there is no case folding.
+	 */
+	public static boolean isValidTokenIssuer(String issuer) {
+		return isValid(issuer) || isCustomIssuerUrn(issuer);
+	}
+
+	private static boolean isCustomIssuerUrn(String issuer) {
+		if (issuer == null || issuer.length() <= CUSTOM_ISSUER_URN_PREFIX.length()
+				|| !issuer.startsWith(CUSTOM_ISSUER_URN_PREFIX)) {
+			return false;
+		}
+		try {
+			URI uri = new URI(issuer);
+			return uri.isOpaque() && uri.getFragment() == null;
+		} catch (URISyntaxException ex) {
+			return false;
+		}
 	}
 
 	private TraceIssuers() {
