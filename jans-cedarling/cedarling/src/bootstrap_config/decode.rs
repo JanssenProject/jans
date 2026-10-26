@@ -17,9 +17,11 @@ use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
+use super::trace_config::build_trace_config;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSignature, PolicyStoreSource, SigstoreMode,
+    SigstoreSigner,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::HttpClientConfig;
@@ -54,6 +56,7 @@ impl BootstrapConfig {
         };
 
         let policy_store_config = build_policy_store_config(raw)?;
+        let trace_config = build_trace_config(raw, &policy_store_config.source)?;
 
         // Load the jwks from a local file
         let jwks = raw
@@ -116,6 +119,7 @@ impl BootstrapConfig {
             max_base64_size: raw.max_base64_size,
             data_store_config,
             http_client_config,
+            trace_config,
         })
     }
 }
@@ -126,14 +130,14 @@ impl BootstrapConfig {
 fn build_policy_store_config(
     raw: &BootstrapConfigRaw,
 ) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
-    match (
+    let source = match (
         raw.local_policy_store.clone(),
         raw.policy_store_uri.clone(),
         raw.policy_store_local_fn.clone(),
         raw.policy_store_cjar_url.clone(),
     ) {
         // Case: no policy store provided
-        (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
+        (None, None, None, None) => return Err(BootstrapConfigLoadingError::MissingPolicyStore),
         // Case: get the policy store from an inline string (YAML supported for test suites; legacy JSON rejected)
         (Some(policy_store), None, None, None) => {
             let trimmed = policy_store.trim();
@@ -143,28 +147,18 @@ fn build_policy_store_config(
             if crate::common::policy_store::is_json_content(&policy_store) {
                 return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
             }
-            Ok(PolicyStoreConfig {
-                source: PolicyStoreSource::Yaml(policy_store),
-                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-                max_file_size: raw.policy_store_max_file_size,
-            })
+            PolicyStoreSource::Yaml(policy_store)
         },
         // Case: get the policy store from a URI
-        (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::Uri(policy_store_uri),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-            max_file_size: raw.policy_store_max_file_size,
-        }),
+        (None, Some(policy_store_uri), None, None) => PolicyStoreSource::Uri(policy_store_uri),
         // Case: get the policy store from a CjarUrl
-        (None, None, None, Some(policy_store_cjar_url)) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::CjarUrl(policy_store_cjar_url),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-            max_file_size: raw.policy_store_max_file_size,
-        }),
+        (None, None, None, Some(policy_store_cjar_url)) => {
+            PolicyStoreSource::CjarUrl(policy_store_cjar_url)
+        },
         // Case: get the policy store from a local file or directory
         (None, None, Some(raw_path), None) => {
             let path = Path::new(&raw_path);
-            let source = if path.is_dir() {
+            if path.is_dir() {
                 PolicyStoreSource::Directory(path.into())
             } else {
                 let file_ext = path
@@ -183,16 +177,47 @@ fn build_policy_store_config(
                         );
                     },
                 }
-            };
-            Ok(PolicyStoreConfig {
-                source,
-                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-                max_file_size: raw.policy_store_max_file_size,
-            })
+            }
         },
         // Case: multiple policy stores were set
-        _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
+        _ => return Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
+    };
+
+    let signature = build_policy_store_signature(raw)?;
+    Ok(PolicyStoreConfig {
+        source,
+        refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        max_file_size: raw.policy_store_max_file_size,
+        signature,
+    })
+}
+
+/// Build the Sigstore check; `enforce` needs a signer. The loader checks the source.
+fn build_policy_store_signature(
+    raw: &BootstrapConfigRaw,
+) -> Result<PolicyStoreSignature, BootstrapConfigLoadingError> {
+    if raw.policy_store_sigstore_mode == SigstoreMode::Disabled {
+        return Ok(PolicyStoreSignature::Disabled);
     }
+    // A blank value would never match a certificate, so treat it as unset.
+    let required = |value: &Option<String>, property| {
+        value.clone().filter(|v| !v.trim().is_empty()).ok_or(
+            BootstrapConfigLoadingError::MissingSigstoreProperty(property),
+        )
+    };
+    let cert_identity = required(
+        &raw.policy_store_sigstore_cert_identity,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
+    )?;
+    let cert_oidc_issuer = required(
+        &raw.policy_store_sigstore_cert_oidc_issuer,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
+    )?;
+    Ok(PolicyStoreSignature::Enforce(SigstoreSigner {
+        cert_identity,
+        cert_oidc_issuer,
+        bundle_uri: raw.policy_store_sigstore_bundle_uri.clone(),
+    }))
 }
 
 /// Build `DataStoreConfig` from raw config fields.
@@ -377,6 +402,132 @@ mod tests {
             config.policy_store_config.max_file_size, 4096,
             "A string-valued cap must parse to the same number"
         );
+    }
+
+    fn decode_cjar_url(extra: &str) -> Result<BootstrapConfig, BootstrapConfigLoadingError> {
+        let json = format!(
+            r#"{{
+                "CEDARLING_APPLICATION_NAME": "test",
+                "CEDARLING_POLICY_STORE_CJAR_URL": "https://example.com/store.cjar"
+                {extra}
+            }}"#
+        );
+        let raw: BootstrapConfigRaw = serde_json::from_str(&json)
+            .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
+        BootstrapConfig::try_from(raw)
+    }
+
+    const SIGNER: &str = r#",
+        "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com""#;
+
+    #[test]
+    fn sigstore_is_disabled_by_default() {
+        let config = decode_cjar_url("").expect("config without sigstore properties decodes");
+        assert_eq!(
+            config.policy_store_config.signature,
+            PolicyStoreSignature::Disabled,
+            "signature check must be off unless enabled"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_decodes_signer() {
+        let config = decode_cjar_url(SIGNER).expect("enforce with signer decodes");
+        assert_eq!(
+            config.policy_store_config.signature,
+            PolicyStoreSignature::Enforce(SigstoreSigner {
+                cert_identity: "signer@example.com".to_string(),
+                cert_oidc_issuer: "https://accounts.google.com".to_string(),
+                bundle_uri: None,
+            }),
+            "enforce must carry the configured signer"
+        );
+
+        let config = decode_cjar_url(&format!(
+            r#"{SIGNER}, "CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI": "https://example.com/b.json""#
+        ))
+        .expect("enforce with bundle URI decodes");
+        assert!(
+            matches!(
+                config.policy_store_config.signature,
+                PolicyStoreSignature::Enforce(SigstoreSigner { bundle_uri: Some(ref uri), .. })
+                    if uri == "https://example.com/b.json"
+            ),
+            "bundle URI override must be kept"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_requires_signer() {
+        let err = decode_cjar_url(r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce""#)
+            .expect_err("enforce without identity must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"
+                )
+            ),
+            "expected missing identity, got {err:?}"
+        );
+
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com""#,
+        )
+        .expect_err("enforce without issuer must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"
+                )
+            ),
+            "expected missing issuer, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_rejects_blank_signer() {
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "   ",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com""#,
+        )
+        .expect_err("a blank identity must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"
+                )
+            ),
+            "expected missing identity, got {err:?}"
+        );
+
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "\t""#,
+        )
+        .expect_err("a blank issuer must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"
+                )
+            ),
+            "expected missing issuer, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn sigstore_rejects_unknown_mode() {
+        decode_cjar_url(r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "warn""#)
+            .expect_err("an unknown mode must not decode");
     }
 
     #[test]

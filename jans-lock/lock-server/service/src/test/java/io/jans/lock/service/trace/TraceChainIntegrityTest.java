@@ -6,7 +6,7 @@
 
 package io.jans.lock.service.trace;
 
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
@@ -54,7 +54,7 @@ import io.jans.lock.service.trace.testkit.TraceTestHarness;
  * shuffle the 48 forward positions across 4 independent producer chains and still assert an exact
  * head sequence.
  */
-class TraceChainIntegrityTest {
+public class TraceChainIntegrityTest {
 
 	private static final long SEED = 42L;
 
@@ -84,9 +84,14 @@ class TraceChainIntegrityTest {
 
 	private TraceTestHarness harness;
 
+	/** Override to run the same suite against another {@code TraceCryptoProvider}. */
+	protected TraceTestHarness newHarness() {
+		return new TraceTestHarness();
+	}
+
 	@BeforeEach
 	void setUp() {
-		harness = new TraceTestHarness();
+		harness = newHarness();
 	}
 
 	private static String contentDigestOf(String json) {

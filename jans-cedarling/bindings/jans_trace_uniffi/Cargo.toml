@@ -1,0 +1,20 @@
+[package]
+name = "jans_trace_uniffi"
+version = "0.0.0"
+edition = "2024"
+license = "Apache-2.0"
+publish = false
+description = "UniFFI bindings of jans-trace-core for the JVM"
+
+[lib]
+crate-type = ["cdylib"]
+name = "jans_trace_uniffi"
+
+[dependencies]
+jans-trace-core = { workspace = true }
+thiserror = { workspace = true }
+uniffi = { workspace = true, features = ["cli"] }
+zeroize = { workspace = true }
+
+[lints]
+workspace = true

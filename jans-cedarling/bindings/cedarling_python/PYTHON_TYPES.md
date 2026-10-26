@@ -21,7 +21,8 @@ Attributes
 :param tokens: List of TokenInput objects containing JWT tokens with explicit type mappings  
 :param resource: Resource data (wrapped `EntityData` object)  
 :param action: The action to be authorized  
-:param context: Optional Python dictionary with additional context
+:param context: Optional Python dictionary with additional context  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -37,6 +38,29 @@ request = AuthorizeMultiIssuerRequest(
     action="Read",
     context={"location": "miami"}
 )
+```
+---
+
+AuthorizeOptions
+================
+
+A Python wrapper for the Rust `cedarling::AuthorizeOptions` struct.
+Per-call metadata that travels with an authorization request. None of it
+takes part in policy evaluation: the decision is the same with or without
+options.
+
+Attributes
+----------  
+:param trace: Optional `TraceContext`. `None` means the host has no
+    execution context, so no TRACE record can be emitted for the decision.
+    The getter returns a copy, so `opts.trace.workload_id = ...` is
+    discarded; assign a new `TraceContext` instead.
+
+Example
+-------
+```python
+options = AuthorizeOptions(trace=TraceContext("exec-1", "https://gw.example.com", "workload-1"))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
 ```
 ---
 
@@ -75,7 +99,8 @@ entities built once for the whole batch.
 Attributes
 ----------  
 :param tokens: List of `TokenInput` shared across every item.  
-:param items: List of `BatchItem` objects, evaluated in input order.
+:param items: List of `BatchItem` objects, evaluated in input order.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -105,7 +130,8 @@ against the same principal snapshot and pushed-data snapshot.
 Attributes
 ----------  
 :param principal: Optional `EntityData` shared across every item.  
-:param items: List of `BatchItem` objects, evaluated in input order.
+:param items: List of `BatchItem` objects, evaluated in input order.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -483,6 +509,40 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ---
 
+DropReason
+==========
+
+Why a token was dropped from a multi-issuer authorization. Same shape as
+the ``reason`` object in the core JSON.
+
+Attributes
+----------
+.. attribute:: kind
+    str: stable snake-case slug (e.g. ``"jwt_validation_failed"``).
+.. attribute:: detail
+    str | None: stable detail slug for ``invalid_input``
+    (``"empty_mapping"`` / ``"empty_payload"``); ``None`` otherwise.
+.. attribute:: message
+    str: claim-free human-readable message; non-empty for every reason.
+---
+
+DroppedToken
+============
+
+A token the caller supplied that multi-issuer authorization did not use.
+Identifies the entry by its input `mapping` and zero-based `index`, with a
+claim-free `reason`.
+
+Attributes
+----------
+.. attribute:: mapping
+    str: the Cedar entity-type mapping of the dropped input.
+.. attribute:: index
+    int: zero-based position in the request's ``tokens`` list.
+.. attribute:: reason
+    DropReason: why the token was dropped.
+---
+
 EntityData
 ============
 
@@ -542,6 +602,10 @@ Methods
 .. method:: request_id(self) -> str
     Returns the unique request ID for this authorization.
 
+.. method:: dropped_tokens(self) -> list[DroppedToken]
+    Returns the tokens the caller supplied that were not used in this
+    decision (empty when every token contributed).
+
 ---
 
 PolicyEffect
@@ -594,7 +658,8 @@ Attributes
     the core performs partial evaluation of the policies.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
+:param context: Python dictionary with additional context.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -620,6 +685,33 @@ Example
 ```python
 # Create a token input for multi-issuer authorization
 token = TokenInput(mapping="Jans::Access_Token", payload="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+```
+---
+
+TraceContext
+============
+
+A Python wrapper for the Rust `cedarling::TraceContext` struct.
+TRACE execution context, already normalized by the host. Cedarling does not
+parse headers, tokens or baggage and never generates `execution_id`: the
+execution initiator (gateway, PEP, host) owns the `execution_id` +
+`execution_authority` pair.
+
+Attributes
+----------  
+:param execution_id: `trace_execution_id` issued by the execution initiator.  
+:param execution_authority: Authority that issued `execution_id`.  
+:param workload_id: Stable id of the workload the decision is made for.  
+:param workload_instance_id: Optional instance of that workload.
+
+Example
+-------
+```python
+trace = TraceContext(
+    execution_id="exec-01JABC",
+    execution_authority="https://gateway.example.com",
+    workload_id="spiffe://example.org/agent/planner",
+)
 ```
 ---
 

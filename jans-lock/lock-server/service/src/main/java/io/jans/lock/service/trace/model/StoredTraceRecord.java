@@ -56,10 +56,23 @@ public final class StoredTraceRecord {
 
 	private final long version;
 
+	private final PolicyRef policy;
+
 	public StoredTraceRecord(RecordIdentity identity, String assertionRaw, String contentDigest,
 			VerificationResult verification, ReceiptEntry receipt, IngestionFlags flags, ExecutionIdentity execution,
 			ChainPosition chainPosition, String prevRecordHash, List<TokenRef> tokenRefs, String eventKind, long signedAt, String nodeId,
 			long createdAtMs, long version) {
+		this(identity, assertionRaw, contentDigest, verification, receipt, flags, execution, chainPosition,
+				prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version, null);
+	}
+
+	/**
+	 * @param policy the {@code trace.policy} release the record names, or {@code null} when it names none
+	 */
+	public StoredTraceRecord(RecordIdentity identity, String assertionRaw, String contentDigest,
+			VerificationResult verification, ReceiptEntry receipt, IngestionFlags flags, ExecutionIdentity execution,
+			ChainPosition chainPosition, String prevRecordHash, List<TokenRef> tokenRefs, String eventKind, long signedAt, String nodeId,
+			long createdAtMs, long version, PolicyRef policy) {
 		this.identity = Objects.requireNonNull(identity, "identity");
 		this.assertionRaw = Objects.requireNonNull(assertionRaw, "assertionRaw");
 		this.contentDigest = Objects.requireNonNull(contentDigest, "contentDigest");
@@ -76,6 +89,7 @@ public final class StoredTraceRecord {
 		this.nodeId = Objects.requireNonNull(nodeId, "nodeId");
 		this.createdAtMs = createdAtMs;
 		this.version = version;
+		this.policy = policy;
 	}
 
 	public RecordIdentity getIdentity() {
@@ -149,12 +163,19 @@ public final class StoredTraceRecord {
 	}
 
 	/**
+	 * @return the {@code trace.policy} release the record names, or {@code null}
+	 */
+	public PolicyRef getPolicy() {
+		return policy;
+	}
+
+	/**
 	 * @return an independent deep copy of this record (defensive copy of the mutable
 	 *         {@link IngestionFlags} and the two lists; everything else is already immutable)
 	 */
 	public StoredTraceRecord copy() {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, flags, execution,
-				chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version);
+				chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs, version, policy);
 	}
 
 	/**
@@ -165,7 +186,7 @@ public final class StoredTraceRecord {
 	public StoredTraceRecord withFlags(IngestionFlags newFlags, long newVersion) {
 		return new StoredTraceRecord(identity, assertionRaw, contentDigest, verification, receipt, newFlags,
 				execution, chainPosition, prevRecordHash, tokenRefs, eventKind, signedAt, nodeId, createdAtMs,
-				newVersion);
+				newVersion, policy);
 	}
 
 	@Override
@@ -190,7 +211,7 @@ public final class StoredTraceRecord {
 		return "StoredTraceRecord [identity=" + identity + ", contentDigest=" + contentDigest + ", receipt="
 				+ receipt + ", flags=" + flags + ", execution=" + execution + ", chainPosition=" + chainPosition
 				+ ", eventKind=" + eventKind + ", signedAt=" + signedAt + ", nodeId=" + nodeId + ", createdAtMs="
-				+ createdAtMs + ", version=" + version + "]";
+				+ createdAtMs + ", version=" + version + ", policy=" + policy + "]";
 	}
 
 }

@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.verify;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -13,6 +14,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -32,19 +36,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.BaseLockServiceTest;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519PublicKeys;
-import io.jans.lock.service.trace.crypto.Ed25519TestKeys;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
-import io.jans.lock.service.trace.error.TraceCryptoException;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
+import io.jans.lock.trace.crypto.bc.Ed25519Capability;
+import io.jans.lock.trace.crypto.bc.Ed25519PublicKeys;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
+import io.jans.lock.trace.crypto.bc.Ed25519Verifier;
+import io.jans.lock.trace.crypto.bc.JavaTraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
+import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.parse.CommonAssertionValidator;
@@ -90,7 +100,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	private CommonAssertionValidator commonValidator;
 
-	private Ed25519Capability capability;
+	private TraceCryptoProvider cryptoProvider;
 
 	private TraceVerificationService service;
 
@@ -98,7 +108,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	@BeforeAll
 	static void installProvider() {
-		Ed25519TestKeys.installProvider();
+		TraceTestKeys.installProvider();
 	}
 
 	@BeforeEach
@@ -109,6 +119,10 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
 
+		cryptoProvider = TraceTestCrypto.javaProvider();
+		assertTrue(cryptoProvider.isAvailable(), "Ed25519 must be available for these tests");
+		setField(parser, "cryptoProvider", cryptoProvider);
+
 		commonValidator = new CommonAssertionValidator();
 		setField(commonValidator, "appConfiguration", appConfiguration);
 
@@ -116,15 +130,12 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		keyRegistry = new ProducerKeyRegistry();
 		setField(keyRegistry, "traceStore", store);
 		setField(keyRegistry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(keyRegistry, "cryptoProvider", cryptoProvider);
 
-		capability = new Ed25519Capability();
-		capability.probe();
-		assertTrue(capability.isAvailable(), "Ed25519 must be available for these tests");
+		service = newService(cryptoProvider, keyRegistry, parser);
 
-		service = newService(capability, keyRegistry, new Ed25519Verifier(), parser);
-
-		keyPair = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, KID, Ed25519TestKeys.toJwk(keyPair.getPublic()),
+		keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, KID, TraceTestKeys.toJwk(keyPair.getPublic()),
 				new ArrayList<>(TraceConstants.EVENT_KINDS), KEY_VALID_FROM_MS, null, CLIENT_ID, KEY_VALID_FROM_MS);
 	}
 
@@ -132,16 +143,15 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	 * Wires the private {@code @Inject} fields by reflection (the service carries no test-seam
 	 * setters), the same way {@code OrmTraceStores} and {@code EventKindValidatorsTest} do.
 	 */
-	private TraceVerificationService newService(Ed25519Capability ed25519Capability, ProducerKeyRegistry registry,
-			Ed25519Verifier verifier, TraceAssertionParser assertionParser) {
+	private TraceVerificationService newService(TraceCryptoProvider provider, ProducerKeyRegistry registry,
+			TraceAssertionParser assertionParser) {
 		TraceVerificationService result = new TraceVerificationService();
 		setField(result, "log", LoggerFactory.getLogger(TraceVerificationService.class));
-		setField(result, "capability", ed25519Capability);
+		setField(result, "cryptoProvider", provider);
 		setField(result, "parser", assertionParser);
 		setField(result, "commonValidator", commonValidator);
 		setField(result, "eventKindRegistry", new EventKindValidatorRegistry());
 		setField(result, "keyRegistry", registry);
-		setField(result, "verifier", verifier);
 		return result;
 	}
 
@@ -165,7 +175,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		assertEquals(KID, verified.getVerification().getKeyId());
 		assertEquals(RECEIVED_AT_MS, verified.getVerification().getVerifiedAtMs());
 		assertEquals(Ed25519PublicKeys.ALGORITHM, verified.getVerification().getAlgorithm());
-		assertEquals(Ed25519PublicKeys.thumbprint(Ed25519TestKeys.toJwk(keyPair.getPublic())),
+		assertEquals(Ed25519PublicKeys.thumbprint(TraceTestKeys.toJwk(keyPair.getPublic())),
 				verified.getVerification().getKeyThumbprint());
 		assertEquals(Boolean.TRUE, verified.getVerification().getKeyAuthorized());
 
@@ -192,8 +202,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_EventKindOutsideKeyScope_UnknownProducerKeyBeforeSignature() {
 		String adOnlyKid = "ad-only-kid";
-		KeyPair adOnlyKey = Ed25519TestKeys.generateKeyPair();
-		keyRegistry.register(DOMAIN, PRODUCER, adOnlyKid, Ed25519TestKeys.toJwk(adOnlyKey.getPublic()),
+		KeyPair adOnlyKey = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(DOMAIN, PRODUCER, adOnlyKid, TraceTestKeys.toJwk(adOnlyKey.getPublic()),
 				List.of(TraceConstants.EVENT_KIND_AUTHORIZATION_DECISION), KEY_VALID_FROM_MS, null, CLIENT_ID,
 				KEY_VALID_FROM_MS);
 
@@ -279,7 +289,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 
 	@Test
 	void testVerify_SignedWithDifferentKey_InvalidSignature() {
-		KeyPair otherKeyPair = Ed25519TestKeys.generateKeyPair();
+		KeyPair otherKeyPair = TraceTestKeys.generateKeyPair();
 		String json = SignedAssertionFactory.authorizationDecision().sign(otherKeyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
@@ -326,15 +336,16 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_ProducerNotAllowed_NoKeyLookupAndNoCrypto() {
 		ProducerKeyRegistry mockRegistry = mock(ProducerKeyRegistry.class);
-		Ed25519Verifier mockVerifier = mock(Ed25519Verifier.class);
-		TraceVerificationService guarded = newService(capability, mockRegistry, mockVerifier, parser);
+		TraceCryptoProvider spyProvider = spy(cryptoProvider);
+		TraceVerificationService guarded = newService(spyProvider, mockRegistry, parser);
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> guarded.verify(body(json), ctx("other-producer")));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
-		verifyNoInteractions(mockRegistry, mockVerifier);
+		verifyNoInteractions(mockRegistry);
+		verify(spyProvider, never()).verifyAndDigest(any(), any(), any());
 	}
 
 	@Test
@@ -353,7 +364,7 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	@Test
 	void testVerify_EventKindViolation_InvalidAssertionBeforeKeyLookup() {
 		ProducerKeyRegistry mockRegistry = mock(ProducerKeyRegistry.class);
-		TraceVerificationService guarded = newService(capability, mockRegistry, new Ed25519Verifier(), parser);
+		TraceVerificationService guarded = newService(cryptoProvider, mockRegistry, parser);
 		String json = SignedAssertionFactory.authorizationDecision().withoutField("trace", "policy", "bundle_hash")
 				.sign(keyPair.getPrivate());
 
@@ -377,8 +388,8 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 	void testVerify_CapabilityUnavailable_CryptoUnavailableBeforeParsing() {
 		TraceAssertionParser mockParser = mock(TraceAssertionParser.class);
 		// A never-probed capability reports Ed25519 as unavailable.
-		TraceVerificationService guarded = newService(new Ed25519Capability(), keyRegistry, new Ed25519Verifier(),
-				mockParser);
+		TraceVerificationService guarded = newService(
+				new JavaTraceCryptoProvider(new Ed25519Capability(), new Ed25519Verifier()), keyRegistry, mockParser);
 		String json = SignedAssertionFactory.authorizationDecision().sign(keyPair.getPrivate());
 
 		TraceCryptoException ex = assertThrows(TraceCryptoException.class,
@@ -394,12 +405,108 @@ class TraceVerificationServiceTest extends BaseLockServiceTest {
 		TraceValidationException original = new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST,
 				"body_too_large");
 		when(mockParser.parse(any(InputStream.class))).thenThrow(original);
-		TraceVerificationService guarded = newService(capability, keyRegistry, new Ed25519Verifier(), mockParser);
+		TraceVerificationService guarded = newService(cryptoProvider, keyRegistry, mockParser);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> guarded.verify(body("{}"), ctx("*")));
 
 		assertSame(original, ex);
+	}
+
+	// -- assertion_raw / assertion fidelity -------------------------------------------------------------
+
+	/**
+	 * Signs a fixture that carries Unicode and number members under unreserved top-level names.
+	 * The signature covers the JCS form, so any textual spelling of the same values must verify.
+	 */
+	private String signedFidelityAssertion() throws Exception {
+		ObjectNode extra = (ObjectNode) MAPPER.readTree("{\"x_emoji\":\"\uD83D\uDE00\",\"x_nfc\":\"\u00e9\","
+				+ "\"x_nfd\":\"e\u0301\",\"x_sep\":\"a\u2028b\u2029c\",\"x_ctl\":\"a\\u0000b\\u001fc\\u007fd\","
+				+ "\"x_exp\":1e2,\"x_frac\":1.5,\"x_zero\":0,\"x_big_exp\":1e21,\"x_small\":0.000001,\"x_tiny\":1e-7,"
+				+ "\"x_safe\":9007199254740991,\"x_over\":9007199254740993,"
+				+ "\"x_huge\":123456789012345678901234567890,\"x_arr\":[3,1,2,{\"b\":1,\"a\":[]}]}");
+		SignedAssertionFactory factory = SignedAssertionFactory.authorizationDecision();
+		extra.fields().forEachRemaining(member -> factory.withField(member.getValue(), member.getKey()));
+		return factory.sign(keyPair.getPrivate());
+	}
+
+	/** Every character above U+007F written as a {@code \\uXXXX} escape (UTF-16 code units). */
+	private static String asciiEscaped(String json) {
+		StringBuilder out = new StringBuilder();
+		for (char c : json.toCharArray()) {
+			if (c > 0x7f) {
+				out.append(String.format("\\u%04x", (int) c));
+			} else {
+				out.append(c);
+			}
+		}
+		return out.toString();
+	}
+
+	@Test
+	void testVerify_EscapedLiteralAndReSpelledNumbers_VerifyWithSameDigestAndRawPreserved() throws Exception {
+		String compact = signedFidelityAssertion();
+		assertTrue(compact.contains("\"x_exp\":100.0"), compact);
+		assertTrue(compact.contains("\"x_zero\":0,"), compact);
+		assertTrue(compact.contains("\"x_frac\":1.5"), compact);
+
+		String escaped = asciiEscaped(compact);
+		String respelled = compact.replace("\"x_exp\":100.0", "\"x_exp\":1E+2").replace("\"x_zero\":0,", "\"x_zero\":-0,")
+				.replace("\"x_frac\":1.5", "\"x_frac\":15e-1");
+		String reordered = SignedAssertionFactory.reorderAndPrettyPrint(compact);
+		assertNotEquals(compact, escaped);
+		assertNotEquals(compact, respelled);
+
+		VerifiedAssertion first = service.verify(body(compact), ctx("*"));
+		for (String variant : new String[] { escaped, respelled, reordered, asciiEscaped(respelled) }) {
+			VerifiedAssertion other = service.verify(body(variant), ctx("*"));
+
+			assertTrue(other.getVerification().isSignatureValid());
+			assertEquals(first.getContentDigest(), other.getContentDigest());
+			assertEquals(variant, other.getParsed().getRawText());
+			assertArrayEquals(variant.getBytes(StandardCharsets.UTF_8),
+					other.getParsed().getRawText().getBytes(StandardCharsets.UTF_8));
+		}
+		assertEquals(independentContentDigest(escaped), first.getContentDigest());
+	}
+
+	@Test
+	void testVerify_ReEmittedAssertion_JcsAndDigestEqualOriginal() throws Exception {
+		String compact = signedFidelityAssertion();
+		for (String received : new String[] { compact, asciiEscaped(compact) }) {
+			VerifiedAssertion verified = service.verify(body(received), ctx("*"));
+
+			// The response hop: ASSERTION_MAPPER re-parses the stored text, the JSON provider writes
+			// the tree, and a client parses that body.
+			JsonNode assertion = MAPPER.readTree(verified.getParsed().getRawText());
+			JsonNode wire = MAPPER.readTree(MAPPER.writeValueAsString(assertion));
+
+			assertEquals(JcsCanonicalizer.canonicalize(verified.getParsed().getRoot()), JcsCanonicalizer.canonicalize(wire));
+			assertEquals(verified.getContentDigest(), CanonicalHashes.sha256PrefixedOfJcs(wire));
+			assertEquals(verified.getContentDigest(), CanonicalHashes.sha256PrefixedOfJcs(assertion));
+		}
+	}
+
+	@Test
+	void testVerify_FidelityAssertion_JcsFormsOfNumbersAndStrings() throws Exception {
+		VerifiedAssertion verified = service.verify(body(signedFidelityAssertion()), ctx("*"));
+
+		String jcs = JcsCanonicalizer.canonicalize(verified.getParsed().getRoot());
+
+		assertTrue(jcs.contains("\"x_exp\":100,"), jcs);
+		assertTrue(jcs.contains("\"x_frac\":1.5,"), jcs);
+		assertTrue(jcs.endsWith("\"x_zero\":0}"), jcs);
+		assertTrue(jcs.contains("\"x_big_exp\":1e+21,"), jcs);
+		assertTrue(jcs.contains("\"x_small\":0.000001,"), jcs);
+		assertTrue(jcs.contains("\"x_tiny\":1e-7,"), jcs);
+		assertTrue(jcs.contains("\"x_safe\":9007199254740991,"), jcs);
+		// Documented limit: integers above 2^53-1 keep their exact digits; an ECMAScript verifier
+		// would print 9007199254740992 here.
+		assertTrue(jcs.contains("\"x_over\":9007199254740993,"), jcs);
+		assertTrue(jcs.contains("\"x_huge\":123456789012345678901234567890,"), jcs);
+		assertTrue(jcs.contains("\"x_ctl\":\"a\\u0000b\\u001fc\u007fd\""), jcs);
+		assertTrue(jcs.contains("\"x_sep\":\"a\u2028b\u2029c\""), jcs);
+		assertTrue(jcs.contains("\"x_arr\":[3,1,2,{\"a\":[],\"b\":1}]"), jcs);
 	}
 
 	// -- helpers ------------------------------------------------------------------------------------

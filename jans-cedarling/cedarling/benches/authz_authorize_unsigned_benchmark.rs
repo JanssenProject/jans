@@ -4,9 +4,9 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataStoreConfig, EntityData, HttpClientConfig,
-    InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, RequestUnsigned,
+    AuthorizationConfig, AuthorizeOptions, BootstrapConfig, Cedarling, DataStoreConfig, EntityData,
+    HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel, LogTypeConfig,
+    PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use serde::Deserialize;
@@ -157,6 +157,7 @@ async fn prepare_cedarling() -> Result<Cedarling, InitCedarlingError> {
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
 
     Cedarling::new(&bootstrap_config).await
@@ -192,5 +193,6 @@ fn prepare_unsigned_request() -> RequestUnsigned {
         action: "Jans::Action::\"Read\"".to_string(),
         context: json!({}),
         resource,
+        options: AuthorizeOptions::default(),
     }
 }

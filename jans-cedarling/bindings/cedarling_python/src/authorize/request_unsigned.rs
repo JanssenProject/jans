@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::authorize_options::{self, AuthorizeOptions};
 use super::entity_data::EntityData;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
@@ -25,6 +26,7 @@ use serde_pyobject::from_pyobject;
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
+/// :param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 ///
 /// Example
 /// -------
@@ -46,23 +48,29 @@ pub struct RequestUnsigned {
     /// call so mutations to the source dict (or nested values) are always picked up.
     #[pyo3(get, set)]
     pub context: Py<PyDict>,
+    /// Per-call options; never change the decision. The getter returns a copy,
+    /// so mutating `req.options.trace` is discarded; assign new options instead.
+    #[pyo3(get, set)]
+    pub options: Option<AuthorizeOptions>,
 }
 
 #[pymethods]
 impl RequestUnsigned {
     #[new]
-    #[pyo3(signature = (action, resource, context, principal=None))]
+    #[pyo3(signature = (action, resource, context, principal=None, options=None))]
     fn new(
         action: String,
         resource: EntityData,
         context: Py<PyDict>,
         principal: Option<EntityData>,
+        options: Option<AuthorizeOptions>,
     ) -> Self {
         Self {
             principal,
             action,
             resource,
             context,
+            options,
         }
     }
 }
@@ -83,6 +91,7 @@ impl RequestUnsigned {
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,
+            options: authorize_options::to_cedarling(self.options.as_ref()),
         })
     }
 }

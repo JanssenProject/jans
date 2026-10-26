@@ -9,6 +9,8 @@ use thiserror::Error;
 
 use super::{AssertionIdentity, SignedAssertion};
 use crate::Digest;
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::key::PublicKey;
 
 /// The registered key Lock selected by the record's identity, with the `producer` and `kid`
@@ -90,18 +92,15 @@ pub enum VerifyError {
 
 impl VerifyError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::ProducerMismatch { .. } => "PRODUCER_MISMATCH",
-            Self::KidMismatch { .. } => "KID_MISMATCH",
-            Self::SignatureInvalid => "SIGNATURE_INVALID",
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{VerificationContext, VerifiedAssertion, VerifyError};
+    use crate::ErrorCode;
     use crate::assertion::{SignedAssertion, UnsignedAssertion};
     use crate::key::PublicKey;
     use crate::signature::Ed25519Signer;
@@ -120,7 +119,7 @@ mod tests {
     }"#;
 
     fn signer() -> Ed25519Signer {
-        Ed25519Signer::from_secret_bytes(KID, &[7; 32])
+        Ed25519Signer::from_secret_bytes(KID, &[7; 32]).expect("test secret is 32 bytes")
     }
 
     fn public_key() -> PublicKey {
@@ -208,7 +207,9 @@ mod tests {
         let signature = produced.signature().to_string();
         let pretty = with_signature(UNSIGNED, &signature);
         let other_key = PublicKey::from_bytes(
-            &Ed25519Signer::from_secret_bytes(KID, &[8; 32]).public_key_bytes(),
+            &Ed25519Signer::from_secret_bytes(KID, &[8; 32])
+                .expect("test secret is 32 bytes")
+                .public_key_bytes(),
         )
         .expect("other key is valid");
         let foreign = sign(&UNSIGNED.replace("AUTHORIZATION_DECISION", "CAPABILITY_INVOKED"))
@@ -301,7 +302,7 @@ mod tests {
 
     struct CodeCase {
         error: VerifyError,
-        expected: &'static str,
+        expected: ErrorCode,
     }
 
     #[test]
@@ -311,18 +312,18 @@ mod tests {
         let cases = [
             CodeCase {
                 error: VerifyError::SignatureInvalid,
-                expected: "SIGNATURE_INVALID",
+                expected: ErrorCode::SignatureInvalid,
             },
             CodeCase {
                 error: VerifyError::ProducerMismatch {
                     signed: signed.clone(),
                     expected: expected.clone(),
                 },
-                expected: "PRODUCER_MISMATCH",
+                expected: ErrorCode::ProducerMismatch,
             },
             CodeCase {
                 error: VerifyError::KidMismatch { signed, expected },
-                expected: "KID_MISMATCH",
+                expected: ErrorCode::KidMismatch,
             },
         ];
         for case in cases {

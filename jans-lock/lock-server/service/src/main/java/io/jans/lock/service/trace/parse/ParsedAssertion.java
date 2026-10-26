@@ -12,9 +12,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.canon.CanonicalHashes;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
 
 /**
  * The bounded-parsed form of an incoming TRACE assertion: the exact received bytes decoded as
@@ -59,9 +56,9 @@ public final class ParsedAssertion {
 
 	private JsonNode subject;
 
-	private byte[] signatureInput;
+	private List<String> reservedMembers = Collections.emptyList();
 
-	private String contentDigest;
+	private int reservedMemberCount;
 
 	ParsedAssertion(String rawText, ObjectNode root) {
 		this.rawText = rawText;
@@ -190,26 +187,25 @@ public final class ParsedAssertion {
 	}
 
 	/**
-	 * @return {@code JCS(assertion without the top-level "signature" field)}, UTF-8 encoded;
-	 *         computed on first use and cached
+	 * @return paths of Lock-derived members the producer placed in its signed body; ignored by
+	 *         Lock and surfaced as {@code reserved_member_flag}
 	 */
-	public byte[] signatureInput() {
-		if (signatureInput == null) {
-			signatureInput = JcsCanonicalizer
-					.canonicalizeToUtf8(JcsCanonicalizer.withoutField(root, TraceConstants.SIGNATURE_FIELD));
-		}
-		return signatureInput;
+	public List<String> getReservedMembers() {
+		return reservedMembers;
 	}
 
 	/**
-	 * @return {@code "sha256:" + lowercaseHex(SHA-256(UTF-8(JCS(full assertion))))};
-	 *         computed on first use and cached
+	 * @return how many Lock-derived members the signed body carries; {@link #getReservedMembers()}
+	 *         keeps at most {@link io.jans.lock.service.trace.TraceConstants#MAX_RESERVED_MEMBERS}
 	 */
-	public String contentDigest() {
-		if (contentDigest == null) {
-			contentDigest = CanonicalHashes.sha256PrefixedOfJcs(root);
-		}
-		return contentDigest;
+	public int getReservedMemberCount() {
+		return reservedMemberCount;
+	}
+
+	void setReservedMembers(List<String> reservedMembers, int reservedMemberCount) {
+		this.reservedMembers = reservedMembers == null ? Collections.emptyList()
+				: Collections.unmodifiableList(reservedMembers);
+		this.reservedMemberCount = reservedMemberCount;
 	}
 
 	/**

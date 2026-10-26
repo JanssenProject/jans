@@ -8,7 +8,12 @@ members = [
     "sigstore-verifier",
     "test_utils",
 ]
-exclude = ["bindings/cedarling-java", "bindings/benchmarks", "custom-lints",]
+exclude = [
+    "bindings/benchmarks",
+    "bindings/cedarling-java",
+    "bindings/jans-trace-java",
+    "custom-lints",
+]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -24,7 +29,9 @@ jsonwebkey = "0.4.0"
 chrono = "0.4"
 reqwest = { version = "0.13.2", features = ["json", "form"] }
 cedarling = { path = "cedarling" }
+jans-trace-core = { path = "jans-trace-core", version = "0.0.0" }
 test_utils = { path = "test_utils" }
+sigstore-verifier = { path = "sigstore-verifier", version = "0.0.0" }
 wasm-bindgen = "0.2.103"
 wasm-bindgen-futures = "0.4.53"
 web-sys = "0.3"
@@ -35,6 +42,9 @@ mockito = "1.5.0"
 sha2 = "0.11.0"
 base64 = { version = "0.23.1", default-features = false, features = ["alloc"] }
 ed25519-dalek = { version = "3.0.0", default-features = false, features = ["fast", "zeroize"] }
+uniffi = "0.32.1"
+uniffi_macros = "0.32.1"
+zeroize = "1.9.0"
 
 [workspace.lints.clippy]
 pedantic = "warn"

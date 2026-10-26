@@ -13,6 +13,8 @@
 use serde_json::{Map, Value};
 use thiserror::Error;
 
+use crate::ErrorCode;
+use crate::error_code::HasErrorCode;
 use crate::json::{JsonError, canonicalize_value, parse_strict, write_jcs_string};
 use crate::limits::LimitKind;
 use crate::signature::{ParseSignatureError, SignatureValue, SignerError, TraceSigner};
@@ -25,9 +27,6 @@ pub use batch::{ParseBatchError, batch_body, parse_batch};
 pub use verify::{VerificationContext, VerifiedAssertion, VerifyError};
 
 const SIGNATURE: &str = "signature";
-
-/// One code for every rejection of the assertion's common structure (core design §10).
-const INVALID_ASSERTION_SHAPE: &str = "INVALID_ASSERTION_SHAPE";
 
 /// Bytes the top-level signature member adds to canonical JSON:
 /// `,"signature":"<86 base64url characters>"`.
@@ -305,16 +304,8 @@ pub enum ParseUnsignedAssertionError {
 
 impl ParseUnsignedAssertionError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-            Self::NotAnObject
-            | Self::InvalidProducer
-            | Self::InvalidKid
-            | Self::InvalidRecordId => INVALID_ASSERTION_SHAPE,
-            Self::SignatureAlreadyPresent => "SIGNATURE_ALREADY_PRESENT",
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -341,11 +332,8 @@ pub enum SignError {
 
 impl SignError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::KidMismatch { .. } => "KID_MISMATCH",
-            Self::Signer(e) => e.code(),
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -372,17 +360,8 @@ pub enum ParseSignedAssertionError {
 
 impl ParseSignedAssertionError {
     #[must_use]
-    pub const fn code(&self) -> &'static str {
-        match self {
-            Self::SizeLimitExceeded(e) => e.code(),
-            Self::Json(e) => e.code(),
-            Self::NotAnObject
-            | Self::InvalidProducer
-            | Self::InvalidKid
-            | Self::InvalidRecordId => INVALID_ASSERTION_SHAPE,
-            Self::MissingSignature => "MISSING_SIGNATURE",
-            Self::InvalidSignatureEncoding(e) => e.code(),
-        }
+    pub fn code(&self) -> ErrorCode {
+        HasErrorCode::error_code(self)
     }
 }
 
@@ -404,6 +383,7 @@ mod tests {
         ParseSignedAssertionError, ParseUnsignedAssertionError, SignError, SignedAssertion,
         UnsignedAssertion,
     };
+    use crate::ErrorCode;
     use crate::json::{JsonError, canonicalize_json};
     use crate::limits::LimitKind;
     use crate::signature::{
@@ -422,7 +402,7 @@ mod tests {
     }"#;
 
     fn signer() -> Ed25519Signer {
-        Ed25519Signer::from_secret_bytes(KID, &[7; 32])
+        Ed25519Signer::from_secret_bytes(KID, &[7; 32]).expect("test secret is 32 bytes")
     }
 
     /// Stands in for an HSM that is unreachable.
@@ -658,7 +638,8 @@ mod tests {
 
     #[test]
     fn sign_rejects_kid_that_differs_from_signer() {
-        let other = Ed25519Signer::from_secret_bytes("key-other", &[7; 32]);
+        let other = Ed25519Signer::from_secret_bytes("key-other", &[7; 32])
+            .expect("test secret is 32 bytes");
         assert_eq!(
             unsigned(UNSIGNED).sign(&other),
             Err(SignError::KidMismatch {
@@ -799,8 +780,8 @@ mod tests {
     }
 
     struct CodeCase {
-        actual: &'static str,
-        expected: &'static str,
+        actual: ErrorCode,
+        expected: ErrorCode,
     }
 
     #[test]
@@ -808,27 +789,27 @@ mod tests {
         let cases = [
             CodeCase {
                 actual: ParseUnsignedAssertionError::NotAnObject.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
+                expected: ErrorCode::InvalidAssertionShape,
             },
             CodeCase {
                 actual: ParseUnsignedAssertionError::InvalidKid.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
+                expected: ErrorCode::InvalidAssertionShape,
             },
             CodeCase {
                 actual: ParseUnsignedAssertionError::SignatureAlreadyPresent.code(),
-                expected: "SIGNATURE_ALREADY_PRESENT",
+                expected: ErrorCode::SignatureAlreadyPresent,
             },
             CodeCase {
                 actual: ParseSignedAssertionError::InvalidRecordId.code(),
-                expected: "INVALID_ASSERTION_SHAPE",
+                expected: ErrorCode::InvalidAssertionShape,
             },
             CodeCase {
                 actual: ParseSignedAssertionError::MissingSignature.code(),
-                expected: "MISSING_SIGNATURE",
+                expected: ErrorCode::MissingSignature,
             },
             CodeCase {
                 actual: SignError::Signer(SignerError).code(),
-                expected: "SIGNER_FAILURE",
+                expected: ErrorCode::SignerFailure,
             },
             CodeCase {
                 actual: SignError::KidMismatch {
@@ -836,7 +817,7 @@ mod tests {
                     signer: String::new(),
                 }
                 .code(),
-                expected: "KID_MISMATCH",
+                expected: ErrorCode::KidMismatch,
             },
         ];
         for case in cases {

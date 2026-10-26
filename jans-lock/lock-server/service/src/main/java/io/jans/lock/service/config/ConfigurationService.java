@@ -58,13 +58,22 @@ public class ConfigurationService {
         ObjectNode audit = objectMapper.createObjectNode();
         response.set("audit", audit);
         audit.put("health_endpoint", baseEndpointUri + "/audit/health");
+        audit.put("health_bulk_endpoint", baseEndpointUri + "/audit/health/bulk");
         audit.put("log_endpoint", baseEndpointUri + "/audit/log");
+        audit.put("log_bulk_endpoint", baseEndpointUri + "/audit/log/bulk");
         audit.put("telemetry_endpoint", baseEndpointUri + "/audit/telemetry");
+        audit.put("telemetry_bulk_endpoint", baseEndpointUri + "/audit/telemetry/bulk");
+
+        if (appConfiguration.getTraceConfiguration().isEnabled()) {
+            audit.put("trace_endpoint", baseEndpointUri + "/audit/trace");
+            audit.put("trace_bulk_endpoint", baseEndpointUri + "/audit/trace/bulk");
+            audit.put("trace_record_endpoint", baseEndpointUri + "/audit/trace/records");
+            audit.put("trace_execution_endpoint", baseEndpointUri + "/audit/trace/executions");
+        }
 
         ObjectNode config = objectMapper.createObjectNode();
+        response.set("config", config);
         config.put("policy_endpoint", baseEndpointUri + "/policy");
-
-        config.put("sse_endpoint", baseEndpointUri + "/sse");
 
         return response;
 	}
