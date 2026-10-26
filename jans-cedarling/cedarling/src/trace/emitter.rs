@@ -141,10 +141,14 @@ impl Borrow<SignedAssertion> for Pending {
 
 /// What Lock did with the genesis record of a chain. Lock registers a chain
 /// from that record and refuses the chain's other records with
-/// `chain_not_registered` until it does.
+/// `chain_not_registered` until it does, so the genesis record goes alone and
+/// nothing else is signed into the chain before Lock accepts it: a refused
+/// genesis record then costs one record, not a request of them.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum GenesisState {
-    /// Not accepted yet: sent, waiting to be sent, or waiting for a resend.
+    /// Opened, the genesis record not signed yet.
+    Unsigned,
+    /// Signed, not accepted yet: sent, waiting to be sent, or waiting for a resend.
     Pending,
     /// Accepted, so Lock has registered the chain.
     Accepted,
@@ -155,6 +159,20 @@ enum GenesisState {
     /// it no longer knows the chain (a restored database, the client moved to
     /// another evidence domain), so the chain is replaced like a lost one.
     Unregistered,
+}
+
+/// What a round leaves: the chain to sign into next and how the round went.
+struct RoundEnd {
+    chain: ProducerChain,
+    outcome: RoundOutcome,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum RoundOutcome {
+    /// Lock answered, or the round had nothing to send.
+    Done,
+    /// The request was lost, or Lock will never register the chain.
+    Failed,
 }
 
 /// The next bulk request: its body and the records joined into it, in order.
@@ -221,7 +239,7 @@ impl Emitter {
             metrics: params.metrics,
             limits,
             chain_id: chain.chain_id(),
-            genesis: GenesisState::Pending,
+            genesis: GenesisState::Unsigned,
             pending: VecDeque::new(),
         };
         emitter.chain_opened();
@@ -251,10 +269,17 @@ impl Emitter {
                 let Ok(draft) = rx.try_recv() else { break };
                 drafts.push(draft);
             }
-            chain = self.round(chain, drafts, Mode::Running(&cancel)).await;
+            chain = self
+                .round(chain, drafts, Mode::Running(&cancel))
+                .await
+                .chain;
         }
 
         // Stopping: send everything once; what Lock does not take is dropped.
+        // After the first failure the rest is dropped unsent, so stopping
+        // while Lock is down or refuses the chain takes one request, not one
+        // per batch or, with each new chain starting at its genesis record
+        // alone, one per record.
         rx.close();
         let mut rest = Vec::new();
         while let Ok(draft) = rx.try_recv() {
@@ -263,13 +288,41 @@ impl Emitter {
         let mut rest = rest.into_iter();
         while !self.pending.is_empty() || rest.len() > 0 {
             let drafts = rest.by_ref().take(self.room()).collect();
-            chain = self.round(chain, drafts, Mode::Stopping).await;
+            let end = self.round(chain, drafts, Mode::Stopping).await;
+            chain = end.chain;
+            if end.outcome == RoundOutcome::Failed {
+                self.drop_at_shutdown(rest.len());
+                break;
+            }
         }
+    }
+
+    /// Drops what is left at shutdown after Lock did not take a request.
+    fn drop_at_shutdown(&mut self, unsigned: usize) {
+        let dropped = self.pending.len() + unsigned;
+        self.pending.clear();
+        if dropped == 0 {
+            return;
+        }
+        self.log(
+            LogLevel::WARN,
+            None,
+            format!(
+                "Lock Server did not take TRACE records while Cedarling was shutting down; \
+                 the remaining {dropped} records are dropped unsent"
+            ),
+        );
+        self.count(EmitterEvent::Dropped, dropped);
     }
 
     /// Drafts the next request still has room for.
     fn room(&self) -> usize {
-        self.max_records.saturating_sub(self.pending.len())
+        match self.genesis {
+            GenesisState::Unsigned => 1,
+            GenesisState::Accepted => self.max_records.saturating_sub(self.pending.len()),
+            // A lost chain is replaced before the next round signs anything.
+            GenesisState::Pending | GenesisState::Lost | GenesisState::Unregistered => 0,
+        }
     }
 
     /// Signs `drafts`, sends one request and applies Lock's answer.
@@ -278,16 +331,20 @@ impl Emitter {
         chain: ProducerChain,
         drafts: Vec<RecordDraft>,
         mode: Mode<'_>,
-    ) -> ProducerChain {
+    ) -> RoundEnd {
         let mut chain = self.sign(chain, drafts).await;
         let mut resend = false;
+        let mut outcome = RoundOutcome::Done;
         if let Some(request) = self.next_request() {
             match self.send(&request.body, request.records.len(), mode).await {
                 Sent::Results(results) => resend = self.settle(request.records, results, mode),
-                Sent::Lost => request
-                    .records
-                    .iter()
-                    .for_each(|record| self.forget(record)),
+                Sent::Lost => {
+                    outcome = RoundOutcome::Failed;
+                    request
+                        .records
+                        .iter()
+                        .for_each(|record| self.forget(record));
+                },
                 Sent::Interrupted => self.put_back(request.records),
             }
         }
@@ -295,12 +352,13 @@ impl Emitter {
             self.genesis,
             GenesisState::Lost | GenesisState::Unregistered
         ) {
+            outcome = RoundOutcome::Failed;
             chain = self.replace_chain();
         }
         if resend {
             self.pause(mode).await;
         }
-        chain
+        RoundEnd { chain, outcome }
     }
 
     async fn sign(&mut self, chain: ProducerChain, drafts: Vec<RecordDraft>) -> ProducerChain {
@@ -330,6 +388,9 @@ impl Emitter {
         for (record_id, result) in record_ids.into_iter().zip(results) {
             match result {
                 Ok(assertion) => {
+                    if sequence == 1 {
+                        self.genesis = GenesisState::Pending;
+                    }
                     self.pending.push_back(Pending {
                         assertion,
                         record_id,
@@ -462,6 +523,7 @@ impl Emitter {
             .map(|result| (result.index, result))
             .collect();
         let mut resend = Vec::new();
+        let mut unregistered_chain = Vec::new();
         for (index, mut record) in batch.into_iter().enumerate() {
             let Some(result) = results.remove(&index) else {
                 self.log(
@@ -478,9 +540,12 @@ impl Emitter {
             }
             let error = result.error.as_deref().unwrap_or("none");
             let unregistered = error == CHAIN_NOT_REGISTERED;
-            let resendable =
-                TRANSIENT_ERRORS.contains(&error) || (unregistered && self.awaits_genesis(&record));
-            if !resendable {
+            if unregistered && self.forgot_chain(&record) {
+                // Dropped with the chain, under the one warning that replaces it.
+                unregistered_chain.push(record);
+                continue;
+            }
+            if !TRANSIENT_ERRORS.contains(&error) {
                 // Lock opens a chain from its genesis record only in this mode.
                 let hint = if unregistered && self.is_current_genesis(&record) {
                     "; Lock Server needs `chainRegistrationMode: FIRST_OBSERVED`"
@@ -496,9 +561,6 @@ impl Emitter {
                     ),
                 );
                 self.count(EmitterEvent::Rejected, 1);
-                if unregistered {
-                    self.unregistered(&record);
-                }
                 self.forget(&record);
                 continue;
             }
@@ -526,7 +588,7 @@ impl Emitter {
         }
         let any = !resend.is_empty();
         // Resent records come before the rest, which was signed after them.
-        for record in resend.into_iter().rev() {
+        for record in unregistered_chain.into_iter().chain(resend).rev() {
             self.pending.push_front(record);
         }
         any
@@ -555,20 +617,22 @@ impl Emitter {
         }
     }
 
-    /// Whether `record` follows the genesis record of the current chain, which
-    /// Lock has not registered yet. Lock refusing the genesis record itself
-    /// with `chain_not_registered` never registers the chain.
-    fn awaits_genesis(&self, record: &Pending) -> bool {
-        record.chain_id == self.chain_id
-            && self.genesis != GenesisState::Accepted
-            && !self.is_current_genesis(record)
-    }
-
-    /// Notes a `chain_not_registered` refusal of a record of the current chain
-    /// after Lock had registered it.
-    fn unregistered(&mut self, record: &Pending) {
-        if record.chain_id == self.chain_id && self.genesis == GenesisState::Accepted {
-            self.genesis = GenesisState::Unregistered;
+    /// Notes a `chain_not_registered` refusal of `record`. Returns whether it
+    /// means Lock no longer knows the current chain, which it had registered
+    /// (a restored database, the client moved to another evidence domain).
+    fn forgot_chain(&mut self, record: &Pending) -> bool {
+        if record.chain_id != self.chain_id {
+            return false;
+        }
+        match self.genesis {
+            GenesisState::Accepted => {
+                self.genesis = GenesisState::Unregistered;
+                true
+            },
+            // A later record of the same request, after the first one noted it.
+            GenesisState::Unregistered => true,
+            // Lock never registered the chain: a refusal of its genesis record.
+            GenesisState::Unsigned | GenesisState::Pending | GenesisState::Lost => false,
         }
     }
 
@@ -625,7 +689,7 @@ impl Emitter {
     fn open_chain(&mut self) -> ProducerChain {
         let chain = ProducerChain::open(self.producer_id.clone(), self.pdp_id);
         self.chain_id = chain.chain_id();
-        self.genesis = GenesisState::Pending;
+        self.genesis = GenesisState::Unsigned;
         self.chain_opened();
         chain
     }
@@ -989,9 +1053,18 @@ mod tests {
             [draft(), draft(), draft()],
         );
 
-        let bodies = lock.bodies(1).await;
-        let records = records(&bodies[0]);
-        assert_eq!(records.len(), 3, "the three drafts go in one request");
+        let bodies = lock.bodies(2).await;
+        assert_eq!(
+            records(&bodies[0]).len(),
+            1,
+            "the genesis record goes alone"
+        );
+        assert_eq!(
+            records(&bodies[1]).len(),
+            2,
+            "the rest go in one request once Lock accepted the genesis record"
+        );
+        let records: Vec<SignedAssertion> = bodies.iter().flat_map(|body| records(body)).collect();
         let chain_id = position(&records[0]).chain_id;
         let mut prev = Digest::GENESIS.to_string();
         for (expected, record) in (1..).zip(&records) {
@@ -1026,7 +1099,11 @@ mod tests {
             .iter()
             .map(|body| records(body).len())
             .collect();
-        assert_eq!(sizes, [2, 2, 1], "no request carries more than two records");
+        assert_eq!(
+            sizes,
+            [1, 2, 2],
+            "after the genesis record no request carries more than two records"
+        );
         emitter.handle.shut_down().await;
     }
 
@@ -1077,16 +1154,23 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn record_storage_failure_resends_that_record_only() {
-        let lock = FakeLock::new([Reply::PerRecord(vec![None, Some("storage_failure")])]);
-        let emitter = start(params(lock.clone(), metrics()), 4, [draft(), draft()]);
+        let lock = FakeLock::new([
+            Reply::AcceptAll,
+            Reply::PerRecord(vec![None, Some("storage_failure")]),
+        ]);
+        let emitter = start(
+            params(lock.clone(), metrics()),
+            4,
+            [draft(), draft(), draft()],
+        );
 
-        let bodies = lock.bodies(2).await;
-        let first = records(&bodies[0]);
-        let second = records(&bodies[1]);
-        assert_eq!(second.len(), 1, "only the failed record is sent again");
+        let bodies = lock.bodies(3).await;
+        let failed = records(&bodies[1]);
+        let resent = records(&bodies[2]);
+        assert_eq!(resent.len(), 1, "only the failed record is sent again");
         assert_eq!(
-            second[0].as_str(),
-            first[1].as_str(),
+            resent[0].as_str(),
+            failed[1].as_str(),
             "the failed record goes again with the same bytes"
         );
         emitter.handle.shut_down().await;
@@ -1094,21 +1178,28 @@ mod tests {
 
     #[tokio::test(start_paused = true)]
     async fn rejected_record_is_not_resent() {
-        let lock = FakeLock::new([Reply::PerRecord(vec![None, Some("invalid_signature")])]);
+        let lock = FakeLock::new([
+            Reply::AcceptAll,
+            Reply::PerRecord(vec![None, Some("invalid_signature")]),
+        ]);
         let metrics = metrics();
-        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+        let emitter = start(
+            params(lock.clone(), metrics.clone()),
+            4,
+            [draft(), draft(), draft()],
+        );
 
-        let rejected = records(&lock.bodies(1).await[0])[1].as_str().to_string();
+        let rejected = records(&lock.bodies(2).await[1])[1].as_str().to_string();
         emitter
             .tx
             .send(draft())
             .await
             .expect("the emitter is running");
-        let bodies = lock.bodies(2).await;
-        let second = records(&bodies[1]);
-        assert_eq!(second.len(), 1, "only the new record is sent");
+        let bodies = lock.bodies(3).await;
+        let third = records(&bodies[2]);
+        assert_eq!(third.len(), 1, "only the new record is sent");
         assert_ne!(
-            second[0].as_str(),
+            third[0].as_str(),
             rejected,
             "a rejected record is not sent again"
         );
@@ -1121,33 +1212,34 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn genesis_transient_failure_keeps_tail() {
-        let lock = FakeLock::new([Reply::PerRecord(vec![
-            Some("storage_failure"),
-            Some("chain_not_registered"),
-            Some("chain_not_registered"),
-        ])]);
+    async fn genesis_transient_failure_resends_it_alone() {
+        let lock = FakeLock::new([Reply::PerRecord(vec![Some("storage_failure")])]);
         let emitter = start(
             params(lock.clone(), metrics()),
             4,
             [draft(), draft(), draft()],
         );
 
-        let bodies = lock.bodies(2).await;
+        let bodies = lock.bodies(3).await;
         assert_eq!(
             bodies[1], bodies[0],
-            "the genesis record and the tail go again in order, with the same bytes"
+            "the genesis record goes again alone, with the same bytes"
+        );
+        let sequences: Vec<u64> = records(&bodies[2])
+            .iter()
+            .map(|record| position(record).sequence)
+            .collect();
+        assert_eq!(
+            sequences,
+            [2, 3],
+            "the rest are signed into the chain once Lock accepted its genesis record"
         );
         emitter.handle.shut_down().await;
     }
 
     #[tokio::test(start_paused = true)]
     async fn genesis_lost_opens_new_chain() {
-        let lock = FakeLock::new([Reply::PerRecord(vec![
-            Some("invalid_signature"),
-            Some("chain_not_registered"),
-            Some("chain_not_registered"),
-        ])]);
+        let lock = FakeLock::new([Reply::PerRecord(vec![Some("invalid_signature")])]);
         let metrics = metrics();
         let emitter = start(
             params(lock.clone(), metrics.clone()),
@@ -1155,22 +1247,24 @@ mod tests {
             [draft(), draft(), draft()],
         );
 
-        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
-        emitter
-            .tx
-            .send(draft())
-            .await
-            .expect("the emitter is running");
+        let started = tokio::time::Instant::now();
         let bodies = lock.bodies(2).await;
+        assert!(
+            started.elapsed() < WORKER_HTTP_RETRY_DUR,
+            "the new chain does not wait for a resend pause"
+        );
+        let old = records(&bodies[0]);
+        assert_eq!(old.len(), 1, "the refused genesis record went alone");
         let second = records(&bodies[1]);
         assert_eq!(
             second.len(),
             1,
-            "the tail of the lost chain is not sent again"
+            "the new chain also starts with its genesis record alone"
         );
         let position = position(&second[0]);
         assert_ne!(
-            position.chain_id, old_chain,
+            position.chain_id,
+            self::position(&old[0]).chain_id,
             "the next record starts a new chain"
         );
         assert_eq!(
@@ -1191,8 +1285,8 @@ mod tests {
         assert_eq!(stats.get("trace.rejected"), Some(&1), "the genesis record");
         assert_eq!(
             stats.get("trace.dropped"),
-            Some(&2),
-            "the tail of the lost chain"
+            None,
+            "nothing else was signed into the refused chain"
         );
         emitter.handle.shut_down().await;
     }
@@ -1200,35 +1294,27 @@ mod tests {
     #[tokio::test(start_paused = true)]
     async fn genesis_chain_not_registered_is_final() {
         // Lock in `PRE_REGISTERED` mode refuses the genesis record itself.
-        let lock = FakeLock::new([Reply::PerRecord(vec![
-            Some("chain_not_registered"),
-            Some("chain_not_registered"),
-        ])]);
+        let lock = FakeLock::new([Reply::PerRecord(vec![Some("chain_not_registered")])]);
         let metrics = metrics();
         let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
 
-        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
-        emitter
-            .tx
-            .send(draft())
-            .await
-            .expect("the emitter is running");
         let bodies = lock.bodies(2).await;
+        let refused = records(&bodies[0]);
         let second = records(&bodies[1]);
-        assert_eq!(second.len(), 1, "the refused chain is not sent again");
+        assert_ne!(
+            second[0].as_str(),
+            refused[0].as_str(),
+            "the refused genesis record is not sent again"
+        );
         let position = position(&second[0]);
         assert_ne!(
-            position.chain_id, old_chain,
+            position.chain_id,
+            self::position(&refused[0]).chain_id,
             "the next record starts a new chain"
         );
         assert_eq!(position.sequence, 1, "the new chain starts at its genesis");
         let stats = metrics.snapshot_and_reset().operational_stats;
         assert_eq!(stats.get("trace.rejected"), Some(&1), "the genesis record");
-        assert_eq!(
-            stats.get("trace.dropped"),
-            Some(&1),
-            "the tail of the chain"
-        );
         assert_eq!(
             stats.get("trace.chains_opened"),
             Some(&1),
@@ -1242,39 +1328,48 @@ mod tests {
         // Lock accepted the genesis record, then lost the chain's registration.
         let lock = FakeLock::new([
             Reply::AcceptAll,
-            Reply::PerRecord(vec![Some("chain_not_registered")]),
+            Reply::PerRecord(vec![Some("chain_not_registered"); 3]),
         ]);
         let metrics = metrics();
-        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+        let emitter = start(
+            params(lock.clone(), metrics.clone()),
+            4,
+            [draft(), draft(), draft(), draft()],
+        );
 
-        let old_chain = position(&records(&lock.bodies(1).await[0])[0]).chain_id;
-        emitter
-            .tx
-            .send(draft())
-            .await
-            .expect("the emitter is running");
-        let refused = records(&lock.bodies(2).await[1])[0].as_str().to_string();
+        let refused = records(&lock.bodies(2).await[1]);
+        assert_eq!(refused.len(), 3, "the records after the genesis record");
+        let started = tokio::time::Instant::now();
         emitter
             .tx
             .send(draft())
             .await
             .expect("the emitter is running");
         let bodies = lock.bodies(3).await;
+        assert!(
+            started.elapsed() < WORKER_HTTP_RETRY_DUR,
+            "the new chain does not wait for a resend pause"
+        );
         let third = records(&bodies[2]);
         assert_eq!(third.len(), 1, "only the new record is sent");
-        assert_ne!(
-            third[0].as_str(),
-            refused,
-            "the refused record is not resent"
-        );
         let position = position(&third[0]);
         assert_ne!(
-            position.chain_id, old_chain,
+            position.chain_id,
+            self::position(&refused[0]).chain_id,
             "a chain Lock no longer knows is replaced"
         );
         assert_eq!(position.sequence, 1, "the new chain starts at its genesis");
         let stats = metrics.snapshot_and_reset().operational_stats;
-        assert_eq!(stats.get("trace.rejected"), Some(&1), "the refused record");
+        assert_eq!(
+            stats.get("trace.rejected"),
+            None,
+            "records of a chain Lock forgot are not each reported as rejected"
+        );
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&3),
+            "they are dropped with the chain"
+        );
         assert_eq!(
             stats.get("trace.chains_opened"),
             Some(&1),
@@ -1375,7 +1470,11 @@ mod tests {
     async fn shutdown_sends_an_unanswered_batch_once() {
         let lock = FakeLock::new(std::iter::repeat_with(|| Reply::Retryable).take(10));
         let metrics = metrics();
-        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
+        let emitter = start(
+            params(lock.clone(), metrics.clone()),
+            8,
+            std::iter::repeat_with(draft).take(5),
+        );
 
         lock.bodies(1).await;
         emitter.handle.shut_down().await;
@@ -1384,7 +1483,7 @@ mod tests {
         assert_eq!(
             bodies.len(),
             2,
-            "one request before shutdown, one during it"
+            "one request before shutdown, one during it; the rest is not sent"
         );
         assert_eq!(
             bodies[1], bodies[0],
@@ -1392,8 +1491,8 @@ mod tests {
         );
         assert_eq!(
             counter(&metrics, "trace.dropped"),
-            Some(2),
-            "records Lock did not take at shutdown are dropped"
+            Some(5),
+            "the held record and those still queued are dropped"
         );
     }
 
@@ -1401,7 +1500,7 @@ mod tests {
     async fn shutdown_does_not_resend_failed_records() {
         let lock = FakeLock::new([
             Reply::Retryable,
-            Reply::PerRecord(vec![Some("storage_failure"), Some("storage_failure")]),
+            Reply::PerRecord(vec![Some("storage_failure")]),
         ]);
         let metrics = metrics();
         let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft(), draft()]);
