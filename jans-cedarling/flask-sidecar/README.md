@@ -30,6 +30,7 @@ For running via poetry, the sidecar supports the following environment variables
 | APP_MODE                        | testing       | development, testing, production |
 | CEDARLING_BOOTSTRAP_CONFIG_FILE | None          | Path to your configuration       |
 | SIDECAR_DEBUG_RESPONSE          | False         | True, False                      |
+| SIDECAR_TRACE_WORKLOAD_ID       | None          | TRACE `workload_id` used when `Audit-Workload-ID` is missing; falls back to `CEDARLING_APPLICATION_NAME`, then `cedarling-sidecar` |
 
 - Navigate to `jans/jans-cedarling/flask-sidecar/main` and create a file named `.env`
 - Set environment variables like so:
