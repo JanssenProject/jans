@@ -49,6 +49,9 @@ public class OpenIdProtectionService implements OpenIdProtection {
     /** OAuth {@code client_id} claim; not among the {@link JwtClaimName} constants. */
     static final String CLIENT_ID_CLAIM = "client_id";
 
+    /** Part of the AS error text when the token used on the introspection endpoint lacks a scope the AS requires. */
+    static final String INTROSPECTION_SCOPE_REASON = "used to access introspection endpoint does not have";
+
     @Inject
     private Logger log;
 
@@ -123,7 +126,7 @@ public class OpenIdProtectionService implements OpenIdProtection {
                     iresp = introspectionService.introspectToken("Bearer " + bearerToken, bearerToken);
                 } catch (WebApplicationException e) {
                     log.error(e.getMessage());
-                    if (e.getResponse().getStatus() == UNAUTHORIZED.getStatusCode()) {
+                    if (isInvalidTokenRejection(e.getResponse())) {
                         // The AS authenticates the introspection call with the token itself, so it answers 401 for an expired, revoked or unknown token
                         return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token", "The access token is expired, revoked or invalid"));
                     }
@@ -199,6 +202,25 @@ public class OpenIdProtectionService implements OpenIdProtection {
         }
 
         return StringUtils.isBlank(clientId) ? null : clientId;
+    }
+
+    /**
+     * The AS also answers 401 when a valid token lacks the scope its configuration requires for
+     * introspection; that is no evidence the token is invalid, so it is not reported as such.
+     */
+    private boolean isInvalidTokenRejection(Response response) {
+        if (response.getStatus() != UNAUTHORIZED.getStatusCode()) {
+            return false;
+        }
+
+        String body;
+        try {
+            body = response.hasEntity() ? response.readEntity(String.class) : "";
+        } catch (Exception e) {
+            body = "";
+        }
+
+        return !StringUtils.contains(body, INTROSPECTION_SCOPE_REASON);
     }
 
     public Response processIntrospectionResponse(IntrospectionResponse iresponse, List<String> scopes) {

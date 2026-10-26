@@ -186,6 +186,19 @@ class OpenIdProtectionServiceTest {
 	}
 
 	@Test
+	void testAuthorize_IntrospectionAnswers401ForMissingIntrospectionScope_Denied403() {
+		String reason = "{\"error\":\"access_denied\",\"error_description\":\"access_token " + OpenIdProtectionService.INTROSPECTION_SCOPE_REASON
+				+ " 'introspection' scope\"}";
+		when(introspectionService.introspectToken("Bearer opaque-8", "opaque-8"))
+				.thenThrow(new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(reason).build()));
+
+		AuthorizationOutcome outcome = service.authorize("Bearer opaque-8", resourceInfo);
+
+		assertEquals(Response.Status.FORBIDDEN.getStatusCode(), outcome.getErrorResponse().getStatus());
+		assertNull(outcome.getErrorResponse().getHeaderString(HttpHeaders.WWW_AUTHENTICATE));
+	}
+
+	@Test
 	void testAuthorize_IntrospectionAnswers500_Denied403() {
 		when(introspectionService.introspectToken("Bearer opaque-7", "opaque-7"))
 				.thenThrow(new WebApplicationException(Response.status(Response.Status.INTERNAL_SERVER_ERROR).build()));
