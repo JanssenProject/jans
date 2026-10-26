@@ -7,11 +7,13 @@
 //! Lock has no TRACE endpoint over gRPC.
 
 use std::fmt;
+use std::time::Duration;
 
 use async_trait::async_trait;
 use bytes::Bytes;
+use chrono::{DateTime, Utc};
 use reqwest::StatusCode;
-use reqwest::header::CONTENT_TYPE;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, RETRY_AFTER};
 use serde::Deserialize;
 use tokio::sync::RwLock;
 
@@ -19,6 +21,7 @@ use super::LockAccessToken;
 use super::register_client::{TokenSource, request_access_token};
 use crate::TraceEndpoint;
 use crate::http::HttpClient;
+use crate::http_utils::MAX_EXPONENTIAL_DELAY;
 
 /// Acceptance flags that point at a problem on the producer's side. Coverage
 /// gaps and lateness are expected after a loss or a retry, so they are not kept.
@@ -51,9 +54,14 @@ pub(crate) struct BulkItemResult {
 /// Why a bulk request has no per-record results.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub(crate) enum PostBulkError {
-    /// The request did not reach Lock or Lock failed: the same bytes may go again.
-    #[error("TRACE bulk request failed: {0}")]
-    Retryable(String),
+    /// The request did not reach Lock, Lock failed, or Lock or a proxy before
+    /// it asks to repeat it: the same bytes may go again.
+    #[error("TRACE bulk request failed: {reason}")]
+    Retryable {
+        reason: String,
+        /// How long Lock or the proxy asked to wait, if it did.
+        retry_after: Option<Duration>,
+    },
     /// Lock refused the whole request; the same bytes get the same answer.
     #[error(
         "Lock Server rejected the TRACE bulk request with HTTP {status} (error: {}, reason: {})",
@@ -113,8 +121,9 @@ impl BulkSink for TraceSink {
         // Stored for the following calls, so they do not hit `401` again.
         let token = request_access_token(&self.http, source)
             .await
-            .map_err(|err| {
-                PostBulkError::Retryable(format!("reissuing the Lock Server token failed: {err}"))
+            .map_err(|err| PostBulkError::Retryable {
+                reason: format!("reissuing the Lock Server token failed: {err}"),
+                retry_after: None,
             })?;
         *self.token.write().await = LockAccessToken(token);
         match self.post_once(body).await? {
@@ -142,19 +151,27 @@ impl TraceSink {
             .bulk_request(token, body)
             .send()
             .await
-            .map_err(|err| PostBulkError::Retryable(err.to_string()))?;
+            .map_err(|err| retryable(err.to_string()))?;
         let status = response.status();
         if status == StatusCode::UNAUTHORIZED {
             return Ok(Attempt::Unauthorized);
         }
-        if status.is_server_error() {
-            return Err(PostBulkError::Retryable(format!("HTTP {status}")));
+        // `429` and `408` come from a proxy before Lock as often as from Lock:
+        // both ask to repeat the request later, not to drop it.
+        if status.is_server_error()
+            || status == StatusCode::TOO_MANY_REQUESTS
+            || status == StatusCode::REQUEST_TIMEOUT
+        {
+            return Err(PostBulkError::Retryable {
+                reason: format!("HTTP {status}"),
+                retry_after: retry_after(response.headers(), Utc::now()),
+            });
         }
         let bytes = self
             .http
             .read_response_capped(response)
             .await
-            .map_err(|err| PostBulkError::Retryable(err.to_string()))?;
+            .map_err(|err| retryable(err.to_string()))?;
         if status == StatusCode::MULTI_STATUS {
             return parse_results(&bytes).map(Attempt::Results);
         }
@@ -165,6 +182,32 @@ impl TraceSink {
             reason: error.and_then(|body| body.reason),
         })
     }
+}
+
+fn retryable(reason: String) -> PostBulkError {
+    PostBulkError::Retryable {
+        reason,
+        retry_after: None,
+    }
+}
+
+/// How long `Retry-After` (RFC 9110, section 10.2.3) asks to wait: delay
+/// seconds or an IMF-fixdate. The value comes from Lock or from any proxy
+/// before it, so a missing, unreadable or past one leaves the wait to the
+/// backoff, and a longer one is cut to the longest backoff delay: a
+/// misconfigured proxy cannot stop TRACE for hours.
+fn retry_after(headers: &HeaderMap, now: DateTime<Utc>) -> Option<Duration> {
+    let value = headers.get(RETRY_AFTER)?.to_str().ok()?.trim();
+    let delay = match value.parse::<u64>() {
+        Ok(seconds) => Duration::from_secs(seconds),
+        Err(_) => DateTime::parse_from_rfc2822(value)
+            .ok()?
+            .with_timezone(&Utc)
+            .signed_duration_since(now)
+            .to_std()
+            .ok()?,
+    };
+    Some(delay.min(MAX_EXPONENTIAL_DELAY))
 }
 
 fn unauthorized() -> PostBulkError {
@@ -428,8 +471,78 @@ mod tests {
             .await
             .expect_err("a 5xx response should be an error");
         assert!(
-            matches!(err, PostBulkError::Retryable(_)),
-            "expected Retryable, got {err:?}"
+            matches!(
+                err,
+                PostBulkError::Retryable {
+                    retry_after: None,
+                    ..
+                }
+            ),
+            "expected Retryable without Retry-After, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn too_many_requests_and_timeout_are_retryable_with_retry_after() {
+        for (status, header, expected) in [
+            (429, Some("7"), Some(Duration::from_secs(7))),
+            (408, None, None),
+            (503, Some("120"), Some(Duration::from_secs(120))),
+        ] {
+            let mut server = Server::new_async().await;
+            let mut mock = server.mock("POST", BULK_PATH).with_status(status);
+            if let Some(header) = header {
+                mock = mock.with_header("retry-after", header);
+            }
+            let _bulk = mock.create();
+
+            let err = sink(&server, None)
+                .post_bulk(&bulk_body())
+                .await
+                .expect_err("a request Lock or a proxy asks to repeat should be an error");
+            assert!(
+                matches!(
+                    err,
+                    PostBulkError::Retryable { retry_after, .. } if retry_after == expected
+                ),
+                "HTTP {status} with Retry-After {header:?} should be Retryable after {expected:?}, \
+                 got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn retry_after_reads_seconds_and_dates_and_ignores_the_rest() {
+        let now = DateTime::parse_from_rfc2822("Mon, 26 Oct 2026 12:00:00 GMT")
+            .expect("test date parses")
+            .with_timezone(&Utc);
+        for (value, expected) in [
+            ("120", Some(120)),
+            (" 5 ", Some(5)),
+            ("0", Some(0)),
+            ("Mon, 26 Oct 2026 12:01:30 GMT", Some(90)),
+            ("Mon, 26 Oct 2026 11:59:00 GMT", None),
+            ("999999", Some(MAX_EXPONENTIAL_DELAY.as_secs())),
+            ("-5", None),
+            ("1.5", None),
+            ("soon", None),
+            ("", None),
+        ] {
+            let mut headers = HeaderMap::new();
+            headers.insert(
+                RETRY_AFTER,
+                value.parse().expect("test header value is valid"),
+            );
+            assert_eq!(
+                retry_after(&headers, now),
+                expected.map(Duration::from_secs),
+                "Retry-After {value:?}"
+            );
+        }
+        assert_eq!(
+            retry_after(&HeaderMap::new(), now),
+            None,
+            "no Retry-After leaves the wait to the backoff"
         );
     }
 
@@ -444,8 +557,14 @@ mod tests {
             .await
             .expect_err("a connection failure should be an error");
         assert!(
-            matches!(err, PostBulkError::Retryable(_)),
-            "expected Retryable, got {err:?}"
+            matches!(
+                err,
+                PostBulkError::Retryable {
+                    retry_after: None,
+                    ..
+                }
+            ),
+            "expected Retryable without Retry-After, got {err:?}"
         );
     }
 

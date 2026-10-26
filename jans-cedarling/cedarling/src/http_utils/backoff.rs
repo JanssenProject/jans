@@ -7,7 +7,7 @@ use std::time::Duration;
 use tokio::time::sleep;
 
 /// The longest delay of [`Backoff::new_exponential`].
-const MAX_EXPONENTIAL_DELAY: Duration = Duration::from_secs(300);
+pub(crate) const MAX_EXPONENTIAL_DELAY: Duration = Duration::from_secs(300);
 
 /// Implements a backoff strategy for retrying operations.
 pub(crate) struct Backoff {
@@ -62,7 +62,13 @@ impl Backoff {
     }
 
     pub(crate) async fn snooze(&mut self) -> Result<(), ()> {
-        let backoff_duration = (self.backoff_duration)(self.attempts);
+        self.snooze_at_least(Duration::ZERO).await
+    }
+
+    /// Like [`Self::snooze`], but waits at least `floor`: as long as a server
+    /// asked with `Retry-After`, while a shorter request keeps the backoff.
+    pub(crate) async fn snooze_at_least(&mut self, floor: Duration) -> Result<(), ()> {
+        let backoff_duration = (self.backoff_duration)(self.attempts).max(floor);
         self.attempts += 1;
 
         if let Some(max_attempts) = self.max_attempts

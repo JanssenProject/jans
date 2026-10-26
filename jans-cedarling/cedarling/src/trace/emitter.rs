@@ -17,6 +17,7 @@ use std::collections::{HashMap, VecDeque};
 use std::num::NonZeroUsize;
 use std::panic::AssertUnwindSafe;
 use std::sync::{Arc, Mutex, PoisonError};
+use std::time::Duration;
 
 use bytes::Bytes;
 use futures::FutureExt;
@@ -204,7 +205,10 @@ enum RoundOutcome {
     /// Lock answered, or the round had nothing to send.
     Done,
     /// The request was lost, or Lock never registered the chain.
-    Failed,
+    Failed {
+        /// How long Lock or a proxy before it asked to wait, if it did.
+        retry_after: Option<Duration>,
+    },
 }
 
 /// The next bulk request: its body and the records joined into it, in order.
@@ -228,7 +232,10 @@ enum Sent {
     /// Lock answered for each record.
     Results(Vec<BulkItemResult>),
     /// Every record of the request is lost, already counted and logged.
-    Lost,
+    Lost {
+        /// How long Lock or a proxy before it last asked to wait, if it did.
+        retry_after: Option<Duration>,
+    },
     /// Stopping was requested while waiting to retry; the records stay.
     Interrupted,
 }
@@ -306,8 +313,8 @@ impl Emitter {
             }
             let end = self.round(chain, drafts, Mode::Running(&cancel)).await;
             chain = end.chain;
-            if end.outcome == RoundOutcome::Failed {
-                self.back_off(&cancel).await;
+            if let RoundOutcome::Failed { retry_after } = end.outcome {
+                self.back_off(&cancel, retry_after).await;
             }
         }
 
@@ -326,7 +333,7 @@ impl Emitter {
             let drafts = rest.by_ref().take(self.room()).collect();
             let end = self.round(chain, drafts, Mode::Stopping).await;
             chain = end.chain;
-            if end.outcome == RoundOutcome::Failed {
+            if matches!(end.outcome, RoundOutcome::Failed { .. }) {
                 self.drop_at_shutdown(rest.len());
                 break;
             }
@@ -338,12 +345,14 @@ impl Emitter {
     /// every record gets a request every few minutes, not one per batch or
     /// per decision. Meanwhile the queue fills and decisions are turned away
     /// from TRACE, never held.
-    async fn back_off(&mut self, cancel: &CancellationToken) {
+    /// `retry_after` is how long Lock or a proxy before it last asked to wait;
+    /// the wait is never shorter than the backoff.
+    async fn back_off(&mut self, cancel: &CancellationToken, retry_after: Option<Duration>) {
         let mut backoff = match std::mem::replace(&mut self.lock, LockState::Accepting) {
             LockState::Refusing { backoff } => backoff,
             LockState::Accepting => Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, None),
         };
-        let delay = backoff.next_delay();
+        let delay = backoff.next_delay().max(retry_after.unwrap_or_default());
         self.lock = LockState::Refusing { backoff };
         self.log(
             LogLevel::WARN,
@@ -400,8 +409,8 @@ impl Emitter {
         if let Some(request) = self.next_request() {
             match self.send(&request.body, request.records.len(), mode).await {
                 Sent::Results(results) => resend = self.settle(request.records, results, mode),
-                Sent::Lost => {
-                    outcome = RoundOutcome::Failed;
+                Sent::Lost { retry_after } => {
+                    outcome = RoundOutcome::Failed { retry_after };
                     request
                         .records
                         .iter()
@@ -414,7 +423,9 @@ impl Emitter {
             // Lock refused the chain or never got its genesis record: the
             // next genesis record would most likely fare the same.
             GenesisState::Lost => {
-                outcome = RoundOutcome::Failed;
+                if outcome == RoundOutcome::Done {
+                    outcome = RoundOutcome::Failed { retry_after: None };
+                }
                 chain = self.replace_chain();
             },
             // Lock took the chain before; it forgot it once, so a new chain
@@ -537,7 +548,7 @@ impl Emitter {
     async fn send(&mut self, body: &Bytes, records: usize, mode: Mode<'_>) -> Sent {
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
         loop {
-            let err = match self.sink.post_bulk(body).await {
+            let (err, retry_after) = match self.sink.post_bulk(body).await {
                 Ok(results) => return Sent::Results(results),
                 Err(err @ PostBulkError::Rejected { .. }) => {
                     self.log(
@@ -546,13 +557,13 @@ impl Emitter {
                         format!("{err}; its {records} TRACE records are lost"),
                     );
                     self.count(EmitterEvent::Rejected, records);
-                    return Sent::Lost;
+                    return Sent::Lost { retry_after: None };
                 },
-                Err(err @ PostBulkError::Retryable(_)) => err,
+                Err(err @ PostBulkError::Retryable { retry_after, .. }) => (err, retry_after),
             };
             let retry = match mode {
                 Mode::Running(cancel) => tokio::select! {
-                    retry = backoff.snooze() => retry.is_ok(),
+                    retry = backoff.snooze_at_least(retry_after.unwrap_or_default()) => retry.is_ok(),
                     () = cancel.cancelled() => return Sent::Interrupted,
                 },
                 Mode::Stopping => {
@@ -562,7 +573,7 @@ impl Emitter {
                         format!("{err}; Cedarling is shutting down, its {records} TRACE records are dropped"),
                     );
                     self.count(EmitterEvent::Dropped, records);
-                    return Sent::Lost;
+                    return Sent::Lost { retry_after: None };
                 },
             };
             if !retry {
@@ -572,7 +583,7 @@ impl Emitter {
                     format!("{err}; retries exhausted, its {records} TRACE records are dropped"),
                 );
                 self.count(EmitterEvent::Dropped, records);
-                return Sent::Lost;
+                return Sent::Lost { retry_after };
             }
         }
     }
@@ -881,6 +892,8 @@ mod tests {
     enum Reply {
         AcceptAll,
         Retryable,
+        /// Lock, or a proxy before it, asks to repeat the request after this many seconds.
+        RetryAfter(u64),
         /// The whole request refused, as Lock does with `403`.
         Rejected,
         /// Per record: `None` accepted, `Some(id)` rejected with that error id.
@@ -940,7 +953,14 @@ mod tests {
             };
             match reply {
                 Reply::AcceptAll => Ok((0..count).map(|index| item(index, None)).collect()),
-                Reply::Retryable => Err(PostBulkError::Retryable("Lock is down".to_string())),
+                Reply::Retryable => Err(PostBulkError::Retryable {
+                    reason: "Lock is down".to_string(),
+                    retry_after: None,
+                }),
+                Reply::RetryAfter(seconds) => Err(PostBulkError::Retryable {
+                    reason: "HTTP 429 Too Many Requests".to_string(),
+                    retry_after: Some(Duration::from_secs(seconds)),
+                }),
                 Reply::Rejected => Err(PostBulkError::Rejected {
                     status: 403,
                     error: Some("access_denied".to_string()),
@@ -1606,6 +1626,42 @@ mod tests {
         assert_eq!(
             recovered, 2,
             "each time Lock takes records again after refusing, it is logged once"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn retry_after_stretches_a_retry_but_never_shortens_it() {
+        let lock = FakeLock::new([Reply::RetryAfter(1), Reply::RetryAfter(45)]);
+        let emitter = start(params(lock.clone(), metrics()), 4, [draft()]);
+
+        let started = tokio::time::Instant::now();
+        let mut sent_at = Vec::new();
+        for count in 1..=3 {
+            lock.bodies(count).await;
+            sent_at.push(started.elapsed().as_secs());
+        }
+        assert_eq!(
+            sent_at,
+            [0, 10, 10 + 45],
+            "a shorter Retry-After keeps the 10 s backoff; a longer one (45 s) replaces the 20 s"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn retry_after_stretches_the_wait_before_the_next_request() {
+        let lock = FakeLock::new([Reply::RetryAfter(45)]);
+        let mut params = params(lock.clone(), metrics());
+        params.max_retries = 0;
+        let emitter = start(params, 4, [draft(), draft()]);
+
+        let started = tokio::time::Instant::now();
+        lock.bodies(2).await;
+        assert_eq!(
+            started.elapsed().as_secs(),
+            45,
+            "the request after a lost one waits as long as Lock asked, not the 10 s backoff"
         );
         emitter.handle.shut_down().await;
     }
