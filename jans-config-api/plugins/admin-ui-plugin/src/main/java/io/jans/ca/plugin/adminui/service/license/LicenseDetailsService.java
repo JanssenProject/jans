@@ -115,11 +115,11 @@ public class LicenseDetailsService extends BaseService {
         }
         if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
             log.info(ErrorResponse.LICENSE_EXPIRY_DATE_NOT_PRESENT.getDescription());
-            return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+            return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
         }
         if (Strings.isNullOrEmpty(licConfigFromMemory.getLicenseDetailsLastUpdatedOn())) {
             log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
-            return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+            return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
         }
         long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
         long intervalForSyncLicenseDetailsInDays = licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays();
@@ -220,6 +220,9 @@ public class LicenseDetailsService extends BaseService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
+            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            LicenseConfig licenseConfigurationFromDB = appConf.getMainSettings().getLicenseConfig();
+
             if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
                 log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
@@ -234,23 +237,23 @@ public class LicenseDetailsService extends BaseService {
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseValidUpto())) {
                 log.info(ErrorResponse.LICENSE_EXPIRY_DATE_NOT_PRESENT.getDescription());
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseDetailsLastUpdatedOn())) {
                 log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
             }
             long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
             long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
             log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
             if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
             }
             //calculate if license is expired
             long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
             if (daysDiffOfLicenseValidity < 0) {
-                return syncLicenseDetailsFromAgamaLab(auiConfiguration);
+                return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
             }
             if (licenseConfiguration.getLicenseMAUThreshold() == null) {
                 log.error(ErrorResponse.MAU_IS_NULL.getDescription());
@@ -283,7 +286,7 @@ public class LicenseDetailsService extends BaseService {
      * on failure contains an error code and message describing the problem (e.g., missing configuration, license not present,
      * expired, token generation or API access errors)
      */
-    private GenericResponse syncLicenseDetailsFromAgamaLab(AUIConfiguration auiConfiguration) {
+    private GenericResponse syncLicenseDetailsFromAgamaLab(AUIConfiguration auiConfiguration, LicenseConfig persistedLicenseConfig) {
         log.info("Inside syncLicenseDetailsFromAgamaLab: the method to sync license details from Agama lab");
         Integer httpStatus = null;
         try {
@@ -293,9 +296,29 @@ public class LicenseDetailsService extends BaseService {
             String checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/isActive");
 
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
-            if (tokenResponse == null) {
+            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                 log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                if (persistedLicenseConfig == null || Strings.isNullOrEmpty(persistedLicenseConfig.getSsa())) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
+                }
+                DCRResponse dcrResponse = executeDCR(persistedLicenseConfig.getSsa());
+                if (dcrResponse == null) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+                }
+                try {
+                    saveCreateClientInPersistence(persistedLicenseConfig.getSsa(), dcrResponse);
+                } catch (Exception e) {
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
+                }
+
+                auiConfiguration = auiConfigurationService.getAUIConfiguration();
+                licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+                checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/isActive");
+                tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+                if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+                    log.info("Unable to get access token after DCR from {}", licenseConfiguration.getScanAuthServerHostname());
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                }
             }
 
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,

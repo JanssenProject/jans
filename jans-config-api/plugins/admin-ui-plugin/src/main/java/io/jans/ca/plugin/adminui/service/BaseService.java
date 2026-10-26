@@ -126,7 +126,7 @@ public class BaseService {
 
                 return tokenResponse;
             }
-            log.error("Error in getting access token: {}", response.getEntity());
+            log.error("Error in getting access token: {}", response.readEntity(String.class));
 
         } catch (Exception e) {
             log.error("Problems processing token call", e);
