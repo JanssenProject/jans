@@ -1244,9 +1244,7 @@ impl Authz {
     /// The host's TRACE context, shared by the records of one request; `None`
     /// when TRACE is disabled or the host passed no context.
     fn trace_context(&self, options: &AuthorizeOptions) -> Option<Arc<TraceContext>> {
-        if self.config.trace.is_none() {
-            return None;
-        }
+        self.config.trace.as_ref()?;
         options.trace.clone().map(Arc::new)
     }
 
