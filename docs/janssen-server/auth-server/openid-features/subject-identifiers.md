@@ -118,8 +118,13 @@ Example discovery response fragment:
   `sub`.
 - A new authentication request creates a new grant and a new identifier. Janssen Server never reuses a value.
 - No sector identifier is required for clients with the `ephemeral` type.
-- Back-channel `logout_token` does not contain `sub` for these clients, because no grant exists at logout time. Use
-  `sid` to correlate the session.
+- Grants without an end-user, such as `client_credentials`, have no ephemeral identifier. Their `sub` is the
+  `client_id`, as for other subject types.
+- Back-channel logout is not supported for these clients, because a `logout_token` cannot carry a stable `sub`.
+  Registration and client update requests that set `backchannel_logout_uri` on an `ephemeral` client are rejected with
+  `invalid_client_metadata`. Logout skips the back-channel call for such clients if one is already stored.
+- A token issued before the client switched to `ephemeral` has no stored identifier. Janssen Server rejects such a
+  token as invalid instead of returning a different `sub` on each call.
 
 ## Properties
 

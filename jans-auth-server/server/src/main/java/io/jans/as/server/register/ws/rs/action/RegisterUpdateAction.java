@@ -137,6 +137,13 @@ public class RegisterUpdateAction {
 
             registerService.updateClientFromRequestObject(client, request, true);
 
+            try {
+                registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
+            } catch (WebApplicationException e) {
+                clientService.removeFromCache(client); // discard in-memory changes
+                throw e;
+            }
+
             boolean updateClient = true;
             if (externalDynamicClientRegistrationService.isEnabled()) {
                 updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(httpRequest, request, client);
