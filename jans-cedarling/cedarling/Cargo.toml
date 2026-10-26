@@ -37,7 +37,6 @@ cedar-policy = { version = "4.11.2", features = ["partial-eval"] }
 cedar-policy-core = "4.11.2"
 base64 = { workspace = true, features = ["std", "simd-unsafe"] }
 url = "2.5.8"
-jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
 typed-builder = "0.23.2"
 semver = { version = "1.0.28", features = ["serde"] }
@@ -90,12 +89,14 @@ sigstore-verifier = { workspace = true }
 sha2 = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+jsonwebtoken = { workspace = true, features = ["aws_lc_rs"] }
 tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.4.0", features = ["futures"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+jsonwebtoken = { workspace = true, features = ["rust_crypto"] }
 web-sys = { workspace = true, features = ["console"] }
 # override getrandom to use `wasm_js` feature
 getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }

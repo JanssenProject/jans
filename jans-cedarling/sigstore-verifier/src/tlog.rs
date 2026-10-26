@@ -604,7 +604,7 @@ mod tests {
         let signing_key = SigningKey::from_slice(&[3u8; 32]).unwrap();
         let rekor_pk = signing_key
             .verifying_key()
-            .to_encoded_point(false)
+            .to_sec1_point(false)
             .as_bytes()
             .to_vec();
 
@@ -663,7 +663,7 @@ mod tests {
         let wrong = SigningKey::from_slice(&[8u8; 32])
             .expect("key from seed")
             .verifying_key()
-            .to_encoded_point(false)
+            .to_sec1_point(false)
             .as_bytes()
             .to_vec();
         verify_set_from_bundle(&entry, &wrong)
@@ -778,7 +778,7 @@ mod tests {
         use sha2::{Digest, Sha256};
 
         let sk = SigningKey::from_slice(&[9u8; 32]).expect("key from seed");
-        let pk = sk.verifying_key().to_encoded_point(false);
+        let pk = sk.verifying_key().to_sec1_point(false);
         let key_id = crate::crypto::p256_key_id(pk.as_bytes()).expect("P-256 key ID");
         let root = [0xAAu8; 32];
 
@@ -1072,7 +1072,7 @@ mod tests {
         use p256::ecdsa::{Signature, SigningKey};
 
         let sk = SigningKey::from_slice(&[9u8; 32]).expect("key from seed");
-        let pk = sk.verifying_key().to_encoded_point(false);
+        let pk = sk.verifying_key().to_sec1_point(false);
         let key_id = crate::crypto::p256_key_id(pk.as_bytes()).expect("P-256 key ID");
 
         let signed_text = format!("rekor.test \u{2014} log\n{size}\n{}\n", b64(root));
@@ -1163,7 +1163,7 @@ mod tests {
         let untrusted_sk = SigningKey::from_slice(&[7u8; 32]).expect("key from seed");
         let untrusted_key = untrusted_sk
             .verifying_key()
-            .to_encoded_point(false)
+            .to_sec1_point(false)
             .as_bytes()
             .to_vec();
         let err = verify_checkpoint(&envelope, &[&untrusted_key], &root, 1)

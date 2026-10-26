@@ -22,7 +22,6 @@ serde_json_canonicalizer = "0.4.1"
 thiserror = "2.0"
 derive_more = "2.1.1"
 jsonwebtoken = { version = "11.0.0", features = [
-    "rust_crypto",
     "use_pem",
 ], default-features = false }
 jsonwebkey = "0.4.0"

@@ -438,7 +438,7 @@ pub fn ec_pub_pem(vk: &VerifyingKey) -> String {
         0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08,
         0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00,
     ];
-    let point = vk.to_encoded_point(false);
+    let point = vk.to_sec1_point(false);
     let mut der = P256_SPKI_PREFIX.to_vec();
     der.extend_from_slice(point.as_bytes());
 
@@ -515,7 +515,7 @@ pub fn b64(bytes: &[u8]) -> String {
 
 /// SHA-256 key ID of a Rekor signing key's uncompressed SPKI point.
 pub fn rekor_key_id(rekor_sk: &SigningKey) -> [u8; 32] {
-    crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
+    crate::crypto::p256_key_id(rekor_sk.verifying_key().to_sec1_point(false).as_bytes())
         .expect("P-256 uncompressed point is 65 bytes")
 }
 
