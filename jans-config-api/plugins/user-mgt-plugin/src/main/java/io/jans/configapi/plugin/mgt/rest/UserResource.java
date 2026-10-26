@@ -26,7 +26,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -323,6 +322,11 @@ public class UserResource extends BaseResource {
 
             // validate user permission
             String candidateUserInum = user.getAttribute("inum");
+            User storedUser = userMgmtSrv.getUserBasedOnInum(candidateUserInum);
+            checkResourceNotNull(storedUser, USER);
+            if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
+                throwBadRequestException("USER_UPDATE_ERROR", "User DN does not match user inum");
+            }
             validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST);
 
             // checking mandatory attributes
@@ -759,10 +763,6 @@ public class UserResource extends BaseResource {
             return;
         }
 
-        if (isRolePermissionExemptClient(loggedInUserInum)) {
-            return;
-        }
-
         // Return if logged-in user is updating own profile
         if (StringUtils.isNotBlank(loggedInUserInum) && loggedInUserInum.equals(userInum)) {
             return;
@@ -832,7 +832,7 @@ public class UserResource extends BaseResource {
         if (loggedInUserRoleList == null || loggedInUserRoleList.isEmpty()) {
             StringBuilder errMsg = new StringBuilder("User role-permission is missing for logged-in user {")
                     .append(loggedInUserInum).append("}");
-            logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", escapeLog(errMsg));
+            logger.error("validateUserPermission - UNAUTHORIZED- missing-role - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));

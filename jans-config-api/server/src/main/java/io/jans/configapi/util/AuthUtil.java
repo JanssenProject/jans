@@ -944,7 +944,7 @@ public class AuthUtil {
 
     public IntrospectionResponse getIntrospectionResponse(String token) throws JsonProcessingException {
         IntrospectionResponse introspectionResponse = null;
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token) || !token.contains("Bearer")) {
             return introspectionResponse;
         }
 

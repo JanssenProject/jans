@@ -81,7 +81,7 @@ public class UserResourceFilter extends BaseFilter {
                 status = ((WebApplicationException) ex).getResponse().getStatusInfo().toEnum();
             }
             StringBuilder errMsg = new StringBuilder("UserResourceFilter - authorization failed for method:{")
-                    .append(requestContext.getMethod()).append("}, path:{").append(info.getPath())
+                    .append(requestContext.getMethod()).append("}, path:{").append(escapeLog(info.getPath()))
                     .append("}, errorMessage:{").append(ex.getMessage()).append("}");
 
             log.error(errMsg.toString());
@@ -118,6 +118,10 @@ public class UserResourceFilter extends BaseFilter {
             throw new WebApplicationException("Header attribute `User-inum` missing",
                     Response.status(Response.Status.BAD_REQUEST).build());
         }
+        
+        // validate IntrospectionResponse
+        log.debug(" UserResourceFilter - validateDataInIntrospectionResponse ");
+        validateDataInIntrospectionResponse(introspectionResponse, userInum);
 
         // Find scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
@@ -175,9 +179,9 @@ public class UserResourceFilter extends BaseFilter {
         List<String> excludedClients = authUtil.getUserRolePermissionExcludedClients();
         return excludedClients == null ? Collections.emptyList() : excludedClients;
     }
-
+    
     private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
-
+        log.info(" Verify DataInIntrospectionResponse");
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
             return;
@@ -189,8 +193,8 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         String inum = authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(), USER_INUM);
-        log.debug("Header userInum :{} and  token Introspection inum:{}", userInum, inum);
-        if (StringUtils.isBlank(inum) || !inum.equalsIgnoreCase(userInum)) {
+        log.debug(" Header userInum :{} and  token Introspection inum:{}", userInum, inum);
+        if (StringUtils.isNotBlank(inum) && !inum.equalsIgnoreCase(userInum)) {
             throw new WebApplicationException("Header attribute `User-inum` does not correspond to User token",
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
