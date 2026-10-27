@@ -24,7 +24,7 @@ use crate::log::{
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use crate::trace::{
-    DecisionFacts, DraftError, Outcome, TokenFacts, TraceRecordStatus, TraceRecorder, token_facts,
+    DecisionFacts, DraftError, Outcome, TokenRef, TraceRecordStatus, TraceRecorder, token_facts,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
@@ -36,7 +36,6 @@ use request::{
 };
 use serde_json::json;
 use smol_str::SmolStr;
-use std::borrow::Borrow;
 use std::cell::OnceCell;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -373,7 +372,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || token_facts(&validated_tokens, &request.tokens),
+            || token_facts(&validated_tokens, &request.tokens).map(Arc::from),
         );
 
         // Decision log
@@ -496,9 +495,8 @@ impl Authz {
         let trace_tokens = OnceCell::new();
         let trace_token_facts = || {
             trace_tokens
-                .get_or_init(|| token_facts(&validated_tokens, &request.tokens))
-                .as_ref()
-                .map_err(Clone::clone)
+                .get_or_init(|| token_facts(&validated_tokens, &request.tokens).map(Arc::from))
+                .clone()
         };
         let trace_context = self.trace_context(&request.options);
 
@@ -780,7 +778,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || Ok(TokenFacts::default()),
+            || Ok(Arc::from([])),
         );
 
         // Decision log
@@ -930,7 +928,7 @@ impl Authz {
                 &item.action,
                 &resource_uid,
                 decision,
-                || Ok(TokenFacts::default()),
+                || Ok(Arc::from([])),
             );
 
             self.log_decision(
@@ -1246,26 +1244,23 @@ impl Authz {
 
     /// Hands the TRACE record of one decision to the emitter; `None` when TRACE is
     /// disabled. `tokens` runs only when the record is built.
-    fn record_trace<T: Borrow<TokenFacts>>(
+    fn record_trace(
         &self,
         request_id: Uuid,
         trace_context: Option<&Arc<TraceContext>>,
         action: &str,
         resource: &EntityUid,
         allowed: bool,
-        tokens: impl FnOnce() -> Result<T, DraftError>,
+        tokens: impl FnOnce() -> Result<Arc<[TokenRef]>, DraftError>,
     ) -> Option<TraceRecordStatus> {
         let trace = self.config.trace.as_ref()?;
         Some(
             trace.record(request_id, trace_context, &self.config.policy_store, || {
-                let tokens = tokens()?;
-                let tokens: &TokenFacts = tokens.borrow();
-                trace.warn_left_out(request_id, tokens);
                 Ok(DecisionFacts {
                     action: action.to_string(),
                     resource_type: resource.type_name().to_string(),
                     outcome: Outcome::from_allowed(allowed),
-                    tokens: Arc::clone(&tokens.refs),
+                    tokens: tokens()?,
                 })
             }),
         )
@@ -2040,11 +2035,14 @@ mod trace_record_tests {
             .decision
             .tokens
             .iter()
-            .map(|token| (token.issuer.as_str(), token.token_type.as_str()))
+            .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
             .collect();
         assert_eq!(
             tokens,
-            [("https://idp.dolphin.sea", "Dolphin::Access_Token")],
+            [(
+                "https://idp.dolphin.sea".to_string(),
+                "Dolphin::Access_Token"
+            )],
             "the record references the token the decision used"
         );
     }
@@ -2170,11 +2168,14 @@ mod trace_record_tests {
                 .decision
                 .tokens
                 .iter()
-                .map(|token| (token.issuer.as_str(), token.token_type.as_str()))
+                .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
                 .collect();
             assert_eq!(
                 tokens,
-                [("https://idp.dolphin.sea", "Dolphin::Access_Token")],
+                [(
+                    "https://idp.dolphin.sea".to_string(),
+                    "Dolphin::Access_Token"
+                )],
                 "every record references the batch token"
             );
         }

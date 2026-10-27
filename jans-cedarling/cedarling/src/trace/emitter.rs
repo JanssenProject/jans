@@ -907,7 +907,9 @@ mod tests {
     use crate::common::policy_store::test_utils::fixtures;
     use crate::lock::{BulkItemResult, BulkSink, PostBulkError};
     use crate::log::{LogStrategy, TEST_LOGGER, gen_uuid7};
-    use crate::trace::record::{DecisionFacts, Outcome, PolicyFacts, RecordDraft, TokenRef};
+    use crate::trace::record::{
+        DecisionFacts, IssuerRef, Outcome, PolicyFacts, RecordDraft, TokenRef,
+    };
     use crate::trace::test_utils::{CjarStore, cjar_store};
     use crate::trace::{ProducerKey, TraceRecordStatus, TraceRecorder};
     use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
@@ -1115,7 +1117,7 @@ mod tests {
             .map(|index| {
                 let jti = format!("{index:0>256}");
                 TokenRef::new(
-                    "https://idp.example.com",
+                    IssuerRef::Url("https://idp.example.com".to_string()),
                     "Jans::Access_Token",
                     Some(&jti),
                     "raw",

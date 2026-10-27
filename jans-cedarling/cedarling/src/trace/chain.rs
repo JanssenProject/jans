@@ -155,7 +155,7 @@ fn token(token: &TokenRef) -> Value {
         TokenId::Fingerprint(digest) => ("fingerprint", digest.to_string()),
     };
     json!({
-        "issuer": token.issuer,
+        "issuer": token.issuer.to_string(),
         "token_type": token.token_type,
         name: id,
     })
@@ -178,7 +178,9 @@ mod tests {
     use crate::authz::TraceContext;
     use crate::common::app_types::PdpID;
     use crate::log::gen_uuid7;
-    use crate::trace::record::{DecisionFacts, Outcome, PolicyFacts, RecordDraft, TokenRef};
+    use crate::trace::record::{
+        DecisionFacts, IssuerRef, Outcome, PolicyFacts, RecordDraft, TokenRef,
+    };
 
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
     const KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
@@ -237,14 +239,19 @@ mod tests {
     fn tokens() -> Vec<TokenRef> {
         vec![
             TokenRef::new(
-                "https://idp.example.com",
+                IssuerRef::Url("https://idp.example.com".to_string()),
                 "Jans::Access_Token",
                 Some("jti-1"),
                 "a.b.c",
             )
             .expect("test token ref should build"),
-            TokenRef::new("https://idp.example.com", "Jans::Id_Token", None, "d.e.f")
-                .expect("test token ref should build"),
+            TokenRef::new(
+                IssuerRef::Url("https://idp.example.com".to_string()),
+                "Jans::Id_Token",
+                None,
+                "d.e.f",
+            )
+            .expect("test token ref should build"),
         ]
     }
 

@@ -16,9 +16,7 @@ use tokio::sync::mpsc;
 use tokio::sync::mpsc::error::TrySendError;
 use uuid7::Uuid;
 
-use super::record::{
-    DecisionFacts, DraftError, RawTokenInField, RecordDraft, TokenRef, is_lock_issuer,
-};
+use super::record::{DecisionFacts, DraftError, IssuerRef, RawTokenInField, RecordDraft, TokenRef};
 use super::status::TraceRecordStatus;
 use crate::authz::TraceContext;
 use crate::authz::metrics::MetricsCollector;
@@ -63,7 +61,6 @@ struct QueueState {
 struct WarnedOnce {
     over_limit: AtomicBool,
     invalid_field: AtomicBool,
-    custom_token_left_out: AtomicBool,
 }
 
 impl TraceRecorder {
@@ -219,24 +216,6 @@ impl TraceRecorder {
         );
     }
 
-    /// Notes the custom tokens [`token_facts`] left out of the record of
-    /// `request_id`.
-    pub(crate) fn warn_left_out(&self, request_id: Uuid, tokens: &TokenFacts) {
-        for mapping in &tokens.left_out {
-            self.warn_first(
-                &self.warned.custom_token_left_out,
-                request_id,
-                "later ones are logged at DEBUG",
-                || {
-                    format!(
-                        "custom token `{mapping}` has no issuer Lock accepts; it is left out of \
-                         the TRACE record"
-                    )
-                },
-            );
-        }
-    }
-
     /// WARN for the first of its kind, with `later` saying where the rest go,
     /// and DEBUG for the rest. The message is built only when its level is
     /// logged, so a repeated cause costs no allocation at a higher log level.
@@ -278,31 +257,22 @@ fn signed_at() -> u64 {
     u64::try_from(Utc::now().timestamp()).unwrap_or_default()
 }
 
-/// The tokens a decision used, as the record references them.
-#[derive(Debug, Default, PartialEq)]
-pub(crate) struct TokenFacts {
-    pub(crate) refs: Arc<[TokenRef]>,
-    /// Mappings of the custom tokens left out of `refs`, for
-    /// [`TraceRecorder::warn_left_out`].
-    pub(crate) left_out: Vec<String>,
-}
-
 /// References to the tokens a multi-issuer decision used, in request order. The
-/// `issuer` and `jti` come from the token claims; the `mapping` and the raw text
-/// come from the request input at the token's index.
+/// `jti` comes from the token claims; the `mapping` and the raw text come from
+/// the request input at the token's index.
 ///
-/// A custom token whose issuer Lock would reject is left out and named in
-/// `left_out`: Cedarling cannot name its issuer, and the decision still has a
-/// record. A JWT stays in, so an issuer Lock rejects stops the record instead.
+/// A JWT is named by its `iss` claim, so an issuer Lock rejects stops the
+/// record. A custom (non-JWT) token has no issuer URI: it is named by the URN of
+/// its custom issuer in the policy store, whatever the host's processor put in
+/// `iss`, so the record does not depend on host code.
 pub(crate) fn token_facts(
     validated: &HashMap<String, ValidatedToken>,
     inputs: &[TokenInput],
-) -> Result<TokenFacts, DraftError> {
+) -> Result<Vec<TokenRef>, DraftError> {
     let mut ordered: Vec<&ValidatedToken> = validated.values().collect();
     ordered.sort_by_key(|validated| validated.index);
 
     let mut refs = Vec::with_capacity(ordered.len());
-    let mut left_out = Vec::new();
     for validated in ordered {
         let position = refs.len();
         // The index comes from validating these same inputs, so this does not
@@ -314,29 +284,18 @@ pub(crate) fn token_facts(
         };
         let token = &validated.token;
         let claim = |name| token.get_claim_val(name).and_then(Value::as_str);
-        let issuer = claim("iss");
+        let issuer = match &token.iss {
+            Some(TokenIssuer::Custom(meta)) => IssuerRef::CustomIssuer(meta.issuer_id.clone()),
+            _ => IssuerRef::Url(claim("iss").unwrap_or_default().to_string()),
+        };
 
-        if matches!(token.iss, Some(TokenIssuer::Custom(_))) && !issuer.is_some_and(is_lock_issuer)
-        {
-            left_out.push(input.mapping.clone());
-            continue;
-        }
-
-        let token_ref = TokenRef::new(
-            issuer.unwrap_or_default(),
-            &input.mapping,
-            claim("jti"),
-            &input.payload,
-        )
-        .map_err(|RawTokenInField(field)| DraftError::InvalidField {
-            path: format!("trace.event.tokens[{position}].{field}"),
-        })?;
+        let token_ref = TokenRef::new(issuer, &input.mapping, claim("jti"), &input.payload)
+            .map_err(|RawTokenInField(field)| DraftError::InvalidField {
+                path: format!("trace.event.tokens[{position}].{field}"),
+            })?;
         refs.push(token_ref);
     }
-    Ok(TokenFacts {
-        refs: refs.into(),
-        left_out,
-    })
+    Ok(refs)
 }
 
 #[cfg(test)]
@@ -733,13 +692,17 @@ mod tests {
     }
 
     #[test]
-    fn custom_token_without_lock_issuer_is_left_out() {
+    fn custom_token_is_named_by_its_issuer_urn() {
         let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid());
-        for claims in [json!({"sub": "d1"}), json!({"iss": "dolphin", "sub": "d1"})] {
-            let log = memory_log();
+        let raw = "dolphin-opaque";
+        for claims in [
+            json!({"sub": "d1"}),
+            json!({"iss": "dolphin", "sub": "d1"}),
+            json!({"iss": "https://dolphin.example.com", "sub": "d1"}),
+        ] {
             let inputs = [
                 input("Jans::Access_Token", "header.payload.sig"),
-                input("Acme::DolphinToken", "dolphin-opaque"),
+                input("Acme::DolphinToken", raw),
             ];
             let tokens = by_mapping([
                 jwt(
@@ -750,28 +713,30 @@ mod tests {
                 custom("Acme::DolphinToken", claims.clone(), 1),
             ]);
 
-            let tokens = token_facts(&tokens, &inputs)
-                .expect("a custom token Lock cannot name is left out, not an error");
+            let refs = token_facts(&tokens, &inputs).expect("token facts build");
             assert_eq!(
-                tokens.left_out,
-                ["Acme::DolphinToken"],
-                "the left-out token is named by its mapping ({claims})"
+                refs[1],
+                TokenRef::new(
+                    IssuerRef::CustomIssuer("dolphin".to_string()),
+                    "Acme::DolphinToken",
+                    None,
+                    raw,
+                )
+                .expect("test token ref should build"),
+                "a custom token is named by its custom issuer, whatever its iss ({claims})"
             );
 
             let (tx, mut rx) = mpsc::channel(1);
-            let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
-            recorder.warn_left_out(gen_uuid7(), &tokens);
-            assert!(
-                warned(&log, "Acme::DolphinToken"),
-                "leaving out a token should be warned with its mapping ({claims})"
+            let status = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics()).record(
+                gen_uuid7(),
+                Some(&trace()),
+                &store,
+                || Ok(facts(refs)),
             );
-            let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
-                Ok(facts(tokens.refs))
-            });
             assert_eq!(
                 status,
                 TraceRecordStatus::Emitted,
-                "the record is still emitted"
+                "Lock accepts the issuer URN ({claims})"
             );
             let draft = rx.try_recv().expect("the emitter should get the draft");
             let types: Vec<_> = draft
@@ -782,31 +747,21 @@ mod tests {
                 .collect();
             assert_eq!(
                 types,
-                ["Jans::Access_Token"],
-                "only the token Lock can name is in the record ({claims})"
+                ["Jans::Access_Token", "Acme::DolphinToken"],
+                "both tokens are in the record ({claims})"
             );
         }
     }
 
     #[test]
-    fn custom_token_with_lock_issuer_is_kept() {
+    fn custom_token_keeps_its_jti() {
         let inputs = [input("Acme::DolphinToken", "dolphin-opaque")];
-        let tokens = by_mapping([custom(
-            "Acme::DolphinToken",
-            json!({"iss": "https://dolphin.example.com", "jti": "d-1"}),
-            0,
-        )]);
-        let tokens = token_facts(&tokens, &inputs).expect("token facts build");
+        let tokens = by_mapping([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
+        let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
-            *tokens.refs,
-            [TokenRef::new(
-                "https://dolphin.example.com",
-                "Acme::DolphinToken",
-                Some("d-1"),
-                "dolphin-opaque",
-            )
-            .expect("test token ref should build")],
-            "a custom token with an issuer Lock accepts is referenced"
+            refs[0].id,
+            TokenId::Jti("d-1".to_string()),
+            "a custom token is referenced by the jti its processor returned"
         );
     }
 
@@ -817,13 +772,13 @@ mod tests {
         let log = memory_log();
         let tokens =
             token_facts(&tokens, &inputs).expect("a JWT stays in the list even without an issuer");
-        assert_eq!(tokens.refs.len(), 1, "the JWT is not left out");
+        assert_eq!(tokens.len(), 1, "the JWT is not left out");
 
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
             Some(&trace()),
             &minimal_store(),
-            || Ok(facts(tokens.refs)),
+            || Ok(facts(tokens)),
         );
         assert_eq!(
             status,
@@ -841,15 +796,17 @@ mod tests {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
         let tokens = by_mapping([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
-        let refs = token_facts(&tokens, &inputs)
-            .expect("token facts build")
-            .refs;
+        let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
             TokenId::Fingerprint(token_fingerprint(raw)),
             "a token without jti is referenced by the fingerprint of its text"
         );
-        assert_eq!(refs[0].issuer, ISSUER, "issuer comes from the iss claim");
+        assert_eq!(
+            refs[0].issuer,
+            IssuerRef::Url(ISSUER.to_string()),
+            "issuer comes from the iss claim"
+        );
     }
 
     #[test]
@@ -864,9 +821,7 @@ mod tests {
             jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
             jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
         ]);
-        let refs = token_facts(&tokens, &inputs)
-            .expect("token facts build")
-            .refs;
+        let refs = token_facts(&tokens, &inputs).expect("token facts build");
         let types: Vec<_> = refs.iter().map(|token| token.token_type.as_str()).collect();
         assert_eq!(
             types,
@@ -901,20 +856,13 @@ mod tests {
     fn invalid_field() -> DecisionFacts {
         facts(vec![
             TokenRef::new(
-                "",
+                IssuerRef::Url(String::new()),
                 "Jans::Access_Token",
                 Some("jti-1"),
                 "header.payload.sig",
             )
             .expect("test token ref should build"),
         ])
-    }
-
-    fn left_out() -> TokenFacts {
-        TokenFacts {
-            refs: Arc::from([]),
-            left_out: vec!["Acme::DolphinToken".to_string()],
-        }
     }
 
     #[test]
@@ -995,19 +943,17 @@ mod tests {
                 TraceRecordStatus::NotEmittedInvalidField,
                 "an empty issuer is an invalid field"
             );
-            recorder.warn_left_out(gen_uuid7(), &left_out());
             warnings.extend(messages(&log, "WARN"));
         }
 
         assert_eq!(
             warnings.len(),
-            3,
+            2,
             "each kind is warned once, whatever the other kinds did: {warnings:?}"
         );
         for needle in [
             "trace.event.decision.action",
             "trace.event.tokens[0].issuer",
-            "Acme::DolphinToken",
         ] {
             assert!(
                 warnings.iter().any(|message| message.contains(needle)),
