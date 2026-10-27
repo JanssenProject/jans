@@ -8,14 +8,13 @@ tags:
   - annotations
 ---
 
-# Pattern: Challenges and Step-Up
+# Pattern: Step-Up and Evidence
 
 !!! note "Illustrative example"
 
-    Acme, ReportBot, and every annotation key below (`@challenge`, `@challenge_ttl_seconds`,
-    `@containment`, and the rest) are invented for this page. Cedarling attaches no meaning to
-    them; they work only because the example application reads them. The scenario is simplified to
-    show the mechanism, not to be copied as a security design. See
+    Acme, ReportBot, and every `@checks` value below are invented for this page. Cedarling attaches
+    no meaning to them; they work only because the example application reads them. The scenario is
+    simplified to show the mechanism, not to be copied as a security design. See
     [Policy Annotation Patterns](./annotation-patterns.md) for the ground rules.
 
 ## The Scenario
@@ -30,114 +29,100 @@ document classified `highly_confidential`, normally read only by the strategy an
 Nothing here is obviously an attack. There are three plausible explanations:
 
 - Dana genuinely needs the document and nobody told the access system.
-- The assistant over-reached and expanded a vague question into a search Dana never intended, so a
-  document Dana never asked for was opened under Dana's identity.
+- The assistant over-reached and expanded a vague question into a search Dana never intended.
 - Dana's credentials are being used by somebody else.
 
-A binary access system has to pick one. Denying blocks legitimate work and trains people to route
-around the tool. Allowing means an agent exfiltrates strategy documents at machine speed, and the
-security team finds out from a log review next week.
+A binary answer has to pick one. Denying blocks legitimate work and trains people to route around
+the tool. Allowing means an agent reads strategy documents at machine speed, and the security team
+finds out from a log review next week.
 
-Neither has to be the answer. The system can ask instead: confirm with the human that the access
-was intended, and get the data owner to confirm the need.
-[Beyond Zero](https://queue.acm.org/detail.cfm?id=3819083) calls this a *challenge*, friction
-applied in the moment and in proportion to the risk, instead of a flat denial.
+## Where the Challenge Is Decided
+
+The better answer is to ask: confirm with Dana that the access was intended, get the data owner to
+confirm the need, or require a security key. [Beyond Zero](https://queue.acm.org/detail.cfm?id=3819083)
+calls this a *challenge*, friction applied in the moment and in proportion to the risk.
+
+Choosing that challenge is not the policy's job. Which challenge to put in front of an accessor is
+an organization-level decision that spans applications, and it is usually made by a reasoning engine
+or an identity orchestration service. It weighs signals no single policy sees: the device, the
+session's history, what the same account did in other applications an hour ago. A policy that named
+its own challenge would be making that decision with a fraction of the information.
+
+What the policy can do is say precisely what is missing. Its `@checks` label names the condition
+that denied the request, and its `unless` clause names the evidence that would satisfy it. The
+reasoning engine takes the label as one input among many and decides what to do: run a challenge,
+refuse outright, or raise an alert.
+
+Once a challenge is issued, the interaction becomes stateful. The accessor goes off to complete it,
+the challenge service records the result, and the next request arrives with richer context. The
+challenge itself carries no claims; it is the opportunity to collect them. The policy sees only the
+outcome, as evidence in the context, and evaluates the request again.
 
 ## Modeling the Agent
 
 The policies below are written against the identity model, so the identity model comes first.
 
-The agent is a principal in its own right, not a flag on the human. `ReportBot` has its own entity,
-its own ID, and its own attributes, and it carries a reference to the human who operates it:
+The agent is a principal in its own right, not a flag on the human. `ReportBot` has its own entity
+type, its own ID, and its own attributes, so policies tell "an agent did this" from "a human did
+this" by the principal type, which the engine enforces, rather than by reading a string out of the
+context that nothing prevents the caller from setting.
 
-- `Acme::Agent::"reportbot-7f3"` is the accessor that made the request
-- `operated_by: Acme::User::"dana"` is the human accountable for it
+The agent also has to stay attributable to the human who operates it. Lose that link and the agent
+has ambient authority nobody owns. An attribute of type `User` cannot express that link, because
+[only the principal and the resource are
+entities](./annotation-patterns.md#only-the-principal-and-the-resource-are-entities). So the agent
+carries its operator as an identifier, together with copies of the operator attributes the policies
+need, filled in by the server when it builds the request:
 
-Two consequences follow. Policies tell "an agent did this" from "a human did this" by the principal
-type, which is part of the policy scope and therefore enforced by the engine, rather than by reading
-a string out of the context that nothing prevents the caller from setting. And the reference to the
-operator keeps the request attributable to a person even when no person typed it. Lose that
-reference and the agent has ambient authority nobody owns.
+- `operator_id` keeps the request attributable to a person, and it is what the challenge service
+  uses to reach the operator
+- `operator_assignments` and `operator_risk_tier` are copies of the operator's own attributes, so
+  rules about the human's scope and risk can be evaluated on an agent request
 
-An agent-initiated request and a human-initiated request are therefore two different requests, with
-different principals, evaluated against different (though overlapping) policies.
-
-## Why Annotations Are the Right Place for the Remedy
-
-The decision is still binary. Cedar has `permit` and `forbid`, and adding a third outcome would
-mean forking the policy language. `Challenge` is not a decision but a status attached to a
-denial, saying "denied for now, and here is what would change the answer."
-
-An annotation carries that well:
-
-- The policy that denied the request knows *why*, so it is the right place to record *what would
-  resolve it*. The condition and the remedy stay in one reviewable unit.
-- The set of challenges is a policy decision, not an application decision. Which risky combinations
-  deserve a security-key touch and which deserve owner approval is a question for the security
-  team, and it changes far more often than the application code.
-- The application only needs the *names* of the challenges it can run. It never needs to know under
-  which conditions each one applies.
+Make them required in the schema. A required attribute the server forgot to fill in fails the
+request, while an optional one that is missing would make every policy reading it error, drop out of
+the decision, and stop protecting anything.
 
 ## The Flow
 
-```
- ┌──────┐        ┌─────┐            ┌───────────┐      ┌───────────────────┐
- │ Dana │        │ App │            │ Cedarling │      │ Challenge service │
- └──┬───┘        └──┬──┘            └─────┬─────┘      └─────────┬─────────┘
-    │  prompt       │                     │                      │
-    │──────────────▶│                     │                      │
-    │               │  1. authorize_unsigned                      │
-    │               │  principal: Agent::"reportbot-7f3"          │
-    │               │  completed_challenges: []                   │
-    │               │────────────────────▶│                      │
-    │               │  Deny, reason: [    │                      │
-    │               │    forbid_agent_read_sensitive_without_intent,
-    │               │    forbid_offscope_sensitive_read_by_agent ]│
-    │               │◀────────────────────│                      │
-    │               │                     │                      │
-    │               │  2. annotation_values(reason, "challenge")  │
-    │               │────────────────────▶│                      │
-    │               │  ["confirm_human_intent",                  │
-    │               │   "data_owner_approval"]                   │
-    │               │◀────────────────────│                      │
-    │               │                     │                      │
-    │               │  3. run both challenges, each to the actor its policy names
-    │               │───────────────────────────────────────────▶│
-    │  "ReportBot wants to open strategy-fy27. Did you ask for this?"
-    │◀──────────────────────────────────────────────────────────│
-    │  confirm      │                     │                      │
-    │──────────────────────────────────────────────────────────▶│
-    │               │  attested results (server-side, TTL-bound)  │
-    │               │◀───────────────────────────────────────────│
-    │               │                     │                      │
-    │               │  4. re-authorize, same principal            │
-    │               │  completed_challenges: [both]               │
-    │               │────────────────────▶│                      │
-    │               │  Allow, reason: [permit_read_documents]     │
-    │               │◀────────────────────│                      │
-    │  answer       │                     │                      │
-    │◀──────────────│                     │                      │
+```text
+ Dana          App                  Cedarling        Reasoning engine     Challenge service
+  |             |                       |                    |                    |
+  |-- prompt -->|                       |                    |                    |
+  |             |-- 1. authorize ------>|                    |                    |
+  |             |   principal: Agent::"reportbot-7f3"         |                    |
+  |             |   attestations: []    |                    |                    |
+  |             |<-- Deny, reason: -----|                    |                    |
+  |             |    forbid_agent_read_sensitive_unconfirmed  |                    |
+  |             |    forbid_offscope_sensitive_read_by_agent  |                    |
+  |             |                       |                    |                    |
+  |             |-- 2. annotation_values(reason, "checks") -->|                    |
+  |             |   agent.human_intent_unconfirmed            |                    |
+  |             |   document.outside_operator_assignments     |                    |
+  |             |                       |                    |                    |
+  |             |-- 3. checks + signals ------------------->|                    |
+  |             |<-- decision: run two challenges -----------|                    |
+  |             |                       |                    |                    |
+  |             |-- 4. run challenges ---------------------------------------->|
+  |<-- "ReportBot wants to open strategy-fy27. Did you ask for this?" ---------|
+  |-- confirm ---------------------------------------------------------------->|
+  |             |                       |        (data owner approves too)    |
+  |             |<-- attested results, server-side, bound to this request ---|
+  |             |                       |                    |                    |
+  |             |-- 5. re-authorize --->|                    |                    |
+  |             |   attestations: [human_intent_confirmed, data_owner_approved]   |
+  |             |<-- Allow -------------|                    |                    |
+  |<-- answer --|                       |                    |                    |
 ```
 
-Step 4 is the important one. The challenge results go back in as context, and the same policies are
+Step 5 is the important one. The evidence goes back in as context, and the same policies are
 evaluated again. No policy is bypassed and no verdict is overridden. The request became a different,
 better-evidenced request.
 
-The principal is the agent, and an agent cannot confirm intent or touch a security key, so both
-prompt for either of those goes to `principal.operated_by`.
-
-Owner approval is the opposite case. Routing it to the operator would mean the operator approves
-their own off-scope read, and the control the policy was written for turns into a click. It goes to
-whoever owns the document, which the resource already records in `owner_team`.
-
-Routing is the application's job, and `@challenge_actor` is how each policy says where its prompt
-belongs: `controlling_human` for the two the operator answers, `data_owner` for the one they must
-not.
-
 ## Schema
 
-Both principal types apply to the action, and the challenge results are part of the context so the
-policies can test them.
+Both principal types apply to the action, and the collected evidence is part of the context so the
+policies can test it.
 
 ```cedarschema
 namespace Acme {
@@ -147,7 +132,9 @@ namespace Acme {
     };
 
     entity Agent = {
-        "operated_by": User,
+        "operator_id": String,
+        "operator_assignments": Set<String>,
+        "operator_risk_tier": String,
         "model": String,
     };
 
@@ -161,7 +148,7 @@ namespace Acme {
         principal: [User, Agent],
         resource: [Document],
         context: {
-            "completed_challenges": Set<String>,
+            "attestations": Set<String>,
         }
     };
 }
@@ -169,7 +156,7 @@ namespace Acme {
 
 ## Policies
 
-One broad `permit`, with the risk conditions layered on top as annotated `forbid` policies:
+One broad `permit`, with the risk conditions layered on top as labeled `forbid` policies:
 
 ```cedar
 @id("permit_read_documents")
@@ -180,15 +167,13 @@ permit (
 );
 ```
 
-An agent reading a highly confidential document must have the human confirm that this is what they
-asked for. This condition is about the *nature of the accessor*, so it exists only for `Agent`:
+An agent reading a highly confidential document needs evidence that the human intended it. This
+condition is about the *nature of the accessor*, so it exists only for `Agent`:
 
 ```cedar
-@id("forbid_agent_read_sensitive_without_intent")
-@challenge("confirm_human_intent")
-@challenge_actor("controlling_human")
-@challenge_ttl_seconds("300")
-@user_message_id("access.challenge.confirm_human_intent")
+@id("forbid_agent_read_sensitive_unconfirmed")
+@checks("agent.human_intent_unconfirmed")
+@detail("An agent is reading a highly confidential document with no confirmation from its operator.")
 forbid (
     principal is Acme::Agent,
     action == Acme::Action::"Read",
@@ -196,22 +181,19 @@ forbid (
 )
 when { resource.sensitivity == "highly_confidential" }
 unless {
-    context.completed_challenges.contains("confirm_human_intent")
+    context.attestations.contains("human_intent_confirmed")
 };
 ```
 
-Reading a highly confidential document outside your work assignment needs the data owner's
-approval. This one is about the *human's scope of work*, and it applies whether the human reads
-the document directly or an agent reads it for them. So it exists twice, once per principal type,
-differing only in how it reaches the human's assignments:
+Reading a highly confidential document outside the human's work assignments needs the data owner's
+approval on record. This one is about the *human's scope of work*, and it applies whether the human
+reads the document directly or an agent reads it for them. So it exists twice, once per principal
+type, differing only in where the assignments come from:
 
 ```cedar
 @id("forbid_offscope_sensitive_read_by_agent")
-@challenge("data_owner_approval")
-@challenge_actor("data_owner")
-@challenge_strength("high")
-@challenge_ttl_seconds("3600")
-@user_message_id("access.challenge.owner_approval")
+@checks("document.outside_operator_assignments")
+@detail("The document's subject is not among the operator's assignments and no owner approval is recorded.")
 forbid (
     principal is Acme::Agent,
     action == Acme::Action::"Read",
@@ -219,20 +201,17 @@ forbid (
 )
 when {
     resource.sensitivity == "highly_confidential" &&
-    !principal.operated_by.assignments.contains(resource.subject)
+    !principal.operator_assignments.contains(resource.subject)
 }
 unless {
-    context.completed_challenges.contains("data_owner_approval")
+    context.attestations.contains("data_owner_approved")
 };
 ```
 
 ```cedar
 @id("forbid_offscope_sensitive_read_by_user")
-@challenge("data_owner_approval")
-@challenge_actor("data_owner")
-@challenge_strength("high")
-@challenge_ttl_seconds("3600")
-@user_message_id("access.challenge.owner_approval")
+@checks("document.outside_operator_assignments")
+@detail("The document's subject is not among the user's assignments and no owner approval is recorded.")
 forbid (
     principal is Acme::User,
     action == Acme::Action::"Read",
@@ -243,25 +222,25 @@ when {
     !principal.assignments.contains(resource.subject)
 }
 unless {
-    context.completed_challenges.contains("data_owner_approval")
+    context.attestations.contains("data_owner_approved")
 };
 ```
 
 Evaluated against Dana's request, the agent principal trips both agent policies:
 
 ```text
-DENY   reason: forbid_agent_read_sensitive_without_intent
+DENY   reason: forbid_agent_read_sensitive_unconfirmed
                forbid_offscope_sensitive_read_by_agent
 ```
 
-Had Dana opened the document directly, only the scope rule would have fired: one challenge instead
-of two, which is the proportionality the design is after.
+Had Dana opened the document directly, only the scope rule would have fired:
 
 ```text
 DENY   reason: forbid_offscope_sensitive_read_by_user
 ```
 
-And once both challenges are recorded in the context, the same policy set allows the request:
+And once both pieces of evidence are recorded in the context, the same policy set allows the
+request:
 
 ```text
 ALLOW  reason: permit_read_documents
@@ -269,35 +248,22 @@ ALLOW  reason: permit_read_documents
 
 ### Notes on the Shape of This
 
-Each challenge is its own policy. Cedar rejects a duplicate annotation key on one policy, so
-`@challenge` appears once per policy. The constraint has a useful consequence: independent risk
-conditions stay independent policies, they are reviewed separately, and the ones that matched are
-the ones reported in `reason()`.
+Each condition is its own policy. Cedar rejects a duplicate annotation key on one policy, so
+`@checks` appears once per policy. Independent risk conditions stay independent policies, they are
+reviewed separately, and the ones that matched are the ones reported in `reason()`.
 
-Each `forbid` clears itself through `unless`. A `forbid` with no way to clear it is a hard block,
-not a challenge. The `unless` clause makes the denial resolvable, and it is why the second
-authorization call can legitimately return `Allow`.
+Each `forbid` names the evidence that clears it, in its `unless` clause. A `forbid` with no `unless`
+is a hard block: no amount of evidence changes the answer. The `unless` clause is the policy's real
+statement of what would make the request acceptable, and it is enforced by the engine on the second
+call rather than trusted to the application.
 
-For a resolvable denial, the guidance lives on `forbid` rather than on `permit`. How decisions are
-reported forces this: on a `Deny`, only the satisfied `forbid` policies appear in `reason()`, and if
-nothing matched at all, `reason()` is empty and there are no annotations to read. Annotations on
-`permit` policies are not wasted, they simply speak on the allow path, which is what the [quota
-page](./annotation-quota.md) is built on. A broad `permit` with annotated `forbid` layers on top
-keeps hints available at the moment they are needed. See [Only the determining policies are
-reported](./annotation-patterns.md#only-the-determining-policies-are-reported).
+The policy names evidence, not a procedure. `data_owner_approved` says what has to be true. Whether
+the challenge service collects it with an in-app approval, a ticket, or a call is not the policy's
+concern, and the reasoning engine may decide not to try at all.
 
-One rule, two principal types, two policies. Cedar's scope cannot match a union of principal types,
-so a rule covering both is either written twice or written once with the type test moved into the
-`when` clause, narrowing on `principal is Acme::User` and `principal is Acme::Agent` in two branches
-of an `||`. That single-policy form validates. The pair is still worth the duplication here: each
-principal type gets its own `@id`, so `reason()` and the decision log say which shape fired, and a
-reviewer reads one condition at a time. Keeping the `@challenge` value identical across the pair
-means the application still sees one challenge, whichever policy fired. If the duplication grows
-past a handful of pairs, mirror the operator's decision-relevant attributes onto the agent entity
-when it is built (`agent.assignments` copied from `operated_by`). That collapses each pair into a
-single policy at the cost of a denormalized entity. It is a trade between policy-store duplication
-and entity-builder complexity, and it is worth deciding once for the whole policy set rather than
-per policy.
+One rule, two principal types, two policies. They share one `@checks` value, so the reasoning
+engine sees the same condition whichever principal type fired it, while each keeps its own `@id`
+for the decision log.
 
 ## Application Code
 
@@ -305,171 +271,99 @@ per policy.
 use std::collections::BTreeSet;
 
 // Server-issued records only, already filtered to this action and resource and to
-// records whose @challenge_ttl_seconds has not expired. Never the raw client context.
-let mut completed: BTreeSet<String> = session.valid_challenges_for(&document, Action::Read);
+// records that have not expired. Never the raw client context.
+let mut attestations: BTreeSet<String> = evidence.valid_for(&document, Action::Read);
 
-for attempt in 0..2 {
-    let result = cedarling
-        .authorize_unsigned(read_request(&agent, &document, &completed))
-        .await?;
+// A set: two policies reporting the same condition are one condition.
+let checks = |result: &AuthorizeResult| -> BTreeSet<String> {
+    cedarling
+        .annotation_values(result.response.diagnostics().reason(), "checks")
+        .into_iter()
+        .collect()
+};
 
-    if result.decision {
-        return Ok(serve(result));
-    }
-
-    let reason: Vec<_> = result.response.diagnostics().reason().collect();
-
-    // Every challenge asked for by a policy that actually matched.
-    let asked = cedarling.annotation_values(reason.iter().copied(), "challenge");
-
-    // No guidance, or the challenges were already attempted: a plain denial.
-    if asked.is_empty() || attempt == 1 {
-        let message_id = cedarling
-            .annotation_values(reason.iter().copied(), "user_message_id")
-            .into_iter()
-            .next()
-            .unwrap_or_else(|| "access.denied.generic".to_string());
-        return Err(deny(message_id));
-    }
-
-    // Each policy's annotations stay grouped: the challenge it asked for, the TTL that
-    // applies to it, and the message that belongs with it. This is also the audit trail.
-    let by_policy = cedarling.annotations_by_policy(reason.iter().copied());
-    audit.record(&by_policy);
-
-    // Run the challenges. Results are attested server-side, never taken from the client.
-    for name in asked {
-        // Who answers is the policy's call, not this loop's: an agent cannot confirm
-        // its operator's intent, and an operator cannot approve their own off-scope read.
-        let responder = match actor_of(&by_policy, &name)? {
-            Actor::DataOwner => Responder::Team(&document.owner_team),
-            Actor::ControllingHuman => Responder::User(&agent.operated_by),
-        };
-
-        match challenge_service
-            .run(&name, responder, strength_of(&by_policy, &name), &document)
-            .await?
-        {
-            Outcome::Passed => {
-                // Stored server-side, scoped to this resource and action, and stamped
-                // with the @challenge_ttl_seconds of the policy that asked for it.
-                session.record_challenge(&name, &document, Action::Read, ttl_of(&by_policy, &name))?;
-                completed.insert(name);
-            }
-            Outcome::Failed | Outcome::Abandoned => return Err(deny_and_escalate(name)),
-        }
-    }
+// Evidence collected earlier is already in this request, so a read that needs no
+// challenge is allowed here and never reaches the reasoning engine.
+let first = cedarling
+    .authorize_unsigned(read_request(&agent, &document, &attestations))
+    .await?;
+if first.decision {
+    return Ok(serve(first));
 }
 
-/// Every group whose `challenge` is `name`. `by_policy` is keyed by policy ID, so
-/// the challenge name has to be looked up in the values.
-fn groups_for<'a>(
-    by_policy: &'a HashMap<String, HashMap<String, String>>,
-    name: &str,
-) -> impl Iterator<Item = &'a HashMap<String, String>> {
-    let name = name.to_string();
-    by_policy
-        .values()
-        .filter(move |a| a.get("challenge") == Some(&name))
+// No labels: no policy named missing evidence, so there is nothing to collect.
+let found = checks(&first);
+if found.is_empty() {
+    return Err(deny(&found));
 }
 
-/// The shortest TTL any matching policy asked for. Two policies can name the same
-/// challenge, `reason()` has no order, so taking the first one found would pick
-/// nondeterministically. A policy that set no TTL gets the application's floor.
-fn ttl_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> u64 {
-    groups_for(by_policy, name)
-        .map(|a| {
-            a.get("challenge_ttl_seconds")
-                .and_then(|t| t.parse().ok())
-                .unwrap_or(MIN_CHALLENGE_TTL_SECONDS)
-        })
-        .min()
-        .unwrap_or(MIN_CHALLENGE_TTL_SECONDS)
+audit.record(&cedarling.annotations_by_policy(first.response.diagnostics().reason()));
+
+// The reasoning engine decides what, if anything, to ask for. It sees the conditions
+// the policies found plus signals from outside this request.
+let plan = reasoning_engine
+    .decide(&agent, &document, &found, session.signals())
+    .await?;
+
+let challenges = match plan {
+    Plan::Challenge(challenges) => challenges,
+    Plan::Refuse | Plan::Contain => return Err(deny(&found)),
+};
+
+for challenge in challenges {
+    // Results are attested by the challenge service and stored server-side,
+    // bound to this resource and action, with the expiry the service set.
+    let attestation = challenge_service.run(challenge, &agent, &document).await?;
+    attestations.insert(evidence.record(attestation, &document, Action::Read)?);
 }
 
-/// Who has to answer. Silence defaults to the strictest reading, but a value this
-/// code cannot route is a policy bug and so is a disagreement between two policies
-/// naming the same challenge. Neither may fall through to the operator: that is the
-/// party the challenge exists to check, so the quiet fallback weakens exactly the
-/// case it was meant to cover.
-fn actor_of(
-    by_policy: &HashMap<String, HashMap<String, String>>,
-    name: &str,
-) -> Result<Actor, Error> {
-    let actors: BTreeSet<&str> = groups_for(by_policy, name)
-        .filter_map(|a| a.get("challenge_actor"))
-        .map(String::as_str)
-        .collect();
-
-    match actors.into_iter().collect::<Vec<_>>().as_slice() {
-        [] | ["controlling_human"] => Ok(Actor::ControllingHuman),
-        ["data_owner"] => Ok(Actor::DataOwner),
-        other => Err(Error::MalformedAnnotation("challenge_actor", other.join(", "))),
-    }
-}
-
-fn strength_of(by_policy: &HashMap<String, HashMap<String, String>>, name: &str) -> Strength {
-    groups_for(by_policy, name)
-        .filter_map(|a| a.get("challenge_strength"))
-        .map(|s| Strength::parse(s))
-        .max()
-        .unwrap_or(Strength::High)
+// One more evaluation with the new evidence, and its answer is final.
+let second = cedarling
+    .authorize_unsigned(read_request(&agent, &document, &attestations))
+    .await?;
+if second.decision {
+    Ok(serve(second))
+} else {
+    Err(deny(&checks(&second)))
 }
 ```
 
-```javascript
-const result = await cedarling.authorize_unsigned(JSON.stringify(request));
+There are three ways out before any challenge runs. The request is allowed on the first call,
+because the evidence it needs was collected earlier or it never needed any. No policy labeled the
+denial, so there is nothing to ask for. Or the reasoning engine refuses. The reasoning engine cannot
+turn a `Deny` into an `Allow`; it can only collect evidence that the policies then evaluate.
 
-if (!result.decision) {
-  const reason = result.response.diagnostics.reason;
+Nothing in this code trusts the caller. The set fed into `context.attestations` is rebuilt from
+server-side records that are scoped to this resource and action and dropped once they expire, which
+is what makes the policy's `unless` clause mean anything.
 
-  // Grouped, so each challenge keeps its own TTL and message.
-  const asked = Object.values(cedarling.annotations_by_policy(reason))
-    .filter((a) => a.challenge);
+There is exactly one evaluation after the evidence is collected. A second denial goes back to the
+caller, not to the reasoning engine, because asking again until the answer is `Allow` turns a policy
+mistake into an endless series of prompts.
 
-  if (asked.length === 0) {
-    return denyPlain(
-      cedarling.annotations_map(reason).user_message_id ?? "access.denied.generic",
-    );
-  }
-  return requestChallenges(asked);
-}
-```
+## Requirements for the Evidence
 
-Nothing in that loop trusts the caller. The set fed into `context.completed_challenges` is rebuilt
-from server-side records that are scoped to this resource and action and dropped once their TTL has
-passed, which is what makes the policy's `unless` clause mean anything. The requirements below spell
-out why each of those properties matters.
+The pattern is only as strong as the integrity of `context.attestations`, so treat these as part of
+the implementation rather than as advice. They bind whoever runs the challenges: the reasoning
+engine, the challenge service, and the application that assembles the context.
 
-The retry is bounded on purpose. One re-evaluation after the challenges pass is enough. Looping
-until `Allow` turns a policy misconfiguration into an infinite challenge prompt.
-
-## Security Requirements
-
-The pattern is only as strong as the integrity of `context.completed_challenges`, so treat these as
-part of the implementation rather than as advice.
-
-- Never accept completed challenges from the client. A challenge result has to be produced by the
-  challenge service and held in server-side session state, or in a signed, audience-bound token. If
-  a browser or an agent can put `"security_key_touch"` into the context, the policy enforces
-  nothing.
-- Enforce the TTL. `@challenge_ttl_seconds` is a hint the application has to act on: drop the
-  completed challenge from the context once it expires, so long-lived sessions cannot ride one touch
-  forever. Cedar has no concept of elapsed time here, so nothing enforces it if the application does
-  not. Treat a policy that carries no TTL as the shortest one you support rather than as unbounded.
-  Otherwise the one challenge somebody forgot to annotate is the one that never expires.
-- Bind the result to the request. A challenge passed for one document should not silently authorize
-  a bulk export of a thousand others. Scope the stored result to the action and resource it was
-  raised for, or to a short window, whichever your risk model justifies.
-- Address the challenge to someone who can refuse it. A challenge an agent satisfies on its own is
-  not a challenge, and one the requester answers about their own request is not either.
-  `@challenge_actor` names the party per policy: `controlling_human` resolves to
-  `principal.operated_by`, `data_owner` to the team in `resource.owner_team`. Those two are the
-  whole vocabulary: a third value, or two policies asking for different ones, is a policy bug, and
-  routing it to the operator anyway hands the challenge to the party it was meant to constrain.
-  Record who answered, and reject an answer from that principal.
-- Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs
-  in the same stream as the decision logs.
+- Never accept evidence from the client. An attestation has to be produced by the challenge service
+  and held in server-side session state, or in a signed, audience-bound token. If a browser or an
+  agent can put `"human_intent_confirmed"` into the context, the policy enforces nothing.
+- Expire it. Cedar has no concept of elapsed time here, so the challenge service sets a lifetime on
+  every attestation and the application drops expired ones before building the context. An
+  attestation with no expiry is one that a long-lived session rides forever.
+- Bind it to the request. Evidence collected for one document should not silently authorize a bulk
+  export of a thousand others. Scope the stored attestation to the action and resource it was
+  collected for, or to a short window, whichever your risk model justifies.
+- Collect it from someone who can refuse. An attestation an agent produces on its own is not
+  evidence, and neither is one the requester produces about their own request.
+  `human_intent_confirmed` has to come from the operator named by `operator_id`, never from the
+  agent; `data_owner_approved` has to come from the team in `resource.owner_team`, never from the
+  operator, or the operator approves their own off-scope read. Record who answered, and reject an
+  answer from the wrong party.
+- Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs in
+  the same stream as the decision logs, where the reasoning engine can see it next time.
 
 Because those records live on the server, a browser evaluating these same policies is working from a
 copy it cannot refresh, so its denials are provisional. See
@@ -477,50 +371,46 @@ copy it cannot refresh, so its denials are provisional. See
 
 ## Variation: Risk Carried by the Operator
 
-Risk attaches to the human, but the request arrives from the agent. Reaching through `operated_by`
-keeps the two connected, so an elevated-risk operator does not get a quieter path by sending an
-assistant:
+Risk attaches to the human, but the request arrives from the agent. The copied
+`operator_risk_tier` keeps the two connected, so an elevated-risk operator does not get a quieter
+path by sending an assistant:
 
 ```cedar
 @id("forbid_agent_read_for_elevated_risk_operator")
-@challenge("security_key_touch")
-@challenge_actor("controlling_human")
-@challenge_ttl_seconds("60")
-@user_message_id("access.challenge.security_key")
+@checks("operator.elevated_risk")
+@detail("The agent's operator is flagged elevated-risk and no security key verification is recorded.")
 forbid (
     principal is Acme::Agent,
     action == Acme::Action::"Read",
     resource is Acme::Document
 )
 when {
-    principal.operated_by.risk_tier == "elevated" &&
+    principal.operator_risk_tier == "elevated" &&
     resource.sensitivity == "highly_confidential"
 }
 unless {
-    context.completed_challenges.contains("security_key_touch")
+    context.attestations.contains("security_key_verified")
 };
 ```
 
 ## Variation: Containment
 
-A challenge is resolvable in the moment. Some outcomes should not be. After several failed
-challenges, or when an investigation has already flagged the account, the right answer is a durable
-block that a person has to lift.
+Some conditions should not be resolvable in the moment. After several failed challenges, or when an
+investigation has already flagged the account, the right answer is a durable block that a person has
+to lift.
 
-That is the same annotation mechanism with the `unless` clause removed, plus a different vocabulary
-so the application does not offer a way out that does not exist:
+That is the same mechanism with the `unless` clause removed:
 
 ```cedar
 @id("forbid_contained_operator")
-@containment("session_freeze")
-@user_message_id("access.contained.contact_security")
-@escalate_to("secops-oncall")
+@checks("operator.contained")
+@detail("The agent's operator is under containment by security operations.")
 forbid (
     principal is Acme::Agent,
     action,
     resource
 )
-when { principal.operated_by.risk_tier == "contained" };
+when { principal.operator_risk_tier == "contained" };
 ```
 
 The human's own sessions need the twin, or containment stops an assistant and lets the operator
@@ -528,9 +418,8 @@ carry on by hand:
 
 ```cedar
 @id("forbid_contained_user")
-@containment("session_freeze")
-@user_message_id("access.contained.contact_security")
-@escalate_to("secops-oncall")
+@checks("operator.contained")
+@detail("The user is under containment by security operations.")
 forbid (
     principal is Acme::User,
     action,
@@ -539,24 +428,24 @@ forbid (
 when { principal.risk_tier == "contained" };
 ```
 
-The application reads `containment` rather than `challenge`, shows the message, and does not prompt:
-there is no inline path from here back to `Allow`. Lifting it means changing the `risk_tier`, which
-happens outside the request.
+No evidence clears these policies, so the reasoning engine has nothing to collect. It reads
+`operator.contained` and knows not to offer a challenge; lifting the block means changing the risk
+tier, which happens outside the request.
 
 Containment depends on an attribute being present, and it is the one policy here that must never
-stop applying unnoticed. When the policy store carries a schema, Cedarling validates entities
-against it, so an operator entity built without `risk_tier` fails the request instead of slipping
-past the containment policy. Without a schema there is nothing to check: the policy errors at
-evaluation, drops out of the decision, and the denial it should have produced never happens. Ship a
-schema, and keep `risk_tier` required in it rather than optional.
+stop applying unnoticed. Keep `risk_tier` and `operator_risk_tier` required in the schema. Cedarling
+validates the principal against the schema when it builds it, so a principal without the attribute
+fails the request instead of slipping past the containment policy. Without a schema there is nothing
+to check: the policy errors at evaluation, drops out of the decision, and the denial it should have
+produced never happens.
 
-Containment is keyed on the human. Freezing one misbehaving agent while its operator keeps working
-would need `risk_tier` on `Agent` and a third policy; this example leaves that out.
+Containment here is keyed on the human. Freezing one misbehaving agent while its operator keeps
+working would need a risk attribute of the agent's own and a third policy.
 
 ## What This Buys You
 
-The application ends up with no hardcoded knowledge of *when* to challenge. It knows how to run
-`confirm_human_intent`, `data_owner_approval`, and `security_key_touch`, it knows to address them to
-the operator, and it knows how to read annotations. Security engineers add a condition, retire one,
-or raise a challenge's strength by editing policies, and each of those changes is a diff you can
-review, test against recorded requests, and find later in the decision log.
+The policies state what each risky condition is and what evidence would make it acceptable, and the
+engine enforces that on every call. The decision about how to collect the evidence stays where the
+signals are: with the reasoning engine and the challenge service. Security engineers add a
+condition, retire one, or tighten what counts as sufficient evidence by editing policies, and each
+change is a diff you can review, test against recorded requests, and find later in the decision log.

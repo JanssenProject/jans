@@ -708,4 +708,4 @@ After an authorization call, the policies that determined the decision are repor
 
 Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
 
-See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples, and [Policy Annotation Patterns](../patterns/annotation-patterns.md) for worked scenarios — step-up challenges, quota warnings, and the design constraints behind them.
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples, and [Policy Annotation Patterns](../patterns/annotation-patterns.md) for worked scenarios: labeling what each policy checks, quota warnings, step-up evidence, and the design constraints behind them.
