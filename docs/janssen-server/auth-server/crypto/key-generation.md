@@ -48,7 +48,6 @@ For LDAP or another persistence type, export and update the same `jansConfWebKey
 - Run the procedure as `root`
 
 - Confirm that the required files and utilities exist:
-
     ```bash
     test -x /opt/jre/bin/java
     test -x /opt/jre/bin/keytool
@@ -56,9 +55,7 @@ For LDAP or another persistence type, export and update the same `jansConfWebKey
     command -v jq
     command -v psql
     ```
-
 - Set reusable paths:
-
     ```bash
     export JANS_AUTH_KEYSTORE=/etc/certs/jans-auth-keys.pkcs12
     export JANS_AUTH_JWKS=/etc/certs/jans-auth-keys.json
