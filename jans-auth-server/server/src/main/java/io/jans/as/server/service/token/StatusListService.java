@@ -118,6 +118,9 @@ public class StatusListService {
     public static StatusList join(List<? extends AbstractIndexPool> pools, int bitSize, Logger log) {
         StatusList result = new StatusList(bitSize);
         for (AbstractIndexPool pool : pools) {
+            if (pool.getEndIndex() != null) {
+                result.ensureSize(pool.getEndIndex() + 1);
+            }
             try {
                 final String data = pool.getData();
                 if (StringUtils.isBlank(data)) {

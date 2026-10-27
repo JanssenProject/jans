@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -21,6 +22,8 @@ public class StatusList {
     private final int bits;
     private final int divisor;
     private String aggregationUri;
+    // BitSet drops trailing zero bytes, so the entry count is kept to pad VALID entries back in.
+    private int size;
 
     public StatusList(int bits) {
         this.divisor = 8 / bits;
@@ -35,15 +38,21 @@ public class StatusList {
     }
 
     public String encodeAsString() throws IOException {
-        byte[] byteArray = this.list.toByteArray();
+        byte[] byteArray = toByteArray();
         byte[] zipped = compress(byteArray);
 //        System.out.println("encode zipped: " + new String(zipped));
         return Base64.getUrlEncoder().withoutPadding().encodeToString(zipped);
     }
 
     public byte[] encodeAsBytes() throws IOException {
-        byte[] byteArray = this.list.toByteArray();
+        byte[] byteArray = toByteArray();
         return compress(byteArray);
+    }
+
+    private byte[] toByteArray() {
+        byte[] byteArray = this.list.toByteArray();
+        int length = (int) (((long) size * bits + 7) / 8);
+        return byteArray.length >= length ? byteArray : Arrays.copyOf(byteArray, length);
     }
 
     public Map<String, Object> encodeAsJSON() throws IOException {
@@ -60,7 +69,9 @@ public class StatusList {
     public void decode(String input) throws IOException {
         byte[] zipped = Base64.getUrlDecoder().decode(input + "=".repeat((4 - input.length() % 4) % 4));
 //        System.out.println("decode - zipped: " + new String(zipped));
-        this.list = BitSet.valueOf(decompress(zipped));
+        byte[] bytes = decompress(zipped);
+        this.list = BitSet.valueOf(bytes);
+        this.size = bytes.length * divisor;
     }
 
     public void set(int pos, int value) {
@@ -73,6 +84,19 @@ public class StatusList {
             boolean bitValue = ((value >> i) & 1) == 1;
             this.list.set(pos * this.bits + i, bitValue);
         }
+        ensureSize(pos + 1);
+    }
+
+    /**
+     * Makes the encoded list cover at least {@code size} entries, so allocated but unset
+     * indexes read as VALID instead of being out of bounds.
+     */
+    public void ensureSize(int size) {
+        this.size = Math.max(this.size, size);
+    }
+
+    public int getSize() {
+        return size;
     }
 
     public void validateSetValue(int value) {
