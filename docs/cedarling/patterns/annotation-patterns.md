@@ -45,10 +45,8 @@ The pages build on each other, so read them in this order if the mechanism is ne
 
 | Pattern | Problem it solves |
 |---|---|
-| [Quota and threshold warnings](./annotation-quota.md) | Telling the user they are close to a limit before it turns into a denial |
 | [Multi-step flows and escalation](./annotation-workflow.md) | Onboarding prerequisites, approvals, and break-glass access |
 | [Step-up and evidence](./annotation-challenge.md) | A denial that names what is missing, so a challenge service can collect it |
-| [Shaping the response](./annotation-response-shaping.md) | Masking and limiting data according to the grant that matched |
 | [Advisory denials in a client-side PDP](./annotation-client-authority.md) | Telling a browser which of its own denials rest on data it cannot see |
 
 ## Annotations Inform, the Application Decides
@@ -84,7 +82,6 @@ found. See [Step-up and evidence](./annotation-challenge.md).
 |---|---|---|
 | `@checks` | the condition the policy tests, as a stable identifier: `onboarding.bank_account_missing`, `quota.reports.exhausted` | application code |
 | `@detail` | one sentence for the developer explaining the condition: "The workspace has used its full monthly report quota." | logs and debugging tools, never end users |
-| `@control`, `@regulation` | which compliance control or regulation the policy implements | auditors and compliance tooling |
 | `@server_input` | the context field the policy reads that only the server holds fresh | a client-side PDP |
 
 A `@checks` value names a state, not an action. `onboarding.bank_account_missing` stays accurate
@@ -119,6 +116,20 @@ security alert is decided elsewhere.
 Annotations are static. The value is a literal string fixed at authoring time. It cannot
 include context, entity attributes, or the current counter value. Anything dynamic is resolved
 by the application after it reads the label.
+
+## Labels on an Allow
+
+Labels usually turn up on denials, but a `permit` carries them just as well. On an `Allow`,
+`reason()` holds the satisfied `permit` policies, so the application can read their labels after a
+successful authorization. That covers "allowed, and here is something worth knowing":
+
+- an entitlement that expires soon
+- access through a temporary exception rather than a standing grant, like the break-glass rule on
+  the [workflow page](./annotation-workflow.md#part-3-break-glass-access)
+
+A `permit` written only to carry a label still grants access. It changes no decision only while a
+broader `permit` already allows the same requests; if someone later narrows that grant, the labeled
+policy becomes the one that allows them. Keep its conditions no wider than the grant it sits beside.
 
 ## Mechanics You Need to Know
 
@@ -161,10 +172,12 @@ rules that might have applied, so treat a principal-less denial as "undetermined
 reason for a refusal.
 
 The default-deny row is the one people most often get wrong. If you want a label for a request that
-simply matches no `permit`, an annotated `forbid` has to exist and match, as the quota example does
-with its `forbid` at 100%. Otherwise, the application needs its own fallback for "denied, nothing
-more to say". Do not add a catch-all `forbid` just to hang an annotation on it: in Cedar `forbid`
-always wins, so a broad catch-all silently overrides every `permit` you have.
+simply matches no `permit`, an annotated `forbid` has to exist and match, as
+`forbid_generate_report_quota_exhausted` does on the
+[client-side page](./annotation-client-authority.md). Otherwise, the application needs its own
+fallback for "denied, nothing more to say". Do not add a catch-all `forbid` just to hang an
+annotation on it: in Cedar `forbid` always wins, so a broad catch-all silently overrides every
+`permit` you have.
 
 ### One Key per Policy, Several Values Means Several Policies
 
@@ -255,7 +268,9 @@ break. One condition per policy, one identifier per condition.
 
 Do not invent keys per policy. An annotation vocabulary is an interface between policy authors and
 application developers, so keep a short, documented list of keys and of the `@checks` values in use,
-and treat adding one as an API change. A value that no code maps is a silent no-op.
+and treat adding one as an API change. A value that no code maps is a silent no-op, so test the
+application's table against the policy store: every `@checks` value in use has an entry, and every
+entry is still used.
 
 Do not assume an annotation will be there. Policies change independently of the application, so
 every lookup needs a sane default for "no label", and an unknown `@checks` value needs a defined

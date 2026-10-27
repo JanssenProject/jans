@@ -73,10 +73,9 @@ to be kept that way:
 - Every guarded call is authorized again on the server, from inputs the server resolved itself. A
   single endpoint that trusts the browser's decision, or that rebuilds the request from what the
   browser sent, ends the guarantee for that endpoint.
-- The client renders denials and never shapes data. The handling rules from the [response shaping
-  page](./annotation-response-shaping.md) are applied by whoever builds the response, which is the
-  server. A browser that masks columns it received in the clear only changes how data it already has
-  is displayed.
+- The client renders denials and never shapes data. Masking and row limits are applied by whoever
+  builds the response, which is the server. A browser that masks columns it received in the clear
+  only changes how data it already has is displayed.
 - Everything the browser evaluates is treated as public. The embedded PDP holds the policy store and
   the entity attributes it reasons over, so thresholds, tier names, contract quotas, and risk tiers
   are readable by anyone who opens the developer tools. Ship only what you are willing to show, and
