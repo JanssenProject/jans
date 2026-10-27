@@ -348,6 +348,7 @@ mod tests {
     use jans_trace_core::inputs::token_fingerprint;
     use serde_json::{Value, json};
     use tokio::sync::mpsc;
+    use tokio::sync::mpsc::error::TryRecvError;
 
     use super::*;
     use crate::app_types::PdpID;
@@ -472,7 +473,11 @@ mod tests {
             !built.get(),
             "without a TRACE context the decision facts should not be built"
         );
-        assert!(rx.try_recv().is_err(), "nothing should reach the emitter");
+        let err = rx.try_recv().expect_err("nothing should reach the emitter");
+        assert!(
+            matches!(err, TryRecvError::Empty),
+            "the channel should be open and empty, got {err:?}"
+        );
         assert_eq!(
             metrics
                 .snapshot_and_reset()
