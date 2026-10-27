@@ -14,6 +14,7 @@ import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.LicenseConfiguration;
 import io.jans.orm.PersistenceEntryManager;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -229,6 +230,8 @@ public class LicenseServiceTest {
 
         AtomicInteger tokenCalls = new AtomicInteger();
         CountDownLatch initialTokenRequests = new CountDownLatch(2);
+        io.jans.as.client.TokenResponse replacementTokenResponse = new io.jans.as.client.TokenResponse();
+        replacementTokenResponse.setAccessToken("replacement-access-token");
         doAnswer(invocation -> {
             int tokenCall = tokenCalls.incrementAndGet();
             Consumer<String> errorResponseConsumer = invocation.getArgument(3);
@@ -238,22 +241,30 @@ public class LicenseServiceTest {
                     throw new IllegalStateException("Concurrent token requests did not both start");
                 }
                 errorResponseConsumer.accept("{\"error\":\"invalid_client\"}");
+                return null;
             }
-            return null;
+            return replacementTokenResponse;
         }).when(service).getToken(any(TokenRequest.class), anyString(), isNull(), nullable(Consumer.class));
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
             Future<GenericResponse> firstCheck = executor.submit(service::checkLicense);
             Future<GenericResponse> secondCheck = executor.submit(service::checkLicense);
-            assertNotNull(firstCheck.get(10, TimeUnit.SECONDS));
-            assertNotNull(secondCheck.get(10, TimeUnit.SECONDS));
+            assertEquals(firstCheck.get(10, TimeUnit.SECONDS).getResponseCode(), 500);
+            assertEquals(secondCheck.get(10, TimeUnit.SECONDS).getResponseCode(), 500);
         } finally {
             executor.shutdownNow();
         }
 
         verify(service, times(1)).executeDCR("ssa");
         verify(entryManager, times(1)).merge(adminConf);
+        ArgumentCaptor<TokenRequest> tokenRequestCaptor = ArgumentCaptor.forClass(TokenRequest.class);
+        verify(service, times(4)).getToken(tokenRequestCaptor.capture(), anyString(), isNull(), nullable(Consumer.class));
+        assertEquals(tokenRequestCaptor.getAllValues().get(2).getAuthUsername(), "replacement-client");
+        assertEquals(tokenRequestCaptor.getAllValues().get(3).getAuthUsername(), "replacement-client");
+        java.lang.reflect.Field retryMarker = LicenseDetailsService.class.getDeclaredField("dcrRetryFailedClientId");
+        retryMarker.setAccessible(true);
+        assertNull(retryMarker.get(service));
         assertEquals(runtimeLicenseConfiguration.getScanApiClientId(), "replacement-client");
     }
 
