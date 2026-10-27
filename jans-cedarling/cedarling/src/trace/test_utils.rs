@@ -28,9 +28,9 @@ pub(crate) fn cjar_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
     CjarStore { store, bundle_hash }
 }
 
-/// A spec v2 `.cjar` store with one JWT issuer, so a multi-issuer decision has a
-/// `bundle_hash` to record. Tokens of its issuer are not signature-checked
-/// under `JwtConfig::new_without_validation`.
+/// A spec v2 `.cjar` store with one JWT issuer and one custom issuer, so a
+/// multi-issuer decision has a `bundle_hash` to record. Tokens of its JWT issuer
+/// are not signature-checked under `JwtConfig::new_without_validation`.
 pub(crate) fn multi_issuer_store() -> PolicyStoreTestBuilder {
     let mut builder = fixtures::minimal_valid().with_spec_version(2).with_schema(
         r#"namespace Dolphin {
@@ -51,12 +51,21 @@ pub(crate) fn multi_issuer_store() -> PolicyStoreTestBuilder {
     context: Context
   };
 }
+namespace Sonar {
+  entity Api_Key = {
+    token_type: String,
+    jti: String,
+    iss: String,
+    validated_at: Long,
+  } tags Set<String>;
+}
 namespace Jans {
   type Url = {"host": String, "path": String, "protocol": String};
 }
 type Context = {
   tokens: {
     dolphin_access_token?: Dolphin::Access_Token,
+    sonar_api_key?: Sonar::Api_Key,
     total_token_count: Long
   }
 };
@@ -71,7 +80,8 @@ type Context = {
                 "configuration_endpoints": {
                     "configuration": "https://idp.dolphin.sea/.well-known/openid-configuration"
                 }
-            }
+            },
+            "Sonar::Api_Key": {"type": "custom", "issuer": "Sonar"}
         })
         .to_string(),
     );

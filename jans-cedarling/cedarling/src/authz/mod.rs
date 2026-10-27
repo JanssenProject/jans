@@ -1716,7 +1716,10 @@ mod trace_record_tests {
     use crate::log::{LogStrategy, TEST_LOGGER};
     use crate::trace::test_utils::{CjarStore, dolphin_token, multi_issuer_store};
     use crate::trace::{Outcome, TraceRecorder};
-    use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
+    use crate::{
+        CustomTokenError, CustomTokenProcessor, LogConfig, LogStorage, LogTypeConfig,
+        MemoryLogConfig, ProcessedTokenClaims, TokenInput,
+    };
 
     fn with_trace() -> AuthorizeOptions {
         AuthorizeOptions::with_trace(TraceContext::new(
@@ -2036,6 +2039,79 @@ mod trace_record_tests {
                 "Dolphin::Access_Token"
             )],
             "the record references the token the decision used"
+        );
+    }
+
+    /// Accepts any payload as a `Sonar::Api_Key`, with no claims.
+    struct SonarProcessor;
+
+    #[cfg_attr(
+        not(any(target_arch = "wasm32", target_arch = "wasm64")),
+        async_trait::async_trait
+    )]
+    #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait::async_trait(?Send))]
+    impl CustomTokenProcessor for SonarProcessor {
+        async fn process(
+            &self,
+            _mapping: &str,
+            payload: &str,
+        ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+            Ok(ProcessedTokenClaims::new(HashMap::new(), payload))
+        }
+    }
+
+    /// The issuer id in a custom token's reference is the one validation gives the
+    /// token, not one the test chooses.
+    #[tokio::test]
+    async fn custom_token_is_recorded_by_its_issuer_urn() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(1);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = AuthorizeMultiIssuerRequest::new(
+            vec![
+                dolphin_token(),
+                TokenInput::new("Sonar::Api_Key".to_string(), "sonar-key-1".to_string()),
+            ],
+            entity("Dolphin::Resource", "d1"),
+            "Dolphin::Action::\"Read\"".to_string(),
+        )
+        .with_options(with_trace());
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(SonarProcessor);
+
+        authz
+            .authorize_multi_issuer(&request, Some(&processor))
+            .await
+            .expect("the decision should be made");
+
+        let draft = rx
+            .try_recv()
+            .expect("the decision should reach the emitter");
+        let tokens: Vec<_> = draft
+            .decision
+            .tokens
+            .iter()
+            .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
+            .collect();
+        assert_eq!(
+            tokens,
+            [
+                (
+                    "https://idp.dolphin.sea".to_string(),
+                    "Dolphin::Access_Token"
+                ),
+                (
+                    "urn:jans:cedarling:custom-issuer:sonar".to_string(),
+                    "Sonar::Api_Key"
+                ),
+            ],
+            "the custom token is named by its issuer name lowercased, the JWT by its iss"
         );
     }
 
