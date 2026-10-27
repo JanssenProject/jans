@@ -261,6 +261,17 @@ enum Sent {
     Interrupted,
 }
 
+/// Why [`Emitter::replace_chain`] gives up a chain.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ChainEnd {
+    /// Lock refused its genesis record, or never got it.
+    GenesisLost,
+    /// Lock registered it and no longer knows it.
+    Forgotten,
+    /// The signing task failed, which took the chain's state with it.
+    SigningFailed,
+}
+
 /// What [`Emitter::settle`] made of one response.
 struct Settled {
     /// A record goes back for a resend.
@@ -474,7 +485,7 @@ impl Emitter {
                 // At shutdown the failure drops what is left, so a new chain
                 // would send nothing.
                 if matches!(mode, Mode::Running(_)) {
-                    chain = self.replace_chain();
+                    chain = self.replace_chain(self.chain_end());
                     // The records to resend were of the replaced chain.
                     resend = false;
                 }
@@ -484,7 +495,7 @@ impl Emitter {
             GenesisState::Unregistered {
                 chain: ChainUse::InUse,
             } => {
-                chain = self.replace_chain();
+                chain = self.replace_chain(ChainEnd::Forgotten);
                 resend = false;
             },
             GenesisState::Unsigned | GenesisState::Pending | GenesisState::Accepted { .. } => {},
@@ -515,7 +526,10 @@ impl Emitter {
                         record_ids.len()
                     ),
                 );
-                return self.replace_chain();
+                // Counted like any record that could not be signed, so the
+                // emitter counts still add up to what the recorder emitted.
+                self.count(EmitterEvent::SignFailed, record_ids.len());
+                return self.replace_chain(ChainEnd::SigningFailed);
             },
         };
         let mut sequence = first;
@@ -896,14 +910,15 @@ impl Emitter {
     /// Opens a chain in place of the current one, which Lock does not know:
     /// it would refuse every other record of it. Those records are dropped
     /// rather than signed again.
-    fn replace_chain(&mut self) -> ProducerChain {
+    fn replace_chain(&mut self, end: ChainEnd) -> ProducerChain {
         let lost = self.chain_id;
         let before = self.pending.len();
         self.pending.retain(|record| record.chain_id != lost);
         let dropped = before - self.pending.len();
-        let cause = match self.genesis {
-            GenesisState::Unregistered { .. } => "is no longer registered in Lock Server",
-            _ => "lost its genesis record",
+        let cause = match end {
+            ChainEnd::GenesisLost => "lost its genesis record",
+            ChainEnd::Forgotten => "is no longer registered in Lock Server",
+            ChainEnd::SigningFailed => "could not be signed into",
         };
         self.log(
             LogLevel::WARN,
@@ -916,6 +931,14 @@ impl Emitter {
         self.count(EmitterEvent::Dropped, dropped);
         self.count(EmitterEvent::ChainOpened, 1);
         self.open_chain()
+    }
+
+    /// Why the current chain ends, from what Lock did with its genesis record.
+    fn chain_end(&self) -> ChainEnd {
+        match self.genesis {
+            GenesisState::Unregistered { .. } => ChainEnd::Forgotten,
+            _ => ChainEnd::GenesisLost,
+        }
     }
 
     fn open_chain(&mut self) -> ProducerChain {
@@ -1156,6 +1179,27 @@ mod tests {
                 .lock()
                 .expect("thread list is not poisoned")
                 .push(std::thread::current().id());
+            self.inner.sign(message)
+        }
+    }
+
+    /// Signs with the test key, then panics from the signature after `ok`.
+    struct PanickingSigner {
+        inner: Ed25519Signer,
+        ok: usize,
+        signed: std::sync::atomic::AtomicUsize,
+    }
+
+    impl TraceSigner for PanickingSigner {
+        fn kid(&self) -> &str {
+            self.inner.kid()
+        }
+
+        fn sign(&self, message: &[u8]) -> Result<[u8; 64], SignerError> {
+            let signed = self
+                .signed
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            assert!(signed < self.ok, "test signer panics");
             self.inner.sign(message)
         }
     }
@@ -2247,6 +2291,53 @@ mod tests {
         assert!(
             disabled.contains("trace_disabled") && !disabled.contains("CEDARLING_TRACE_BULK"),
             "a refusal whose reason explains it gets no advice: {disabled}"
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn drafts_lost_to_a_panicking_signer_are_counted() {
+        let lock = FakeLock::new([]);
+        let log = memory_log();
+        let metrics = metrics();
+        let mut params = params(lock.clone(), metrics.clone());
+        params.log = log.clone();
+        params.signer = Arc::new(PanickingSigner {
+            inner: test_signer(),
+            ok: 1,
+            signed: std::sync::atomic::AtomicUsize::new(0),
+        });
+        let emitter = start(params, 8, [draft()]);
+        lock.bodies(1).await;
+        for _ in 0..3 {
+            emitter
+                .tx
+                .send(draft())
+                .await
+                .expect("the emitter is running");
+        }
+        emitter.handle.shut_down().await;
+
+        assert_eq!(
+            metrics
+                .snapshot_and_reset()
+                .operational_stats
+                .get("trace.sign_failed"),
+            Some(&3),
+            "the drafts of the batch whose signing failed are counted"
+        );
+        let warnings: Vec<String> = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == "WARN")
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .filter(|message| message.contains("new chain is opened"))
+            .collect();
+        assert!(
+            !warnings.is_empty()
+                && warnings
+                    .iter()
+                    .all(|message| message.contains("could not be signed into")),
+            "the replaced chain is blamed on signing, not on its genesis record: {warnings:?}"
         );
     }
 }
