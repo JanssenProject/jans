@@ -21,9 +21,11 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -46,6 +48,7 @@ public class Fido2ReadinessServiceTest {
     private static final String BASE = ISSUER + "/jans-fido2/restv1/rp/";
 
     private Fido2Util fido2Util;
+    private AuthUtil authUtil;
     private Fido2ReadinessService service;
 
     @BeforeMethod
@@ -54,7 +57,17 @@ public class Fido2ReadinessServiceTest {
         when(fido2Util.getIssuer()).thenReturn(ISSUER);
         service = new Fido2ReadinessService();
         service.fido2Util = fido2Util;
+        authUtil = mock(AuthUtil.class);
+        service.authUtil = authUtil;
+        introspect("inum-1234", "client-1");
         service.log = mock(Logger.class);
+    }
+
+    private void introspect(String inum, String clientId) {
+        IntrospectionResponse introspection = mock(IntrospectionResponse.class);
+        when(introspection.getClientId()).thenReturn(clientId);
+        when(authUtil.getIntrospectionResponse(anyString())).thenReturn(introspection);
+        when(authUtil.getJsonNodeKeyValue(any(), eq("inum"))).thenReturn(inum);
     }
 
     private static HttpServiceResponse upstream(int status, String body, String retryAfter) throws Exception {
@@ -90,7 +103,7 @@ public class Fido2ReadinessServiceTest {
         when(fido2Util.executePost(anyString(), anyMap(), anyString()))
                 .thenReturn(upstream(200, "{\"enabled\":true}", null));
 
-        Outcome outcome = service.check("example.com", true, "Bearer abc", "inum-1234");
+        Outcome outcome = service.check("example.com", true, "Bearer abc");
 
         ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
         verify(fido2Util).executePost(eq(BASE + "example.com/readiness"), headers.capture(),
@@ -106,7 +119,7 @@ public class Fido2ReadinessServiceTest {
     public void missingOrHostilePrincipal_isLabelledSafely() throws Exception {
         when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(200, "{}", null));
 
-        service.check("example.com", false, null, "bob\r\nX-Evil: 1");
+        service.check("example.com", false, null);
 
         ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
         verify(fido2Util).executePost(anyString(), headers.capture(), eq("{\"recheck\":false}"));
@@ -117,10 +130,34 @@ public class Fido2ReadinessServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
+    public void principal_comesFromTheIntrospectedToken_notFromTheCaller() throws Exception {
+        introspect("bob\r\nX-Evil: 1", "client-1");
+        when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(200, "{}", null));
+
+        service.check("example.com", false, "Bearer abc");
+
+        ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
+        verify(fido2Util).executePost(anyString(), headers.capture(), anyString());
+        assertEquals(headers.getValue().get(Constants.REQUESTED_BY_HEADER), "bob__X-Evil:_1");
+    }
+
+    @Test
+    public void principal_fallsBackToClientId_thenUnknown() {
+        introspect(null, "client-1");
+        assertEquals(service.principalOf("Bearer abc"), "client-1");
+
+        when(authUtil.getIntrospectionResponse(anyString())).thenThrow(new IllegalStateException("down"));
+        assertNull(service.principalOf("Bearer abc"));
+        assertNull(service.principalOf(null));
+        assertEquals(Fido2ReadinessService.sanitize(service.principalOf("Bearer abc")), "unknown");
+    }
+
+    @Test
     public void notFoundFromTheServer_isReturnedUnchanged() throws Exception {
         when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(404, null, null));
 
-        Outcome outcome = service.check("nope.example", false, "Bearer abc", null);
+        Outcome outcome = service.check("nope.example", false, "Bearer abc");
 
         assertEquals(outcome.getStatus(), 404);
         assertNull(outcome.getBody());
@@ -131,7 +168,7 @@ public class Fido2ReadinessServiceTest {
         when(fido2Util.executePost(anyString(), anyMap(), anyString()))
                 .thenReturn(upstream(429, "<html>slow down</html>", "42"));
 
-        Outcome outcome = service.check("example.com", true, "Bearer abc", null);
+        Outcome outcome = service.check("example.com", true, "Bearer abc");
 
         assertEquals(outcome.getStatus(), 429);
         assertEquals(outcome.getRetryAfter(), "42");
@@ -142,14 +179,14 @@ public class Fido2ReadinessServiceTest {
     public void ok_nonJsonBody_isAnError() throws Exception {
         when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(200, "<html/>", null));
 
-        service.check("example.com", true, "Bearer abc", null);
+        service.check("example.com", true, "Bearer abc");
     }
 
     @Test
     public void tooManyRequests_keepsRetryAfter() throws Exception {
         when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(429, null, "42"));
 
-        Outcome outcome = service.check("example.com", true, "Bearer abc", null);
+        Outcome outcome = service.check("example.com", true, "Bearer abc");
 
         assertEquals(outcome.getStatus(), 429);
         assertEquals(outcome.getRetryAfter(), "42");
@@ -158,7 +195,7 @@ public class Fido2ReadinessServiceTest {
     @Test
     public void blankId_isRejected_withoutCallingTheServer() {
         WebApplicationException e = expectThrows(WebApplicationException.class,
-                () -> service.check("  ", false, "Bearer abc", null));
+                () -> service.check("  ", false, "Bearer abc"));
 
         assertEquals(e.getResponse().getStatus(), 400);
         verify(fido2Util, never()).executePost(any(), any(), any());
@@ -169,7 +206,7 @@ public class Fido2ReadinessServiceTest {
         when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(null);
 
         WebApplicationException e = expectThrows(WebApplicationException.class,
-                () -> service.check("example.com", false, "Bearer abc", null));
+                () -> service.check("example.com", false, "Bearer abc"));
 
         assertEquals(e.getResponse().getStatus(), 500);
     }

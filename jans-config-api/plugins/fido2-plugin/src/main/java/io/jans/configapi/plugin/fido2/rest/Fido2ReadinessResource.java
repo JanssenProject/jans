@@ -54,7 +54,6 @@ import org.slf4j.Logger;
 public class Fido2ReadinessResource extends BaseResource {
 
     private static final String ERR_MSG = "Exception while running Fido2 native app readiness check is - ";
-    private static final String USER_INUM = "User-inum";
 
     /** Request body shape, for the generated API spec only; the body is read as a tree. */
     @Schema(description = "Only recheck is read; other fields are ignored")
@@ -74,7 +73,6 @@ public class Fido2ReadinessResource extends BaseResource {
      *
      * @param rpConfigId  the RP id exactly as configured, URL-encoded
      * @param token       the caller's Authorization header, forwarded to the FIDO2 server
-     * @param requestedBy the authenticated user's inum when the caller supplies it, for the FIDO2 audit
      * @param body        empty or {@code {"recheck": true}}
      * @return the FIDO2 server's result, or its 404 / 429 (with {@code Retry-After})
      */
@@ -97,11 +95,11 @@ public class Fido2ReadinessResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response checkReadiness(@PathParam("rpConfigId") String rpConfigId,
-            @HeaderParam("Authorization") String token, @HeaderParam(USER_INUM) String requestedBy, String body) {
+            @HeaderParam("Authorization") String token, String body) {
         logger.info("Fido2 native app readiness check requested");
         boolean recheck = recheckRequested(body);
         try {
-            return toResponse(fido2ReadinessService.check(rpConfigId, recheck, token, requestedBy));
+            return toResponse(fido2ReadinessService.check(rpConfigId, recheck, token));
         } catch (WebApplicationException ex) {
             throw ex;
         } catch (Exception ex) {

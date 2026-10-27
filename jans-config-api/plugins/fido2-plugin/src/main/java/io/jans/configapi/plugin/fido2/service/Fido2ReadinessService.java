@@ -9,9 +9,11 @@ package io.jans.configapi.plugin.fido2.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
+import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.inject.Inject;
@@ -48,6 +50,7 @@ public class Fido2ReadinessService {
     private static final String RETRY_AFTER = "Retry-After";
     private static final String FIDO2_RP_BASE_URL = "/jans-fido2/restv1" + Constants.RP + "/";
     private static final String READINESS = "/readiness";
+    private static final String USER_INUM = "inum";
     private static final String UNKNOWN = "unknown";
     private static final int MAX_PRINCIPAL_LENGTH = 128;
 
@@ -82,6 +85,9 @@ public class Fido2ReadinessService {
     @Inject
     Fido2Util fido2Util;
 
+    @Inject
+    AuthUtil authUtil;
+
     public String getReadinessUrl(String rpConfigId) {
         return fido2Util.getIssuer() + FIDO2_RP_BASE_URL + encodeSegment(rpConfigId) + READINESS;
     }
@@ -92,10 +98,9 @@ public class Fido2ReadinessService {
      * @param rpConfigId  the RP id exactly as configured in {@code requestedParties}
      * @param recheck     skip the FIDO2 server's cached result (it is still rate limited there)
      * @param token       the caller's {@code Authorization} header value to forward, may be null
-     * @param requestedBy the authenticated caller, forwarded for the FIDO2 server's audit, may be null
      * @return the FIDO2 server's status, body and {@code Retry-After}, unchanged
      */
-    public Outcome check(String rpConfigId, boolean recheck, String token, String requestedBy)
+    public Outcome check(String rpConfigId, boolean recheck, String token)
             throws JsonProcessingException {
         if (StringUtils.isBlank(rpConfigId)) {
             throw new WebApplicationException("The relying party id is required",
@@ -104,7 +109,7 @@ public class Fido2ReadinessService {
         String url = getReadinessUrl(rpConfigId);
         log.info("Fido2 native app readiness check, recheck:{}", recheck);
 
-        HttpServiceResponse serviceResponse = fido2Util.executePost(url, buildHeaders(token, requestedBy),
+        HttpServiceResponse serviceResponse = fido2Util.executePost(url, buildHeaders(token, principalOf(token)),
                 "{\"recheck\":" + recheck + "}");
         HttpResponse httpResponse = serviceResponse == null ? null : serviceResponse.getHttpResponse();
         if (httpResponse == null || httpResponse.getStatusLine() == null) {
@@ -139,6 +144,27 @@ public class Fido2ReadinessService {
             throw ex;
         } catch (IOException ex) {
             throw new WebApplicationException("Unable to read upstream response entity", ex);
+        }
+    }
+
+    /**
+     * The caller as the authorization server knows it: the introspected user {@code inum}, else the client id.
+     * Never taken from a request header, so the FIDO2 server's audit cannot be told who the caller is.
+     */
+    String principalOf(String token) {
+        if (StringUtils.isBlank(token)) {
+            return null;
+        }
+        try {
+            IntrospectionResponse introspection = authUtil.getIntrospectionResponse(token);
+            if (introspection == null) {
+                return null;
+            }
+            String inum = authUtil.getJsonNodeKeyValue(introspection.getAuthorizationDetails(), USER_INUM);
+            return StringUtils.isNotBlank(inum) ? inum : introspection.getClientId();
+        } catch (Exception ex) {
+            log.warn("Unable to resolve the caller of the Fido2 native app readiness check: {}", ex.getMessage());
+            return null;
         }
     }
 

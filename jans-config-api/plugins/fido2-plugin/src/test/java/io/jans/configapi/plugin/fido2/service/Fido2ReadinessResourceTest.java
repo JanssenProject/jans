@@ -67,7 +67,7 @@ public class Fido2ReadinessResourceTest {
     @Test
     public void writeScope_isRequired_withAdminAndSuperWriteAsSuperScopes() throws Exception {
         Method method = Fido2ReadinessResource.class.getMethod("checkReadiness", String.class, String.class,
-                String.class, String.class);
+                String.class);
         ProtectedApi api = method.getAnnotation(ProtectedApi.class);
 
         assertEquals(Arrays.asList(api.scopes()), Arrays.asList(Constants.FIDO2_CONFIG_WRITE_ACCESS));
@@ -78,47 +78,47 @@ public class Fido2ReadinessResourceTest {
 
     @Test
     public void tokenAndPrincipalAreHandedToTheService() throws Exception {
-        when(service.check(anyString(), anyBoolean(), anyString(), anyString())).thenReturn(outcome(200, "{}", null));
+        when(service.check(anyString(), anyBoolean(), anyString())).thenReturn(outcome(200, "{}", null));
 
-        Response response = resource.checkReadiness("example.com", "Bearer abc", "inum-1", "{\"recheck\": true}");
+        Response response = resource.checkReadiness("example.com", "Bearer abc", "{\"recheck\": true}");
 
         assertEquals(response.getStatus(), 200);
-        verify(service).check("example.com", true, "Bearer abc", "inum-1");
+        verify(service).check("example.com", true, "Bearer abc");
     }
 
     @Test
     public void emptyBody_meansNoRecheck_andUnknownFieldsAreIgnored() throws Exception {
-        when(service.check(anyString(), anyBoolean(), anyString(), anyString())).thenReturn(outcome(200, "{}", null));
+        when(service.check(anyString(), anyBoolean(), anyString())).thenReturn(outcome(200, "{}", null));
 
-        resource.checkReadiness("example.com", "Bearer abc", "inum-1", null);
-        resource.checkReadiness("example.com", "Bearer abc", "inum-1",
+        resource.checkReadiness("example.com", "Bearer abc", null);
+        resource.checkReadiness("example.com", "Bearer abc",
                 "{\"url\":\"http://169.254.169.254/\",\"host\":\"x\"}");
 
-        verify(service, times(2)).check("example.com", false, "Bearer abc", "inum-1");
+        verify(service, times(2)).check("example.com", false, "Bearer abc");
     }
 
     @Test
     public void bodyThatIsNotAJsonObject_isRejected_withoutCallingTheServer() {
         expectThrows(WebApplicationException.class,
-                () -> resource.checkReadiness("example.com", "Bearer abc", null, "[1]"));
+                () -> resource.checkReadiness("example.com", "Bearer abc", "[1]"));
         expectThrows(WebApplicationException.class,
-                () -> resource.checkReadiness("example.com", "Bearer abc", null, "{oops"));
+                () -> resource.checkReadiness("example.com", "Bearer abc", "{oops"));
 
         verifyNoInteractions(service);
     }
 
     @Test
     public void notFoundFromTheServer_reachesTheCaller() throws Exception {
-        when(service.check(eq("nope"), anyBoolean(), anyString(), anyString())).thenReturn(outcome(404, null, null));
+        when(service.check(eq("nope"), anyBoolean(), anyString())).thenReturn(outcome(404, null, null));
 
-        assertEquals(resource.checkReadiness("nope", "Bearer abc", "inum-1", null).getStatus(), 404);
+        assertEquals(resource.checkReadiness("nope", "Bearer abc", null).getStatus(), 404);
     }
 
     @Test
     public void tooManyRequests_reachesTheCaller_withRetryAfter() throws Exception {
-        when(service.check(anyString(), anyBoolean(), anyString(), anyString())).thenReturn(outcome(429, null, "42"));
+        when(service.check(anyString(), anyBoolean(), anyString())).thenReturn(outcome(429, null, "42"));
 
-        Response response = resource.checkReadiness("example.com", "Bearer abc", "inum-1", null);
+        Response response = resource.checkReadiness("example.com", "Bearer abc", null);
 
         assertEquals(response.getStatus(), 429);
         assertEquals(response.getHeaderString("Retry-After"), "42");
@@ -126,11 +126,11 @@ public class Fido2ReadinessResourceTest {
 
     @Test
     public void anyOtherUpstreamStatus_isAnInternalError_notPassedThrough() throws Exception {
-        when(service.check(anyString(), anyBoolean(), anyString(), anyString()))
+        when(service.check(anyString(), anyBoolean(), anyString()))
                 .thenReturn(outcome(502, "{\"secret\":1}", null));
 
         WebApplicationException e = expectThrows(WebApplicationException.class,
-                () -> resource.checkReadiness("example.com", "Bearer abc", "inum-1", null));
+                () -> resource.checkReadiness("example.com", "Bearer abc", null));
 
         assertEquals(e.getResponse().getStatus(), 500);
     }
