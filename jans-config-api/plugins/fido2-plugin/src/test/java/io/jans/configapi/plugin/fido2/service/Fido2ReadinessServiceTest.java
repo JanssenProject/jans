@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -27,7 +28,6 @@ import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.configapi.security.service.OpenIdService;
-import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -50,7 +50,6 @@ public class Fido2ReadinessServiceTest {
     private static final String BASE = ISSUER + "/jans-fido2/restv1/rp/";
 
     private Fido2Util fido2Util;
-    private AuthUtil authUtil;
     private OpenIdService openIdService;
     private Fido2ReadinessService service;
 
@@ -60,9 +59,6 @@ public class Fido2ReadinessServiceTest {
         when(fido2Util.getIssuer()).thenReturn(ISSUER);
         service = new Fido2ReadinessService();
         service.fido2Util = fido2Util;
-        authUtil = mock(AuthUtil.class);
-        when(authUtil.getIssuer()).thenReturn(ISSUER);
-        service.authUtil = authUtil;
         openIdService = mock(OpenIdService.class);
         service.openIdService = openIdService;
         introspect("inum-1234", "client-1");
@@ -70,13 +66,18 @@ public class Fido2ReadinessServiceTest {
     }
 
     private void introspect(String inum, String clientId) {
+        introspect(inum, null, clientId);
+    }
+
+    private void introspect(String inum, String username, String clientId) {
         IntrospectionResponse introspection = mock(IntrospectionResponse.class);
         when(introspection.getClientId()).thenReturn(clientId);
+        when(introspection.getUsername()).thenReturn(username);
         if (inum != null) {
             when(introspection.getAuthorizationDetails()).thenReturn(new ObjectMapper().createObjectNode().put("inum", inum));
         }
         try {
-            when(openIdService.getIntrospectionResponse(anyString(), anyString(), anyString())).thenReturn(introspection);
+            when(openIdService.getIntrospectionResponse(anyString(), anyString(), isNull())).thenReturn(introspection);
         } catch (Exception ex) {
             throw new IllegalStateException(ex);
         }
@@ -155,19 +156,22 @@ public class Fido2ReadinessServiceTest {
     }
 
     @Test
-    public void introspection_isCalledWithHeaderTokenAndIssuer_inThatOrder() throws Exception {
+    public void introspection_isCalledWithHeaderAndToken_andNoIssuer() throws Exception {
         service.principalOf("Bearer abc");
 
-        verify(openIdService).getIntrospectionResponse("Bearer abc", "abc", ISSUER);
+        verify(openIdService).getIntrospectionResponse("Bearer abc", "abc", null);
         assertNull(service.principalOf("abc"));
     }
 
     @Test
-    public void principal_fallsBackToClientId_thenUnknown() throws Exception {
+    public void principal_prefersInumThenUsername_thenClientId_thenUnknown() throws Exception {
         introspect(null, "client-1");
         assertEquals(service.principalOf("Bearer abc"), "client-1");
 
-        when(openIdService.getIntrospectionResponse(anyString(), anyString(), anyString()))
+        introspect(null, "alice", "client-1");
+        assertEquals(service.principalOf("Bearer abc"), "alice");
+
+        when(openIdService.getIntrospectionResponse(anyString(), anyString(), isNull()))
                 .thenThrow(new IllegalStateException("down"));
         assertNull(service.principalOf("Bearer abc"));
         assertNull(service.principalOf(null));

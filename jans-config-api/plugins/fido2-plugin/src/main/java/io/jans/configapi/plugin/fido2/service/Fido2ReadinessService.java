@@ -14,7 +14,6 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
 import io.jans.configapi.security.service.OpenIdService;
-import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.inject.Inject;
@@ -88,9 +87,6 @@ public class Fido2ReadinessService {
     Fido2Util fido2Util;
 
     @Inject
-    AuthUtil authUtil;
-
-    @Inject
     OpenIdService openIdService;
 
     public String getReadinessUrl(String rpConfigId) {
@@ -153,7 +149,7 @@ public class Fido2ReadinessService {
     }
 
     /**
-     * The caller as the authorization server knows it: the introspected user {@code inum}, else the client id.
+     * The caller as the authorization server knows it: the introspected user {@code inum}, else the user name, else the client id.
      * Never taken from a request header, so the FIDO2 server's audit cannot be told who the caller is.
      */
     String principalOf(String token) {
@@ -161,8 +157,9 @@ public class Fido2ReadinessService {
             return null;
         }
         try {
+            // no issuer: use the configured introspection endpoint, as the Config API's own token filter does
             IntrospectionResponse introspection = openIdService.getIntrospectionResponse(token,
-                    token.substring(BEARER.length()).trim(), authUtil.getIssuer());
+                    token.substring(BEARER.length()).trim(), null);
             if (introspection == null) {
                 return null;
             }
@@ -170,7 +167,8 @@ public class Fido2ReadinessService {
             if (details != null && details.hasNonNull(USER_INUM) && !details.get(USER_INUM).asText().isBlank()) {
                 return details.get(USER_INUM).asText();
             }
-            return introspection.getClientId();
+            return StringUtils.isNotBlank(introspection.getUsername()) ? introspection.getUsername()
+                    : introspection.getClientId();
         } catch (Exception ex) {
             log.warn("Unable to resolve the caller of the Fido2 native app readiness check: {}", ex.getMessage());
             return null;
