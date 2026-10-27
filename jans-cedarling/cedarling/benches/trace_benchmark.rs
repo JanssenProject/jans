@@ -150,6 +150,12 @@ impl MockLock {
         self.received.load(Ordering::SeqCst)
     }
 
+    async fn wait_received(&self, target: usize) {
+        while self.received() < target {
+            tokio::time::sleep(Duration::from_millis(1)).await;
+        }
+    }
+
     fn lock_config(&self, log_channel_capacity: NonZeroUsize) -> LockServiceConfig {
         LockServiceConfig {
             config_uri: format!(
@@ -334,7 +340,8 @@ fn trace_authorize_unsigned(c: &mut Criterion) {
 fn trace_emitter_throughput(c: &mut Criterion) {
     let runtime = Runtime::new().expect("init tokio runtime");
     let lock = runtime.block_on(MockLock::start());
-    let capacity = NonZeroUsize::new(THROUGHPUT_DECISIONS).expect("non-zero");
+    // One more slot for the record of the decision made before measuring.
+    let capacity = NonZeroUsize::new(THROUGHPUT_DECISIONS + 1).expect("non-zero");
     let cedarling = runtime
         .block_on(Cedarling::new(&bootstrap_config(
             Some(lock.lock_config(capacity)),
@@ -342,6 +349,8 @@ fn trace_emitter_throughput(c: &mut Criterion) {
         )))
         .expect("Cedarling should start");
     runtime.block_on(expect_status(&cedarling, with_trace(), "trace.emitted"));
+    // Lock has that record before the first sample counts what it receives.
+    runtime.block_on(lock.wait_received(1));
     let request = request(with_trace());
 
     let mut group = c.benchmark_group("trace_emitter_throughput");
@@ -363,9 +372,7 @@ fn trace_emitter_throughput(c: &mut Criterion) {
                             .await
                             .expect("the decision should be made");
                     }
-                    while lock.received() < target {
-                        tokio::time::sleep(Duration::from_millis(1)).await;
-                    }
+                    lock.wait_received(target).await;
                     total += start.elapsed();
                 }
                 total
