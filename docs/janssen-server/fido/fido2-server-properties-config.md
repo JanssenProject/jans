@@ -232,6 +232,11 @@ not configured or has no app of that platform. Nothing is served from Jans: both
 `https://<rp-id>/.well-known/...` without following redirects, so deploy each file on the RP-ID host itself.
 Apple's file is named `apple-app-site-association`, with no `.json` extension.
 
+After deploying, run the native app readiness check for the same RP
+(`POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, which needs `nativeReadinessEnabled` and
+`nativeReadinessAllowExternalFetch`) to confirm the deployed files match the configured apps. A mismatched
+fingerprint or Team ID is the most common deployment failure, and the check reports it.
+
 ### Advertised algorithms
 
 The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
