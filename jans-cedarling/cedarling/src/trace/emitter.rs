@@ -176,14 +176,21 @@ enum GenesisState {
     /// Signed, not accepted yet: sent, waiting to be sent, or waiting for a resend.
     Pending,
     /// Accepted, so Lock has registered the chain.
-    Accepted,
+    Accepted { chain: ChainUse },
     /// Lost for good, so Lock will never register the chain: it is replaced
     /// before more records are signed into it.
     Lost,
     /// Accepted, but Lock later refused a record with `chain_not_registered`:
     /// it no longer knows the chain (a restored database, the client moved to
     /// another evidence domain), so the chain is replaced like a lost one.
-    Unregistered,
+    Unregistered { chain: ChainUse },
+}
+
+/// Whether Lock took more of a registered chain than its genesis record.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ChainUse {
+    GenesisOnly,
+    InUse,
 }
 
 /// Whether Lock takes TRACE requests, judged by the last ones.
@@ -204,7 +211,8 @@ struct RoundEnd {
 enum RoundOutcome {
     /// Lock answered, or the round had nothing to send.
     Done,
-    /// The request was lost, or Lock never registered the chain.
+    /// The request was lost, Lock took none of its records, or Lock never
+    /// registered the chain or forgot it right after registering it.
     Failed {
         /// How long Lock or a proxy before it asked to wait, if it did.
         retry_after: Option<Duration>,
@@ -238,6 +246,22 @@ enum Sent {
     },
     /// Stopping was requested while waiting to retry; the records stay.
     Interrupted,
+}
+
+/// What [`Emitter::settle`] made of one response.
+struct Settled {
+    /// A record goes back for a resend.
+    resend: bool,
+    outcome: RoundOutcome,
+}
+
+/// Records of one response Lock refused for good for the same cause.
+struct Refusal {
+    error: String,
+    reason: String,
+    hint: &'static str,
+    first: Uuid,
+    records: usize,
 }
 
 struct Emitter {
@@ -390,9 +414,9 @@ impl Emitter {
     fn room(&self) -> usize {
         match self.genesis {
             GenesisState::Unsigned => 1,
-            GenesisState::Accepted => self.max_records.saturating_sub(self.pending.len()),
+            GenesisState::Accepted { .. } => self.max_records.saturating_sub(self.pending.len()),
             // A lost chain is replaced before the next round signs anything.
-            GenesisState::Pending | GenesisState::Lost | GenesisState::Unregistered => 0,
+            GenesisState::Pending | GenesisState::Lost | GenesisState::Unregistered { .. } => 0,
         }
     }
 
@@ -408,7 +432,11 @@ impl Emitter {
         let mut outcome = RoundOutcome::Done;
         if let Some(request) = self.next_request() {
             match self.send(&request.body, request.records.len(), mode).await {
-                Sent::Results(results) => resend = self.settle(request.records, results, mode),
+                Sent::Results(results) => {
+                    let settled = self.settle(request.records, results, mode);
+                    resend = settled.resend;
+                    outcome = settled.outcome;
+                },
                 Sent::Lost { retry_after } => {
                     outcome = RoundOutcome::Failed { retry_after };
                     request
@@ -420,18 +448,24 @@ impl Emitter {
             }
         }
         match self.genesis {
-            // Lock refused the chain or never got its genesis record: the
-            // next genesis record would most likely fare the same.
-            GenesisState::Lost => {
+            // Lock refused the chain, never got its genesis record, or forgot
+            // the chain right after registering it: the next chain would most
+            // likely fare the same.
+            GenesisState::Lost
+            | GenesisState::Unregistered {
+                chain: ChainUse::GenesisOnly,
+            } => {
                 if outcome == RoundOutcome::Done {
                     outcome = RoundOutcome::Failed { retry_after: None };
                 }
                 chain = self.replace_chain();
             },
-            // Lock took the chain before; it forgot it once, so a new chain
-            // goes at once.
-            GenesisState::Unregistered => chain = self.replace_chain(),
-            GenesisState::Unsigned | GenesisState::Pending | GenesisState::Accepted => {},
+            // Lock forgot a chain it used, as after a restored database: a new
+            // chain goes at once.
+            GenesisState::Unregistered {
+                chain: ChainUse::InUse,
+            } => chain = self.replace_chain(),
+            GenesisState::Unsigned | GenesisState::Pending | GenesisState::Accepted { .. } => {},
         }
         if resend {
             self.pause(mode).await;
@@ -617,20 +651,22 @@ impl Emitter {
         }
     }
 
-    /// Applies Lock's answer for each record of `batch`. Returns whether a
-    /// record goes back for a resend.
+    /// Applies Lock's answer for each record of `batch`.
     fn settle(
         &mut self,
         batch: Vec<Pending>,
         results: Vec<BulkItemResult>,
         mode: Mode<'_>,
-    ) -> bool {
+    ) -> Settled {
         let mut results: HashMap<usize, BulkItemResult> = results
             .into_iter()
             .map(|result| (result.index, result))
             .collect();
         let mut resend = Vec::new();
         let mut unregistered_chain = Vec::new();
+        let mut refusals = Vec::<Refusal>::new();
+        let mut taken = 0;
+        let mut refused = 0;
         for (index, mut record) in batch.into_iter().enumerate() {
             let Some(result) = results.remove(&index) else {
                 self.log(
@@ -639,10 +675,12 @@ impl Emitter {
                     "Lock Server returned no result for the TRACE record; it is lost".to_string(),
                 );
                 self.lose(&[record]);
+                refused += 1;
                 continue;
             };
             if result.accepted {
                 self.accepted(&record, &result.flags);
+                taken += 1;
                 continue;
             }
             let error = result.error.as_deref().unwrap_or("none");
@@ -659,16 +697,30 @@ impl Emitter {
                 } else {
                     ""
                 };
+                let reason = result.reason.as_deref().unwrap_or("none");
                 self.log(
-                    LogLevel::ERROR,
+                    LogLevel::DEBUG,
                     Some(record.record_id),
                     format!(
-                        "Lock Server rejected the TRACE record (error: {error}, reason: {}){hint}",
-                        result.reason.as_deref().unwrap_or("none")
+                        "Lock Server rejected the TRACE record (error: {error}, reason: {reason})"
                     ),
                 );
+                match refusals
+                    .iter_mut()
+                    .find(|refusal| refusal.error == error && refusal.reason == reason)
+                {
+                    Some(refusal) => refusal.records += 1,
+                    None => refusals.push(Refusal {
+                        error: error.to_string(),
+                        reason: reason.to_string(),
+                        hint,
+                        first: record.record_id,
+                        records: 1,
+                    }),
+                }
                 self.count(EmitterEvent::Rejected, 1);
                 self.forget(&record);
+                refused += 1;
                 continue;
             }
             record.attempts += 1;
@@ -693,12 +745,47 @@ impl Emitter {
                 resend.push(record);
             }
         }
+        for refusal in refusals {
+            self.log_refusal(&refusal);
+        }
         let any = !resend.is_empty();
         // Resent records come before the rest, which was signed after them.
         for record in unregistered_chain.into_iter().chain(resend).rev() {
             self.pending.push_front(record);
         }
-        any
+        Settled {
+            resend: any,
+            // Lock answered, but took none of it for good: as refused as a
+            // refused request, e.g. after the producer key was revoked.
+            outcome: if taken == 0 && refused > 0 {
+                RoundOutcome::Failed { retry_after: None }
+            } else {
+                RoundOutcome::Done
+            },
+        }
+    }
+
+    /// One `ERROR` for the records of a response Lock refused for the same
+    /// cause, which is usually all of them; each is logged at `DEBUG`.
+    fn log_refusal(&self, refusal: &Refusal) {
+        let Refusal {
+            error,
+            reason,
+            hint,
+            first,
+            records,
+        } = refusal;
+        let message = if *records == 1 {
+            format!(
+                "Lock Server rejected the TRACE record (error: {error}, reason: {reason}){hint}"
+            )
+        } else {
+            format!(
+                "Lock Server rejected {records} TRACE records of one request (error: {error}, \
+                 reason: {reason}){hint}; this is the first, each is logged at DEBUG"
+            )
+        };
+        self.log(LogLevel::ERROR, Some(*first), message);
     }
 
     fn accepted(&mut self, record: &Pending, flags: &[&str]) {
@@ -712,7 +799,13 @@ impl Emitter {
             );
         }
         if self.is_current_genesis(record) {
-            self.genesis = GenesisState::Accepted;
+            self.genesis = GenesisState::Accepted {
+                chain: ChainUse::GenesisOnly,
+            };
+        } else if record.chain_id == self.chain_id
+            && let GenesisState::Accepted { chain } = &mut self.genesis
+        {
+            *chain = ChainUse::InUse;
         }
         self.log(
             LogLevel::DEBUG,
@@ -740,12 +833,12 @@ impl Emitter {
             return false;
         }
         match self.genesis {
-            GenesisState::Accepted => {
-                self.genesis = GenesisState::Unregistered;
+            GenesisState::Accepted { chain } => {
+                self.genesis = GenesisState::Unregistered { chain };
                 true
             },
             // A later record of the same request, after the first one noted it.
-            GenesisState::Unregistered => true,
+            GenesisState::Unregistered { .. } => true,
             // Lock never registered the chain: a refusal of its genesis record.
             GenesisState::Unsigned | GenesisState::Pending | GenesisState::Lost => false,
         }
@@ -785,7 +878,7 @@ impl Emitter {
         self.pending.retain(|record| record.chain_id != lost);
         let dropped = before - self.pending.len();
         let cause = match self.genesis {
-            GenesisState::Unregistered => "is no longer registered in Lock Server",
+            GenesisState::Unregistered { .. } => "is no longer registered in Lock Server",
             _ => "lost its genesis record",
         };
         self.log(
@@ -1484,35 +1577,40 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
-    async fn chain_not_registered_after_genesis_accepted_opens_new_chain() {
-        // Lock accepted the genesis record, then lost the chain's registration.
+    async fn chain_lock_forgot_after_using_it_is_replaced_at_once() {
+        // Lock took the chain for a while, then lost it, as after a restored database.
         let lock = FakeLock::new([
+            Reply::AcceptAll,
             Reply::AcceptAll,
             Reply::PerRecord(vec![Some("chain_not_registered"); 3]),
         ]);
         let metrics = metrics();
-        let emitter = start(
-            params(lock.clone(), metrics.clone()),
-            4,
-            [draft(), draft(), draft(), draft()],
-        );
+        let emitter = start(params(lock.clone(), metrics.clone()), 8, [draft(), draft()]);
+        lock.bodies(2).await;
+        for _ in 0..3 {
+            emitter
+                .tx
+                .send(draft())
+                .await
+                .expect("the emitter is running");
+        }
 
-        let refused = records(&lock.bodies(2).await[1]);
-        assert_eq!(refused.len(), 3, "the records after the genesis record");
+        let refused = records(&lock.bodies(3).await[2]);
+        assert_eq!(refused.len(), 3, "the records Lock no longer takes");
         let started = tokio::time::Instant::now();
         emitter
             .tx
             .send(draft())
             .await
             .expect("the emitter is running");
-        let bodies = lock.bodies(3).await;
+        let bodies = lock.bodies(4).await;
         assert!(
             started.elapsed() < WORKER_HTTP_RETRY_DUR,
-            "the new chain does not wait for a resend pause"
+            "the new chain does not wait"
         );
-        let third = records(&bodies[2]);
-        assert_eq!(third.len(), 1, "only the new record is sent");
-        let position = position(&third[0]);
+        let fourth = records(&bodies[3]);
+        assert_eq!(fourth.len(), 1, "only the new record is sent");
+        let position = position(&fourth[0]);
         assert_ne!(
             position.chain_id,
             self::position(&refused[0]).chain_id,
@@ -1534,6 +1632,122 @@ mod tests {
             stats.get("trace.chains_opened"),
             Some(&1),
             "one chain replaced"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn chain_lock_forgot_right_after_its_genesis_waits_the_backoff() {
+        // Lock registers each chain and forgets it at once: replacing it without
+        // a wait would go round as fast as decisions come.
+        let lock = FakeLock::new([
+            Reply::AcceptAll,
+            Reply::PerRecord(vec![Some("chain_not_registered"); 3]),
+        ]);
+        let metrics = metrics();
+        let emitter = start(
+            params(lock.clone(), metrics.clone()),
+            4,
+            [draft(), draft(), draft(), draft()],
+        );
+
+        let refused = records(&lock.bodies(2).await[1]);
+        assert_eq!(refused.len(), 3, "the records after the genesis record");
+        let started = tokio::time::Instant::now();
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        let bodies = lock.bodies(3).await;
+        assert_eq!(
+            started.elapsed(),
+            WORKER_HTTP_RETRY_DUR,
+            "the new chain waits the first backoff"
+        );
+        let position = position(&records(&bodies[2])[0]);
+        assert_ne!(
+            position.chain_id,
+            self::position(&refused[0]).chain_id,
+            "the forgotten chain is still replaced"
+        );
+        assert_eq!(
+            counter(&metrics, "trace.dropped"),
+            Some(3),
+            "its records are dropped with it"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn lock_refusing_every_record_gets_requests_ever_more_rarely() {
+        // Lock took the chain, then refuses each record, e.g. its key was revoked.
+        let refuse_all = || Reply::PerRecord(vec![Some("key_not_valid"); 2]);
+        let lock = FakeLock::new([Reply::AcceptAll, refuse_all(), refuse_all(), refuse_all()]);
+        let log = memory_log();
+        let metrics = metrics();
+        let mut params = params(lock.clone(), metrics.clone());
+        params.log = log.clone();
+        params.bulk_max_records = NonZeroUsize::new(2).expect("non-zero");
+        let emitter = start(params, 8, std::iter::repeat_with(draft).take(7));
+
+        let started = tokio::time::Instant::now();
+        let mut sent_at = Vec::new();
+        for count in 2..=4 {
+            lock.bodies(count).await;
+            sent_at.push(started.elapsed().as_secs());
+        }
+        assert_eq!(
+            sent_at,
+            [0, 10, 30],
+            "a response that takes no record backs off like a refused request"
+        );
+        assert_eq!(
+            counter(&metrics, "trace.rejected"),
+            Some(6),
+            "every refused record is counted"
+        );
+        emitter.handle.shut_down().await;
+        let errors: Vec<String> = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == "ERROR")
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .collect();
+        assert_eq!(
+            errors.len(),
+            3,
+            "one ERROR per response, not per record: {errors:?}"
+        );
+        assert!(
+            errors[0].contains("2 TRACE records") && errors[0].contains("key_not_valid"),
+            "the ERROR names the count and the cause: {}",
+            errors[0]
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn lock_refusing_some_records_does_not_back_off() {
+        let lock = FakeLock::new([
+            Reply::AcceptAll,
+            Reply::PerRecord(vec![None, Some("key_not_valid")]),
+        ]);
+        let emitter = start(
+            params(lock.clone(), metrics()),
+            8,
+            [draft(), draft(), draft()],
+        );
+        lock.bodies(2).await;
+        let started = tokio::time::Instant::now();
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        lock.bodies(3).await;
+        assert!(
+            started.elapsed() < WORKER_HTTP_RETRY_DUR,
+            "Lock takes records, so the next request does not wait"
         );
         emitter.handle.shut_down().await;
     }
