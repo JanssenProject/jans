@@ -837,8 +837,8 @@ impl Cedarling {
     }
 
     #[uniffi::method]
-    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     #[uniffi::method]

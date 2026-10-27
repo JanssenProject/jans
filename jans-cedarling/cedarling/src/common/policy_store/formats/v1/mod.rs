@@ -6,24 +6,22 @@
 //! Policy store format v1: the v0 layout with a required
 //! `policy_store_spec_version` in `metadata.json`.
 //!
-//! This is the current version, so it is the only one that converts into
+//! v1 stores are migrated to the current version before conversion into
 //! runtime types.
 
 pub(crate) mod custom_issuer;
 pub(crate) mod metadata;
 pub(crate) mod trusted_issuer;
 
-use std::collections::HashMap;
-
 use custom_issuer::{CustomIssuerParser, ParsedCustomIssuer};
 use metadata::MetadataDoc;
 use trusted_issuer::{IssuerParser, ParsedIssuer};
 
-use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
+use super::{
+    Files, IssuerDirFiles, IssuerDirs, Layout, ParseStoreError, ReadStoreError, StoreContent,
+};
 use crate::common::policy_store::loader::StoreFs;
-use crate::common::policy_store::manager::{ConversionError, PolicyStoreManager};
-use crate::common::policy_store::metadata::PolicyStoreMetadata;
-use crate::common::policy_store::{CustomIssuerMetadata, PolicyStore, TrustedIssuer};
+use crate::common::policy_store::manager::ConversionError;
 
 pub(crate) const SPEC_VERSION: u32 = 1;
 
@@ -36,8 +34,11 @@ const LAYOUT: Layout = Layout {
     policies_dir: "policies",
     templates_dir: "templates",
     entities_dir: "entities",
-    trusted_issuers_dir: "trusted-issuers",
-    custom_issuers_dir: "custom-issuers",
+};
+
+const ISSUER_DIRS: IssuerDirs = IssuerDirs {
+    trusted_issuers: "trusted-issuers",
+    custom_issuers: "custom-issuers",
 };
 
 /// Reads a v1 store and parses its files; `metadata_json` has already been
@@ -48,7 +49,8 @@ pub(super) fn read(
     strict: bool,
 ) -> Result<PolicyStoreDoc, ReadStoreError> {
     let files = super::read_files(fs, &LAYOUT, metadata_json, strict)?;
-    Ok(parse(files)?)
+    let issuers = super::read_issuer_dirs(fs, &ISSUER_DIRS)?;
+    Ok(parse(files, issuers)?)
 }
 
 /// A whole v1 store, parsed but not yet converted into runtime types.
@@ -61,7 +63,7 @@ pub(crate) struct PolicyStoreDoc {
 }
 
 /// Parses the raw files of a v1 store.
-fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
+fn parse(files: Files, issuers: IssuerDirFiles) -> Result<PolicyStoreDoc, ParseStoreError> {
     let Files {
         metadata_json,
         schema,
@@ -69,9 +71,11 @@ fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
         policies,
         templates,
         entities,
+    } = files;
+    let IssuerDirFiles {
         trusted_issuers,
         custom_issuers,
-    } = files;
+    } = issuers;
 
     let metadata = metadata::parse(&metadata_json)?;
 
@@ -108,50 +112,10 @@ fn parse(files: Files) -> Result<PolicyStoreDoc, ParseStoreError> {
     })
 }
 
-/// Converts a v1 store into the runtime store and its metadata.
-pub(crate) fn into_runtime(
-    doc: PolicyStoreDoc,
-) -> Result<(PolicyStore, PolicyStoreMetadata), ParseStoreError> {
-    let metadata = metadata::into_runtime(doc.metadata)?;
-    let trusted_issuers = trusted_issuers_into_runtime(doc.trusted_issuers)?;
-    let custom_issuers = custom_issuers_into_runtime(doc.custom_issuers)?;
-
-    let store = PolicyStoreManager::build(
-        &doc.content,
-        metadata.policy_store.version.clone(),
-        trusted_issuers,
-        custom_issuers,
-    )?;
-
-    Ok((store, metadata))
-}
-
-/// Rejects duplicate issuer ids across files; `None` when there are no issuers.
-fn trusted_issuers_into_runtime(
-    issuers: Vec<ParsedIssuer>,
-) -> Result<Option<HashMap<String, TrustedIssuer>>, ConversionError> {
-    if issuers.is_empty() {
-        return Ok(None);
-    }
-    IssuerParser::validate_issuers(&issuers).map_err(ConversionError::TrustedIssuerValidation)?;
-    Ok(Some(IssuerParser::create_issuer_map(issuers)))
-}
-
-/// Rejects duplicate custom issuer ids across files.
-fn custom_issuers_into_runtime(
-    issuers: Vec<ParsedCustomIssuer>,
-) -> Result<HashMap<String, CustomIssuerMetadata>, ConversionError> {
-    if issuers.is_empty() {
-        return Ok(HashMap::new());
-    }
-    CustomIssuerParser::validate(&issuers).map_err(ConversionError::CustomIssuerValidation)?;
-    Ok(CustomIssuerParser::create_map(issuers))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerValidateError};
+    use crate::common::policy_store::errors::PolicyStoreError;
     use crate::common::policy_store::loader::StoreFile;
 
     const METADATA: &str = r#"{
@@ -166,7 +130,7 @@ mod tests {
             content: format!(
                 r#"{{
                     "id": "{id}",
-                    "name": "Issuer {id}",
+                    "name": "{id}",
                     "openid_configuration_endpoint": "https://{id}.test/.well-known/openid-configuration",
                     "token_metadata": {{
                         "access_token": {{ "entity_type_name": "{id}::Access_token" }}
@@ -176,8 +140,11 @@ mod tests {
         }
     }
 
-    fn loaded(trusted_issuers: Vec<StoreFile>, custom_issuers: Vec<StoreFile>) -> Files {
-        Files {
+    fn loaded(
+        trusted_issuers: Vec<StoreFile>,
+        custom_issuers: Vec<StoreFile>,
+    ) -> (Files, IssuerDirFiles) {
+        let files = Files {
             metadata_json: METADATA.to_string(),
             schema: None,
             schema_source_exists: false,
@@ -187,15 +154,18 @@ mod tests {
             }],
             templates: vec![],
             entities: vec![],
+        };
+        let issuers = IssuerDirFiles {
             trusted_issuers,
             custom_issuers,
-        }
+        };
+        (files, issuers)
     }
 
-    /// Golden v1 store: every version-specific file reaches the runtime store.
+    /// Golden v1 store: every version-specific file parses with v1 semantics.
     #[test]
-    fn golden_store_converts_to_runtime() {
-        let doc = parse(loaded(
+    fn golden_store_parses() {
+        let (files, issuers) = loaded(
             vec![issuer_file("a.json", "Alpha")],
             vec![StoreFile {
                 name: "acme.json".to_string(),
@@ -203,84 +173,42 @@ mod tests {
                     r#"{ "tokens_mappings": { "Acme::Custom": { "required_claims": ["sub"] } } }"#
                         .to_string(),
             }],
-        ))
-        .expect("golden v1 store should parse");
+        );
+        let doc = parse(files, issuers).expect("golden v1 store should parse");
+
         assert_eq!(
             doc.metadata.policy_store_spec_version, SPEC_VERSION,
             "spec version should be read from metadata.json"
         );
-
-        let (store, metadata) = into_runtime(doc).expect("golden v1 store should convert");
         assert_eq!(
-            metadata.policy_store.name, "Golden v1",
-            "metadata name mismatch"
+            doc.trusted_issuers[0].issuer.token_metadata["access_token"].entity_type_name,
+            "Alpha::Access_token",
+            "trusted issuer token metadata should be parsed"
         );
         assert_eq!(
-            store.version.as_deref(),
-            Some("1.0.0"),
-            "content version should come from policy_store.version"
-        );
-
-        let issuer = &store
-            .trusted_issuers
-            .as_ref()
-            .expect("trusted issuers should be present")["Alpha"];
-        assert_eq!(issuer.name, "Issuer Alpha", "issuer name mismatch");
-        assert_eq!(
-            issuer.token_metadata["access_token"].entity_type_name, "Alpha::Access_token",
-            "token metadata should be converted"
+            doc.custom_issuers[0].id, "acme",
+            "custom issuer id comes from the file"
         );
         assert!(
-            store.custom_issuers["acme"].tokens_mappings["Acme::Custom"]
+            doc.custom_issuers[0].meta.tokens_mappings["Acme::Custom"]
                 .required_claims
                 .contains("sub"),
-            "custom issuer required_claims should be converted"
-        );
-    }
-
-    #[test]
-    fn no_issuers_convert_to_empty_runtime_fields() {
-        let doc = parse(loaded(vec![], vec![])).expect("store without issuers should parse");
-        let (store, _) = into_runtime(doc).expect("store without issuers should convert");
-        assert!(
-            store.trusted_issuers.is_none(),
-            "no trusted issuer files should leave trusted_issuers unset"
-        );
-        assert!(
-            store.custom_issuers.is_empty(),
-            "no custom issuer files should leave custom_issuers empty"
-        );
-    }
-
-    #[test]
-    fn duplicate_issuer_ids_are_rejected() {
-        let doc = parse(loaded(
-            vec![issuer_file("a.json", "Dup"), issuer_file("b.json", "Dup")],
-            vec![],
-        ))
-        .expect("each issuer file is valid on its own");
-
-        let err = into_runtime(doc).expect_err("duplicate issuer ids must be rejected");
-        assert!(
-            matches!(
-                &err,
-                ParseStoreError::Conversion(ConversionError::TrustedIssuerValidation(errors))
-                    if matches!(&errors[..], [TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }]
-                        if id == "Dup" && first_file == "a.json" && second_file == "b.json")
-            ),
-            "expected one DuplicateId naming the id and both files, got: {err:?}"
+            "custom issuer required_claims should be parsed"
         );
     }
 
     #[test]
     fn invalid_issuer_file_is_reported_with_file_name() {
-        let err = parse(loaded(
-            vec![StoreFile {
-                name: "bad.json".to_string(),
-                content: "{ not json".to_string(),
-            }],
-            vec![],
-        ))
+        let err = {
+            let (files, issuers) = loaded(
+                vec![StoreFile {
+                    name: "bad.json".to_string(),
+                    content: "{ not json".to_string(),
+                }],
+                vec![],
+            );
+            parse(files, issuers)
+        }
         .expect_err("malformed issuer file must be rejected");
         assert!(
             matches!(

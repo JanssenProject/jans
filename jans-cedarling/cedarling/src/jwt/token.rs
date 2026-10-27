@@ -6,7 +6,8 @@
 use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-use std::{collections::HashMap, sync::Arc};
+use smol_str::SmolStr;
+use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
 /// Identifies where a validated [`Token`] came from.
 ///
@@ -25,11 +26,8 @@ pub(crate) enum TokenIssuer {
 /// a [`TrustedIssuer`].
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct CustomTokenIssuerMeta {
-    /// Sanitized issuer id. Used directly for the `context.tokens.{issuer}_{type}`
-    /// key, so it is expected to already be collision-checked at init.
-    pub issuer_id: String,
-    /// Cedar entity type name for this token, if configured on the custom issuer.
-    pub entity_type_name: Option<String>,
+    /// The issuer name lowercased, given as the token's `iss`.
+    pub issuer_id: SmolStr,
     /// The id used as the token entity id (supplied by the processor).
     pub token_id: String,
     /// Effective expiration (unix seconds) the processor reported, via
@@ -41,25 +39,18 @@ pub(crate) struct CustomTokenIssuerMeta {
 
 /// Structure representing a validated token, used to derive a Cedar token entity.
 /// The `iss` field carries the resolved issuer; a JWT-backed token references a
-/// `TrustedIssuer`, a custom token carries [`CustomTokenIssuerMeta`].
+/// `TrustedIssuer`, a custom token carries [`CustomTokenIssuerMeta`]. Every
+/// validated token has one: a token is only accepted for the issuer its mapping
+/// names.
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Token {
-    pub name: String,
-    pub iss: Option<TokenIssuer>,
+    pub iss: TokenIssuer,
     pub(crate) claims: TokenClaims,
 }
 
 impl Token {
-    pub(crate) fn new(name: &str, claims: TokenClaims, iss: Option<TokenIssuer>) -> Token {
-        Self {
-            name: name.to_string(),
-            iss,
-            claims,
-        }
-    }
-
-    pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
-        self.claims.get_claim(name)
+    pub(crate) fn new(claims: TokenClaims, iss: TokenIssuer) -> Token {
+        Self { iss, claims }
     }
 
     pub(crate) fn get_claim_val(&self, name: &str) -> Option<&Value> {
@@ -74,18 +65,12 @@ impl Token {
         &self.claims.claims
     }
 
-    /// Extract normalized issuer from a token.
-    pub(crate) fn extract_normalized_issuer(&self) -> Option<IssClaim> {
+    /// The normalized issuer of the token: the configured `iss` of a JWT issuer,
+    /// which a validated JWT's `iss` claim equals, or a custom issuer's id.
+    pub(crate) fn normalized_issuer(&self) -> Cow<'_, IssClaim> {
         match &self.iss {
-            // From TrustedIssuer reference (preferred)
-            Some(TokenIssuer::Jwt(trusted_issuer)) => Some(trusted_issuer.iss_claim()),
-            // Custom issuer: the sanitized issuer id is the normalized issuer.
-            Some(TokenIssuer::Custom(meta)) => Some(IssClaim::new(meta.issuer_id.as_str())),
-            // Fallback: from token claims
-            None => self
-                .claims
-                .get_claim("iss")
-                .and_then(|claim| claim.value().as_str().map(IssClaim::new)),
+            TokenIssuer::Jwt(trusted_issuer) => Cow::Borrowed(trusted_issuer.iss_claim()),
+            TokenIssuer::Custom(meta) => Cow::Owned(IssClaim::new(meta.issuer_id.as_str())),
         }
     }
 }

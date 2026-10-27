@@ -22,6 +22,7 @@ use crate::authz::TraceContext;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::token_types::EntityTypeName;
 use crate::jwt::{TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
@@ -266,7 +267,7 @@ fn signed_at() -> u64 {
 /// its custom issuer in the policy store, whatever the host's processor put in
 /// `iss`, so the record does not depend on host code.
 pub(crate) fn token_facts(
-    validated: &HashMap<String, ValidatedToken>,
+    validated: &HashMap<EntityTypeName, ValidatedToken>,
     inputs: &[TokenInput],
 ) -> Result<Vec<TokenRef>, DraftError> {
     let mut ordered: Vec<&ValidatedToken> = validated.values().collect();
@@ -285,8 +286,8 @@ pub(crate) fn token_facts(
         let token = &validated.token;
         let claim = |name| token.get_claim_val(name).and_then(Value::as_str);
         let issuer = match &token.iss {
-            Some(TokenIssuer::Custom(meta)) => IssuerRef::CustomIssuer(meta.issuer_id.clone()),
-            _ => IssuerRef::Url(claim("iss").unwrap_or_default().to_string()),
+            TokenIssuer::Custom(meta) => IssuerRef::CustomIssuer(meta.issuer_id.to_string()),
+            TokenIssuer::Jwt(_) => IssuerRef::Url(claim("iss").unwrap_or_default().to_string()),
         };
 
         let token_ref = TokenRef::new(issuer, &input.mapping, claim("jti"), &input.payload)
@@ -313,8 +314,9 @@ mod tests {
     use crate::app_types::PdpID;
     use crate::authz::TraceContext;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
-    use crate::common::policy_store::TrustedIssuer;
     use crate::common::policy_store::test_utils::fixtures;
+    use crate::common::policy_store::token_types::TokenType;
+    use crate::common::policy_store::{TokenEntityMetadata, TokenTypes, TrustedIssuer};
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer, ValidatedToken};
     use crate::log::{LogStrategy, Logger, TEST_LOGGER, gen_uuid7};
     use crate::trace::TraceRecordStatus;
@@ -373,38 +375,66 @@ mod tests {
         })
     }
 
-    fn validated(mapping: &str, claims: Value, iss: TokenIssuer, index: usize) -> ValidatedToken {
+    fn validated(
+        token_type: Arc<TokenType>,
+        claims: Value,
+        iss: TokenIssuer,
+        index: usize,
+    ) -> ValidatedToken {
         let claims = TokenClaims::try_from(claims).expect("test claims are a JSON object");
-        let token = Token::new(mapping, claims, Some(iss));
         ValidatedToken {
-            token: Arc::new(token),
+            token: Arc::new(Token::new(claims, iss)),
             index,
+            token_type,
         }
     }
 
-    /// Validated tokens keyed by their mapping, as multi-issuer validation returns them.
-    fn by_mapping(
+    /// Validated tokens keyed by their entity type, as multi-issuer validation
+    /// returns them.
+    fn by_entity_type(
         tokens: impl IntoIterator<Item = ValidatedToken>,
-    ) -> HashMap<String, ValidatedToken> {
+    ) -> HashMap<EntityTypeName, ValidatedToken> {
         tokens
             .into_iter()
-            .map(|validated| (validated.token.name.clone(), validated))
+            .map(|validated| (validated.token_type.entity_type().clone(), validated))
             .collect()
     }
 
+    /// A JWT of the default `Jans` issuer, validated as the token type `mapping`.
     fn jwt(mapping: &str, claims: Value, index: usize) -> ValidatedToken {
-        let issuer = TokenIssuer::Jwt(Arc::new(TrustedIssuer::default()));
-        validated(mapping, claims, issuer, index)
+        let token_types = TokenTypes::build(
+            [TrustedIssuer::default().with_tokens(HashMap::from([(
+                mapping.to_string(),
+                TokenEntityMetadata::builder().build(),
+            )]))],
+            [],
+        )
+        .expect("test token types should build");
+        let token_type = token_types
+            .resolve(mapping)
+            .expect("the test token type should be configured");
+        let issuer = token_types
+            .jwt_issuers()
+            .values()
+            .next()
+            .expect("the test JWT issuer should be configured");
+        validated(
+            Arc::clone(token_type),
+            claims,
+            TokenIssuer::Jwt(Arc::clone(issuer)),
+            index,
+        )
     }
 
+    /// A token of the custom issuer `Dolphin`, validated as the token type `mapping`.
     fn custom(mapping: &str, claims: Value, index: usize) -> ValidatedToken {
+        let token_type = TokenType::custom_for_test(mapping, "Dolphin");
         let issuer = TokenIssuer::Custom(CustomTokenIssuerMeta {
-            issuer_id: "dolphin".to_string(),
-            entity_type_name: Some(mapping.to_string()),
+            issuer_id: token_type.issuer().key_prefix().clone(),
             token_id: "dolphin-1".to_string(),
             expiration: None,
         });
-        validated(mapping, claims, issuer, index)
+        validated(Arc::new(token_type), claims, issuer, index)
     }
 
     fn input(mapping: &str, payload: &str) -> TokenInput {
@@ -704,7 +734,7 @@ mod tests {
                 input("Jans::Access_Token", "header.payload.sig"),
                 input("Acme::DolphinToken", raw),
             ];
-            let tokens = by_mapping([
+            let tokens = by_entity_type([
                 jwt(
                     "Jans::Access_Token",
                     json!({"iss": ISSUER, "jti": "jti-1"}),
@@ -756,7 +786,7 @@ mod tests {
     #[test]
     fn custom_token_keeps_its_jti() {
         let inputs = [input("Acme::DolphinToken", "dolphin-opaque")];
-        let tokens = by_mapping([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
+        let tokens = by_entity_type([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -768,7 +798,7 @@ mod tests {
     #[test]
     fn jwt_without_lock_issuer_is_invalid_field() {
         let inputs = [input("Jans::Access_Token", "header.payload.sig")];
-        let tokens = by_mapping([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
+        let tokens = by_entity_type([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
         let log = memory_log();
         let tokens =
             token_facts(&tokens, &inputs).expect("a JWT stays in the list even without an issuer");
@@ -795,7 +825,7 @@ mod tests {
     fn token_without_jti_uses_fingerprint() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = by_mapping([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
+        let tokens = by_entity_type([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -816,7 +846,7 @@ mod tests {
             input("B::T", "raw-b"),
             input("C::T", "raw-c"),
         ];
-        let tokens = by_mapping([
+        let tokens = by_entity_type([
             jwt("C::T", json!({"iss": ISSUER, "jti": "c"}), 2),
             jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
             jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
@@ -834,7 +864,7 @@ mod tests {
     fn raw_token_in_jti_is_invalid_field() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = by_mapping([jwt(
+        let tokens = by_entity_type([jwt(
             "Jans::Access_Token",
             json!({"iss": ISSUER, "jti": raw}),
             0,

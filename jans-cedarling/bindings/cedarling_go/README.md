@@ -385,10 +385,10 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 ### Trusted Issuer Loading Info
 
-When trusted issuers are configured in the policy store, you can query loading status:
+When the policy store declares JWT issuers in `trusted-issuers.json`, you can query loading status. Issuers are identified by their `issuer` name in that file.
 
 ```go
-loadedByName := instance.IsTrustedIssuerLoadedByName("issuer_id")
+loadedByName := instance.IsTrustedIssuerLoadedByName("Acme")
 loadedByIss := instance.IsTrustedIssuerLoadedByIss("https://issuer.example.org")
 totalIssuers := instance.TotalIssuers()
 loadedCount := instance.LoadedTrustedIssuersCount()
