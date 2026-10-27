@@ -9,15 +9,8 @@
 //! never signed, so the producer chain gets no gap. Lengths are
 //! counted in UTF-16 units, because Lock counts Java `String` length.
 
-// Read by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
-// into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )
-)]
+use std::fmt;
+use std::sync::Arc;
 
 use jans_trace_core::Digest;
 use jans_trace_core::inputs::token_fingerprint;
@@ -25,7 +18,7 @@ use url::Url;
 use uuid7::Uuid;
 
 use crate::authz::TraceContext;
-use crate::common::policy_store::PolicyStoreWithID;
+use crate::common::policy_store::PolicyStoreMetadata;
 
 /// Lock `MAX_FACT_TEXT_LENGTH` for `action` and `resource_type`
 /// (`EventKindValidationSupport`).
@@ -50,6 +43,12 @@ pub(crate) enum Outcome {
 }
 
 impl Outcome {
+    pub(crate) fn from_allowed(allowed: bool) -> Self {
+        if allowed { Self::Allow } else { Self::Deny }
+    }
+
+    /// Read only by the producer chain, which signs on native targets only.
+    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::Allow => "ALLOW",
@@ -65,16 +64,50 @@ pub(crate) struct DecisionFacts {
     pub(crate) resource_type: String,
     pub(crate) outcome: Outcome,
     /// Empty for `authorize_unsigned`, which uses no tokens.
-    pub(crate) tokens: Vec<TokenRef>,
+    pub(crate) tokens: Arc<[TokenRef]>,
 }
 
 /// A token reference: never the token itself, which must not leave Cedarling.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TokenRef {
-    pub(crate) issuer: String,
+    pub(crate) issuer: IssuerRef,
     /// The request `mapping` as is, e.g. `Jans::Access_Token`.
     pub(crate) token_type: String,
     pub(crate) id: TokenId,
+}
+
+/// Who issued a referenced token, as Lock names it in `tokens[].issuer`.
+#[derive(Debug, Clone, PartialEq)]
+pub(crate) enum IssuerRef {
+    /// The `iss` claim of a JWT, as the token has it. Validation matched it to a
+    /// trusted issuer, but Lock may still reject its form (e.g. plain `http`).
+    Url(String),
+    /// A custom issuer of the policy store, for a credential without an issuer
+    /// URI, by the id Cedarling checks when it loads the store.
+    CustomIssuer(String),
+}
+
+/// Lock `TraceIssuers` accepts this prefix followed by a custom issuer id in
+/// `tokens[].issuer`, so the two must stay the same.
+const CUSTOM_ISSUER_URN_PREFIX: &str = "urn:jans:cedarling:custom-issuer:";
+
+impl IssuerRef {
+    /// The text Cedarling chose or received, without the URN prefix.
+    fn text(&self) -> &str {
+        match self {
+            Self::Url(url) => url,
+            Self::CustomIssuer(id) => id,
+        }
+    }
+}
+
+impl fmt::Display for IssuerRef {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Url(url) => f.write_str(url),
+            Self::CustomIssuer(id) => write!(f, "{CUSTOM_ISSUER_URN_PREFIX}{id}"),
+        }
+    }
 }
 
 /// `jti` when the token has one, otherwise a fingerprint of the token text.
@@ -89,7 +122,7 @@ impl TokenRef {
     /// that holds `raw_token` itself, so a wiring mistake cannot sign the token
     /// into the record.
     pub(crate) fn new(
-        issuer: &str,
+        issuer: IssuerRef,
         mapping: &str,
         jti: Option<&str>,
         raw_token: &str,
@@ -97,7 +130,7 @@ impl TokenRef {
         let jti = jti.filter(|jti| !jti.is_empty());
         let holds_token = |text: &str| !raw_token.is_empty() && text.contains(raw_token);
         for (field, text) in [
-            ("issuer", Some(issuer)),
+            ("issuer", Some(issuer.text())),
             ("token_type", Some(mapping)),
             ("jti", jti),
         ] {
@@ -110,7 +143,7 @@ impl TokenRef {
             None => TokenId::Fingerprint(token_fingerprint(raw_token)),
         };
         Ok(Self {
-            issuer: issuer.to_string(),
+            issuer,
             token_type: mapping.to_string(),
             id,
         })
@@ -134,9 +167,12 @@ pub(crate) struct PolicyFacts {
 impl PolicyFacts {
     /// `None` when the store cannot back a record: no `.cjar` (`bundle_hash`),
     /// no metadata, or an empty id or version, all of which Lock requires.
-    pub(crate) fn from_store(store: &PolicyStoreWithID) -> Option<Self> {
-        let bundle_hash = store.bundle_hash()?;
-        let metadata = store.metadata.as_ref()?;
+    pub(crate) fn from_archive(
+        bundle_hash: Option<Digest>,
+        metadata: Option<&PolicyStoreMetadata>,
+    ) -> Option<Self> {
+        let bundle_hash = bundle_hash?;
+        let metadata = metadata?;
         let non_empty = |value: &str| (!value.is_empty()).then(|| value.to_string());
         Some(Self {
             store_id: non_empty(metadata.id())?,
@@ -154,9 +190,9 @@ impl PolicyFacts {
 pub(crate) struct RecordDraft {
     pub(crate) record_id: Uuid,
     pub(crate) signed_at: u64,
-    pub(crate) trace: TraceContext,
+    pub(crate) trace: Arc<TraceContext>,
     pub(crate) decision: DecisionFacts,
-    pub(crate) policy: PolicyFacts,
+    pub(crate) policy: Arc<PolicyFacts>,
 }
 
 /// Why no record is built. Each maps to a `trace_record_status`:
@@ -180,9 +216,9 @@ impl RecordDraft {
     pub(crate) fn new(
         record_id: Uuid,
         signed_at: u64,
-        trace: &TraceContext,
+        trace: &Arc<TraceContext>,
         decision: DecisionFacts,
-        policy: PolicyFacts,
+        policy: Arc<PolicyFacts>,
     ) -> Result<Self, DraftError> {
         require_context(&trace.execution_id, "execution_id")?;
         require_context(&trace.execution_authority, "execution_authority")?;
@@ -228,7 +264,7 @@ impl RecordDraft {
         Ok(Self {
             record_id,
             signed_at,
-            trace: trace.clone(),
+            trace: Arc::clone(trace),
             decision,
             policy,
         })
@@ -261,7 +297,10 @@ fn check_fact_text(value: &str, path: &str) -> Result<(), DraftError> {
 
 fn check_token(token: &TokenRef, index: usize) -> Result<(), DraftError> {
     let path = |field: &str| format!("trace.event.tokens[{index}].{field}");
-    if !is_lock_issuer(&token.issuer) {
+    // A custom issuer id was checked when the store was loaded.
+    if let IssuerRef::Url(url) = &token.issuer
+        && !is_lock_issuer(url)
+    {
         return Err(invalid(&path("issuer")));
     }
     if token.token_type.is_empty() {
@@ -297,7 +336,10 @@ mod tests {
     use jans_trace_core::inputs::token_fingerprint;
 
     use super::*;
+    use crate::common::policy_store::PolicyStoreWithID;
+    use crate::common::policy_store::test_utils::fixtures;
     use crate::log::gen_uuid7;
+    use crate::trace::test_utils::{CjarStore, cjar_store};
 
     const ISSUER: &str = "https://idp.example.com";
 
@@ -311,7 +353,7 @@ mod tests {
 
     fn token(issuer: &str) -> TokenRef {
         TokenRef::new(
-            issuer,
+            IssuerRef::Url(issuer.to_string()),
             "Jans::Access_Token",
             Some("jti-1"),
             "header.payload.sig",
@@ -324,7 +366,7 @@ mod tests {
             action: action.to_string(),
             resource_type: "Jans::Issue".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         }
     }
 
@@ -341,7 +383,13 @@ mod tests {
         trace: &TraceContext,
         decision: DecisionFacts,
     ) -> Result<RecordDraft, DraftError> {
-        RecordDraft::new(gen_uuid7(), 1_700_000_000, trace, decision, policy())
+        RecordDraft::new(
+            gen_uuid7(),
+            1_700_000_000,
+            &Arc::new(trace.clone()),
+            decision,
+            Arc::new(policy()),
+        )
     }
 
     fn draft(decision: DecisionFacts) -> Result<RecordDraft, DraftError> {
@@ -447,8 +495,13 @@ mod tests {
 
     #[test]
     fn token_type_65_is_over_limit() {
-        let long = TokenRef::new(ISSUER, &"T".repeat(65), Some("jti-1"), "raw")
-            .expect("test token ref should build");
+        let long = TokenRef::new(
+            IssuerRef::Url(ISSUER.to_string()),
+            &"T".repeat(65),
+            Some("jti-1"),
+            "raw",
+        )
+        .expect("test token ref should build");
         let err = draft(decision("a", vec![long]))
             .expect_err("a 65-character token_type should be over the limit");
         assert!(
@@ -459,8 +512,13 @@ mod tests {
 
     #[test]
     fn jti_257_is_over_limit() {
-        let long = TokenRef::new(ISSUER, "Jans::Access_Token", Some(&"j".repeat(257)), "raw")
-            .expect("test token ref should build");
+        let long = TokenRef::new(
+            IssuerRef::Url(ISSUER.to_string()),
+            "Jans::Access_Token",
+            Some(&"j".repeat(257)),
+            "raw",
+        )
+        .expect("test token ref should build");
         let err = draft(decision("a", vec![long]))
             .expect_err("a 257-character jti should be over the limit");
         assert!(
@@ -530,7 +588,7 @@ mod tests {
                 "issuer",
             ),
         ] {
-            let err = TokenRef::new(issuer, mapping, jti, raw)
+            let err = TokenRef::new(IssuerRef::Url(issuer.to_string()), mapping, jti, raw)
                 .expect_err("a field that holds the raw token should be rejected");
             assert_eq!(
                 err,
@@ -545,7 +603,7 @@ mod tests {
         // Only the token itself is refused, not values that merely look like one.
         let jti = "aaaaaaaaaa.bbbbbbbbbb.cccccccccc";
         let token = TokenRef::new(
-            ISSUER,
+            IssuerRef::Url(ISSUER.to_string()),
             "Jans::Access_Token",
             Some(jti),
             "header.payload.sig",
@@ -556,24 +614,39 @@ mod tests {
 
     #[test]
     fn empty_raw_token_is_never_found() {
-        TokenRef::new(ISSUER, "Jans::Access_Token", Some("jti-1"), "")
-            .expect("an empty raw token cannot leak into a field");
+        TokenRef::new(
+            IssuerRef::Url(ISSUER.to_string()),
+            "Jans::Access_Token",
+            Some("jti-1"),
+            "",
+        )
+        .expect("an empty raw token cannot leak into a field");
     }
 
     #[test]
     fn token_without_jti_uses_core_fingerprint() {
         let raw = "header.payload.signature";
         for jti in [None, Some("")] {
-            let token = TokenRef::new(ISSUER, "Jans::Access_Token", jti, raw)
-                .expect("test token ref should build");
+            let token = TokenRef::new(
+                IssuerRef::Url(ISSUER.to_string()),
+                "Jans::Access_Token",
+                jti,
+                raw,
+            )
+            .expect("test token ref should build");
             assert_eq!(
                 token.id,
                 TokenId::Fingerprint(token_fingerprint(raw)),
                 "a token without jti ({jti:?}) should use the core fingerprint"
             );
         }
-        let token = TokenRef::new(ISSUER, "Jans::Access_Token", Some("jti-1"), raw)
-            .expect("test token ref should build");
+        let token = TokenRef::new(
+            IssuerRef::Url(ISSUER.to_string()),
+            "Jans::Access_Token",
+            Some("jti-1"),
+            raw,
+        )
+        .expect("test token ref should build");
         assert_eq!(
             token.id,
             TokenId::Jti("jti-1".to_string()),
@@ -585,32 +658,30 @@ mod tests {
         );
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     #[test]
     fn outcome_serializes_as_lock_vocabulary() {
         assert_eq!(Outcome::Allow.as_str(), "ALLOW", "allow outcome");
         assert_eq!(Outcome::Deny.as_str(), "DENY", "deny outcome");
     }
-    fn cjar_store() -> (PolicyStoreWithID, jans_trace_core::Digest) {
-        let bytes = crate::common::policy_store::test_utils::fixtures::minimal_valid()
-            .with_version("2.1.0")
-            .build_archive()
-            .expect("test archive builds");
-        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
-        let store = crate::common::policy_store::loader::read_policy_store_archive_bytes(
-            bytes,
-            false,
-            crate::common::policy_store::archive_handler::ArchiveLimits::default(),
-        )
-        .expect("test archive parses")
-        .store;
-        (store, hash)
+
+    #[test]
+    fn outcome_from_allowed_decision() {
+        assert_eq!(Outcome::from_allowed(true), Outcome::Allow, "allowed");
+        assert_eq!(Outcome::from_allowed(false), Outcome::Deny, "denied");
     }
 
     #[test]
     fn policy_facts_from_cjar_store() {
-        let (store, hash) = cjar_store();
-        let facts = PolicyFacts::from_store(&store).expect("a .cjar store has policy facts");
-        assert_eq!(facts.bundle_hash, hash, "bundle_hash comes from the store");
+        let CjarStore { store, bundle_hash } =
+            cjar_store(&fixtures::minimal_valid().with_version("2.1.0"));
+        let facts = store
+            .trace_policy()
+            .expect("a .cjar store has policy facts");
+        assert_eq!(
+            facts.bundle_hash, bundle_hash,
+            "bundle_hash comes from the store"
+        );
         assert_eq!(facts.store_version, "2.1.0", "store version from metadata");
         assert_eq!(
             facts.store_id,
@@ -626,15 +697,40 @@ mod tests {
 
     #[test]
     fn policy_facts_none_without_bundle_hash() {
-        let (archived, _) = cjar_store();
+        let CjarStore {
+            store: archived, ..
+        } = cjar_store(&fixtures::minimal_valid());
         let store = PolicyStoreWithID::without_archive(
             archived.id.clone(),
             archived.store.clone(),
             archived.metadata.clone(),
         );
         assert!(
-            PolicyFacts::from_store(&store).is_none(),
+            store.trace_policy().is_none(),
             "a store without bundle_hash cannot back a TRACE record"
         );
+    }
+
+    #[test]
+    fn policy_facts_none_without_store_version() {
+        let CjarStore { store, .. } = cjar_store(&fixtures::minimal_valid().with_version(""));
+        assert!(
+            store.trace_policy().is_none(),
+            "a .cjar whose metadata has no policy store version cannot back a TRACE record"
+        );
+    }
+
+    #[test]
+    fn custom_issuer_is_named_by_its_urn_and_not_checked_as_a_url() {
+        let issuer = IssuerRef::CustomIssuer("dolphin".to_string());
+        assert_eq!(
+            issuer.to_string(),
+            "urn:jans:cedarling:custom-issuer:dolphin",
+            "Lock names a custom issuer by this URN"
+        );
+        let token = TokenRef::new(issuer, "Acme::DolphinToken", None, "dolphin-opaque")
+            .expect("test token ref should build");
+        draft(decision("a", vec![token]))
+            .expect("a custom issuer is not held to the URL rule of a JWT issuer");
     }
 }
