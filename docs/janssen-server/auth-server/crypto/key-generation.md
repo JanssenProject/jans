@@ -298,6 +298,12 @@ curl -fsSk "https://${JANS_FQDN}/jans-auth/restv1/jwks" \
 
 The number of published keys can be lower than the number generated. `jans-auth` publishes only algorithms enabled and supported by the running configuration and provider.
 
+Set this list to every signing algorithm used by the deployment, including the default and client-specific token algorithms (space-separated):
+
+```bash
+export REQUIRED_SIGNING_ALGS='RS256'
+```
+
 Confirm that every published `kid` exists in the generated JWKS:
 
 ```bash
@@ -314,6 +320,33 @@ comm -23 \
 ```
 
 Expected result: no output.
+
+Confirm that every required CONNECT signing key is published. A key that is missing here can still be used to sign tokens, and clients would then be unable to validate them:
+
+```bash
+comm -23 \
+  <(
+    jq -r --arg required "$REQUIRED_SIGNING_ALGS" '
+      ($required | split(" ")) as $requiredAlgs
+      | .keys[]
+      | .alg as $alg
+      | select(
+          .use == "sig"
+          and ((.key_ops_type // []) | index("connect"))
+          and ($requiredAlgs | index($alg))
+        )
+      | .kid
+    ' "$RECOVERY_DIR/jans-auth-keys.json" \
+    | sort
+  ) \
+  <(
+    curl -fsSk "https://${JANS_FQDN}/jans-auth/restv1/jwks" \
+    | jq -r '.keys[].kid' \
+    | sort
+  )
+```
+
+Expected result: no output. If a required key is listed, add its algorithm to `jwksAlgorithmsSupported` (or clear that list) before putting the server back into service.
 
 Also verify discovery:
 
