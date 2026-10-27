@@ -117,9 +117,14 @@ set -e
 MVN_PAR="-T 4"   # the backgrounded cargo build holds the other four until it finishes
 MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
-for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+# jans-core/cedarling (and config-api, which consumes it) need cedarling-java, so they are built
+# after the native lib below.
+for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-fido2; do
   pl=""
-  case "$mod" in jans-auth-server | jans-scim | jans-config-api | jans-fido2) pl="$NO_FIPS" ;; esac
+  case "$mod" in
+    jans-core) pl="-pl !cedarling" ;;
+    jans-auth-server | jans-scim | jans-fido2) pl="$NO_FIPS" ;;
+  esac
   echo "::group::build $mod"
   mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
     $pl -f "$mod/pom.xml" clean install
@@ -140,14 +145,26 @@ if [ "$ced_ok" = 1 ]; then
     sleep 1
   done
 fi
-[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
+[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock tests will be skipped"
 echo "::endgroup::"
+
+# Without the local native lib (empty $CED_OPTS) cedarling-java falls back to the nightly release's.
+set -e
+echo "::group::build cedarling-java + jans-core-cedarling + jans-config-api"
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae $CED_OPTS \
+  -f jans-cedarling/bindings/cedarling-java/pom.xml clean install
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
+  -pl cedarling -f jans-core/pom.xml clean install
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
+  $NO_FIPS -f jans-config-api/pom.xml clean install
+echo "::endgroup::"
+set +e
 
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
 # failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
-for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; do
+for mod in agama jans-lock/lock-server; do
   case "$mod" in
-    *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
+    *lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac
   pl=""
   case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
@@ -202,16 +219,18 @@ else
     }
   done
   [ "$img_rc" -eq 0 ] || exit 1
-  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema must be
-  # overlaid or the loader creates the tables from the pinned one.
+  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema and SQL
+  # column types/indexes must be overlaid or the loader creates the tables from the pinned ones.
   for svc in persistence-loader config-api auth-server scim fido2; do
-    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup/schema >/dev/null <<EOF
+    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/$svc:ci
-COPY jans_schema.json custom_schema.json /app/schema/
+COPY schema/jans_schema.json schema/custom_schema.json /app/schema/
+COPY static/rdbm/sql_data_types.json /app/static/rdbm/
 EOF
   done
   docker build -q -t local/persistence-loader:ci -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/persistence-loader:ci
+COPY static/rdbm /app/static/rdbm
 COPY templates/test /app/templates/test
 COPY schema/jans_test_schema.json /app/templates/test/
 EOF

@@ -28,6 +28,7 @@ use crate::{
     authz::error_metrics::ErrorMetricKey,
     init::policy_store_refresh::{RefreshOutcome, RefreshStrategy},
     log::Decision,
+    trace::{EmitterEvent, TraceRecordStatus},
 };
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
@@ -269,6 +270,11 @@ struct IntervalState {
     data_get_ops: AtomicI64,
     data_remove_ops: AtomicI64,
 
+    /// One counter per [`TraceRecordStatus::ALL`] entry, in the same order.
+    trace_record_statuses: [AtomicI64; TraceRecordStatus::ALL.len()],
+    /// One counter per [`EmitterEvent::ALL`] entry, in the same order.
+    trace_emitter_events: [AtomicI64; EmitterEvent::ALL.len()],
+
     policy_stats: RwLock<HashMap<String, PolicyStats>>,
     error_counters: RwLock<HashMap<String, i64>>,
 }
@@ -305,6 +311,8 @@ impl IntervalState {
             data_push_ops: AtomicI64::new(0),
             data_get_ops: AtomicI64::new(0),
             data_remove_ops: AtomicI64::new(0),
+            trace_record_statuses: Default::default(),
+            trace_emitter_events: Default::default(),
             policy_stats: RwLock::new(HashMap::new()),
             error_counters: RwLock::new(HashMap::new()),
         }
@@ -465,6 +473,7 @@ struct PolicyStoreRefreshMetrics {
     outcome_parse_error: AtomicI64,
     outcome_rebuild_error: AtomicI64,
     outcome_decode_error: AtomicI64,
+    outcome_verification_error: AtomicI64,
 }
 
 impl PolicyStoreRefreshMetrics {
@@ -482,6 +491,7 @@ impl PolicyStoreRefreshMetrics {
             RefreshOutcome::ParseError => &self.outcome_parse_error,
             RefreshOutcome::RebuildError => &self.outcome_rebuild_error,
             RefreshOutcome::DecodeError => &self.outcome_decode_error,
+            RefreshOutcome::VerificationError => &self.outcome_verification_error,
         };
         per_outcome.fetch_add(1, Ordering::Relaxed);
 
@@ -494,7 +504,8 @@ impl PolicyStoreRefreshMetrics {
             | RefreshOutcome::NetworkError
             | RefreshOutcome::ParseError
             | RefreshOutcome::RebuildError
-            | RefreshOutcome::DecodeError => {
+            | RefreshOutcome::DecodeError
+            | RefreshOutcome::VerificationError => {
                 self.consecutive_failures.fetch_add(1, Ordering::Relaxed);
             },
         }
@@ -601,6 +612,11 @@ impl PolicyStoreRefreshMetrics {
             ops,
             "policy_store_refresh.outcome_decode_error",
             &self.outcome_decode_error,
+        );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_verification_error",
+            &self.outcome_verification_error,
         );
     }
 }
@@ -939,6 +955,39 @@ impl MetricsCollector {
             .fetch_add(1, Ordering::Relaxed);
     }
 
+    /// Counts the TRACE record status of one decision.
+    pub(crate) fn record_trace_status(&self, status: TraceRecordStatus) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        if let Some((_, counter)) = TraceRecordStatus::ALL
+            .iter()
+            .zip(&interval.trace_record_statuses)
+            .find(|(known, _)| **known == status)
+        {
+            counter.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    /// Counts `count` occurrences of what the TRACE emitter did.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn record_trace_emitter(&self, event: EmitterEvent, count: usize) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        if let Some((_, counter)) = EmitterEvent::ALL
+            .iter()
+            .zip(&interval.trace_emitter_events)
+            .find(|(known, _)| **known == event)
+        {
+            counter.fetch_add(saturating_usize_to_i64(count), Ordering::Relaxed);
+        }
+    }
+
     pub(crate) fn set_policy_count(&self, count: usize) {
         if !self.mode.collects() {
             return;
@@ -997,6 +1046,16 @@ impl MetricsCollector {
 
         let mut ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
         self.refresh.inject_if_nonzero(&mut ops);
+        // Only non-zero, so a Cedarling without TRACE reports no `trace.*` keys.
+        for (status, counter) in TraceRecordStatus::ALL
+            .iter()
+            .zip(&old.trace_record_statuses)
+        {
+            insert_if_nonzero(&mut ops, status.metric_key(), counter);
+        }
+        for (event, counter) in EmitterEvent::ALL.iter().zip(&old.trace_emitter_events) {
+            insert_if_nonzero(&mut ops, event.metric_key(), counter);
+        }
 
         MetricsSnapshot {
             policy_stats,
@@ -1570,6 +1629,25 @@ mod tests {
                 .get("policy_store_refresh.consecutive_failures"),
             Some(&2),
             "RebuildError counts as a failure for the streak"
+        );
+    }
+
+    #[test]
+    fn policy_store_refresh_verification_error_counts_as_failure() {
+        let collector = MetricsCollector::new(MetricsMode::Local);
+        collector.record_policy_store_refresh(RefreshOutcome::VerificationError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_verification_error"),
+            Some(&1),
+            "VerificationError must increment its own per-outcome counter",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&1),
+            "VerificationError counts as a failure for the streak",
         );
     }
 

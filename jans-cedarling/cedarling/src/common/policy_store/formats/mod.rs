@@ -29,7 +29,9 @@ pub(super) use v1 as current;
 
 use std::borrow::Cow;
 use std::fmt;
+use std::sync::Arc;
 
+use jans_trace_core::Digest;
 use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
 
@@ -39,6 +41,7 @@ use super::loader::{StoreFile, StoreFs};
 use super::manager::ConversionError;
 use super::migration::IntoCurrent;
 use super::schema_parser::ParsedSchema;
+use crate::trace::PolicyFacts;
 
 /// Where every spec version keeps its metadata.
 ///
@@ -326,9 +329,11 @@ pub(crate) struct ParsedPolicyStore {
 /// or policy error. That version then reads the rest of the store from its own
 /// layout and parses it. Older versions are migrated step by step; only the
 /// current version converts into runtime types.
+/// `bundle_hash` is `Some` exactly when `fs` is a `.cjar`, and comes from its bytes.
 pub(super) fn read_policy_store(
     fs: &StoreFs<'_>,
     strict_schema_validation: bool,
+    bundle_hash: Option<Digest>,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
 
@@ -339,11 +344,14 @@ pub(super) fn read_policy_store(
 
     let (store, metadata) = current::into_runtime(doc)?;
 
+    let trace_policy = PolicyFacts::from_archive(bundle_hash, Some(&metadata)).map(Arc::new);
     Ok(ParsedPolicyStore {
         store: PolicyStoreWithID {
             id: metadata.policy_store.id.clone(),
             store,
             metadata: Some(metadata),
+            bundle_hash,
+            trace_policy,
         },
         format: FormatReport {
             spec_version: Some(selected.spec_version),
@@ -414,7 +422,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false)
+        read_policy_store(&fs, false, None)
     }
 
     #[test]
@@ -488,8 +496,8 @@ mod tests {
             .expect("in-memory metadata should be created");
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
 
-        let err =
-            read_policy_store(&fs, true).expect_err("an unsupported version must be rejected");
+        let err = read_policy_store(&fs, true, None)
+            .expect_err("an unsupported version must be rejected");
         assert!(
             matches!(
                 err,

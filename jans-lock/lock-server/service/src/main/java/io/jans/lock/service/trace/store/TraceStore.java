@@ -6,10 +6,12 @@
 
 package io.jans.lock.service.trace.store;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -19,7 +21,9 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -55,7 +59,7 @@ public interface TraceStore {
 	 *                                  exists
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
-	void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException;
+	void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * Replaces the three mutable correlation flags ({@code coverageGap}, {@code chainLinkFailure},
@@ -98,6 +102,13 @@ public interface TraceStore {
 
 	List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token);
 
+	/**
+	 * @return records in the domain whose indexed {@code trace.policy} release matches
+	 *         {@code query}, ordered by {@code receiptSequence} ascending, paged by
+	 *         {@code start}/{@code count}
+	 */
+	List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count);
+
 	long countRecords(String domainId);
 
 	// -- receipts -------------------------------------------------------------------------------
@@ -116,10 +127,20 @@ public interface TraceStore {
 	void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException;
 
 	/**
-	 * @return {@code true} if a matching receipt was found and updated, {@code false} otherwise
-	 * @throws TraceStorageException on a persistence failure
+	 * Moves a receipt out of {@code PENDING} by compare-and-swap (design §9): reads the row, checks its
+	 * state and writes {@code target} only while the row is still {@code PENDING}. {@code COMMITTED}
+	 * and {@code VOID} are terminal; a lost compare-and-swap is re-read and re-evaluated, so a
+	 * terminal state is never overwritten.
+	 *
+	 * @param target {@code COMMITTED} or {@code VOID}
+	 * @return {@link ReceiptSettlement#SETTLED}, {@link ReceiptSettlement#ALREADY_SETTLED} (the same
+	 *         state is already stored), {@link ReceiptSettlement#CONFLICT} (the other terminal state
+	 *         is stored) or {@link ReceiptSettlement#NOT_FOUND}
+	 * @throws IllegalArgumentException if {@code target} is {@code PENDING}
+	 * @throws TraceStorageException    on a persistence failure, including exhausted compare-and-swap
+	 *                                   retries
 	 */
-	boolean updateReceiptState(String domainId, long receiptSequence, TraceReceiptState state)
+	ReceiptSettlement settleReceipt(String domainId, long receiptSequence, TraceReceiptState target)
 			throws TraceStorageException;
 
 	/**
@@ -129,6 +150,46 @@ public interface TraceStore {
 	Optional<ReceiptHead> findReceiptHead(String domainId);
 
 	Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence);
+
+	/**
+	 * @return the domain's receipts at the given sequences, in one lookup; sequences without a
+	 *         receipt are absent from the result
+	 */
+	List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences);
+
+	// -- policy store releases (shared by every node, not domain-scoped) ------------------------
+
+	Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash);
+
+	/**
+	 * Stores a release first seen by this node; the entry's id and DN are derived here.
+	 *
+	 * @throws DuplicateEntryException another node stored it first
+	 */
+	void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException, TraceStorageException;
+
+	/**
+	 * Records that a node served the release at {@code servedAtMs}: the last-served time only moves
+	 * forward (and the version with it), the first-served time only moves back. Concurrent callers
+	 * keep the maximum and the minimum.
+	 *
+	 * @return {@code false} when no such release is stored
+	 */
+	boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) throws TraceStorageException;
+
+	/** @return up to {@code limit} releases whose last-served time is before {@code cutoffMs} */
+	List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit);
+
+	/**
+	 * Deletes the release only if its last-served time is still before {@code cutoffMs}, in one
+	 * conditional delete, so a release another node refreshed meanwhile is kept.
+	 *
+	 * @return {@code true} when a row was deleted; {@code false} when it was refreshed or is
+	 *         already gone
+	 */
+	boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs)
+			throws TraceStorageException;
 
 	/**
 	 * @return {@code PENDING} receipts received strictly before {@code cutoffMs} (a receipt

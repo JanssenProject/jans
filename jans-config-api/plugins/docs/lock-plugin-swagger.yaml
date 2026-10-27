@@ -98,6 +98,21 @@ paths:
         required: true
         schema:
           type: string
+      - name: requestId
+        in: query
+        description: Cedarling request_id to match
+        schema:
+          type: string
+      - name: policyStoreId
+        in: query
+        description: Policy store id to match
+        schema:
+          type: string
+      - name: policyStoreVersion
+        in: query
+        description: Policy store version to match
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
@@ -825,6 +840,21 @@ components:
             type: string
             description: Additional context information as key-value pairs
           description: Additional context information as key-value pairs
+        requestId:
+          type: string
+          description: Cedarling request_id of the decision; contextInformation request_id
+            wins when present
+          example: 0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d
+        policyStoreId:
+          type: string
+          description: Policy store id used for the decision; contextInformation policystore_id
+            wins when present
+          example: a1bf63d5a5e4a0b7d0d5c9e3
+        policyStoreVersion:
+          type: string
+          description: Policy store version used for the decision; contextInformation
+            policystore_version wins when present
+          example: 1.2.3
       description: Log audit entry
     TelemetryEntry:
       type: object
@@ -1099,6 +1129,19 @@ components:
           description: Seconds after signed_at a record is accepted before being flagged
             late
           format: int32
+        policyMismatchGraceSeconds:
+          type: integer
+          description: "Seconds after the last Lock node stops serving a policy store\
+            \ release during which records judged under it are not flagged policy_mismatch_flag;\
+            \ the check uses the larger of this and latenessThresholdSeconds, plus\
+            \ about 130 seconds for update and cache lag"
+          format: int32
+        policyReleaseRetentionDays:
+          type: integer
+          description: Days a policy store release no node serves any more is kept
+            for the policy release check before it is deleted; never less than the
+            check's acceptance window
+          format: int32
         maxFutureSkewSeconds:
           type: integer
           description: Seconds a signed_at may be ahead of Lock's clock before the
@@ -1158,6 +1201,12 @@ components:
           description: "How producer chains come to exist: PRE_REGISTERED (admin API\
             \ only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers\
             \ it); an unknown value is treated as PRE_REGISTERED"
+        cryptoProvider:
+          type: string
+          description: "TRACE cryptography implementation: JAVA (BouncyCastle, in-process)\
+            \ or NATIVE (jans-trace-core through the jans-trace-java binding); an\
+            \ unknown value is treated as JAVA"
+          default: JAVA
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object

@@ -11,13 +11,14 @@ use super::default_values::{
     default_http_client_max_retries, default_http_client_retry_delay_secs, default_jti,
     default_jwks_refresh_min_interval, default_log_channel_capacity, default_log_max_retries,
     default_policy_store_max_file_size, default_status_list_refresh_interval_max,
-    default_token_cache_capacity, default_token_cache_max_ttl, default_true,
+    default_token_cache_capacity, default_token_cache_max_ttl, default_trace_bulk_max_bytes,
+    default_trace_bulk_max_records, default_true,
 };
 #[cfg(not(target_arch = "wasm32"))]
 use super::default_values::{
     default_http_client_request_timeout, default_stdout_buffer_limit, default_stdout_timeout_millis,
 };
-use super::feature_types::{FeatureToggle, LoggerType};
+use super::feature_types::{FeatureToggle, LoggerType, SigstoreMode};
 use super::json_util::{
     deserialize_jwks_refresh_interval, deserialize_jwks_refresh_min_interval,
     deserialize_or_parse_string_as_json, deserialize_status_list_refresh_interval_max,
@@ -43,7 +44,12 @@ use std::num::NonZeroUsize;
 /// This structure is used to deserialize values from ENV VARS so json keys is same as keys in environment variables
 //
 //  All fields should be available to parse from string, because env vars always string.
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
+//
+//  No `Debug` outside tests: the raw values include secrets (the inline TRACE key,
+//  the SSA JWT) that the decoded `BootstrapConfig` redacts, and a `{:?}` of this
+//  struct would print them.
+#[derive(Deserialize, Serialize, PartialEq)]
+#[cfg_attr(test, derive(Debug))]
 pub struct BootstrapConfigRaw {
     ///  Human friendly identifier for the application
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
@@ -527,6 +533,110 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub policy_store_max_file_size: u64,
+
+    /// `enforce` rejects a `.cjar` policy store unless its Sigstore bundle
+    /// verifies. Default: `disabled`.
+    #[serde(rename = "CEDARLING_POLICY_STORE_SIGSTORE_MODE", default)]
+    pub policy_store_sigstore_mode: SigstoreMode,
+
+    /// Expected signer identity (certificate SAN), matched exactly.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_cert_identity: Option<String>,
+
+    /// Expected OIDC issuer of the signing certificate, matched exactly.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_cert_oidc_issuer: Option<String>,
+
+    /// Bundle location; defaults to the policy store location plus `.sigstore.json`.
+    #[serde(
+        rename = "CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub policy_store_sigstore_bundle_uri: Option<String>,
+
+    // =========================================================================
+    // TRACE Configuration
+    // =========================================================================
+    /// If enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for
+    /// each decision that carries a TRACE context and sends it to Lock Server.
+    /// Requires `CEDARLING_LOCK` and a `.cjar` policy store. Default: `disabled`.
+    #[serde(rename = "CEDARLING_TRACE", default)]
+    pub trace: FeatureToggle,
+
+    /// Stable producer id registered in Lock. Defaults to `CEDARLING_APPLICATION_NAME`.
+    #[serde(
+        rename = "CEDARLING_TRACE_PRODUCER_ID",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_producer_id: Option<String>,
+
+    /// Path to the unencrypted PKCS#8 PEM Ed25519 private key that signs TRACE
+    /// records. A path keeps the secret out of the bootstrap config.
+    /// ***Required*** if `CEDARLING_TRACE == enabled` and
+    /// `CEDARLING_TRACE_SIGNING_KEY_PEM` is not set.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KEY",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_key: Option<String>,
+
+    /// The same key as unencrypted PKCS#8 PEM text, for hosts that inject secrets
+    /// as values. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set.
+    ///
+    /// Prefer the key file where the host can provide one: a key inlined in the
+    /// configuration can leak through environment dumps, process listings or
+    /// configuration files kept under version control.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KEY_PEM",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_key_pem: Option<String>,
+
+    /// `kid` the signing key is registered under in Lock. When unset or blank,
+    /// the RFC 7638 thumbprint of the public key (`sha256:<hex>`) is used.
+    #[serde(
+        rename = "CEDARLING_TRACE_SIGNING_KID",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_signing_kid: Option<String>,
+
+    /// TRACE bulk endpoint. `discovered` or unset takes `trace_bulk_endpoint`
+    /// from the Lock Server well-known configuration.
+    #[serde(
+        rename = "CEDARLING_TRACE_ENDPOINT",
+        default,
+        deserialize_with = "parse_option_string"
+    )]
+    pub trace_endpoint: Option<String>,
+
+    /// Maximum number of records in one TRACE bulk request. Default: 100, as in Lock.
+    #[serde(
+        rename = "CEDARLING_TRACE_BULK_MAX_RECORDS",
+        default = "default_trace_bulk_max_records",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trace_bulk_max_records: usize,
+
+    /// Maximum size in bytes of one TRACE bulk request. Default: 4194304 (4 MiB), as in Lock.
+    #[serde(
+        rename = "CEDARLING_TRACE_BULK_MAX_BYTES",
+        default = "default_trace_bulk_max_bytes",
+        deserialize_with = "deserialize_or_parse_string_as_json"
+    )]
+    pub trace_bulk_max_bytes: usize,
 }
 
 impl Default for BootstrapConfigRaw {

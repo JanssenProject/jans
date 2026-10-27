@@ -38,7 +38,7 @@ public class Main {
             EntityData resource = EntityData.Companion.fromJson(resourceJson);
 
             // Perform authorization (unsigned: optional principal + action + resource + context)
-            AuthorizeResult result = cedarling.authorizeUnsigned(principal, action, resource, contextJson);
+            AuthorizeResult result = cedarling.authorizeUnsigned(principal, action, resource, contextJson, null);
 
             // Print decision and full result as pretty-formatted JSON
             System.out.println("Decision:\n" + JsonUtil.toPrettyJson(result.getDecision()));

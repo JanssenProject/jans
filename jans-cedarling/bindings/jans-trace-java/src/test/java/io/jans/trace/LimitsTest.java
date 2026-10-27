@@ -21,7 +21,7 @@ public class LimitsTest {
             limits.maxBatchBytes(), limits.maxBatchRecords(),
         };
         long[] expected = {256 * 1024, 32, 1024, 1024, 64 * 1024, 512 * 1024, 8 * 1024 * 1024, 500};
-        assertEquals(actual, expected, "defaults should be the decision R16 values");
+        assertEquals(actual, expected, "defaults should be the core library values");
     }
 
     @Test

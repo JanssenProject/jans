@@ -72,9 +72,8 @@ public class ConfigurationService {
         }
 
         ObjectNode config = objectMapper.createObjectNode();
+        response.set("config", config);
         config.put("policy_endpoint", baseEndpointUri + "/policy");
-
-        config.put("sse_endpoint", baseEndpointUri + "/sse");
 
         return response;
 	}

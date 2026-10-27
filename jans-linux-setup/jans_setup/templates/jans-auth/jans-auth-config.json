@@ -595,6 +595,12 @@
         "serializeRules": {
           "JAVA": ["java", "sun", "com.sun", "jdk"],
           "KRYO": []
+        },
+        "trackingSettings": {
+            "enabled": false,
+            "skipTemplateViews": false,
+            "skipInstructionFrequencies": false,
+            "excludedFlows": [ ]
         }
     },
     "blockWebviewAuthorizationEnabled": false,

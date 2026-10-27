@@ -34,7 +34,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.TraceTime;
+import io.jans.lock.trace.crypto.TraceTime;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -42,6 +42,8 @@ import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
+import io.jans.lock.trace.crypto.bc.ReceiptHashes;
 
 /**
  * Tests for {@link TraceReceiptChain}: sequential allocation and linkage, cross-node contention on
@@ -83,12 +85,14 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 		setField(chain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(chain, "store", backingStore);
 		setField(chain, "appConfiguration", appConfiguration);
+		setField(chain, "cryptoProvider", TraceTestCrypto.javaProvider());
 		return chain;
 	}
 
-	private void insertMatchingRecord(String recordId, String contentDigest) throws DuplicateEntryException {
+	private void insertMatchingRecord(String recordId, String contentDigest, long receiptSequence)
+			throws DuplicateEntryException {
 		StoredTraceRecord record = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
-				.recordId(recordId).contentDigest(contentDigest).build();
+				.recordId(recordId).contentDigest(contentDigest).receiptSequence(receiptSequence).build();
 		store.insertRecord(record);
 	}
 
@@ -102,21 +106,21 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 				NODE_ID);
 		assertEquals(1L, claim1.getSeq());
 		assertEquals(TraceConstants.ZERO_HASH, claim1.getPrevReceiptHash());
-		insertMatchingRecord("rec-1", "sha256:" + digest('1'));
+		insertMatchingRecord("rec-1", "sha256:" + digest('1'), 1);
 		chain.commit(DOMAIN, claim1.getSeq());
 
 		ReceiptClaim claim2 = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 2_000L,
 				NODE_ID);
 		assertEquals(2L, claim2.getSeq());
 		assertEquals(claim1.getReceiptHash(), claim2.getPrevReceiptHash());
-		insertMatchingRecord("rec-2", "sha256:" + digest('2'));
+		insertMatchingRecord("rec-2", "sha256:" + digest('2'), 2);
 		chain.commit(DOMAIN, claim2.getSeq());
 
 		ReceiptClaim claim3 = chain.claim(DOMAIN, PRODUCER, "rec-3", "rec-3-key", "sha256:" + digest('3'), 3_000L,
 				NODE_ID);
 		assertEquals(3L, claim3.getSeq());
 		assertEquals(claim2.getReceiptHash(), claim3.getPrevReceiptHash());
-		insertMatchingRecord("rec-3", "sha256:" + digest('3'));
+		insertMatchingRecord("rec-3", "sha256:" + digest('3'), 3);
 		chain.commit(DOMAIN, claim3.getSeq());
 
 		ChainVerificationReport report = chain.verifyDomain(DOMAIN, 100);
@@ -195,7 +199,7 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 
 		ReceiptClaim claim1 = chain.claim(DOMAIN, PRODUCER, "rec-1", "rec-1-key", "sha256:" + digest('1'), 1_000L,
 				NODE_ID);
-		insertMatchingRecord("rec-1", "sha256:" + digest('1'));
+		insertMatchingRecord("rec-1", "sha256:" + digest('1'), 1);
 		chain.commit(DOMAIN, claim1.getSeq());
 
 		ReceiptClaim claim2 = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 2_000L,
@@ -209,7 +213,7 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 		assertEquals(claim2.getReceiptHash(), claim3.getPrevReceiptHash(),
 				"prev hash must link to the voided position's hash, not skip it");
 		assertNotEquals(claim1.getReceiptHash(), claim2.getReceiptHash());
-		insertMatchingRecord("rec-3", "sha256:" + digest('3'));
+		insertMatchingRecord("rec-3", "sha256:" + digest('3'), 3);
 		chain.commit(DOMAIN, claim3.getSeq());
 
 		ChainVerificationReport report = chain.verifyDomain(DOMAIN, 100);

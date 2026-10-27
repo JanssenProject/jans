@@ -111,12 +111,11 @@ class JansAuthInstaller(JettyInstaller):
         scope_list = self.get_config_api_scopes()
 
         for api_role in role_mapping['rolePermissionMapping']:
-            if api_role['role'] == 'api-admin':
-                break
-
-        for scope in scope_list:
-            if scope not in api_role['permissions']:
-                api_role['permissions'].append(scope)
+            if api_role['role'] != 'admin':
+                continue
+            for scope in scope_list:
+                if scope not in api_role['permissions']:
+                    api_role['permissions'].append(scope)
 
         Config.template_rendering_dict['role_scope_mappings'] = json.dumps(role_mapping)
 

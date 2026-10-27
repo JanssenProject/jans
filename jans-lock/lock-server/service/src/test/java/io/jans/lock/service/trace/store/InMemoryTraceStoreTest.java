@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
@@ -31,6 +32,7 @@ import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.ReceiptEntry;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
@@ -91,18 +93,18 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 	}
 
 	@Test
-	void testFailNextUpdateReceiptState_throwsOnce_thenSucceeds() throws Exception {
+	void testFailNextSettleReceipt_throwsOnce_thenSucceeds() throws Exception {
 		InMemoryTraceStore inMemoryStore = (InMemoryTraceStore) store;
 		TraceReceiptEntry row = newReceiptEntry(1L);
 		inMemoryStore.insertReceipt(row);
 
-		inMemoryStore.failNextUpdateReceiptState();
+		inMemoryStore.failNextSettleReceipt();
 		assertThrows(TraceStorageException.class,
-				() -> inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED));
+				() -> inMemoryStore.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED));
 		assertEquals(TraceReceiptState.PENDING, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
 
-		boolean updated = inMemoryStore.updateReceiptState(DOMAIN, 1L, TraceReceiptState.COMMITTED);
-		assertTrue(updated);
+		ReceiptSettlement settled = inMemoryStore.settleReceipt(DOMAIN, 1L, TraceReceiptState.COMMITTED);
+		assertEquals(ReceiptSettlement.SETTLED, settled);
 		assertEquals(TraceReceiptState.COMMITTED, inMemoryStore.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
 	}
 
@@ -201,6 +203,34 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 		assertEquals(1, successes.get());
 		assertEquals(1, duplicates.get());
 		assertEquals(1, inMemoryStore.snapshot().size());
+	}
+
+	@Test
+	void testRecordPolicyReleaseServed_concurrentSightings_keepMaxAndMin() throws Exception {
+		InMemoryTraceStore releases = new InMemoryTraceStore();
+		String hash = "sha256:" + "e".repeat(64);
+		TracePolicyReleaseEntry entry = new TracePolicyReleaseEntry();
+		entry.setPolicyStoreId("store-1");
+		entry.setBundleHash(hash);
+		entry.setFirstServedAtMs(50_000L);
+		entry.setLastServedAtMs(50_000L);
+		releases.insertPolicyRelease(entry);
+		ExecutorService pool = Executors.newFixedThreadPool(8);
+		CountDownLatch start = new CountDownLatch(1);
+		for (int i = 1; i <= 100; i++) {
+			long servedAtMs = i * 1_000L;
+			pool.submit(() -> {
+				start.await();
+				return releases.recordPolicyReleaseServed("store-1", hash, "1.0.0", servedAtMs);
+			});
+		}
+		start.countDown();
+		pool.shutdown();
+		assertTrue(pool.awaitTermination(10, TimeUnit.SECONDS));
+
+		TracePolicyReleaseEntry found = releases.findPolicyRelease("store-1", hash).orElseThrow();
+		assertEquals(100_000L, found.getLastServedAtMs());
+		assertEquals(1_000L, found.getFirstServedAtMs());
 	}
 
 }

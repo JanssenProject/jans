@@ -24,6 +24,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceConfiguration {
 
     public static final int DEFAULT_LATENESS_THRESHOLD_SECONDS = 300;
+    public static final int DEFAULT_POLICY_MISMATCH_GRACE_SECONDS = 300;
+    public static final int DEFAULT_POLICY_RELEASE_RETENTION_DAYS = 30;
     public static final int DEFAULT_MAX_FUTURE_SKEW_SECONDS = 300;
     public static final int DEFAULT_MAX_REQUEST_BYTES = 262144;
     public static final int DEFAULT_MAX_JSON_DEPTH = 32;
@@ -37,6 +39,7 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_BULK_RECORDS = 100;
     public static final int DEFAULT_MAX_BULK_REQUEST_BYTES = 4_194_304;
     public static final String DEFAULT_CHAIN_REGISTRATION_MODE = "PRE_REGISTERED";
+    public static final String DEFAULT_CRYPTO_PROVIDER = "JAVA";
     /** Ceiling {@link #getMaxBulkRequestBytes()} clamps to regardless of configuration, so a
      *  careless value can never make the bulk endpoint buffer an unbounded amount of memory per
      *  request (CWE-770). Not itself configurable. */
@@ -61,6 +64,14 @@ public class TraceConfiguration {
     @DocProperty(description = "Seconds after signed_at a record is accepted before being flagged late", defaultValue = "300")
     @Schema(description = "Seconds after signed_at a record is accepted before being flagged late")
     private int latenessThresholdSeconds = DEFAULT_LATENESS_THRESHOLD_SECONDS;
+
+    @DocProperty(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag", defaultValue = "300")
+    @Schema(description = "Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag")
+    private int policyMismatchGraceSeconds = DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
+
+    @DocProperty(description = "Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window", defaultValue = "30")
+    @Schema(description = "Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window")
+    private int policyReleaseRetentionDays = DEFAULT_POLICY_RELEASE_RETENTION_DAYS;
 
     @DocProperty(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected", defaultValue = "300")
     @Schema(description = "Seconds a signed_at may be ahead of Lock's clock before the record is rejected")
@@ -114,6 +125,10 @@ public class TraceConfiguration {
     @Schema(description = "How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED")
     private String chainRegistrationMode = DEFAULT_CHAIN_REGISTRATION_MODE;
 
+    @DocProperty(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA", defaultValue = "JAVA")
+    @Schema(description = "TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA", defaultValue = "JAVA")
+    private String cryptoProvider = DEFAULT_CRYPTO_PROVIDER;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -152,6 +167,22 @@ public class TraceConfiguration {
 
     public void setLatenessThresholdSeconds(int latenessThresholdSeconds) {
         this.latenessThresholdSeconds = latenessThresholdSeconds;
+    }
+
+    public int getPolicyMismatchGraceSeconds() {
+        return policyMismatchGraceSeconds >= 0 ? policyMismatchGraceSeconds : DEFAULT_POLICY_MISMATCH_GRACE_SECONDS;
+    }
+
+    public void setPolicyMismatchGraceSeconds(int policyMismatchGraceSeconds) {
+        this.policyMismatchGraceSeconds = policyMismatchGraceSeconds;
+    }
+
+    public int getPolicyReleaseRetentionDays() {
+        return policyReleaseRetentionDays > 0 ? policyReleaseRetentionDays : DEFAULT_POLICY_RELEASE_RETENTION_DAYS;
+    }
+
+    public void setPolicyReleaseRetentionDays(int policyReleaseRetentionDays) {
+        this.policyReleaseRetentionDays = policyReleaseRetentionDays;
     }
 
     public int getMaxFutureSkewSeconds() {
@@ -268,11 +299,23 @@ public class TraceConfiguration {
         this.chainRegistrationMode = chainRegistrationMode;
     }
 
+    public String getCryptoProvider() {
+        return cryptoProvider == null || cryptoProvider.trim().isEmpty()
+                ? DEFAULT_CRYPTO_PROVIDER
+                : cryptoProvider;
+    }
+
+    public void setCryptoProvider(String cryptoProvider) {
+        this.cryptoProvider = cryptoProvider;
+    }
+
     @Override
     public String toString() {
         return "TraceConfiguration [enabled=" + enabled + ", defaultEvidenceDomainId=" + defaultEvidenceDomainId
                 + ", defaultAllowedProducerIds=" + defaultAllowedProducerIds + ", clientDomainBindings=" + clientDomainBindings + ", latenessThresholdSeconds="
-                + getLatenessThresholdSeconds() + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
+                + getLatenessThresholdSeconds() + ", policyMismatchGraceSeconds=" + getPolicyMismatchGraceSeconds()
+                + ", policyReleaseRetentionDays=" + getPolicyReleaseRetentionDays()
+                + ", maxFutureSkewSeconds=" + getMaxFutureSkewSeconds()
                 + ", maxRequestBytes=" + getMaxRequestBytes() + ", maxJsonDepth="
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
@@ -281,7 +324,8 @@ public class TraceConfiguration {
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
                 + getMaxBulkRecords() + ", maxBulkRequestBytes=" + getMaxBulkRequestBytes()
-                + ", chainRegistrationMode=" + getChainRegistrationMode() + "]";
+                + ", chainRegistrationMode=" + getChainRegistrationMode()
+                + ", cryptoProvider=" + getCryptoProvider() + "]";
     }
 
 }

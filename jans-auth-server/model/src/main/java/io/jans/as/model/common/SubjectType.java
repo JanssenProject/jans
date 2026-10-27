@@ -19,7 +19,8 @@ import java.util.Map;
 public enum SubjectType implements AttributeEnum {
 
     PAIRWISE("pairwise"),
-    PUBLIC("public");
+    PUBLIC("public"),
+    EPHEMERAL("ephemeral");
     private static final Map<String, SubjectType> mapByValues = new HashMap<>();
 
     static {

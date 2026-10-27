@@ -27,6 +27,7 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+mod trace;
 // is reexported in hidden bindings module
 #[doc(hidden)]
 pub mod sparkv;
@@ -58,7 +59,10 @@ pub use authz::request::{
     BatchAuthorizeUnsignedRequest, BatchItem, CedarEntityMapping, EntityData, RequestUnsigned,
     TokenInput,
 };
-pub use authz::{AuthorizeError, AuthorizeResult, BatchItemError, MultiIssuerAuthorizeResult};
+pub use authz::{
+    AuthorizeError, AuthorizeOptions, AuthorizeResult, BatchItemError, DropReason, DroppedToken,
+    MultiIssuerAuthorizeResult, TokenInputError, TraceContext,
+};
 pub use bootstrap_config::*;
 /// Identifier of a Cedar policy, re-exported from [`cedar_policy`] so callers can
 /// pass the policy IDs from `response.diagnostics().reason()` to the annotation
@@ -77,13 +81,24 @@ use init::policy_store_refresh::{
     AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
     spawn_refresh_worker,
 };
+use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::service_factory::ServiceFactoryParams;
 use init::service_factory::ServiceInitError;
+#[cfg(not(target_arch = "wasm32"))]
+use init::service_factory::StartTraceError;
+#[cfg(not(target_arch = "wasm32"))]
+pub use init::service_factory::{InvalidTraceKeyError, LoadProducerKeyError};
 use lock::InitLockServiceError;
 use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
+#[cfg(not(target_arch = "wasm32"))]
+use trace::EmitterHandle;
+#[cfg(not(target_arch = "wasm32"))]
+pub use trace::EmitterInitError;
+pub use trace::{ParseProducerIdError, ParseTraceSigningKidError, ProducerId, TraceSigningKid};
 
 use semver::Version;
 
@@ -130,6 +145,28 @@ pub enum InitCedarlingError {
     /// logs to the Lock Server.
     #[error("failed to initialize the Lock Service: {0}")]
     InitLockService(#[from] InitLockServiceError),
+    /// Error returned when TRACE is enabled without what it needs from the rest of
+    /// the configuration.
+    #[error(transparent)]
+    TraceSetup(#[from] TraceSetupError),
+    /// Error returned when TRACE is enabled but its signing key cannot be loaded.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error(transparent)]
+    TraceKey(#[from] LoadProducerKeyError),
+    /// Error returned when TRACE is enabled but its emitter cannot start.
+    #[cfg(not(target_arch = "wasm32"))]
+    #[error(transparent)]
+    TraceEmitter(#[from] EmitterInitError),
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl From<StartTraceError> for InitCedarlingError {
+    fn from(err: StartTraceError) -> Self {
+        match err {
+            StartTraceError::Key(err) => Self::TraceKey(err),
+            StartTraceError::Emitter(err) => Self::TraceEmitter(err),
+        }
+    }
 }
 
 /// Sized wrapper around the custom token processor trait object so it can be
@@ -161,6 +198,11 @@ pub struct Cedarling {
     /// exits when [`Cedarling`] goes away. The leading `_` tells the compiler
     /// the field is intentionally not read.
     _refresh_handle: Option<Arc<PolicyStoreRefreshHandle>>,
+    /// Signs and sends TRACE records; `None` when TRACE is disabled or Lock has
+    /// no TRACE endpoint. Stopped by [`Self::shut_down`] before the log, as it
+    /// writes to the log and sends with the Lock token.
+    #[cfg(not(target_arch = "wasm32"))]
+    trace_emitter: Option<Arc<EmitterHandle>>,
 }
 
 impl Cedarling {
@@ -176,7 +218,16 @@ impl Cedarling {
     }
 
     /// Create a new instance of the Cedarling application.
+    #[allow(clippy::too_many_lines)]
     pub async fn new(config: &BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+        // Checked here as well as when decoding, so a `BootstrapConfig` built
+        // directly cannot skip it; before any network work, as it needs none.
+        if config.trace_config.is_some() {
+            bootstrap_config::check_trace_setup(
+                config.lock_config.is_some(),
+                &config.policy_store_config.source,
+            )?;
+        }
         let pdp_id = app_types::PdpID::new();
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
@@ -191,15 +242,17 @@ impl Cedarling {
         );
         let metrics = Arc::new(MetricsCollector::new(metrics_mode));
 
-        let log = crate::log::init_logger(
+        let initialized = crate::log::init_logger(
             &config.log_config,
             pdp_id,
             app_name,
             config.lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
+            config.trace_config.as_ref().map(|trace| &trace.endpoint),
         )
         .await?;
+        let log = initialized.log;
 
         log.log_any(
             LogEntry::new(BaseLogEntry::new_system_opt_request_id(
@@ -229,17 +282,34 @@ impl Cedarling {
             metrics.clone(),
         )?);
 
-        let mut service_factory = ServiceFactory::new(
-            config,
+        let mut service_factory = ServiceFactory::new(ServiceFactoryParams {
+            bootstrap_config: config,
             service_config,
-            log.clone(),
-            data.clone(),
-            metrics.clone(),
-        );
+            log_service: log.clone(),
+            data_store: data.clone(),
+            metrics: metrics.clone(),
+            #[cfg(not(target_arch = "wasm32"))]
+            trace_sink: initialized.trace_sink,
+            #[cfg(not(target_arch = "wasm32"))]
+            pdp_id,
+        });
+
+        #[cfg(not(target_arch = "wasm32"))]
+        let trace_emitter = service_factory.start_trace().await?;
 
         // Log policy store metadata if available (new format only)
         if let Some(metadata) = service_factory.policy_store_metadata() {
             log_policy_store_metadata(&log, metadata);
+        }
+        // Compared with the `bundle_hash` Lock serves for the same `.cjar`.
+        if let Some(bundle_hash) = service_factory.policy_store_bundle_hash() {
+            log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::INFO,
+                    None,
+                ))
+                .set_message(format!("Policy store bundle_hash: {bundle_hash}")),
+            );
         }
 
         if let Some(registry) = log.health_registry() {
@@ -273,6 +343,8 @@ impl Cedarling {
             data,
             metrics,
             _refresh_handle: refresh_handle,
+            #[cfg(not(target_arch = "wasm32"))]
+            trace_emitter,
         })
     }
 
@@ -484,6 +556,10 @@ impl Cedarling {
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
+        #[cfg(not(target_arch = "wasm32"))]
+        if let Some(emitter) = &self.trace_emitter {
+            emitter.shut_down().await;
+        }
         self.log.shut_down().await;
     }
 }
@@ -570,7 +646,18 @@ async fn perform_bootstrap_load(
         format,
         body_hash,
         validators,
+        signed_by,
     } = loaded;
+
+    if let Some(signed_by) = signed_by {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::INFO,
+                None,
+            ))
+            .set_message(format!("policy store signature verified: {signed_by}")),
+        );
+    }
 
     for warning in &format.warnings {
         log.log_any(
@@ -674,6 +761,7 @@ fn maybe_spawn_refresh_worker(
         initial_format: seed.format,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
+        verifier: ArchiveVerifier::from_config(&config.policy_store_config.signature),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
 }

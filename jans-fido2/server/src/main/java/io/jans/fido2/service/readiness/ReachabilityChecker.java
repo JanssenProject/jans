@@ -31,8 +31,8 @@ import jakarta.inject.Inject;
  * <li>{@code reachability.content-type} (HTTP 200 only; the media type is compared, parameters such as
  * {@code charset} are ignored): PASS for {@code application/json}. A missing header is FAIL. Any other type
  * is FAIL for {@code assetlinks.json}, which Google documents as requiring {@code application/json}, and
- * WARN for {@code apple-app-site-association}, where the {@code application/json} requirement is a
- * convention rather than something known to be enforced.</li>
+ * WARN for {@code apple-app-site-association}, where Apple documents {@code application/json} but does
+ * not document enforcing it.</li>
  * <li>{@code reachability.limits}: FAIL for a body over the size limit or a timeout, PASS for a response
  * within the size limit.</li>
  * </ul>
@@ -47,11 +47,21 @@ public class ReachabilityChecker {
     private WellKnownFetcher fetcher;
 
     public ReachabilityReport checkAssetLinks(ValidatedRpId rpId) {
-        return report(rpId, fetcher.fetchAssetLinks(rpId), CheckStatus.FAIL);
+        return checkAssetLinks(rpId, fetcher);
     }
 
     public ReachabilityReport checkAppleAppSiteAssociation(ValidatedRpId rpId) {
-        return report(rpId, fetcher.fetchAppleAppSiteAssociation(rpId), CheckStatus.WARN);
+        return checkAppleAppSiteAssociation(rpId, fetcher);
+    }
+
+    /** As {@link #checkAssetLinks(ValidatedRpId)}, using a fetcher that carries the caller's size and time limits. */
+    public ReachabilityReport checkAssetLinks(ValidatedRpId rpId, WellKnownFetcher withLimits) {
+        return report(rpId, withLimits.fetchAssetLinks(rpId), CheckStatus.FAIL);
+    }
+
+    /** As {@link #checkAppleAppSiteAssociation(ValidatedRpId)}, using a fetcher that carries the caller's limits. */
+    public ReachabilityReport checkAppleAppSiteAssociation(ValidatedRpId rpId, WellKnownFetcher withLimits) {
+        return report(rpId, withLimits.fetchAppleAppSiteAssociation(rpId), CheckStatus.WARN);
     }
 
     private static ReachabilityReport report(ValidatedRpId rpId, WellKnownFetchResult fetch,

@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +39,9 @@ final class EventKindValidationSupport {
 	static final Set<String> INVOCATION_OUTCOMES = Collections
 			.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("SUCCESS", "FAILURE")));
 
+	static final Set<String> EFFECT_STATUSES = Collections.unmodifiableSet(
+			new LinkedHashSet<>(Arrays.asList("planned", "dispatched", "confirmed", "failed", "reverted")));
+
 	private static final int MAX_FACT_TEXT_LENGTH = 512;
 
 	private static final int MAX_FACT_ID_LENGTH = 256;
@@ -61,6 +63,10 @@ final class EventKindValidationSupport {
 					+ "|^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$");
 
 	private static final int MIN_RAW_TOKEN_MATERIAL_LENGTH = 20;
+
+	private static final String WORKLOAD_ID = "workload_id";
+
+	private static final String FINGERPRINT = "fingerprint";
 
 	private EventKindValidationSupport() {
 	}
@@ -122,11 +128,28 @@ final class EventKindValidationSupport {
 		}
 	}
 
+	/**
+	 * Like {@link #requireNonEmptyString} but a missing or {@code null} member is accepted; a present
+	 * member must still be a non-empty string.
+	 */
+	static void optionalNonEmptyString(JsonNode parent, String field, String path) {
+		JsonNode node = parent.get(field);
+		if (node == null || node.isNull()) {
+			return;
+		}
+		requireNonEmptyString(parent, field, path, null);
+	}
+
 	static void optionalHashString(JsonNode parent, String field, String path) {
 		JsonNode node = parent.get(field);
 		if (node == null || node.isNull()) {
 			return;
 		}
+		requireHashString(parent, field, path);
+	}
+
+	static void requireHashString(JsonNode parent, String field, String path) {
+		JsonNode node = requireField(parent, field, path);
 		if (!node.isTextual()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
 		}
@@ -142,7 +165,7 @@ final class EventKindValidationSupport {
 	 */
 	static void optionalDigests(JsonNode event, String... fields) {
 		for (String field : fields) {
-			optionalHashString(event, field, "trace.event." + field);
+			optionalHashString(event, field, TraceConstants.TRACE_EVENT_PATH + field);
 		}
 	}
 
@@ -160,8 +183,8 @@ final class EventKindValidationSupport {
 	 * (non-empty, at most {@value #MAX_FACT_TEXT_LENGTH} characters) and an {@code outcome}; plural
 	 * entries also carry a unique {@code idField}. A {@code resource_id} member is forbidden (the
 	 * facts name a resource <em>type</em>, never an instance). The record-level
-	 * {@code trace.event.outcome} and the removed {@code capability_ids} are forbidden, because the
-	 * outcome lives in the facts and Lock does not resolve capability ids.
+	 * {@code trace.event.outcome} is forbidden, because the outcome lives in the facts. A signed
+	 * {@code capability_ids} is a Lock-derived member: ignored and flagged, never rejected.
 	 *
 	 * <p>Nothing is returned or stored: the facts remain in the signed assertion only.
 	 *
@@ -170,7 +193,6 @@ final class EventKindValidationSupport {
 	 */
 	static void requireCapabilityFacts(JsonNode event, String singular, String plural, String idField,
 			Set<String> outcomes) {
-		forbidField(event, "capability_ids", "trace.event.capability_ids");
 		forbidField(event, "outcome", "trace.event.outcome");
 
 		boolean hasSingular = present(event, singular);
@@ -185,7 +207,7 @@ final class EventKindValidationSupport {
 		}
 
 		if (hasSingular) {
-			String path = "trace.event." + singular;
+			String path = TraceConstants.TRACE_EVENT_PATH + singular;
 			JsonNode fact = event.get(singular);
 			if (!fact.isObject()) {
 				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
@@ -194,7 +216,7 @@ final class EventKindValidationSupport {
 			return;
 		}
 
-		String path = "trace.event." + plural;
+		String path = TraceConstants.TRACE_EVENT_PATH + plural;
 		JsonNode entries = event.get(plural);
 		if (!entries.isArray()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
@@ -245,7 +267,7 @@ final class EventKindValidationSupport {
 		if (!subject.isObject()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:trace.subject");
 		}
-		requireNonEmptyString(subject, "workload_id", "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
+		requireNonEmptyString(subject, WORKLOAD_ID, "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
 		optionalBoundedString(subject, "workload_instance_id", "trace.subject.workload_instance_id",
 				MAX_SUBJECT_ID_LENGTH);
 	}
@@ -262,9 +284,9 @@ final class EventKindValidationSupport {
 		if (!subject.isObject()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:trace.subject");
 		}
-		JsonNode workloadId = subject.get("workload_id");
+		JsonNode workloadId = subject.get(WORKLOAD_ID);
 		if (workloadId != null && !workloadId.isNull()) {
-			requireNonEmptyString(subject, "workload_id", "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
+			requireNonEmptyString(subject, WORKLOAD_ID, "trace.subject.workload_id", MAX_SUBJECT_ID_LENGTH);
 		}
 		optionalBoundedString(subject, "workload_instance_id", "trace.subject.workload_instance_id",
 				MAX_SUBJECT_ID_LENGTH);
@@ -303,35 +325,36 @@ final class EventKindValidationSupport {
 				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
 						"type:" + entryPath);
 			}
-			rejectRawTokenMaterial(entry);
-
-			String issuer = requireNonEmptyString(entry, "issuer", entryPath + ".issuer", null);
-			validateIssuer(issuer, entryPath + ".issuer");
-			String tokenType = requireNonEmptyString(entry, "token_type", entryPath + ".token_type",
-					MAX_TOKEN_TYPE_LENGTH);
-
-			boolean hasJti = entry.has("jti") && !entry.get("jti").isNull();
-			boolean hasFingerprint = entry.has("fingerprint") && !entry.get("fingerprint").isNull();
-			if (hasJti == hasFingerprint) {
-				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-						"token_ref_identity");
-			}
-
-			String jti = null;
-			String fingerprint = null;
-			if (hasJti) {
-				jti = requireNonEmptyString(entry, "jti", entryPath + ".jti", MAX_JTI_LENGTH);
-			} else {
-				fingerprint = requireNonEmptyString(entry, "fingerprint", entryPath + ".fingerprint", null);
-				if (!TraceConstants.HASH_PATTERN.matcher(fingerprint).matches()
-						&& !FINGERPRINT_PATTERN.matcher(fingerprint).matches()) {
-					throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
-							"invalid:" + entryPath + ".fingerprint");
-				}
-			}
-			result.add(new TokenRef(issuer, tokenType, jti, fingerprint));
+			result.add(extractTokenRef(entry, entryPath));
 		}
 		return result;
+	}
+
+	private static TokenRef extractTokenRef(JsonNode entry, String entryPath) {
+		rejectRawTokenMaterial(entry);
+
+		String issuer = requireNonEmptyString(entry, "issuer", entryPath + ".issuer", null);
+		validateIssuer(issuer, entryPath + ".issuer");
+		String tokenType = requireNonEmptyString(entry, "token_type", entryPath + ".token_type",
+				MAX_TOKEN_TYPE_LENGTH);
+
+		boolean hasJti = entry.has("jti") && !entry.get("jti").isNull();
+		boolean hasFingerprint = entry.has(FINGERPRINT) && !entry.get(FINGERPRINT).isNull();
+		if (hasJti == hasFingerprint) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"token_ref_identity");
+		}
+		if (hasJti) {
+			return new TokenRef(issuer, tokenType,
+					requireNonEmptyString(entry, "jti", entryPath + ".jti", MAX_JTI_LENGTH), null);
+		}
+		String fingerprint = requireNonEmptyString(entry, FINGERPRINT, entryPath + "." + FINGERPRINT, null);
+		if (!TraceConstants.HASH_PATTERN.matcher(fingerprint).matches()
+				&& !FINGERPRINT_PATTERN.matcher(fingerprint).matches()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"invalid:" + entryPath + "." + FINGERPRINT);
+		}
+		return new TokenRef(issuer, tokenType, null, fingerprint);
 	}
 
 	/**
@@ -340,9 +363,8 @@ final class EventKindValidationSupport {
 	 * appears under.
 	 */
 	private static void rejectRawTokenMaterial(JsonNode entry) {
-		Iterator<Map.Entry<String, JsonNode>> fields = entry.fields();
-		while (fields.hasNext()) {
-			JsonNode value = fields.next().getValue();
+		for (Map.Entry<String, JsonNode> member : entry.properties()) {
+			JsonNode value = member.getValue();
 			if (value.isTextual()) {
 				String text = value.textValue();
 				if (text.length() >= MIN_RAW_TOKEN_MATERIAL_LENGTH && COMPACT_JWS_PATTERN.matcher(text).matches()) {
@@ -353,9 +375,9 @@ final class EventKindValidationSupport {
 		}
 	}
 
-	/** Design §7.3: see {@link TraceIssuers#isValid(String)}. */
+	/** Design §7.3: see {@link TraceIssuers#isValidTokenIssuer(String)}. */
 	private static void validateIssuer(String issuer, String path) {
-		if (!TraceIssuers.isValid(issuer)) {
+		if (!TraceIssuers.isValidTokenIssuer(issuer)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 		}
 	}
