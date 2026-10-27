@@ -245,8 +245,14 @@ public class LicenseServiceTest {
             return replacementTokenResponse;
         }).when(service).getToken(any(TokenRequest.class), anyString(), isNull(), nullable(Consumer.class));
 
+        GenericResponse firstResponse = service.checkLicense();
         service.checkLicense();
-        service.checkLicense();
+
+        assertEquals(firstResponse.getResponseMessage(),
+                ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
+        ArgumentCaptor<TokenRequest> tokenRequestCaptor = ArgumentCaptor.forClass(TokenRequest.class);
+        verify(service, times(3)).getToken(tokenRequestCaptor.capture(), anyString(), isNull(), nullable(Consumer.class));
+        assertEquals(tokenRequestCaptor.getAllValues().get(2).getAuthUsername(), "replacement-client");
 
         verify(service, times(1)).executeDCR("ssa");
         verify(entryManager, times(2)).merge(adminConf);

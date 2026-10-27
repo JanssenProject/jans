@@ -112,7 +112,7 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
         }
-        if(Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
+        if (Strings.isNullOrEmpty(licenseConfigurationFromDB.getLicenseHardwareKey())) {
             log.error(ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.HARDWARE_ID_NOT_PRESENT.getDescription());
         }
@@ -455,6 +455,11 @@ public class LicenseDetailsService extends BaseService {
                 }
                 if (persistedLicenseConfig == null || Strings.isNullOrEmpty(persistedLicenseConfig.getSsa())) {
                     return licenseSyncTokenFailure(ErrorResponse.LICENSE_SSA_MISSING);
+                }
+                if (pendingLicenseClientDcrResponse != null
+                        && !Objects.equals(pendingLicenseClientDcrSsa, persistedLicenseConfig.getSsa())) {
+                    pendingLicenseClientDcrResponse = null;
+                    pendingLicenseClientDcrSsa = null;
                 }
                 if (pendingLicenseClientDcrResponse == null) {
                     pendingLicenseClientDcrSsa = persistedLicenseConfig.getSsa();
