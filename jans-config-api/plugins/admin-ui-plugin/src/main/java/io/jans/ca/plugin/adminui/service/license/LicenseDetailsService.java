@@ -175,10 +175,11 @@ public class LicenseDetailsService extends BaseService {
             } catch (Exception e) {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
             }
+            licenseConfig = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN).getMainSettings().getLicenseConfig();
             log.info("Requesting again for access token from {}", licenseConfig.getOidcClient().getOpHost());
             tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
 
-            if (tokenResponse == null) {
+            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                 log.info("Unable to get access token from {}", licenseConfig.getOidcClient().getOpHost());
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             }
