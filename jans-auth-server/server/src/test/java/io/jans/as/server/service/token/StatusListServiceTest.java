@@ -169,6 +169,11 @@ public class StatusListServiceTest {
         assertEquals(joined.get(199), TokenStatus.VALID.getValue());
     }
 
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void join_whenPoolDataIsCorrupt_shouldFail() {
+        StatusListService.join(List.of(pool(0, 0, 99, "not-a-status-list")), 2, log);
+    }
+
     private static StatusIndexPool pool(int id, int startIndex, int endIndex, String data) {
         StatusIndexPool pool = new StatusIndexPool();
         pool.setId(id);

@@ -138,6 +138,8 @@ public class StatusListService {
             } catch (Exception e) {
                 String msg = String.format("Failed to process status list from pool: %s, nodeId: %s", pool.getId(), pool.getNodeId());
                 log.error(msg, e);
+                // The list is already padded over this pool, so skipping it would publish revoked tokens as VALID.
+                throw new IllegalStateException(msg, e);
             }
         }
         return result;

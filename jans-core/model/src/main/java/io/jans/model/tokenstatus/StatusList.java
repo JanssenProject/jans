@@ -88,11 +88,11 @@ public class StatusList {
     }
 
     /**
-     * Makes the encoded list cover at least {@code size} entries, so allocated but unset
+     * Makes the encoded list cover at least {@code minSize} entries, so allocated but unset
      * indexes read as VALID instead of being out of bounds.
      */
-    public void ensureSize(int size) {
-        this.size = Math.max(this.size, size);
+    public void ensureSize(int minSize) {
+        this.size = Math.max(this.size, minSize);
     }
 
     public int getSize() {
