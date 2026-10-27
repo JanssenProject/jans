@@ -173,33 +173,68 @@ public class LicenseDetailsService extends BaseService {
      * @return a GenericResponse: `true` with status 200 when credentials are successfully synchronized; `false` with an error status and message otherwise
      */
     private GenericResponse syncLicenseOIDCClientDetails(LicenseConfig licenseConfig) {
-        log.info("Inside syncLicenseOIDCClientDetails: the method to sync OIDC client details used to access License API on Agama Lab.");
+        String failedClientId = licenseConfig.getOidcClient().getClientId();
+        TokenResponse tokenResponse = generateToken(
+                licenseConfig.getOidcClient().getOpHost(),
+                failedClientId,
+                licenseConfig.getOidcClient().getClientSecret());
 
-        log.info("Requesting for access token from {}", licenseConfig.getOidcClient().getOpHost());
-        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
-
-        if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
-            log.info("Unable to get access token from {}", licenseConfig.getOidcClient().getOpHost());
-            //try to re-generate clients using old SSA
-            DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
-            if (dcrResponse == null) {
-                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
-            }
-            try {
-                saveCreateClientInPersistence(licenseConfig.getSsa(), dcrResponse);
-            } catch (Exception e) {
-                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
-            }
-            licenseConfig = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN).getMainSettings().getLicenseConfig();
-            log.info("Requesting again for access token from {}", licenseConfig.getOidcClient().getOpHost());
-            tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
-
-            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
-                log.info("Unable to get access token from {}", licenseConfig.getOidcClient().getOpHost());
-                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-            }
+        if (hasAccessToken(tokenResponse)) {
+            return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
         }
-        return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
+
+        synchronized (licenseClientRenewalLock) {
+            AdminConf appConf = entryManager.find(
+                    AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+
+            if (appConf == null || appConf.getMainSettings() == null
+                    || appConf.getMainSettings().getLicenseConfig() == null) {
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+            }
+
+            LicenseConfig currentConfig =
+                    appConf.getMainSettings().getLicenseConfig();
+            OIDCClientSettings currentClient = currentConfig.getOidcClient();
+
+            if (currentClient == null) {
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_OIDC_CLIENT_MISSING.getDescription());
+            }
+
+            // If another renewal replaced the client, reuse its credentials.
+            if (Objects.equals(failedClientId, currentClient.getClientId())) {
+                if (Strings.isNullOrEmpty(currentConfig.getSsa())) {
+                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.LICENSE_SSA_MISSING.getDescription());
+                }
+
+                DCRResponse dcrResponse = executeDCR(currentConfig.getSsa());
+                if (dcrResponse == null) {
+                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.ERROR_IN_DCR.getDescription());
+                }
+
+                try {
+                    saveCreateClientInPersistence(
+                            currentConfig.getSsa(), dcrResponse);
+                } catch (Exception e) {
+                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
+                }
+
+                currentClient = new OIDCClientSettings(
+                        dcrResponse.getOpHost(),
+                        dcrResponse.getClientId(),
+                        dcrResponse.getClientSecret());
+            }
+
+            tokenResponse = generateToken(
+                    currentClient.getOpHost(),
+                    currentClient.getClientId(),
+                    currentClient.getClientSecret());
+
+            if (!hasAccessToken(tokenResponse)) {
+                return CommonUtils.createGenericResponse(false, 500,ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+
+            return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
+        }
     }
 
     /**
