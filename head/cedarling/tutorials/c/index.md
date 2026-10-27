@@ -146,7 +146,7 @@ int main() {
 
 Cedarling provides two main authorization interfaces:
 
-- **Multi-Issuer Authorization**: Processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on `token_metadata` configuration.
+- **Multi-Issuer Authorization**: Processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on the token types declared in the policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 - **Unsigned Authorization**: Allows you to pass principals directly, bypassing tokens entirely. Useful for internal data or when tokens are not available.
 
 ### Multi-Issuer Authorization

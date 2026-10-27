@@ -1410,7 +1410,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Token Validation Failures">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-failures-and-forbid-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Token failures and <code>forbid</code> policies
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Token failures and forbid policies">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2431,7 +2442,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Token Validation Failures">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#token-failures-and-forbid-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Token failures and <code>forbid</code> policies
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Token failures and forbid policies">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2782,11 +2804,11 @@ context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:p
 <p><strong>Pattern</strong>: <code>{issuer_name}_{token_type}</code></p>
 <p><strong>Issuer Name Resolution</strong>:</p>
 <ol>
-<li>Look up issuer in trusted issuer metadata</li>
-<li>Use the <code>name</code> field from configuration</li>
-<li>If no <code>name</code> field, extract hostname from JWT <code>iss</code> claim</li>
-<li>Convert to lowercase, replace special characters with underscores</li>
+<li>Look up the token's <code>mapping</code> in the policy store's <a href=".././cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a></li>
+<li>Use that entry's <code>issuer</code>, lowercased</li>
 </ol>
+<p>A token whose <code>mapping</code> has no entry is dropped, so every key comes from the
+configuration. Keys are computed once when the store loads and must be unique.</p>
 <p><strong>Token Type Resolution</strong>:</p>
 <ol>
 <li>Extract from <code>mapping</code> field (e.g., "Jans::Access_Token")</li>
@@ -2798,7 +2820,7 @@ context.tokens.acme_access_token.getTag(&quot;scope&quot;).contains(&quot;read:p
 <thead>
 <tr>
 <th>JWT Issuer</th>
-<th>Trusted Issuer Name</th>
+<th>Entry <code>issuer</code></th>
 <th>Token Mapping</th>
 <th>Result</th>
 </tr>
@@ -3139,20 +3161,20 @@ permit(
 </blockquote>
 <h3 id="how-routing-works">How routing works<a class="headerlink" href="#how-routing-works" title="Permanent link">#</a></h3>
 <p>Routing is decided by the policy store alone: a token is sent to the custom path instead of the JWT pipeline whenever its <code>mapping</code> equals a token type declared by some <strong>custom issuer</strong>. Registering a <code>CustomTokenProcessor</code> does not change <em>which</em> path a token takes only whether that path can succeed.</p>
-<p>So clearing the processor does <strong>not</strong> fall back to the JWT pipeline. If a <code>mapping</code> matches a custom issuer but no processor is registered, the token fails with <code>NoProcessorRegistered</code> (the whole request fails) for a <code>required</code> issuer, otherwise the token is skipped. A custom <code>mapping</code> therefore cannot equal a JWT trusted issuer's token type; that collision is rejected at instance startup.</p>
+<p>So clearing the processor does <strong>not</strong> fall back to the JWT pipeline. If a <code>mapping</code> matches a custom issuer but no processor is registered, the token is dropped with <code>no_processor_registered</code>. Each entity type has exactly one entry in the policy store, so a custom type can never shadow a JWT type.</p>
 <h3 id="1-configure-the-custom-issuer">1. Configure the custom issuer<a class="headerlink" href="#1-configure-the-custom-issuer" title="Permanent link">#</a></h3>
-<p>Add a <code>custom_issuers</code> map to the policy store, keyed by issuer name (mirrors <code>trusted_issuers</code>). For the directory format, use per-file <code>custom-issuers/*.json</code>, see <a href=".././cedarling-policy-store/#custom-issuer-files">Custom Issuer Files</a>.</p>
+<p>Declare each custom token type as a <code>custom</code> entry in the policy store's
+<a href=".././cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a>, keyed
+by its Cedar entity type:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;custom_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;CustomIssuerName&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="nt">&quot;Custom::SessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomKeys&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Custom::SessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomKeys&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -3166,24 +3188,30 @@ permit(
 </thead>
 <tbody>
 <tr>
-<td><code>tokens_mappings</code></td>
-<td>map (required)</td>
-<td>Token types this issuer emits, keyed by Cedar entity type name. The key is matched against the request <code>mapping</code> to route a token to this issuer, so one issuer can emit several token types. Must declare at least one.</td>
+<td>key</td>
+<td>string (required)</td>
+<td>Cedar entity type. A request <code>mapping</code> equal to it is routed to the custom path.</td>
 </tr>
 <tr>
-<td><code>tokens_mappings.&lt;type&gt;.required</code></td>
-<td>bool (default <code>false</code>)</td>
-<td>When <code>true</code>, a processing failure (error, timeout, or missing required claim) fails the <strong>whole</strong> request. When <code>false</code>, the token is dropped and authorization continues without it. Set per token type, so one issuer can mix required and optional tokens.</td>
+<td><code>type</code></td>
+<td><code>"custom"</code> (required)</td>
+<td>Selects the custom path; JWT-only fields such as <code>configuration_endpoints</code> are rejected.</td>
 </tr>
 <tr>
-<td><code>tokens_mappings.&lt;type&gt;.required_claims</code></td>
+<td><code>issuer</code></td>
+<td>string (required)</td>
+<td>Issuer identity, a single Cedar identifier. Lowercased, it is the <code>context.tokens</code> key prefix and the token's <code>iss</code> attribute. One issuer may declare several token types, but cannot also declare <code>jwt</code> entries.</td>
+</tr>
+<tr>
+<td><code>required_claims</code></td>
 <td>string[] (default <code>[]</code>)</td>
-<td>Claims that must be present in the processor output; a missing claim yields <code>MissingRequiredClaim</code>.</td>
+<td>Claims that must be present in the processor output; a missing claim drops the token.</td>
 </tr>
 </tbody>
 </table>
 <p>Each token type lands under its own <code>context.tokens.{issuer}_{token_type}</code> key, so the example above yields <code>customkeys_apikey</code> and <code>customkeys_sessionkey</code>.</p>
-<p>An entity type name may be declared by only one custom issuer; support for several issuers sharing a type is tracked in <a href="https://github.com/JanssenProject/jans/issues/14747">issue #14747</a>. Custom issuer names must be unique after sanitization and must not collide with a JWT trusted-issuer name since both share the <code>context.tokens</code> key namespace, so a collision fails instance startup.</p>
+<p>Each entity type has exactly one entry, JWT or custom, and every <code>context.tokens</code> key must be unique; a conflict fails the policy store load. Legacy single-file YAML test stores declare the same configuration under a top-level <code>custom_issuers</code> map, see the <a href=".././cedarling-policy-store/#legacy-single-file-format-yaml-test-suites">legacy format</a>.</p>
+<p>The matching schema types <code>customkeys_apikey</code> into <code>context.tokens</code> as <code>Custom::ApiKey</code> (all attributes optional, <code>tags Set&lt;String&gt;</code>), following the same rules as <a href="#cedar-schema-for-multi-issuer-tokens">Cedar Schema for Multi-Issuer Tokens</a>.</p>
 <h3 id="2-implement-the-processor">2. Implement the processor<a class="headerlink" href="#2-implement-the-processor" title="Permanent link">#</a></h3>
 <p>Implement <code>CustomTokenProcessor::process</code>, which turns a raw payload into <code>ProcessedTokenClaims</code>. One processor handles all custom mappings and dispatches internally on <code>mapping</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="k">use</span><span class="w"> </span><span class="n">cedarling</span><span class="p">::{</span><span class="n">CustomTokenError</span><span class="p">,</span><span class="w"> </span><span class="n">CustomTokenProcessor</span><span class="p">,</span><span class="w"> </span><span class="n">ProcessedTokenClaims</span><span class="p">};</span>
@@ -3259,7 +3287,7 @@ permit(
 <span class="n">cedarling</span><span class="p">.</span><span class="n">set_custom_token_processor</span><span class="p">(</span><span class="nb">None</span><span class="p">);</span>
 </code></pre></div>
 <h3 id="4-write-the-policy">4. Write the policy<a class="headerlink" href="#4-write-the-policy" title="Permanent link">#</a></h3>
-<p>A custom token becomes a Cedar entity at <code>context.tokens.{issuer}_{token_type}</code> issuer <code>CustomIssuerName</code> + mapping <code>Custom::ApiKey</code> → <code>customissuername_apikey</code>. Claims are tags; the token entity's <code>iss</code> attribute is the <strong>sanitized issuer name as a plain string</strong> (there is no <code>TrustedIssuer</code> entity for a custom issuer).</p>
+<p>A custom token becomes a Cedar entity at <code>context.tokens.{issuer}_{token_type}</code>: issuer <code>CustomIssuerName</code> + mapping <code>Custom::ApiKey</code> --&gt; <code>customissuername_apikey</code>. Claims are tags; the token entity's <code>iss</code> attribute is the <strong>lowercased issuer name as a plain string</strong> (there is no <code>TrustedIssuer</code> entity for a custom issuer).</p>
 <div class="highlight"><pre><span></span><code>permit(
     principal,
     action == Custom::Action::&quot;Read&quot;,
@@ -3285,35 +3313,30 @@ permit(
 <td>Claims flow into <code>context.tokens.*</code>.</td>
 </tr>
 <tr>
-<td>Processor returns <code>Err</code>, token <code>required: true</code></td>
-<td>Whole request fails with the error.</td>
-</tr>
-<tr>
-<td>Processor returns <code>Err</code>, token <code>required: false</code></td>
-<td>Token dropped, authorization continues.</td>
+<td>Processor returns <code>Err</code></td>
+<td>Token dropped (<code>custom_processing_failed</code>), authorization continues.</td>
 </tr>
 <tr>
 <td><code>mapping</code> is custom but no processor registered</td>
-<td><code>NoProcessorRegistered</code> (fail-closed if <code>required</code>, else skipped).</td>
+<td>Token dropped (<code>no_processor_registered</code>).</td>
 </tr>
 <tr>
 <td>A <code>required_claims</code> entry is absent from the output</td>
-<td><code>MissingRequiredClaim</code>.</td>
+<td>Token dropped (<code>custom_processing_failed</code>).</td>
 </tr>
 <tr>
 <td>The reported expiration (<code>expiration</code>, else an <code>exp</code> claim) has already passed</td>
-<td><code>Expired</code>.</td>
-</tr>
-<tr>
-<td>No custom issuer declares the requested <code>mapping</code></td>
-<td><code>UnknownMapping</code>.</td>
+<td>Token dropped (<code>custom_processing_failed</code>).</td>
 </tr>
 <tr>
 <td><code>process</code> exceeds the configured timeout (&gt; 0)</td>
-<td><code>Timeout</code>.</td>
+<td>Token dropped (<code>custom_processing_timed_out</code>).</td>
 </tr>
 </tbody>
 </table>
+<p>Like a JWT, a custom token is never required: a failure drops only that token,
+and the request fails only when no token at all survives. See
+<a href="#token-failures-and-forbid-policies">Token failures and <code>forbid</code> policies</a>.</p>
 <p>Set <code>CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS</code> to bound slow processors. <code>0</code> (the default) disables the timeout; see <a href=".././cedarling-properties/">Cedarling Properties</a>. Keep <code>cacheable: true</code> (the default) to skip re-running <code>process</code> for an identical payload and use <code>false</code> for revocation-sensitive tokens.</p>
 <blockquote>
 <p>A complete, runnable example can be found in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/cedarling/examples/custom_token_processor.rs"><code>cedarling/examples/custom_token_processor.rs</code></a>.</p>
@@ -3403,45 +3426,35 @@ action &quot;ReadArtifact&quot; appliesTo {
 </code></pre></div>
 <p>If a policy does constrain the principal, Cedar's partial evaluator cannot fully evaluate it and emits a residual. Residual-dependent requests <strong>fail closed with Deny</strong> in Cedarling; the request's diagnostics list the residual policy ids so they can be located and fixed.</p>
 <h3 id="policy-store-configuration">Policy Store Configuration<a class="headerlink" href="#policy-store-configuration" title="Permanent link">#</a></h3>
-<p>Configure trusted issuers with the <code>name</code> field for predictable token naming:</p>
+<p>Declare each accepted token type in the policy store's
+<a href=".././cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a>, with
+an <code>issuer</code> that gives predictable token naming:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;acme_corp_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Corporation Identity Provider&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp::Access_Token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;google_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google Identity Provider&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google::Id_Token&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;custom_service_issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomService&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Custom Service Provider&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://service.example.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;custom_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomService::ServiceToken&quot;</span><span class="p">,</span>
-<span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;AcmeCorp::Access_Token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Google::Id_Token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;CustomService::ServiceToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CustomService&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://service.example.com/.well-known/openid-configuration&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>These yield <code>context.tokens.acmecorp_access_token</code>, <code>google_id_token</code> and
+<code>customservice_servicetoken</code>.</p>
 <h3 id="cedar-schema-for-multi-issuer-tokens">Cedar Schema for Multi-Issuer Tokens<a class="headerlink" href="#cedar-schema-for-multi-issuer-tokens" title="Permanent link">#</a></h3>
 <h4 id="core-token-schema-structure">Core Token Schema Structure<a class="headerlink" href="#core-token-schema-structure" title="Permanent link">#</a></h4>
 <p>Each token type (Access_Token, Id_Token, custom tokens) must follow this structure:</p>
@@ -3600,6 +3613,29 @@ type TokensContext = {
 <span class="n">result</span> <span class="o">=</span> <span class="n">cedarling</span><span class="o">.</span><span class="n">authorize_multi_issuer</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 </code></pre></div>
 <p>However, if every token is invalid, Cedarling will raise an error. <strong>It is important that users always handle errors gracefully.</strong></p>
+<h3 id="token-failures-and-forbid-policies">Token failures and <code>forbid</code> policies<a class="headerlink" href="#token-failures-and-forbid-policies" title="Permanent link">#</a></h3>
+<p>Every token is optional, JWT and custom alike. A token that fails validation or
+processing is dropped with a <code>WARN</code> log and a metric, and authorization
+continues with the remaining tokens. Only when no token survives does the request
+fail, with <code>TokenValidationFailed</code>. Dropped tokens are reported in
+<a href="#inspecting-dropped-tokens"><code>dropped_tokens</code></a>, but the decision itself is made
+without them.</p>
+<p>What that means for policies:</p>
+<ul>
+<li>A <code>permit</code> that needs a dropped token does not fire. That is safe: the request
+  is denied unless another policy permits it.</li>
+<li>A <code>forbid</code> that reads a dropped token <strong>does not fire either</strong>, which can turn
+  a denial into an allow. A condition such as
+  <code>context.tokens.acme_access_token.getTag("risk").contains("high")</code> cannot
+  forbid anything when the token is missing.</li>
+</ul>
+<p>So a token that must be present has to be required in policy, with a <code>forbid</code>
+that fires when it is absent:</p>
+<div class="highlight"><pre><span></span><code>forbid (principal, action, resource)
+unless { context has tokens.acme_access_token };
+</code></pre></div>
+<p>This replaces the <code>required</code> flag of version 1 custom issuers, which made a
+failing token fail the whole request.</p>
 <h4 id="inspecting-dropped-tokens">Inspecting dropped tokens<a class="headerlink" href="#inspecting-dropped-tokens" title="Permanent link">#</a></h4>
 <p>A dropped token no longer has to be recovered from the logs. Every
 <code>MultiIssuerAuthorizeResult</code> carries a <code>dropped_tokens</code> list, and the same list
@@ -3667,15 +3703,15 @@ shape as the JSON form:</p>
 </tr>
 <tr>
 <td><code>duplicate_token</code></td>
-<td>A token with the same issuer and token type was already accepted (see <a href="#non-deterministic-tokens">Non-Deterministic Tokens</a>).</td>
+<td>An earlier token with the same mapping was already accepted; this one was not validated (see <a href="#non-deterministic-tokens">Non-Deterministic Tokens</a>).</td>
 </tr>
 <tr>
 <td><code>duplicate_mapping</code></td>
-<td>Two trusted issuers map to the same entity type; the later input replaced the earlier one (last wins).</td>
+<td>No longer emitted: a second token for a mapping is reported as <code>duplicate_token</code>. Kept for compatibility.</td>
 </tr>
 <tr>
 <td><code>no_processor_registered</code></td>
-<td>The mapping routes to a custom issuer but no processor is registered, and the mapping is not <code>required</code>.</td>
+<td>The mapping routes to a custom issuer but no processor is registered.</td>
 </tr>
 <tr>
 <td><code>custom_processing_failed</code></td>
@@ -3693,7 +3729,7 @@ shape as the JSON form:</p>
 </table>
 <p>The reason is deliberately claim-free: it never contains token payloads or claim
 values, so it is safe to log and surface to callers. <code>reason.message</code> is
-non-empty for every slug (e.g. <code>duplicate issuer and token-type combination</code>),
+non-empty for every slug (e.g. <code>a token with the same mapping was already accepted</code>),
 while <code>reason.detail</code> is set only for <code>invalid_input</code> and is absent (<code>None</code> /
 <code>null</code> / <code>nil</code>) otherwise. Order is not
 guaranteed; use each entry's <code>index</code> to correlate with the request <code>tokens</code>
@@ -3702,35 +3738,39 @@ the list is empty and the field is omitted from the serialized result. For a
 batch request the list is produced once (tokens are validated once for the whole
 batch) and repeats on every item's result.</p>
 <h3 id="non-deterministic-tokens">Non-Deterministic Tokens<a class="headerlink" href="#non-deterministic-tokens" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># ERROR: Multiple tokens of same type from same issuer</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Two tokens for the same mapping: policies could not tell which one to use</span>
 <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token1&quot;</span><span class="p">),</span>  <span class="c1"># From Jans::Access_Token</span>
-    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token2&quot;</span><span class="p">),</span>  <span class="c1"># Also from Jans::Access_Token - ERROR!</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token1&quot;</span><span class="p">),</span>  <span class="c1"># accepted</span>
+    <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token2&quot;</span><span class="p">),</span>  <span class="c1"># dropped: duplicate_token</span>
 <span class="p">]</span>
-
-<span class="c1"># This non-deterministic.</span>
-<span class="c1"># Which token should policies reference?</span>
-<span class="c1"># Cedarling processes only the first item and writes log messages for all subsequent items that are skipped.</span>
 </code></pre></div>
+<p>A mapping names one token type of one issuer, so only one token per mapping is
+used. The first one that is accepted wins; later ones for the same mapping are
+dropped as <code>duplicate_token</code> and logged, without being validated. A token that
+fails validation does not count, so a later token for its mapping is still
+checked.</p>
 <h3 id="trusted-issuer-validation">Trusted Issuer Validation<a class="headerlink" href="#trusted-issuer-validation" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="c1"># Tokens from unknown issuers are rejected</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># A JWT is accepted only from the issuer its mapping names</span>
 <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
     <span class="n">TokenInput</span><span class="p">(</span>
         <span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
-        <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token_from_unknown_issuer&quot;</span>  <span class="c1"># ERROR if issuer not in trusted issuers</span>
+        <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token_from_another_issuer&quot;</span>  <span class="c1"># dropped: its iss is not the entry&#39;s iss</span>
     <span class="p">)</span>
 <span class="p">]</span>
 
-<span class="c1"># Only tokens from issuers configured in policy store are accepted</span>
+<span class="c1"># The token&#39;s iss must equal the expected iss of the mapping&#39;s entry in</span>
+<span class="c1"># trusted-issuers.json; otherwise the token is dropped (jwt_validation_failed).</span>
 </code></pre></div>
 <h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">#</a></h2>
 <h3 id="1-use-descriptive-issuer-names">1. Use Descriptive Issuer Names<a class="headerlink" href="#1-use-descriptive-issuer-names" title="Permanent link">#</a></h3>
 <p>Configure clear, predictable issuer names in your policy store:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Good - clear and predictable</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Issuer1&quot;</span><span class="w"> </span><span class="c1">// Bad - unclear what this represents</span>
+<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AcmeCorp&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// Good - clear and predictable</span>
+<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Issuer1&quot;</span><span class="w"> </span><span class="c1">// Bad - unclear what this represents</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>The <code>issuer</code> is visible to policies, as the <code>TrustedIssuer</code> namespace and the
+<code>context.tokens</code> key prefix, so renaming it later means updating policies.</p>
 <h3 id="2-start-schema-less-for-development">2. Start Schema-Less for Development<a class="headerlink" href="#2-start-schema-less-for-development" title="Permanent link">#</a></h3>
 <p>Begin without Cedar schemas for rapid development:</p>
 <ul>
@@ -3860,7 +3900,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 19, 2026
+    October 27, 2026
   </span>
 
     

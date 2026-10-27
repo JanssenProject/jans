@@ -134,7 +134,7 @@ Cedarling provides authorization interfaces for evaluating access requests based
 
 #### Token-Based Authorization (Multi-Issuer)
 
-For token-based authorization, use `authorizeMultiIssuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+For token-based authorization, use `authorizeMultiIssuer` which processes JWT tokens and maps them to Cedar entities based on the token types declared in your policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 
 **1. Prepare tokens**
 

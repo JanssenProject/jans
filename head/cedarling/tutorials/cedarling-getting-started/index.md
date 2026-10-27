@@ -171,7 +171,7 @@ Cedarling provides two authorization methods. Not sure which to use? See the [qu
 **Multi-Issuer Authorization (Token-based) — Recommended**
 
 - Uses `authorize_multi_issuer` to process JWT tokens from multiple issuers.
-- Token data is mapped to Cedar entities based on `token_metadata` configuration in the policy store.
+- Token data is mapped to Cedar entities based on the token types declared in the policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 - Authorization decisions are made based on context values derived from token payloads.
 - **Recommended for most production deployments** where you have JWT tokens from trusted identity providers.
 
