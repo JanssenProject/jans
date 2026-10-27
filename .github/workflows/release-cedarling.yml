@@ -1,6 +1,6 @@
 name: "Release: Cedarling crates.io"
 
-# Publishes sigstore-verifier, then cedarling (which depends on it), to crates.io.
+# Publishes jans-trace-core and sigstore-verifier, then cedarling (which depends on both), to crates.io.
 #
 # Two trigger paths:
 #   workflow_dispatch — manual; dry_run defaults to true (validation-first).
@@ -121,10 +121,10 @@ jobs:
         NIGHTLY_VERSION="0.0.$((LAST_PATCH + 1))"
         echo "Last published patch: 0.0.${LAST_PATCH} → publishing ${NIGHTLY_VERSION}"
 
-        for crate in sigstore-verifier cedarling; do
+        for crate in jans-trace-core sigstore-verifier cedarling; do
           sed -i "s/^version = \".*\"/version = \"${NIGHTLY_VERSION}\"/" "${crate}/Cargo.toml"
         done
-        sed -i -E "s/^(sigstore-verifier = \{[^}]*version = )\"[^\"]*\"/\1\"${NIGHTLY_VERSION}\"/" Cargo.toml
+        sed -i -E "s/^((jans-trace-core|sigstore-verifier) = \{[^}]*version = )\"[^\"]*\"/\1\"${NIGHTLY_VERSION}\"/" Cargo.toml
 
         echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
 
@@ -136,7 +136,7 @@ jobs:
       run: |
         DIRTY_FLAGS="--locked"
         [ "${REF}" = "nightly" ] && DIRTY_FLAGS="--allow-dirty"
-        cargo publish -p sigstore-verifier -p cedarling ${DIRTY_FLAGS} --dry-run
+        cargo publish -p jans-trace-core -p sigstore-verifier -p cedarling ${DIRTY_FLAGS} --dry-run
 
     - name: Publish crates
       if: ${{ inputs.dry_run != true }}
@@ -158,7 +158,7 @@ jobs:
             | grep -q '"vers":"'"${2}"'"'
         }
 
-        for crate in sigstore-verifier cedarling; do
+        for crate in jans-trace-core sigstore-verifier cedarling; do
           version=$(cargo metadata --no-deps --format-version 1 \
             | jq -r --arg c "${crate}" '.packages[] | select(.name == $c) | .version')
 
