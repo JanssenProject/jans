@@ -3,15 +3,20 @@
 ### Sequence Diagram
 
 ```mermaid
-sequenceDiagram
-title Client credentials flow
-autonumber 1
 
-activate Resource owner Client
-Resource owner Client->>Jans AS:Client Authentication
-activate Jans AS
-Jans AS-->>Resource owner Client:Access Token
-deactivate Jans AS
+sequenceDiagram
+    title Client credentials flow
+    autonumber 1
+
+    participant Client as Resource owner Client
+    participant JansAS as Jans AS
+
+    activate Client
+    Client->>JansAS:Client Authentication
+    activate JansAS
+    JansAS-->>Client:Access Token
+    deactivate JansAS
+
 ```
 ### Testing
 

@@ -2344,51 +2344,54 @@ After the user returns to the client via the redirect URL, the application will 
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
 <pre class="mermaid"><code>
 sequenceDiagram
-title Authorization code flow
-autonumber 1
+    title Authorization code flow
+    autonumber 1
 
-participant Resource owner User 
-activate Resource owner User
-Client-&gt;&gt;Jans AS:Authorization Request
-activate Client 
-activate Jans AS
-Resource owner User -&gt;&gt;Jans AS:User login and consent
-Jans AS--&gt;&gt;Client:Authorization code response
-deactivate Client
-deactivate Jans AS
+    participant User as Resource owner User 
+    participant Client
+    participant Jans as Jans AS
+    participant RS as Resource Server
 
-Client-&gt;&gt;Jans AS: Exchange code for Access Token
-activate Client
-activate Jans AS
-Jans AS--&gt;&gt;Client: Access Token with optional Refresh Token
-deactivate Client
-deactivate Jans AS
-
-loop 
-    Client-&gt;&gt;Resource Server: Call API with Access Token
-    activate Client
-    activate Resource Server
-    Resource Server--&gt;&gt;Client: Protected Resource
+    activate User
+    Client-&gt;&gt;Jans: Authorization Request
+    activate Client 
+    activate Jans
+    User-&gt;&gt;Jans: User login and consent
+    Jans--&gt;&gt;Client: Authorization code response
     deactivate Client
-    deactivate Resource Server
-end
+    deactivate Jans
 
+    Client-&gt;&gt;Jans: Exchange code for Access Token
+    activate Client
+    activate Jans
+    Jans--&gt;&gt;Client: Access Token with optional Refresh Token
+    deactivate Client
+    deactivate Jans
 
-Client-&gt;&gt;Resource Server: Call API with expired Access Token
-activate Client
-activate Resource Server
-Resource Server--&gt;&gt;Client: Invalid token error
-deactivate Client
-deactivate Resource Server
+    loop
+        Client-&gt;&gt;RS: Call API with Access Token
+        activate Client
+        activate RS
+        RS--&gt;&gt;Client: Protected Resource
+        deactivate Client
+        deactivate RS
+    end
 
+    Client-&gt;&gt;RS: Call API with expired Access Token
+    activate Client
+    activate RS
+    RS--&gt;&gt;Client: Invalid token error
+    deactivate Client
+    deactivate RS
 
-Client-&gt;&gt;Jans AS: Resource Token
-activate Client
-activate Jans AS
-Jans AS--&gt;&gt;Client: Access Token with optional Refresh Token
-deactivate Client
-deactivate Jans AS
-deactivate Resource owner User</code></pre>
+    Client-&gt;&gt;Jans: Refresh Token
+    activate Client
+    activate Jans
+    Jans--&gt;&gt;Client: Access Token with optional Refresh Token
+    deactivate Client
+    deactivate Jans
+    deactivate User
+</code></pre>
 <h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
 <ol>
 <li>
@@ -2474,7 +2477,7 @@ In the back channel the following steps take place :</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 15, 2025
+    October 27, 2026
   </span>
 
     

@@ -1146,6 +1146,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="TRACE properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-records-are-sent" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How records are sent
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#record-status-and-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Record status and metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-server-setup-for-trace" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Lock Server setup for TRACE
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1630,6 +1669,45 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="TRACE properties">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#how-records-are-sent" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        How records are sent
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#record-status-and-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Record status and metrics
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock-server-setup-for-trace" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Lock Server setup for TRACE
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -1892,13 +1970,9 @@ the Cedarling will use the default value as specified in the property definition
 <li><strong><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></strong> : <code>enabled</code> | <code>disabled</code>: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Default is <code>disabled</code>.</li>
 <li><strong><code>CEDARLING_LOCK_TRANSPORT</code></strong> : <code>rest</code> | <code>grpc</code>: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the <code>grpc</code> feature enabled. Default value is <code>rest</code>.</li>
 <li><strong><code>CEDARLING_LOCK_LOG_CHANNEL_CAPACITY</code></strong> : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is <code>100</code>.</li>
-<li><strong><code>CEDARLING_LOCK_LOG_MAX_RETRIES</code></strong> : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff strategy. Default is <code>5</code>.</li>
+<li><strong><code>CEDARLING_LOCK_LOG_MAX_RETRIES</code></strong> : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff: the delay doubles from 10 seconds up to 5 minutes. Default is <code>5</code>.</li>
 </ul>
 <h3 id="trace-properties">TRACE properties<a class="headerlink" href="#trace-properties" title="Permanent link">#</a></h3>
-<div class="admonition note">
-<p class="admonition-title">In development</p>
-<p>TRACE is still in development. In this release Cedarling validates the TRACE configuration and loads the signing key at startup, but does not build or send TRACE records yet.</p>
-</div>
 <p>With TRACE enabled, Cedarling signs an <code>AUTHORIZATION_DECISION</code> TRACE record for each authorization decision that carries a TRACE context (see <a href=".././cedarling-authz/#authorize-options-and-trace-context">Authorize options and TRACE context</a>) and sends it to Lock Server. TRACE never changes the decision. An invalid TRACE configuration stops Cedarling at startup.</p>
 <p>TRACE requires:</p>
 <ul>
@@ -1914,12 +1988,119 @@ the Cedarling will use the default value as specified in the property definition
 <li><strong><code>CEDARLING_TRACE_SIGNING_KEY</code></strong> : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with <code>openssl genpkey -algorithm ed25519 -out trace-key.pem</code>. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If <code>CEDARLING_TRACE</code> == <code>enabled</code>, this property or <code>CEDARLING_TRACE_SIGNING_KEY_PEM</code> is required; when both are set, this one is used.</li>
 <li><strong><code>CEDARLING_TRACE_SIGNING_KEY_PEM</code></strong> : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when <code>CEDARLING_TRACE_SIGNING_KEY</code> is not set. Prefer <code>CEDARLING_TRACE_SIGNING_KEY</code> where the host can provide a file: a key inlined in the configuration can leak through environment dumps, process listings or configuration files kept under version control. Treat a configuration that contains this property as a secret.</li>
 <li><strong><code>CEDARLING_TRACE_SIGNING_KID</code></strong> : <code>kid</code> the key is registered under in Lock, at most 255 UTF-16 code units (Lock counts Java string length). If unset or blank, the <code>kid</code> is the RFC 7638 thumbprint of the public key (<code>sha256:&lt;hex&gt;</code>). Cedarling logs the producer id, <code>kid</code> and thumbprint at startup, so the admin can register the key in Lock.</li>
-<li><strong><code>CEDARLING_TRACE_ENDPOINT</code></strong> : <code>discovered</code> or a URL of the TRACE bulk endpoint. <code>discovered</code> (the default) takes <code>trace_bulk_endpoint</code> from the Lock Server well-known configuration.</li>
+<li><strong><code>CEDARLING_TRACE_ENDPOINT</code></strong> : <code>discovered</code> or a URL of the TRACE bulk endpoint. <code>discovered</code> (the default) takes <code>trace_bulk_endpoint</code> from the Lock Server well-known configuration. An empty or blank value also means <code>discovered</code>. The endpoint, explicit or discovered, must use <code>https</code>, or <code>http</code> only to a loopback host (<code>localhost</code>, <code>127.0.0.1</code>, <code>[::1]</code>), because every bulk request carries the Lock access token.</li>
 <li><strong><code>CEDARLING_TRACE_BULK_MAX_RECORDS</code></strong> : Maximum number of records in one bulk request. Must be greater than 0. Default is <code>100</code>, the Lock Server default.</li>
-<li><strong><code>CEDARLING_TRACE_BULK_MAX_BYTES</code></strong> : Maximum size in bytes of one bulk request. Must be greater than 0. Default is <code>4194304</code> (4 MiB), the Lock Server default.</li>
+<li><strong><code>CEDARLING_TRACE_BULK_MAX_BYTES</code></strong> : Maximum size in bytes of one bulk request. Must be at least <code>262146</code>: the largest record Lock Server accepts by default (<code>maxRequestBytes</code>, <code>262144</code> bytes) plus the brackets of the array, so any record fits in a request. Default is <code>4194304</code> (4 MiB), the Lock Server default.</li>
 </ul>
 <p>Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: <code>CEDARLING_TRACE_CHAIN_GENESIS</code> (a new producer chain always starts as <code>first_observed</code> at each start) and <code>CEDARLING_TRACE_EMISSION</code> (every decision with a TRACE context is emitted).</p>
-<p><strong>Limitation: TRACE fully describes JWT tokens only.</strong> A record lists the tokens of an <code>authorize_multi_issuer</code> call by issuer, token type and <code>jti</code> (or a fingerprint when there is no <code>jti</code>). The token type is the request <code>mapping</code> as is, for example <code>Jans::Access_Token</code>. Lock accepts only an <code>https</code> issuer, or <code>http</code> with host <code>localhost</code>. A custom (non-JWT) token handled by a <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">custom token processor</a> is listed only when the processor returns such an issuer as the <code>iss</code> claim. Otherwise the token is left out of the record and Cedarling logs a warning; the record is still sent. A JWT whose <code>iss</code> Lock would reject means no record for that decision.</p>
+<p><strong>Tokens in a record.</strong> A record lists the tokens of an <code>authorize_multi_issuer</code> call by issuer, token type and <code>jti</code> (or a fingerprint when there is no <code>jti</code>). The token type is the request <code>mapping</code> as is, for example <code>Jans::Access_Token</code>. A JWT is listed with its <code>iss</code> claim; Lock Server accepts only an <code>https</code> issuer, or <code>http</code> with host <code>localhost</code>, so a JWT whose <code>iss</code> Lock Server would reject means no record for that decision. A custom (non-JWT) token handled by a <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">custom token processor</a> has no issuer URI, so it is listed with the issuer <code>urn:jans:cedarling:custom-issuer:&lt;issuer_id&gt;</code>, whatever the processor returns as <code>iss</code>. <code>&lt;issuer_id&gt;</code> is the name of its custom issuer in the policy store as Cedarling normalizes it: lower case, with <code>.</code>, <code>-</code> and spaces turned into <code>_</code> (<code>CustomKeys</code> becomes <code>customkeys</code>). Lock Server accepts this issuer in a token reference.</p>
+<h4 id="how-records-are-sent">How records are sent<a class="headerlink" href="#how-records-are-sent" title="Permanent link">#</a></h4>
+<p>The authorization call only hands its record to a queue and returns; it never waits for Lock Server. A background emitter takes whatever the queue holds, up to <code>CEDARLING_TRACE_BULK_MAX_RECORDS</code> and <code>CEDARLING_TRACE_BULK_MAX_BYTES</code>, signs it and sends it as one bulk request. While a request is in flight, the next batch gathers in the queue, so under load requests fill up and when traffic is light each record goes out on its own.</p>
+<p>TRACE reuses two Lock log properties:</p>
+<ul>
+<li><code>CEDARLING_LOCK_LOG_CHANNEL_CAPACITY</code> is the size of the queue. When it is full, for example while Lock Server is down, the decision is still returned and its record is not emitted (<code>not_emitted_queue_full</code>). A record is signed only when the emitter takes it from the queue, so a record that never got into the queue leaves no gap in the producer chain. Cedarling logs a <code>WARN</code> when the queue fills and, when it has room again, an <code>INFO</code> with the number of records not emitted meanwhile.</li>
+<li><code>CEDARLING_LOCK_LOG_MAX_RETRIES</code> is how many times a failed bulk request is retried, with exponential backoff doubling from 10 seconds up to 5 minutes, and how many times one record is resent.</li>
+</ul>
+<p><code>CEDARLING_LOCK_LOG_INTERVAL</code> does not apply to TRACE: records are sent as soon as the emitter takes them.</p>
+<p>What is retried:</p>
+<ul>
+<li>A request that does not reach Lock Server, or gets an HTTP <code>5xx</code>, <code>429</code> or <code>408</code>, is retried with the same bytes. <code>429</code> and <code>408</code> often come from a proxy before Lock Server; both ask to repeat the request later. After the last retry its records are dropped.</li>
+<li>A <code>Retry-After</code> header on such an answer, in seconds or as an HTTP date, makes the wait before the next attempt at least that long, never shorter than the emitter's own backoff, and at most 5 minutes, so a misconfigured proxy cannot stop TRACE for hours. Without the header, or with a value that cannot be read or is in the past, the emitter's own backoff applies.</li>
+<li>HTTP <code>401</code>: when Cedarling obtained its token through DCR, it requests a new token and sends the same request once more; a second <code>401</code> is final. A token set with <code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code> cannot be renewed, so its <code>401</code> is final at once.</li>
+<li>Any other refusal of the whole request is final: its records are logged at <code>ERROR</code> and dropped. This includes HTTP <code>403</code>: for a token without the <code>trace.write</code> scope, or for a client Lock Server has no evidence domain for (see <a href="#lock-server-setup-for-trace">Lock Server setup for TRACE</a>), and <code>400 invalid_request</code>.</li>
+<li>Lock Server refuses a request over its <code>traceConfiguration.maxBulkRecords</code> or <code>maxBulkRequestBytes</code> with <code>400 invalid_request</code> and the reason <code>max_bulk_records_exceeded</code> or <code>bulk_body_too_large</code>. The <code>ERROR</code> then names the Cedarling setting to lower, <code>CEDARLING_TRACE_BULK_MAX_RECORDS</code> or <code>CEDARLING_TRACE_BULK_MAX_BYTES</code>, with its current value. Lock Server sends the reason only when its <code>errorReasonEnabled</code> is <code>true</code> (default <code>false</code>); without it, the <code>ERROR</code> names the causes that fit a request Cedarling builds: TRACE disabled in Lock Server (<code>traceConfiguration.enabled</code>), or a bulk limit, with both Cedarling settings and their values.</li>
+<li>Per record, Lock Server answers in a <code>207</code> response. A record refused with <code>storage_failure</code> or <code>crypto_unavailable</code> is resent, after a 10-second pause, together with the next request. A record refused with <code>chain_not_registered</code> is never resent. When Lock Server refuses the first record (genesis) of the chain with <code>chain_not_registered</code>, it registers chains only through its admin API: Cedarling needs <code>chainRegistrationMode: FIRST_OBSERVED</code> (see <a href="#lock-server-setup-for-trace">Lock Server setup for TRACE</a>). Every other refusal is final. The records of one response refused for the same error and reason are logged with one <code>ERROR</code> that gives their count; each record is logged at <code>DEBUG</code>.</li>
+</ul>
+<p>Lock Server registers a producer chain from its genesis record and refuses every other record of the chain until it does. So Cedarling sends the genesis record alone and signs no other record into the chain until Lock Server accepts it; decisions made meanwhile wait in the queue. If the genesis record is lost (refused or dropped), Cedarling opens a new chain, which starts with its own genesis record. If Lock Server refuses records with <code>chain_not_registered</code> after it accepted the genesis record (for example, its database was restored), Cedarling logs one <code>WARN</code>, drops the records of that chain it still holds, counts them in <code>trace.dropped</code> and opens a new chain. It does so without a pause when Lock Server had accepted more of the chain than its genesis record; a chain Lock Server forgot right after its genesis record is replaced after the wait described below, since the next one would likely fare the same.</p>
+<p>When Lock Server does not take a request (it is lost after its retries, refused as a whole, answered with every record refused, or Lock Server refuses the genesis record), the emitter waits before the next request: 10 seconds, doubling with each failure in a row up to 5 minutes; a longer <code>Retry-After</code> on the last answer stretches the wait, also to at most 5 minutes. Each wait is logged at <code>WARN</code> with its length. So a Lock Server that is down or refuses every record gets a request every few minutes, not one per decision. Meanwhile decisions wait in the queue; when it is full they are reported as <code>not_emitted_queue_full</code>, and the authorization path never waits. The first record Lock Server accepts ends the waits, which is logged at <code>INFO</code>. A chain Lock Server forgot after taking more than its genesis record is not such a failure and is replaced at once.</p>
+<p><code>Cedarling::shut_down</code> stops the emitter before the log. On shut down the emitter sends every record it still holds once, without retries or pauses, so stopping Cedarling does not wait for Lock Server to come back. After the first request Lock Server does not take (it fails, or Lock Server refuses the genesis record), the remaining records are not sent: one <code>WARN</code> reports how many are dropped, and they are counted in <code>trace.dropped</code>.</p>
+<p>When Lock Server publishes no <code>trace_bulk_endpoint</code> and <code>CEDARLING_TRACE_ENDPOINT</code> is not set, or the endpoint is plain <code>http</code> to a non-loopback host, Cedarling starts, logs a <code>WARN</code> once and reports <code>not_emitted_no_endpoint</code> for every decision.</p>
+<h4 id="record-status-and-metrics">Record status and metrics<a class="headerlink" href="#record-status-and-metrics" title="Permanent link">#</a></h4>
+<p>With TRACE enabled, every decision log entry has a <code>trace_record_status</code> field (see <a href=".././cedarling-authz/#authorize-options-and-trace-context">Authorize options and TRACE context</a>):</p>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>emitted</code></td>
+<td>The record was handed to the emitter. Whether Lock Server accepted it shows in the emitter logs and the <code>trace.accepted</code> metric.</td>
+</tr>
+<tr>
+<td><code>not_emitted_missing_context</code></td>
+<td>The call had no TRACE context, or a required context field was empty.</td>
+</tr>
+<tr>
+<td><code>not_emitted_over_limit</code></td>
+<td>A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed facts. The first one is logged at <code>WARN</code> with the field, later ones at <code>DEBUG</code>.</td>
+</tr>
+<tr>
+<td><code>not_emitted_invalid_field</code></td>
+<td>A value Lock Server rejects, such as a JWT issuer that is not <code>https</code>, or a policy store that cannot back a record: a <code>.cjar</code> whose <code>metadata.json</code> has no <code>policy_store.id</code> or <code>policy_store.version</code>. A store like this is reported with one <code>WARN</code> when it is loaded. Any other value is logged at <code>WARN</code> with the field the first time, later ones at <code>DEBUG</code>.</td>
+</tr>
+<tr>
+<td><code>not_emitted_queue_full</code></td>
+<td>The queue to the emitter is full.</td>
+</tr>
+<tr>
+<td><code>not_emitted_stopped</code></td>
+<td>The emitter has stopped: Cedarling was shut down, or the emitter ended unexpectedly, which is logged at <code>ERROR</code> when it happens. This instance emits no more records. Reported with one <code>WARN</code>.</td>
+</tr>
+<tr>
+<td><code>not_emitted_no_endpoint</code></td>
+<td>There is no TRACE endpoint to send to.</td>
+</tr>
+</tbody>
+</table>
+<p>When TRACE is disabled, the field is absent and no <code>trace.*</code> metric is added.</p>
+<p>With metrics enabled, <code>operational_stats</code> counts each status under <code>trace.&lt;status&gt;</code> (for example <code>trace.emitted</code>), and what the emitter did afterwards:</p>
+<ul>
+<li><code>trace.accepted</code>: records Lock Server accepted.</li>
+<li><code>trace.rejected</code>: records Lock Server refused for good, alone or with their whole request.</li>
+<li><code>trace.dropped</code>: records given up after their retries, or dropped with a chain that was replaced.</li>
+<li><code>trace.sign_failed</code>: records that could not be signed.</li>
+<li><code>trace.chains_opened</code>: chains opened to replace one whose genesis record was lost or that Lock Server no longer knows.</li>
+</ul>
+<p>A counter appears only after it is first incremented.</p>
+<h4 id="lock-server-setup-for-trace">Lock Server setup for TRACE<a class="headerlink" href="#lock-server-setup-for-trace" title="Permanent link">#</a></h4>
+<p>Lock Server accepts TRACE records only with an access token that has the <code>https://jans.io/oauth/lock/trace.write</code> scope; <code>log.write</code> is not enough. With TRACE enabled, Cedarling asks for this scope in addition to the usual Lock scopes. When Cedarling registers through DCR (see <a href=".././cedarling-lock-server/">Lock Server integration</a>):</p>
+<ul>
+<li>In the Auth Server, add <code>https://jans.io/oauth/lock/trace.write</code> to the software roles of the SSA and to the <code>scope_list</code> of the interception script that adds the Cedarling scopes. The scope is created when Lock Server is installed.</li>
+<li>In Lock Server, enable TRACE, so that it publishes <code>trace_bulk_endpoint</code>, and register the producer key: Cedarling logs the producer id, <code>kid</code> and thumbprint at startup.</li>
+</ul>
+<p>In the Lock Server <code>traceConfiguration</code> (see <a href="../../../janssen-server/lock/trace/#configuration">Lock Server TRACE configuration</a>), Cedarling also needs:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Set it to</th>
+<th>Without it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>chainRegistrationMode</code></td>
+<td><code>FIRST_OBSERVED</code></td>
+<td>every record is refused: <code>chain_not_registered</code></td>
+</tr>
+<tr>
+<td><code>defaultEvidenceDomainId</code></td>
+<td>a domain id, for example <code>default</code></td>
+<td>every request is refused: HTTP <code>403</code> <code>client_not_bound</code></td>
+</tr>
+<tr>
+<td><code>defaultAllowedProducerIds</code></td>
+<td>a list that contains <code>CEDARLING_TRACE_PRODUCER_ID</code></td>
+<td>every record is refused: <code>producer_not_allowed</code></td>
+</tr>
+</tbody>
+</table>
+<p>Cedarling opens a new producer chain at every start and registers it with its first record, which the default <code>PRE_REGISTERED</code> mode does not allow (see <a href="../../../janssen-server/lock/trace/#chain-registration-modes">Chain registration modes</a>). A per-client entry in <code>clientDomainBindings</code> also works instead of the two defaults, but Cedarling registers a new client through DCR at every start, so the defaults are simpler.</p>
+<p>To see why Lock Server refused a record, set <code>errorReasonEnabled: true</code> in the Lock Server configuration: Cedarling then logs Lock Server's <code>reason</code> with the error, for example <code>event_kind_not_authorized</code>. Lock Server reads this setting only at startup.</p>
+<p>A token set with <code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code> must already carry the <code>trace.write</code> scope.</p>
 <h2 id="authorize_multi_issuer-method-properties">authorize_multi_issuer method properties<a class="headerlink" href="#authorize_multi_issuer-method-properties" title="Permanent link">#</a></h2>
 <p>These properties are relevant only when using <code>authorize_multi_issuer</code> with signed JWT tokens from trusted identity providers. 
 Also called Token-based Access Control (TBAC). This is the recommended authorization method for most production deployments.</p>
@@ -2020,7 +2201,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 21, 2026
+    October 27, 2026
   </span>
 
     
