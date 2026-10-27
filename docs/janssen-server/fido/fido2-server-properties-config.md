@@ -217,6 +217,21 @@ ceremony. When an origin is rejected, the server log says which RPs were conside
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.
 
+#### Exporting the association files
+
+The server generates both files from these fields, for you to deploy on the RP-ID host. They are the same
+files the readiness check compares a deployed copy against.
+
+| Request | File |
+| --- | --- |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/assetlinks.json` | Android `assetlinks.json`, one statement per `androidApps` entry |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/apple-app-site-association` | Apple file, one `TeamID.BundleID` per complete `iosApps` entry |
+
+`{rpConfigId}` is the RP `id` as configured, URL-encoded. The answer is a JSON download, `404` when the RP is
+not configured or has no app of that platform. Nothing is served from Jans: both Apple and Android fetch
+`https://<rp-id>/.well-known/...` without following redirects, so deploy each file on the RP-ID host itself.
+Apple's file is named `apple-app-site-association`, with no `.json` extension.
+
 ### Advertised algorithms
 
 The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
