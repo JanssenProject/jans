@@ -178,4 +178,21 @@ class GrpcAuthorizationInterceptorTest extends BaseLockServiceTest {
 		assertEquals(Status.Code.UNAUTHENTICATED, status.getValue().getCode());
 		verify(next, never()).startCall(any(), any());
 	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void testInterceptCall_AuthorizationFailureDoesNotLeakExceptionMessage() {
+		ServerCall<Object, Object> call = callTo(TraceServiceGrpc.SERVICE_NAME + "/GetRecord");
+		ServerCallHandler<Object, Object> next = mock(ServerCallHandler.class);
+		when(openIdProtection.authorize(any(), any()))
+				.thenThrow(new IllegalStateException("introspection failed at https://internal.example.org/introspect"));
+
+		interceptor.interceptCall(call, new Metadata(), next);
+
+		org.mockito.ArgumentCaptor<Status> status = org.mockito.ArgumentCaptor.forClass(Status.class);
+		verify(call).close(status.capture(), any(Metadata.class));
+		assertEquals(Status.Code.INTERNAL, status.getValue().getCode());
+		assertEquals("Authorization error", status.getValue().getDescription());
+		verify(next, never()).startCall(any(), any());
+	}
 }

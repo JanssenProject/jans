@@ -148,7 +148,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             log.error("Error during gRPC authorization for '{}'", methodName, e);
             
             call.close(Status.INTERNAL
-                    .withDescription("Authorization error: " + e.getMessage())
+                    .withDescription("Authorization error")
                     .withCause(e), new Metadata());
             
             return new ServerCall.Listener<ReqT>() {};
