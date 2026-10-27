@@ -94,9 +94,10 @@ def parse_kv(text: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Example lines:
 #   ✅ authz_authorize_unsigned/new/estimates.json: 371266 ns <= 1000000 ns
+#   ⚪ cedarling_startup/new/estimates.json: 5000000 ns (not checked against 1000000 ns)
 # ---------------------------------------------------------------------------
 _RUST_RE = re.compile(
-    r"^[✅❌]\s+(.+?):\s+(\d+(?:\.\d+)?)\s+ns\b",
+    r"^[✅❌⚪]\s+(.+?):\s+(\d+(?:\.\d+)?)\s+ns\b",
     re.MULTILINE,
 )
 
