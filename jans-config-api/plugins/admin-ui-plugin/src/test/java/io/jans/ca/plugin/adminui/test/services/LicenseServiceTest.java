@@ -26,8 +26,10 @@ import org.testng.annotations.Test;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
+
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
@@ -238,7 +240,7 @@ public class LicenseServiceTest {
             if (tokenCall <= 2) {
                 initialTokenRequests.countDown();
                 if (!initialTokenRequests.await(5, TimeUnit.SECONDS)) {
-                    throw new IllegalStateException("Concurrent token requests did not both start");
+                    throw new IllegalStateException("Concurrent token requests did not both report invalid_client");
                 }
                 errorResponseConsumer.accept("{\"error\":\"invalid_client\"}");
                 return null;
