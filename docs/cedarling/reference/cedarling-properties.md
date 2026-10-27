@@ -173,7 +173,7 @@ What is retried:
 - A request that does not reach Lock Server, or gets an HTTP `5xx`, `429` or `408`, is retried with the same bytes. `429` and `408` often come from a proxy before Lock Server; both ask to repeat the request later. After the last retry its records are dropped.
 - A `Retry-After` header on such an answer, in seconds or as an HTTP date, makes the wait before the next attempt at least that long, never shorter than the emitter's own backoff, and at most 5 minutes, so a misconfigured proxy cannot stop TRACE for hours. Without the header, or with a value that cannot be read or is in the past, the emitter's own backoff applies.
 - HTTP `401`: when Cedarling obtained its token through DCR, it requests a new token and sends the same request once more; a second `401` is final. A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` cannot be renewed, so its `401` is final at once.
-- Any other refusal of the whole request is final: its records are logged at `ERROR` and dropped. This includes HTTP `403`, which Lock Server returns for a token without the `trace.write` scope (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)), and `400 invalid_request`.
+- Any other refusal of the whole request is final: its records are logged at `ERROR` and dropped. This includes HTTP `403`: for a token without the `trace.write` scope, or for a client Lock Server has no evidence domain for (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)), and `400 invalid_request`.
 - Lock Server refuses a request over its `traceConfiguration.maxBulkRecords` or `maxBulkRequestBytes` with `400 invalid_request` and the reason `max_bulk_records_exceeded` or `bulk_body_too_large`. The `ERROR` then names the Cedarling setting to lower, `CEDARLING_TRACE_BULK_MAX_RECORDS` or `CEDARLING_TRACE_BULK_MAX_BYTES`, with its current value. Lock Server sends the reason only when its `errorReasonEnabled` is `true` (default `false`); without it, the `ERROR` names the causes that fit a request Cedarling builds: TRACE disabled in Lock Server (`traceConfiguration.enabled`), or a bulk limit, with both Cedarling settings and their values.
 - Per record, Lock Server answers in a `207` response. A record refused with `storage_failure` or `crypto_unavailable` is resent, after a 10-second pause, together with the next request. A record refused with `chain_not_registered` is never resent. When Lock Server refuses the first record (genesis) of the chain with `chain_not_registered`, it registers chains only through its admin API: Cedarling needs `chainRegistrationMode: FIRST_OBSERVED` (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)). Every other refusal is final. The records of one response refused for the same error and reason are logged with one `ERROR` that gives their count; each record is logged at `DEBUG`.
 
@@ -220,8 +220,13 @@ Lock Server accepts TRACE records only with an access token that has the `https:
 
 In the Lock Server `traceConfiguration` (see [Lock Server TRACE configuration](../../janssen-server/lock/trace.md#configuration)), Cedarling also needs:
 
-- `chainRegistrationMode: FIRST_OBSERVED`. Cedarling opens a new producer chain at every start and registers it with its first record. In the default `PRE_REGISTERED` mode, Lock Server refuses every record with `chain_not_registered` (see [Chain registration modes](../../janssen-server/lock/trace.md#chain-registration-modes)).
-- Permission for the Cedarling client to submit for its producer id (`CEDARLING_TRACE_PRODUCER_ID`): list the producer id in `defaultAllowedProducerIds`, or give the client an entry in `clientDomainBindings` whose `allowedProducerIds` contains it. Otherwise Lock Server refuses every record with `producer_not_allowed`.
+| Setting | Set it to | Without it |
+|---|---|---|
+| `chainRegistrationMode` | `FIRST_OBSERVED` | every record is refused: `chain_not_registered` |
+| `defaultEvidenceDomainId` | a domain id, for example `default` | every request is refused: HTTP `403` `client_not_bound` |
+| `defaultAllowedProducerIds` | a list that contains `CEDARLING_TRACE_PRODUCER_ID` | every record is refused: `producer_not_allowed` |
+
+Cedarling opens a new producer chain at every start and registers it with its first record, which the default `PRE_REGISTERED` mode does not allow (see [Chain registration modes](../../janssen-server/lock/trace.md#chain-registration-modes)). A per-client entry in `clientDomainBindings` also works instead of the two defaults, but Cedarling registers a new client through DCR at every start, so the defaults are simpler.
 
 To see why Lock Server refused a record, set `errorReasonEnabled: true` in the Lock Server configuration: Cedarling then logs Lock Server's `reason` with the error, for example `event_kind_not_authorized`. Lock Server reads this setting only at startup.
 
