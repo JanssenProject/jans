@@ -63,6 +63,7 @@ class BaseConfig:
     CEDARLING_BOOTSTRAP_CONFIG = None
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
+    SIDECAR_TRACE_WORKLOAD_ID = os.getenv("SIDECAR_TRACE_WORKLOAD_ID")
 
 
 class TestingConfig(BaseConfig):

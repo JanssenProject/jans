@@ -375,13 +375,12 @@ public class OrmTraceStore implements TraceStore {
 	@Override
 	public Optional<ReceiptHead> findReceiptHead(String domainId) {
 		Filter filter = Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId);
-		PagedResult<TraceReceiptEntry> paged = persistenceEntryManager.findPagedEntries(receiptsBase(),
-				TraceReceiptEntry.class, filter, new String[] { ATTR_RECEIPT_SEQ, ATTR_RECEIPT_HASH }, ATTR_RECEIPT_SEQ,
-				SortOrder.DESCENDING, 0, 1, 1);
-		if (paged.getEntries().isEmpty()) {
+		List<TraceReceiptEntry> heads = persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter,
+				new String[] { ATTR_RECEIPT_SEQ, ATTR_RECEIPT_HASH }, ATTR_RECEIPT_SEQ, SortOrder.DESCENDING, 0, 1, 1);
+		if (heads.isEmpty()) {
 			return Optional.empty();
 		}
-		TraceReceiptEntry entity = paged.getEntries().get(0);
+		TraceReceiptEntry entity = heads.get(0);
 		return Optional.of(new ReceiptHead(entity.getReceiptSeq() == null ? 0L : entity.getReceiptSeq(),
 				entity.getReceiptHash()));
 	}

@@ -191,6 +191,10 @@ final class FakeEntryManagerBehavior {
 		when(mock.findPagedEntries(anyString(), any(Class.class), any(Filter.class), any(), anyString(),
 				any(SortOrder.class), anyInt(), anyInt(), anyInt())).thenAnswer(this::pagedAnswer);
 
+		when(mock.findEntries(anyString(), any(Class.class), any(Filter.class), any(), anyString(),
+				any(SortOrder.class), anyInt(), anyInt(), anyInt()))
+				.thenAnswer(inv -> ((PagedResult) pagedAnswer(inv)).getEntries());
+
 		when(mock.countEntries(anyString(), any(Class.class), any(Filter.class)))
 				.thenAnswer(inv -> matchAll(inv, -1).size());
 	}

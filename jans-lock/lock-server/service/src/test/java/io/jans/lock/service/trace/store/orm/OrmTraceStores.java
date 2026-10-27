@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.service.BaseLockServiceTest;
+import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.orm.PersistenceEntryManager;
 
@@ -31,6 +32,10 @@ final class OrmTraceStores extends BaseLockServiceTest {
 	}
 
 	static OrmTraceStore create(PersistenceEntryManager persistenceEntryManager) {
+		return create(persistenceEntryManager, TraceTestCrypto.traceKeys());
+	}
+
+	static OrmTraceStore create(PersistenceEntryManager persistenceEntryManager, TraceKeys traceKeys) {
 		BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
 		baseDnConfiguration.setTrace(BASE_DN);
 		StaticConfiguration staticConfiguration = new StaticConfiguration();
@@ -40,7 +45,7 @@ final class OrmTraceStores extends BaseLockServiceTest {
 		setField(store, "log", LoggerFactory.getLogger(OrmTraceStore.class));
 		setField(store, "persistenceEntryManager", persistenceEntryManager);
 		setField(store, "staticConfiguration", staticConfiguration);
-		setField(store, "traceKeys", TraceTestCrypto.traceKeys());
+		setField(store, "traceKeys", traceKeys);
 		store.init();
 		return store;
 	}
