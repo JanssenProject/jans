@@ -7,11 +7,11 @@ tags:
   - key rotation
 ---
 
-# Regenerating the cryptographic keys 
+# Regenerating the cryptographic keys
 
-Janssen server uses cryptographic keys for signing and encryption. This document describes the steps that help you regenerate and keep key related information in synch.
+Janssen server uses cryptographic keys for signing and encryption. This document describes the steps that help you regenerate and keep key-related information in sync.
 
-The key related information and artifacts need to be in synchronization with each other at following places:
+The key-related information and artifacts need to be in synchronization with each other at following places:
 
 1. The PKCS#12 keystore containing the private keys
 2. The public JWKS file on the filesystem
@@ -26,6 +26,9 @@ The key related information and artifacts need to be in synchronization with eac
     ```
 
     Also, it is highly recommended to generate the keystore and JWKS as one pair, validate them, and update the filesystem and persistence in the same maintenance window.
+
+!!! warning
+    This procedure is for VM-based installations and should only be run on development or test environments. For production Kubernetes deployments, follow the [certificate management guide](https://docs.jans.io/stable/janssen-server/kubernetes-ops/cert-management/) instead.
 
 ## Scope
 
@@ -116,7 +119,7 @@ cp -a "$JANS_AUTH_JWKS" "$BACKUP_DIR/" 2>/dev/null || true
 sudo -u postgres psql -d jansdb -Atc \
 'SELECT "jansConfWebKeys"
    FROM "jansAppConf"
-  WHERE "jansConfWebKeys" IS NOT NULL;' \
+  WHERE "dn" = '"'"'ou=jans-auth,ou=configuration,o=jans'"'"';' \
 > "$BACKUP_DIR/jansConfWebKeys.json"
 
 chmod 600 "$BACKUP_DIR"/*
@@ -149,11 +152,11 @@ The following algorithm set creates Connect and SSA keys for common signing and 
   -sig_keys RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512 \
   -enc_keys RSA1_5 RSA-OAEP ECDH-ES \
   -dnname "CN=Jans Auth CA Certificates" \
-  -expiration 3650 \
+  -expiration 365 \
   > "$RECOVERY_DIR/jans-auth-keys.json"
 ```
 
-`-expiration` is expressed in days for Connect keys. SSA key validity is handled separately by the generator and is normally much longer.
+`-expiration` is expressed in days for Connect keys (365 here; set it according to your rotation policy). SSA key validity is handled separately by the generator and is normally much longer.
 
 !!! note
     Supported algorithms can vary by Janssen server version and Java security provider. Check the generator options on the installed server before changing the algorithm list:
@@ -248,13 +251,13 @@ BEGIN;
 
 UPDATE "jansAppConf"
 SET "jansConfWebKeys" = \$jwks\$$NEW_JWKS\$jwks\$
-WHERE "jansConfWebKeys" IS NOT NULL;
+WHERE "dn" = 'ou=jans-auth,ou=configuration,o=jans';
 
 SELECT
   COUNT(*) AS rows_with_webkeys,
   jsonb_array_length("jansConfWebKeys"::jsonb -> 'keys') AS key_count
 FROM "jansAppConf"
-WHERE "jansConfWebKeys" IS NOT NULL
+WHERE "dn" = 'ou=jans-auth,ou=configuration,o=jans'
 GROUP BY "jansConfWebKeys";
 
 COMMIT;
@@ -343,10 +346,10 @@ systemctl list-units --no-pager \
 
 Use a new private/incognito browser session and test:
 
-1. Open the Admin UI
+1. Open a client application that authenticates against the Janssen server
 2. Authenticate
 3. Complete the authorization-code redirect
-4. Confirm that the Admin UI loads without an HTTP 500 response
+4. Confirm that the application loads without an HTTP 500 response
 5. Test any critical OIDC, OAuth, UMA, SSA, or encrypted-token workflows used by the deployment
 
 Monitor the `jans-auth` module while testing:
@@ -393,7 +396,7 @@ BEGIN;
 
 UPDATE "jansAppConf"
 SET "jansConfWebKeys" = \$jwks\$$OLD_JWKS\$jwks\$
-WHERE "jansConfWebKeys" IS NOT NULL;
+WHERE "dn" = 'ou=jans-auth,ou=configuration,o=jans';
 
 COMMIT;
 SQL
