@@ -6,8 +6,6 @@
 
 package io.jans.lock.service.grpc.trace;
 
-import java.io.ByteArrayInputStream;
-
 import org.slf4j.Logger;
 
 import io.grpc.stub.StreamObserver;
@@ -65,14 +63,14 @@ public class GrpcTraceServiceImpl extends TraceServiceGrpc.TraceServiceImplBase 
     @Override
     public void submitRecord(SubmitRecordRequest request, StreamObserver<RecordAcceptance> responseObserver) {
         GrpcTraceCall.execute(log, "submitRecord", responseObserver,
-                () -> traceRestWebService.submitRecord(new ByteArrayInputStream(request.getAssertion().toByteArray()), null, null),
+                () -> traceRestWebService.submitRecord(request.getAssertion().newInput(), null, null),
                 TraceAcceptanceResponse.class, mapper::toRecordAcceptance);
     }
 
     @Override
     public void submitBulkRecords(SubmitBulkRecordsRequest request, StreamObserver<BulkAcceptance> responseObserver) {
         GrpcTraceCall.execute(log, "submitBulkRecords", responseObserver,
-                () -> traceRestWebService.submitBulkRecords(new ByteArrayInputStream(request.getRecords().toByteArray()), null, null),
+                () -> traceRestWebService.submitBulkRecords(request.getRecords().newInput(), null, null),
                 TraceBulkIngestionResponse.class, mapper::toBulkAcceptance);
     }
 

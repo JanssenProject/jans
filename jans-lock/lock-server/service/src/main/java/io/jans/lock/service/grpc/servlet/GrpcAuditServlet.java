@@ -10,8 +10,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 
@@ -22,9 +24,8 @@ import io.grpc.servlet.jakarta.ServletServerBuilder;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.GrpcServerMode;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
-import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
-import io.jans.lock.service.grpc.trace.GrpcTraceServiceProvider;
+import io.jans.lock.service.grpc.server.GrpcServiceRegistry;
 import io.jans.lock.service.grpc.util.GrpcLimits;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -59,10 +60,7 @@ public class GrpcAuditServlet extends HttpServlet {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private GrpcAuditServiceProvider grpcAuditServiceProvider;
-
-    @Inject
-    private GrpcTraceServiceProvider grpcTraceServiceProvider;
+    private GrpcServiceRegistry grpcServiceRegistry;
 
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
@@ -83,24 +81,22 @@ public class GrpcAuditServlet extends HttpServlet {
         // Only initialize if not already set
         if (adapterRef.get() == null) {
             try {
-                BindableService rawService = grpcAuditServiceProvider.getService();
-                if (rawService == null) {
-                    log.error("GrpcAuditServiceProvider returned null service");
+                List<BindableService> services = grpcServiceRegistry.getServices();
+                if (services.stream().anyMatch(Objects::isNull)) {
+                    log.error("gRPC service registry returned null service");
                     return;
                 }
 
                 ServletServerBuilder builder = new ServletServerBuilder();
-                builder.addService(ServerInterceptors.intercept(rawService, authorizationInterceptor));
-                builder.addService(ServerInterceptors.intercept(grpcTraceServiceProvider.getTraceService(), authorizationInterceptor));
-                builder.addService(ServerInterceptors.intercept(grpcTraceServiceProvider.getTraceAdminService(), authorizationInterceptor));
-                builder.maxInboundMessageSize(GrpcLimits.MAX_INBOUND_MESSAGE_SIZE);
+                services.forEach(service -> builder.addService(ServerInterceptors.intercept(service, authorizationInterceptor)));
+                builder.maxInboundMessageSize(GrpcLimits.maxInboundMessageSize(appConfiguration.getTraceConfiguration()));
 
                 ServletAdapter newAdapter = builder.buildServletAdapter();
                 
                 // Atomic compare-and-set: only set if still null
                 if (adapterRef.compareAndSet(null, newAdapter)) {
-                    log.info("gRPC adapter initialized successfully with authorization enabled for service: {}",
-                            rawService.getClass().getSimpleName());
+                    log.info("gRPC adapter initialized successfully with authorization enabled for services: {}",
+                            services.stream().map(service -> service.getClass().getSimpleName()).collect(Collectors.toList()));
                 } else {
                     log.info("gRPC adapter was already initialized by another thread");
                 }

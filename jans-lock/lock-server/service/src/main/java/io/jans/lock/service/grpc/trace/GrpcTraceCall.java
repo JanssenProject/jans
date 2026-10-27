@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.grpc.util.GrpcStatusMapper;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -56,8 +57,19 @@ final class GrpcTraceCall {
     static Status toStatus(Response response) {
         Status status = GrpcStatusMapper.fromHttpStatus(response.getStatusInfo().toEnum());
         Object entity = response.getEntity();
-        String description = entity == null || entity.toString().isEmpty() ? response.getStatusInfo().getReasonPhrase()
-                : entity.toString();
+        String body = entity == null ? "" : entity.toString();
+        if (Status.Code.ALREADY_EXISTS == status.getCode() && isAmbiguousIdentifier(body)) {
+            status = Status.FAILED_PRECONDITION;
+        }
+
+        String description = body.isEmpty() ? response.getStatusInfo().getReasonPhrase() : body;
         return status.withDescription(description);
+    }
+
+    /**
+     * A bare identifier used by several producers is a 409 but not an "already exists" condition.
+     */
+    private static boolean isAmbiguousIdentifier(String body) {
+        return body.contains("\"" + TraceErrorResponseType.AMBIGUOUS_IDENTIFIER.getParameter() + "\"");
     }
 }

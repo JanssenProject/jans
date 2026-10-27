@@ -272,6 +272,19 @@ class GrpcTraceServiceImplTest {
 	}
 
 	@Test
+	void testAmbiguousIdentifierConflict_IsFailedPreconditionNotAlreadyExists() {
+		String body = "{\"error\":\"ambiguous_identifier\"}";
+		doThrow(new WebApplicationException(Response.status(Response.Status.CONFLICT).entity(body).build())).when(rest)
+				.getRecord(any(), any());
+
+		RecordingObserver<RecordEnvelope> observer = new RecordingObserver<>();
+		service.getRecord(GetRecordRequest.newBuilder().setRecordId("r").build(), observer);
+
+		assertEquals(Status.Code.FAILED_PRECONDITION, observer.errorStatus().getCode());
+		assertEquals(body, observer.errorStatus().getDescription());
+	}
+
+	@Test
 	void testRestErrorStatuses_AreMapped() {
 		assertEquals(Status.Code.NOT_FOUND, errorCodeOf(Response.Status.NOT_FOUND));
 		assertEquals(Status.Code.INVALID_ARGUMENT, errorCodeOf(Response.Status.BAD_REQUEST));
