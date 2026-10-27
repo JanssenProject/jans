@@ -126,6 +126,8 @@ def _transform_lock_dynamic_config(conf, manager):
         ("cryptoProvider", "JAVA"),
         ("policyMismatchGraceSeconds", 300),
         ("policyReleaseRetentionDays", 30),
+        ("correlationRetryLimit", 3),
+        ("chainRegistrationMode", "PRE_REGISTERED"),
     ]:
         if tconf_k not in conf["traceConfiguration"]:
             conf["traceConfiguration"][tconf_k] = tconf_v
