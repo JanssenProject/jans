@@ -58,7 +58,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         dn, jans_auth_conf_dynamic = self.dbUtils.get_jans_auth_conf_dynamic()
         agama_config=jans_auth_conf_dynamic["agamaConfiguration"].copy()
-        agama_config['disableTCHV'] = True
         agama_config['enabled'] = True
         self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')

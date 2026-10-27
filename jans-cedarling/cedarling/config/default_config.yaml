@@ -28,7 +28,6 @@ CEDARLING_LOCK_TELEMETRY_INTERVAL: 0
 CEDARLING_LOCK_LISTEN_SSE: "disabled"
 # Sign AUTHORIZATION_DECISION TRACE records and send them to Lock Server.
 # Requires CEDARLING_LOCK: "enabled", a .cjar policy store and a signing key.
-# Still in development: records are not built or sent yet.
 CEDARLING_TRACE: "disabled"
 # Defaults to CEDARLING_APPLICATION_NAME; must match ^[A-Za-z0-9][A-Za-z0-9._:/-]{0,254}$.
 # CEDARLING_TRACE_PRODUCER_ID: null
@@ -39,9 +38,11 @@ CEDARLING_TRACE: "disabled"
 # CEDARLING_TRACE_SIGNING_KEY_PEM: null
 # Defaults to the key thumbprint (sha256:<hex>).
 # CEDARLING_TRACE_SIGNING_KID: null
-# "discovered" takes trace_bulk_endpoint from the Lock Server well-known configuration.
+# "discovered" (or a blank value) takes trace_bulk_endpoint from the Lock Server well-known
+# configuration. Must be https, or http only to a loopback host: the Lock token goes with it.
 # CEDARLING_TRACE_ENDPOINT: "discovered"
 # CEDARLING_TRACE_BULK_MAX_RECORDS: 100
+# At least 262146: one record of the Lock Server default maxRequestBytes plus brackets.
 # CEDARLING_TRACE_BULK_MAX_BYTES: 4194304
 CEDARLING_MAX_DEFAULT_ENTITIES: 1000
 CEDARLING_MAX_BASE64_SIZE: 1048576

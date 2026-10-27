@@ -80,11 +80,4 @@ public class ManagedBeanService {
 
     }
 
-    /*
-    public static void main(String ...args) throws Exception {
-        ManagedBeanService mbs = new ManagedBeanService();
-        System.out.println(mbs.getClassQualifiers(....class));
-    }
-    */
-    
 }

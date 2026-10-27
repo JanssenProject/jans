@@ -375,9 +375,9 @@ final class EventKindValidationSupport {
 		}
 	}
 
-	/** Design §7.3: see {@link TraceIssuers#isValid(String)}. */
+	/** Design §7.3: see {@link TraceIssuers#isValidTokenIssuer(String)}. */
 	private static void validateIssuer(String issuer, String path) {
-		if (!TraceIssuers.isValid(issuer)) {
+		if (!TraceIssuers.isValidTokenIssuer(issuer)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "invalid:" + path);
 		}
 	}

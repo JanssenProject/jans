@@ -7,16 +7,6 @@
 //! record takes the next position and carries the `content_digest` of the one
 //! before, so Lock sees a gap or a fork.
 
-// Driven by the TRACE emitter, not wired in yet. Remove this attribute with it: `expect` turns
-// into a warning as soon as the items are used.
-#![cfg_attr(
-    not(test),
-    expect(
-        dead_code,
-        reason = "consumed by the TRACE emitter; remove when it is wired in"
-    )
-)]
-
 use jans_trace_core::assertion::{
     ParseUnsignedAssertionError, SignError, SignedAssertion, UnsignedAssertion,
 };
@@ -67,6 +57,16 @@ impl ProducerChain {
             next_sequence: 1,
             prev_record_hash: Digest::GENESIS,
         }
+    }
+
+    /// Id of this chain, `producer_chain_id` in every record of it.
+    pub(crate) fn chain_id(&self) -> Uuid {
+        self.chain_id
+    }
+
+    /// `sequence_number` the next signed record gets; the first record is `1`.
+    pub(crate) fn next_sequence(&self) -> u64 {
+        self.next_sequence
     }
 
     /// The position advances only after the record is signed, so a record that
@@ -155,7 +155,7 @@ fn token(token: &TokenRef) -> Value {
         TokenId::Fingerprint(digest) => ("fingerprint", digest.to_string()),
     };
     json!({
-        "issuer": token.issuer,
+        "issuer": token.issuer.to_string(),
         "token_type": token.token_type,
         name: id,
     })
@@ -164,6 +164,7 @@ fn token(token: &TokenRef) -> Value {
 #[cfg(test)]
 mod tests {
     use std::collections::BTreeSet;
+    use std::sync::Arc;
 
     use jans_trace_core::assertion::{
         ParseUnsignedAssertionError, SignError, SignedAssertion, VerificationContext, VerifyError,
@@ -177,7 +178,9 @@ mod tests {
     use crate::authz::TraceContext;
     use crate::common::app_types::PdpID;
     use crate::log::gen_uuid7;
-    use crate::trace::record::{DecisionFacts, Outcome, PolicyFacts, RecordDraft, TokenRef};
+    use crate::trace::record::{
+        DecisionFacts, IssuerRef, Outcome, PolicyFacts, RecordDraft, TokenRef,
+    };
 
     /// RFC 8410 section 10.3 example key: public test vector, not a secret.
     const KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
@@ -215,29 +218,40 @@ mod tests {
             action: ACTION.to_string(),
             resource_type: "Jans::Issue".to_string(),
             outcome: Outcome::Allow,
-            tokens,
+            tokens: tokens.into(),
         };
-        let policy = PolicyFacts {
+        let policy = Arc::new(PolicyFacts {
             store_id: "store-1".to_string(),
             store_version: "1.0.0".to_string(),
             language_version: "4.4".to_string(),
             bundle_hash: jans_trace_core::inputs::compute_bundle_hash(b"archive"),
-        };
-        RecordDraft::new(gen_uuid7(), 1_781_138_542, &trace, decision, policy)
-            .expect("test draft should build")
+        });
+        RecordDraft::new(
+            gen_uuid7(),
+            1_781_138_542,
+            &Arc::new(trace),
+            decision,
+            policy,
+        )
+        .expect("test draft should build")
     }
 
     fn tokens() -> Vec<TokenRef> {
         vec![
             TokenRef::new(
-                "https://idp.example.com",
+                IssuerRef::Url("https://idp.example.com".to_string()),
                 "Jans::Access_Token",
                 Some("jti-1"),
                 "a.b.c",
             )
             .expect("test token ref should build"),
-            TokenRef::new("https://idp.example.com", "Jans::Id_Token", None, "d.e.f")
-                .expect("test token ref should build"),
+            TokenRef::new(
+                IssuerRef::Url("https://idp.example.com".to_string()),
+                "Jans::Id_Token",
+                None,
+                "d.e.f",
+            )
+            .expect("test token ref should build"),
         ]
     }
 
@@ -245,18 +259,32 @@ mod tests {
         serde_json::from_str(signed.as_str()).expect("signed record should be JSON")
     }
 
-    fn position(signed: &SignedAssertion) -> (u64, String) {
+    /// Where a record sits in its chain.
+    #[derive(Debug, PartialEq)]
+    struct ChainPosition {
+        sequence: u64,
+        prev_record_hash: String,
+    }
+
+    fn position(signed: &SignedAssertion) -> ChainPosition {
         let record = json(signed);
         let chain = &record["producer_chain"];
-        (
-            chain["sequence_number"]
+        ChainPosition {
+            sequence: chain["sequence_number"]
                 .as_u64()
                 .expect("sequence_number should be an integer"),
-            chain["prev_record_hash"]
+            prev_record_hash: chain["prev_record_hash"]
                 .as_str()
                 .expect("prev_record_hash should be a string")
                 .to_string(),
-        )
+        }
+    }
+
+    fn genesis_position() -> ChainPosition {
+        ChainPosition {
+            sequence: 1,
+            prev_record_hash: Digest::GENESIS.to_string(),
+        }
     }
 
     fn member_names(value: &Value, names: &mut BTreeSet<String>) {
@@ -291,7 +319,7 @@ mod tests {
             .expect("first record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "a new chain should start at sequence 1 with the genesis hash"
         );
     }
@@ -307,7 +335,10 @@ mod tests {
                 .expect("record should be signed");
             assert_eq!(
                 position(&signed),
-                (sequence, prev.to_string()),
+                ChainPosition {
+                    sequence,
+                    prev_record_hash: prev.to_string(),
+                },
                 "record {sequence} should link to the content digest of the one before"
             );
             prev = signed.content_digest();
@@ -475,7 +506,7 @@ mod tests {
             .expect("next record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "a failed signature should not take a chain position"
         );
     }
@@ -502,7 +533,7 @@ mod tests {
             .expect("next record should be signed");
         assert_eq!(
             position(&signed),
-            (1, Digest::GENESIS.to_string()),
+            genesis_position(),
             "an oversized record should not take a chain position"
         );
     }

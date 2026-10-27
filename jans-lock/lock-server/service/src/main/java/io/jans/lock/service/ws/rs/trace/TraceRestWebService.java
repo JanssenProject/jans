@@ -19,6 +19,7 @@ import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,6 +37,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
@@ -59,8 +61,8 @@ public interface TraceRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "202", description = "Accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceAcceptanceResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or the request is not allowed for the client", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
 	@POST
@@ -77,8 +79,8 @@ public interface TraceRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "207", description = "Multi-Status (per-item outcomes in the body)", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceBulkIngestionResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or the request is not allowed for the client", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
 	@POST
 	@Path("/bulk")
@@ -94,8 +96,8 @@ public interface TraceRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceRecordResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or the request is not allowed for the client", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
@@ -113,8 +115,8 @@ public interface TraceRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceRecordSearchResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or the request is not allowed for the client", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
 	@GET
 	@Path("/records")
@@ -136,8 +138,8 @@ public interface TraceRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceExecutionResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or the request is not allowed for the client", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TraceErrorResponse.class))), })
