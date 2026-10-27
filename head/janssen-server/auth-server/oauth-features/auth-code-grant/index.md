@@ -8,51 +8,54 @@ After the user returns to the client via the redirect URL, the application will 
 ```mermaid
 
 sequenceDiagram
-title Authorization code flow
-autonumber 1
+    title Authorization code flow
+    autonumber 1
 
-participant Resource owner User 
-activate Resource owner User
-Client->>Jans AS:Authorization Request
-activate Client 
-activate Jans AS
-Resource owner User ->>Jans AS:User login and consent
-Jans AS-->>Client:Authorization code response
-deactivate Client
-deactivate Jans AS
+    participant User as Resource owner User 
+    participant Client
+    participant Jans as Jans AS
+    participant RS as Resource Server
 
-Client->>Jans AS: Exchange code for Access Token
-activate Client
-activate Jans AS
-Jans AS-->>Client: Access Token with optional Refresh Token
-deactivate Client
-deactivate Jans AS
-
-loop 
-    Client->>Resource Server: Call API with Access Token
-    activate Client
-    activate Resource Server
-    Resource Server-->>Client: Protected Resource
+    activate User
+    Client->>Jans: Authorization Request
+    activate Client 
+    activate Jans
+    User->>Jans: User login and consent
+    Jans-->>Client: Authorization code response
     deactivate Client
-    deactivate Resource Server
-end
+    deactivate Jans
 
+    Client->>Jans: Exchange code for Access Token
+    activate Client
+    activate Jans
+    Jans-->>Client: Access Token with optional Refresh Token
+    deactivate Client
+    deactivate Jans
 
-Client->>Resource Server: Call API with expired Access Token
-activate Client
-activate Resource Server
-Resource Server-->>Client: Invalid token error
-deactivate Client
-deactivate Resource Server
+    loop
+        Client->>RS: Call API with Access Token
+        activate Client
+        activate RS
+        RS-->>Client: Protected Resource
+        deactivate Client
+        deactivate RS
+    end
 
+    Client->>RS: Call API with expired Access Token
+    activate Client
+    activate RS
+    RS-->>Client: Invalid token error
+    deactivate Client
+    deactivate RS
 
-Client->>Jans AS: Resource Token
-activate Client
-activate Jans AS
-Jans AS-->>Client: Access Token with optional Refresh Token
-deactivate Client
-deactivate Jans AS
-deactivate Resource owner User
+    Client->>Jans: Refresh Token
+    activate Client
+    activate Jans
+    Jans-->>Client: Access Token with optional Refresh Token
+    deactivate Client
+    deactivate Jans
+    deactivate User
+
 ```
 
 ### Testing

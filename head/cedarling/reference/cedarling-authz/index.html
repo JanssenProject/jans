@@ -2716,7 +2716,7 @@ namespace MyApp {
 <p>Multi-issuer batch takes <code>tokens</code> in place of <code>principal</code> — see <a href="#multi-issuer-authorization-authorize_multi_issuer-recommended">Multi-Issuer Authorization</a> for the token contract.</p>
 <h2 id="authorize-options-and-trace-context">Authorize options and TRACE context<a class="headerlink" href="#authorize-options-and-trace-context" title="Permanent link">#</a></h2>
 <p>Every request type (<code>RequestUnsigned</code>, <code>AuthorizeMultiIssuerRequest</code>, <code>BatchAuthorizeUnsignedRequest</code>, <code>BatchAuthorizeMultiIssuerRequest</code>) has an optional <code>options</code> field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without <code>options</code> behaves exactly as before. In a batch request, <code>options</code> applies to the whole call, not to individual items.</p>
-<p>The only option today is <code>trace</code>, the TRACE execution context of the call. TRACE is still in development: Cedarling accepts the context but does not emit TRACE records yet (see <a href=".././cedarling-properties/#trace-properties">TRACE properties</a>).</p>
+<p>The only option today is <code>trace</code>, the TRACE execution context of the call. With TRACE enabled (see <a href=".././cedarling-properties/#trace-properties">TRACE properties</a>), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.</p>
 <table>
 <thead>
 <tr>
@@ -2764,6 +2764,17 @@ namespace MyApp {
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
+<p>With TRACE enabled, the decision log entry of every decision says what happened to its record in <code>trace_record_status</code>. In a batch, each item has its own decision log entry and its own status. The field is absent when TRACE is disabled.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;log_kind&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019394db-f52b-7b06-88b8-a288670a32c2&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;action&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Action::\&quot;Read\&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;resource&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Issue::\&quot;2\&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ALLOW&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;trace_record_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emitted&quot;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>emitted</code> means the record was handed to the emitter, which sends it to Lock Server in the background; the record's <code>record_id</code> is the decision's <code>request_id</code>. A decision without a TRACE context logs <code>not_emitted_missing_context</code>. See <a href=".././cedarling-properties/#record-status-and-metrics">Record status and metrics</a> for every status.</p>
 <p>In Rust, attach options with <code>with_options</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kd">let</span><span class="w"> </span><span class="n">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">request</span><span class="p">.</span><span class="n">with_options</span><span class="p">(</span><span class="n">AuthorizeOptions</span><span class="p">::</span><span class="n">with_trace</span><span class="p">(</span><span class="n">TraceContext</span><span class="p">::</span><span class="n">new</span><span class="p">(</span>
 <span class="w">    </span><span class="n">execution_id</span><span class="p">,</span>
@@ -2880,7 +2891,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 21, 2026
+    October 27, 2026
   </span>
 
     

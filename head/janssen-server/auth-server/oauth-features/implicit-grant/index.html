@@ -2322,33 +2322,38 @@
 Instead, use Authorization code flow with PKCE -<a href="https://tools.ietf.org/html/draft-ietf-oauth-browser-based-apps">OAuth 2.0 for Browser-Based Apps</a>.
 <a href="https://oauth.net/2/grant-types/implicit/">Further reading</a></p>
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
-<pre class="mermaid"><code>sequenceDiagram
+<pre class="mermaid"><code>
+sequenceDiagram
+    title Implicit flow
+    autonumber 1
 
-title Implicit flow
-autonumber 1
+    participant User as Resource owner User
+    participant Client
+    participant JansAS as Jans AS
+    participant WebResource as Web - Hosted client resource
 
-participant Resource owner User
-Client-&gt;&gt;Jans AS:Authorization Request
-activate Client
-activate Jans AS
-Resource owner User -&gt;&gt;Jans AS:User login and consent
-Jans AS--&gt;&gt;Client:Access Token in the URI fragment
-deactivate Client
-deactivate Jans AS
+    Client-&gt;&gt;JansAS:Authorization Request
+    activate Client
+    activate JansAS
+    User-&gt;&gt;JansAS:User login and consent
+    JansAS--&gt;&gt;Client:Access Token in the URI fragment
+    deactivate Client
+    deactivate JansAS
 
-Client -&gt;&gt;Jans AS:Validate Access Token
-activate Client
-activate Jans AS
-Jans AS--&gt;&gt;Client:Validate response
-deactivate Client
-deactivate Jans AS
+    Client-&gt;&gt;JansAS:Validate Access Token
+    activate Client
+    activate JansAS
+    JansAS--&gt;&gt;Client:Validate response
+    deactivate Client
+    deactivate JansAS
 
-Client -&gt;&gt;Web - Hosted client resource:Call API with Access Token
-activate Client
-activate Jans AS
-Jans AS--&gt;&gt;Client:Protected resource
-deactivate Client
-deactivate Jans AS
+    Client-&gt;&gt;WebResource:Call API with Access Token
+    activate Client
+    activate JansAS
+    JansAS--&gt;&gt;Client:Protected resource
+    deactivate Client
+    deactivate JansAS
+
 </code></pre>
 
 
@@ -2420,7 +2425,7 @@ deactivate Jans AS
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 15, 2025
+    October 27, 2026
   </span>
 
     

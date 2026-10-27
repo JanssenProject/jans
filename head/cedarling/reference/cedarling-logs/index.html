@@ -1988,6 +1988,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
 <li><code>dropped_tokens</code>: Multi-issuer only. List of supplied tokens that were not used in the decision, each with the input <code>mapping</code>, zero-based <code>index</code>, and a claim-free <code>reason</code> (<code>{ "kind": "...", "detail": ..., "message": "..." }</code>, where <code>kind</code> is a stable slug and <code>detail</code> is optional — present for <code>invalid_input</code>, omitted for unit reasons — while <code>message</code> is always the non-empty Display text). Omitted when no token was dropped. See <a href=".././cedarling-multi-issuer/#inspecting-dropped-tokens">Inspecting dropped tokens</a> for the reason slugs.</li>
 <li><code>decision_time_micro_sec</code>: how long the decision took</li>
 <li><code>pushed_data</code>: Information about pushed data injected into the authorization context (omitted if none)</li>
+<li><code>trace_record_status</code>: What happened to the TRACE record of this decision, for example <code>emitted</code> or <code>not_emitted_missing_context</code> (omitted when TRACE is disabled). See <a href=".././cedarling-properties/#record-status-and-metrics">Record status and metrics</a>.</li>
 </ul>
 <p>Whenever a request ends with a <code>DENY</code> and Cedar diagnostics contain errors, Cedarling also emits a separate <code>ERROR</code>-level Decision log that summarizes those diagnostics. This makes policy failures immediately visible even if the full debug log is filtered out.</p>
 <h3 id="debug-log-sample">Debug Log Sample<a class="headerlink" href="#debug-log-sample" title="Permanent link">#</a></h3>
@@ -2158,7 +2159,7 @@ analysis to show everything the attacker attempted, both allowed and denied.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 19, 2026
+    October 27, 2026
   </span>
 
     

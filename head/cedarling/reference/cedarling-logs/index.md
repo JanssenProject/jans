@@ -199,6 +199,7 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 * `dropped_tokens`: Multi-issuer only. List of supplied tokens that were not used in the decision, each with the input `mapping`, zero-based `index`, and a claim-free `reason` (`{ "kind": "...", "detail": ..., "message": "..." }`, where `kind` is a stable slug and `detail` is optional — present for `invalid_input`, omitted for unit reasons — while `message` is always the non-empty Display text). Omitted when no token was dropped. See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
 * `decision_time_micro_sec`: how long the decision took
 * `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
+* `trace_record_status`: What happened to the TRACE record of this decision, for example `emitted` or `not_emitted_missing_context` (omitted when TRACE is disabled). See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics).
 
 Whenever a request ends with a `DENY` and Cedar diagnostics contain errors, Cedarling also emits a separate `ERROR`-level Decision log that summarizes those diagnostics. This makes policy failures immediately visible even if the full debug log is filtered out.
 
