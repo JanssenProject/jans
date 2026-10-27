@@ -685,24 +685,25 @@ spec:
       port: 50051
   {{- end }}
   {{- else }}
+  {{- /* One rule per service: a GRPCRoute rule allows at most 8 matches */}}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
-    {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
     {{- range $grpcMethod := $grpcMethods }}
     - method:
         service: {{ $grpcService }}
         method: {{ $grpcMethod }}
     {{- end }}
-    {{- end }}
-    {{- if .Values.additionalConfig.nginx.enableAuditGrpcRewriteSnippets }}
+    {{- if $.Values.additionalConfig.nginx.enableAuditGrpcRewriteSnippets }}
     filters:
     - type: ExtensionRef
       extensionRef:
         group: gateway.nginx.org
         kind: SnippetsFilter
-        name: {{ .Release.Name }}-nginx-audit-grpc-rewrite
+        name: {{ $.Release.Name }}-nginx-audit-grpc-rewrite
     {{- end }}
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051
+  {{- end }}
   {{- end }}
 {{- end }}

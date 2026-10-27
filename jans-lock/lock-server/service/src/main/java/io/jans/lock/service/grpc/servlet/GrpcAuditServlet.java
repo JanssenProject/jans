@@ -53,6 +53,9 @@ public class GrpcAuditServlet extends HttpServlet {
 
     private static final long serialVersionUID = -5675524890589330190L;
 
+    /** The bridge accepted 10 MiB messages before the TRACE services were added: keep it as the floor. */
+    private static final int BRIDGE_MIN_INBOUND_MESSAGE_SIZE = 10 * 1024 * 1024;
+
     @Inject
     private Logger log;
 
@@ -89,7 +92,8 @@ public class GrpcAuditServlet extends HttpServlet {
 
                 ServletServerBuilder builder = new ServletServerBuilder();
                 services.forEach(service -> builder.addService(ServerInterceptors.intercept(service, authorizationInterceptor)));
-                builder.maxInboundMessageSize(GrpcLimits.maxInboundMessageSize(appConfiguration.getTraceConfiguration()));
+                builder.maxInboundMessageSize(Math.max(BRIDGE_MIN_INBOUND_MESSAGE_SIZE,
+                        GrpcLimits.maxInboundMessageSize(appConfiguration.getTraceConfiguration())));
 
                 ServletAdapter newAdapter = builder.buildServletAdapter();
                 

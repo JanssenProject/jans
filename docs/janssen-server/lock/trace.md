@@ -766,7 +766,7 @@ Send the access token in the `authorization: Bearer <token>` metadata entry. The
 - **Retrieval.** `RecordEnvelope.assertion_raw` is the exact accepted text. `RecordEnvelope.assertion` is the same value re-emitted as JSON, as in REST.
 - **Optional fields.** An unset optional field behaves like an absent REST query parameter. `SearchRecordsRequest` and `GetExecutionRequest` use `start` 0 and `count` 100 when unset.
 - **Bulk results.** `BulkResultEntry.flags` and `receipt_sequence` are set only for accepted entries, and `error` only for rejected ones.
-- **Message size.** Lock accepts inbound gRPC messages of up to `maxBulkRequestBytes` (4 MiB by default, at most 16 MiB) plus 64 KiB of envelope. The server reads the value at startup, so restart Lock after you change it. The limit applies to every gRPC method, including the audit service. A bulk body over `maxBulkRequestBytes` but inside the transport limit fails with `INVALID_ARGUMENT`; a larger message is rejected by gRPC with `RESOURCE_EXHAUSTED`.
+- **Message size.** Lock accepts inbound gRPC messages of up to `maxBulkRequestBytes` (4 MiB by default, at most 16 MiB) plus 64 KiB of envelope. The server reads the value at startup, so restart Lock after you change it. The limit applies to every gRPC method, including the audit service. The servlet bridge (`bridge` mode) accepts at least 10 MiB. A bulk body over `maxBulkRequestBytes` but inside the transport limit fails with `INVALID_ARGUMENT`; a larger message is rejected by gRPC with `RESOURCE_EXHAUSTED`.
 
 Errors use the gRPC status code that matches the HTTP status of the REST error. The status description is the structured JSON error body described in the [error catalog](#error-catalog).
 
@@ -781,10 +781,10 @@ Errors use the gRPC status code that matches the HTTP status of the REST error. 
 
 An unexpected server error returns `INTERNAL` with the description `Internal error` and no detail. A gRPC method that has no protected REST counterpart is rejected with `PERMISSION_DENIED`.
 
-Example with `grpcurl`:
+Example with `grpcurl`, run from the root of the Janssen repository (the `-import-path` folder holds `trace.proto`):
 
 ```bash
-grpcurl -proto trace.proto \
+grpcurl -import-path jans-lock/lock-server/service/src/main/proto/grpc -proto trace.proto \
   -H "authorization: Bearer $TOKEN" \
   -d '{"record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41"}' \
   jans.example.org:443 io.jans.lock.trace.TraceService/GetRecord

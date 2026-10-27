@@ -313,17 +313,18 @@ spec:
       port: 50051
   {{- end }}
   {{- else }}
+  {{- /* One rule per service: a GRPCRoute rule allows at most 8 matches */}}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
-    {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
     {{- range $grpcMethod := $grpcMethods }}
     - method:
         service: {{ $grpcService }}
         method: {{ $grpcMethod }}
     {{- end }}
-    {{- end }}
     backendRefs:
     - name: {{ $svcName }}-grpc
       port: 50051
+  {{- end }}
   {{- end }}
 {{- end }}
 

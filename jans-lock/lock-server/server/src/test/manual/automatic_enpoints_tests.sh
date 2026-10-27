@@ -299,6 +299,9 @@ BULK_TELEMETRY_GRPC='{ "entries": '"${BULK_TELEMETRY_JSON_REST}"' }'
 # Helper functions
 # ─────────────────────────────────────────────────────────────────────────────
 
+# redact TEXT: mask bearer tokens so that failed commands can be printed to CI logs
+redact() { sed -E "s/([Bb]earer )[^' ]+/\1***/g" <<<"$1"; }
+
 check_http_success() {
   local cmd="$1"
   local desc="$2"
@@ -308,7 +311,7 @@ check_http_success() {
     echo "✅  $desc (HTTP $status)"
   else
     echo "❌  $desc → HTTP $status"
-    echo "Command: $cmd"
+    echo "Command: $(redact "$cmd")"
     return 1
   fi
 }
@@ -322,7 +325,7 @@ check_http_should_fail() {
     echo "✅ (expected failure) $desc (HTTP $status)"
   else
     echo "❌ UNEXPECTED success → $desc (HTTP $status)"
-    echo "Command: $cmd"
+    echo "Command: $(redact "$cmd")"
     return 1
   fi
 }
@@ -335,7 +338,7 @@ check_grpc_success() {
     echo "✅  $desc"
   else
     echo "❌  $desc"
-    echo "Command: $cmd"
+    echo "Command: $(redact "$cmd")"
     echo "Output:"
     cat "$RES_FILE"
     return 1
@@ -348,7 +351,7 @@ check_grpc_should_fail() {
   > "$RES_FILE"
   if eval "$cmd" >"$RES_FILE" 2>&1; then
     echo "❌ UNEXPECTED success → $desc"
-    echo "Command: $cmd"
+    echo "Command: $(redact "$cmd")"
     echo "Output:"
     cat "$RES_FILE"
     return 1
@@ -361,7 +364,7 @@ check_grpc_should_fail() {
       echo "✅ (expected failure) $desc with status: $code"
     else
       echo "❌ UNEXPECTED gRPC error → $desc"
-      echo "Command: $cmd"
+      echo "Command: $(redact "$cmd")"
       echo "Output:"
       echo "$output"
       return 1
@@ -553,11 +556,11 @@ run_trace_tests() {
 
   echo -e "\n6. TRACE: obtaining tokens\n"
   local admin_token write_token read_token
-  admin_token="$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_ADMIN")"
+  admin_token=$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_ADMIN")
   [[ -z "$admin_token" ]] && { echo "Failed to obtain trace.admin token (is the scope granted to the client?)"; exit 1; }
-  write_token="$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_WRITE")"
+  write_token=$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_WRITE")
   [[ -z "$write_token" ]] && { echo "Failed to obtain trace.write token"; exit 1; }
-  read_token="$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_READ")"
+  read_token=$(get_token "$TRACE_CLIENT_ID" "$TRACE_CLIENT_SECRET" "$SCOPE_TRACE_READ")
   [[ -z "$read_token" ]] && { echo "Failed to obtain trace.readonly token"; exit 1; }
   echo "trace.admin, trace.write and trace.readonly tokens obtained"
 
@@ -876,9 +879,12 @@ run_audit_tests() {
 # Main
 # ─────────────────────────────────────────────────────────────────────────────
 
+SECTIONS_RUN=0
+
 if is_true "$(prop test.audit true)"; then
   if is_configured "$AUDIT_CLIENT_ID" && is_configured "$AUDIT_CLIENT_SECRET"; then
     run_audit_tests
+    SECTIONS_RUN=$((SECTIONS_RUN + 1))
   else
     echo "⚠️  audit tests skipped: audit.client.id / audit.client.secret are not configured"
   fi
@@ -887,9 +893,15 @@ fi
 if is_true "$(prop test.trace true)"; then
   if is_configured "$TRACE_CLIENT_ID" && is_configured "$TRACE_CLIENT_SECRET"; then
     run_trace_tests
+    SECTIONS_RUN=$((SECTIONS_RUN + 1))
   else
     echo "⚠️  TRACE tests skipped: trace.client.id / trace.client.secret are not configured"
   fi
+fi
+
+if [[ $SECTIONS_RUN -eq 0 ]]; then
+  echo "❌ no test section ran: configure audit.client.* or trace.client.* and enable test.audit or test.trace"
+  exit 1
 fi
 
 echo -e "\n┌──────────────────────────────┐"
