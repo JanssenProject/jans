@@ -20,6 +20,8 @@ import io.jans.lock.model.config.GrpcServerMode;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
+import io.jans.lock.service.grpc.trace.GrpcTraceServiceProvider;
+import io.jans.lock.service.grpc.util.GrpcLimits;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -42,6 +44,9 @@ public class GrpcServerStarter {
 
     @Inject
     private GrpcAuditServiceProvider grpcAuditServiceProvider;
+
+    @Inject
+    private GrpcTraceServiceProvider grpcTraceServiceProvider;
 
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
@@ -85,6 +90,11 @@ public class GrpcServerStarter {
                         io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                                 .sslContext(sslContext)
                                 .addService(grpcAuditServiceProvider.getService())  // Get service from provider
+                                .addService(grpcTraceServiceProvider.getTraceService())
+                                .addService(grpcTraceServiceProvider.getTraceAdminService())
+                                .addService(grpcTraceServiceProvider.getTraceService())
+                                .addService(grpcTraceServiceProvider.getTraceAdminService())
+                                .maxInboundMessageSize(GrpcLimits.MAX_INBOUND_MESSAGE_SIZE)
                                 .intercept(authorizationInterceptor);  // Add authorization interceptor
 
                 grpcServer = nettyBuilder.build().start();
@@ -97,6 +107,7 @@ public class GrpcServerStarter {
         } else {
             grpcServer = ServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                     .addService(grpcAuditServiceProvider.getService())  // Get service from provider
+                    .maxInboundMessageSize(GrpcLimits.MAX_INBOUND_MESSAGE_SIZE)
                     .intercept(authorizationInterceptor)  // Add authorization interceptor
                     .build()
                     .start();

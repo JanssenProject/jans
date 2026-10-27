@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 
 import io.grpc.BindableService;
 import io.grpc.ServerInterceptors;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.servlet.jakarta.ServletAdapter;
 import io.grpc.servlet.jakarta.ServletServerBuilder;
 import io.jans.lock.model.config.AppConfiguration;
@@ -25,6 +24,8 @@ import io.jans.lock.model.config.GrpcServerMode;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
+import io.jans.lock.service.grpc.trace.GrpcTraceServiceProvider;
+import io.jans.lock.service.grpc.util.GrpcLimits;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.servlet.ServletException;
@@ -61,6 +62,9 @@ public class GrpcAuditServlet extends HttpServlet {
     private GrpcAuditServiceProvider grpcAuditServiceProvider;
 
     @Inject
+    private GrpcTraceServiceProvider grpcTraceServiceProvider;
+
+    @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
 
     // Use AtomicReference for thread-safe lazy initialization
@@ -85,11 +89,11 @@ public class GrpcAuditServlet extends HttpServlet {
                     return;
                 }
 
-                ServerServiceDefinition wrapped = ServerInterceptors.intercept(rawService, authorizationInterceptor);
-
                 ServletServerBuilder builder = new ServletServerBuilder();
-                builder.addService(wrapped);
-                builder.maxInboundMessageSize(10 * 1024 * 1024);
+                builder.addService(ServerInterceptors.intercept(rawService, authorizationInterceptor));
+                builder.addService(ServerInterceptors.intercept(grpcTraceServiceProvider.getTraceService(), authorizationInterceptor));
+                builder.addService(ServerInterceptors.intercept(grpcTraceServiceProvider.getTraceAdminService(), authorizationInterceptor));
+                builder.maxInboundMessageSize(GrpcLimits.MAX_INBOUND_MESSAGE_SIZE);
 
                 ServletAdapter newAdapter = builder.buildServletAdapter();
                 
