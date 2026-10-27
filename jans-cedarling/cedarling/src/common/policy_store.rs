@@ -5,21 +5,25 @@
 
 #[cfg(test)]
 mod archive_security_tests;
+pub(crate) mod custom_issuer_metadata;
 pub(crate) mod log_entry;
 #[cfg(test)]
 pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
+pub(crate) mod token_types;
 
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
+use crate::trace::PolicyFacts;
 
 pub(crate) mod archive_handler;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
-pub(crate) mod issuer_parser;
+pub(crate) mod formats;
 pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;
 pub(crate) mod metadata;
+pub(crate) mod migration;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 #[cfg(feature = "tools")]
@@ -31,9 +35,19 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 use url::Url;
 
+#[cfg(test)]
+pub(crate) use custom_issuer_metadata::CustomIssuerMetadata;
+pub(crate) use custom_issuer_metadata::CustomTokenMetadata;
 pub(crate) use token_entity_metadata::TokenEntityMetadata;
+#[cfg(test)]
+pub(crate) use token_types::TestJwtIssuer;
+pub(crate) use token_types::{
+    ContextKey, InvalidEntityType, InvalidIssuerName, IssuerName, TokenTypeKind, TokenTypes,
+    TokenTypesError,
+};
 
 // Re-export types used by init/policy_store.rs and external consumers
 pub(crate) use manager::ConversionError;
@@ -61,11 +75,9 @@ pub(crate) struct PolicyStore {
     /// Cedar policy set
     pub(crate) policies: PoliciesContainer,
 
-    /// An optional `HashMap` of trusted issuers.
-    ///
-    /// This field may contain issuers that are trusted to provide tokens, allowing for additional
-    /// verification and security when handling JWTs.
-    pub(crate) trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+    /// Every accepted token type, JWT and custom, keyed by the entity type a
+    /// request `mapping` names.
+    pub(crate) token_types: TokenTypes,
 
     /// Default entities for the policy store.
     pub(crate) default_entities: DefaultEntitiesWithWarns,
@@ -75,31 +87,6 @@ impl PolicyStore {
     pub(crate) fn get_store_version(&self) -> &str {
         self.version.as_deref().unwrap_or("undefined")
     }
-
-    pub(crate) fn validate_trusted_issuers(&self) -> Result<(), TrustedIssuersValidationError> {
-        // check if iss already present in other policy store
-        let mut oidc_to_trusted_issuer: HashMap<String, String> = HashMap::new();
-
-        for (issuer_name, trusted_issuer) in self.trusted_issuers.iter().flatten() {
-            let oidc_url = trusted_issuer.oidc_endpoint.to_string();
-            if let Some(_previous_issuer_name) = oidc_to_trusted_issuer.get(&oidc_url) {
-                return Err(TrustedIssuersValidationError {
-                    oidc_url: format!(
-                        "openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer"
-                    ),
-                });
-            }
-            oidc_to_trusted_issuer.insert(oidc_url, issuer_name.to_owned());
-        }
-
-        Ok(())
-    }
-}
-
-#[derive(Debug, derive_more::Display, derive_more::Error)]
-#[display("openid_configuration_endpoint: '{oidc_url}' is used for more than one issuer")]
-pub(crate) struct TrustedIssuersValidationError {
-    oidc_url: String,
 }
 
 /// Wrapper around [`PolicyStore`] to have access to it and ID of policy store.
@@ -117,46 +104,110 @@ pub(crate) struct PolicyStoreWithID {
     /// Optional metadata from new format policy stores.
     /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
+    /// `sha256:<hex>` of the raw `.cjar` bytes this store was parsed from; `None`
+    /// for stores without an archive (YAML, directory). Lives with the store, so
+    /// a refresh swaps the hash together with the policies it identifies.
+    /// Private and set only where the archive bytes are read, so a `.cjar` store
+    /// cannot exist without its hash.
+    bundle_hash: Option<jans_trace_core::Digest>,
+    /// What a TRACE record says about this store, derived from `bundle_hash` and
+    /// `metadata` when the store is read, so it is swapped together with them and
+    /// shared by every record instead of copied; `None` when the store cannot
+    /// back a record.
+    trace_policy: Option<Arc<PolicyFacts>>,
+}
+
+impl PolicyStoreWithID {
+    /// A store that was not read from a `.cjar` (legacy YAML), so it has no `bundle_hash`.
+    pub(crate) fn without_archive(
+        id: String,
+        store: PolicyStore,
+        metadata: Option<metadata::PolicyStoreMetadata>,
+    ) -> Self {
+        Self {
+            id,
+            store,
+            metadata,
+            bundle_hash: None,
+            trace_policy: None,
+        }
+    }
+
+    /// Hash of the `.cjar` this store came from; `None` without an archive.
+    pub(crate) fn bundle_hash(&self) -> Option<jans_trace_core::Digest> {
+        self.bundle_hash
+    }
+
+    /// What a TRACE record says about this store; `None` when it cannot back one.
+    pub(crate) fn trace_policy(&self) -> Option<&Arc<PolicyFacts>> {
+        self.trace_policy.as_ref()
+    }
+}
+
+/// Path suffix that turns an issuer URL into its discovery URL (OIDC Discovery §4).
+const DISCOVERY_SUFFIX: &str = "/.well-known/openid-configuration";
+
+/// A configuration endpoint the expected `iss` cannot be derived from.
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[error(
+    "configuration endpoint '{0}' must be the issuer URL followed by \
+     `/.well-known/openid-configuration`, without query or fragment"
+)]
+pub struct InvalidConfigurationEndpoint(String);
+
+/// Derives the expected `iss` from an OIDC discovery URL, keeping any path
+/// before the well-known suffix (OIDC Discovery §4).
+pub(crate) fn iss_from_configuration(
+    configuration: &Url,
+) -> Result<Url, InvalidConfigurationEndpoint> {
+    let invalid = || InvalidConfigurationEndpoint(configuration.to_string());
+    if configuration.query().is_some() || configuration.fragment().is_some() {
+        return Err(invalid());
+    }
+    let issuer_path = configuration
+        .path()
+        .strip_suffix(DISCOVERY_SUFFIX)
+        .ok_or_else(invalid)?;
+    let mut iss = configuration.clone();
+    iss.set_path(issuer_path);
+    Ok(iss)
+}
+
+/// Where an issuer's signing keys come from.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum KeySource {
+    /// OIDC discovery; keys come from the discovered `jwks_uri`.
+    Discovery { configuration: Url },
+    /// Keys fetched straight from a JWKS URL, with no discovery request.
+    Static { jwks: Url },
 }
 
 /// Represents a trusted issuer that can provide JWTs.
 ///
-/// This struct includes the issuer's name, description, and the `OpenID` configuration endpoint
-/// for discovering issuer-related information.
+/// Holds the `iss` its tokens must carry and where its signing keys come from.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TrustedIssuer {
-    /// The name of the trusted issuer.
-    /// Name also describe namespace in Cedar policy where entity `TrustedIssuer` is located.
-    pub(crate) name: String,
-    /// A brief description of the trusted issuer.
-    pub(crate) description: String,
-    /// The `OpenID` configuration endpoint for the issuer.
-    ///
-    /// This endpoint is used to obtain information about the issuer's capabilities.
-    // Private to force usage of `iss_claim` method to get normalized iss claim
-    oidc_endpoint: Url,
-    /// Metadata for tokens issued by the trusted issuer.
-    pub(crate) token_metadata: HashMap<String, TokenEntityMetadata>,
+    /// The issuer's name: the namespace of its `TrustedIssuer` entity.
+    pub(crate) name: IssuerName,
+    /// The `iss` its tokens must carry.
+    iss: Url,
+    /// `iss` normalized once, as every token's `iss` is compared against it.
+    iss_claim: IssClaim,
+    /// Where the issuer's signing keys come from.
+    pub(crate) key_source: KeySource,
 }
 
 #[cfg(test)]
 impl Default for TrustedIssuer {
     fn default() -> Self {
-        Self {
-            name: "Jans".to_string(),
-            description: String::default(),
-            // This will only really be called during testing so we just put this test value
-            oidc_endpoint: Url::parse("https://test.jans.org/.well-known/openid-configuration")
-                .unwrap(),
-            token_metadata: HashMap::from([
-                ("access_token".into(), TokenEntityMetadata::access_token()),
-                ("id_token".into(), TokenEntityMetadata::id_token()),
-                (
-                    "userinfo_token".into(),
-                    TokenEntityMetadata::userinfo_token(),
-                ),
-            ]),
-        }
+        Self::new(
+            IssuerName::for_test("Jans"),
+            Url::parse("https://test.jans.org").expect("test iss should be a valid url"),
+            KeySource::Discovery {
+                configuration: Url::parse("https://test.jans.org/.well-known/openid-configuration")
+                    .expect("test configuration endpoint should be a valid url"),
+            },
+        )
     }
 }
 
@@ -170,35 +221,80 @@ impl Default for &TrustedIssuer {
 }
 
 impl TrustedIssuer {
-    pub(crate) fn new(
-        name: String,
-        description: String,
-        oidc_endpoint: Url,
-        metadata: HashMap<String, TokenEntityMetadata>,
-    ) -> Self {
+    pub(crate) fn new(name: IssuerName, iss: Url, key_source: KeySource) -> Self {
+        let iss_claim = IssClaim::new(iss.as_str());
         Self {
             name,
-            description,
-            oidc_endpoint,
-            token_metadata: metadata,
+            iss,
+            iss_claim,
+            key_source,
         }
     }
 
+    /// An issuer loaded through OIDC discovery, with `iss` derived offline
+    /// from `configuration`.
     #[cfg(test)]
-    pub(crate) fn set_oidc_endpoint(&mut self, url: Url) {
-        self.oidc_endpoint = url;
+    pub(crate) fn from_configuration(
+        name: impl AsRef<str>,
+        configuration: Url,
+    ) -> Result<Self, InvalidConfigurationEndpoint> {
+        let iss = iss_from_configuration(&configuration)?;
+        Ok(Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        ))
     }
 
-    /// Get the OIDC endpoint URL.
-    /// Should be used when we need to make requests to the OIDC endpoint.
-    ///
-    /// If you need comparison with `iss` claim, use `iss_claim` method instead.
-    pub(crate) fn get_oidc_endpoint(&self) -> &Url {
-        &self.oidc_endpoint
+    /// A discovery issuer whose configuration endpoint is `iss` plus the
+    /// well-known suffix.
+    #[cfg(test)]
+    pub(crate) fn discovery_at(name: impl AsRef<str>, iss: Url) -> Self {
+        let configuration = Url::parse(&format!(
+            "{}{DISCOVERY_SUFFIX}",
+            iss.as_str().trim_end_matches('/')
+        ))
+        .expect("test configuration endpoint should be a valid url");
+        Self::new(
+            IssuerName::for_test(name.as_ref()),
+            iss,
+            KeySource::Discovery { configuration },
+        )
     }
 
-    pub(crate) fn iss_claim(&self) -> IssClaim {
-        IssClaim::new(&self.oidc_endpoint.origin().ascii_serialization())
+    /// This issuer declaring `tokens`, keyed by entity type, for building
+    /// [`TokenTypes`] in tests.
+    #[cfg(test)]
+    pub(crate) fn with_tokens(
+        self,
+        tokens: HashMap<String, TokenEntityMetadata>,
+    ) -> token_types::TestJwtIssuer {
+        token_types::TestJwtIssuer {
+            issuer: self,
+            tokens,
+        }
+    }
+
+    /// Points the issuer at another discovery endpoint, re-deriving `iss`.
+    #[cfg(test)]
+    pub(crate) fn set_configuration_endpoint(&mut self, configuration: Url) {
+        let iss = iss_from_configuration(&configuration)
+            .expect("test configuration endpoint should derive an iss");
+        *self = Self::new(
+            self.name.clone(),
+            iss,
+            KeySource::Discovery { configuration },
+        );
+    }
+
+    /// The `iss` its tokens must carry.
+    pub(crate) fn iss(&self) -> &Url {
+        &self.iss
+    }
+
+    /// The normalized `iss` its tokens must carry.
+    pub(crate) fn iss_claim(&self) -> &IssClaim {
+        &self.iss_claim
     }
 }
 
@@ -426,6 +522,79 @@ fn matches_resource(policy: &Policy, resource_types: &HashSet<EntityTypeName>) -
         ResourceConstraint::Is(type_name) | ResourceConstraint::IsIn(type_name, _) => {
             resource_types.contains(&type_name)
         },
+    }
+}
+
+/// Checks whether byte content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
+pub(crate) fn is_json_bytes(bytes: &[u8]) -> bool {
+    bytes
+        .iter()
+        .find(|b| !b.is_ascii_whitespace())
+        .is_some_and(|b| *b == b'{' || *b == b'[')
+}
+
+/// Checks whether text content looks like a JSON document (object or array),
+/// used only to report legacy JSON policy stores with a precise error.
+#[inline]
+pub(crate) fn is_json_content(content: &str) -> bool {
+    is_json_bytes(content.as_bytes())
+}
+
+#[cfg(test)]
+mod json_content_detection_tests {
+    use super::{is_json_bytes, is_json_content};
+
+    #[test]
+    fn test_is_json_content_detects_json() {
+        assert!(
+            is_json_content(r#"{"cedar_version": "v4.0.0"}"#),
+            "pure JSON object should be detected as JSON"
+        );
+        assert!(
+            is_json_content(r#"[{"id": "1"}]"#),
+            "pure JSON array should be detected as JSON"
+        );
+        assert!(
+            is_json_content("  \n\t  {\n  \"key\": \"value\"\n}"),
+            "whitespace-prefixed JSON should be detected as JSON"
+        );
+        assert!(
+            is_json_bytes(b"  {\"key\": \"value\"}"),
+            "raw bytes should be detected as JSON"
+        );
+    }
+
+    #[test]
+    fn test_is_json_content_allows_valid_yaml() {
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies:\n  allow: true"),
+            "valid YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("# leading comment\ncedar_version: v4.0.0"),
+            "commented YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("---\ncedar_version: v4.0.0"),
+            "document-marker YAML should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("cedar_version: v4.0.0\npolicies: { allow: true }"),
+            "YAML with nested flow mapping should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content(""),
+            "empty string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_content("   \n\t  \n"),
+            "whitespace-only string should not be detected as JSON"
+        );
+        assert!(
+            !is_json_bytes(b"\x00\x01\x02"),
+            "arbitrary binary should not be detected as JSON"
+        );
     }
 }
 
@@ -756,7 +925,10 @@ mod policy_metadata_tests {
         assert_eq!(result, ["/trial", "/upgrade"]);
 
         assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
-        assert!(container.annotation_values(ids.iter(), "absent").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "absent"),
+            [] as [std::string::String; 0]
+        );
     }
 
     #[test]
@@ -783,10 +955,75 @@ mod policy_metadata_tests {
         let ids = [PolicyId::new("plain")];
 
         assert!(container.annotations_map(ids.iter()).is_empty());
-        assert!(container.annotation_values(ids.iter(), "any").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "any"),
+            [] as [std::string::String; 0]
+        );
 
         let by_policy = container.annotations_by_policy(ids.iter());
         assert_eq!(by_policy.len(), 1);
         assert!(by_policy["plain"].is_empty());
+    }
+}
+
+#[cfg(test)]
+mod iss_from_configuration_tests {
+    use super::*;
+
+    fn derive(configuration: &str) -> Result<Url, InvalidConfigurationEndpoint> {
+        iss_from_configuration(&Url::parse(configuration).expect("test url should parse"))
+    }
+
+    #[test]
+    fn root_issuer_keeps_origin() {
+        let iss = derive("https://idp.example/.well-known/openid-configuration")
+            .expect("a root discovery URL should derive an iss");
+        assert_eq!(
+            IssClaim::new(iss.as_str()),
+            IssClaim::new("https://idp.example"),
+            "a root issuer should derive its origin"
+        );
+    }
+
+    #[test]
+    fn path_before_suffix_is_kept() {
+        for (configuration, expected) in [
+            (
+                "https://kc.example/realms/a/.well-known/openid-configuration",
+                "https://kc.example/realms/a",
+            ),
+            (
+                "https://login.microsoftonline.com/tenant-1/v2.0/.well-known/openid-configuration",
+                "https://login.microsoftonline.com/tenant-1/v2.0",
+            ),
+        ] {
+            let iss = derive(configuration).expect("a path-based discovery URL should derive");
+            assert_eq!(
+                iss.as_str(),
+                expected,
+                "{configuration} should keep the issuer path"
+            );
+        }
+    }
+
+    #[test]
+    fn rejects_url_not_of_discovery_shape() {
+        for configuration in [
+            "https://idp.example",
+            "https://idp.example/auth",
+            "https://idp.example/.well-known/openid-configuration/extra",
+            "https://idp.example/.well-known/openid-configuration?tenant=a",
+            "https://idp.example/.well-known/openid-configuration#frag",
+        ] {
+            let err = derive(configuration)
+                .expect_err("a URL not of the discovery shape must be rejected");
+            assert_eq!(
+                err,
+                InvalidConfigurationEndpoint(
+                    Url::parse(configuration).expect("valid url").to_string()
+                ),
+                "the error should name {configuration}"
+            );
+        }
     }
 }

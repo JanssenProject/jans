@@ -6,9 +6,10 @@
 //! In this file we define functions for serde `default` macro.
 
 use super::feature_types::FeatureToggle;
+use crate::common::policy_store::archive_handler::ArchiveLimits;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::log::StdOutLoggerMode;
-use crate::{HttpClientConfig, JwtConfig, lock_config::LockServiceConfig};
+use crate::{HttpClientConfig, JwtConfig, TraceConfig, lock_config::LockServiceConfig};
 
 use std::num::NonZeroUsize;
 
@@ -58,6 +59,14 @@ pub(super) fn default_log_max_retries() -> u32 {
     LockServiceConfig::DEFAULT_LOG_MAX_RETRIES
 }
 
+pub(super) fn default_trace_bulk_max_records() -> usize {
+    TraceConfig::DEFAULT_BULK_MAX_RECORDS.get()
+}
+
+pub(super) fn default_trace_bulk_max_bytes() -> usize {
+    TraceConfig::DEFAULT_BULK_MAX_BYTES.get()
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub(super) fn default_http_client_request_timeout() -> u64 {
     HttpClientConfig::DEFAULT_REQUEST_TIMEOUT.as_secs()
@@ -73,4 +82,8 @@ pub(super) fn default_http_client_retry_delay_secs() -> u64 {
 
 pub(super) fn default_http_client_max_response_size_bytes() -> u64 {
     HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES
+}
+
+pub(super) fn default_policy_store_max_file_size() -> u64 {
+    ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE
 }

@@ -3,7 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
+use crate::common::issuer_utils::IssClaim;
+use crate::common::policy_store::IssuerName;
 
 use super::IssuerConfig;
 use ahash::{HashMap, HashMapExt};
@@ -15,15 +16,13 @@ use std::{
 const MUTEX_POISONED_ERR: &str =
     "IssuerIndex RwLock poisoned due to another thread panicking while holding the lock";
 
-/// The value of the `iss` claim from a JWT
+/// The loaded issuers, by issuer id, and the `iss` values they cover. Several
+/// issuers may share one `iss`, so it is kept as a set rather than a key.
 ///
-/// An index mapping `iss` claims to their corresponding `IssuerConfig`s
-/// This structure allows efficient lookup of issuer configurations
-///
-/// This structure is thread-safe for concurrent reads and writes
+/// Thread-safe for concurrent reads and writes.
 pub(super) struct IssuerIndex {
-    issuer_idx: RwLock<HashMap<String, Arc<IssuerConfig>>>,
-    iss_index: RwLock<HashMap<IssClaim, Arc<IssuerConfig>>>,
+    issuer_idx: RwLock<HashMap<IssuerName, Arc<IssuerConfig>>>,
+    iss_index: RwLock<HashSet<IssClaim>>,
 }
 
 impl IssuerIndex {
@@ -31,59 +30,34 @@ impl IssuerIndex {
     pub(super) fn new() -> Self {
         Self {
             issuer_idx: RwLock::new(HashMap::new()),
-            iss_index: RwLock::new(HashMap::new()),
+            iss_index: RwLock::new(HashSet::new()),
         }
     }
 
-    /// Insert or update an `IssuerConfig` for a given iss claim
+    /// Adds a loaded issuer under its id and records its `iss`.
     pub(super) fn insert(&self, iss: IssClaim, config: IssuerConfig) {
-        let issuer_id = config.issuer_id.clone();
-        let rc_config = Arc::new(config);
-
         self.issuer_idx
             .write()
             .expect(MUTEX_POISONED_ERR)
-            .insert(issuer_id, rc_config.clone());
+            .insert(config.policy.name.clone(), Arc::new(config));
 
         self.iss_index
             .write()
             .expect(MUTEX_POISONED_ERR)
-            .insert(iss, rc_config);
+            .insert(iss);
     }
 
-    /// Get the `TrustedIssuer` for a given iss claim, if it exists
-    pub(super) fn get_trusted_issuer(&self, iss: &IssClaim) -> Option<Arc<TrustedIssuer>> {
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        index.get(iss).map(|config| config.policy.clone())
-    }
-
-    /// Find the token metadata key for a given entity type name
-    /// e.g., "`Dolphin::Access_Token`" -> "`access_token`"
-    pub(super) fn find_token_metadata_key(&self, entity_type_name: &str) -> Option<String> {
-        // Look through all trusted issuers to find the matching entity type name
-
-        // TODO: Optimize this lookup to have O(1) complexity, to have index structure
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        for issuer_config in index.values() {
-            for (token_key, token_metadata) in &issuer_config.policy.token_metadata {
-                if token_metadata.entity_type_name == entity_type_name {
-                    return Some(token_key.clone());
-                }
-            }
-        }
-        None
-    }
-
-    /// Get the number of issuer configurations in the index
+    /// Get the number of issuer configurations in the index; counted by issuer
+    /// id, since several issuers may share one `iss`.
     pub(super) fn len(&self) -> usize {
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
+        let index = self.issuer_idx.read().expect(MUTEX_POISONED_ERR);
         index.len()
     }
 
     /// Check if the index contains a specific iss claim
     pub(super) fn contains_iss(&self, iss: &IssClaim) -> bool {
         let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        index.contains_key(iss)
+        index.contains(iss)
     }
 
     /// Find the iss claim for a given issuer ID (policy store key)
@@ -98,10 +72,7 @@ impl IssuerIndex {
 
     /// Get all issuer IDs in the index of loaded trusted issuers
     pub(super) fn loaded_issuer_ids(&self) -> HashSet<String> {
-        let index = self.iss_index.read().expect(MUTEX_POISONED_ERR);
-        index
-            .values()
-            .map(|config| config.issuer_id.clone())
-            .collect()
+        let index = self.issuer_idx.read().expect(MUTEX_POISONED_ERR);
+        index.keys().map(ToString::to_string).collect()
     }
 }

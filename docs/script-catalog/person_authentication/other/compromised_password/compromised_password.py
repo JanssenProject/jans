@@ -11,13 +11,12 @@ from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper
 import javax.crypto.spec.SecretKeySpec as SecretKeySpec
 import javax.crypto.spec.IvParameterSpec as IvParameterSpec
-import javax.crypto.Cipher
 from javax.crypto import *
 from io.jans.util import ArrayHelper
 from java.util import Arrays
 import urllib, urllib2, json
+from java.lang import Throwable
 
-import java
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
@@ -99,7 +98,6 @@ class PersonAuthentication(PersonAuthenticationType):
             authenticationService = CdiUtil.bean(AuthenticationService)
             print "compromised_password (with password update). Authenticate for step 3"
             userService = CdiUtil.bean(UserService)
-            update_button = requestParameters.get("loginForm:updateButton")
             new_password_array = requestParameters.get("new_password")
             if ArrayHelper.isEmpty(new_password_array) or StringHelper.isEmpty(new_password_array[0]):
                 print "compromised_password (with password update). Authenticate for step 3. New password is empty"
@@ -107,22 +105,23 @@ class PersonAuthentication(PersonAuthenticationType):
             new_password = new_password_array[0]
 
             user = authenticationService.getAuthenticatedUser()
-            if user == None:
+            if user is None:
                 print "compromised_password (with password update). Authenticate for step 3. Failed to determine user name"
                 return False
 
             user_name = user.getUserId()
             print "compromised_password (with password update). Authenticate for step 3. Attempting to set new user '" + user_name + "' password"
             find_user_by_uid = userService.getUser(user_name)
-            if (find_user_by_uid == None):
+            if (find_user_by_uid is None):
                 print "compromised_password (with password update). Authenticate for step 3. Failed to find user"
                 return False
 
             find_user_by_uid.setAttribute("userPassword", new_password)
             userService.updateUser(find_user_by_uid)
             print "compromised_password (with password update). Authenticate for step 3. Password updated successfully"
-            logged_in = authenticationService.authenticate(user_name)
+            authenticationService.authenticate(user_name)
             return True
+        return None
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         identity = CdiUtil.bean(Identity)
@@ -188,7 +187,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(vericloud_gluu_creds_file, 'r')
         try:
             creds = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "Vericloud API. Initialize notification services. Failed to load credentials from file:", vericloud_gluu_creds_file
             return False
         finally:
@@ -198,7 +197,7 @@ class PersonAuthentication(PersonAuthenticationType):
             url = str(creds["api_url"])
             api_key=str(creds["api_key"])
             api_secret= str(creds["api_secret"])
-        except:
+        except (Exception, Throwable):
             print "Vericloud API. Initialize notification services. Invalid credentials file '%s' format:" % super_gluu_creds_file
             return False
       

@@ -59,12 +59,14 @@ async fn test_cedarling_with_valid_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
+            ..Default::default()
         },
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: crate::HttpClientConfig::default(),
+        trace_config: None,
     })
     .await;
 
@@ -114,12 +116,14 @@ async fn test_cedarling_without_ssa() {
         authorization_config: AuthorizationConfig {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
+            ..Default::default()
         },
         lock_config: Some(lock_config),
         max_default_entities: None,
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: crate::HttpClientConfig::default(),
+        trace_config: None,
     })
     .await;
 

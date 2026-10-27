@@ -5,6 +5,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.ClientService;
 import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
@@ -14,6 +15,9 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,6 +40,9 @@ public class ParValidatorTest {
 
     @Mock
     private ClientService clientService;
+
+    @Mock
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Mock
     private Logger log;
@@ -91,6 +98,23 @@ public class ParValidatorTest {
         when(clientService.isPublic(client)).thenReturn(true);
 
         parValidator.validateAuthentication("testId", "testState");
+    }
+
+    @Test
+    public void validateAuthentication_whenNoSessionClientAndCimdClientId_shouldResolveViaClientIdMetadataService() {
+        String cimdClientId = "https://rp.example.org/client-metadata.json";
+        Client cimdClient = new Client();
+        cimdClient.setClientId(cimdClientId);
+        cimdClient.setTokenEndpointAuthMethod("none");
+
+        when(identity.getSessionClient()).thenReturn(null);
+        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(cimdClient);
+        when(appConfiguration.getParForbidPublicClient()).thenReturn(false);
+
+        parValidator.validateAuthentication(cimdClientId, "testState");
+
+        verify(clientIdMetadataService).resolveClient(cimdClientId);
+        verify(clientService, never()).getClient(anyString());
     }
 
 }

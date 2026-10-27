@@ -2,9 +2,11 @@
 
 This tutorial walks through cloning the Janssen Project repository and building the Janssen Tarp browser extension yourself, instead of installing a pre-built release.
 
+Tarp currently pins `@janssenproject/cedarling_wasm` version `0.0.468`.
+
 ## 1. Prerequisites
 
-- **Node.js** ≥ v18.15.0 (check with `node -v`)
+- **Node.js** 22, 24, or 26 (check with `node -v`)
 - **npm** (bundled with Node.js)
 - **git**
 
@@ -88,6 +90,6 @@ If you're modifying the extension:
 
 ## 8. Troubleshooting
 
-- **`npm install` fails on native/WASM deps** — ensure your Node.js version meets the ≥ 18.15.0 requirement; older versions can fail to install the Cedarling WASM package.
+- **`npm install` fails on native/WASM deps** — use Node.js 22, 24, or 26, as required by the Cedarling WASM package.
 - **Build succeeds but extension icon is missing/broken** — re-run `npm run build` (not `build-dev`) for a clean production output, since `dist/` is cleaned on each build.
 - **Changes not reflected in browser** — remember unpacked extensions must be manually reloaded after each rebuild (Chrome) or are removed on restart (Firefox temporary add-ons).

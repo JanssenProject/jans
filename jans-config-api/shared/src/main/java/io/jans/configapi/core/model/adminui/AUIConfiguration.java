@@ -41,8 +41,6 @@ public class AUIConfiguration {
     private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
     private CedarlingLogType cedarlingLogType;
-    private String auiCedarlingPolicyStoreUrl;
-    private String auiCedarlingDefaultPolicyStorePath;
 
     /**
      * Retrieves the additional key-value parameters configured for the Admin UI.
@@ -603,42 +601,6 @@ public class AUIConfiguration {
     }
 
     /**
-     * Gets the Admin UI Cedarling policy store URL.
-     *
-     * @return the configured Cedarling policy store URL for the Admin UI, or {@code null} if not set.
-     */
-    public String getAuiCedarlingPolicyStoreUrl() {
-        return auiCedarlingPolicyStoreUrl;
-    }
-
-    /**
-     * Sets the Admin UI Cedarling policy store URL.
-     *
-     * @param auiCedarlingPolicyStoreUrl the URL of the Cedarling policy store used by the Admin UI
-     */
-    public void setAuiCedarlingPolicyStoreUrl(String auiCedarlingPolicyStoreUrl) {
-        this.auiCedarlingPolicyStoreUrl = auiCedarlingPolicyStoreUrl;
-    }
-
-    /**
-     * Gets the default filesystem path used for the Admin UI's Cedarling policy store.
-     *
-     * @return the default Cedarling policy store path for the Admin UI, or `null` if not set
-     */
-    public String getAuiCedarlingDefaultPolicyStorePath() {
-        return auiCedarlingDefaultPolicyStorePath;
-    }
-
-    /**
-     * Set the default filesystem path that Cedarling uses for the Admin UI policy store.
-     *
-     * @param auiCedarlingDefaultPolicyStorePath the default policy store path to use, or {@code null} to unset
-     */
-    public void setAuiCedarlingDefaultPolicyStorePath(String auiCedarlingDefaultPolicyStorePath) {
-        this.auiCedarlingDefaultPolicyStorePath = auiCedarlingDefaultPolicyStorePath;
-    }
-
-    /**
      * Produce a string representation of this AUIConfiguration containing all configuration fields and their current values.
      *
      * @return a string containing each field name and its current value for this configuration instance
@@ -675,8 +637,6 @@ public class AUIConfiguration {
                 ", allowSmtpKeystoreEdit=" + allowSmtpKeystoreEdit +
                 ", additionalParameters=" + additionalParameters +
                 ", cedarlingLogType=" + cedarlingLogType +
-                ", auiCedarlingPolicyStoreUrl='" + auiCedarlingPolicyStoreUrl + '\'' +
-                ", auiCedarlingDefaultPolicyStorePath='" + auiCedarlingDefaultPolicyStorePath +
                 '}';
     }
 }

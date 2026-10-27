@@ -2,6 +2,7 @@ package provider
 
 import (
         "context"
+        "encoding/json"
         "errors"
         "testing"
 
@@ -44,6 +45,11 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
                         UnfinishedRequestExpiration:     180,
                         AuthenticationHistoryExpiration: 1296000,
                         EnabledFidoAlgorithms:           []string{"RS256", "ES256"},
+                        LockAuditEnabled:                true,
+                        LockAuditEndpoint:               "https://example.org/audit",
+                        LockAuditClientId:               "lock-audit-client",
+                        LockAuditClientPassword:         "lock-audit-secret",
+                        LockAuditFlushInterval:          60,
                 },
         }
 
@@ -60,8 +66,8 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 
         // Note: Empty strings and default boolean values don't generate patches
         // Expected patches: non-empty strings, non-default bools, ints, and arrays
-        if len(patches) != 17 {
-                t.Errorf("Got %d patches, expected 17", len(patches))
+        if len(patches) != 22 {
+                t.Errorf("Got %d patches, expected 22", len(patches))
         }
 
         if err := fromSchemaResource(data, &newCfg); err != nil {
@@ -148,4 +154,73 @@ func testAccResourceCheckFido2ConfigurationDestroy(s *terraform.State) error {
         }
 
         return nil
+}
+
+func TestResourceFido2Config_RequestedPartyMapping(t *testing.T) {
+
+        testCases := []struct {
+                name   string
+                policy *jans.RequestedPartyPolicy
+        }{
+                {"without policy", nil},
+                {"with policy", &jans.RequestedPartyPolicy{AttestationMode: "enforced"}},
+        }
+
+        for _, tc := range testCases {
+                t.Run(tc.name, func(t *testing.T) {
+
+                        data := resourceFido2Configuration().Data(nil)
+
+                        cfg := jans.JansFido2DynConfiguration{
+                                Fido2Configuration: jans.Fido2Configuration{
+                                        RequestedParties: []jans.RequestedParties{
+                                                {
+                                                        Id:      "https://server.example.com",
+                                                        Origins: []string{"server.example.com"},
+                                                        Policy:  tc.policy,
+                                                },
+                                        },
+                                        MetadataServers: []jans.MetadataServer{
+                                                {Url: "https://mds.example.com", RootCert: "root"},
+                                        },
+                                        AttestationMode: "monitor",
+                                        Hints:           []string{"security-key"},
+                                },
+                                Fido2MetricsEnabled:  true,
+                                TrustedProxyEnabled:  true,
+                                TrustedProxyIpRanges: []string{"10.0.0.0/8"},
+                        }
+
+                        if err := toSchemaResource(data, cfg); err != nil {
+                                t.Fatal(err)
+                        }
+
+                        newCfg := jans.JansFido2DynConfiguration{}
+                        if err := fromSchemaResource(data, &newCfg); err != nil {
+                                t.Fatal(err)
+                        }
+
+                        if diff := cmp.Diff(cfg, newCfg); diff != "" {
+                                t.Errorf("Got different configuration after mapping: %s", diff)
+                        }
+                })
+        }
+}
+
+func TestRequestedPartiesJSONNames(t *testing.T) {
+
+        rp := jans.RequestedParties{
+                Id:      "https://server.example.com",
+                Origins: []string{"server.example.com"},
+        }
+
+        b, err := json.Marshal(rp)
+        if err != nil {
+                t.Fatal(err)
+        }
+
+        expected := `{"id":"https://server.example.com","origins":["server.example.com"]}`
+        if string(b) != expected {
+                t.Errorf("Got %s, expected %s", b, expected)
+        }
 }

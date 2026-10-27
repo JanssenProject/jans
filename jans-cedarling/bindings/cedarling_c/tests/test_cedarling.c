@@ -588,6 +588,64 @@ void test_trusted_issuer_loading_info() {
     cedarling_drop(instance_id);
 }
 
+void test_policy_store_id(void) {
+    printf("\nTest: Policy Store ID\n");
+    printf("=======================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0) {
+        printf("[FAIL] Failed to create instance for policy store ID tests\n");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    // Legacy YAML store reports the policy_stores map key
+    char* id = NULL;
+    ret = cedarling_get_policy_store_id(instance_id, &id);
+    TEST_ASSERT(ret == 0, "Get policy store ID succeeds");
+    TEST_ASSERT(id != NULL && strcmp(id, "a1bf93115de86de760ee0bea1d529b521489e5a11747") == 0,
+        "Policy store ID equals policy_stores map key");
+    cedarling_free_string(id);
+
+    id = (char*)"sentinel";
+    ret = cedarling_get_policy_store_id(99999, &id);
+    TEST_ASSERT(ret != 0, "Invalid instance rejects policy store ID");
+    TEST_ASSERT(id == NULL, "Invalid instance resets policy store ID output to NULL");
+
+    ret = cedarling_get_policy_store_id(instance_id, NULL);
+    TEST_ASSERT(ret != 0, "Reject NULL out_id for policy store ID");
+
+    cedarling_drop(instance_id);
+}
+
+// The signature properties pass through the C JSON config: a YAML store
+// cannot be signed, so enforcing the check must fail at init.
+void test_sigstore_enforce_requires_cjar(void) {
+    printf("\nTest: Policy Store Signature Check\n");
+    printf("====================================\n");
+
+    const char* config = "{\n"
+        "    \"CEDARLING_APPLICATION_NAME\": \"TestApp\",\n"
+        "    \"CEDARLING_LOG_TYPE\": \"off\",\n"
+        "    \"CEDARLING_POLICY_STORE_LOCAL_FN\": \"../../../test_files/policy-store_ok_2.yaml\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_MODE\": \"enforce\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY\": \"signer@example.com\",\n"
+        "    \"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER\": \"https://accounts.google.com\"\n"
+        "}";
+
+    CedarlingInstanceResult result;
+    int ret = cedarling_new(config, &result);
+    TEST_ASSERT(ret != 0, "Reject signature enforcement for a YAML policy store");
+    TEST_ASSERT(result.error_message != NULL
+        && strstr(result.error_message, "is not a `.cjar` archive") != NULL,
+        "Error says the policy store is not a .cjar archive");
+    cedarling_free_instance_result(&result);
+}
+
  void test_memory_management(){
      printf("\nTest: Memory Management\n");
      printf("=========================\n");
@@ -883,6 +941,71 @@ void test_authorize_multi_issuer_batch(void) {
     cedarling_drop(instance_id);
 }
 
+// Unsigned request for TestPrincipal1 with `is_ok` and an optional trailing
+// member (e.g. `options`), as a C host would send it.
+#define UNSIGNED_REQUEST(IS_OK, EXTRA) \
+    "{\"principal\":{\"cedar_entity_mapping\":{\"entity_type\":\"Jans::TestPrincipal1\"," \
+    "\"id\":\"test_principal_1\"},\"is_ok\":" IS_OK "}," \
+    "\"action\":\"Jans::Action::\\\"UpdateForTestPrincipals\\\"\"," \
+    "\"resource\":{\"cedar_entity_mapping\":{\"entity_type\":\"Jans::Issue\",\"id\":\"random_id\"}," \
+    "\"org_id\":\"some_long_id\",\"country\":\"US\"},\"context\":{}" EXTRA "}"
+
+#define TRACE_OPTIONS \
+    ",\"options\":{\"trace\":{\"execution_id\":\"exec-1\"," \
+    "\"execution_authority\":\"https://gateway.example.com\",\"workload_id\":\"workload-1\"}}"
+
+// 1 for allow, 0 for deny, -1 when the call failed.
+static int unsigned_decision(uint64_t instance_id, const char* request) {
+    CedarlingResult auth_result;
+    int ret = cedarling_authorize_unsigned(instance_id, request, &auth_result);
+    int decision = -1;
+    if (ret == 0 && auth_result.data != NULL) {
+        decision = strstr(auth_result.data, "\"decision\":true") != NULL ? 1 : 0;
+    }
+    cedarling_free_result(&auth_result);
+    return decision;
+}
+
+// `options` travels in the request JSON through the C ABI unchanged and never
+// changes the decision; a malformed trace context is rejected like bad JSON.
+void test_authorize_unsigned_with_options(void) {
+    printf("\nTest: Unsigned Authorization with AuthorizeOptions\n");
+    printf("==================================================\n");
+
+    CedarlingInstanceResult instance_result;
+    int ret = cedarling_new(TEST_CONFIG, &instance_result);
+    if (ret != 0) {
+        printf("[FAIL] Failed to create instance for options tests\n");
+        cedarling_free_instance_result(&instance_result);
+        return;
+    }
+    uint64_t instance_id = instance_result.instance_id;
+    cedarling_free_instance_result(&instance_result);
+
+    TEST_ASSERT(unsigned_decision(instance_id, UNSIGNED_REQUEST("true", "")) == 1,
+                "Baseline request without options allows");
+    TEST_ASSERT(unsigned_decision(instance_id, UNSIGNED_REQUEST("true", TRACE_OPTIONS)) == 1,
+                "Request with trace options still allows");
+    TEST_ASSERT(unsigned_decision(instance_id, UNSIGNED_REQUEST("false", "")) == 0,
+                "Baseline request without options denies");
+    TEST_ASSERT(unsigned_decision(instance_id, UNSIGNED_REQUEST("false", TRACE_OPTIONS)) == 0,
+                "Request with trace options still denies");
+
+    const char* missing_workload = UNSIGNED_REQUEST("true",
+        ",\"options\":{\"trace\":{\"execution_id\":\"exec-1\","
+        "\"execution_authority\":\"https://gateway.example.com\"}}");
+    CedarlingResult auth_result;
+    ret = cedarling_authorize_unsigned(instance_id, missing_workload, &auth_result);
+    TEST_ASSERT(ret == JSON_ERROR,
+                "Trace context without workload_id is a JSON error");
+    TEST_ASSERT(auth_result.error_message != NULL &&
+                    strstr(auth_result.error_message, "workload_id") != NULL,
+                "Error message names the missing workload_id");
+    cedarling_free_result(&auth_result);
+
+    cedarling_drop(instance_id);
+}
+
  int main() {
      printf("Starting Cedarling C Binding Tests\n");
      printf("==================================\n");
@@ -895,6 +1018,8 @@ void test_authorize_multi_issuer_batch(void) {
 
     test_authorization();
 
+    test_authorize_unsigned_with_options();
+
     test_authorize_unsigned_batch();
 
     test_authorize_unsigned_batch_mixed_ordering();
@@ -906,6 +1031,10 @@ void test_authorize_multi_issuer_batch(void) {
     test_logging_functions();
 
     test_trusted_issuer_loading_info();
+
+    test_policy_store_id();
+
+    test_sigstore_enforce_requires_cjar();
 
      test_memory_management();
 

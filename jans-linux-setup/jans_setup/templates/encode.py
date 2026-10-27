@@ -8,9 +8,8 @@ sys.path.append(os.path.join("%(install_dir)s", 'jans_setup/pylib'))
 from pyDes import *
 
 saltFn = "%(configFolder)s/salt"
-f = open(saltFn)
-salt_property = f.read()
-f.close()
+with open(saltFn) as f:
+    salt_property = f.read()
 
 key = salt_property.split("=")[1].strip()
 
@@ -21,7 +20,6 @@ def obscure(data=""):
     return base64.b64encode(en_data).decode('utf-8')
 
 def unobscure(s=""):
-    engine = triple_des(key, ECB, pad=None, padmode=PAD_PKCS5)
     cipher = triple_des(key)
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=PAD_PKCS5)
     return decrypted.decode('utf-8')

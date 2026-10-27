@@ -4,6 +4,7 @@
 # Copyright (c) 2024, Gluu, Inc.
 
 from typing import Optional, List, final, Dict, Any
+from datetime import timedelta
 from enum import Enum
 
 @final
@@ -493,12 +494,41 @@ class Cedarling:
         """
         ...
 
-    def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
+    def drain_metrics(self) -> "MetricsSnapshot":
         """
-        Check whether a trusted issuer was loaded by issuer identifier.
+        Destructive read: return the telemetry metrics snapshot and reset
+        the counters for the next interval.
+
+        Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+        Lock telemetry ticker owns the collector. Raises `ValueError` when
+        Lock telemetry owns the collector, i.e. whenever
+        `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+        server has no telemetry endpoint. `interval` is a
+        `datetime.timedelta` with sub-second precision.
+
+        Raises:
+            ValueError: If metrics collection is disabled or owned by lock
+                telemetry.
+        """
+        ...
+
+    def policy_store_id(self) -> Optional[str]:
+        """
+        Get the ID of the currently published policy store.
+
+        Returns:
+            The store ID, or None when the store carries no ID.
+            The value is opaque and source-dependent; it may change
+            after a background refresh.
+        """
+        ...
+
+    def is_trusted_issuer_loaded_by_name(self, issuer_name: str) -> bool:
+        """
+        Check whether a trusted issuer was loaded by name.
 
         Args:
-            issuer_id: The trusted issuer identifier to check.
+            issuer_name: The issuer name to check, the `issuer` of its token types.
 
         Returns:
             True if the trusted issuer is loaded, otherwise False.
@@ -554,6 +584,7 @@ class RequestUnsigned:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -561,7 +592,33 @@ class RequestUnsigned:
         resource: EntityData,
         context: Dict[str, Any],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
+
+@final
+class TraceContext:
+    """TRACE execution context, already normalized by the host."""
+
+    execution_id: str
+    execution_authority: str
+    workload_id: str
+    workload_instance_id: Optional[str]
+
+    def __init__(
+        self,
+        execution_id: str,
+        execution_authority: str,
+        workload_id: str,
+        workload_instance_id: Optional[str] = None,
+    ) -> None: ...
+
+@final
+class AuthorizeOptions:
+    """Per-call metadata of a request; never changes the decision."""
+
+    trace: Optional[TraceContext]
+
+    def __init__(self, trace: Optional[TraceContext] = None) -> None: ...
 
 @final
 class CedarEntityMapping:
@@ -634,6 +691,7 @@ class AuthorizeMultiIssuerRequest:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -641,13 +699,31 @@ class AuthorizeMultiIssuerRequest:
         action: str,
         resource: EntityData,
         context: Dict[str, Any] | None = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
+
+@final
+class DropReason:
+    """Why a token was dropped; same shape as the core JSON `reason` object."""
+
+    kind: str
+    detail: Optional[str]
+    message: str
+    def __repr__(self) -> str: ...
+
+@final
+class DroppedToken:
+    mapping: str
+    index: int
+    reason: DropReason
+    def __repr__(self) -> str: ...
 
 @final
 class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+    def dropped_tokens(self) -> List[DroppedToken]: ...
 
 @final
 class BatchItem:
@@ -670,11 +746,13 @@ class BatchAuthorizeUnsignedRequest:
 
     principal: Optional[EntityData]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         items: List[BatchItem],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -683,11 +761,13 @@ class BatchAuthorizeMultiIssuerRequest:
 
     tokens: List[TokenInput]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         tokens: List[TokenInput],
         items: List[BatchItem],
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -794,6 +874,25 @@ class DataStoreStats:
     memory_alert_threshold: float
     memory_alert_triggered: bool
 
+@final
+class MetricsSnapshot:
+    """
+    Destructive read: telemetry metrics snapshot with per-policy stats,
+    error counters, and operational counters for the current interval.
+    Draining resets the counters, so use a single consumer.
+
+    Attributes:
+        policy_stats: Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+        error_counters: Classified error counters keyed by error metric key.
+        operational_stats: Operational counters and gauges (authorization, cache, JWT, data, lock).
+        interval: Duration of the snapshot interval with sub-second precision.
+    """
+
+    policy_stats: dict[str, int]
+    error_counters: dict[str, int]
+    operational_stats: dict[str, int]
+    interval: timedelta
+
 class CedarType(Enum):
     """
     Represents the type of a Cedar value based on JSON structure.
@@ -824,7 +923,7 @@ class CedarType(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: "CedarType") -> bool: ...
+    def __eq__(self, other: object) -> bool: ...
 
 class PolicyEffect(Enum):
     """
@@ -840,7 +939,7 @@ class PolicyEffect(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: "PolicyEffect") -> bool: ...
+    def __eq__(self, other: object) -> bool: ...
 
 @final
 class PolicyMetadata:

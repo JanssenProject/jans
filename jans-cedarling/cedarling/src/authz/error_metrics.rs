@@ -7,7 +7,7 @@ use crate::{
     AuthorizeError, DataError,
     authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
-    jwt::{TrustedIssuerError, ValidateJwtError},
+    jwt::{CustomTokenError, UnknownTokenMapping, ValidateJwtError},
 };
 
 /// Trait for error types that map to a telemetry metric key.
@@ -24,8 +24,20 @@ impl ErrorMetricKey for MultiIssuerValidationError {
             Self::EmptyTokenArray => "multi_issuer.empty_token_array",
             Self::TokenValidationFailed => "multi_issuer.all_tokens_failed",
             Self::InvalidContextJson => "multi_issuer.invalid_context",
-            Self::MissingIssuer => "multi_issuer.missing_issuer",
             MultiIssuerValidationError::InvalidClaims(_) => "multi_issuer.invalid_claim",
+            Self::CustomToken(e) => match e {
+                CustomTokenError::Processing(_) => "multi_issuer.custom_token_processing",
+                CustomTokenError::Timeout(_) => "multi_issuer.custom_token_timeout",
+                CustomTokenError::UnknownMapping(_) => "multi_issuer.custom_token_unknown_mapping",
+                CustomTokenError::Expired { .. } => "multi_issuer.custom_token_expired",
+                CustomTokenError::EmptyTokenId(_) => "multi_issuer.custom_token_empty_token_id",
+                CustomTokenError::MissingRequiredClaim(_) => {
+                    "multi_issuer.custom_token_missing_claim"
+                },
+                CustomTokenError::NoProcessorRegistered(_) => {
+                    "multi_issuer.custom_token_no_processor"
+                },
+            },
         }
     }
 }
@@ -79,6 +91,12 @@ impl ErrorMetricKey for MultiIssuerEntityError {
     }
 }
 
+impl ErrorMetricKey for UnknownTokenMapping {
+    fn metric_key(&self) -> &'static str {
+        "jwt.unknown_token_mapping"
+    }
+}
+
 impl ErrorMetricKey for ValidateJwtError {
     fn metric_key(&self) -> &'static str {
         match self {
@@ -90,7 +108,6 @@ impl ErrorMetricKey for ValidateJwtError {
             Self::GetJwtStatus(_) | Self::DeserializeStatusClaim(_) => "jwt.status_check_failed",
             Self::RejectJwtStatus(_) => "jwt.status_rejected",
             Self::MissingStatusList => "jwt.missing_status_list",
-            Self::TrustedIssuerValidation(e) => e.metric_key(),
         }
     }
 }
@@ -104,17 +121,6 @@ impl ErrorMetricKey for DataError {
             Self::TTLExceeded { .. } => "data.ttl_exceeded",
             Self::ValueTooLarge { .. } => "data.value_too_large",
             Self::SerializationError(_) => "data.serialization",
-        }
-    }
-}
-
-impl ErrorMetricKey for TrustedIssuerError {
-    fn metric_key(&self) -> &'static str {
-        match self {
-            Self::UntrustedIssuer(_) => "jwt.untrusted_issuer",
-            Self::MissingRequiredClaim { .. } | Self::EmptyEntityTypeName { .. } => {
-                "jwt.missing_required_claim"
-            },
         }
     }
 }

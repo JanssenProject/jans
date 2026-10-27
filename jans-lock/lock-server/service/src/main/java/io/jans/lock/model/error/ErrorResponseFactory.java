@@ -91,10 +91,28 @@ public class ErrorResponseFactory implements Configuration {
         throw createWebApplicationException(INTERNAL_SERVER_ERROR, CommonErrorResponseType.UNKNOWN_ERROR, reason);
     }
 
+    public WebApplicationException traceException(TraceErrorResponseType type, String reason) {
+        return traceException(type, reason, null);
+    }
+
+    public WebApplicationException traceException(TraceErrorResponseType type, String reason, Throwable e) {
+        return createWebApplicationException(type.httpStatus(), type, reason, e);
+    }
+
     private String errorAsJson(IErrorType type, String reason) {
+        return buildErrorResponse(type, reason).toJSonString();
+    }
+
+    /**
+     * Builds the structured error body for {@code type}/{@code reason} without wrapping it in a
+     * {@link WebApplicationException}, for callers that embed it inside a larger response (e.g. a
+     * bulk endpoint's per-item result) instead of throwing it. Applies the same
+     * {@code errorReasonEnabled} gating and persisted-message lookup as every other error path.
+     */
+    public DefaultErrorResponse buildErrorResponse(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
-        return error.toJSonString();
+        return error;
     }
 
     private DefaultErrorResponse getErrorResponse(IErrorType type) {
@@ -106,6 +124,8 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getCommon();
             } else if (type instanceof StatErrorResponseType) {
                 list = messages.getStat();
+            } else if (type instanceof TraceErrorResponseType) {
+                list = messages.getTrace();
             }
             if (list != null) {
                 final ErrorMessage m = getError(list, type);
@@ -114,6 +134,10 @@ public class ErrorResponseFactory implements Configuration {
                         .orElse(m.getDescription());
                 response.setErrorDescription(description);
                 response.setErrorUri(m.getUri());
+            } else if (type instanceof TraceErrorResponseType) {
+                // Older deployments may not have a "trace" section in the persisted errors
+                // configuration yet; fall back to the enum id instead of leaving the description unset.
+                response.setErrorDescription(type.getParameter());
             }
         }
 

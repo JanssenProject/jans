@@ -1,0 +1,721 @@
+// This software is available under the Apache-2.0 license.
+// See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+//
+// Copyright (c) 2024, Gluu, Inc.
+
+//! X.509 certificate parsing and validation.
+//!
+//! Uses `x509-parser` for zero-copy, pure-Rust parsing.
+//! Extracts pubkey, SAN, issuer extension, validity, SCT, `BasicConstraints`, EKU.
+
+use x509_parser::certificate::X509Certificate;
+use x509_parser::prelude::*;
+
+use crate::error::SigstoreVerificationError;
+
+/// OID for the Fulcio OIDC issuer extension (v2).
+const OID_ISSUER_V2: &str = "1.3.6.1.4.1.57264.1.8";
+
+/// A certificate's `signatureAlgorithm` — the digest paired with ECDSA used to
+/// sign the TBS. The signing curve is the issuer key's, not encoded here.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) enum SignatureAlgorithm {
+    /// ecdsa-with-SHA256 (OID 1.2.840.10045.4.3.2).
+    EcdsaSha256,
+    /// ecdsa-with-SHA384 (OID 1.2.840.10045.4.3.3).
+    EcdsaSha384,
+    /// ecdsa-with-SHA512 (OID 1.2.840.10045.4.3.4).
+    EcdsaSha512,
+    /// Any other/unsupported algorithm; holds the raw OID for diagnostics.
+    Other(String),
+}
+
+impl SignatureAlgorithm {
+    /// Map a dotted OID string to the algorithm.
+    #[must_use]
+    pub fn from_oid(oid: &str) -> Self {
+        match oid {
+            "1.2.840.10045.4.3.2" => Self::EcdsaSha256,
+            "1.2.840.10045.4.3.3" => Self::EcdsaSha384,
+            "1.2.840.10045.4.3.4" => Self::EcdsaSha512,
+            other => Self::Other(other.to_string()),
+        }
+    }
+}
+
+/// OID for the CT Precertificate SCTs extension.
+const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
+
+/// OID for Extended Key Usage: code signing.
+const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
+
+/// OID for id-ecPublicKey (RFC 5480).
+const OID_EC_PUBLIC_KEY: &str = "1.2.840.10045.2.1";
+/// OID for the secp256r1 / prime256v1 named curve.
+const OID_CURVE_P256: &str = "1.2.840.10045.3.1.7";
+/// OID for the secp384r1 named curve.
+const OID_CURVE_P384: &str = "1.3.132.0.34";
+
+/// The NIST curve of an EC public key, read from the SPKI's declared
+/// `AlgorithmIdentifier` (id-ecPublicKey + namedCurve OID) — not inferred
+/// from the raw point's byte length. Byte-length inference happens to work
+/// today because P-256 and P-384 uncompressed points have different
+/// lengths, but it doesn't authenticate curve identity the way reading the
+/// certificate's own algorithm declaration does.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum EcCurve {
+    /// secp256r1 / prime256v1 (OID 1.2.840.10045.3.1.7).
+    P256,
+    /// secp384r1 (OID 1.3.132.0.34).
+    P384,
+}
+
+/// A parsed X.509 certificate with extracted fields needed for Sigstore verification.
+// The bools below are independent facts extracted from unrelated X.509
+// extensions (BasicConstraints, EKU, two separate KeyUsage bits) — they
+// aren't a state machine to collapse into an enum.
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Clone)]
+pub(crate) struct Cert {
+    /// The raw DER bytes of the certificate.
+    pub der: Vec<u8>,
+
+    /// The public key bytes (SEC1 uncompressed point for ECDSA P-256).
+    pub pubkey_bytes: Vec<u8>,
+
+    /// The public key's curve, read from the SPKI's declared algorithm —
+    /// `None` if the key isn't `id-ecPublicKey` on a recognized curve.
+    pub curve: Option<EcCurve>,
+
+    /// The full DER of this cert's `SubjectPublicKeyInfo`.
+    /// Used as the SCT `issuer_key_hash` input (SHA-256 over the issuer SPKI).
+    pub spki_der: Vec<u8>,
+
+    /// Subject Alternative Names (URIs and email addresses).
+    pub sans: Vec<String>,
+
+    /// The OIDC issuer extracted from the Fulcio extension (OID 1.3.6.1.4.1.57264.1.8).
+    pub issuer: Option<String>,
+
+    /// Certificate validity: not before (UNIX epoch seconds).
+    pub not_before: i64,
+
+    /// Certificate validity: not after (UNIX epoch seconds).
+    pub not_after: i64,
+
+    /// The raw bytes of the SCT extension (if present).
+    pub sct_extension: Option<Vec<u8>>,
+
+    /// Whether this certificate is a CA (`BasicConstraints` CA:TRUE).
+    pub is_ca: bool,
+
+    /// The pathLen constraint from `BasicConstraints` (None if no constraint).
+    pub path_len: Option<u32>,
+
+    /// Whether the certificate has the code signing EKU.
+    pub has_code_signing_eku: bool,
+
+    /// Whether the certificate has the keyCertSign key usage.
+    pub has_key_cert_sign: bool,
+
+    /// Whether the certificate has the digitalSignature key usage.
+    ///
+    /// Fulcio sets this (critical) on every leaf it issues to scope the
+    /// certificate's purpose to signing, not general-purpose key use.
+    pub has_digital_signature: bool,
+
+    /// The TBS certificate DER bytes (for chain validation).
+    pub tbs_der: Vec<u8>,
+
+    /// The signature value from the certificate (BIT STRING payload).
+    pub signature_value: Vec<u8>,
+
+    /// The certificate's `signatureAlgorithm`. Determines the digest used when
+    /// verifying this cert's signature against its issuer.
+    pub signature_algorithm: SignatureAlgorithm,
+
+    /// The issuer DN as string.
+    pub issuer_dn: String,
+
+    /// The subject DN as string.
+    pub subject_dn: String,
+}
+
+impl Cert {
+    /// Parse a DER-encoded X.509 certificate.
+    pub fn from_der(der_bytes: &[u8]) -> Result<Self, SigstoreVerificationError> {
+        let (_, cert) = X509Certificate::from_der(der_bytes).map_err(|e| {
+            SigstoreVerificationError::CertificateParsing {
+                reason: format!("DER parsing failed: {e}"),
+            }
+        })?;
+
+        Ok(Self::from_parsed(&cert, der_bytes.to_vec()))
+    }
+
+    /// Parse a PEM-encoded X.509 certificate.
+    pub fn from_pem(pem_bytes: &[u8]) -> Result<Self, SigstoreVerificationError> {
+        let der_bytes = parse_pem_to_der(pem_bytes).ok_or_else(|| {
+            SigstoreVerificationError::CertificateParsing {
+                reason: "PEM parsing failed".into(),
+            }
+        })?;
+        Self::from_der(&der_bytes)
+    }
+
+    fn from_parsed(cert: &X509Certificate, der: Vec<u8>) -> Self {
+        let tbs = &cert.tbs_certificate;
+
+        let subject_pki = &tbs.subject_pki;
+        let pubkey_bytes = subject_pki.subject_public_key.data.to_vec();
+        let spki_der = subject_pki.raw.to_vec();
+        let curve = extract_ec_curve(subject_pki);
+
+        let sans = extract_sans(tbs);
+
+        let issuer = extract_issuer_extension(tbs);
+
+        let not_before = tbs.validity.not_before.timestamp();
+        let not_after = tbs.validity.not_after.timestamp();
+
+        let sct_extension = extract_sct_extension(tbs);
+
+        let (is_ca, path_len) = extract_basic_constraints(tbs);
+
+        let has_code_signing_eku = extract_eku_code_signing(tbs);
+
+        let has_key_cert_sign = extract_key_usage_key_cert_sign(tbs);
+        let has_digital_signature = extract_key_usage_digital_signature(tbs);
+
+        let issuer_dn = cert.issuer().to_string();
+        let subject_dn = cert.subject().to_string();
+
+        // TBS DER and signature value come straight from `x509-parser` — the
+        // raw TBS bytes (what gets hashed for chain validation) and the
+        // BIT STRING payload (unused-bits byte already stripped).
+        let tbs_der = tbs.as_ref().to_vec();
+        let signature_value = cert.signature_value.data.to_vec();
+        let signature_algorithm =
+            SignatureAlgorithm::from_oid(&cert.signature_algorithm.algorithm.to_id_string());
+
+        Self {
+            der,
+            pubkey_bytes,
+            curve,
+            spki_der,
+            sans,
+            issuer,
+            not_before,
+            not_after,
+            sct_extension,
+            is_ca,
+            path_len,
+            has_code_signing_eku,
+            has_key_cert_sign,
+            has_digital_signature,
+            tbs_der,
+            signature_value,
+            signature_algorithm,
+            issuer_dn,
+            subject_dn,
+        }
+    }
+}
+
+// ── Extension extraction helpers ────────────────────────────────────────────
+
+fn extract_sans(tbs: &TbsCertificate) -> Vec<String> {
+    let mut sans = Vec::new();
+    if let Ok(Some(ext)) = tbs.subject_alternative_name() {
+        for name in &ext.value.general_names {
+            match name {
+                GeneralName::URI(uri) => sans.push(uri.to_string()),
+                GeneralName::RFC822Name(email) => sans.push(email.to_string()),
+                _ => {},
+            }
+        }
+    }
+    sans
+}
+
+fn extract_issuer_extension(tbs: &TbsCertificate) -> Option<String> {
+    for ext in tbs.extensions() {
+        if ext.oid.to_id_string() == OID_ISSUER_V2 {
+            // The extension value is a DER-encoded UTF8String
+            if let Some(value) = ext.value.parse_der_utf8string() {
+                return Some(value);
+            }
+        }
+    }
+    None
+}
+
+fn extract_sct_extension(tbs: &TbsCertificate) -> Option<Vec<u8>> {
+    for ext in tbs.extensions() {
+        if ext.oid.to_id_string() == OID_SCT_LIST {
+            return Some(ext.value.to_vec());
+        }
+    }
+    None
+}
+
+fn extract_basic_constraints(tbs: &TbsCertificate) -> (bool, Option<u32>) {
+    for ext in tbs.extensions() {
+        if let ParsedExtension::BasicConstraints(bc) = ext.parsed_extension() {
+            return (bc.ca, bc.path_len_constraint);
+        }
+    }
+    (false, None)
+}
+
+fn extract_eku_code_signing(tbs: &TbsCertificate) -> bool {
+    for ext in tbs.extensions() {
+        if let ParsedExtension::ExtendedKeyUsage(eku) = ext.parsed_extension() {
+            if eku.code_signing {
+                return true;
+            }
+            // Also check by OID
+            for oid in &eku.other {
+                if oid.to_id_string() == OID_EKU_CODE_SIGNING {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
+
+fn extract_key_usage_key_cert_sign(tbs: &TbsCertificate) -> bool {
+    for ext in tbs.extensions() {
+        if let ParsedExtension::KeyUsage(ku) = ext.parsed_extension() {
+            return ku.key_cert_sign();
+        }
+    }
+    false
+}
+
+fn extract_key_usage_digital_signature(tbs: &TbsCertificate) -> bool {
+    for ext in tbs.extensions() {
+        if let ParsedExtension::KeyUsage(ku) = ext.parsed_extension() {
+            return ku.digital_signature();
+        }
+    }
+    false
+}
+
+/// Read the EC curve from the SPKI's declared `AlgorithmIdentifier`
+/// (id-ecPublicKey + namedCurve OID), not from the raw point's byte length.
+fn extract_ec_curve(spki: &x509_parser::x509::SubjectPublicKeyInfo) -> Option<EcCurve> {
+    if spki.algorithm.algorithm.to_id_string() != OID_EC_PUBLIC_KEY {
+        return None;
+    }
+    let curve_oid = spki
+        .algorithm
+        .parameters
+        .as_ref()
+        .and_then(|p| p.as_oid().ok())?
+        .to_id_string();
+    match curve_oid.as_str() {
+        OID_CURVE_P256 => Some(EcCurve::P256),
+        OID_CURVE_P384 => Some(EcCurve::P384),
+        _ => None,
+    }
+}
+
+/// Parse a `UTF8String` from DER-encoded extension bytes.
+trait DerUtf8String {
+    fn parse_der_utf8string(&self) -> Option<String>;
+}
+
+impl DerUtf8String for [u8] {
+    fn parse_der_utf8string(&self) -> Option<String> {
+        if self.len() < 2 || self[0] != 0x0C {
+            return None;
+        }
+        let (len, consumed) = decode_der_length(&self[1..]).ok()?;
+        let start = 1 + consumed;
+        let end = start.checked_add(len)?;
+        let content = self.get(start..end)?;
+        // No trailing bytes — the input must be fully consumed.
+        if end != self.len() {
+            return None;
+        }
+        String::from_utf8(content.to_vec()).ok()
+    }
+}
+
+/// Decode a DER length. Requires canonical encoding: short form for lengths
+/// below 128, no leading zero bytes in long form.
+fn decode_der_length(bytes: &[u8]) -> Result<(usize, usize), ()> {
+    let first = *bytes.first().ok_or(())?;
+    if first < 0x80 {
+        return Ok((first as usize, 1));
+    }
+    // Long form: 0x8<n> followed by <n> octets.
+    let num_octets = (first & 0x7F) as usize;
+    if num_octets == 0 || num_octets > std::mem::size_of::<usize>() {
+        return Err(());
+    }
+    // Leading zero byte is non-canonical.
+    let len_bytes = bytes.get(1..1 + num_octets).ok_or(())?;
+    if len_bytes[0] == 0 {
+        return Err(());
+    }
+    // The value must be >= 128; otherwise short form should have been used.
+    let mut len: usize = 0;
+    for &b in len_bytes {
+        len = len.checked_shl(8).ok_or(())? | (b as usize);
+    }
+    if len < 128 {
+        return Err(());
+    }
+    Ok((len, 1 + num_octets))
+}
+
+// ── Cert validation checks ───────────────────────────────────────────────────
+
+impl Cert {
+    /// Validate that the leaf certificate is not a CA and has the code signing EKU.
+    pub fn validate_leaf(&self) -> Result<(), SigstoreVerificationError> {
+        if self.is_ca {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "leaf certificate must not be a CA (BasicConstraints CA:false)".into(),
+            });
+        }
+
+        if !self.has_code_signing_eku {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "leaf certificate must have code signing EKU (1.3.6.1.5.5.7.3.3)".into(),
+            });
+        }
+
+        if !self.has_digital_signature {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "leaf certificate must have KeyUsage digitalSignature".into(),
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Validate that a trust anchor / CA certificate has CA:true and keyCertSign.
+    pub fn validate_ca(&self) -> Result<(), SigstoreVerificationError> {
+        if !self.is_ca {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "CA certificate must have BasicConstraints CA:true".into(),
+            });
+        }
+
+        if !self.has_key_cert_sign {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "CA certificate must have KeyUsage keyCertSign".into(),
+            });
+        }
+
+        Ok(())
+    }
+
+    /// Check that the certificate is valid at `integrated_time` (UNIX seconds).
+    pub fn check_validity(&self, integrated_time: i64) -> Result<(), SigstoreVerificationError> {
+        if integrated_time < self.not_before {
+            return Err(SigstoreVerificationError::CertificateExpired {
+                reason: format!(
+                    "certificate not yet valid at signing time: not_before={}, integrated_time={}",
+                    self.not_before, integrated_time
+                ),
+            });
+        }
+        if integrated_time > self.not_after {
+            return Err(SigstoreVerificationError::CertificateExpired {
+                reason: format!(
+                    "certificate expired at signing time: not_after={}, integrated_time={}",
+                    self.not_after, integrated_time
+                ),
+            });
+        }
+        Ok(())
+    }
+}
+
+/// Simple PEM-to-DER conversion without relying on the `pem` crate.
+///
+/// Extracts the base64 content between `-----BEGIN ...-----` and `-----END ...-----`.
+///
+/// Returns `None` unless the input contains exactly one complete, non-empty
+/// PEM block. Rejected: input with no `-----BEGIN ` line (which would
+/// otherwise decode the empty string to an empty, meaningless DER buffer), a
+/// block truncated before its `-----END ` line, and a concatenated
+/// multi-block file (which would otherwise silently yield only its first
+/// certificate). Callers holding several certificates pass them as separate
+/// entries — see [`SigstoreTrustRootRaw`](crate::trust_root::SigstoreTrustRootRaw),
+/// whose fields are `Vec<Vec<u8>>` for exactly that reason.
+pub(crate) fn parse_pem_to_der(pem_bytes: &[u8]) -> Option<Vec<u8>> {
+    let input = std::str::from_utf8(pem_bytes).ok()?;
+    let mut in_body = false;
+    let mut closed = false;
+    let mut b64 = String::new();
+    for line in input.lines() {
+        if line.starts_with("-----BEGIN ") {
+            // A second BEGIN means a concatenated multi-block PEM: reject
+            // rather than keep whichever block happened to come first.
+            if in_body || closed {
+                return None;
+            }
+            in_body = true;
+            continue;
+        }
+        if line.starts_with("-----END ") {
+            if !in_body {
+                return None;
+            }
+            in_body = false;
+            closed = true;
+            continue;
+        }
+        if in_body {
+            b64.push_str(line.trim());
+        }
+    }
+    // `in_body` still set means the block never closed.
+    if !closed || in_body || b64.is_empty() {
+        return None;
+    }
+    base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64.as_bytes()).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_support::{Ca, LeafOpts, make_leaf, make_root};
+
+    fn leaf_and_root() -> (Cert, Cert, Ca) {
+        let root = make_root("test-root");
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        (leaf_cert, root_cert, root)
+    }
+
+    #[test]
+    fn leaf_fields_extracted() {
+        let (leaf, _, _) = leaf_and_root();
+        assert!(
+            leaf.sans.iter().any(|s| s.contains("github.com/acme/app")),
+            "URI SAN must be extracted, got {:?}",
+            leaf.sans
+        );
+        assert_eq!(
+            leaf.issuer.as_deref(),
+            Some("https://token.actions.githubusercontent.com"),
+            "OIDC issuer extension (1.3.6.1.4.1.57264.1.8) must be extracted"
+        );
+        assert!(
+            leaf.has_code_signing_eku,
+            "code-signing EKU must be detected"
+        );
+        assert!(!leaf.is_ca, "leaf must not be a CA");
+    }
+
+    #[test]
+    fn leaf_validates() {
+        let (leaf, _, _) = leaf_and_root();
+        leaf.validate_leaf()
+            .expect("well-formed leaf must validate");
+    }
+
+    #[test]
+    fn root_is_recognized_as_ca() {
+        let (_, root, _) = leaf_and_root();
+        assert!(root.is_ca, "root must be recognized as CA");
+        assert!(root.has_key_cert_sign, "root must have keyCertSign");
+        root.validate_ca().expect("root must validate as CA");
+    }
+
+    #[test]
+    fn curve_read_from_spki_algorithm_not_point_length() {
+        // Both fixtures are P-256 (test_support's default keypair()); this
+        // asserts the curve comes from the declared SPKI algorithm/OID, not
+        // an inferred byte count. P-384 coverage lives in chain.rs, which
+        // exercises curve selection through an actual signature-verifying
+        // chain walk against P-384 fixtures.
+        let (leaf, root, _) = leaf_and_root();
+        assert_eq!(leaf.curve, Some(EcCurve::P256), "leaf curve must be P-256");
+        assert_eq!(root.curve, Some(EcCurve::P256), "root curve must be P-256");
+    }
+
+    #[test]
+    fn leaf_without_code_signing_eku_rejected() {
+        let root = make_root("r");
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                code_signing_eku: false,
+                ..LeafOpts::default()
+            },
+        );
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let err = cert
+            .validate_leaf()
+            .expect_err("leaf lacking code-signing EKU must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from EKU check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn leaf_without_digital_signature_key_usage_rejected() {
+        let root = make_root("r");
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                has_digital_signature: false,
+                ..LeafOpts::default()
+            },
+        );
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        assert!(
+            !cert.has_digital_signature,
+            "fixture must not carry digitalSignature"
+        );
+        let err = cert
+            .validate_leaf()
+            .expect_err("leaf lacking KeyUsage digitalSignature must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from KeyUsage check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn leaf_marked_ca_rejected() {
+        let root = make_root("r");
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                is_ca: true,
+                ..LeafOpts::default()
+            },
+        );
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let err = cert
+            .validate_leaf()
+            .expect_err("a CA:true leaf must be rejected");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            "must be CertificateChain from CA check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn validity_window_enforced() {
+        let (leaf, _, _) = leaf_and_root();
+        let mid = i64::midpoint(leaf.not_before, leaf.not_after);
+        leaf.check_validity(mid).expect("valid within window");
+        let err = leaf
+            .check_validity(leaf.not_before - 1)
+            .expect_err("must reject a timestamp before not_before");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
+            "must be CertificateExpired, got {err:?}"
+        );
+        let err = leaf
+            .check_validity(leaf.not_after + 1)
+            .expect_err("must reject a timestamp after not_after");
+        assert!(
+            matches!(err, SigstoreVerificationError::CertificateExpired { .. }),
+            "must be CertificateExpired, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn issuer_absent_when_extension_missing() {
+        let root = make_root("r");
+        let leaf = make_leaf(
+            &root,
+            &LeafOpts {
+                oidc_issuer: None,
+                ..LeafOpts::default()
+            },
+        );
+        let cert = Cert::from_der(&leaf.der).expect("parse leaf without OIDC issuer");
+        assert!(
+            cert.issuer.is_none(),
+            "no OIDC issuer ext => issuer is None"
+        );
+    }
+
+    #[test]
+    fn pem_single_block_round_trips() {
+        let root = make_root("r");
+        let pem = crate::test_support::der_to_pem(&root.der);
+        assert_eq!(
+            parse_pem_to_der(pem.as_bytes()).as_deref(),
+            Some(root.der.as_slice()),
+            "a single well-formed PEM block must decode back to its DER"
+        );
+    }
+
+    #[test]
+    fn pem_without_begin_line_rejected() {
+        for input in [&b""[..], b"not a pem", b"{\"json\": true}"] {
+            assert_eq!(
+                parse_pem_to_der(input),
+                None,
+                "input with no BEGIN line must be rejected, not decoded to empty DER"
+            );
+        }
+    }
+
+    #[test]
+    fn pem_truncated_before_end_line_rejected() {
+        let root = make_root("r");
+        let pem = crate::test_support::der_to_pem(&root.der);
+        let truncated = pem
+            .split_once("-----END ")
+            .expect("the generated test PEM has an END line")
+            .0;
+        assert_eq!(
+            parse_pem_to_der(truncated.as_bytes()),
+            None,
+            "a block that never closes must be rejected, not decoded as truncated DER"
+        );
+    }
+
+    #[test]
+    fn pem_end_without_begin_rejected() {
+        assert_eq!(
+            parse_pem_to_der(b"-----END CERTIFICATE-----\n"),
+            None,
+            "a stray END line must be rejected"
+        );
+    }
+
+    #[test]
+    fn pem_empty_block_rejected() {
+        assert_eq!(
+            parse_pem_to_der(b"-----BEGIN CERTIFICATE-----\n-----END CERTIFICATE-----\n"),
+            None,
+            "a block with no base64 body must be rejected"
+        );
+    }
+
+    #[test]
+    fn concatenated_pem_rejected() {
+        // The standard Fulcio `fulcio.crt.pem` ships root and intermediate
+        // concatenated: keeping only the first one silently drops a trust
+        // anchor, so reject and make the caller split them.
+        let first = make_root("first");
+        let second = make_root("second");
+        let concatenated = format!(
+            "{}{}",
+            crate::test_support::der_to_pem(&first.der),
+            crate::test_support::der_to_pem(&second.der)
+        );
+        assert_eq!(
+            parse_pem_to_der(concatenated.as_bytes()),
+            None,
+            "a multi-block PEM must be rejected, not silently reduced to its first certificate"
+        );
+    }
+}

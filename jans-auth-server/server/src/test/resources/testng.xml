@@ -17,6 +17,7 @@
             <class name="io.jans.as.server.model.common.ExecutionContextTest" />
             <class name="io.jans.as.server.model.common.TxTokenTest" />
             <class name="io.jans.as.server.model.common.AuthorizationGrantTest" />
+            <class name="io.jans.as.server.model.token.ClientAssertionTest" />
 
             <class name="io.jans.as.server.service.MTLSServiceTest" />
             <class name="io.jans.as.server.service.ScopeServiceTest" />
@@ -31,6 +32,7 @@
             <class name="io.jans.as.server.service.DiscoveryServiceTest" />
             <class name="io.jans.as.server.service.AcrServiceTest" />
             <class name="io.jans.as.server.service.ClientIdMetadataServiceTest" />
+            <class name="io.jans.as.server.service.AuthorizeServiceTest" />
 
             <class name="io.jans.as.server.service.token.GlobalTokenRevocationServiceTest" />
 
@@ -50,6 +52,14 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthzRequestTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthzDetailsServiceTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeServiceTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.ConsentGathererServiceTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.ConsentGatheringSessionServiceTest" />
+
+            <!-- PAR -->
+            <class name="io.jans.as.server.par.ws.rs.ParValidatorTest" />
+
+            <!-- UMA -->
+            <class name="io.jans.as.server.uma.service.UmaSessionServiceTest" />
 
             <!-- AuthZEN: Access Evaluation -->
             <class name="io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1Test" />

@@ -2,10 +2,8 @@ import copy
 import json
 import asyncio
 from collections import OrderedDict
-from typing import Any, Optional
-from functools import partial
+from typing import Any
 
-import prompt_toolkit
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
 from prompt_toolkit.formatted_text import HTML
@@ -173,6 +171,33 @@ class Plugin(DialogUtils):
                             name='acrValidationEnabled',
                             checked=self.data.get('acrValidationEnabled'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'acrValidationEnabled'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.app.getTitledCheckBox(
+                            _("Enable User Role Permission Validation"),
+                            name='userRolePermissionValidationEnabled',
+                            checked=self.data.get('userRolePermissionValidationEnabled', True),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'userRolePermissionValidationEnabled'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.app.getTitledCheckBox(
+                            _("Validate User Inum in Introspection"),
+                            name='validateUserInumInIntrospectionFlag',
+                            checked=self.data.get('validateUserInumInIntrospectionFlag', True),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'validateUserInumInIntrospectionFlag'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.app.getTitledCheckBox(
+                            _("Fetch User Role in Introspection"),
+                            name='fetchUserRoleInIntrospectionFlag',
+                            checked=self.data.get('fetchUserRoleInIntrospectionFlag', True),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'fetchUserRoleInIntrospectionFlag'),
                             style=cli_style.check_box,
                             widget_style=cli_style.black_bg_widget
                         ),
@@ -386,7 +411,6 @@ class Plugin(DialogUtils):
                     kwargs['data'].get('description') or '',
                     kwargs['data'].get('jansServiceModule') or []
                     )
-                services = []
             else:
                 title = _("Add Mapping Properties")
                 mapping_data = ('','', '', [])
@@ -459,8 +483,6 @@ class Plugin(DialogUtils):
 
             dialog = self.app.get_confirm_dialog(HTML(_("Are you sure want to delete mapping <b>{}</b>?".format(kwargs['selected'][0]))), confirm_handler=do_delete_mapping)
             self.app.show_jans_dialog(dialog)
-
-        add_asset_dir_mapping_properties_title = _("Mapping Properties: ")
 
         asset_dir_mappings = copy.deepcopy(self.data.get('assetMgtConfiguration', {}).get('assetDirMapping', []))
         asset_dir_mapping_data = []

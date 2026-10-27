@@ -10,10 +10,11 @@ use std::collections::HashSet;
 use std::time::Duration;
 
 use cedarling::{
-    AuthorizationConfig, AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
-    BatchAuthorizeUnsignedRequest, BatchItem, BootstrapConfig, Cedarling, DataStoreConfig,
-    EntityData, HttpClientConfig, InitCedarlingError, JwtConfig, LogConfig, LogLevel,
-    LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned, TokenInput,
+    AuthorizationConfig, AuthorizeMultiIssuerRequest, AuthorizeOptions,
+    BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest, BatchItem, BootstrapConfig,
+    Cedarling, DataStoreConfig, EntityData, HttpClientConfig, InitCedarlingError, JwtConfig,
+    LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig, PolicyStoreSource, RequestUnsigned,
+    TokenInput,
 };
 use criterion::measurement::WallTime;
 use criterion::{
@@ -57,6 +58,7 @@ fn unsigned_batch_vs_sequence(c: &mut Criterion) {
                 action: item.action.clone(),
                 resource: item.resource.clone(),
                 context: item.context.clone(),
+                options: AuthorizeOptions::default(),
             })
             .collect();
 
@@ -281,6 +283,7 @@ async fn prepare_unsigned_cedarling() -> Result<Cedarling, InitCedarlingError> {
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }
@@ -308,6 +311,7 @@ fn prepare_unsigned_request() -> RequestUnsigned {
         action: "Jans::Action::\"UpdateForTestPrincipals\"".to_string(),
         context: json!({}),
         resource,
+        options: AuthorizeOptions::default(),
     }
 }
 
@@ -315,8 +319,8 @@ async fn prepare_multi_issuer_cedarling(
     base_idp_url1: &str,
     base_idp_url2: &str,
 ) -> Result<Cedarling, InitCedarlingError> {
-    let mut policy_store: serde_yaml_ng::Value =
-        serde_yaml_ng::from_str(MULTI_ISSUER_POLICY_STORE).expect("valid YAML");
+    let mut policy_store: serde_json::Value =
+        serde_saphyr::from_str(MULTI_ISSUER_POLICY_STORE).expect("valid YAML");
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["AcmeIssuer"]["openid_configuration_endpoint"] =
         format!("{base_idp_url1}/.well-known/openid-configuration").into();
     policy_store["policy_stores"]["multi_issuer_basic_store"]["trusted_issuers"]["DolphinIssuer"]
@@ -331,7 +335,7 @@ async fn prepare_multi_issuer_cedarling(
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Yaml(
-                serde_yaml_ng::to_string(&policy_store).expect("serialize YAML"),
+                serde_saphyr::to_string(&policy_store).expect("serialize YAML"),
             ),
             ..Default::default()
         },
@@ -348,6 +352,7 @@ async fn prepare_multi_issuer_cedarling(
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     };
     Cedarling::new(&bootstrap_config).await
 }

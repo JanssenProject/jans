@@ -17,9 +17,11 @@ use std::time::Duration;
 
 use super::authorization_config::AuthorizationConfig;
 use super::raw_config::LoggerType;
+use super::trace_config::build_trace_config;
 use super::{
     BootstrapConfig, BootstrapConfigLoadingError, JwtConfig, LogConfig, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSignature, PolicyStoreSource, SigstoreMode,
+    SigstoreSigner,
 };
 use super::{BootstrapConfigRaw, LockServiceConfig};
 use crate::HttpClientConfig;
@@ -54,6 +56,7 @@ impl BootstrapConfig {
         };
 
         let policy_store_config = build_policy_store_config(raw)?;
+        let trace_config = build_trace_config(raw, &policy_store_config.source)?;
 
         // Load the jwks from a local file
         let jwks = raw
@@ -86,6 +89,8 @@ impl BootstrapConfig {
         let authorization_config = AuthorizationConfig {
             decision_log_default_jwt_id: raw.decision_log_default_jwt_id.clone(),
             strict_schema_validation: raw.strict_schema_validation.into(),
+            custom_token_processor_timeout_millis: raw.custom_token_processor_timeout_millis,
+            metrics_collection: raw.metrics_collection.into(),
         };
 
         // Build `DataStoreConfig` from raw config, using defaults if not specified
@@ -114,6 +119,7 @@ impl BootstrapConfig {
             max_base64_size: raw.max_base64_size,
             data_store_config,
             http_client_config,
+            trace_config,
         })
     }
 }
@@ -124,33 +130,35 @@ impl BootstrapConfig {
 fn build_policy_store_config(
     raw: &BootstrapConfigRaw,
 ) -> Result<PolicyStoreConfig, BootstrapConfigLoadingError> {
-    match (
+    let source = match (
         raw.local_policy_store.clone(),
         raw.policy_store_uri.clone(),
         raw.policy_store_local_fn.clone(),
         raw.policy_store_cjar_url.clone(),
     ) {
         // Case: no policy store provided
-        (None, None, None, None) => Err(BootstrapConfigLoadingError::MissingPolicyStore),
-        // Case: get the policy store from a JSON string
-        (Some(policy_store), None, None, None) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::Json(policy_store),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-        }),
+        (None, None, None, None) => return Err(BootstrapConfigLoadingError::MissingPolicyStore),
+        // Case: get the policy store from an inline string (YAML supported for test suites; legacy JSON rejected)
+        (Some(policy_store), None, None, None) => {
+            let trimmed = policy_store.trim();
+            if trimmed.is_empty() {
+                return Err(BootstrapConfigLoadingError::MissingPolicyStore);
+            }
+            if crate::common::policy_store::is_json_content(&policy_store) {
+                return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+            }
+            PolicyStoreSource::Yaml(policy_store)
+        },
         // Case: get the policy store from a URI
-        (None, Some(policy_store_uri), None, None) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::Uri(policy_store_uri),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-        }),
+        (None, Some(policy_store_uri), None, None) => PolicyStoreSource::Uri(policy_store_uri),
         // Case: get the policy store from a CjarUrl
-        (None, None, None, Some(policy_store_cjar_url)) => Ok(PolicyStoreConfig {
-            source: PolicyStoreSource::CjarUrl(policy_store_cjar_url),
-            refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-        }),
+        (None, None, None, Some(policy_store_cjar_url)) => {
+            PolicyStoreSource::CjarUrl(policy_store_cjar_url)
+        },
         // Case: get the policy store from a local file or directory
         (None, None, Some(raw_path), None) => {
             let path = Path::new(&raw_path);
-            let source = if path.is_dir() {
+            if path.is_dir() {
                 PolicyStoreSource::Directory(path.into())
             } else {
                 let file_ext = path
@@ -158,7 +166,9 @@ fn build_policy_store_config(
                     .and_then(|ext| ext.to_str())
                     .map(str::to_lowercase);
                 match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
+                    Some("json") => {
+                        return Err(BootstrapConfigLoadingError::LegacyJsonNotSupported);
+                    },
                     Some("yaml" | "yml") => PolicyStoreSource::FileYaml(path.into()),
                     Some("cjar") => PolicyStoreSource::CjarFile(path.into()),
                     _ => {
@@ -167,15 +177,47 @@ fn build_policy_store_config(
                         );
                     },
                 }
-            };
-            Ok(PolicyStoreConfig {
-                source,
-                refresh_interval_secs: raw.policy_store_refresh_interval_secs,
-            })
+            }
         },
         // Case: multiple policy stores were set
-        _ => Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
+        _ => return Err(BootstrapConfigLoadingError::ConflictingPolicyStores),
+    };
+
+    let signature = build_policy_store_signature(raw)?;
+    Ok(PolicyStoreConfig {
+        source,
+        refresh_interval_secs: raw.policy_store_refresh_interval_secs,
+        max_file_size: raw.policy_store_max_file_size,
+        signature,
+    })
+}
+
+/// Build the Sigstore check; `enforce` needs a signer. The loader checks the source.
+fn build_policy_store_signature(
+    raw: &BootstrapConfigRaw,
+) -> Result<PolicyStoreSignature, BootstrapConfigLoadingError> {
+    if raw.policy_store_sigstore_mode == SigstoreMode::Disabled {
+        return Ok(PolicyStoreSignature::Disabled);
     }
+    // A blank value would never match a certificate, so treat it as unset.
+    let required = |value: &Option<String>, property| {
+        value.clone().filter(|v| !v.trim().is_empty()).ok_or(
+            BootstrapConfigLoadingError::MissingSigstoreProperty(property),
+        )
+    };
+    let cert_identity = required(
+        &raw.policy_store_sigstore_cert_identity,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY",
+    )?;
+    let cert_oidc_issuer = required(
+        &raw.policy_store_sigstore_cert_oidc_issuer,
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER",
+    )?;
+    Ok(PolicyStoreSignature::Enforce(SigstoreSigner {
+        cert_identity,
+        cert_oidc_issuer,
+        bundle_uri: raw.policy_store_sigstore_bundle_uri.clone(),
+    }))
 }
 
 /// Build `DataStoreConfig` from raw config fields.
@@ -232,4 +274,304 @@ fn resolve_log_type(
         },
     };
     Ok(log_type_config)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
+
+    /// Minimal config body; a policy store source is required, and the inline
+    /// YAML source keeps these tests off the filesystem and network. Inline
+    /// JSON is rejected as a legacy policy store, so the value must be YAML.
+    fn raw_config_json(extra: &str) -> String {
+        format!(
+            r#"{{
+                "CEDARLING_APPLICATION_NAME": "test",
+                "CEDARLING_POLICY_STORE_LOCAL": "cedar_version: v4.0.0\npolicy_stores: {{}}"
+                {extra}
+            }}"#
+        )
+    }
+
+    fn decode(extra: &str) -> BootstrapConfig {
+        let raw: BootstrapConfigRaw = serde_json::from_str(&raw_config_json(extra))
+            .expect("raw bootstrap config should deserialize");
+        BootstrapConfig::try_from(raw).expect("raw config should decode")
+    }
+
+    #[test]
+    fn archive_cap_does_not_move_the_http_cap() {
+        // The two caps bound different memory (decompressed output vs. buffered
+        // response body), so tuning the archive cap must leave every other
+        // HTTP fetch on its own default.
+        let http_default = Some(HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES);
+
+        let neither = decode("");
+        assert_eq!(
+            neither.http_client_config.max_response_size_bytes, http_default,
+            "With neither property set the HTTP cap must use its own default"
+        );
+        assert_eq!(
+            neither.policy_store_config.max_file_size,
+            ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+            "With neither property set the archive cap must use its own default"
+        );
+
+        let small = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096"#);
+        assert_eq!(
+            small.http_client_config.max_response_size_bytes, http_default,
+            "A small archive cap must not shrink unrelated HTTP responses"
+        );
+        assert_eq!(
+            small.policy_store_config.max_file_size, 4096,
+            "The archive cap must carry the configured value"
+        );
+
+        let disabled = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 0"#);
+        assert_eq!(
+            disabled.http_client_config.max_response_size_bytes, http_default,
+            "Disabling the archive cap must not remove the HTTP cap"
+        );
+    }
+
+    #[test]
+    fn http_cap_does_not_move_the_archive_cap() {
+        let explicit = decode(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
+                "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 8192"#,
+        );
+        assert_eq!(
+            explicit.http_client_config.max_response_size_bytes,
+            Some(8192),
+            "An explicit HTTP cap must be used as given"
+        );
+        assert_eq!(
+            explicit.policy_store_config.max_file_size, 4096,
+            "An explicit HTTP cap must not disturb the archive cap"
+        );
+
+        let disabled = decode(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 4096,
+                "CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES": 0"#,
+        );
+        assert_eq!(
+            disabled.http_client_config.max_response_size_bytes, None,
+            "An explicit 0 must disable the HTTP cap"
+        );
+        assert_eq!(
+            disabled.policy_store_config.max_file_size, 4096,
+            "Disabling the HTTP cap must leave the archive cap enforced"
+        );
+    }
+
+    #[test]
+    fn max_file_size_is_honored_from_json_and_yaml() {
+        // Env is covered by the `raw_config` tests; these two are the remaining
+        // documented input formats.
+        let from_json = BootstrapConfig::load_from_json(&raw_config_json(
+            r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": 512"#,
+        ))
+        .expect("JSON bootstrap config should load");
+        assert_eq!(
+            from_json.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from JSON"
+        );
+
+        let yaml = concat!(
+            "CEDARLING_APPLICATION_NAME: test\n",
+            "CEDARLING_POLICY_STORE_LOCAL: 'cedar_version: v4.0.0'\n",
+            "CEDARLING_POLICY_STORE_MAX_FILE_SIZE: 512\n",
+        );
+        let raw: BootstrapConfigRaw =
+            serde_saphyr::from_str(yaml).expect("YAML bootstrap config should deserialize");
+        let from_yaml = BootstrapConfig::try_from(raw).expect("YAML config should decode");
+        assert_eq!(
+            from_yaml.policy_store_config.max_file_size, 512,
+            "The policy store cap must be honored from YAML"
+        );
+    }
+
+    #[test]
+    fn max_file_size_is_honored_from_a_string_valued_env_var() {
+        // Env vars always arrive as strings, so the numeric properties go
+        // through `deserialize_or_parse_string_as_json`.
+        let config = decode(r#", "CEDARLING_POLICY_STORE_MAX_FILE_SIZE": "4096""#);
+
+        assert_eq!(
+            config.policy_store_config.max_file_size, 4096,
+            "A string-valued cap must parse to the same number"
+        );
+    }
+
+    fn decode_cjar_url(extra: &str) -> Result<BootstrapConfig, BootstrapConfigLoadingError> {
+        let json = format!(
+            r#"{{
+                "CEDARLING_APPLICATION_NAME": "test",
+                "CEDARLING_POLICY_STORE_CJAR_URL": "https://example.com/store.cjar"
+                {extra}
+            }}"#
+        );
+        let raw: BootstrapConfigRaw = serde_json::from_str(&json)
+            .map_err(|e| BootstrapConfigLoadingError::DecodingJSON(e.to_string()))?;
+        BootstrapConfig::try_from(raw)
+    }
+
+    const SIGNER: &str = r#",
+        "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com""#;
+
+    #[test]
+    fn sigstore_is_disabled_by_default() {
+        let config = decode_cjar_url("").expect("config without sigstore properties decodes");
+        assert_eq!(
+            config.policy_store_config.signature,
+            PolicyStoreSignature::Disabled,
+            "signature check must be off unless enabled"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_decodes_signer() {
+        let config = decode_cjar_url(SIGNER).expect("enforce with signer decodes");
+        assert_eq!(
+            config.policy_store_config.signature,
+            PolicyStoreSignature::Enforce(SigstoreSigner {
+                cert_identity: "signer@example.com".to_string(),
+                cert_oidc_issuer: "https://accounts.google.com".to_string(),
+                bundle_uri: None,
+            }),
+            "enforce must carry the configured signer"
+        );
+
+        let config = decode_cjar_url(&format!(
+            r#"{SIGNER}, "CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI": "https://example.com/b.json""#
+        ))
+        .expect("enforce with bundle URI decodes");
+        assert!(
+            matches!(
+                config.policy_store_config.signature,
+                PolicyStoreSignature::Enforce(SigstoreSigner { bundle_uri: Some(ref uri), .. })
+                    if uri == "https://example.com/b.json"
+            ),
+            "bundle URI override must be kept"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_requires_signer() {
+        let err = decode_cjar_url(r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce""#)
+            .expect_err("enforce without identity must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"
+                )
+            ),
+            "expected missing identity, got {err:?}"
+        );
+
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com""#,
+        )
+        .expect_err("enforce without issuer must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"
+                )
+            ),
+            "expected missing issuer, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn sigstore_enforce_rejects_blank_signer() {
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "   ",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com""#,
+        )
+        .expect_err("a blank identity must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"
+                )
+            ),
+            "expected missing identity, got {err:?}"
+        );
+
+        let err = decode_cjar_url(
+            r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+                "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "\t""#,
+        )
+        .expect_err("a blank issuer must fail");
+        assert!(
+            matches!(
+                err,
+                BootstrapConfigLoadingError::MissingSigstoreProperty(
+                    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"
+                )
+            ),
+            "expected missing issuer, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn sigstore_rejects_unknown_mode() {
+        decode_cjar_url(r#", "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "warn""#)
+            .expect_err("an unknown mode must not decode");
+    }
+
+    #[test]
+    fn test_reject_legacy_json_inline() {
+        let cases = [
+            "{\"cedar_version\": \"v4.0.0\"}",
+            "   \n  {\"cedar_version\": \"v4.0.0\"}",
+            "[{\"id\": \"item\"}]",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let err = build_policy_store_config(&raw).expect_err("legacy JSON must be rejected");
+            assert!(
+                matches!(err, BootstrapConfigLoadingError::LegacyJsonNotSupported),
+                "expected LegacyJsonNotSupported for input: {case}, got {err:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_accept_valid_yaml_inline() {
+        let cases = [
+            "cedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "# comment\ncedar_version: v4.0.0\npolicy_stores:\n  tracer:\n    name: Tracer",
+            "---\ncedar_version: v4.0.0",
+            "cedar_version: v4.0.0\nflow_map: { key: value }",
+        ];
+
+        for case in cases {
+            let raw = BootstrapConfigRaw {
+                local_policy_store: Some(case.to_string()),
+                ..Default::default()
+            };
+            let config = build_policy_store_config(&raw)
+                .expect("valid YAML inline policy store must be accepted");
+            assert!(
+                matches!(config.source, PolicyStoreSource::Yaml(_)),
+                "expected PolicyStoreSource::Yaml, got {:?}",
+                config.source
+            );
+        }
+    }
 }

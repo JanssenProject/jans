@@ -1,4 +1,5 @@
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "2c01a46cc4a168c72196d77afcae13444f19371b",

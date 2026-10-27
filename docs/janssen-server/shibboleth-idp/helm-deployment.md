@@ -27,6 +27,9 @@ helm repo add janssen https://docs.jans.io/charts
 helm repo update
 ```
 
+Charts are also available as OCI artifacts at
+`oci://ghcr.io/janssenproject/charts/janssen`.
+
 ## Basic Deployment
 
 ### Enable Shibboleth IDP in Janssen Chart

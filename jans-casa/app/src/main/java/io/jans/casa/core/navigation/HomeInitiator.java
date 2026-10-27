@@ -1,6 +1,7 @@
 package io.jans.casa.core.navigation;
 
 import com.nimbusds.oauth2.sdk.GeneralException;
+import com.nimbusds.oauth2.sdk.pkce.CodeVerifier;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,9 +56,12 @@ public class HomeInitiator extends CommonInitiator implements Initiator {
                     String code = oidcFlowService.validateAuthnResponse(WebUtils.getFullRequestURL(),
                             flowContext.getState());
                     flowContext.setState(null);
+                    CodeVerifier codeVerifier = Optional.ofNullable(flowContext.getCodeVerifier())
+                            .map(CodeVerifier::new).orElse(null);
+                    flowContext.setCodeVerifier(null);
                     
                     //TODO: check what happens when user did not ever entered his username at IDP, and tries accessing the app again
-                    Pair<String, String> tokenResult = oidcFlowService.getTokens(code);
+                    Pair<String, String> tokenResult = oidcFlowService.getTokens(code, codeVerifier);
                     
                     String accessToken = tokenResult.getX();
                     String idToken = tokenResult.getY();
@@ -98,8 +102,10 @@ public class HomeInitiator extends CommonInitiator implements Initiator {
         flowContext.setStage(INITIAL);
         logger.debug("Starting authorization flow");
         //do Authz Redirect
-        Pair<String, String> pair = oidcFlowService.getAuthnRequestUrl(ConfigurationHandler.AGAMA_FLOW_ACR);
+        CodeVerifier codeVerifier = new CodeVerifier();
+        Pair<String, String> pair = oidcFlowService.getAuthnRequestUrl(ConfigurationHandler.AGAMA_FLOW_ACR, codeVerifier);
         flowContext.setState(pair.getY());
+        flowContext.setCodeVerifier(codeVerifier.getValue());
         WebUtils.execRedirect(pair.getX());
     }
     

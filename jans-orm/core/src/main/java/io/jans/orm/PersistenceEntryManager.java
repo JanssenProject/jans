@@ -60,6 +60,31 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	Void merge(Object entry);
 
+	/**
+	 * Conditionally updates {@code entry}, succeeding only if the entry's currently stored
+	 * {@code @Version} value still equals the value held on {@code entry} at call time. On success,
+	 * increments the stored version and writes the same new value back onto {@code entry}.
+	 *
+	 * <p>Like {@link #merge(Object)}, this call pre-reads the entry's current attributes to build
+	 * the diff. If the entry does not exist at all when the call begins, the backend's normal
+	 * not-found behavior for {@code merge()} applies (e.g. {@code EntryPersistenceException}), not
+	 * {@code VersionMismatchException} -- a backend cannot cheaply tell "never existed" apart from
+	 * "deleted before this call" without an extra round trip, and this method does not add one.
+	 * {@code VersionMismatchException} is reserved for a version that no longer matches at the final
+	 * compare-and-swap, which also covers the entry being deleted in the race window between this
+	 * call's own pre-read and its write.</p>
+	 *
+	 * @throws io.jans.orm.exception.MappingException if entry's class has more than one
+	 *         {@code @Version} field, or that field's current value on {@code entry} is null
+	 * @throws io.jans.orm.exception.VersionMismatchException if the stored version no longer matches
+	 *         at the compare-and-swap (another writer updated first, or the entry was deleted after
+	 *         this call's own pre-read)
+	 * @throws io.jans.orm.exception.UnsupportedOperationException if the active persistence backend
+	 *         does not implement versioned updates, or {@code entry}'s class has zero
+	 *         {@code @Version} fields
+	 */
+	Void updateWithVersion(Object entry);
+
 	@Deprecated
 	boolean contains(Object entity);
 
@@ -92,6 +117,20 @@ public interface PersistenceEntryManager extends EntityManager {
                             int start, int count, int chunkSize);
     <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             BatchOperation<T> batchOperation, int start, int count, int chunkSize);
+
+    /**
+     * Sorted search which returns at most count entries starting from start without calculating total
+     * entries count. Prefer it over findPagedEntries when total count is not needed.
+     * When sortBy is specified it replaces the entity default sort (@DataEntry sortBy) where the backend
+     * supports it, so the database can read rows in index order. Backends which can't skip the count
+     * fall back to findPagedEntries.
+     */
+    @SuppressWarnings("java:S107")
+    default <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+                                    SortOrder sortOrder, int start, int count, int chunkSize) {
+        return findPagedEntries(primaryKey, entryClass, filter, ldapReturnAttributes, sortBy, sortOrder, start, count, chunkSize)
+                .getEntries();
+    }
 
     // TODO: Combine sortBy and SortOrder into Sort
     <T> PagedResult<T> findPagedEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,

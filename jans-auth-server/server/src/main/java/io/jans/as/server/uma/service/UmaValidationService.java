@@ -30,7 +30,7 @@ import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.uma.authorization.UmaPCT;
@@ -116,7 +116,7 @@ public class UmaValidationService {
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private UmaExpressionService expressionService;
@@ -413,7 +413,7 @@ public class UmaValidationService {
             }
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLIENT_ID, "Invalid clientId: " + clientId);
         }
-        Client client = clientService.getClient(clientId);
+        Client client = clientIdMetadataService.resolveClient(clientId);
         if (client == null) {
             if (log.isErrorEnabled()) {
                 log.error("Failed to find client with client_id: {}", escapeLog(clientId));

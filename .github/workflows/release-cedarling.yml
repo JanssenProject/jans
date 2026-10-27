@@ -1,6 +1,6 @@
 name: "Release: Cedarling crates.io"
 
-# Publishes the cedarling crate to crates.io.
+# Publishes jans-trace-core and sigstore-verifier, then cedarling (which depends on both), to crates.io.
 #
 # Two trigger paths:
 #   workflow_dispatch — manual; dry_run defaults to true (validation-first).
@@ -14,7 +14,7 @@ name: "Release: Cedarling crates.io"
 #   vX.Y.Z     — versions were already bumped by version_bump.py; publishes
 #                as-is from the tagged tree.
 #
-# The publish step is idempotent via a sparse index preflight.
+# The publish step is idempotent per crate via a sparse index preflight.
 
 on:
   workflow_dispatch:
@@ -121,8 +121,10 @@ jobs:
         NIGHTLY_VERSION="0.0.$((LAST_PATCH + 1))"
         echo "Last published patch: 0.0.${LAST_PATCH} → publishing ${NIGHTLY_VERSION}"
 
-        # Patch cedarling version
-        sed -i "s/^version = \".*\"/version = \"${NIGHTLY_VERSION}\"/" cedarling/Cargo.toml
+        for crate in jans-trace-core sigstore-verifier cedarling; do
+          sed -i "s/^version = \".*\"/version = \"${NIGHTLY_VERSION}\"/" "${crate}/Cargo.toml"
+        done
+        sed -i -E "s/^((jans-trace-core|sigstore-verifier) = \{[^}]*version = )\"[^\"]*\"/\1\"${NIGHTLY_VERSION}\"/" Cargo.toml
 
         echo "NIGHTLY_VERSION=${NIGHTLY_VERSION}" >> $GITHUB_ENV
 
@@ -134,42 +136,44 @@ jobs:
       run: |
         DIRTY_FLAGS="--locked"
         [ "${REF}" = "nightly" ] && DIRTY_FLAGS="--allow-dirty"
-        cargo publish -p cedarling ${DIRTY_FLAGS} --dry-run
+        cargo publish -p jans-trace-core -p sigstore-verifier -p cedarling ${DIRTY_FLAGS} --dry-run
 
-    - name: Publish cedarling
+    - name: Publish crates
       if: ${{ inputs.dry_run != true }}
       # Idempotent: preflight the sparse index so re-runs skip already-uploaded versions.
-      # Polls until the version is visible before exiting so a re-run does not race a
+      # Polls until each version is visible before exiting so a re-run does not race a
       # just-uploaded but not-yet-indexed version.
-      # Sparse index path for "cedarling" (len > 3): ce/da/cedarling
       working-directory: jans-cedarling
       env:
         CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
         REF: ${{ inputs.ref }}
       run: |
-        CEDARLING_VERSION=$(cargo metadata --no-deps --format-version 1 \
-          | jq -r '.packages[] | select(.name == "cedarling") | .version')
-        INDEX_URL="https://index.crates.io/ce/da/cedarling"
+        PUBLISH_FLAGS="--locked"
+        [ "${REF}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
 
         index_has_version() {
           curl -sf --connect-timeout 10 --max-time 30 \
             -H "User-Agent: jans-cedarling-publish-workflow" \
-            "${INDEX_URL}" 2>/dev/null \
-            | grep -q '"vers":"'"${CEDARLING_VERSION}"'"'
+            "https://index.crates.io/${1:0:2}/${1:2:2}/${1}" 2>/dev/null \
+            | grep -q '"vers":"'"${2}"'"'
         }
 
-        if index_has_version; then
-          echo "cedarling@${CEDARLING_VERSION} already in registry index; skipping publish."
-        else
-          PUBLISH_FLAGS="--locked"
-          [ "${REF}" = "nightly" ] && PUBLISH_FLAGS="--allow-dirty"
-          cargo publish -p cedarling ${PUBLISH_FLAGS}
+        for crate in jans-trace-core sigstore-verifier cedarling; do
+          version=$(cargo metadata --no-deps --format-version 1 \
+            | jq -r --arg c "${crate}" '.packages[] | select(.name == $c) | .version')
 
-          echo "Waiting for cedarling@${CEDARLING_VERSION} in the sparse registry index..."
+          if index_has_version "${crate}" "${version}"; then
+            echo "${crate}@${version} already in registry index; skipping publish."
+            continue
+          fi
+
+          cargo publish -p "${crate}" ${PUBLISH_FLAGS}
+
+          echo "Waiting for ${crate}@${version} in the sparse registry index..."
           found=0
           for i in $(seq 1 20); do
-            if index_has_version; then
-              echo "cedarling@${CEDARLING_VERSION} is visible in the registry index."
+            if index_has_version "${crate}" "${version}"; then
+              echo "${crate}@${version} is visible in the registry index."
               found=1
               break
             fi
@@ -177,7 +181,7 @@ jobs:
             sleep 15
           done
           if [ "${found}" -eq 0 ]; then
-            echo "ERROR: cedarling@${CEDARLING_VERSION} did not appear in the registry index after 20 attempts."
+            echo "ERROR: ${crate}@${version} did not appear in the registry index after 20 attempts."
             exit 1
           fi
-        fi
+        done

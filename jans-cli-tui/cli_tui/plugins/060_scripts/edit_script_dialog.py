@@ -1,4 +1,3 @@
-import os
 import asyncio
 from functools import partial
 from typing import Optional, Sequence, Callable, Any
@@ -11,7 +10,7 @@ from prompt_toolkit.layout.containers import HSplit, VSplit, Window
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
-    Button, Dialog, Frame
+    Button, Dialog
 
 from utils.multi_lang import _
 from utils.static import DialogResult, cli_style

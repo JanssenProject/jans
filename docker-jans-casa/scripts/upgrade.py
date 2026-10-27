@@ -10,11 +10,11 @@ from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import utcnow
 
 from settings import LOGGING_CONFIG
 from utils import get_ads_project_base64
 from utils import get_ads_project_md5sum
-from utils import utcnow
 from utils import CASA_AGAMA_DEPLOYMENT_ID
 from utils import CASA_AGAMA_ARCHIVE
 

@@ -9,6 +9,8 @@
 
 **Lint:**
 - `cargo clippy --workspace` - Run clippy linter
+- `cargo clippy -p cedarling --all-targets` - Lint tests and benches too
+- `cargo clippy -p cedarling --target wasm32-unknown-unknown` - Lint the WASM build, where native-only code is dead
 - `cargo fmt --check` - Check formatting compliance
 - See clippy.toml for project-specific lint rules
 
@@ -50,12 +52,19 @@
 - Prefer Result<T, E> over panics
 - Use derive_more for error derivation when needed
 - Include context in error messages
+- Give each fallible function its own error type with only the variants it can return, so callers match exactly what can happen instead of a shared catch-all enum
+- Never use runtime validation that can panic (e.g. `assert!`, `expect`, `unwrap`) for input validation in production code. Use `Result` and propagate errors through the type system instead. The only exceptions are invariants that are statically guaranteed by the type system or explicitly agreed with the user.
 
 **Types:**
 - Use typed-builder for complex struct construction
 - Leverage serde for serialization/deserialization
 - Use smol_str for string optimization where appropriate
 - Prefer strong typing over stringly-typed APIs
+- Make invalid states unrepresentable: use enums, newtypes, and the type system to encode constraints at compile time. Avoid runtime checks where a more precise type can guarantee correctness statically.
+- Replace several related `bool` fields or flags with one enum, so contradictory combinations cannot exist. An enum that names a lifecycle stage ends in `State` (`GenesisState { Pending, Accepted, Lost }`); an enum of plain values does not (`Outcome { Allow, Deny }`)
+- Do not use tuples for grouped values in signatures, return types, or test helpers: use a struct with named fields (`BulkRequest { body, records }`, not `(String, Vec<Pending>)`). Only std APIs that require pairs, such as `HashMap::from([(k, v)])`, take a tuple
+- Do not add `#[non_exhaustive]` to new public types: a new variant or field should break the bindings' build, so they are updated, rather than fall into a wildcard arm
+- Keep derived data with its source: compute it once where the source is built and store it next to it (as `PolicyStoreWithID` holds `bundle_hash`), so the two are replaced together and cannot disagree
 
 **Visibility:**
 - Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.
@@ -84,6 +93,14 @@
 - For pattern matching errors, use `assert!(matches!(...), "descriptive message")`
 - All assertions must include a descriptive message explaining what is being tested
 - Use `expect_err("explicit comment")` instead of `panic()` when expecting errors
+- A negative test asserts the specific error variant (and its key fields), not just that some error occurred
+- Before relying on a new test, check that it fails without the change it covers
+
+**Async and Performance:**
+- Blocking I/O and CPU-heavy work (signing, hashing large inputs) inside async code run through `tokio::task::spawn_blocking`, never directly on the runtime
+- Where `spawn_blocking` is not available (WASM runs on one thread) and the work must stay on the runtime, split it into bounded steps and yield between them (for example `tokio::task::yield_now().await` every N items), so authorization and other tasks keep running while it completes
+- Data read by many items, records, or retries is shared, not copied: `Arc<T>`, `Arc<[T]>`, or `bytes::Bytes`, created once and only when the feature that needs it is enabled
+- The authorization path never waits on side work such as logging or telemetry export: hand it off without blocking (for example `try_send`) and report what was dropped
 
 **File Headers:**
 - Each Rust file must contain the Apache 2.0 license header:

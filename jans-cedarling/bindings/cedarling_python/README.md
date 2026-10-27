@@ -171,9 +171,18 @@ instance = Cedarling(bootstrap_config)
 bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
 instance = Cedarling(bootstrap_config)
 
+# Verify the .cjar Sigstore bundle before loading it (any .cjar source).
+# The bundle defaults to the archive location plus ".sigstore.json".
+# In your bootstrap-config.yaml:
+# CEDARLING_POLICY_STORE_SIGSTORE_MODE: "enforce"
+# CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY: "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com"
+# CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER: "https://accounts.google.com"
+bootstrap_config = BootstrapConfig.load_from_file("/path/to/bootstrap-config.yaml")
+instance = Cedarling(bootstrap_config)
+
 # Using environment variables instead of a file
 import os
-os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.json"
+os.environ["CEDARLING_POLICY_STORE_LOCAL_FN"] = "/path/to/policy-store.cjar"
 bootstrap_config = BootstrapConfig.from_env()
 instance = Cedarling(bootstrap_config)
 ```
@@ -296,6 +305,24 @@ print(f"Total size: {stats.total_size_bytes} bytes")
 print(f"Capacity usage: {stats.capacity_usage_percent}%")
 ```
 
+### Drain Metrics
+
+Destructive read: returns a `MetricsSnapshot` (`policy_stats`,
+`error_counters`, `operational_stats`, `interval`) and resets the
+counters.
+
+```python
+snapshot = instance.drain_metrics()
+print(f"Requests: {snapshot.operational_stats.get('authz.requests_total')}")
+print(f"Interval: {snapshot.interval}")
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails when the Lock
+telemetry ticker owns the collector i.e. whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `interval` is a `datetime.timedelta` with sub-second
+precision.
+
 ### Error Handling
 
 The Context Data API methods raise specific exceptions for different error conditions:
@@ -345,7 +372,7 @@ The data is injected into the evaluation context before policy evaluation, allow
 `Cedarling` exposes trusted issuer loading status APIs:
 
 ```python
-loaded_by_name = instance.is_trusted_issuer_loaded_by_name("issuer_id")
+loaded_by_name = instance.is_trusted_issuer_loaded_by_name("Acme")
 loaded_by_iss = instance.is_trusted_issuer_loaded_by_iss("https://issuer.example.org")
 total = instance.total_issuers()
 loaded_count = instance.loaded_trusted_issuers_count()
@@ -353,7 +380,7 @@ loaded_ids = instance.loaded_trusted_issuer_ids()
 failed_ids = instance.failed_trusted_issuer_ids()
 ```
 
-These values are meaningful when your policy store defines a `trusted-issuers/` section.
+These values are meaningful when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.
 
 ## Building the Python Library
 

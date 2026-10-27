@@ -28,6 +28,7 @@ tags:
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
+| allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -43,7 +44,7 @@ tags:
 | authorizationEncryptionEncValuesSupported | A list of the authorization encryption algorithms supported | [Details](#authorizationencryptionencvaluessupported) |
 | authorizationEndpoint | The authorization endpoint URL | [Details](#authorizationendpoint) |
 | authorizationRequestCustomAllowedParameters | This list details the allowed custom parameters for authorization requests | [Details](#authorizationrequestcustomallowedparameters) |
-| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false. | [Details](#authorizationresponseissparametersupported) |
+| authorizationResponseIssParameterSupported | Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true. | [Details](#authorizationresponseissparametersupported) |
 | authorizationSigningAlgValuesSupported | List of authorization signing algorithms supported by this OP | [Details](#authorizationsigningalgvaluessupported) |
 | backchannelAuthenticationEndpoint | Backchannel Authentication Endpoint | [Details](#backchannelauthenticationendpoint) |
 | backchannelAuthenticationRequestSigningAlgValuesSupported | Backchannel Authentication Request Signing Alg Values Supported | [Details](#backchannelauthenticationrequestsigningalgvaluessupported) |
@@ -89,6 +90,7 @@ tags:
 | connectionServiceConfiguration | Connection service Configuration | [Details](#connectionserviceconfiguration) |
 | consentGatheringScriptBackwardCompatibility | Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration | [Details](#consentgatheringscriptbackwardcompatibility) |
 | cookieDomain | Sets cookie domain for all cookies created by OP | [Details](#cookiedomain) |
+| cookieSameSite | Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing. | [Details](#cookiesamesite) |
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
@@ -165,7 +167,7 @@ tags:
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idJagIssueRefreshToken | Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false. | [Details](#idjagissuerefreshtoken) |
 | idJagLifetime | Lifetime in seconds for ID-JAGs issued by this AS (IdP role). | [Details](#idjaglifetime) |
-| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. | [Details](#idjagtrustedidpissuers) |
+| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used. | [Details](#idjagtrustedidpissuers) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
 | idTokenFilterClaimsBasedOnAccessToken | Boolean value specifying whether idToken filters claims based on accessToken | [Details](#idtokenfilterclaimsbasedonaccesstoken) |
@@ -263,7 +265,7 @@ tags:
 | requestUriHashVerificationEnabled | Boolean value specifying whether the OP supports use of the request_uri hash verification | [Details](#requesturihashverificationenabled) |
 | requestUriParameterSupported | Boolean value specifying whether the OP supports use of the request_uri parameter | [Details](#requesturiparametersupported) |
 | requirePar | Boolean value to indicate of Pushed Authorisation Request(PAR)is required | [Details](#requirepar) |
-| requirePkce | Boolean value true check for Proof Key for Code Exchange (PKCE) | [Details](#requirepkce) |
+| requirePkce | Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled. | [Details](#requirepkce) |
 | requireRequestObjectEncryption | Boolean value true encrypts request object | [Details](#requirerequestobjectencryption) |
 | requireRequestUriRegistration | Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter | [Details](#requirerequesturiregistration) |
 | responseModesSupported | This list details which OAuth 2.0 response modes are supported by this OP | [Details](#responsemodessupported) |
@@ -293,6 +295,10 @@ tags:
 | skipSessionAuthnTimeCheckDuringPromptLogin | Boolean value true allows to skip session authentication time check when client is configured from prompt login (has property defaultPromptLogin=true) | [Details](#skipsessionauthntimecheckduringpromptlogin) |
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
 | softwareStatementValidationType | Validation type used for software statement | [Details](#softwarestatementvalidationtype) |
+| spiffeBundleConnectTimeoutMs | Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundleconnecttimeoutms) |
+| spiffeBundleMaxResponseSize | Maximum response size in bytes for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundlemaxresponsesize) |
+| spiffeBundleReadTimeoutMs | Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch | [Details](#spiffebundlereadtimeoutms) |
+| spiffeTrustDomains | Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored. | [Details](#spiffetrustdomains) |
 | spontaneousScopeLifetime | The lifetime of spontaneous scope in seconds | [Details](#spontaneousscopelifetime) |
 | ssaConfiguration | SSA Configuration | [Details](#ssaconfiguration) |
 | statAuthorizationScope | Scope required for Statistical Authorization | [Details](#statauthorizationscope) |
@@ -303,8 +309,9 @@ tags:
 | statusListIndexAllocationBlockSize | Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100. | [Details](#statuslistindexallocationblocksize) |
 | statusListResponseJwtLifetime | The status list response JWT lifetime (used to set exp claim in JWT). | [Details](#statuslistresponsejwtlifetime) |
 | statusListResponseJwtSignatureAlgorithm | The status list signature algorithm to sign response JWT. Defaults to RS256. | [Details](#statuslistresponsejwtsignaturealgorithm) |
+| strictTokenRedirectUriValidation | Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client. | [Details](#stricttokenredirecturivalidation) |
 | subjectIdentifiersPerClientSupported | A list of the subject identifiers supported per client | [Details](#subjectidentifiersperclientsupported) |
-| subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. | [Details](#subjecttypessupported) |
+| subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default. | [Details](#subjecttypessupported) |
 | tokenEndpoint | The token endpoint URL | [Details](#tokenendpoint) |
 | tokenEndpointAuthMethodsSupported | A list of Client Authentication methods supported by this Token Endpoint | [Details](#tokenendpointauthmethodssupported) |
 | tokenEndpointAuthSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods | [Details](#tokenendpointauthsigningalgvaluessupported) |
@@ -506,6 +513,15 @@ tags:
 - Default value: None
 
 
+## allowStartupOnJwksUriFetchFailure
+
+- Description: Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.
+
+- Required: No
+
+- Default value: false
+
+
 ## applyXFrameOptionsHeaderIfUriContainsAny
 
 - Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.
@@ -643,11 +659,11 @@ tags:
 
 ## authorizationResponseIssParameterSupported
 
-- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: false.
+- Description: Boolean value specifying whether the authorization server includes the iss parameter in authorization responses per RFC 9207. Default: true.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## authorizationSigningAlgValuesSupported
@@ -1049,6 +1065,15 @@ tags:
 ## cookieDomain
 
 - Description: Sets cookie domain for all cookies created by OP
+
+- Required: No
+
+- Default value: None
+
+
+## cookieSameSite
+
+- Description: Sets SameSite attribute value (None, Lax or Strict) for all cookies created by OP (session_id, uma_session_id, session_state, opbs, current_sessions, consent_session_id, rp_origin_id). Defaults to None to preserve cross-site SSO flows (silent authentication via hidden iframe with prompt=none, cross-site POST to the authorization endpoint). Setting Lax breaks silent/iframe-based authentication and cross-site POST to the authorization endpoint for RPs hosted on a different site than the OP. Setting Strict additionally breaks normal top-level cross-site SSO redirects, effectively disabling SSO for any RP not on the same site as the OP. Value is matched case-insensitively against None/Lax/Strict; any other value falls back to None. See auth-server session management docs before changing.
 
 - Required: No
 
@@ -1741,7 +1766,7 @@ tags:
 
 ## idJagTrustedIdpIssuers
 
-- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
+- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.
 
 - Required: No
 
@@ -2623,11 +2648,11 @@ tags:
 
 ## requirePkce
 
-- Description: Boolean value true check for Proof Key for Code Exchange (PKCE)
+- Description: Require PKCE (S256 code_challenge) for the authorization code grant, per OAuth 2.1. When false, PKCE is still required for clients with requirePkce enabled.
 
 - Required: No
 
-- Default value: false
+- Default value: true
 
 
 ## requireRequestObjectEncryption
@@ -2891,6 +2916,42 @@ tags:
 - Default value: None
 
 
+## spiffeBundleConnectTimeoutMs
+
+- Description: Connection timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 5000
+
+
+## spiffeBundleMaxResponseSize
+
+- Description: Maximum response size in bytes for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 1048576
+
+
+## spiffeBundleReadTimeoutMs
+
+- Description: Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch
+
+- Required: No
+
+- Default value: 10000
+
+
+## spiffeTrustDomains
+
+- Description: Admin-configured, out-of-band trust anchor mapping (trust domain -> SPIFFE Bundle Endpoint) used to validate SPIFFE X.509-SVID and JWT-SVID client credentials. A client-supplied `spiffe_bundle_endpoint` is never trusted as a trust anchor source; only trust domains listed here are honored.
+
+- Required: No
+
+- Default value: None
+
+
 ## spontaneousScopeLifetime
 
 - Description: The lifetime of spontaneous scope in seconds
@@ -2981,6 +3042,15 @@ tags:
 - Default value: None
 
 
+## strictTokenRedirectUriValidation
+
+- Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.
+
+- Required: No
+
+- Default value: true
+
+
 ## subjectIdentifiersPerClientSupported
 
 - Description: A list of the subject identifiers supported per client
@@ -2992,7 +3062,7 @@ tags:
 
 ## subjectTypesSupported
 
-- Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.
+- Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default.
 
 - Required: No
 

@@ -11,6 +11,7 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -100,16 +101,7 @@ public class AuthorizeRestWebServiceValidator {
         }
 
         try {
-            final Client client;
-
-            // Check if client_id is a CIMD URL (Client ID Metadata Document)
-            if (clientIdMetadataService.isCimdClientId(clientId)) {
-                log.debug("Processing CIMD client_id: {}", clientId);
-                client = clientIdMetadataService.getClient(clientId);
-            } else {
-                // Traditional client lookup from database
-                client = clientService.getClient(clientId);
-            }
+            final Client client = clientIdMetadataService.resolveClient(clientId);
 
             if (client == null) {
                 log.debug("Unable to find client by id {}.", clientId);
@@ -395,11 +387,18 @@ public class AuthorizeRestWebServiceValidator {
         return redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT, reason);
     }
 
-    public void validatePkce(String codeChallenge, RedirectUriResponse redirectUriResponse, Client client) {
+    public void validatePkce(String codeChallenge, String codeChallengeMethod, RedirectUriResponse redirectUriResponse, Client client) {
         final boolean requirePkce = isTrue(appConfiguration.getRequirePkce()) || client.getAttributes().getRequirePkce();
         if (requirePkce && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "PKCE is required but code_challenge is missing");
+        }
+
+        // OAuth 2.1 only allows the S256 code_challenge_method; "plain" (or an omitted/unrecognized method,
+        // which RFC 7636 would otherwise default to "plain") is rejected.
+        if (!Strings.isNullOrEmpty(codeChallenge) && CodeVerifier.CodeChallengeMethod.fromString(codeChallengeMethod) != CodeVerifier.CodeChallengeMethod.S256) {
+            log.error("PKCE code_challenge_method is invalid: {} (only S256 is allowed, plain method is not supported).", codeChallengeMethod);
+            throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST, "PKCE code_challenge_method must be S256");
         }
     }
 

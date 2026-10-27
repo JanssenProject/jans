@@ -21,7 +21,8 @@ Attributes
 :param tokens: List of TokenInput objects containing JWT tokens with explicit type mappings  
 :param resource: Resource data (wrapped `EntityData` object)  
 :param action: The action to be authorized  
-:param context: Optional Python dictionary with additional context
+:param context: Optional Python dictionary with additional context  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -37,6 +38,29 @@ request = AuthorizeMultiIssuerRequest(
     action="Read",
     context={"location": "miami"}
 )
+```
+---
+
+AuthorizeOptions
+================
+
+A Python wrapper for the Rust `cedarling::AuthorizeOptions` struct.
+Per-call metadata that travels with an authorization request. None of it
+takes part in policy evaluation: the decision is the same with or without
+options.
+
+Attributes
+----------  
+:param trace: Optional `TraceContext`. `None` means the host has no
+    execution context, so no TRACE record can be emitted for the decision.
+    The getter returns a copy, so `opts.trace.workload_id = ...` is
+    discarded; assign a new `TraceContext` instead.
+
+Example
+-------
+```python
+options = AuthorizeOptions(trace=TraceContext("exec-1", "https://gw.example.com", "workload-1"))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
 ```
 ---
 
@@ -75,7 +99,8 @@ entities built once for the whole batch.
 Attributes
 ----------  
 :param tokens: List of `TokenInput` shared across every item.  
-:param items: List of `BatchItem` objects, evaluated in input order.
+:param items: List of `BatchItem` objects, evaluated in input order.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -87,11 +112,12 @@ req = BatchAuthorizeMultiIssuerRequest(
 ```
 ---
 
-BatchAuthorizeMultiIssuerResponse
-=================================
+# BatchAuthorizeMultiIssuerResponse
+Multi-issuer analog of `BatchAuthorizeUnsignedResponse`.
 
-Multi-issuer analog of `BatchAuthorizeUnsignedResponse`. Each entry in
-`results` is a `BatchItemMultiIssuerResult`.
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemMultiIssuerResult]): The evaluation results, in input order.
 ---
 
 BatchAuthorizeUnsignedRequest
@@ -104,7 +130,8 @@ against the same principal snapshot and pushed-data snapshot.
 Attributes
 ----------  
 :param principal: Optional `EntityData` shared across every item.  
-:param items: List of `BatchItem` objects, evaluated in input order.
+:param items: List of `BatchItem` objects, evaluated in input order.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -116,15 +143,18 @@ req = BatchAuthorizeUnsignedRequest(
 ```
 ---
 
-BatchAuthorizeUnsignedResponse
-==============================
+# BatchAuthorizeUnsignedResponse
+A Python wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 
-A Python wrapper for
-`cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each entry
 in `results` is a `BatchItemUnsignedResult` — an `AuthorizeResult` when
-Cedar reached a decision, or a `BatchItemError` when the item failed to
-build. `results[i]` corresponds to the `items[i]` supplied to the request.
+Cedar reached a decision, or a `BatchItemError` when the item failed during
+per-item preparation or request validation. `results[i]` corresponds to the
+`items[i]` supplied to the request.
+
+Attributes:
+    batch_id (str): The shared UUIDv7 identifier for this batch evaluation.
+    results (List[BatchItemUnsignedResult]): The evaluation results, in input order.
 ---
 
 BatchItem
@@ -161,7 +191,7 @@ Attributes
 :param item_index: Position of the failing item in the original `items` list.  
 :type item_index: int  
 :param message: Human-readable diagnostic. Safe to log.  
-:type message: str  
+:type message: str
 ---
 
 # BatchItemMultiIssuerResult
@@ -378,6 +408,27 @@ Methods
 
     :returns: A DataStoreStats object
     :raises DataErrorCtx: If the operation fails
+
+.. method:: drain_metrics(self) -> MetricsSnapshot
+
+    Destructive read: returns the telemetry metrics snapshot and resets
+    the counters for the next interval.
+
+    Only available when `CEDARLING_METRICS_COLLECTION` is enabled and no
+    Lock telemetry ticker owns the collector. Raises `ValueError` when
+    Lock telemetry owns the collector, i.e. whenever
+    `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock
+    server has no telemetry endpoint. `interval` is a
+    `datetime.timedelta` with sub-second precision.
+
+    :returns: A MetricsSnapshot object
+    :raises ValueError: If metrics collection is disabled or owned by lock telemetry.
+
+.. method:: policy_store_id(self) -> str | None
+
+    Returns the ID of the currently published policy store, if it carries one.
+
+    :returns: The store ID, or None when the store carries no ID.
 ---
 
 DataEntry
@@ -458,6 +509,40 @@ errors : list of PolicyEvaluationError
     A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
 ---
 
+DropReason
+==========
+
+Why a token was dropped from a multi-issuer authorization. Same shape as
+the ``reason`` object in the core JSON.
+
+Attributes
+----------
+.. attribute:: kind
+    str: stable snake-case slug (e.g. ``"jwt_validation_failed"``).
+.. attribute:: detail
+    str | None: stable detail slug for ``invalid_input``
+    (``"empty_mapping"`` / ``"empty_payload"``); ``None`` otherwise.
+.. attribute:: message
+    str: claim-free human-readable message; non-empty for every reason.
+---
+
+DroppedToken
+============
+
+A token the caller supplied that multi-issuer authorization did not use.
+Identifies the entry by its input `mapping` and zero-based `index`, with a
+claim-free `reason`.
+
+Attributes
+----------
+.. attribute:: mapping
+    str: the Cedar entity-type mapping of the dropped input.
+.. attribute:: index
+    int: zero-based position in the request's ``tokens`` list.
+.. attribute:: reason
+    DropReason: why the token was dropped.
+---
+
 EntityData
 ============
 
@@ -480,6 +565,26 @@ Methods
     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
 ---
 
+MetricsSnapshot
+================
+
+Destructive read: telemetry metrics snapshot with per-policy stats, error
+counters, and operational counters for the current interval. Draining
+resets the counters, so use a single consumer.
+
+Attributes
+----------
+policy_stats : dict
+    Per-policy evaluation counts (`policy_id`, `policy_id.allow`,
+    `policy_id.deny`)
+error_counters : dict
+    Classified error counters keyed by error metric key
+operational_stats : dict
+    Operational counters and gauges (authorization, cache, JWT, data, lock)
+interval : datetime.timedelta
+    Duration of the snapshot interval with sub-second precision.
+---
+
 MultiIssuerAuthorizeResult
 ==========================
 
@@ -496,6 +601,10 @@ Methods
 
 .. method:: request_id(self) -> str
     Returns the unique request ID for this authorization.
+
+.. method:: dropped_tokens(self) -> list[DroppedToken]
+    Returns the tokens the caller supplied that were not used in this
+    decision (empty when every token contributed).
 
 ---
 
@@ -549,7 +658,8 @@ Attributes
     the core performs partial evaluation of the policies.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
-:param context: Python dictionary with additional context.
+:param context: Python dictionary with additional context.  
+:param options: Optional `AuthorizeOptions`, e.g. a TRACE context.
 
 Example
 -------
@@ -575,6 +685,33 @@ Example
 ```python
 # Create a token input for multi-issuer authorization
 token = TokenInput(mapping="Jans::Access_Token", payload="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
+```
+---
+
+TraceContext
+============
+
+A Python wrapper for the Rust `cedarling::TraceContext` struct.
+TRACE execution context, already normalized by the host. Cedarling does not
+parse headers, tokens or baggage and never generates `execution_id`: the
+execution initiator (gateway, PEP, host) owns the `execution_id` +
+`execution_authority` pair.
+
+Attributes
+----------  
+:param execution_id: `trace_execution_id` issued by the execution initiator.  
+:param execution_authority: Authority that issued `execution_id`.  
+:param workload_id: Stable id of the workload the decision is made for.  
+:param workload_instance_id: Optional instance of that workload.
+
+Example
+-------
+```python
+trace = TraceContext(
+    execution_id="exec-01JABC",
+    execution_authority="https://gateway.example.com",
+    workload_id="spiffe://example.org/agent/planner",
+)
 ```
 ---
 

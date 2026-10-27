@@ -68,6 +68,9 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
     
     @Inject
 	private AppConfiguration appConfiguration;
@@ -110,12 +113,13 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
         // if attestation mode is enabled in the global config
 
-        if (!appConfiguration.getFido2Configuration().getAttestationMode().equalsIgnoreCase(AttestationMode.DISABLED.getValue()))
+        if (!AttestationMode.DISABLED.getValue()
+                .equalsIgnoreCase(rpPolicyService.resolveAttestationMode(registration.getRpId())))
         {
         	if (attStmt.hasNonNull("x5c")) {
 
                 List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
-                X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
+                X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates, registration.getRpId());
                 if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
                     throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
                 }

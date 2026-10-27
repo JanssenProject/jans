@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cedarling webpack example</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Cedarling services</h1>
+        <p>
+          Run authorization and inspect raw Cedarling results. Validation
+          warnings are expected only for these offline test tokens.
+        </p>
+        <p>
+          <a
+            href="https://docs.jans.io/stable/cedarling/reference/cedarling-authz/"
+            >Authorization fields</a
+          >
+          ·
+          <a
+            href="https://docs.jans.io/stable/cedarling/reference/cedarling-logs/"
+            >Log fields</a
+          >
+        </p>
+        <button id="authorize" type="button">Run Cedarling example</button>
+        <p id="result" aria-live="polite">Ready</p>
+      </header>
+      <div id="results"></div>
+    </main>
+    <script src="bundle.js"></script>
+  </body>
+</html>

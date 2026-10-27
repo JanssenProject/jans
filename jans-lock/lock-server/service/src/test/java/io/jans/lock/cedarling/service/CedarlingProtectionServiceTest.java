@@ -193,6 +193,7 @@ class CedarlingProtectionServiceTest {
             Response response = service.processAuthorization(null, mock(ResourceInfo.class));
 
             assertStatus(UNAUTHORIZED, response);
+            assertEquals("Bearer realm=\"jans-lock\"", response.getHeaderString("WWW-Authenticate"));
         }
 
         @Test
@@ -227,7 +228,7 @@ class CedarlingProtectionServiceTest {
     }
 
     // ===========================================================================
-    // 3. Token is not a valid JWT → 403 Forbidden
+    // 3. Token is not a valid JWT → 401 Unauthorized
     // ===========================================================================
 
     @Nested
@@ -235,33 +236,33 @@ class CedarlingProtectionServiceTest {
     class JwtParsingTests {
 
         @Test
-        @DisplayName("plain text token (not JWT-encoded) returns 403")
-        void plainTextToken_returns403() {
+        @DisplayName("plain text token (not JWT-encoded) returns 401")
+        void plainTextToken_returns401() {
             // Jwt.parse() will throw InvalidJwtException for a non-JWT string,
             // causing tokenAsJwt() to return null.
             Response response = service.processAuthorization(
                     "Bearer i-am-not-a-jwt",
                     mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-            assertStatus(FORBIDDEN, response);
+            assertStatus(UNAUTHORIZED, response);
             assertTrue(
                     response.getEntity().toString().contains("JWT"),
                     "Response body should mention JWT");
         }
 
         @Test
-        @DisplayName("random base64 string that looks like JWT parts returns 403")
-        void malformedBase64Token_returns403() {
+        @DisplayName("random base64 string that looks like JWT parts returns 401")
+        void malformedBase64Token_returns401() {
             Response response = service.processAuthorization(
                     "Bearer aaa.bbb.ccc",
                     mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-            assertStatus(FORBIDDEN, response);
+            assertStatus(UNAUTHORIZED, response);
         }
     }
 
     // ===========================================================================
-    // 4. JWT issuer mismatch → 403 Forbidden
+    // 4. JWT issuer mismatch → 401 Unauthorized
     // ===========================================================================
 
     @Nested
@@ -269,8 +270,8 @@ class CedarlingProtectionServiceTest {
     class IssuerValidationTests {
 
         @Test
-        @DisplayName("JWT with wrong issuer returns 403")
-        void wrongIssuer_returns403() throws Exception {
+        @DisplayName("JWT with wrong issuer returns 401")
+        void wrongIssuer_returns401() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 Jwt jwt = buildMockJwt("https://untrusted-idp.example.com", futureEpoch(), SignatureAlgorithm.RS256);
                 jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);
@@ -279,7 +280,7 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-                assertStatus(FORBIDDEN, response);
+                assertStatus(UNAUTHORIZED, response);
                 assertTrue(
                         response.getEntity().toString().contains("issuer"),
                         "Response body should mention 'issuer'");
@@ -288,7 +289,7 @@ class CedarlingProtectionServiceTest {
     }
 
     // ===========================================================================
-    // 5. Expired JWT → 403 Forbidden
+    // 5. Expired JWT → 401 Unauthorized
     // ===========================================================================
 
     @Nested
@@ -296,8 +297,8 @@ class CedarlingProtectionServiceTest {
     class ExpiryValidationTests {
 
         @Test
-        @DisplayName("expired JWT returns 403")
-        void expiredJwt_returns403() throws Exception {
+        @DisplayName("expired JWT returns 401")
+        void expiredJwt_returns401() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 Jwt jwt = buildMockJwt(TEST_ISSUER, pastEpoch(), SignatureAlgorithm.RS256);
                 jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);
@@ -306,7 +307,10 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-                assertStatus(FORBIDDEN, response);
+                assertStatus(UNAUTHORIZED, response);
+                assertTrue(
+                        response.getHeaderString("WWW-Authenticate").startsWith("Bearer error=\"invalid_token\""),
+                        "Response should carry an invalid_token challenge");
                 assertTrue(
                         response.getEntity().toString().contains("Expired"),
                         "Response body should mention expiry");
@@ -314,8 +318,8 @@ class CedarlingProtectionServiceTest {
         }
 
         @Test
-        @DisplayName("JWT with exp claim absent (defaults to epoch 0) returns 403")
-        void missingExpClaim_returns403() throws Exception {
+        @DisplayName("JWT with exp claim absent (defaults to epoch 0) returns 401")
+        void missingExpClaim_returns401() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class)) {
                 // When getClaimAsInteger returns null, the service defaults to 0
                 // (epoch 0 = 1970-01-01), so the token is immediately expired.
@@ -326,7 +330,7 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-                assertStatus(FORBIDDEN, response);
+                assertStatus(UNAUTHORIZED, response);
             }
         }
     }
@@ -374,7 +378,7 @@ class CedarlingProtectionServiceTest {
     }
 
     // ===========================================================================
-    // 7. Signature verification fails → 403 Forbidden
+    // 7. Signature verification fails → 401 Unauthorized
     // ===========================================================================
 
     @Nested
@@ -382,8 +386,8 @@ class CedarlingProtectionServiceTest {
     class SignatureVerificationTests {
 
         @Test
-        @DisplayName("invalid signature returns 403")
-        void invalidSignature_returns403() throws Exception {
+        @DisplayName("invalid signature returns 401")
+        void invalidSignature_returns401() throws Exception {
             try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class);
                  MockedConstruction<AuthCryptoProvider> cryptoMock = mockConstruction(
                          AuthCryptoProvider.class,
@@ -399,7 +403,7 @@ class CedarlingProtectionServiceTest {
                         "Bearer " + DUMMY_JWT,
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
-                assertStatus(FORBIDDEN, response);
+                assertStatus(UNAUTHORIZED, response);
             }
         }
     }
@@ -433,6 +437,33 @@ class CedarlingProtectionServiceTest {
                         mockResourceInfo(SecuredResource.class, "securedMethod"));
 
                 assertNull(response, "Granted access must pass through (null response)");
+            }
+        }
+
+        @Test
+        @DisplayName("valid JWT + Cedarling grants → authorize() reports the client from claims")
+        void validJwtAndCedarlingGrants_authorizeReportsClient() throws Exception {
+            try (MockedStatic<Jwt> jwtStatic = mockStatic(Jwt.class);
+                 MockedConstruction<AuthCryptoProvider> cryptoMock = mockConstruction(
+                         AuthCryptoProvider.class,
+                         (mock, ctx) -> when(
+                                 mock.verifySignature(any(), any(), any(), any(), any(), any()))
+                                 .thenReturn(true))) {
+
+                Jwt jwt = buildMockJwt(TEST_ISSUER, futureEpoch(), SignatureAlgorithm.RS256);
+                lenient().when(jwt.getClaims().getClaimAsString("client_id")).thenReturn("2200.cedar");
+                jwtStatic.when(() -> Jwt.parse(anyString())).thenReturn(jwt);
+                when(mapper.readValue(any(URL.class), eq(Map.class))).thenReturn(Map.of());
+                when(authorizationService.authorize(anyMap(), anyString(), anyMap(), anyMap()))
+                        .thenReturn(true);
+
+                io.jans.lock.service.security.AuthorizationOutcome outcome = service.authorize(
+                        "Bearer " + DUMMY_JWT,
+                        mockResourceInfo(SecuredResource.class, "securedMethod"));
+
+                assertTrue(outcome.isAllowed());
+                assertEquals("2200.cedar", outcome.getClient().getClientId());
+                assertTrue(outcome.getClient().isFromJwt());
             }
         }
 

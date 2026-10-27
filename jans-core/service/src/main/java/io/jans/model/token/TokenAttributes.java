@@ -36,6 +36,26 @@ public class TokenAttributes implements Serializable {
     private String authorizationDetails;
     @JsonProperty("statusListIndex")
     private Integer statusListIndex;
+    @JsonProperty("redirectUri")
+    private String redirectUri;
+    @JsonProperty("ephemeralSub")
+    private String ephemeralSub;
+
+    public String getEphemeralSub() {
+        return ephemeralSub;
+    }
+
+    public void setEphemeralSub(String ephemeralSub) {
+        this.ephemeralSub = ephemeralSub;
+    }
+
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
 
     public boolean isAuthorizationChallenge() {
         return authorizationChallenge;

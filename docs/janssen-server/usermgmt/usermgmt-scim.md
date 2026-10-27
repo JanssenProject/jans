@@ -57,7 +57,7 @@ Please see [Janssen SCIM logs documentation](https://docs.jans.io/v1.0.14/admin/
 
 ## API documentation at a glance
 
-[SCIM API](https://docs.jans.io/v1.0.14/admin/reference/openapi/) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested. Find yaml files [here](https://github.com/JanssenProject/jans/blob/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml).
+[SCIM API](https://docs.jans.io/stable/janssen-server/reference/openapi/) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested. Find yaml files [here](https://github.com/JanssenProject/jans/blob/main/jans-scim/server/src/main/resources/jans-scim-openapi.yaml).
 
 
 ## Working in OAuth mode

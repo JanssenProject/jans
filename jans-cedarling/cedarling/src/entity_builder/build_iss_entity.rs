@@ -12,16 +12,13 @@ use cedar_policy::Entity;
 use serde_json::{Value, json};
 use smol_str::ToSmolStr;
 use std::collections::{HashMap, HashSet};
-use url::Origin;
 
 pub(super) fn build_iss_entity(
     iss_type_name: &str,
     id: &str,
     iss: &TrustedIssuer,
     schema: Option<&MappingSchema>,
-) -> Result<(Origin, Entity), BuildEntityError> {
-    let origin = iss.get_oidc_endpoint().origin();
-
+) -> Result<Entity, BuildEntityError> {
     let attrs_shape = schema
         .as_ref()
         .map(|s| {
@@ -37,8 +34,7 @@ pub(super) fn build_iss_entity(
     )
     .map_err(|e| BuildEntityErrorKind::from(e).while_building(iss_type_name))?;
 
-    let entity = build_cedar_entity(iss_type_name, id, attrs, HashSet::new())?;
-    Ok((origin, entity))
+    build_cedar_entity(iss_type_name, id, attrs, HashSet::new())
 }
 
 impl TrustedIssuer {
@@ -48,13 +44,13 @@ impl TrustedIssuer {
     /// This currently hard-coded since we don't have specifications yet on
     /// how to configure this using the policy store.
     fn entity_attr_srcs(&self) -> HashMap<String, Value> {
-        let oidc_endpoint = &self.get_oidc_endpoint();
+        let iss = self.iss();
         HashMap::from([(
             "issuer_entity_id".into(),
             json!({
-                "host": oidc_endpoint.host().map(|h| h.to_smolstr()),
-                "path": "/",
-                "protocol": oidc_endpoint.scheme(),
+                "host": iss.host().map(|h| h.to_smolstr()),
+                "path": iss.path(),
+                "protocol": iss.scheme(),
             }),
         )])
     }
@@ -62,7 +58,6 @@ impl TrustedIssuer {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
 
     use serde_json::json;
     use url::Url;
@@ -73,11 +68,9 @@ mod test {
     use crate::entity_builder::schema::MappingSchema;
 
     fn test_trusted_issuer() -> TrustedIssuer {
-        TrustedIssuer::new(
-            "some_iss".to_string(),
-            "some_desc".to_string(),
-            Url::parse("https://test.jans.org").unwrap(),
-            HashMap::new(),
+        TrustedIssuer::discovery_at(
+            "some_iss",
+            Url::parse("https://test.jans.org").expect("test iss should be a valid url"),
         )
     }
 
@@ -87,11 +80,8 @@ mod test {
         let schema: MappingSchema = (&*CEDARLING_VALIDATOR_SCHEMA)
             .try_into()
             .expect("should initialize mapping schema");
-        let (origin, iss_entity) =
-            build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
-                .expect("should build TrustedIssuer entity");
-
-        assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
+        let iss_entity = build_iss_entity("Jans::TrustedIssuer", "some_iss", &iss, Some(&schema))
+            .expect("should build TrustedIssuer entity");
 
         assert_entity_eq(
             &iss_entity,
@@ -113,10 +103,8 @@ mod test {
     #[test]
     fn can_build_trusted_issuer_entity_without_schema() {
         let iss = test_trusted_issuer();
-        let (origin, iss_entity) = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
+        let iss_entity = build_iss_entity("TrustedIssuer", "some_iss", &iss, None)
             .expect("should build TrustedIssuer entity");
-
-        assert_eq!(origin.ascii_serialization(), "https://test.jans.org");
 
         assert_entity_eq(
             &iss_entity,
@@ -133,5 +121,35 @@ mod test {
             }),
             None,
         );
+    }
+
+    /// Path-based issuers on one origin keep their own path.
+    #[test]
+    fn issuer_entity_id_keeps_the_iss_path() {
+        for path in ["/realms/a", "/realms/b"] {
+            let iss = TrustedIssuer::discovery_at(
+                "Kc",
+                Url::parse(&format!("https://kc.example{path}"))
+                    .expect("test iss should be a valid url"),
+            );
+            let iss_entity = build_iss_entity("TrustedIssuer", "kc", &iss, None)
+                .expect("should build TrustedIssuer entity");
+
+            assert_entity_eq(
+                &iss_entity,
+                &json!({
+                    "uid": {"type": "TrustedIssuer", "id": "kc"},
+                    "attrs": {
+                        "issuer_entity_id": {
+                            "protocol": "https",
+                            "host": "kc.example",
+                            "path": path,
+                        },
+                    },
+                    "parents": [],
+                }),
+                None,
+            );
+        }
     }
 }

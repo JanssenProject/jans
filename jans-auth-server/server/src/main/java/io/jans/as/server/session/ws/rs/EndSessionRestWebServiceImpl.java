@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.FeatureFlagType;
@@ -54,6 +55,7 @@ import org.slf4j.Logger;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -95,7 +97,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private CookieService cookieService;
 
     @Inject
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
     private GrantService grantService;
@@ -174,7 +176,11 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     private void collectFrontAndBackChannelsUris(Pair<SessionId, AuthorizationGrant> pair, Set<Client> clients, Set<String> frontchannelUris, Map<String, Client> backchannelUris) {
         for (Client client : clients) {
             boolean hasBackchannel = false;
-            for (String logoutUri : client.getAttributes().getBackchannelLogoutUri()) {
+            final boolean ephemeral = SubjectType.EPHEMERAL.equals(client.getSubjectType());
+            if (ephemeral) {
+                log.debug("Skip back-channel logout for client with ephemeral subject type: {}", client.getClientId());
+            }
+            for (String logoutUri : ephemeral ? Collections.<String>emptyList() : client.getAttributes().getBackchannelLogoutUri()) {
                 if (Util.isNullOrEmpty(logoutUri)) {
                     continue; // skip if logout_uri is blank
                 }
@@ -566,7 +572,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         }
 
         final Set<Client> clients = sessionId.getPermissionGrantedMap() != null ?
-                clientService.getClient(sessionId.getPermissionGrantedMap().getClientIds(true), true) :
+                clientIdMetadataService.resolveClientsForLogout(sessionId.getPermissionGrantedMap().getClientIds(true)) :
                 Sets.newHashSet();
         if (authorizationGrant != null) {
             clients.add(authorizationGrant.getClient());

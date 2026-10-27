@@ -7,7 +7,7 @@ from prompt_toolkit.layout.containers import (
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.key_binding import KeyBindings
-from typing import TypeVar, Callable
+from typing import Callable
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 

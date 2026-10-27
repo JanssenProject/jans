@@ -324,5 +324,124 @@
         "type": "string",
         "index": ["presence", "equality"],
         "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceDomainId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceExecKey",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceChainPosKey",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceRecordId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceExecId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceTokenKeys",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansRequestId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPolicyStoreId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansPolicyStoreVersion",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceLastServedAtMs",
+        "type": "integer",
+        "index": ["equality", "ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTracePolicyStoreId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTracePolicyStoreVersion",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceBundleHash",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceiptSeq",
+        "type": "integer",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceiptState",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceProducerId",
+        "type": "string",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
+        "attribute": "jansTraceReceivedAtMs",
+        "type": "integer",
+        "index": ["ordering"],
+        "backend": ["userRoot"]
     }
 ]

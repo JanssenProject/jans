@@ -266,9 +266,9 @@ Required:
 
 - `multi_valued` (Boolean) Indicates if the attribute can hold multiple values.
 - `name` (String) Name of the attribute. Example: name, displayName, birthdate, email
-- `values` (List of String) List of values for the attribute.
 
 Optional:
 
 - `display_value` (String) Display value for the attribute.
 - `value` (String) Value for the attribute.
+- `values` (List of String) List of values for the attribute.

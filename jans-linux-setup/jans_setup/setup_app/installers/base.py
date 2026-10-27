@@ -10,19 +10,17 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 from setup_app.utils.db_utils import dbUtils
 from setup_app.utils.progress import jansProgress
-from setup_app.utils.printVersion import get_war_info
 
 class BaseInstaller:
     needdb = True
     dbUtils = dbUtils
-    service_scopes_created = False
 
     def register_progess(self):
         if not hasattr(self, 'output_folder'):
             self.output_folder = os.path.join(Config.output_dir, self.service_name)
 
         if not hasattr(self, 'templates_dir'):
-            self.templates_dir = os.path.join(Config.templateFolder, self.service_name)
+            self.templates_dir = os.path.join(Config.template_folder, self.service_name)
 
         jansProgress.register(self)
 
@@ -40,22 +38,19 @@ class BaseInstaller:
             self.dbUtils.bind()
 
         self.check_for_download()
-
-        if not base.snap:
-            self.create_user()
-
+        self.create_user()
         self.create_folders()
 
         self.install()
         self.copy_static()
         self.generate_configuration()
 
-        # before rendering templates, let's push variables of this class to Config.templateRenderingDict
+        # before rendering templates, let's push variables of this class to Config.template_rendering_dict
         self.update_rendering_dict()
         self.render_unit_file()
 
         self.render_import_templates()
-        if not self.service_scopes_created:
+        if not getattr(self, 'service_scopes_created', False):
             self.create_scopes()
 
         self.update_backend()
@@ -68,7 +63,7 @@ class BaseInstaller:
         units = self.get_systemd_service_list(unit)
 
         for unit in units:
-            unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
+            unit_files_dir = os.path.join(Config.static_folder, 'system/systemd')
             unit_file = os.path.join(unit_files_dir, unit + '.service')
             if os.path.exists(unit_file):
                 self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
@@ -81,7 +76,7 @@ class BaseInstaller:
             if not obj_name.startswith('__') and (not callable(obj)):
                 mydict[obj_name] = obj
 
-        Config.templateRenderingDict.update(mydict)
+        Config.template_rendering_dict.update(mydict)
 
 
     def check_clients(self, client_var_id_list, resource=False, create=True):
@@ -142,6 +137,7 @@ class BaseInstaller:
         result = self.dbUtils.search('ou=scopes,o=jans', search_filter=search_filter)
         if result:
             return result.get('dn')
+        return None
 
 
     def get_systemd_service_list(self, service):
@@ -158,17 +154,8 @@ class BaseInstaller:
         services = self.get_systemd_service_list(service)
 
         for service in services:
-
-            if base.snap:
-                service = os.environ['SNAP_NAME'] + '.' + service
-
             try:
-                if base.snap:
-                    cmd_list = [base.snapctl, operation, service]
-                    if operation == 'start':
-                        cmd_list.insert(-1, '--enable')
-                    self.run(cmd_list, None, None, True)
-                elif base.systemctl:
+                if base.systemctl:
                     local_script = os.path.join(Config.jansOptFolder, 'scripts', service)
                     if os.path.exists(local_script):
                         self.run([local_script, operation], useWait=True)
@@ -178,12 +165,11 @@ class BaseInstaller:
                     self.run([base.service_path, operation, service], None, None, True)
                 else:
                     self.run([base.service_path, service, operation], None, None, True)
-            except:
+            except Exception:
                 self.logIt("Error running operation {} for service {}".format(operation, service), True)
 
     def enable(self, service=None):
-        if not base.snap:
-            self.run_service_command('enable', service)
+        self.run_service_command('enable', service)
 
     def stop(self, service=None):
         self.run_service_command('stop', service)
@@ -196,13 +182,12 @@ class BaseInstaller:
         self.start(service)
 
     def reload_daemon(self, service=None):
-        if not base.snap:
-            if not service:
-                service = self.service_name
-            if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
-                self.run([base.service_path, 'daemon-reload'])
-            elif base.os_name == 'ubuntu16':
-                self.run([paths.cmd_update_rc, service, 'defaults'])
+        if not service:
+            service = self.service_name
+        if (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
+            self.run([base.service_path, 'daemon-reload'])
+        elif base.os_name == 'ubuntu16':
+            self.run([paths.cmd_update_rc, service, 'defaults'])
 
     def pre_install(self):
         """Installer may require some settings before installation"""
@@ -271,7 +256,7 @@ class BaseInstaller:
         scopes_json_fn = os.path.join(self.templates_dir, 'scopes.json')
 
         if not os.path.exists(scopes_json_fn):
-            return
+            return None
 
         self.logIt(f"Creating {self.service_name} scopes from {scopes_json_fn}")
         scopes = base.readJsonFile(scopes_json_fn)
@@ -303,4 +288,5 @@ class BaseInstaller:
 
         self.dbUtils.import_ldif([scopes_ldif_fn])
         self.service_scopes_created = True
+        self.scopes = scopes_list
         return scopes_list

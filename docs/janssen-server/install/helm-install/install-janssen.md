@@ -52,6 +52,14 @@ helm repo add janssen https://docs.jans.io/charts
 helm repo update
 ```
 
+Charts are also published as OCI artifacts, which can be installed without
+adding a repository:
+
+```bash
+helm install janssen oci://ghcr.io/janssenproject/charts/janssen \
+  -n jans --create-namespace -f override.yaml
+```
+
 ## Install Janssen
 
 ```bash

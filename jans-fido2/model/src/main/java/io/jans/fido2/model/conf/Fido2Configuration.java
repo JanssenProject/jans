@@ -64,6 +64,30 @@ public class Fido2Configuration {
 	private boolean enterpriseAttestation = false;
 	@DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation", defaultValue = "monitor")
 	private String attestationMode = "monitor";
+	@DocProperty(description = "Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony")
+	private List<String> allowedTopOrigins = new ArrayList<>();
+
+	@DocProperty(description = "Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence", defaultValue = "false")
+	private boolean lockAuditEnabled = false;
+	@DocProperty(description = "Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it")
+	private String lockAuditEndpoint;
+	@DocProperty(description = "OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events")
+	private String lockAuditClientId;
+	@DocProperty(description = "OAuth2 client secret (encrypted), paired with lockAuditClientId")
+	private String lockAuditClientPassword;
+	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect", defaultValue = "20")
+	private int lockAuditFlushInterval = 20;
+
+	@DocProperty(description = "Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work", defaultValue = "false")
+	private boolean nativeReadinessEnabled = false;
+	@DocProperty(description = "Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property", defaultValue = "false")
+	private boolean nativeReadinessAllowExternalFetch = false;
+	@DocProperty(description = "Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound", defaultValue = "131072")
+	private int nativeReadinessMaxResponseBytes = 131072;
+	@DocProperty(description = "Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound", defaultValue = "3000")
+	private int nativeReadinessTimeoutMs = 3000;
+	@DocProperty(description = "Time in seconds a native app readiness result is served from cache before the association files are fetched again", defaultValue = "3600")
+	private int nativeReadinessCacheTtlSeconds = 3600;
 
 	public boolean isRecordAbandonedAssertions() {
 		return recordAbandonedAssertions;
@@ -135,6 +159,14 @@ public class Fido2Configuration {
 
 	public void setRequestedParties(List<RequestedParty> requestedParties) {
 		this.requestedParties = requestedParties;
+	}
+
+	public List<String> getAllowedTopOrigins() {
+		return allowedTopOrigins;
+	}
+
+	public void setAllowedTopOrigins(List<String> allowedTopOrigins) {
+		this.allowedTopOrigins = allowedTopOrigins;
 	}
 
 	public List<String> getHints() {
@@ -221,6 +253,86 @@ public class Fido2Configuration {
 		this.attestationMode = attestationMode;
 	}
 
+	public boolean isLockAuditEnabled() {
+		return lockAuditEnabled;
+	}
+
+	public void setLockAuditEnabled(boolean lockAuditEnabled) {
+		this.lockAuditEnabled = lockAuditEnabled;
+	}
+
+	public String getLockAuditEndpoint() {
+		return lockAuditEndpoint;
+	}
+
+	public void setLockAuditEndpoint(String lockAuditEndpoint) {
+		this.lockAuditEndpoint = lockAuditEndpoint;
+	}
+
+	public String getLockAuditClientId() {
+		return lockAuditClientId;
+	}
+
+	public void setLockAuditClientId(String lockAuditClientId) {
+		this.lockAuditClientId = lockAuditClientId;
+	}
+
+	public String getLockAuditClientPassword() {
+		return lockAuditClientPassword;
+	}
+
+	public void setLockAuditClientPassword(String lockAuditClientPassword) {
+		this.lockAuditClientPassword = lockAuditClientPassword;
+	}
+
+	public int getLockAuditFlushInterval() {
+		return lockAuditFlushInterval;
+	}
+
+	public void setLockAuditFlushInterval(int lockAuditFlushInterval) {
+		this.lockAuditFlushInterval = lockAuditFlushInterval;
+	}
+
+	public boolean isNativeReadinessEnabled() {
+		return nativeReadinessEnabled;
+	}
+
+	public void setNativeReadinessEnabled(boolean nativeReadinessEnabled) {
+		this.nativeReadinessEnabled = nativeReadinessEnabled;
+	}
+
+	public boolean isNativeReadinessAllowExternalFetch() {
+		return nativeReadinessAllowExternalFetch;
+	}
+
+	public void setNativeReadinessAllowExternalFetch(boolean nativeReadinessAllowExternalFetch) {
+		this.nativeReadinessAllowExternalFetch = nativeReadinessAllowExternalFetch;
+	}
+
+	public int getNativeReadinessMaxResponseBytes() {
+		return nativeReadinessMaxResponseBytes;
+	}
+
+	public void setNativeReadinessMaxResponseBytes(int nativeReadinessMaxResponseBytes) {
+		this.nativeReadinessMaxResponseBytes = nativeReadinessMaxResponseBytes;
+	}
+
+	public int getNativeReadinessTimeoutMs() {
+		return nativeReadinessTimeoutMs;
+	}
+
+	public void setNativeReadinessTimeoutMs(int nativeReadinessTimeoutMs) {
+		this.nativeReadinessTimeoutMs = nativeReadinessTimeoutMs;
+	}
+
+	public int getNativeReadinessCacheTtlSeconds() {
+		return nativeReadinessCacheTtlSeconds;
+	}
+
+	public void setNativeReadinessCacheTtlSeconds(int nativeReadinessCacheTtlSeconds) {
+		this.nativeReadinessCacheTtlSeconds = nativeReadinessCacheTtlSeconds;
+	}
+
 	public Fido2Configuration() {
 		// Default constructor required for JSON (Jackson) deserialization of the FIDO2 configuration.
 	}
@@ -232,10 +344,12 @@ public class Fido2Configuration {
 				+ userAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
 				+ ", authenticationHistoryExpiration=" + authenticationHistoryExpiration + ", serverMetadataFolder="
 				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
-				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
+				+ requestedParties + ", metadataServers=" + metadataServers + ", allowedTopOrigins=" + allowedTopOrigins + ", disableMetadataService="
 				+ disableMetadataService + ", mdsDownloadStartupRetries=" + mdsDownloadStartupRetries
 				+ ", mdsDownloadStartupRetryInterval=" + mdsDownloadStartupRetryInterval + ", hints=" + hints
-				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode + "]";
+				+ ", enterpriseAttestation=" + enterpriseAttestation + ", attestationMode=" + attestationMode
+				+ ", lockAuditEnabled=" + lockAuditEnabled + ", lockAuditEndpoint=" + lockAuditEndpoint
+				+ ", lockAuditFlushInterval=" + lockAuditFlushInterval + "]"; // lockAuditClientPassword deliberately excluded, see #14676
 	}
 
 }

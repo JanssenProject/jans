@@ -7,6 +7,7 @@ use crate::result::{BatchItemMultiIssuerOutcome, BatchItemUnsignedOutcome};
 use crate::BatchItem;
 use crate::Cedarling;
 use crate::CedarlingError;
+use crate::MetricsError;
 use crate::TokenInput;
 use crate::{EntityData, JsonValue};
 use serde_json::json;
@@ -60,7 +61,10 @@ fn test_authorize_unsigned_success() {
             principal,
             r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
             resource,
-            JsonValue("{}".to_string()),
+            JsonValue {
+                value: "{}".to_string(),
+            },
+            None,
         )
         .expect("Should be executed successfully.");
 
@@ -83,12 +87,55 @@ fn test_load_from_json_with_archive_bytes_rejects_invalid() {
     let config =
         std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
             .expect("bootstrap.json should be readable");
-    let result = Cedarling::load_from_json_with_archive_bytes(config, vec![0x00, 0x01, 0x02, 0x03]);
+    let result = Cedarling::load_from_json_with_archive_bytes(config, &[0x00, 0x01, 0x02, 0x03]);
     assert!(
         matches!(&result, Err(CedarlingError::InitializationFailed { .. })),
         "invalid archive bytes should yield InitializationFailed, is_ok={}",
         result.is_ok()
     );
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+
+    config["CEDARLING_POLICY_STORE_CJAR_URL"] =
+        serde_json::Value::String("https://example.com/store.cjar".to_string());
+
+    let archive_bytes = std::fs::read(
+        "../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar",
+    )
+    .expect("MyStore.cjar should be readable");
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &archive_bytes,
+    );
+    result.expect(
+        "initialization should succeed using archive bytes, ignoring policy_store_cjar_url",
+    );
+
+    let invalid_result = Cedarling::load_from_json_with_archive_bytes(
+        config.to_string(),
+        &[0x00, 0x01, 0x02, 0x03],
+    );
+    match invalid_result {
+        Err(CedarlingError::InitializationFailed { error_msg }) => {
+            assert!(
+                error_msg.contains("archive") || error_msg.contains("ZIP"),
+                "expected archive error message, got: {error_msg}"
+            );
+            assert!(
+                !error_msg.contains("Conflicting policy stores"),
+                "error must not be ConflictingPolicyStores: {error_msg}"
+            );
+        },
+        Ok(_) => panic!("invalid archive bytes should fail initialization"),
+    }
 }
 
 #[test]
@@ -99,7 +146,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -108,7 +157,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key1".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result.is_some(), "result should not be None");
-    let value: String = serde_json::from_str(&result.unwrap().0)
+    let value: String = serde_json::from_str(&result.unwrap().value)
         .expect("result should be deserializable to string");
     assert_eq!(value, "value1", "retrieved value should match pushed value");
 
@@ -116,7 +165,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             Some(60),
         )
         .expect("push_data_ctx with TTL should succeed");
@@ -125,8 +176,8 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key2".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result2.is_some(), "result should not be None");
-    let value2: serde_json::Value =
-        serde_json::from_str(&result2.unwrap().0).expect("result should be deserializable to JSON");
+    let value2: serde_json::Value = serde_json::from_str(&result2.unwrap().value)
+        .expect("result should be deserializable to JSON");
     assert_eq!(
         value2,
         serde_json::json!({"nested": "data"}),
@@ -137,7 +188,9 @@ fn test_data_api_push_and_get() {
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -146,7 +199,7 @@ fn test_data_api_push_and_get() {
         .get_data_ctx("key3".to_string())
         .expect("get_data_ctx should succeed");
     assert!(result3.is_some(), "result should not be None");
-    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().0)
+    let value3: Vec<i32> = serde_json::from_str(&result3.unwrap().value)
         .expect("result should be deserializable to array");
     assert_eq!(
         value3,
@@ -162,7 +215,9 @@ fn test_data_api_get_data_entry_ctx() {
     cedarling
         .push_data_ctx(
             "test_key".to_string(),
-            JsonValue(r#"{"foo": "bar"}"#.to_string()),
+            JsonValue {
+                value: r#"{"foo": "bar"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -187,7 +242,9 @@ fn test_data_api_remove_data_ctx() {
     cedarling
         .push_data_ctx(
             "to_remove".to_string(),
-            JsonValue(r#""data""#.to_string()),
+            JsonValue {
+                value: r#""data""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -227,21 +284,27 @@ fn test_data_api_clear_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#""value3""#.to_string()),
+            JsonValue {
+                value: r#""value3""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -302,21 +365,27 @@ fn test_data_api_list_data_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#"{"nested": "data"}"#.to_string()),
+            JsonValue {
+                value: r#"{"nested": "data"}"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key3".to_string(),
-            JsonValue(r#"[1, 2, 3]"#.to_string()),
+            JsonValue {
+                value: r#"[1, 2, 3]"#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -353,14 +422,18 @@ fn test_data_api_get_stats_ctx() {
     cedarling
         .push_data_ctx(
             "key1".to_string(),
-            JsonValue(r#""value1""#.to_string()),
+            JsonValue {
+                value: r#""value1""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
     cedarling
         .push_data_ctx(
             "key2".to_string(),
-            JsonValue(r#""value2""#.to_string()),
+            JsonValue {
+                value: r#""value2""#.to_string(),
+            },
             None,
         )
         .expect("push_data_ctx should succeed");
@@ -378,7 +451,13 @@ fn test_data_api_get_stats_ctx() {
 fn test_data_api_invalid_key() {
     let cedarling = create_test_cedarling();
 
-    let result = cedarling.push_data_ctx("".to_string(), JsonValue(r#""value""#.to_string()), None);
+    let result = cedarling.push_data_ctx(
+        "".to_string(),
+        JsonValue {
+            value: r#""value""#.to_string(),
+        },
+        None,
+    );
     result.expect_err("push_data_ctx with empty key should fail");
 }
 
@@ -413,6 +492,16 @@ fn test_trusted_issuer_loading_info_defaults() {
             "loaded id {id:?} should satisfy is_trusted_issuer_loaded_by_name"
         );
     }
+}
+
+#[test]
+fn test_policy_store_id_legacy() {
+    let cedarling = create_test_cedarling();
+    assert_eq!(
+        cedarling.policy_store_id(),
+        Some("a1bf93115de86de760ee0bea1d529b521489e5a11747".to_string()),
+        "legacy store should report policy_stores map key"
+    );
 }
 
 fn batch_resource(id: &str) -> Arc<EntityData> {
@@ -451,7 +540,9 @@ fn batch_item(resource_id: &str) -> BatchItem {
     BatchItem {
         resource: batch_resource(resource_id),
         action: r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     }
 }
 
@@ -465,12 +556,14 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
     let bad_item = BatchItem {
         resource: batch_resource("bad-1"),
         action: "this is not a valid uid".to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     };
     let items = vec![ok_item, bad_item, batch_item("ok-2")];
 
     let response = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), items)
+        .authorize_unsigned_batch(Some(batch_principal(true)), items, None)
         .expect("batch call should succeed");
 
     assert_eq!(response.results.len(), 3, "N=3 items → N=3 results");
@@ -507,7 +600,7 @@ fn test_authorize_unsigned_batch_empty_items_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new())
+        .authorize_unsigned_batch(Some(batch_principal(true)), Vec::new(), None)
         .expect_err("empty items must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -526,7 +619,7 @@ fn test_authorize_unsigned_batch_context_defaults_when_none() {
     };
 
     let response = cedarling
-        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item])
+        .authorize_unsigned_batch(Some(batch_principal(true)), vec![item], None)
         .expect("batch call should succeed");
 
     assert_eq!(
@@ -584,7 +677,9 @@ fn multi_issuer_item(id: &str) -> BatchItem {
     BatchItem {
         resource: multi_issuer_resource(id),
         action: r#"Jans::Action::"Update""#.to_string(),
-        context: Some(JsonValue("{}".to_string())),
+        context: Some(JsonValue {
+            value: "{}".to_string(),
+        }),
     }
 }
 
@@ -596,7 +691,7 @@ fn test_authorize_multi_issuer_batch_ordered_results() {
         .collect();
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items, None)
         .expect("batch call should succeed at the UniFFI boundary");
 
     assert_eq!(
@@ -615,7 +710,7 @@ fn test_authorize_multi_issuer_batch_empty_tokens_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")])
+        .authorize_multi_issuer_batch(Vec::new(), vec![multi_issuer_item("x")], None)
         .expect_err("empty tokens must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -629,7 +724,7 @@ fn test_authorize_multi_issuer_batch_empty_items_rejected() {
     let cedarling = create_test_cedarling();
 
     let err = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new())
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], Vec::new(), None)
         .expect_err("empty items must be rejected");
     let msg = format!("{err:?}");
     assert!(
@@ -648,7 +743,7 @@ fn test_authorize_multi_issuer_batch_context_none_defaults() {
     };
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item])
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], vec![item], None)
         .expect("None context should default to {} and marshal cleanly");
 
     assert_eq!(
@@ -672,13 +767,15 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
         BatchItem {
             resource: multi_issuer_resource("bad-1"),
             action: "this is not a valid uid".to_string(),
-            context: Some(JsonValue("{}".to_string())),
+            context: Some(JsonValue {
+                value: "{}".to_string(),
+            }),
         },
         multi_issuer_item("ok-2"),
     ];
 
     let response = cedarling
-        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items)
+        .authorize_multi_issuer_batch(vec![multi_issuer_access_token()], items, None)
         .expect("batch call should succeed at the UniFFI boundary");
 
     assert_eq!(
@@ -700,4 +797,192 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
         other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
     }
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
+}
+
+/// Builds a bootstrap config string with `CEDARLING_METRICS_COLLECTION` set to
+/// `value` (e.g. "enabled" / "disabled").
+fn metrics_config(value: &str) -> String {
+    let raw = std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+        .expect("bootstrap.json should be readable");
+    let mut config: serde_json::Value =
+        serde_json::from_str(&raw).expect("bootstrap.json should be valid JSON");
+    config["CEDARLING_METRICS_COLLECTION"] = json!(value);
+    config.to_string()
+}
+
+#[test]
+fn test_drain_metrics_disabled_returns_not_enabled() {
+    let cedarling = Cedarling::load_from_json(metrics_config("disabled"))
+        .expect("Cedarling should initialize with metrics disabled");
+
+    let result = cedarling.drain_metrics();
+    assert!(
+        matches!(result, Err(MetricsError::NotEnabled)),
+        "drain_metrics must fail with NotEnabled when metrics collection is disabled"
+    );
+}
+
+#[test]
+fn test_drain_metrics_local_mode_snapshot_and_reset() {
+    let cedarling = Cedarling::load_from_json(metrics_config("enabled"))
+        .expect("Cedarling should initialize with metrics enabled");
+
+    let resource = Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::Issue",
+                    "id": "some_id"
+                },
+                "app_id": "admin_ui_id",
+                "name": "My App",
+                "permission": "view_clients",
+                "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    );
+    let principal = Some(Arc::new(
+        EntityData::from_json(
+            json!({
+                "cedar_entity_mapping": {
+                    "entity_type": "Jans::TestPrincipal1",
+                    "id": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
+                },
+                "is_ok": true
+            })
+            .to_string(),
+        )
+        .expect("EntityData should be correctly parsed"),
+    ));
+
+    let result = cedarling
+        .authorize_unsigned(
+            principal,
+            r#"Jans::Action::"UpdateTestPrincipal""#.to_string(),
+            resource,
+            JsonValue {
+                value: "{}".to_string(),
+            },
+            None,
+        )
+        .expect("authz should be executed successfully");
+    assert!(result.decision, "authz result should be ALLOW: {result:?}");
+
+    let snapshot_after = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed after authorization");
+    assert_eq!(
+        snapshot_after.operational_stats.get("authz.requests_total"),
+        Some(&1),
+        "the authorized request must be counted in the drained interval, got: {:?}",
+        snapshot_after.operational_stats
+    );
+
+    let snapshot_reset = cedarling
+        .drain_metrics()
+        .expect("drain_metrics should succeed on a fresh interval");
+    assert_eq!(
+        snapshot_reset.operational_stats.get("authz.requests_total"),
+        Some(&0),
+        "counters must reset to a fresh zeroed window after a snapshot, got: {:?}",
+        snapshot_reset.operational_stats
+    );
+}
+
+/// Bootstrap JSON for archive bytes with the signature check enforced.
+fn enforce_signature_config(bundle_uri: Option<&str>) -> String {
+    let mut config: serde_json::Value = serde_json::from_str(
+        &std::fs::read_to_string("../../bindings/cedarling_uniffi/test_files/bootstrap.json")
+            .expect("bootstrap.json should be readable"),
+    )
+    .expect("bootstrap.json should be valid JSON");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_MODE"] = json!("enforce");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"] = json!("signer@example.com");
+    config["CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER"] =
+        json!("https://accounts.google.com");
+    if let Some(uri) = bundle_uri {
+        config["CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"] = json!(uri);
+    }
+    config.to_string()
+}
+
+fn my_store_cjar() -> Vec<u8> {
+    std::fs::read("../../bindings/cedarling_uniffi/androidApp/app/src/main/assets/MyStore.cjar")
+        .expect("MyStore.cjar should be readable")
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_enforce_requires_bundle_uri() {
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        enforce_signature_config(None),
+        &my_store_cjar(),
+    );
+    let Err(CedarlingError::InitializationFailed { error_msg }) = result else {
+        panic!("enforce without a bundle URI must fail");
+    };
+    assert!(
+        error_msg.contains("CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"),
+        "error must name the bundle URI property, got: {error_msg}"
+    );
+}
+
+#[test]
+fn test_load_from_json_with_archive_bytes_enforce_rejects_invalid_bundle_file() {
+    let bundle = std::env::temp_dir().join(format!(
+        "cedarling-uniffi-{}-bundle.sigstore.json",
+        std::process::id()
+    ));
+    std::fs::write(&bundle, b"{}").expect("bundle file should be written");
+
+    let result = Cedarling::load_from_json_with_archive_bytes(
+        enforce_signature_config(Some(&bundle.to_string_lossy())),
+        &my_store_cjar(),
+    );
+    let _ = std::fs::remove_file(&bundle);
+    let Err(CedarlingError::InitializationFailed { error_msg }) = result else {
+        panic!("an invalid bundle must not load");
+    };
+    assert!(
+        error_msg.contains("policy store signature does not verify"),
+        "a bundle that does not verify must be rejected, got: {error_msg}"
+    );
+}
+
+/// The uniffi `DropReason` must carry exactly the fields of the core JSON
+/// `reason` object, so every binding exposes the same shape.
+#[test]
+fn test_dropped_token_reason_matches_core_json() {
+    let cases = [
+        cedarling::DropReason::DuplicateToken,
+        cedarling::DropReason::InvalidInput(cedarling::TokenInputError::EmptyPayload),
+    ];
+    for reason in cases {
+        // Core omits `detail` for unit reasons; uniffi exposes it as `None`.
+        let mut expected = serde_json::to_value(&reason).expect("core reason serializes");
+        expected["detail"] = expected
+            .get("detail")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
+        let dropped = crate::result::DroppedToken::from(cedarling::DroppedToken::new(
+            "Jans::Access_Token",
+            3,
+            reason,
+        ));
+        assert_eq!(
+            dropped.mapping, "Jans::Access_Token",
+            "mapping is passed through"
+        );
+        assert_eq!(dropped.index, 3, "index is passed through");
+        assert_eq!(
+            serde_json::json!({
+                "kind": dropped.reason.kind(),
+                "detail": dropped.reason.detail(),
+                "message": dropped.reason.message(),
+            }),
+            expected,
+            "uniffi reason must match the core JSON reason"
+        );
+    }
 }

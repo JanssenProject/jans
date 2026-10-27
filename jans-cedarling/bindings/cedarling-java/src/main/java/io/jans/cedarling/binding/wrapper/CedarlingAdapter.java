@@ -81,9 +81,25 @@ public class CedarlingAdapter implements AutoCloseable {
             String action,
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
+        return authorizeMultiIssuer(tokens, action, resource, context, null);
+    }
+
+    /**
+     * Same as {@link #authorizeMultiIssuer(Map, String, JSONObject, JSONObject)},
+     * with per-call options.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            Map<String, String> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context,
+            AuthorizeOptions options) throws AuthorizeException, EntityException {
 
         List<TokenInput> tokenInputs = toTokenInputs(tokens);
-        return authorizeMultiIssuer(tokenInputs, action, resource, context);
+        return authorizeMultiIssuer(tokenInputs, action, resource, context, options);
     }
 
     /**
@@ -96,13 +112,29 @@ public class CedarlingAdapter implements AutoCloseable {
             String action,
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
+        return authorizeMultiIssuer(tokens, action, resource, context, null);
+    }
+
+    /**
+     * Same as {@link #authorizeMultiIssuer(List, String, JSONObject, JSONObject)},
+     * with per-call options.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public MultiIssuerAuthorizeResult authorizeMultiIssuer(
+            List<TokenInput> tokens,
+            String action,
+            JSONObject resource,
+            JSONObject context,
+            AuthorizeOptions options) throws AuthorizeException, EntityException {
 
         if (resource == null) {
             throw new IllegalArgumentException("resource must not be null");
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : "{}";
-        return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextStr);
+        JsonValue contextJson = context != null ? new JsonValue(context.toString()) : null;
+        return cedarling.authorizeMultiIssuer(tokens, action, resourceObj, contextJson, options);
     }
 
     // ── authorize_unsigned ──────────────────────────────────────────────
@@ -127,10 +159,26 @@ public class CedarlingAdapter implements AutoCloseable {
             String action,
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
+        return authorizeUnsigned(principalJson, action, resource, context, null);
+    }
+
+    /**
+     * Same as {@link #authorizeUnsigned(String, String, JSONObject, JSONObject)},
+     * with per-call options.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public AuthorizeResult authorizeUnsigned(
+            String principalJson,
+            String action,
+            JSONObject resource,
+            JSONObject context,
+            AuthorizeOptions options) throws AuthorizeException, EntityException {
 
         EntityData principal =
                 principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
-        return authorizeUnsignedEntity(principal, action, resource, context);
+        return authorizeUnsignedEntity(principal, action, resource, context, options);
     }
 
     /**
@@ -153,13 +201,30 @@ public class CedarlingAdapter implements AutoCloseable {
             String action,
             JSONObject resource,
             JSONObject context) throws AuthorizeException, EntityException {
+        return authorizeUnsignedEntity(principal, action, resource, context, null);
+    }
+
+    /**
+     * Same as {@link #authorizeUnsignedEntity(EntityData, String, JSONObject, JSONObject)},
+     * with per-call options.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public AuthorizeResult authorizeUnsignedEntity(
+            EntityData principal,
+            String action,
+            JSONObject resource,
+            JSONObject context,
+            AuthorizeOptions options) throws AuthorizeException, EntityException {
 
         if (resource == null) {
             throw new IllegalArgumentException("resource must not be null");
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
         String contextStr = context != null ? context.toString() : "{}";
-        return cedarling.authorizeUnsigned(principal, action, resourceObj, contextStr);
+        return cedarling.authorizeUnsigned(
+                principal, action, resourceObj, new JsonValue(contextStr), options);
     }
 
     // ── authorize_unsigned_batch ────────────────────────────────────────
@@ -184,10 +249,24 @@ public class CedarlingAdapter implements AutoCloseable {
     public BatchAuthorizeUnsignedResponse authorizeUnsignedBatchEntity(
             EntityData principal,
             List<BatchItem> items) throws AuthorizeException {
+        return authorizeUnsignedBatchEntity(principal, items, null);
+    }
+
+    /**
+     * Same as {@link #authorizeUnsignedBatchEntity(EntityData, List)}, with
+     * per-call options that apply to the whole batch.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatchEntity(
+            EntityData principal,
+            List<BatchItem> items,
+            AuthorizeOptions options) throws AuthorizeException {
         if (items == null) {
             throw new IllegalArgumentException("items must not be null");
         }
-        return cedarling.authorizeUnsignedBatch(principal, items);
+        return cedarling.authorizeUnsignedBatch(principal, items, options);
     }
 
     /**
@@ -202,9 +281,23 @@ public class CedarlingAdapter implements AutoCloseable {
     public BatchAuthorizeUnsignedResponse authorizeUnsignedBatch(
             String principalJson,
             List<BatchItem> items) throws AuthorizeException, EntityException {
+        return authorizeUnsignedBatch(principalJson, items, null);
+    }
+
+    /**
+     * Same as {@link #authorizeUnsignedBatch(String, List)}, with per-call
+     * options that apply to the whole batch.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public BatchAuthorizeUnsignedResponse authorizeUnsignedBatch(
+            String principalJson,
+            List<BatchItem> items,
+            AuthorizeOptions options) throws AuthorizeException, EntityException {
         EntityData principal =
                 principalJson != null ? EntityData.Companion.fromJson(principalJson) : null;
-        return authorizeUnsignedBatchEntity(principal, items);
+        return authorizeUnsignedBatchEntity(principal, items, options);
     }
 
     // ── authorize_multi_issuer_batch ────────────────────────────────────
@@ -225,13 +318,27 @@ public class CedarlingAdapter implements AutoCloseable {
     public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
             List<TokenInput> tokens,
             List<BatchItem> items) throws AuthorizeException {
+        return authorizeMultiIssuerBatch(tokens, items, null);
+    }
+
+    /**
+     * Same as {@link #authorizeMultiIssuerBatch(List, List)}, with per-call
+     * options that apply to the whole batch.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
+            List<TokenInput> tokens,
+            List<BatchItem> items,
+            AuthorizeOptions options) throws AuthorizeException {
         if (tokens == null) {
             throw new IllegalArgumentException("tokens must not be null");
         }
         if (items == null) {
             throw new IllegalArgumentException("items must not be null");
         }
-        return cedarling.authorizeMultiIssuerBatch(tokens, items);
+        return cedarling.authorizeMultiIssuerBatch(tokens, items, options);
     }
 
     /**
@@ -245,8 +352,22 @@ public class CedarlingAdapter implements AutoCloseable {
     public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
             Map<String, String> tokens,
             List<BatchItem> items) throws AuthorizeException {
+        return authorizeMultiIssuerBatch(tokens, items, null);
+    }
+
+    /**
+     * Same as {@link #authorizeMultiIssuerBatch(Map, List)}, with per-call
+     * options that apply to the whole batch.
+     *
+     * @param options per-call options such as a TRACE context (may be null); they
+     *     never change the decision
+     */
+    public BatchAuthorizeMultiIssuerResponse authorizeMultiIssuerBatch(
+            Map<String, String> tokens,
+            List<BatchItem> items,
+            AuthorizeOptions options) throws AuthorizeException {
         List<TokenInput> tokenInputs = toTokenInputs(tokens);
-        return authorizeMultiIssuerBatch(tokenInputs, items);
+        return authorizeMultiIssuerBatch(tokenInputs, items, options);
     }
 
     /**
@@ -264,8 +385,8 @@ public class CedarlingAdapter implements AutoCloseable {
             throw new IllegalArgumentException("resource must not be null");
         }
         EntityData resourceObj = EntityData.Companion.fromJson(resource.toString());
-        String contextStr = context != null ? context.toString() : null;
-        return new BatchItem(resourceObj, action, contextStr);
+        JsonValue contextJson = context != null ? new JsonValue(context.toString()) : null;
+        return new BatchItem(resourceObj, action, contextJson);
     }
 
     /**
@@ -362,7 +483,7 @@ public class CedarlingAdapter implements AutoCloseable {
         if (value == null) {
             throw new DataException.SerializationException("value cannot be null");
         }
-        cedarling.pushDataCtx(key, value.toString(), ttlSecs);
+        cedarling.pushDataCtx(key, new JsonValue(value.toString()), ttlSecs);
     }
 
     /**
@@ -382,7 +503,7 @@ public class CedarlingAdapter implements AutoCloseable {
         if (value == null) {
             throw new DataException.SerializationException("value cannot be null");
         }
-        cedarling.pushDataCtx(key, value, ttlSecs);
+        cedarling.pushDataCtx(key, new JsonValue(value), ttlSecs);
     }
 
     /**
@@ -416,12 +537,12 @@ public class CedarlingAdapter implements AutoCloseable {
      * @throws DataException If the operation fails
      */
     public Object getDataCtx(String key) throws DataException {
-        String result = cedarling.getDataCtx(key);
+        JsonValue result = cedarling.getDataCtx(key);
         if (result == null) {
             return null;
         }
         try {
-            org.json.JSONTokener tokener = new org.json.JSONTokener(result);
+            org.json.JSONTokener tokener = new org.json.JSONTokener(result.getValue());
             Object value = tokener.nextValue();
             if (value == org.json.JSONObject.NULL) {
                 return null;
@@ -493,8 +614,8 @@ public class CedarlingAdapter implements AutoCloseable {
         return cedarling;
     }
 
-    public boolean isTrustedIssuerLoadedByName(String issuerId) {
-        return cedarling.isTrustedIssuerLoadedByName(issuerId);
+    public boolean isTrustedIssuerLoadedByName(String issuerName) {
+        return cedarling.isTrustedIssuerLoadedByName(issuerName);
     }
 
     public boolean isTrustedIssuerLoadedByIss(String issClaim) {

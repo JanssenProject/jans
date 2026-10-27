@@ -28,6 +28,7 @@ public class BaseDnConfiguration {
 	private String metric;
 	private String stat;
 	private String audit;
+	private String trace;
 
 	/**
 	 * Gets the base DN for configuration entries.
@@ -119,6 +120,24 @@ public class BaseDnConfiguration {
 	 */
 	public void setAudit(String audit) {
 		this.audit = audit;
+	}
+
+	/**
+	 * Gets the base DN for TRACE evidence entries.
+	 *
+	 * @return the TRACE base DN, e.g. {@code ou=trace,ou=lock,o=jans}, or {@code null} if not set
+	 */
+	public String getTrace() {
+		return trace;
+	}
+
+	/**
+	 * Sets the base DN for TRACE evidence entries.
+	 *
+	 * @param trace the base DN to use for TRACE evidence, e.g. {@code ou=trace,ou=lock,o=jans}
+	 */
+	public void setTrace(String trace) {
+		this.trace = trace;
 	}
 
 }

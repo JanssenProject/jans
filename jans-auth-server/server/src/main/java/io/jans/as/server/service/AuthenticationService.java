@@ -97,6 +97,9 @@ public class AuthenticationService {
     private ClientService clientService;
 
     @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
+    @Inject
     private SessionIdService sessionIdService;
 
     @Inject
@@ -770,7 +773,7 @@ public class AuthenticationService {
         log.debug("ConfigureSessionClient: username: '{}', credentials: '{}'", clientInum,
                 System.identityHashCode(credentials));
 
-        Client client = clientService.getClient(clientInum);
+        Client client = clientIdMetadataService.resolveClient(clientInum);
         configureSessionClient(client);
         return client;
     }

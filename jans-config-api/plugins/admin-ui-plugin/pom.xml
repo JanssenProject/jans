@@ -31,6 +31,11 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>3.3.0</version>
+        </dependency>
 		
         <!-- Testing -->
         <dependency>
@@ -69,6 +74,11 @@
             <version>0.5.2</version>
             <scope>test</scope>
         </dependency>
+        <!-- cedarling -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>cedarling-java</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -83,6 +93,17 @@
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
+                <!-- Binary fixtures must not be filtered as text -->
+                <excludes>
+                    <exclude>**/*.cjar</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.cjar</include>
+                </includes>
             </testResource>
         </testResources>
 		

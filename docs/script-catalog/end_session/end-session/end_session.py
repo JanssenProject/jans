@@ -4,7 +4,6 @@
 #
 
 from io.jans.model.custom.script.type.logout import EndSessionType
-from java.lang import String
 
 class EndSession(EndSessionType):
     def __init__(self, currentTimeMillis):

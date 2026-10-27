@@ -14,6 +14,7 @@
 mod test;
 
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
 
 use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId};
@@ -28,6 +29,8 @@ use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
 };
+use crate::common::policy_store::migration::v1_to_v2::sanitize_issuer_name;
+use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 
 #[derive(Debug, Copy, Clone, PartialEq, Deserialize)]
 enum Encoding {
@@ -52,9 +55,8 @@ enum PolicyContentType {
 }
 
 #[derive(Debug, PartialEq, Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct LegacyTokenEntityMetadata {
-    #[serde(default = "default_trusted")]
-    pub(crate) trusted: bool,
     pub(crate) entity_type_name: String,
     #[serde(default = "default_token_id")]
     pub(crate) token_id: String,
@@ -62,19 +64,27 @@ pub(crate) struct LegacyTokenEntityMetadata {
     pub(crate) required_claims: HashSet<String>,
 }
 
-fn default_trusted() -> bool {
-    true
-}
-
 fn default_token_id() -> String {
     "jti".to_string()
+}
+
+/// Agama-format custom issuer; mirrors the runtime `CustomIssuerMetadata`.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct LegacyCustomIssuerMetadata {
+    pub(crate) tokens_mappings: HashMap<String, LegacyCustomTokenMetadata>,
+}
+
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(crate) struct LegacyCustomTokenMetadata {
+    #[serde(default)]
+    pub(crate) required_claims: HashSet<String>,
 }
 
 impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
     fn from(v: LegacyTokenEntityMetadata) -> Self {
         super::TokenEntityMetadata::builder()
-            .trusted(v.trusted)
-            .entity_type_name(v.entity_type_name)
             .token_id(v.token_id)
             .required_claims(v.required_claims)
             .build()
@@ -82,41 +92,131 @@ impl From<LegacyTokenEntityMetadata> for super::TokenEntityMetadata {
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
 pub(crate) struct LegacyTrustedIssuer {
     pub(crate) name: String,
-    pub(crate) description: String,
     #[serde(
         rename = "openid_configuration_endpoint",
         alias = "configuration_endpoint",
-        deserialize_with = "de_oidc_endpoint_url"
+        deserialize_with = "de_discovery_endpoint"
     )]
-    oidc_endpoint: Url,
-    #[serde(default)]
+    discovery: DiscoveryEndpoint,
+    #[serde(default, deserialize_with = "de_token_metadata")]
     pub(crate) token_metadata: HashMap<String, LegacyTokenEntityMetadata>,
 }
 
-fn de_oidc_endpoint_url<'de, D>(deserializer: D) -> Result<Url, D::Error>
+/// Rejects two keys declaring one entity type, since the runtime keys tokens
+/// by entity type.
+fn de_token_metadata<'de, D>(
+    deserializer: D,
+) -> Result<HashMap<String, LegacyTokenEntityMetadata>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let tokens = HashMap::<String, LegacyTokenEntityMetadata>::deserialize(deserializer)?;
+
+    let mut keys: Vec<(&String, &LegacyTokenEntityMetadata)> = tokens.iter().collect();
+    keys.sort_by(|a, b| a.0.cmp(b.0));
+    let mut owners: HashMap<&str, &str> = HashMap::with_capacity(keys.len());
+    for (key, token) in keys {
+        if let Some(first) = owners.insert(&token.entity_type_name, key) {
+            return Err(de::Error::custom(format!(
+                "entity type '{}' is declared by token_metadata keys '{first}' and '{key}'",
+                token.entity_type_name
+            )));
+        }
+    }
+    Ok(tokens)
+}
+
+/// A discovery URL and the `iss` derived from it at parse time.
+#[derive(Debug, Clone, PartialEq)]
+struct DiscoveryEndpoint {
+    configuration: Url,
+    iss: Url,
+}
+
+fn de_discovery_endpoint<'de, D>(deserializer: D) -> Result<DiscoveryEndpoint, D::Error>
 where
     D: Deserializer<'de>,
 {
     let url_str = String::deserialize(deserializer)?;
-    Url::parse(&url_str).map_err(|_| {
+    let configuration = Url::parse(&url_str).map_err(|_| {
         de::Error::custom("the `\"openid_configuration_endpoint\"` or `\"configuration_endpoint\"` is not a valid url")
-    })
+    })?;
+    let iss = super::iss_from_configuration(&configuration).map_err(de::Error::custom)?;
+    Ok(DiscoveryEndpoint { configuration, iss })
 }
 
-impl From<LegacyTrustedIssuer> for super::TrustedIssuer {
-    fn from(v: LegacyTrustedIssuer) -> Self {
-        super::TrustedIssuer::new(
-            v.name,
-            v.description,
-            v.oidc_endpoint,
-            v.token_metadata
-                .into_iter()
-                .map(|(k, v)| (k, v.into()))
-                .collect(),
-        )
+/// Why the issuers of an Agama-format store cannot be loaded.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum LegacyIssuersError {
+    #[error(transparent)]
+    InvalidIssuerName(#[from] super::InvalidIssuerName),
+    #[error(transparent)]
+    InvalidEntityType(#[from] super::InvalidEntityType),
+    #[error(transparent)]
+    TokenTypes(#[from] super::TokenTypesError),
+}
+
+impl From<LegacyIssuersError> for super::ConversionError {
+    fn from(err: LegacyIssuersError) -> Self {
+        match err {
+            LegacyIssuersError::InvalidIssuerName(e) => e.into(),
+            LegacyIssuersError::InvalidEntityType(e) => e.into(),
+            LegacyIssuersError::TokenTypes(e) => e.into(),
+        }
     }
+}
+
+/// Adds the token types of the Agama-format issuers to `builder`, the way a v1
+/// store is migrated: an issuer with no tokens declares nothing, and a custom
+/// issuer is identified by its sanitized name. Sorted so the same conflict is
+/// always reported the same way.
+fn add_legacy_issuers(
+    builder: &mut TokenTypesBuilder,
+    trusted_issuers: HashMap<String, LegacyTrustedIssuer>,
+    custom_issuers: HashMap<String, LegacyCustomIssuerMetadata>,
+) -> Result<(), LegacyIssuersError> {
+    let mut trusted_issuers: Vec<LegacyTrustedIssuer> = trusted_issuers.into_values().collect();
+    trusted_issuers.sort_by(|a, b| (&a.name, &a.discovery.iss).cmp(&(&b.name, &b.discovery.iss)));
+    for issuer in trusted_issuers {
+        let name = IssuerName::from_str(&issuer.name)?;
+        let mut tokens: Vec<LegacyTokenEntityMetadata> =
+            issuer.token_metadata.into_values().collect();
+        tokens.sort_by(|a, b| a.entity_type_name.cmp(&b.entity_type_name));
+        for token in tokens {
+            builder.add_jwt(
+                EntityTypeName::from_str(&token.entity_type_name)?,
+                name.clone(),
+                issuer.discovery.iss.clone(),
+                super::KeySource::Discovery {
+                    configuration: issuer.discovery.configuration.clone(),
+                },
+                token.into(),
+            )?;
+        }
+    }
+
+    let mut custom_issuers: Vec<(String, LegacyCustomIssuerMetadata)> =
+        custom_issuers.into_iter().collect();
+    custom_issuers.sort_by(|a, b| a.0.cmp(&b.0));
+    for (name, issuer) in custom_issuers {
+        let name = IssuerName::from_str(&sanitize_issuer_name(&name))?;
+        let mut tokens: Vec<(String, LegacyCustomTokenMetadata)> =
+            issuer.tokens_mappings.into_iter().collect();
+        tokens.sort_by(|a, b| a.0.cmp(&b.0));
+        for (entity_type, token) in tokens {
+            builder.add_custom(
+                EntityTypeName::from_str(&entity_type)?,
+                name.clone(),
+                super::CustomTokenMetadata {
+                    required_claims: token.required_claims,
+                },
+            )?;
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -450,6 +550,7 @@ pub(crate) struct LegacyPolicyStore {
     pub schema: Option<LegacyCedarSchema>,
     pub policies: LegacyPoliciesContainer,
     pub trusted_issuers: Option<HashMap<String, LegacyTrustedIssuer>>,
+    pub custom_issuers: Option<HashMap<String, LegacyCustomIssuerMetadata>>,
     pub default_entities: LegacyDefaultEntitiesWithWarns,
 }
 
@@ -510,6 +611,15 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
                     })
                 })
                 .transpose()?,
+            custom_issuers: obj
+                .get("custom_issuers")
+                .filter(|v| !v.is_null())
+                .map(|v| {
+                    HashMap::<String, LegacyCustomIssuerMetadata>::deserialize(v).map_err(|e| {
+                        de::Error::custom(format!("error parsing custom issuers: {e}"))
+                    })
+                })
+                .transpose()?,
             default_entities: obj
                 .get("default_entities")
                 .map(|v| {
@@ -525,19 +635,26 @@ impl<'de> Deserialize<'de> for LegacyPolicyStore {
     }
 }
 
-impl From<LegacyPolicyStore> for super::PolicyStore {
-    fn from(v: LegacyPolicyStore) -> Self {
+impl TryFrom<LegacyPolicyStore> for super::PolicyStore {
+    type Error = LegacyIssuersError;
+
+    fn try_from(v: LegacyPolicyStore) -> Result<Self, Self::Error> {
         let schema: Option<super::CedarSchema> = v.schema.map(std::convert::Into::into);
-        super::PolicyStore {
+        let mut builder = TokenTypesBuilder::default();
+        add_legacy_issuers(
+            &mut builder,
+            v.trusted_issuers.unwrap_or_default(),
+            v.custom_issuers.unwrap_or_default(),
+        )?;
+        let token_types = builder.finish()?;
+        Ok(super::PolicyStore {
             version: v.version,
             schema_source_exists: schema.is_some(),
             schema,
             policies: v.policies.into(),
-            trusted_issuers: v
-                .trusted_issuers
-                .map(|issuers| issuers.into_iter().map(|(k, v)| (k, v.into())).collect()),
+            token_types,
             default_entities: v.default_entities.into(),
-        }
+        })
     }
 }
 

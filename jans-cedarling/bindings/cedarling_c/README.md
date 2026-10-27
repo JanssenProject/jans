@@ -277,7 +277,7 @@ cedarling_free_string_array(&logs);
 
 ### Trusted Issuer Loading Info
 
-When a policy store includes `trusted-issuers/` entries, you can inspect loading status:
+When a policy store declares JWT issuers in `trusted-issuers.json`, you can inspect loading status. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.
 
 ```c
 bool loaded = false;
@@ -285,7 +285,7 @@ bool loaded_by_iss = false;
 size_t total = 0;
 size_t loaded_count = 0;
 
-ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "issuer_id", &loaded);
+ret = cedarling_is_trusted_issuer_loaded_by_name(instance_id, "Acme", &loaded);
 ret = cedarling_is_trusted_issuer_loaded_by_iss(
     instance_id,
     "https://issuer.example.org",
@@ -311,6 +311,19 @@ if (ret == 0) {
     }
 }
 cedarling_free_string_array(&failed_ids);
+```
+
+### Policy Store ID
+
+Get the ID of the currently published policy store. On success `id` is NULL when the store carries no ID. The value is opaque and may change after a background refresh, so don't cache it.
+
+```c
+char* id = NULL;
+ret = cedarling_get_policy_store_id(instance_id, &id);
+if (ret == 0 && id != NULL) {
+    printf("Policy store ID: %s\n", id);
+}
+cedarling_free_string(id);
 ```
 
 ### Cleanup
@@ -364,12 +377,18 @@ cedarling_clear_last_error();
 
 | Function | Description |
 |----------|-------------|
-| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_id, out_result)` | Check loaded status by issuer ID |
+| `cedarling_is_trusted_issuer_loaded_by_name(instance_id, issuer_name, out_result)` | Check loaded status by issuer name |
 | `cedarling_is_trusted_issuer_loaded_by_iss(instance_id, iss_claim, out_result)` | Check loaded status by issuer `iss` claim |
 | `cedarling_total_issuers(instance_id, out_count)` | Get total number of discovered trusted issuers |
 | `cedarling_loaded_trusted_issuers_count(instance_id, out_count)` | Get number of successfully loaded trusted issuers |
-| `cedarling_loaded_trusted_issuer_ids(instance_id, result)` | Get IDs of successfully loaded trusted issuers |
-| `cedarling_failed_trusted_issuer_ids(instance_id, result)` | Get IDs of trusted issuers that failed to load |
+| `cedarling_loaded_trusted_issuer_ids(instance_id, result)` | Get names of successfully loaded trusted issuers |
+| `cedarling_failed_trusted_issuer_ids(instance_id, result)` | Get names of trusted issuers that failed to load |
+
+### Policy Store
+
+| Function | Description |
+|----------|-------------|
+| `cedarling_get_policy_store_id(instance_id, out_id)` | Get the current policy store ID (`*out_id` is NULL when unset; free with `cedarling_free_string`) |
 
 ### Context Data API
 
@@ -424,6 +443,19 @@ For complete configuration documentation, see [cedarling-properties.md](../../..
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.yaml",
     "CEDARLING_JWT_SIG_VALIDATION": "enabled",
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled"
+}
+```
+
+### Verifying the Policy Store Signature
+
+Set these properties to load a `.cjar` only if its Sigstore bundle verifies for the expected signer. The bundle is read from the archive location plus `.sigstore.json` unless `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is set:
+
+```json
+{
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
 }
 ```
 

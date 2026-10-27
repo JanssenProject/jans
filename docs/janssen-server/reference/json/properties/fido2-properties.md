@@ -12,27 +12,35 @@ tags:
 |-----|-----|-----|
 | abandonedRequestExpiration | Expiration time in seconds for abandoned assertion ceremonies. Kept much shorter than authenticationHistoryExpiration because conditional-UI ceremonies start on nearly every login page load, making abandonment the highest-volume outcome | [Details](#abandonedrequestexpiration) |
 | abandonedRequestSweepInterval | Interval in seconds between sweeps for lapsed assertion ceremonies. Must stay below unfinishedRequestExpiration so a ceremony cannot lapse and be deleted between two sweeps | [Details](#abandonedrequestsweepinterval) |
+| allowedTopOrigins | Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony | [Details](#allowedtoporigins) |
 | attestationMode | String value indicating whether MDS validation should be omitted during attestation | [Details](#attestationmode) |
+| attestationMode | Attestation mode for this relying party - disabled, monitor or enforced. Unset falls back to the global attestationMode. | [Details](#attestationmode) |
 | authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests | [Details](#authenticationhistoryexpiration) |
 | authenticatorCertsFolder | Authenticators certificates folder | [Details](#authenticatorcertsfolder) |
 | baseEndpoint | The base URL for Fido2 endpoints | [Details](#baseendpoint) |
+| bundleId | Application bundle identifier, e.g. com.example.app. Not enforced by the server; used to generate apple-app-site-association. | [Details](#bundleid) |
 | cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
 | cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Boolean value specifying whether to enable JDK Loggers | [Details](#disablejdklogger) |
 | disableMetadataService | Boolean value indicating whether the MDS download should be omitted | [Details](#disablemetadataservice) |
+| distribution | How the app is distributed - play-store or self-signed. Not enforced by the server; tells which signing certificate the fingerprints belong to. | [Details](#distribution) |
 | enabledFidoAlgorithms | List of Requested Credential Types | [Details](#enabledfidoalgorithms) |
 | enterpriseAttestation | If authenticators have been enabled for use in a specific protected envt (enterprise authenticators) | [Details](#enterpriseattestation) |
 | externalLoggerConfiguration | Path to external Fido2 logging configuration | [Details](#externalloggerconfiguration) |
 | fido2DeviceInfoCollection | Boolean value specifying whether to collect device information in FIDO2 metrics | [Details](#fido2deviceinfocollection) |
 | fido2ErrorCategorization | Boolean value specifying whether to categorize errors in FIDO2 metrics | [Details](#fido2errorcategorization) |
 | fido2MetricsAggregationEnabled | Boolean value specifying whether FIDO2 metrics aggregation is enabled | [Details](#fido2metricsaggregationenabled) |
-| fido2MetricsAggregationInterval | Interval in minutes for FIDO2 metrics aggregation | [Details](#fido2metricsaggregationinterval) |
 | fido2MetricsEnabled | Boolean value specifying whether FIDO2 passkey metrics collection is enabled | [Details](#fido2metricsenabled) |
 | fido2MetricsRetentionDays | Number of days to keep FIDO2 passkey metrics data | [Details](#fido2metricsretentiondays) |
 | fido2PerformanceMetrics | Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations | [Details](#fido2performancemetrics) |
 | hints | Hints to the RP - security-key, client-device, hybrid | [Details](#hints) |
 | issuer | URL using the https scheme for Issuer identifier | [Details](#issuer) |
+| lockAuditClientId | OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events | [Details](#lockauditclientid) |
+| lockAuditClientPassword | OAuth2 client secret (encrypted), paired with lockAuditClientId | [Details](#lockauditclientpassword) |
+| lockAuditEnabled | Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence | [Details](#lockauditenabled) |
+| lockAuditEndpoint | Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it | [Details](#lockauditendpoint) |
+| lockAuditFlushInterval | Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect | [Details](#lockauditflushinterval) |
 | loggingLayout | Logging layout used for Fido2 | [Details](#logginglayout) |
 | loggingLevel | Logging level for Fido2 logger | [Details](#logginglevel) |
 | mdsCertsFolder | MDS TOC root certificates folder | [Details](#mdscertsfolder) |
@@ -43,10 +51,20 @@ tags:
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
+| nativeReadinessAllowExternalFetch | Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property | [Details](#nativereadinessallowexternalfetch) |
+| nativeReadinessCacheTtlSeconds | Time in seconds a native app readiness result is served from cache before the association files are fetched again | [Details](#nativereadinesscachettlseconds) |
+| nativeReadinessEnabled | Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work | [Details](#nativereadinessenabled) |
+| nativeReadinessMaxResponseBytes | Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound | [Details](#nativereadinessmaxresponsebytes) |
+| nativeReadinessTimeoutMs | Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound | [Details](#nativereadinesstimeoutms) |
+| packageName | Android application package name, e.g. com.example.app. Not enforced by the server; used to generate assetlinks.json. | [Details](#packagename) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
 | recordAbandonedAssertions | Boolean value indicating whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled | [Details](#recordabandonedassertions) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| sha256CertFingerprints | SHA-256 fingerprints of the app signing certificate, as colon-separated hex (AB:CD:...). Not enforced by the server; used to generate assetlinks.json. | [Details](#sha256certfingerprints) |
+| teamId | Apple Developer Team ID, e.g. T9A667JL6T. Not enforced by the server; used to generate apple-app-site-association. | [Details](#teamid) |
+| trustedProxyEnabled | Whether proxy headers may be trusted when recording the client IP in metrics. Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. True trusts them only from the source addresses listed in trustedProxyIpRanges. | [Details](#trustedproxyenabled) |
+| trustedProxyIpRanges | Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation (for example ["10.0.0.0/8", "192.168.1.0/24"]). Only consulted when trustedProxyEnabled is true; an empty list trusts nothing. | [Details](#trustedproxyipranges) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
 | userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
@@ -70,6 +88,15 @@ tags:
 - Default value: 30
 
 
+## allowedTopOrigins
+
+- Description: Full origins (scheme, host and optional port) permitted to frame a cross-origin ceremony; empty denies every framed ceremony
+
+- Required: No
+
+- Default value: None
+
+
 ## attestationMode
 
 - Description: String value indicating whether MDS validation should be omitted during attestation
@@ -77,6 +104,15 @@ tags:
 - Required: No
 
 - Default value: monitor
+
+
+## attestationMode
+
+- Description: Attestation mode for this relying party - disabled, monitor or enforced. Unset falls back to the global attestationMode.
+
+- Required: No
+
+- Default value: None
 
 
 ## authenticationHistoryExpiration
@@ -100,6 +136,15 @@ tags:
 ## baseEndpoint
 
 - Description: The base URL for Fido2 endpoints
+
+- Required: No
+
+- Default value: None
+
+
+## bundleId
+
+- Description: Application bundle identifier, e.g. com.example.app. Not enforced by the server; used to generate apple-app-site-association.
 
 - Required: No
 
@@ -149,6 +194,15 @@ tags:
 - Required: No
 
 - Default value: false
+
+
+## distribution
+
+- Description: How the app is distributed - play-store or self-signed. Not enforced by the server; tells which signing certificate the fingerprints belong to.
+
+- Required: No
+
+- Default value: None
 
 
 ## enabledFidoAlgorithms
@@ -205,15 +259,6 @@ tags:
 - Default value: true
 
 
-## fido2MetricsAggregationInterval
-
-- Description: Interval in minutes for FIDO2 metrics aggregation
-
-- Required: No
-
-- Default value: 60
-
-
 ## fido2MetricsEnabled
 
 - Description: Boolean value specifying whether FIDO2 passkey metrics collection is enabled
@@ -257,6 +302,51 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## lockAuditClientId
+
+- Description: OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditClientPassword
+
+- Description: OAuth2 client secret (encrypted), paired with lockAuditClientId
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditEnabled
+
+- Description: Boolean value indicating whether passkey registration and authentication events are delivered to the Lock Server as audit evidence
+
+- Required: No
+
+- Default value: false
+
+
+## lockAuditEndpoint
+
+- Description: Base URL of the Lock Server audit endpoint (e.g. https://lock.example.com/audit); /log and /log/bulk are derived from it
+
+- Required: No
+
+- Default value: None
+
+
+## lockAuditFlushInterval
+
+- Description: Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect
+
+- Required: No
+
+- Default value: 20
 
 
 ## loggingLayout
@@ -349,6 +439,60 @@ tags:
 - Default value: None
 
 
+## nativeReadinessAllowExternalFetch
+
+- Description: Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property
+
+- Required: No
+
+- Default value: false
+
+
+## nativeReadinessCacheTtlSeconds
+
+- Description: Time in seconds a native app readiness result is served from cache before the association files are fetched again
+
+- Required: No
+
+- Default value: 3600
+
+
+## nativeReadinessEnabled
+
+- Description: Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work
+
+- Required: No
+
+- Default value: false
+
+
+## nativeReadinessMaxResponseBytes
+
+- Description: Maximum number of bytes read from one association file by the native app readiness checks. The server also enforces a fixed upper bound
+
+- Required: No
+
+- Default value: 131072
+
+
+## nativeReadinessTimeoutMs
+
+- Description: Overall deadline in milliseconds for fetching one association file in the native app readiness checks. The server also enforces a fixed upper bound
+
+- Required: No
+
+- Default value: 3000
+
+
+## packageName
+
+- Description: Android application package name, e.g. com.example.app. Not enforced by the server; used to generate assetlinks.json.
+
+- Required: No
+
+- Default value: None
+
+
 ## personCustomObjectClassList
 
 - Description: Custom object class list for dynamic person enrolment
@@ -379,6 +523,42 @@ tags:
 ## serverMetadataFolder
 
 - Description: Authenticators metadata in json format
+
+- Required: No
+
+- Default value: None
+
+
+## sha256CertFingerprints
+
+- Description: SHA-256 fingerprints of the app signing certificate, as colon-separated hex (AB:CD:...). Not enforced by the server; used to generate assetlinks.json.
+
+- Required: No
+
+- Default value: None
+
+
+## teamId
+
+- Description: Apple Developer Team ID, e.g. T9A667JL6T. Not enforced by the server; used to generate apple-app-site-association.
+
+- Required: No
+
+- Default value: None
+
+
+## trustedProxyEnabled
+
+- Description: Whether proxy headers may be trusted when recording the client IP in metrics. Unset preserves the legacy behaviour of trusting them unconditionally. False never reads them. True trusts them only from the source addresses listed in trustedProxyIpRanges.
+
+- Required: No
+
+- Default value: None
+
+
+## trustedProxyIpRanges
+
+- Description: Reverse-proxy source addresses whose forwarded headers are trusted, in CIDR notation (for example ["10.0.0.0/8", "192.168.1.0/24"]). Only consulted when trustedProxyEnabled is true; an empty list trusts nothing.
 
 - Required: No
 

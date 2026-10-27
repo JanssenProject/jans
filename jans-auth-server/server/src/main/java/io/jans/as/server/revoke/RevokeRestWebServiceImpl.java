@@ -21,6 +21,7 @@ import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.external.ExternalRevokeTokenService;
@@ -77,6 +78,9 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     private ClientService clientService;
 
     @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
+    @Inject
     private ExternalRevokeTokenService externalRevokeTokenService;
 
     @Inject
@@ -96,7 +100,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
 
         Client client = sessionClient != null ? sessionClient.getClient() : null;
         if (client == null) {
-            client = clientService.getClient(clientId);
+            client = clientIdMetadataService.resolveClient(clientId);
             if (!clientService.isPublic(client)) {
                 log.trace("Client is not public and not authenticated. Skip revoking.");
                 return response(builder, oAuth2AuditLog);

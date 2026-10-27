@@ -70,6 +70,9 @@ public class AttestationVerifier {
     @Inject
     private AppConfiguration appConfiguration;
 
+    @Inject
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
     public CredAndCounterData verifyAuthenticatorAttestationResponse(Response response, Fido2RegistrationData credential) {
         if (Strings.isNullOrEmpty(response.getAttestationObject()) || Strings.isNullOrEmpty(response.getClientDataJSON())) {
             throw errorResponseFactory.invalidRequest("Authenticator data is invalid");
@@ -109,10 +112,10 @@ public class AttestationVerifier {
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
             log.debug("attestationProcessor : "+attestationProcessor.getClass());
 
-            if (AttestationMode.DISABLED.getValue().equals(appConfiguration.getFido2Configuration().getAttestationMode())) {
+            if (AttestationMode.DISABLED.getValue().equals(rpPolicyService.resolveAttestationMode(credential.getRpId()))) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
-                if (AttestationMode.ENFORCED.getValue().equals(appConfiguration.getFido2Configuration().getAttestationMode()) && fmt.equals(AttestationFormat.none.getFmt())) {
+                if (AttestationMode.ENFORCED.getValue().equals(rpPolicyService.resolveAttestationMode(credential.getRpId())) && fmt.equals(AttestationFormat.none.getFmt())) {
                     throw new Fido2RuntimeException("Unauthorized to perform this action");
                 }
                 else {

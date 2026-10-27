@@ -371,11 +371,15 @@ for a complete code example.
 
 ## Defined API
 
-Please refer to [Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
+The full API is auto-generated from the `cedarling` crate source on every
+release: [Cedarling Rust API documentation](https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html).
+
+For a narrative walkthrough of the core types, see the
+[Cedarling Rust Developer Guide](../developer/cedarling-rust.md#api-reference).
 
 ## See Also
 
 - [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)

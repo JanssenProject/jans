@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -38,7 +37,7 @@ public class LicenseResourceTest extends AdminUIBaseTest {
         Response response = request.get();
         log.info("\n\n Response for getLicenseDetails -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
-        assertTrue(true);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
 
     }
 

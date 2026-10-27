@@ -1,4 +1,3 @@
-import contextlib
 import json
 import os
 import typing as _t
@@ -23,32 +22,6 @@ def render_ldif(src, dst, ctx):
         f.write(safe_render(txt, ctx))
 
 
-def get_jackrabbit_creds():
-    username = os.environ.get("CN_JACKRABBIT_ADMIN_ID", "admin")
-    password = ""  # nosec: B105
-
-    password_file = os.environ.get(
-        "CN_JACKRABBIT_ADMIN_PASSWORD_FILE",
-        "/etc/jans/conf/jackrabbit_admin_password",
-    )
-    with contextlib.suppress(FileNotFoundError):
-        with open(password_file) as f:
-            password = f.read().strip()
-    password = password or username
-    return username, password
-
-
-def get_jackrabbit_rmi_url():
-    # new style ENV
-    rmi_url = os.environ.get("CN_JACKRABBIT_RMI_URL", "")
-    if rmi_url:
-        return rmi_url
-
-    # fallback to default
-    base_url = os.environ.get("CN_JACKRABBIT_URL", "http://localhost:8080")
-    return f"{base_url}/rmi"
-
-
 def get_base_ctx(manager):
     redis_pw = manager.secret.get("redis_password") or ""
     redis_pw_encoded = ""
@@ -60,12 +33,6 @@ def get_base_ctx(manager):
         ).decode()
 
     doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
-    jca_user, jca_pw = get_jackrabbit_creds()
-
-    jca_pw_encoded = encode_text(
-        jca_pw,
-        manager.secret.get("encoded_salt"),
-    ).decode()
 
     cache_type = os.environ.get("CN_CACHE_TYPE", "NATIVE_PERSISTENCE")
     redis_url = os.environ.get('CN_REDIS_URL', 'localhost:6379')
@@ -89,10 +56,6 @@ def get_base_ctx(manager):
         'memcached_url': memcached_url,
 
         "document_store_type": doc_store_type,
-        "jca_server_url": get_jackrabbit_rmi_url(),
-        "jca_username": jca_user,
-        "jca_pw": jca_pw,
-        "jca_pw_encoded": jca_pw_encoded,
 
         'jetty_base': manager.config.get('jetty_base'),
         'orgName': manager.config.get('orgName'),
@@ -229,10 +192,10 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     scope_list = get_config_api_scopes()
 
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
-        if api_role["role"] != "api-admin":
+        if api_role["role"] != "admin":
             continue
 
-        # add special permissions for api-admin
+        # add special permissions for admin
         for scope in scope_list:
             if scope in role_mapping["rolePermissionMapping"][i]["permissions"]:
                 continue

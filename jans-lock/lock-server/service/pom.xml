@@ -32,13 +32,6 @@
 		</testResources>
 
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>false</skipTests>
-				</configuration>
-			</plugin>
 
 			<!-- Swagger -->
 			<plugin>
@@ -130,6 +123,30 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-lock-model</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-java</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-testkit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Runs the shared TRACE suites against the NATIVE provider as well -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-native</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -303,6 +320,16 @@
 			<artifactId>weld-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<!-- Mockito -->
 		<dependency>
@@ -316,4 +343,25 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<!-- TRACE ingest benchmark against a live database, see TraceIngestBenchmark; not part of the default build -->
+		<profile>
+			<id>benchmark</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Benchmark.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

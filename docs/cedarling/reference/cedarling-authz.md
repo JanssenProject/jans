@@ -141,7 +141,7 @@ let request = {
 };
 
 // Execute authorization, the request is passed as a JSON string
-let result = await cedarling.authorize_multi_issuer(JSON.stringify(request));
+let result = await cedarling.authorizeMultiIssuer(JSON.stringify(request));
 
 // Check result — single decision (no per-principal breakdown)
 if (result.decision) {
@@ -199,20 +199,13 @@ permit(
 
 The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always **lowercase** and uses only **underscores** as separators, making it a valid Cedar identifier.
 
-**Pattern**: `{issuer_name}_{token_type}`
+**Pattern**: `{issuer}_{token_type}`
 
-Both components are individually normalized, then joined with a single underscore.
+The key is derived once, when the policy store loads, from the
+`trusted-issuers.json` entry the token's `mapping` names. The token's `iss` claim
+plays no part in it.
 
-**Step 1 — Issuer Name Resolution**:
-
-1. Look up the JWT's `iss` claim in the trusted issuer configuration from the policy store
-2. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
-3. If no trusted issuer matches, extract the hostname from the `iss` URL:
-    - Strip the protocol (`https://`, `http://`)
-    - Take everything before the first `/`
-    - Strip port numbers (everything after `:`)
-    - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
-4. **Sanitize**: replace all `.` (dots), ` ` (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
+**Step 1 — Issuer**: the entry's `issuer`, lowercased (e.g. `"Acme"` --> `acme`).
 
 **Step 2 — Token Type Simplification**:
 
@@ -221,24 +214,26 @@ Both components are individually normalized, then joined with a single underscor
 3. Convert to **lowercase**
 4. Underscores within the token type name are preserved
 
-**Step 3 — Combine**:
-
-Join the sanitized issuer name and simplified token type with `_`:
+**Step 3 — Combine** with `_`:
 
 ```text
-{sanitized_issuer}_{simplified_token_type}
+{lowercase_issuer}_{simplified_token_type}
 ```
 
 **Examples**:
 
-| JWT `iss` claim | Trusted issuer `name` | Token `mapping` | Resulting key |
-|---|---|---|---|
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Id_Token` | `acme_id_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Jans::Access_Token` | `dolphin_access_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
-| `https://unknown.issuer.com/auth` | _(not configured)_ | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
-| `https://login.microsoftonline.com/tenant` | `"Microsoft"` | `Jans::Id_Token` | `microsoft_id_token` |
+| Entry `issuer` | Token `mapping` | Resulting key |
+|---|---|---|
+| `"Acme"` | `Acme::Access_Token` | `acme_access_token` |
+| `"Acme"` | `Acme::Id_Token` | `acme_id_token` |
+| `"Dolphin"` | `Dolphin::Access_Token` | `dolphin_access_token` |
+| `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| `"Microsoft"` | `Microsoft::Id_Token` | `microsoft_id_token` |
+
+Each entity type belongs to one issuer, so a mapping names exactly one entry. A
+mapping with no entry gets no key: the token is dropped. A store where two
+token types derive the same key, or one derives `total_token_count`, does not
+load.
 
 Tokens are then accessible in Cedar policies as `context.tokens.{key}`, e.g.:
 
@@ -256,8 +251,8 @@ context.tokens.acme_access_token.hasTag("scope")
 
 **Non-Deterministic Token Detection**:
 
-- System rejects requests with multiple tokens of the same type from the same issuer
-- Example: Two "Jans::Access_Token" from "Acme" issuer will fail
+- Only one token per mapping is used: the first accepted one
+- Later tokens for the same mapping are dropped as `duplicate_token` and logged
 - This prevents ambiguous policy evaluation
 
 ### Use Cases
@@ -440,7 +435,7 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 The `principal` field uses `cedar_entity_mapping` to define its Cedar entity type and ID. All other fields become entity attributes.
@@ -486,7 +481,7 @@ let input = {
 };
 
 // the request is passed as a JSON string
-let result = await cedarling.authorize_unsigned(JSON.stringify(input));
+let result = await cedarling.authorizeUnsigned(JSON.stringify(input));
 ```
 
 In Rust, pass `principal: None`:
@@ -583,7 +578,7 @@ const request = JSON.stringify({
     context: {}
   }]
 });
-const response = await cedarling.authorize_unsigned_batch(request);
+const response = await cedarling.authorizeUnsignedBatch(request);
 console.log(response.batch_id);
 response.results.forEach((r, i) => {
   if (r.is_ok) {
@@ -595,6 +590,94 @@ response.results.forEach((r, i) => {
 ```
 
 Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer-recommended) for the token contract.
+
+## Authorize options and TRACE context
+
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
+
+| Field | Required | Meaning |
+|---|---|---|
+| `execution_id` | yes | `trace_execution_id` issued by the execution initiator (gateway, PEP, host, agent runtime or scheduler) |
+| `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
+| `workload_id` | yes | Stable id of the workload the decision is made for |
+| `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
+
+```json
+{
+  "principal": { "cedar_entity_mapping": { "entity_type": "Jans::User", "id": "1" } },
+  "action": "Jans::Action::\"Read\"",
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "2" } },
+  "context": {},
+  "options": {
+    "trace": {
+      "execution_id": "01J9Z3K4N6Q8R0S2T4V6W8X0Y2",
+      "execution_authority": "https://gateway.example.com",
+      "workload_id": "billing-service",
+      "workload_instance_id": "billing-service-7f9c"
+    }
+  }
+}
+```
+
+With TRACE enabled, the decision log entry of every decision says what happened to its record in `trace_record_status`. In a batch, each item has its own decision log entry and its own status. The field is absent when TRACE is disabled.
+
+```json
+{
+    "log_kind": "Decision",
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
+    "action": "Jans::Action::\"Read\"",
+    "resource": "Jans::Issue::\"2\"",
+    "decision": "ALLOW",
+    "trace_record_status": "emitted"
+}
+```
+
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
+
+In Rust, attach options with `with_options`:
+
+```rust
+let request = request.with_options(AuthorizeOptions::with_trace(TraceContext::new(
+    execution_id,
+    execution_authority,
+    workload_id,
+)));
+```
+
+In Python, pass `options` to the request constructor:
+
+```python
+from cedarling_python import AuthorizeOptions, RequestUnsigned, TraceContext
+
+options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority, workload_id))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
+```
+
+In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none. Java does not see Kotlin default arguments, so Java code that calls the generated `Cedarling` class directly must pass the last argument itself (`null` for no options); `CedarlingAdapter` keeps the overloads without it:
+
+```java
+AuthorizeOptions options = new AuthorizeOptions(
+        new TraceContext(executionId, executionAuthority, workloadId, null));
+AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
+```
+
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+
+```go
+request := cedarling_go.RequestUnsigned{
+    Action:   action,
+    Resource: resource,
+    Options: &cedarling_go.AuthorizeOptions{Trace: &cedarling_go.TraceContext{
+        ExecutionID:        executionID,
+        ExecutionAuthority: executionAuthority,
+        WorkloadID:         workloadID,
+    }},
+}
+```
 
 ## Policy Introspection
 

@@ -22,8 +22,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'install_jython'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
-        if not base.snap:
-            self.register_progess()
+        self.register_progess()
 
         self.needdb = False # we don't need backend connection in this class
 
@@ -46,7 +45,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
         try:
             self.run(['rm', '-rf', '/opt*-%s' % jython_version])
             self.run([Config.cmd_java, '-jar', jython_installer, '-v', '-s', '-d', '/opt/jython-%s' % jython_version, '-t', 'standard', '-e', 'ensurepip'])
-        except:
+        except Exception:
             self.logIt("Error installing jython-installer-%s.jar" % jython_version)
 
         self.run([paths.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, Config.jython_home])

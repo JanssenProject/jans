@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.couchbase.client.core.diagnostics.EndpointPingReport;
 import com.couchbase.client.core.diagnostics.PingResult;
 import com.couchbase.client.core.diagnostics.PingState;
+import com.couchbase.client.java.diagnostics.PingOptions;
 import com.couchbase.client.core.error.CouchbaseException;
 import com.couchbase.client.core.service.ServiceType;
 import com.couchbase.client.java.Bucket;
@@ -72,12 +73,15 @@ public class CouchbaseConnectionProvider {
 
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
+    private Long lastConnectionErrorTime;
+
     protected CouchbaseConnectionProvider() {
     }
 
     public CouchbaseConnectionProvider(Properties props, ClusterEnvironment clusterEnvironment) {
         this.props = props;
         this.clusterEnvironment = clusterEnvironment;
+        this.lastConnectionErrorTime = null;
     }
 
     public void create() {
@@ -113,7 +117,7 @@ public class CouchbaseConnectionProvider {
         }
 
         openWithWaitImpl();
-        LOG.info("Opended: '{}' buket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
+        LOG.info("Opened: '{}' bucket with base names: '{}'", bucketToBaseNameMapping.keySet(), baseNameToBucketMapping.keySet());
 
         if (props.containsKey("password.encryption.method")) {
             this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("password.encryption.method"));
@@ -155,13 +159,13 @@ public class CouchbaseConnectionProvider {
         long maxWaitTime = currentTime + connectionMaxWaitTimeSeconds * 1000;
         do {
             attempt++;
-            if (attempt > 0) {
+            if (attempt > 1) {
                 LOG.info("Attempting to create connection: '{}'", attempt);
             }
 
             try {
                 open(waitUntilReadyTimeSeconds);
-                if (isConnected(-1)) {
+                if (isConnectedInternall(-1)) {
                 	break;
                 } else {
                     LOG.info("Failed to connect to Couchbase");
@@ -170,12 +174,15 @@ public class CouchbaseConnectionProvider {
                 }
             } catch (CouchbaseException ex) {
                 lastException = ex;
+                // Release partially initialized cluster resources before next retry
+                destroy();
             }
 
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException ex) {
                 LOG.error("Exception happened in sleep", ex);
+                Thread.currentThread().interrupt();
                 return;
             }
             currentTime = System.currentTimeMillis();
@@ -198,7 +205,7 @@ public class CouchbaseConnectionProvider {
         this.cluster = Cluster.connect(connectionString, clusterOptions);
 
         if (waitUntilReadyTimeSeconds > 0) {
-            LOG.info("Uwe waitUntilReady cluster SDK option: '{}'", waitUntilReadyTimeSeconds);
+            LOG.info("Using waitUntilReady cluster SDK option: '{}'", waitUntilReadyTimeSeconds);
         	this.cluster.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
         }
 
@@ -209,7 +216,7 @@ public class CouchbaseConnectionProvider {
 
             Bucket bucket = this.cluster.bucket(bucketName);
             if (waitUntilReadyTimeSeconds > 0) {
-                LOG.info("Uwe waitUntilReady bucket SDK option: '{}'", waitUntilReadyTimeSeconds);
+                LOG.info("Using waitUntilReady bucket SDK option: '{}'", waitUntilReadyTimeSeconds);
                 bucket.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
             }
 
@@ -235,15 +242,66 @@ public class CouchbaseConnectionProvider {
     	return true;
     }
 
-    public boolean isConnected(long timeoutSeconds) {
+    public boolean isConnected() {
+        int waitUntilReadyTimeSeconds = StringHelper.toInteger(props.getProperty("connection.wait-until-ready-time"), -1);
+        boolean isConnected = isConnectedInternall(waitUntilReadyTimeSeconds);
+        if (!isConnected) {
+            int failureRetryWindowTimeSeconds = StringHelper.toInteger(props.getProperty("connection.failure-retry-window-time"), -1);
+            LOG.warn("Connection is not healthy, connection.failure-retry-window-time: {}", failureRetryWindowTimeSeconds);
+            if (failureRetryWindowTimeSeconds == -1) {
+                // No retry window configured, return false immediately
+                return false;
+            }
+
+            if (lastConnectionErrorTime == null) {
+                lastConnectionErrorTime = System.currentTimeMillis();
+                LOG.info("Failure retry window started, allowed window: {}s", failureRetryWindowTimeSeconds);
+                return true; // Return true for the first failure to allow retrying connection
+            } else {
+                long elapsedMs = System.currentTimeMillis() - lastConnectionErrorTime;
+                long windowMs = (long) failureRetryWindowTimeSeconds * 1000;
+                long remainingMs = windowMs - elapsedMs;
+
+                if (remainingMs <= 0) {
+                    LOG.info("Failure retry window time passed");
+                    lastConnectionErrorTime = null;
+                    return false;
+                } else {
+                    LOG.warn("Still within failure retry window — {}s remaining", remainingMs / 1000);
+                    return true;
+                }
+            }
+        } else {
+            // Reset failure window timer once connection is healthy again
+            if (lastConnectionErrorTime != null) {
+                LOG.info("Connection recovered, resetting failure retry window timer");
+                lastConnectionErrorTime = null;
+            }
+        }
+
+        return isConnected;
+    }
+
+	private boolean isConnectedInternall(int timeoutSeconds) {
         if (cluster == null) {
             return false;
         }
 
         boolean isConnected = true;
+        long startTime = System.currentTimeMillis();
         try {
 	        for (BucketMapping bucketMapping : bucketToBaseNameMapping.values()) {
-                if (!isConnected(bucketMapping, timeoutSeconds)) {
+                int remainingSeconds = timeoutSeconds;
+                if (timeoutSeconds > 0) {
+                    long elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000;
+                    remainingSeconds = (int) (timeoutSeconds - elapsedSeconds);
+                    if (remainingSeconds <= 0) {
+                        LOG.error("Probe time budget exhausted after {}s", timeoutSeconds);
+                        isConnected = false;
+                        break;
+                    }
+                }
+                if (!isConnected(bucketMapping, remainingSeconds)) {
                     LOG.error("Bucket '{}' is in invalid state", bucketMapping.getBucketName());
                     isConnected = false;
                     break;
@@ -257,16 +315,15 @@ public class CouchbaseConnectionProvider {
         return isConnected;
     }
 
-    private boolean isConnected(BucketMapping bucketMapping, long timeoutSeconds) {
+    private boolean isConnected(BucketMapping bucketMapping, int timeoutSeconds) {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = this.cluster.buckets();
-        BucketSettings bucketSettings;
-        if (timeoutSeconds == -1) {
-        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions());
-        } else {
-        	bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions().timeout(Duration.ofSeconds(timeoutSeconds)));
+        GetBucketOptions getBucketOptions = GetBucketOptions.getBucketOptions();
+        if (timeoutSeconds > 0) {
+            getBucketOptions.timeout(Duration.ofSeconds(timeoutSeconds));
         }
+        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name(), getBucketOptions);
 
         boolean result = true;
         if (com.couchbase.client.java.manager.bucket.BucketType.COUCHBASE == bucketSettings.bucketType()) {
@@ -285,7 +342,11 @@ public class CouchbaseConnectionProvider {
         }
 
         if (result) {
-            PingResult pingResult = bucket.ping();
+            PingOptions pingOptions = PingOptions.pingOptions();
+            if (timeoutSeconds > 0) {
+                pingOptions.timeout(Duration.ofSeconds(timeoutSeconds));
+            }
+            PingResult pingResult = bucket.ping(pingOptions);
             for (Entry<ServiceType, List<EndpointPingReport>> pingResultEntry : pingResult.endpoints().entrySet()) {
                 for (EndpointPingReport endpointPingReport : pingResultEntry.getValue()) {
                     if (PingState.OK != endpointPingReport.state()) {
@@ -380,4 +441,3 @@ public class CouchbaseConnectionProvider {
     }
 
 }
-

@@ -155,7 +155,7 @@ public class SsaCreateRequest extends BaseRequest {
         result.setSoftwareRoles(extractListByKey(requestObject, SOFTWARE_ROLES.getName()));
         result.setGrantTypes(extractListByKey(requestObject, GRANT_TYPES.getName()));
         result.setOneTimeUse(requestObject.optBoolean(ONE_TIME_USE.getName(), true));
-        result.setRotateSsa(requestObject.optBoolean(ROTATE_SSA.getName(), true));
+        result.setRotateSsa(requestObject.optBoolean(ROTATE_SSA.getName(), false));
         result.setLifetime(integerOrNull(requestObject, LIFETIME.getName()));
         return result;
     }

@@ -3,6 +3,7 @@ package cedarling_go
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // Represents a cedarling principal or resource entity
@@ -158,6 +159,8 @@ type RequestUnsigned struct {
 	Action    string
 	Resource  EntityData
 	Context   any
+	// Options is per-call metadata such as a TRACE context; nil means none.
+	Options *AuthorizeOptions
 }
 
 func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
@@ -167,18 +170,37 @@ func (r RequestUnsigned) MarshalJSON() ([]byte, error) {
 	}
 
 	aux := struct {
-		Principal *EntityData `json:"principal,omitempty"`
-		Action    string      `json:"action"`
-		Resource  EntityData  `json:"resource"`
-		Context   any         `json:"context"`
+		Principal *EntityData       `json:"principal,omitempty"`
+		Action    string            `json:"action"`
+		Resource  EntityData        `json:"resource"`
+		Context   any               `json:"context"`
+		Options   *AuthorizeOptions `json:"options,omitempty"`
 	}{
 		Principal: r.Principal,
 		Action:    r.Action,
 		Resource:  r.Resource,
 		Context:   context,
+		Options:   r.Options,
 	}
 	return json.Marshal(aux)
 
+}
+
+// TraceContext is the TRACE execution context of a call, already normalized by
+// the host. Cedarling never generates ExecutionID: the execution initiator
+// (gateway, PEP, host) owns it together with ExecutionAuthority.
+type TraceContext struct {
+	ExecutionID        string  `json:"execution_id"`
+	ExecutionAuthority string  `json:"execution_authority"`
+	WorkloadID         string  `json:"workload_id"`
+	WorkloadInstanceID *string `json:"workload_instance_id,omitempty"`
+}
+
+// AuthorizeOptions is per-call metadata of an authorization request. None of
+// it takes part in policy evaluation: the decision is the same with or without
+// options. A nil Trace means the host has no execution context.
+type AuthorizeOptions struct {
+	Trace *TraceContext `json:"trace,omitempty"`
 }
 
 // TokenInput represents a JWT token with explicit type mapping
@@ -193,6 +215,8 @@ type AuthorizeMultiIssuerRequest struct {
 	Resource EntityData   `json:"resource"`
 	Action   string       `json:"action"`
 	Context  any          `json:"context"`
+	// Options is per-call metadata such as a TRACE context; nil means none.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
@@ -202,15 +226,17 @@ func (r AuthorizeMultiIssuerRequest) MarshalJSON() ([]byte, error) {
 	}
 
 	aux := struct {
-		Tokens   []TokenInput `json:"tokens"`
-		Resource EntityData   `json:"resource"`
-		Action   string       `json:"action"`
-		Context  any          `json:"context"`
+		Tokens   []TokenInput      `json:"tokens"`
+		Resource EntityData        `json:"resource"`
+		Action   string            `json:"action"`
+		Context  any               `json:"context"`
+		Options  *AuthorizeOptions `json:"options,omitempty"`
 	}{
 		Tokens:   r.Tokens,
 		Resource: r.Resource,
 		Action:   r.Action,
 		Context:  context,
+		Options:  r.Options,
 	}
 	return json.Marshal(aux)
 }
@@ -220,6 +246,25 @@ type MultiIssuerAuthorizeResult struct {
 	Response  CedarResponse `json:"response"`
 	Decision  bool          `json:"decision"`
 	RequestID string        `json:"request_id"`
+	// DroppedTokens lists the supplied tokens that were not used in this decision.
+	DroppedTokens []DroppedToken `json:"dropped_tokens,omitempty"`
+}
+
+// DroppedToken is a token the caller supplied that multi-issuer authorization
+// did not use, identified by its input Mapping and zero-based Index.
+type DroppedToken struct {
+	Mapping string     `json:"mapping"`
+	Index   uint64     `json:"index"`
+	Reason  DropReason `json:"reason"`
+}
+
+// DropReason explains why a token was dropped. Kind is the stable slug
+// ("jwt_validation_failed", ...); Detail is set only for "invalid_input"
+// ("empty_mapping" / "empty_payload"); Message is the non-empty claim-free text.
+type DropReason struct {
+	Kind    string  `json:"kind"`
+	Detail  *string `json:"detail,omitempty"`
+	Message string  `json:"message"`
 }
 
 // BatchItem is one {resource, action, context} triple in a batch
@@ -254,12 +299,16 @@ func (b BatchItem) MarshalJSON() ([]byte, error) {
 type BatchAuthorizeUnsignedRequest struct {
 	Principal *EntityData `json:"principal,omitempty"`
 	Items     []BatchItem `json:"items"`
+	// Options applies to the whole batch, not to individual items.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 // BatchAuthorizeMultiIssuerRequest bundles one token set with N BatchItems.
 type BatchAuthorizeMultiIssuerRequest struct {
 	Tokens []TokenInput `json:"tokens"`
 	Items  []BatchItem  `json:"items"`
+	// Options applies to the whole batch, not to individual items.
+	Options *AuthorizeOptions `json:"options,omitempty"`
 }
 
 // BatchItemError is the per-item build failure surfaced inside a batch
@@ -356,4 +405,15 @@ type DataStoreStats struct {
 	CapacityUsagePercent float64 `json:"capacity_usage_percent"`
 	MemoryAlertThreshold float64 `json:"memory_alert_threshold"`
 	MemoryAlertTriggered bool    `json:"memory_alert_triggered"`
+}
+
+// MetricsSnapshot represents the telemetry metrics snapshot for the current interval.
+// Local snapshots are only available when CEDARLING_METRICS_COLLECTION is enabled.
+type MetricsSnapshot struct {
+	PolicyStats      map[string]int64 `json:"policy_stats"`
+	ErrorCounters    map[string]int64 `json:"error_counters"`
+	OperationalStats map[string]int64 `json:"operational_stats"`
+	// Interval elapsed since the previous drain. Crosses the binding as
+	// whole nanoseconds, which is exactly how time.Duration is represented.
+	Interval time.Duration `json:"interval_nanos"`
 }

@@ -12,7 +12,7 @@ uninstall:
 	pip uninstall -y jans-pycloudlib
 
 serve-docs:
-	mkdocs serve -w jans
+	zensical serve
 
 build-docs:
-	mkdocs build
+	zensical build

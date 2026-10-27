@@ -1,23 +1,16 @@
 import os
 import sys
-import json
 import subprocess
 import uuid
-import glob
-import urllib
-import ssl
-import re
 import pymysql
 import psycopg2
 import inspect
-import tempfile
 
 from setup_app import paths
-from setup_app.messages import msg
 from setup_app.utils import base
 from setup_app.static import InstallTypes, colors, BackendStrings
 
-from setup_app.config import Config
+from setup_app.config import Config, LEGACY_NAMES
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
@@ -38,6 +31,8 @@ class PropertiesUtils(SetupUtils):
 
         if itype == int:
             return int(ival)
+
+        return None
 
     def getYNPrompt(self, propmt_text, default='Y'):
         default = default.lower()
@@ -87,12 +82,12 @@ class PropertiesUtils(SetupUtils):
                 print('The hostname has to be at least three domain components. Try again\n')
         while not Config.ip:
             Config.ip = self.get_ip()
-        while not Config.orgName:
-            Config.orgName = input('Organization Name: ').strip()
-        while not Config.countryCode:
+        while not Config.org_name:
+            Config.org_name = input('Organization Name: ').strip()
+        while not Config.country_code:
             test_code = input('2 Character Country Code: ').strip()
             if len(test_code) == 2:
-                Config.countryCode = test_code
+                Config.country_code = test_code
             else:
                 print('Country code should only be two characters. Try again\n')
         while not Config.city:
@@ -126,13 +121,13 @@ class PropertiesUtils(SetupUtils):
 
         for digest in ('sha256', 'md5'):
             cmd = [paths.cmd_openssl, 'enc', '-md', digest, '-d', '-aes-256-cbc', '-in',  fn, '-out', out_file, '-k', passwd]
-            self.logIt('Running: ' + ' '.join(cmd))
+            self.logIt('Running: ' + ' '.join(cmd[:-1] + ['***']))
             p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output, err = p.communicate()
             if not err.decode().strip():
                 break
         else:
-            print("Can't decrypt {} with password {}\n Exiting ...".format(fn, passwd))
+            print("Can't decrypt {} with supplied password\n Exiting ...".format(fn))
             self.run(['rm', '-f', out_file])
             sys.exit(False)
 
@@ -141,9 +136,7 @@ class PropertiesUtils(SetupUtils):
     def load_properties(self, prop_file, no_update=[]):
         self.logIt('Loading Properties %s' % prop_file)
 
-        no_update += ['noPrompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
-
-        map_db = []
+        no_update = no_update + ['no_prompt', 'jre_version', 'node_version', 'jetty_version', 'jython_version', 'jreDestinationPath']
 
         if prop_file.endswith('.enc'):
             if not Config.properties_password:
@@ -156,6 +149,9 @@ class PropertiesUtils(SetupUtils):
             p = base.read_properties_file(prop_file)
         except Exception:
             self.logIt("Error loading properties", True)
+            sys.exit(1)
+
+        p = {LEGACY_NAMES.get(key, key): val for key, val in p.items()}
 
 
         if p.get('enable-script'):
@@ -164,13 +160,16 @@ class PropertiesUtils(SetupUtils):
         if p.get('install_jans_saml'):
             base.argsp.install_jans_shib = True
 
-        if base.as_bool(p.get('loadTestData', False)):
+        if base.as_bool(p.get('load_test_data', False)):
             base.argsp.t = True
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
         elif p.get('rdbm_type') == 'mysql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '3306'
+
+        if p.get('rdbm_schema') and not base.is_valid_identifier(p['rdbm_schema']):
+            sys.exit(2)
 
         properties_list = list(p.keys())
 
@@ -192,54 +191,41 @@ class PropertiesUtils(SetupUtils):
 
         return p
 
-    def save_properties(self, prop_fn=None, obj=None):
+    @staticmethod
+    def _property_string(value):
+        if isinstance(value, str):
+            return str(value).strip()
+        if isinstance(value, (bool, int, float)):
+            return str(value)
+        return ''
+
+    @staticmethod
+    def _is_saved_property(name, member):
+        if name in LEGACY_NAMES or name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+            return False
+        return not name.startswith(('cmd_', '__')) and not callable(member)
+
+    def save_properties(self, prop_fn=None):
 
         if not prop_fn:
-            prop_fn = Config.savedProperties
-
-        if not obj:
-            obj = self
+            prop_fn = Config.saved_properties
 
         self.logIt('Saving properties to %s' % prop_fn)
 
-        def get_string(value):
-            if isinstance(value, str):
-                return str(value).strip()
-            elif isinstance(value, bool) or isinstance(value, int) or isinstance(value, float):
-                return str(value)
-            else:
-                return ''
-
         try:
             p = Properties()
-            for obj_name, obj in inspect.getmembers(Config):
+            for obj_name, member in inspect.getmembers(Config):
                 obj_name = str(obj_name)
-                if obj_name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+                if not self._is_saved_property(obj_name, member):
                     continue
-
-                if obj_name.startswith('cmd_'):
-                    continue
-
-                if not obj_name.startswith('__') and (not callable(obj)):
-                    value = get_string(obj)
-                    if value != '':
-                        p[obj_name] = value
+                value = self._property_string(member)
+                if value != '':
+                    p[obj_name] = value
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
 
             self.run([paths.cmd_chmod, '600', prop_fn])
-
-            # uncomment later
-            return
-
-            self.run([paths.cmd_openssl, 'enc', '-aes-256-cbc', '-in', prop_fn, '-out', prop_fn+'.enc', '-k', Config.admin_password])
-
-            Config.post_messages.append(
-                "Encrypted properties file saved to {0}.enc with password {1}\nDecrypt the file with the following command if you want to re-use:\nopenssl enc -d -aes-256-cbc -in {2}.enc -out {3}".format(
-                prop_fn,  Config.admin_password, os.path.basename(prop_fn), os.path.basename(Config.setup_properties_fn)))
-
-            self.run(['rm', '-f', prop_fn])
 
         except Exception:
             self.logIt("Error saving properties", True)
@@ -382,6 +368,12 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_config_api')
             Config.addPostSetupService.append('install_jans_cli')
 
+    def prompt_rdbm_schema(self):
+        Config.set_rdbm_schema()
+        while True:
+            Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema).lower()
+            if base.is_valid_identifier(Config.rdbm_schema):
+                break
 
     def prompt_for_rdbm(self):
         while True:
@@ -399,6 +391,9 @@ class PropertiesUtils(SetupUtils):
         else:
             Config.rdbm_install_type = InstallTypes.REMOTE
 
+        if Config.rdbm_install_type == InstallTypes.LOCAL and Config.rdbm_type == 'pgsql':
+            self.prompt_rdbm_schema()
+
         if Config.rdbm_install_type == InstallTypes.REMOTE:
             while True:
                 Config.rdbm_host = self.getPrompt("  {} host".format(Config.rdbm_type.upper()), Config.rdbm_host)
@@ -406,9 +401,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_db = self.getPrompt("  Jnas Database", Config.rdbm_db)
                 Config.rdbm_user = self.getPrompt("  Jans Database Username", Config.rdbm_user)
                 Config.rdbm_password = self.getPrompt("  Jans Database Password", Config.rdbm_password)
-                Config.set_rdbm_schema()
-                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
-
+                if Config.rdbm_type == 'pgsql':
+                    self.prompt_rdbm_schema()
                 use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
                 if use_ssl:
                     Config.rdbm_sslrootcert = self.getPrompt("  Paste RDBM SSL Root Certificate:")
@@ -473,6 +467,7 @@ class PropertiesUtils(SetupUtils):
             else:
                 Config.rdbm_port = 5432
                 Config.rdbm_type = 'pgsql'
+                self.prompt_rdbm_schema()
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
             Config.rdbm_install_type = InstallTypes.REMOTE
@@ -489,8 +484,8 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_user = self.getPrompt("  {} user".format(Config.rdbm_type.upper()), Config.get('rdbm_user'))
                 Config.rdbm_password = self.getPrompt("  {} password".format(Config.rdbm_type.upper()))
                 Config.rdbm_db = self.getPrompt("  {} database".format(Config.rdbm_type.upper()), Config.get('rdbm_db'))
-                Config.set_rdbm_schema()
-                Config.rdbm_schema = self.getPrompt("  Jans Database Schema", Config.rdbm_schema)
+                if Config.rdbm_type == 'pgsql':
+                    self.prompt_rdbm_schema()
 
                 use_ssl = self.getYNPrompt("  Use SSL to connect RDBM")
                 if use_ssl:
@@ -580,14 +575,14 @@ class PropertiesUtils(SetupUtils):
         # Get the Country Code
         long_enough = False
         while not long_enough:
-            countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
-            if len(countryCode) != 2:
+            country_code = self.getPrompt("Enter two letter Country Code", Config.country_code)
+            if len(country_code) != 2:
                 print("Country code must be two characters")
             else:
-                Config.countryCode = countryCode
+                Config.country_code = country_code
                 long_enough = True
 
-        Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
+        Config.org_name = self.getPrompt("Enter Organization Name", Config.org_name)
 
         while True:
             Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
@@ -599,7 +594,7 @@ class PropertiesUtils(SetupUtils):
 
     def promptForProperties(self):
 
-        if Config.noPrompt or '-x' in sys.argv:
+        if Config.no_prompt or '-x' in sys.argv:
             return
 
 

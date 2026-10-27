@@ -20,12 +20,14 @@ pub mod log_config;
 pub mod policy_store_config;
 /// Raw config module
 pub mod raw_config;
+mod trace_config;
 
 #[cfg(not(target_arch = "wasm32"))]
 use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
+use crate::trace::{ParseProducerIdError, ParseTraceSigningKidError};
 use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
 // Re-export types that need to be public
@@ -33,8 +35,13 @@ pub use authorization_config::AuthorizationConfig;
 pub use jwt_config::JwtConfig;
 pub use lock_config::{LockServiceConfig, LockServiceConfigRaw, LockTransport};
 pub use log_config::{LogConfig, LogTypeConfig, MemoryLogConfig};
-pub use policy_store_config::{PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSource};
-pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType};
+pub use policy_store_config::{
+    PolicyStoreConfig, PolicyStoreConfigRaw, PolicyStoreSignature, PolicyStoreSource,
+    SigstoreSigner,
+};
+pub use raw_config::{BootstrapConfigRaw, FeatureToggle, LoggerType, SigstoreMode};
+pub(crate) use trace_config::check_trace_setup;
+pub use trace_config::{TraceConfig, TraceEndpoint, TraceSetupError, TraceSigningKey};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.
@@ -64,6 +71,8 @@ pub struct BootstrapConfig {
     pub data_store_config: DataStoreConfig,
     /// HTTP client settings shared across all outbound requests (timeouts, retries).
     pub http_client_config: HttpClientConfig,
+    /// TRACE producer settings. If `None` then TRACE is disabled.
+    pub trace_config: Option<TraceConfig>,
 }
 
 impl Default for BootstrapConfig {
@@ -92,6 +101,7 @@ impl Default for BootstrapConfig {
             max_base64_size: None,
             data_store_config: DataStoreConfig::default(),
             http_client_config: HttpClientConfig::default(),
+            trace_config: None,
         }
     }
 }
@@ -223,8 +233,7 @@ pub enum BootstrapConfigLoadingError {
 
     /// Error returned when multiple policy store sources were provided.
     #[error(
-        "Multiple store options were provided. Make sure you only one of these properties is set: \
-         `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_LOCAL`"
+        "Multiple store options were provided. Make sure only one policy store source is configured."
     )]
     ConflictingPolicyStores,
 
@@ -232,8 +241,16 @@ pub enum BootstrapConfigLoadingError {
     #[error("No Policy store was provided.")]
     MissingPolicyStore,
 
+    /// Error returned when attempting to use the legacy JSON policy store format.
+    #[error(
+        "Legacy JSON policy store format is no longer supported. Please migrate to the folder-based policy store format (.cjar archive or directory)."
+    )]
+    LegacyJsonNotSupported,
+
     /// Error returned when the policy store file is in an unsupported format.
-    #[error("Unsupported policy store file format for: {0}. Supported formats include: JSON, YAML")]
+    #[error(
+        "Unsupported policy store file format for: {0}. Supported formats include: YAML, CJAR, or a directory"
+    )]
     UnsupportedPolicyStoreFileFormat(String),
 
     /// Error returned when failing to load a local JWKS
@@ -256,11 +273,60 @@ pub enum BootstrapConfigLoadingError {
     )]
     MissingCjarUrl,
 
+    /// Error returned when signature enforcement is on but a required property is unset.
+    #[error("`CEDARLING_POLICY_STORE_SIGSTORE_MODE` is `enforce` but `{0}` is not set")]
+    MissingSigstoreProperty(&'static str),
+
     /// Error returned when transport is set to gRPC but no gRPC endpoint is configured.
     #[error(
         "`CEDARLING_LOCK_TRANSPORT` is set to `grpc` but `CEDARLING_LOCK_GRPC_ENDPOINT` is not set."
     )]
     MissingGrpcEndpoint,
+
+    /// Error returned when TRACE is enabled without what it needs from the rest
+    /// of the configuration.
+    #[error(transparent)]
+    TraceSetup(#[from] TraceSetupError),
+
+    /// Error returned when TRACE is enabled without a signing key.
+    #[error(
+        "`CEDARLING_TRACE` is `enabled` but neither `CEDARLING_TRACE_SIGNING_KEY` nor \
+         `CEDARLING_TRACE_SIGNING_KEY_PEM` is set"
+    )]
+    MissingTraceSigningKey,
+
+    /// Error returned when the TRACE producer id would be rejected by Lock.
+    #[error(
+        "invalid TRACE producer id taken from `{property}`: {source}. Set \
+         `CEDARLING_TRACE_PRODUCER_ID` to 1-255 ASCII characters: a letter or digit, then \
+         letters, digits or `._:/-`"
+    )]
+    InvalidTraceProducerId {
+        /// Property the invalid value came from.
+        property: &'static str,
+        /// Why the value is invalid.
+        source: ParseProducerIdError,
+    },
+
+    /// Error returned when the TRACE `kid` would be rejected by Lock.
+    #[error("invalid `CEDARLING_TRACE_SIGNING_KID`: {0}")]
+    InvalidTraceSigningKid(ParseTraceSigningKidError),
+
+    /// Error returned when `CEDARLING_TRACE_ENDPOINT` is neither `discovered` nor a URL.
+    #[error("invalid `CEDARLING_TRACE_ENDPOINT`: {0}")]
+    InvalidTraceEndpoint(url::ParseError),
+
+    /// Error returned when a TRACE bulk limit is zero.
+    #[error("`{0}` must be greater than 0")]
+    ZeroTraceBulkLimit(&'static str),
+
+    /// Error returned when `CEDARLING_TRACE_BULK_MAX_BYTES` cannot hold the largest
+    /// record Lock accepts, so such a record could never be sent.
+    #[error("`CEDARLING_TRACE_BULK_MAX_BYTES` must be at least {min} to hold one record")]
+    TraceBulkMaxBytesTooSmall {
+        /// Bytes of the largest record Lock accepts, plus the array brackets.
+        min: usize,
+    },
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {
@@ -284,6 +350,22 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_default_config_ships_independent_size_caps() {
+        let config = BootstrapConfig::load_default().unwrap();
+
+        assert_eq!(
+            config.policy_store_config.max_file_size,
+            crate::common::policy_store::archive_handler::ArchiveLimits::DEFAULT_MAX_ENTRY_SIZE,
+            "The shipped default config must carry the bundled archive cap"
+        );
+        assert_eq!(
+            config.http_client_config.max_response_size_bytes,
+            Some(crate::HttpClientConfig::DEFAULT_MAX_RESPONSE_SIZE_BYTES),
+            "The shipped default config must use the HTTP cap's own default"
+        );
+    }
+
+    #[test]
     fn test_load_default_config() {
         let config = BootstrapConfig::load_default().unwrap();
 
@@ -300,7 +382,7 @@ mod tests {
         // Verify policy store configuration
         assert!(matches!(
             config.policy_store_config.source,
-            PolicyStoreSource::FileJson(_)
+            PolicyStoreSource::CjarFile(_)
         ));
 
         // Verify JWT configuration
@@ -324,10 +406,19 @@ mod tests {
             config.authorization_config.decision_log_default_jwt_id,
             "jti"
         );
+        assert!(
+            !config.authorization_config.metrics_collection,
+            "metrics collection must be disabled by default"
+        );
 
         // Verify data store configuration
         assert_eq!(config.data_store_config.max_entries, 10000);
         assert_eq!(config.data_store_config.default_ttl, None);
         assert!(config.data_store_config.enable_metrics);
+
+        assert!(
+            config.trace_config.is_none(),
+            "TRACE must be disabled in the default config"
+        );
     }
 }

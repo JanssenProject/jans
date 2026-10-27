@@ -5,6 +5,8 @@
 mypy>=0.971
 
 # internal docs generator
+zensical>=0.0.58
 mkdocstrings-python>=0.7.1
-mkdocs-material>=8.4.0
 mkdocs-click>=0.8.0
+
+idna>=3.15

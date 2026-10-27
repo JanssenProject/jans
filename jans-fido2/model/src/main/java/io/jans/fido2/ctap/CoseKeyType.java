@@ -13,7 +13,8 @@ public enum CoseKeyType {
 
     OKP(1), // https://tools.ietf.org/html/rfc8152#section-13
     EC2(2), // https://tools.ietf.org/html/rfc8152#section-13
-    RSA(3); // https://tools.ietf.org/html/rfc8230#section-4
+    RSA(3), // https://tools.ietf.org/html/rfc8230#section-4
+    AKP(7); // Algorithm Key Pair, used by ML-DSA - IANA COSE Key Types registry
 
     private static final Map<Integer, CoseKeyType> KEY_MAPPINGS = new HashMap<>();
 
@@ -21,6 +22,7 @@ public enum CoseKeyType {
         KEY_MAPPINGS.put(1, OKP);
         KEY_MAPPINGS.put(2, EC2);
         KEY_MAPPINGS.put(3, RSA);
+        KEY_MAPPINGS.put(7, AKP);
     }
 
     private final int numericValue;

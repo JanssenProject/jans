@@ -6,6 +6,8 @@
 use super::AuthzConfig;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::policy_store::ContextKey;
+use crate::common::policy_store::token_types::TOTAL_TOKEN_COUNT_KEY;
 use crate::entity_builder::BuiltEntities;
 use cedar_policy::Entity;
 use cedar_policy::EntityTypeName;
@@ -171,7 +173,7 @@ pub(super) fn build_context_no_schema(
 /// conflicts before invoking this function.
 pub(super) fn build_multi_issuer_context(
     request_context: Value,
-    token_entities: &HashMap<String, Entity>,
+    token_entities: &HashMap<ContextKey, Entity>,
     schema: Option<&cedar_policy::Schema>,
     action: &cedar_policy::EntityUid,
     pushed_data: &HashMap<String, Value>,
@@ -190,11 +192,14 @@ pub(super) fn build_multi_issuer_context(
             "type": entity.uid().type_name().to_string(),
             "id": entity.uid().id().as_ref() as &str
         });
-        tokens_context.insert(field_name.clone(), entity_ref);
+        tokens_context.insert(field_name.to_string(), entity_ref);
     }
 
     // Add total token count as specified in design
-    tokens_context.insert("total_token_count".to_string(), json!(token_entities.len()));
+    tokens_context.insert(
+        TOTAL_TOKEN_COUNT_KEY.to_string(),
+        json!(token_entities.len()),
+    );
 
     // Merge tokens into request context, checking for conflicts
     let tokens_value = Value::Object(tokens_context);
@@ -360,7 +365,8 @@ mod test {
             .to_json_value()
             .expect("context should serialize to json");
         test_utils::assert_eq!(
-            ctx_json, request_ctx,
+            ctx_json,
+            request_ctx,
             "context should equal request context unchanged"
         );
     }
@@ -417,7 +423,7 @@ mod test {
         )
         .expect("valid entity");
         let mut token_entities = HashMap::new();
-        token_entities.insert("jans_access_token".to_string(), entity);
+        token_entities.insert(ContextKey::for_test("jans_access_token"), entity);
 
         let request_ctx = json!({});
         let action =

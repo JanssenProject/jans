@@ -4,12 +4,10 @@
 // Copyright (c) 2025, Gluu, Inc.
 //
 // WASM cross-platform bench harness. See bindings/benchmarks/CONTRACT.md.
-// YAML→JSON conversion done via a Python subprocess to avoid a js-yaml dep.
 
 import { performance } from "node:perf_hooks";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
-import { execFileSync } from "node:child_process";
 
 const require = createRequire(import.meta.url);
 const fs = require("node:fs");
@@ -26,24 +24,16 @@ function resolveRepoRoot() {
   return path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 }
 
-function yamlFileToJsonString(yamlPath) {
-  const script = `
-import json, pathlib, yaml
-print(json.dumps(yaml.safe_load(pathlib.Path(r'''${yamlPath}''').read_text()), separators=(',',':')))
-`;
-  return execFileSync("python3", ["-c", script], { encoding: "utf8" }).trim();
-}
-
 function emit(row) {
   process.stdout.write(JSON.stringify(row) + "\n");
 }
 
 function buildConfig(scenario, repoRoot) {
-  // WASM accepts the policy store inline; convert YAML on the host.
+  // WASM accepts the policy store inline; pass YAML directly.
   const policyStorePath = path.join(repoRoot, scenario.policy_store_fn);
   return {
     ...(scenario.config_overrides || {}),
-    CEDARLING_POLICY_STORE_LOCAL: yamlFileToJsonString(policyStorePath),
+    CEDARLING_POLICY_STORE_LOCAL: fs.readFileSync(policyStorePath, "utf8"),
   };
 }
 
@@ -131,19 +121,19 @@ function pickInvoker(cedarling, scenario, request) {
   switch (scenario.kind) {
     case "unsigned":
       return async () =>
-        (await cedarling.authorize_unsigned(request)).decision;
+        (await cedarling.authorizeUnsigned(request)).decision;
     case "multi_issuer":
       return async () =>
-        (await cedarling.authorize_multi_issuer(request)).decision;
+        (await cedarling.authorizeMultiIssuer(request)).decision;
     case "unsigned_batch":
       return async () =>
         batchAllAllow(
-          (await cedarling.authorize_unsigned_batch(request)).results,
+          (await cedarling.authorizeUnsignedBatch(request)).results,
         );
     case "multi_issuer_batch":
       return async () =>
         batchAllAllow(
-          (await cedarling.authorize_multi_issuer_batch(request)).results,
+          (await cedarling.authorizeMultiIssuerBatch(request)).results,
         );
     default:
       throw new Error(`unknown scenario kind: ${scenario.kind}`);

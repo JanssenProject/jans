@@ -31,6 +31,14 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
     print_level("parse", &report.parse);
     print_level("schema", &report.schema);
     print_level("metadata", &report.metadata);
+    for warning in &report.warnings {
+        println!(
+            "  {} {}: {}",
+            "warning:".yellow(),
+            warning.file,
+            warning.message
+        );
+    }
 
     let skips = [&report.parse, &report.schema, &report.metadata]
         .iter()
@@ -77,14 +85,12 @@ fn print_level(name: &str, result: &LevelResult) {
 fn describe_source(cfg: &PolicyStoreConfig) -> String {
     use cedarling::PolicyStoreSource;
     match &cfg.source {
-        PolicyStoreSource::FileJson(path)
-        | PolicyStoreSource::FileYaml(path)
+        PolicyStoreSource::FileYaml(path)
         | PolicyStoreSource::CjarFile(path) => path.display().to_string(),
         PolicyStoreSource::Directory(path) => format!("{}/", path.display()),
         PolicyStoreSource::Uri(url)
         | PolicyStoreSource::CjarUrl(url)
         | PolicyStoreSource::LockServer(url) => url.clone(),
-        PolicyStoreSource::Json(_) => "<inline json>".to_string(),
         PolicyStoreSource::Yaml(_) => "<inline yaml>".to_string(),
         PolicyStoreSource::ArchiveBytes(_) => "<inline bytes>".to_string(),
     }

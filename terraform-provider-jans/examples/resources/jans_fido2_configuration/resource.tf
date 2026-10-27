@@ -15,8 +15,6 @@ resource "jans_fido2_configuration" "global" {
     "jansPerson",
   ]
   use_local_cache                 = true
-  super_gluu_enabled              = true
-  old_u2f_migration_enabled       = true
 
   fido2_configuration {
     authentication_history_expiration = 1296000

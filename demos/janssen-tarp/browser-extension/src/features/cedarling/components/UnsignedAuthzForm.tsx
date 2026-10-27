@@ -53,9 +53,11 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
               ? cedarlingConfig?.cedarlingConfig[0]
               : undefined
           );
-          const result: AuthorizeResult = await instance.authorize_unsigned(reqObj);
-          const logs = await instance.get_logs_by_request_id_and_tag(result.request_id, logType);
-          setAuthzResult(result.json_string());
+          const result: AuthorizeResult = await instance.authorizeUnsigned(
+            JSON.stringify(reqObj)
+          );
+          const logs = await instance.getLogsByRequestIdAndTag(result.request_id, logType);
+          setAuthzResult(result.jsonString());
           if (logs.length !== 0) {
             setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).toString());
           }
@@ -63,7 +65,7 @@ export default function UnsignedAuthzForm({ data }: UnsignedAuthzFormProps) {
       } catch (err: unknown) {
         setAuthzResult(String(err));
         if (instance) {
-          const logs = await instance.pop_logs();
+          const logs = await instance.popLogs();
           if (logs.length !== 0) {
             setAuthzLogs(logs.map((log: unknown) => JSON.stringify(log, null, 2)).toString());
           }

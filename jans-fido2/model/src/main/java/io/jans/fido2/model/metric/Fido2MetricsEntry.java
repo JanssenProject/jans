@@ -9,6 +9,7 @@ package io.jans.fido2.model.metric;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
@@ -66,6 +67,16 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
     @JsonObject
     private DeviceInfo deviceInfo;
 
+    /**
+     * Optional native-client context (#14607) — absence must not change behavior. Persisted as JSON,
+     * same pattern as {@link #deviceInfo}, rather than the {@link #additionalData} bag: the shape is
+     * fixed and documented (see {@link NativeClientTelemetry}), so a typed nested object gives schema
+     * clarity without a new LDAP attribute per field.
+     */
+    @AttributeName(name = "jansFido2MetricsNativeTelemetry")
+    @JsonObject
+    private NativeClientTelemetry nativeClientTelemetry;
+
     @AttributeName(name = "jansFido2MetricsErrorReason")
     private String errorReason;
 
@@ -86,6 +97,16 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
 
     @AttributeName(name = "jansFido2MetricsSessionId")
     private String sessionId;
+
+    /**
+     * Caller-supplied correlation ID (#14607), sibling to {@link #sessionId} rather than folded
+     * into it: this one is optional and client-supplied, {@code sessionId} is server-derived and
+     * present whenever a session exists. Kept as its own top-level, indexed attribute — not buried
+     * inside {@link #nativeClientTelemetry}'s JSON blob — so a start call and its matching finish
+     * call are actually queryable/joinable on this value.
+     */
+    @AttributeName(name = "jansFido2MetricsClientCorrelationId")
+    private String clientCorrelationId;
 
     /**
      * Additional data stored as JSON for flexibility
@@ -197,6 +218,14 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
         this.deviceInfo = deviceInfo;
     }
 
+    public NativeClientTelemetry getNativeClientTelemetry() {
+        return nativeClientTelemetry;
+    }
+
+    public void setNativeClientTelemetry(NativeClientTelemetry nativeClientTelemetry) {
+        this.nativeClientTelemetry = nativeClientTelemetry;
+    }
+
     public String getErrorReason() {
         return errorReason;
     }
@@ -251,6 +280,14 @@ public class Fido2MetricsEntry extends Entry implements Serializable {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getClientCorrelationId() {
+        return clientCorrelationId;
+    }
+
+    public void setClientCorrelationId(String clientCorrelationId) {
+        this.clientCorrelationId = clientCorrelationId;
     }
 
     public Map<String, Object> getAdditionalData() {

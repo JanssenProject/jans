@@ -6,28 +6,51 @@
 use crate::common::{issuer_utils::IssClaim, policy_store::TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value;
-use std::{collections::HashMap, sync::Arc};
+use smol_str::SmolStr;
+use std::{borrow::Cow, collections::HashMap, sync::Arc};
 
-/// Structure representing a validated JWT token, used to derive a Cedar token entity.
-/// Make sure to provide a `TrustedIssuer`; otherwise, the `iss` field may not be constructed.
+/// Identifies where a validated [`Token`] came from.
+///
+/// A token is either backed by a JWT [`TrustedIssuer`] (the standard path) or by
+/// a custom issuer resolved by a [`CustomTokenProcessor`](crate::CustomTokenProcessor).
+#[derive(Debug, PartialEq, Clone)]
+pub(crate) enum TokenIssuer {
+    /// A JWT trusted issuer from the policy store.
+    Jwt(Arc<TrustedIssuer>),
+    /// A custom (non-JWT) issuer.
+    Custom(CustomTokenIssuerMeta),
+}
+
+/// Issuer metadata for a custom (non-JWT) token, carried on the built [`Token`]
+/// so the entity builder can resolve its entity type, id, and context key without
+/// a [`TrustedIssuer`].
+#[derive(Debug, PartialEq, Clone)]
+pub(crate) struct CustomTokenIssuerMeta {
+    /// The issuer name lowercased, given as the token's `iss`.
+    pub issuer_id: SmolStr,
+    /// The id used as the token entity id (supplied by the processor).
+    pub token_id: String,
+    /// Effective expiration (unix seconds) the processor reported, via
+    /// `ProcessedTokenClaims::expiration` or an `exp` claim. Carried here so the
+    /// entity builder can populate the `exp` attribute (and satisfy a schema that
+    /// declares `exp` required) even when the processor kept it out of `claims`.
+    pub expiration: Option<i64>,
+}
+
+/// Structure representing a validated token, used to derive a Cedar token entity.
+/// The `iss` field carries the resolved issuer; a JWT-backed token references a
+/// `TrustedIssuer`, a custom token carries [`CustomTokenIssuerMeta`]. Every
+/// validated token has one: a token is only accepted for the issuer its mapping
+/// names.
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct Token {
-    pub name: String,
-    pub iss: Option<Arc<TrustedIssuer>>,
+    pub iss: TokenIssuer,
     pub(crate) claims: TokenClaims,
 }
 
 impl Token {
-    pub(crate) fn new(name: &str, claims: TokenClaims, iss: Option<Arc<TrustedIssuer>>) -> Token {
-        Self {
-            name: name.to_string(),
-            iss,
-            claims,
-        }
-    }
-
-    pub(crate) fn get_claim(&self, name: &str) -> Option<TokenClaim<'_>> {
-        self.claims.get_claim(name)
+    pub(crate) fn new(claims: TokenClaims, iss: TokenIssuer) -> Token {
+        Self { iss, claims }
     }
 
     pub(crate) fn get_claim_val(&self, name: &str) -> Option<&Value> {
@@ -42,17 +65,13 @@ impl Token {
         &self.claims.claims
     }
 
-    /// Extract normalized issuer URL from a token
-    pub(crate) fn extract_normalized_issuer(&self) -> Option<IssClaim> {
-        // Method 1: From TrustedIssuer reference (preferred)
-        if let Some(trusted_issuer) = &self.iss {
-            return Some(trusted_issuer.iss_claim());
+    /// The normalized issuer of the token: the configured `iss` of a JWT issuer,
+    /// which a validated JWT's `iss` claim equals, or a custom issuer's id.
+    pub(crate) fn normalized_issuer(&self) -> Cow<'_, IssClaim> {
+        match &self.iss {
+            TokenIssuer::Jwt(trusted_issuer) => Cow::Borrowed(trusted_issuer.iss_claim()),
+            TokenIssuer::Custom(meta) => Cow::Owned(IssClaim::new(meta.issuer_id.as_str())),
         }
-
-        // Method 2: From token claims (fallback)
-        self.claims
-            .get_claim("iss")
-            .and_then(|claim| claim.value().as_str().map(IssClaim::new))
     }
 }
 

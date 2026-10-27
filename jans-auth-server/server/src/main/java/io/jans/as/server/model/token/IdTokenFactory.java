@@ -45,6 +45,8 @@ import jakarta.inject.Named;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -71,6 +73,9 @@ import static io.jans.as.server.token.ws.rs.TokenExchangeService.DEVICE_SECRET;
 @Stateless
 @Named
 public class IdTokenFactory {
+
+    static final String AGAMA_DATA_SESSION_ATTR_KEY = "agamaData";
+    static final String AGAMA_AMR_KEY = "amr";
 
     @Inject
     private Logger log;
@@ -108,7 +113,7 @@ public class IdTokenFactory {
     @Inject
     private ExternalAuthorizationChallengeService externalAuthorizationChallengeService;
 
-    private void setAmrClaim(JsonWebResponse jwt, String acrValues, Client client) {
+    void setAmrClaim(JsonWebResponse jwt, String acrValues, Client client, SessionId session) {
         List<String> amrList = Lists.newArrayList();
 
         CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
@@ -135,6 +140,10 @@ public class IdTokenFactory {
             addToAmrList(amrList, amrMap);
         }
 
+        if (AcrService.isAgama(acrValues)) {
+            addAgamaAmr(amrList, session);
+        }
+
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
     }
 
@@ -144,6 +153,71 @@ public class IdTokenFactory {
                 amrList.add(entry.getKey() + ":" + entry.getValue());
             }
         }
+    }
+
+    /**
+     * Agama flows can report which authentication method(s) were actually used by putting an
+     * "amr" entry in the "agamaData" session attribute (a JSON object serialized as a string,
+     * see AgamaBridge.py). Propagate it into the id_token's amr claim.
+     */
+    void addAgamaAmr(List<String> amrList, SessionId session) {
+        if (session == null) {
+            log.trace("Unable to propagate amr from agama - session is not available");
+            return;
+        }
+
+        String agamaDataAsJson = session.getSessionAttributes().get(AGAMA_DATA_SESSION_ATTR_KEY);
+        if (StringUtils.isBlank(agamaDataAsJson)) {
+            log.trace("Unable to propagate amr from agama - '{}' session attribute is not set, session id: {}", AGAMA_DATA_SESSION_ATTR_KEY, session.getId());
+            return;
+        }
+
+        try {
+            List<String> agamaAmr = parseAgamaAmr(agamaDataAsJson);
+            if (agamaAmr.isEmpty()) {
+                log.trace("Unable to propagate amr from agama - no non-blank '{}' entry found in '{}' session attribute, session id: {}", AGAMA_AMR_KEY, AGAMA_DATA_SESSION_ATTR_KEY, session.getId());
+                return;
+            }
+
+            for (String amrValue : agamaAmr) {
+                if (amrList.contains(amrValue)) {
+                    log.trace("Amr value '{}' from agama is already present in id_token amr claim, session id: {}", amrValue, session.getId());
+                    continue;
+                }
+                amrList.add(amrValue);
+                log.trace("Propagated amr value '{}' from agama session attribute '{}' into id_token amr claim, session id: {}", amrValue, AGAMA_DATA_SESSION_ATTR_KEY, session.getId());
+            }
+        } catch (JSONException e) {
+            log.error("Unable to propagate amr from agama - failed to parse '{}' session attribute as JSON, session id: {}", AGAMA_DATA_SESSION_ATTR_KEY, session.getId());
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Extracts the "amr" entry (a single string or an array of strings) from the "agamaData"
+     * JSON payload. Returns an empty list when the key is absent or blank.
+     */
+    static List<String> parseAgamaAmr(String agamaDataAsJson) throws JSONException {
+        List<String> result = Lists.newArrayList();
+
+        JSONObject agamaData = new JSONObject(agamaDataAsJson);
+        if (!agamaData.has(AGAMA_AMR_KEY)) {
+            return result;
+        }
+
+        Object amr = agamaData.get(AGAMA_AMR_KEY);
+        if (amr instanceof JSONArray) {
+            JSONArray amrArray = (JSONArray) amr;
+            for (int i = 0; i < amrArray.length(); i++) {
+                Object amrElement = amrArray.get(i);
+                if (amrElement instanceof String && StringUtils.isNotBlank((String) amrElement)) {
+                    result.add((String) amrElement);
+                }
+            }
+        } else if (amr instanceof String && StringUtils.isNotBlank((String) amr)) {
+            result.add((String) amr);
+        }
+        return result;
     }
 
     private void fillClaims(JsonWebResponse jwr,
@@ -192,7 +266,7 @@ public class IdTokenFactory {
         acrValues = AcrService.removeParametersFromAgamaAcr(acrValues);
         if (acrValues != null) {
             jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, acrValues);
-            setAmrClaim(jwr, acrValues, client);
+            setAmrClaim(jwr, acrValues, client, session);
         }
         String nonce = executionContext.getNonce();
         if (StringUtils.isNotBlank(nonce)) {

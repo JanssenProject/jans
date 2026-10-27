@@ -1,0 +1,29 @@
+Flow com.acme.basic.foreign_2
+    Basepath ""
+
+// ==== Invoking getters of Java instances ====
+
+// Build a Map.Entry<String, Integer> instance
+pair = Call java.util.Map#entry "Android" 17
+// Call getKey() and getValue() on the instance
+Log "% = %" pair.key pair.value
+
+keyPairs = [ { width: 10 }, { height: 20 }, { depth: 30 } ]
+// Build a Map<String, Integer> passing a list of (single key/value) Agama maps
+javaMap = Call java.util.Map#ofEntries keyPairs
+// Retrieve the classname of the map by calling getClass().getName()
+Log "javaMap is an instance of" javaMap.class.name
+// Retrieves the value associated to a key. Equivalent to Java's get("width")
+Log javaMap.width
+
+// ==== Datatype reshaping ====
+
+s = "a man's gotta do what a man's gotta do"
+// Invoke split method of String class
+javaArray = Call s split " "
+// A Collection is created on the fly based on javaArray so HashSet constructor can be called
+words = Call java.util.HashSet#new javaArray
+// Print the different words found in the phrase
+Log words
+
+Finish true

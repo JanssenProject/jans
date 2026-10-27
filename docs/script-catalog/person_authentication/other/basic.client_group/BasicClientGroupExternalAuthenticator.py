@@ -7,12 +7,12 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, AuthenticationService, AppInitializer
+from io.jans.as.server.service import UserService, AuthenticationService
 from io.jans.util import StringHelper
 from java.util import Arrays, HashMap
 
-import java
 import json
+from java.lang import Throwable
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -31,7 +31,7 @@ class PersonAuthentication(PersonAuthenticationType):
             
         configurationFilePath = configurationAttributes.get("configuration_file").getValue2()
         self.client_configurations = self.loadClientConfigurations(configurationFilePath)
-        if self.client_configurations == None:
+        if self.client_configurations is None:
             print "Basic (client group). File with client configuration should be not empty"
             return False
 
@@ -47,7 +47,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getApiVersion(self):
         return 11
 
-def getAuthenticationMethodClaims(self, requestParameters):
+    def getAuthenticationMethodClaims(self, requestParameters):
         return None
 
     def isValidAuthenticationMethod(self, usageType, configurationAttributes):
@@ -67,7 +67,7 @@ def getAuthenticationMethodClaims(self, requestParameters):
         print "Basic (client group). Get client_id: '%s' authorization request" % client_id
 
         user_groups = self.client_configurations.get(client_id)
-        if user_groups == None:
+        if user_groups is None:
             print "Basic (client group). There is no user groups configuration for client_id '%s'. allow_default_login: %s" % (client_id, self.allow_default_login)
             if not self.allow_default_login:
                 return False
@@ -118,13 +118,12 @@ def getAuthenticationMethodClaims(self, requestParameters):
         return True
 
     def loadClientConfigurations(self, configurationFile):
-        clientConfiguration = None
 
         # Load configuration from file
         f = open(configurationFile, 'r')
         try:
             configurationFileJson = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "Basic (client group). Load configuration from file. Failed to load authentication configuration from file:", configurationFile
             return None
         finally:
@@ -155,7 +154,7 @@ def getAuthenticationMethodClaims(self, requestParameters):
 
         is_member = False
         member_of_list = find_user_by_uid.getAttributeValues("memberOf")
-        if member_of_list == None:
+        if member_of_list is None:
             return is_member
         
         print member_of_list

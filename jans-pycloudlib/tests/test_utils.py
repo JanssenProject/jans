@@ -306,3 +306,20 @@ def test_get_password_from_file_invalid_b64(monkeypatch, tmpdir):
     # ensure exception is thrown
     with pytest.raises(ValueError):
         get_password_from_file(str(passwd_file))
+
+
+def test_utcnow():
+    from datetime import timezone
+    from jans.pycloudlib.utils import utcnow
+    assert utcnow().tzinfo == timezone.utc
+
+
+def test_generalized_time_utc():
+    from datetime import datetime
+    from unittest import mock
+    from jans.pycloudlib.utils import generalized_time_utc
+    from jans.pycloudlib.utils import UTC
+
+    with mock.patch("jans.pycloudlib.utils.datetime") as patched:
+        patched.now.return_value = datetime(2026, 9, 8, 1, 0, 0, tzinfo=UTC)
+        assert generalized_time_utc() == "20260908010000Z"

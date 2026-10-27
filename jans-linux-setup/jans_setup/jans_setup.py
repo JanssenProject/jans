@@ -1,14 +1,11 @@
 #!/usr/bin/python3
 
-import readline
+import contextlib
+import importlib
 import os
 import sys
 import time
-import glob
-import inspect
-import zipfile
 import shutil
-import traceback
 import code
 import site
 import warnings
@@ -17,6 +14,7 @@ import select
 from pathlib import Path
 from queue import Queue
 
+importlib.import_module('readline')
 warnings.filterwarnings("ignore")
 
 uname_cmd = shutil.which('uname')
@@ -54,12 +52,10 @@ def ami_packaged():
         return True
     my_path = Path(__file__).parent
     for p in site.getsitepackages():
-        try:
+        with contextlib.suppress(ValueError):
             rp = my_path.relative_to(p)
             if rp:
                 return True
-        except ValueError:
-            pass
 
     return False
 
@@ -123,7 +119,6 @@ from setup_app.config import Config
 from setup_app.utils.progress import jansProgress
 
 from setup_app.setup_options import get_setup_options
-from setup_app.utils import printVersion
 
 from setup_app.test_data_loader import TestDataLoader
 from setup_app.utils.properties_utils import propertiesUtils
@@ -150,14 +145,6 @@ if base.current_app.profile == 'jans':
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
-
-if base.snap:
-    try:
-        open('/proc/mounts').close()
-    except:
-        print(
-            "Please execute the following command\n  sudo snap connect jans-server:mount-observe :mount-observe\nbefore running setup. Exiting ...")
-        sys.exit()
 
 if paths.IAMPACKAGED:
     Config.output_dir = os.path.join(__STATIC_SETUP_DIR__, 'output')
@@ -187,7 +174,7 @@ tty_columns = terminal_size.columns
 # check if we are running in terminal
 try:
     os.get_terminal_size()
-except:
+except Exception:
     argsp.no_progress = True
 
 if not (argsp.n or Config.installed_instance):
@@ -240,7 +227,7 @@ if os.path.exists(Config.jans_properties_fn):
         collectProperties.save()
         sys.exit()
 
-if not Config.noPrompt and not Config.installed_instance and not setup_loaded:
+if not Config.no_prompt and not Config.installed_instance and not setup_loaded:
     propertiesUtils.promptForProperties()
 
 propertiesUtils.check_properties()
@@ -329,7 +316,7 @@ base.current_app.proceed_installation = True
 
 def main():
 
-    if not Config.noPrompt:
+    if not Config.no_prompt:
         proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
         if proceed_prompt and proceed_prompt[0] != 'y':
             base.current_app.proceed_installation = False
@@ -362,10 +349,9 @@ def main():
                 jansInstaller.configureSystem()
                 jansInstaller.make_salt()
 
-                if not base.snap:
-                    jreInstaller.start_installation()
-                    jettyInstaller.start_installation()
-                    jythonInstaller.start_installation()
+                jreInstaller.start_installation()
+                jettyInstaller.start_installation()
+                jythonInstaller.start_installation()
 
                 jansInstaller.generate_smtp_config()
                 jansInstaller.copy_scripts()
@@ -373,9 +359,8 @@ def main():
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 
-                if not base.snap:
-                    jansInstaller.update_hostname()
-                    jansInstaller.set_ulimits()
+                jansInstaller.update_hostname()
+                jansInstaller.set_ulimits()
 
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()
@@ -455,7 +440,7 @@ def main():
             for m in Config.post_messages:
                 print(m)
 
-        except:
+        except Exception:
 
             base.logIt("FATAL", True, True)
 

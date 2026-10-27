@@ -6,7 +6,8 @@
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
-    DataStoreStats as CoreDataStoreStats, LogStorage, PolicyStoreSource, TrustedIssuerLoadingInfo,
+    DataStoreStats as CoreDataStoreStats, LogStorage, MetricsError as CoreMetricsError,
+    MetricsSnapshot as CoreMetricsSnapshot, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
 mod result;
@@ -95,6 +96,31 @@ pub enum DataError {
     SerializationError(String),
 }
 
+/// Error returned by [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics)
+/// when a local metrics snapshot is not available.
+#[derive(Debug, thiserror::Error, uniffi::Error)]
+pub enum MetricsError {
+    /// Local metrics collection is disabled. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
+    NotEnabled,
+    /// The metrics collector is owned by the Lock telemetry ticker; enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help. Returned whenever
+    /// `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server
+    /// has no telemetry endpoint and metrics are not shipped anywhere.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
+}
+
+impl From<CoreMetricsError> for MetricsError {
+    fn from(err: CoreMetricsError) -> Self {
+        match err {
+            CoreMetricsError::Disabled => MetricsError::NotEnabled,
+            CoreMetricsError::LockTelemetry => MetricsError::LockTelemetry,
+        }
+    }
+}
+
 #[derive(Debug, Clone, uniffi::Object)]
 pub struct EntityData {
     inner: core::EntityData,
@@ -117,6 +143,56 @@ pub struct TokenInput {
     pub payload: String,
 }
 
+/// TRACE execution context, already normalized by the host. Cedarling never
+/// generates `execution_id`: the execution initiator (gateway, PEP, host) owns
+/// it together with `execution_authority`.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct TraceContext {
+    /// `trace_execution_id` issued by the execution initiator
+    pub execution_id: String,
+    /// Authority that issued `execution_id`
+    pub execution_authority: String,
+    /// Stable id of the workload the decision is made for
+    pub workload_id: String,
+    /// Instance of the workload, when the host distinguishes instances
+    #[uniffi(default)]
+    pub workload_instance_id: Option<String>,
+}
+
+/// Per-call metadata of an authorization request. None of it takes part in
+/// policy evaluation: the decision is the same with or without options.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct AuthorizeOptions {
+    /// `None` means the host has no execution context, so no TRACE record can
+    /// be emitted for the decision.
+    #[uniffi(default)]
+    pub trace: Option<TraceContext>,
+}
+
+impl From<TraceContext> for core::TraceContext {
+    fn from(value: TraceContext) -> Self {
+        core::TraceContext {
+            execution_id: value.execution_id,
+            execution_authority: value.execution_authority,
+            workload_id: value.workload_id,
+            workload_instance_id: value.workload_instance_id,
+        }
+    }
+}
+
+impl From<AuthorizeOptions> for core::AuthorizeOptions {
+    fn from(value: AuthorizeOptions) -> Self {
+        core::AuthorizeOptions {
+            trace: value.trace.map(Into::into),
+        }
+    }
+}
+
+/// `None` options are the same as default options.
+fn options_to_core(options: Option<AuthorizeOptions>) -> core::AuthorizeOptions {
+    options.map(Into::into).unwrap_or_default()
+}
+
 /// One `{resource, action, context}` triple in a batch authorization request.
 ///
 /// `context` is optional; `None` defaults to `{}` at conversion time.
@@ -124,6 +200,7 @@ pub struct TokenInput {
 pub struct BatchItem {
     pub resource: Arc<EntityData>,
     pub action: String,
+    #[uniffi(default)]
     pub context: Option<JsonValue>,
 }
 
@@ -167,6 +244,30 @@ pub struct DataStoreStats {
     pub memory_alert_triggered: bool,
 }
 
+/// Telemetry metrics snapshot for the current interval.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
+    pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters keyed by error metric key.
+    pub error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
+    pub operational_stats: HashMap<String, i64>,
+    /// Duration of the snapshot interval with sub-second precision.
+    pub interval: Duration,
+}
+
+impl From<CoreMetricsSnapshot> for MetricsSnapshot {
+    fn from(snap: CoreMetricsSnapshot) -> Self {
+        Self {
+            policy_stats: snap.policy_stats,
+            error_counters: snap.error_counters,
+            operational_stats: snap.operational_stats,
+            interval: snap.interval,
+        }
+    }
+}
+
 impl TryFrom<CoreDataEntry> for DataEntry {
     type Error = DataError;
 
@@ -180,9 +281,11 @@ impl TryFrom<CoreDataEntry> for DataEntry {
 
         Ok(Self {
             key: entry.key,
-            value: JsonValue(serde_json::to_string(&entry.value).map_err(|e| {
-                DataError::SerializationError(format!("Failed to serialize value: {}", e))
-            })?),
+            value: JsonValue {
+                value: serde_json::to_string(&entry.value).map_err(|e| {
+                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                })?,
+            },
             data_type,
             created_at: entry.created_at.to_rfc3339(),
             expires_at: entry
@@ -264,21 +367,25 @@ impl EntityData {
     }
 }
 
-/// Wrapper struct for JSON values, holding a string representation of the JSON value.
-#[derive(Debug, Clone)]
-pub struct JsonValue(String);
-
-uniffi::custom_newtype!(JsonValue, String);
+/// A wrapper struct for JSON values passed across the FFI boundary.
+///
+/// This struct allows language bindings (like Kotlin or Swift) to pass valid JSON
+/// data to the Cedarling engine as a string, which is then parsed internally.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct JsonValue {
+    /// String representation of the JSON value
+    pub value: String,
+}
 
 impl TryFrom<JsonValue> for Value {
     type Error = serde_json::Error;
-    fn try_from(value: JsonValue) -> Result<Self, Self::Error> {
+    fn try_from(val: JsonValue) -> Result<Self, Self::Error> {
         // Hot-path: callers commonly pass the exact literal `"{}"` for an empty
         // context.
-        if value.0 == "{}" {
+        if val.value == "{}" {
             return Ok(Value::Object(serde_json::Map::new()));
         }
-        serde_json::from_str(&value.0)
+        serde_json::from_str(&val.value)
     }
 }
 
@@ -322,7 +429,7 @@ impl Cedarling {
     #[uniffi::constructor]
     pub fn load_from_json_with_archive_bytes(
         config: String,
-        archive_bytes: Vec<u8>,
+        archive_bytes: &[u8],
     ) -> Result<Self, CedarlingError> {
         let mut raw_config: BootstrapConfigRaw =
             serde_json::from_str(&config).map_err(|e| CedarlingError::InitializationFailed {
@@ -331,6 +438,7 @@ impl Cedarling {
 
         raw_config.local_policy_store = None;
         raw_config.policy_store_uri = None;
+        raw_config.policy_store_cjar_url = None;
         // Set a dummy .cjar file path to satisfy validation (will be overridden below)
         raw_config.policy_store_local_fn = Some("dummy.cjar".to_string());
 
@@ -342,7 +450,7 @@ impl Cedarling {
 
         // Override the policy store source with the archive bytes
         bootstrap_config.policy_store_config.source =
-            PolicyStoreSource::ArchiveBytes(archive_bytes);
+            PolicyStoreSource::ArchiveBytes(archive_bytes.to_vec());
 
         let cedarling = core::blocking::Cedarling::new(&bootstrap_config).map_err(|e| {
             CedarlingError::InitializationFailed {
@@ -373,13 +481,14 @@ impl Cedarling {
     }
 
     // Handles authorization for unsigned requests
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_unsigned(
         &self,
         principal: Option<Arc<EntityData>>,
         action: String,
         resource: Arc<EntityData>,
         context: JsonValue,
+        options: Option<AuthorizeOptions>,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         let core_principal: Option<core::EntityData> = principal.map(|p| p.inner.clone());
 
@@ -392,6 +501,7 @@ impl Cedarling {
             context: context
                 .try_into()
                 .map_err(|_| AuthorizeError::InvalidContext)?,
+            options: options_to_core(options),
         };
 
         let result = self.inner.authorize_unsigned(core_request).map_err(|e| {
@@ -403,13 +513,14 @@ impl Cedarling {
     }
 
     // Handles multi-issuer authorization request
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_multi_issuer(
         &self,
         tokens: Vec<TokenInput>,
         action: String,
         resource: Arc<EntityData>,
         context: Option<JsonValue>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         let core_tokens: Vec<core::TokenInput> = tokens
             .into_iter()
@@ -432,6 +543,7 @@ impl Cedarling {
             resource: core_resource,
             action,
             context: core_context,
+            options: options_to_core(options),
         };
 
         let result = self
@@ -450,11 +562,12 @@ impl Cedarling {
     /// [`BatchAuthorizeUnsignedResponse`] with `batch_id` and per-item results.
     /// Batch-level failures reject the whole call; per-item failures are returned
     /// as `BatchItemError` entries that callers must inspect without affecting other items.
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_unsigned_batch(
         &self,
         principal: Option<Arc<EntityData>>,
         items: Vec<BatchItem>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<BatchAuthorizeUnsignedResponse, AuthorizeError> {
         let core_items = items
             .into_iter()
@@ -463,6 +576,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeUnsignedRequest {
             principal: principal.map(|p| p.inner.clone()),
             items: core_items,
+            options: options_to_core(options),
         };
         let response = self
             .inner
@@ -479,11 +593,12 @@ impl Cedarling {
     /// item is evaluated in input order. Batch-level failures (validation,
     /// JWT verification, status-list refresh) reject the whole call; per-item
     /// failures are returned as `BatchItemError` entries that callers must inspect.
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_multi_issuer_batch(
         &self,
         tokens: Vec<TokenInput>,
         items: Vec<BatchItem>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<BatchAuthorizeMultiIssuerResponse, AuthorizeError> {
         let core_tokens: Vec<core::TokenInput> = tokens
             .into_iter()
@@ -499,6 +614,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeMultiIssuerRequest {
             tokens: core_tokens,
             items: core_items,
+            options: options_to_core(options),
         };
         let response = self
             .inner
@@ -641,9 +757,11 @@ impl Cedarling {
     pub fn get_data_ctx(&self, key: String) -> Result<Option<JsonValue>, DataError> {
         let result: Result<_, core::DataError> = self.inner.get_data_ctx(&key);
         match result.map_err(DataError::from)? {
-            Some(value) => Ok(Some(JsonValue(serde_json::to_string(&value).map_err(
-                |e| DataError::SerializationError(format!("Failed to serialize value: {}", e)),
-            )?))),
+            Some(value) => Ok(Some(JsonValue {
+                value: serde_json::to_string(&value).map_err(|e| {
+                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                })?,
+            })),
             None => Ok(None),
         }
     }
@@ -697,9 +815,30 @@ impl Cedarling {
             .map_err(|e: core::DataError| DataError::from(e))
     }
 
+    /// Destructive read: returns the telemetry metrics snapshot and resets
+    /// the counters for the next interval. `interval` is a Duration with
+    /// sub-second precision (Python `timedelta`, Kotlin `java.time.Duration`,
+    /// Swift `TimeInterval` seconds).
     #[uniffi::method]
-    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    pub fn drain_metrics(&self) -> Result<MetricsSnapshot, MetricsError> {
+        self.inner
+            .drain_metrics()
+            .map(Into::into)
+            .map_err(|e: CoreMetricsError| MetricsError::from(e))
+    }
+
+    /// Returns the ID of the currently published policy store, if it carries one.
+    ///
+    /// `None` when the store carries no ID. The value is an opaque,
+    /// source-dependent string; it may change after a background refresh.
+    #[uniffi::method]
+    pub fn policy_store_id(&self) -> Option<String> {
+        self.inner.policy_store_id()
+    }
+
+    #[uniffi::method]
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     #[uniffi::method]

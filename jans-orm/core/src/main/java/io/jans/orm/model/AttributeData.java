@@ -8,6 +8,8 @@ package io.jans.orm.model;
 
 import java.util.Arrays;
 
+import org.apache.commons.codec.binary.Base64;
+
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -20,6 +22,7 @@ public class AttributeData {
     private final Object[] values;
     private Boolean multiValued;
     private Boolean jsonValue;
+    private Boolean binaryValue;
 
     public AttributeData(String name, Object[] values) {
     	this(name, values, null);
@@ -38,6 +41,14 @@ public class AttributeData {
         this.jsonValue = jsonValue;
     }
 
+    public AttributeData(String name, Object[] values, Boolean multiValued, Boolean jsonValue, Boolean binaryValue) {
+        this.name = name;
+        this.values = values;
+        this.multiValued = multiValued;
+        this.jsonValue = jsonValue;
+        this.binaryValue = binaryValue;
+    }
+
     public AttributeData(String name, Object value) {
         this.name = name;
         this.values = new Object[1];
@@ -53,6 +64,15 @@ public class AttributeData {
         this.jsonValue = jsonValue;
     }
 
+    public AttributeData(String name, Object value, Boolean multiValued, Boolean jsonValue, Boolean binaryValue) {
+        this.name = name;
+        this.values = new Object[1];
+        this.values[0] = value;
+        this.multiValued = multiValued;
+        this.jsonValue = jsonValue;
+        this.binaryValue = binaryValue;
+    }
+
     public final String getName() {
         return name;
     }
@@ -62,7 +82,22 @@ public class AttributeData {
     }
 
     public final String[] getStringValues() {
-    	return StringHelper.toStringArray(this.values);
+    	if (this.values == null) {
+    		// Return empty array to avoid NPE in callers code
+    		return new String[0];
+    	}
+
+    	String[] result = new String[this.values.length];
+    	for (int i = 0; i < this.values.length; i++) {
+    		if (this.values[i] instanceof byte[]) {
+    			// Binary values should be converted to base64 strings for backends without native binary support
+    			result[i] = Base64.encodeBase64String((byte[]) this.values[i]);
+    		} else {
+    			result[i] = String.valueOf(this.values[i]);
+    		}
+    	}
+
+    	return result;
     }
 
     public Object getValue() {
@@ -89,12 +124,40 @@ public class AttributeData {
 		this.jsonValue = jsonValue;
 	}
 
+	public Boolean getBinaryValue() {
+		return binaryValue;
+	}
+
+	public void setBinaryValue(Boolean binaryValue) {
+		this.binaryValue = binaryValue;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + Arrays.deepHashCode(values);
+		result = prime * result + valuesHashCode();
+		return result;
+	}
+
+	/*
+	 * Values should be normalized the same way as in equalsValue to keep
+	 * hashCode consistent with equals: byte[] hashes as its base64 string and
+	 * other values hash as String.valueOf representation
+	 */
+	private int valuesHashCode() {
+		if (values == null) {
+			return 0;
+		}
+
+		int result = 1;
+		for (Object value : values) {
+			String normalizedValue = (value instanceof byte[]) ? Base64.encodeBase64String((byte[]) value)
+					: String.valueOf(value);
+			result = 31 * result + normalizedValue.hashCode();
+		}
+
 		return result;
 	}
 
@@ -120,7 +183,7 @@ public class AttributeData {
 		}
 		
 		for (int i = 0; i < values.length; i++) {
-			if (!StringHelper.equals(String.valueOf(values[i]), String.valueOf(other.values[i]))) {
+			if (!equalsValue(values[i], other.values[i])) {
 				return false;
 			}
 		}
@@ -128,11 +191,30 @@ public class AttributeData {
 		return true;
 	}
 
+	private static boolean equalsValue(Object value1, Object value2) {
+		if ((value1 instanceof byte[]) || (value2 instanceof byte[])) {
+			if ((value1 instanceof byte[]) && (value2 instanceof byte[])) {
+				return Arrays.equals((byte[]) value1, (byte[]) value2);
+			}
+
+			// One value is byte[] and another one is base64 string when DB stores binary data in string column
+			byte[] binaryValue = (value1 instanceof byte[]) ? (byte[]) value1 : (byte[]) value2;
+			Object stringValue = (value1 instanceof byte[]) ? value2 : value1;
+			if (stringValue instanceof String) {
+				return StringHelper.equals(Base64.encodeBase64String(binaryValue), (String) stringValue);
+			}
+
+			return false;
+		}
+
+		return StringHelper.equals(String.valueOf(value1), String.valueOf(value2));
+	}
+
 
     @Override
 	public String toString() {
 		return "AttributeData [name=" + name + ", values=" + Arrays.toString(values) + ", multiValued=" + multiValued
-				+ ", jsonValue=" + jsonValue + "]";
+				+ ", jsonValue=" + jsonValue + ", binaryValue=" + binaryValue + "]";
 	}
 
 }

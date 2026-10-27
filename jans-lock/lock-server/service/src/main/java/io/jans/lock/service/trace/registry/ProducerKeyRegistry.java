@@ -1,0 +1,266 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2026, Janssen Project
+ */
+
+package io.jans.lock.service.trace.registry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
+import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
+import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
+import io.jans.lock.service.trace.error.TraceConflictException;
+import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceVerificationKey;
+import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.store.TraceStore;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+/**
+ * Business-level service over {@link TraceStore} for producer-key lookup with validity evaluation
+ * and key registration/revocation (design §6).
+ *
+ * <p>The MVP does no caching: every {@link #resolveForVerification} call hits {@link TraceStore}
+ * directly, so a revocation is visible on the very next request. The safe upgrade path, if the
+ * per-request lookup cost ever matters, is a short-TTL cache keyed by
+ * {@code (domainId, producerId, kid)} that is explicitly invalidated by {@link #revoke} — never a
+ * cache that only expires on its own, since that would let a revoked key keep verifying for up to
+ * the TTL.
+ *
+ * @author Yuriy Movchan
+ */
+@ApplicationScoped
+public class ProducerKeyRegistry {
+
+	static final String REASON_KEY_NOT_REGISTERED = "key_not_registered";
+
+	static final String REASON_STORED_KEY_UNUSABLE = "stored_key_unusable";
+
+	static final String REASON_NOT_YET_VALID = "not_yet_valid";
+
+	static final String REASON_EXPIRED = "expired";
+
+	static final String REASON_REVOKED = "revoked";
+
+	static final String REASON_VALIDITY_WINDOW = "validity_window";
+
+	static final String REASON_PRODUCER_ID_FORMAT = "producer_id_format";
+
+	static final String REASON_KID_EMPTY = "kid_empty";
+
+	static final String REASON_KID_LENGTH = "kid_length";
+
+	static final String REASON_DUPLICATE_KEY = "duplicate_key";
+
+	static final String REASON_AUTHORIZED_EVENT_KINDS = "authorized_event_kinds";
+
+	static final String REASON_EVENT_KIND_NOT_AUTHORIZED = "event_kind_not_authorized";
+
+	private static final int MAX_KID_LENGTH = 255;
+
+	@Inject
+	private Logger log;
+
+	@Inject
+	private TraceStore traceStore;
+
+	@Inject
+	private TraceCryptoProvider cryptoProvider;
+
+	/**
+	 * Resolves the key that must verify a record's signature and evaluates its validity window at
+	 * {@code nowMs}.
+	 *
+	 * @throws TraceValidationException {@code unknown_producer_key} when no key is registered for
+	 *                                  this {@code (domainId, producerId, kid)}, or when the stored
+	 *                                  JWK cannot be parsed into a usable key (a data error, not a
+	 *                                  crypto-provider failure); {@code key_not_valid} with reason
+	 *                                  {@code not_yet_valid}/{@code expired}/{@code revoked} when the
+	 *                                  key is outside its validity window
+	 */
+	public ResolvedKey resolveForVerification(String domainId, String producerId, String kid, long nowMs) {
+		TraceProducerKeyEntry key = traceStore.findProducerKey(domainId, producerId, kid)
+				.orElseThrow(() -> new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY,
+						REASON_KEY_NOT_REGISTERED));
+
+		if (nowMs < key.getValidFromMs()) {
+			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_NOT_YET_VALID);
+		}
+		if (key.getValidUntilMs() != null && nowMs >= key.getValidUntilMs()) {
+			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_EXPIRED);
+		}
+		if (key.getRevokedAtMs() != null && nowMs >= key.getRevokedAtMs()) {
+			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_REVOKED);
+		}
+
+		TraceVerificationKey verificationKey;
+		try {
+			verificationKey = cryptoProvider.parseKey(key.getPublicKeyJwk());
+		} catch (TraceCryptoException ex) {
+			if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
+				throw ex;
+			}
+			log.error("Stored producer key is unusable: domainId={}, producerId={}, kid={}, reason={}", domainId,
+					producerId, kid, ex.getReason());
+			throw new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, REASON_STORED_KEY_UNUSABLE,
+					ex);
+		}
+		return new ResolvedKey(key, verificationKey);
+	}
+
+	/**
+	 * The single evaluation of a key's event-kind scope: a key authorizes a record
+	 * only if the record's {@code event_kind} is in the key's registered set. A stored key without
+	 * the attribute (registered before the scope existed) authorizes nothing. Runs no crypto and
+	 * reveals no more than an unknown key does: the failure is {@code unknown_producer_key}.
+	 *
+	 * @throws TraceValidationException {@code unknown_producer_key} with reason
+	 *                                  {@code event_kind_not_authorized} when {@code eventKind} is
+	 *                                  outside the key's set
+	 */
+	public void requireEventKindAuthorized(ResolvedKey key, String eventKind) {
+		if (!key.authorizes(eventKind)) {
+			throw new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY,
+					REASON_EVENT_KIND_NOT_AUTHORIZED);
+		}
+	}
+
+	/**
+	 * Registers a new producer key. Keys are create-only: rotation is
+	 * registering a new {@code kid}, retirement is {@link #revoke}; there is no update.
+	 *
+	 * @throws TraceCryptoException     if {@code jwk} is not a well-formed RFC 8037 Ed25519 OKP JWK
+	 *                                  (mapped by {@code TraceErrors} to {@code invalid_key} or
+	 *                                  {@code crypto_unavailable})
+	 * @throws TraceValidationException {@code invalid_key} when {@code validUntilMs} is not strictly
+	 *                                  after {@code validFromMs}, {@code producerId} does not match
+	 *                                  the stable producer id format, {@code kid} is empty or
+	 *                                  longer than 255 characters, or {@code authorizedEventKinds}
+	 *                                  is missing, empty, holds an unknown kind or a duplicate
+	 * @throws TraceConflictException   {@code key_already_exists} when this
+	 *                                  {@code (domainId, producerId, kid)} is already registered
+	 */
+	public TraceProducerKeyEntry register(String domainId, String producerId, String kid, Map<String, String> jwk,
+			List<String> authorizedEventKinds, long validFromMs, Long validUntilMs, String registeredBy, long nowMs) {
+		cryptoProvider.parseKey(jwk);
+
+		if (validUntilMs != null && validUntilMs <= validFromMs) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_VALIDITY_WINDOW);
+		}
+		if (!TraceConstants.PRODUCER_PATTERN.matcher(Objects.toString(producerId, "")).matches()) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_PRODUCER_ID_FORMAT);
+		}
+		if (StringUtils.isEmpty(kid)) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_KID_EMPTY);
+		}
+		if (kid.length() > MAX_KID_LENGTH) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_KID_LENGTH);
+		}
+		requireValidEventKinds(authorizedEventKinds);
+
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(domainId);
+		key.setProducerId(producerId);
+		key.setKid(kid);
+		key.setPublicKeyJwk(jwk);
+		key.setAuthorizedEventKinds(new ArrayList<>(authorizedEventKinds));
+		key.setValidFrom(new Date(validFromMs));
+		key.setValidUntil(validUntilMs == null ? null : new Date(validUntilMs));
+		key.setRegisteredBy(registeredBy);
+		key.setCreationDate(new Date(nowMs));
+		try {
+			traceStore.insertProducerKey(key);
+		} catch (DuplicateEntryException ex) {
+			throw new TraceConflictException(TraceErrorResponseType.KEY_ALREADY_EXISTS, REASON_DUPLICATE_KEY);
+		}
+		return key;
+	}
+
+	private static void requireValidEventKinds(List<String> authorizedEventKinds) {
+		if (authorizedEventKinds == null || authorizedEventKinds.isEmpty()) {
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_AUTHORIZED_EVENT_KINDS);
+		}
+		Set<String> seen = new HashSet<>();
+		for (String kind : authorizedEventKinds) {
+			if (kind == null || !TraceConstants.EVENT_KINDS.contains(kind) || !seen.add(kind)) {
+				throw new TraceValidationException(TraceErrorResponseType.INVALID_KEY, REASON_AUTHORIZED_EVENT_KINDS);
+			}
+		}
+	}
+
+	/**
+	 * Revokes a producer key. Idempotent: revoking an already-revoked key succeeds and returns it
+	 * unchanged.
+	 *
+	 * @return the key after revocation, or {@link Optional#empty()} if no such key is registered
+	 */
+	public Optional<TraceProducerKeyEntry> revoke(String domainId, String producerId, String kid, long nowMs) {
+		boolean found = traceStore.revokeProducerKey(domainId, producerId, kid, nowMs);
+		if (!found) {
+			return Optional.empty();
+		}
+		return traceStore.findProducerKey(domainId, producerId, kid);
+	}
+
+	/**
+	 * @param producerIdOrNull restricts the result to one producer, or {@code null} for all
+	 *                          producers in the domain
+	 */
+	public List<TraceProducerKeyEntry> list(String domainId, String producerIdOrNull) {
+		return traceStore.findProducerKeys(domainId, producerIdOrNull);
+	}
+
+	/**
+	 * A producer key together with the {@link TraceVerificationKey} built from its stored JWK, returned by
+	 * {@link #resolveForVerification} so callers never re-parse the JWK.
+	 */
+	public static final class ResolvedKey {
+
+		private final TraceProducerKeyEntry key;
+
+		private final TraceVerificationKey verificationKey;
+
+		ResolvedKey(TraceProducerKeyEntry key, TraceVerificationKey verificationKey) {
+			this.key = Objects.requireNonNull(key, "key");
+			this.verificationKey = Objects.requireNonNull(verificationKey, "verificationKey");
+		}
+
+		public TraceProducerKeyEntry getKey() {
+			return key;
+		}
+
+		public TraceVerificationKey getVerificationKey() {
+			return verificationKey;
+		}
+
+		/**
+		 * @return the event kinds this key may sign; empty for a legacy row without the attribute
+		 */
+		public List<String> getAuthorizedEventKinds() {
+			List<String> kinds = key.getAuthorizedEventKinds();
+			return kinds == null ? Collections.emptyList() : Collections.unmodifiableList(kinds);
+		}
+
+		boolean authorizes(String eventKind) {
+			return eventKind != null && getAuthorizedEventKinds().contains(eventKind);
+		}
+
+	}
+
+}

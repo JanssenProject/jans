@@ -12,7 +12,6 @@ from ldif import LDIFWriter
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import override_simple_json_property
@@ -26,11 +25,16 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
+from jans.pycloudlib.utils import generalized_time_utc
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
 from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
+from utils import get_ads_project_base64
+from utils import AUI_AGAMA_PW_ARCHIVE
+from utils import AUI_AGAMA_PW_DEPLOYMENT_ID
+from utils import URLModifier
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-config-api")
@@ -79,11 +83,12 @@ def main():
 
     configure_logging()
 
+    plugins = discover_plugins()
+
     with manager.create_lock("config-api-setup"):
-        persistence_setup = PersistenceSetup(manager)
+        persistence_setup = PersistenceSetup(manager, plugins=plugins)
         persistence_setup.import_ldif_files()
 
-    plugins = discover_plugins()
     logger.info("Loaded config-api plugins: %s", plugins)
 
     if "admin-ui" in plugins:
@@ -261,7 +266,7 @@ def configure_admin_ui_logging():
 
 
 class PersistenceSetup:
-    def __init__(self, manager) -> None:
+    def __init__(self, manager, plugins=None) -> None:
         self.manager = manager
 
         client_classes = {
@@ -276,39 +281,8 @@ class PersistenceSetup:
         client_cls = client_classes.get(self.persistence_type)
         self.client = client_cls(manager)
 
-    def get_auth_config(self):
-        dn = "ou=jans-auth,ou=configuration,o=jans"
-        entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
-        return json.loads(entry["jansConfDyn"])
-
-    def transform_url(self, url):
-        auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
-
-        if not auth_server_url:
-            return url
-
-        parse_result = urlparse(url)
-        if parse_result.path.startswith("/.well-known"):
-            path = f"/jans-auth{parse_result.path}"
-        else:
-            path = parse_result.path
-        return f"http://{auth_server_url}{path}"
-
-    def get_injected_urls(self):
-        auth_config = self.get_auth_config()
-
-        urls = (
-            "issuer",
-            "openIdConfigurationEndpoint",
-            "introspectionEndpoint",
-            "tokenEndpoint",
-            "tokenRevocationEndpoint",
-        )
-
-        return {
-            url: self.transform_url(auth_config[url])
-            for url in urls
-        }
+        self.plugins = plugins or []
+        self.url_modifier = URLModifier(self.client)
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
@@ -328,7 +302,8 @@ class PersistenceSetup:
             "endpointInjectionEnabled": "true",
             "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
         }
-        ctx.update(self.get_injected_urls())
+        injected_urls = self.url_modifier.get_injected_urls()
+        ctx.update(injected_urls)
 
         # Client
         ctx["jca_client_id"] = self.manager.config.get("jca_client_id")
@@ -386,6 +361,11 @@ class PersistenceSetup:
             }
             f.write(json.dumps(partial_dyn_conf))
 
+        if "admin-ui" in self.plugins:
+            ctx["agama_pw_deployment_id"] = AUI_AGAMA_PW_DEPLOYMENT_ID
+            ctx["agama_pw_deployment_start_date"] = generalized_time_utc()
+            ctx["agama_pw_assets_base64"] = get_ads_project_base64(AUI_AGAMA_PW_ARCHIVE)
+
         # finalize ctx
         return ctx
 
@@ -423,6 +403,8 @@ class PersistenceSetup:
         self.client.upsert_from_file(scope_file, self.ctx)
 
         files = ["config.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
+        if "admin-ui" in self.plugins:
+            files.append("agama_pw_deployment.ldif")
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:

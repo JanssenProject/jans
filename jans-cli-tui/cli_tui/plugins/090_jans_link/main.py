@@ -15,7 +15,6 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.widget_collections import get_ldap_config_widgets,\
     get_data_for_ldap_widgets
 
-from utils.utils import common_data
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils

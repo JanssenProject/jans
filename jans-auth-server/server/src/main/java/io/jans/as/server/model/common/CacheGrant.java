@@ -37,6 +37,8 @@ public class CacheGrant implements Serializable {
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String redirectUri;
+    private String ephemeralSub;
     private String claims;
     private String deviceCode;
 
@@ -72,8 +74,10 @@ public class CacheGrant implements Serializable {
         acrValues = grant.getAcrValues();
         codeChallenge = grant.getCodeChallenge();
         codeChallengeMethod = grant.getCodeChallengeMethod();
+        redirectUri = grant.getRedirectUri();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
+        ephemeralSub = grant.getEphemeralSub();
         isAuthorizationChallenge = grant.isAuthorizationChallenge();
     }
 
@@ -98,6 +102,7 @@ public class CacheGrant implements Serializable {
         codeChallengeMethod = grant.getCodeChallengeMethod();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
+        ephemeralSub = grant.getEphemeralSub();
 
         authReqId = grant.getAuthReqId();
         tokensDelivered = grant.isTokensDelivered();
@@ -124,6 +129,7 @@ public class CacheGrant implements Serializable {
         codeChallengeMethod = grant.getCodeChallengeMethod();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
+        ephemeralSub = grant.getEphemeralSub();
         deviceCode = grant.getDeviceCode();
     }
 
@@ -219,6 +225,22 @@ public class CacheGrant implements Serializable {
         this.codeChallenge = codeChallenge;
     }
 
+    public String getRedirectUri() {
+        return redirectUri;
+    }
+
+    public void setRedirectUri(String redirectUri) {
+        this.redirectUri = redirectUri;
+    }
+
+    public String getEphemeralSub() {
+        return ephemeralSub;
+    }
+
+    public void setEphemeralSub(String ephemeralSub) {
+        this.ephemeralSub = ephemeralSub;
+    }
+
     public String getCodeChallengeMethod() {
         return codeChallengeMethod;
     }
@@ -262,9 +284,11 @@ public class CacheGrant implements Serializable {
         grant.setSessionDn(sessionDn);
         grant.setCodeChallenge(codeChallenge);
         grant.setCodeChallengeMethod(codeChallengeMethod);
+        grant.setRedirectUri(redirectUri);
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
         grant.setClaims(claims);
+        grant.setEphemeralSub(ephemeralSub);
         grant.setAuthorizationChallenge(isAuthorizationChallenge);
 
         return grant;
@@ -282,6 +306,7 @@ public class CacheGrant implements Serializable {
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
         grant.setClaims(claims);
+        grant.setEphemeralSub(ephemeralSub);
         grant.setAuthReqId(authReqId);
         grant.setTokensDelivered(tokensDelivered);
 
@@ -300,6 +325,7 @@ public class CacheGrant implements Serializable {
         grant.setAcrValues(acrValues);
         grant.setNonce(nonce);
         grant.setClaims(claims);
+        grant.setEphemeralSub(ephemeralSub);
         grant.setDeviceCode(deviceCode);
 
         return grant;

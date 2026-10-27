@@ -11,7 +11,7 @@ image from ``jans-linux-setup/jans_setup/templates/test`` (see the Dockerfile).
 
 Notes:
 
-* The auth test-client secrets are derived deterministically as
+* The auth and jans-lock test-client secrets are derived deterministically as
   ``<inum>-<host-label>`` (matching ``crypto64.encode_test_passwords`` in
   jans-linux-setup) so the test-suite can recompute them without a shared secret.
 * The config-api test client is handled by ``docker-jans-config-api`` bootstrap
@@ -39,6 +39,7 @@ from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
+from sql_setup import SQLBackend
 from utils import prepare_template_ctx
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -53,6 +54,10 @@ TEST_AUTH_CLIENT_INUMS = {
     "jans_auth_test_client_3_inum": "3E20",
     "jans_auth_test_client_4_inum": "FF81-2D39",
 }
+
+LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+
+TEST_SCHEMA_JSON = f"{TEST_TEMPLATE_BASE}/jans_test_schema.json"
 
 # LDIF schema templates declaring the custom attributes used by the test data;
 # parsed at runtime to add the matching SQL columns.
@@ -69,6 +74,7 @@ TEST_DATA_FILES = (
     f"{TEST_TEMPLATE_BASE}/jans-auth/data/jans-auth-test-data-user.ldif",
     f"{TEST_TEMPLATE_BASE}/scim-client/data/scim-test-data-user.ldif",
     f"{TEST_TEMPLATE_BASE}/jans-fido2/data/fido2-device-registration-test-data.ldif",
+    f"{TEST_TEMPLATE_BASE}/jans-lock/data/test-data.ldif",
 )
 
 # Custom scripts enabled for the test-suite (mirrors test_data_loader).
@@ -119,8 +125,8 @@ AUTH_DYNAMIC_CONF_DELTA = {
     "idTokenSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
     "accessTokenSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
     "requestObjectSigningAlgValuesSupported": ["none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"],
-    "softwareStatementValidationClaimName": "jwks_uri",
-    "softwareStatementValidationType": "jwks_uri",
+    "softwareStatementValidationClaimName": "jwks",
+    "softwareStatementValidationType": "jwks",
     "umaGrantAccessIfNoPolicies": True,
     "rejectJwtWithNoneAlg": False,
     "removeRefreshTokensForClientOnLogout": True,
@@ -131,6 +137,7 @@ AUTH_DYNAMIC_CONF_DELTA = {
     "accessEvaluationAllowBasicClientAuthorization": True,
     "spontaneousScopeLifetime": 0,
     "tokenEndpointAuthMethodsSupported": ["client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "self_signed_tls_client_auth", "none"],
+    "subjectTypesSupported": ["public", "pairwise", "ephemeral"],
     "sessionIdRequestParameterEnabled": True,
     "skipRefreshTokenDuringRefreshing": False,
     "featureFlags": ["unknown", "health_check", "userinfo", "clientinfo", "id_generation", "registration", "introspection", "revoke_token", "global_token_revocation", "end_session", "status_session", "jans_configuration", "ciba", "uma", "u2f", "device_authz", "stat", "par", "ssa", "status_list", "logout_status_jwt", "access_evaluation"],
@@ -191,6 +198,39 @@ class TestDataLoader:
             return "TINYTEXT" if self.client.dialect == "mysql" else "TEXT"
         return "TEXT"
 
+    def create_test_tables(self):
+        """Create the test-only tables declared in ``jans_test_schema.json`` (idempotent)."""
+        if not os.path.isfile(TEST_SCHEMA_JSON):
+            logger.warning("Test schema file %s not found; skipping", TEST_SCHEMA_JSON)
+            return
+
+        with open(TEST_SCHEMA_JSON) as f:
+            schema = json.loads(f.read())
+
+        test_attrs = {attr["names"][0]: attr for attr in schema.get("attributeTypes", [])}
+        backend = SQLBackend(self.manager)
+
+        def column_type(attr, table):
+            if not (attr_def := test_attrs.get(attr)):
+                return backend.get_data_type(attr, table)
+            sql_types = attr_def.get("sql_types", {})
+            if type_ := sql_types.get(self.client.dialect) or sql_types.get("mysql"):
+                return type_["type"]
+            return self._resolve_data_type(attr_def["syntax"])
+
+        for oc in schema.get("objectClasses", []):
+            table = oc["names"][0]
+            column_mapping = {
+                "doc_id": backend.get_data_type("doc_id", table),
+                "objectClass": "VARCHAR(48)",
+                "dn": "VARCHAR(128)",
+            }
+            for attr in dict.fromkeys(oc.get("may", [])):
+                column_mapping[attr] = column_type(attr, table)
+
+            logger.info("Creating test table %s", table)
+            self.client.create_table(table, column_mapping, "doc_id")
+
     def add_custom_columns(self):
         """Add the test-only custom attribute columns (idempotent)."""
         existing = self.client.get_table_mapping()
@@ -237,6 +277,10 @@ class TestDataLoader:
             ctx[f"{prefix}_pw"] = pw
             ctx[f"{prefix}_encoded_pw"] = encode_text(pw, salt).decode()
 
+        lock_pw = f"{LOCK_TEST_CLIENT_ID}-{host_label}"
+        ctx["lock_test_client_id"] = LOCK_TEST_CLIENT_ID
+        ctx["lock_test_client_pw"] = lock_pw
+        ctx["lock_test_client_encoded_pw"] = encode_text(lock_pw, salt).decode()
         return ctx
 
     def import_test_data(self, ctx):
@@ -442,6 +486,7 @@ class TestDataLoader:
 
     def load(self):
         logger.info("Loading integration-test data")
+        self.create_test_tables()
         self.add_custom_columns()
         ctx = self.build_ctx()
         self.import_test_data(ctx)

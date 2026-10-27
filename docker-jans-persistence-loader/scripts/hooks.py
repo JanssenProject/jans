@@ -262,6 +262,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "agama/agama.xhtml": "postlogin.htm",
             "agama/consent.xhtml": "agama/consent_authorize.htm",
         }),
+        # add tracking settings
+        ("trackingSettings", {
+            "enabled": False,
+            "skipTemplateViews": False,
+            "skipInstructionFrequencies": False,
+            "excludedFlows": [],
+        }),
     ]:
         if new_key not in conf["agamaConfiguration"]:
             conf["agamaConfiguration"][new_key] = value
@@ -323,6 +330,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "rate_limit",
         "access_evaluation",
         "identity_assertion_authz_grant",
+        "client_id_metadata_document",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
@@ -348,13 +356,17 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf.pop("sessionJwtSigningAlgValuesSupported")
         should_update = True
 
+    # remove implicit and password from grantTypesSupported (see https://github.com/JanssenProject/jans/issues/15090)
+    for grant_type in ["implicit", "password"]:
+        if grant_type in conf["grantTypesSupported"]:
+            conf["grantTypesSupported"].remove(grant_type)
+            should_update = True
+
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
 
 
 def get_ldif_mappings_hook(group, optional_scopes=None):
-    optional_scopes = optional_scopes or []
-
     def default_files():
         return [
             "base.ldif",

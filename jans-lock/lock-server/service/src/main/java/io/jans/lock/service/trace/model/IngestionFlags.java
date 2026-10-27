@@ -1,0 +1,159 @@
+/*
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ *
+ * Copyright (c) 2026, Janssen Project
+ */
+
+package io.jans.lock.service.trace.model;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import io.jans.lock.service.trace.TraceConstants;
+
+/**
+ * The Lock-derived ingestion flags on a TRACE record (design §10). Unlike the other
+ * store value types this class is a mutable, copy-able bag: {@code coverageGap},
+ * {@code chainLinkFailure} and {@code equivocation} may be updated after ingestion by the
+ * correlation service; {@code late}, {@code policyMismatch} and {@code reservedMembers} are fixed at ingestion and the
+ * store layer never changes them via {@code updateRecordFlags}.
+ *
+ * @author Yuriy Movchan
+ */
+public final class IngestionFlags {
+
+	public static final int MAX_RESERVED_MEMBERS = TraceConstants.MAX_RESERVED_MEMBERS;
+
+	private boolean coverageGap;
+
+	private boolean chainLinkFailure;
+
+	private boolean equivocation;
+
+	private boolean late;
+
+	private boolean policyMismatch;
+
+	private List<String> reservedMembers = Collections.emptyList();
+
+	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late) {
+		this(coverageGap, chainLinkFailure, equivocation, late, false);
+	}
+
+	public IngestionFlags(boolean coverageGap, boolean chainLinkFailure, boolean equivocation, boolean late,
+			boolean policyMismatch) {
+		this.coverageGap = coverageGap;
+		this.chainLinkFailure = chainLinkFailure;
+		this.equivocation = equivocation;
+		this.late = late;
+		this.policyMismatch = policyMismatch;
+	}
+
+	/**
+	 * Copy constructor, so callers can hand out an independent instance instead of a shared
+	 * mutable reference.
+	 */
+	public IngestionFlags(IngestionFlags other) {
+		this(other.coverageGap, other.chainLinkFailure, other.equivocation, other.late, other.policyMismatch);
+		this.reservedMembers = other.reservedMembers;
+	}
+
+	/**
+	 * @return a new, independent {@link IngestionFlags} with the same values
+	 */
+	public IngestionFlags copy() {
+		return new IngestionFlags(this);
+	}
+
+	public boolean isCoverageGap() {
+		return coverageGap;
+	}
+
+	public void setCoverageGap(boolean coverageGap) {
+		this.coverageGap = coverageGap;
+	}
+
+	public boolean isChainLinkFailure() {
+		return chainLinkFailure;
+	}
+
+	public void setChainLinkFailure(boolean chainLinkFailure) {
+		this.chainLinkFailure = chainLinkFailure;
+	}
+
+	public boolean isEquivocation() {
+		return equivocation;
+	}
+
+	public void setEquivocation(boolean equivocation) {
+		this.equivocation = equivocation;
+	}
+
+	public boolean isLate() {
+		return late;
+	}
+
+	public void setLate(boolean late) {
+		this.late = late;
+	}
+
+	public boolean isPolicyMismatch() {
+		return policyMismatch;
+	}
+
+	public void setPolicyMismatch(boolean policyMismatch) {
+		this.policyMismatch = policyMismatch;
+	}
+
+	public boolean isReservedMember() {
+		return !reservedMembers.isEmpty();
+	}
+
+	/**
+	 * @return paths of the Lock-derived members the producer signed and Lock ignored, at most
+	 *         {@value #MAX_RESERVED_MEMBERS}
+	 */
+	public List<String> getReservedMembers() {
+		return reservedMembers;
+	}
+
+	public void setReservedMembers(List<String> reservedMembers) {
+		if (reservedMembers == null || reservedMembers.isEmpty()) {
+			this.reservedMembers = Collections.emptyList();
+			return;
+		}
+		List<String> capped = reservedMembers.size() > MAX_RESERVED_MEMBERS
+				? reservedMembers.subList(0, MAX_RESERVED_MEMBERS)
+				: reservedMembers;
+		this.reservedMembers = Collections.unmodifiableList(new ArrayList<>(capped));
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof IngestionFlags)) {
+			return false;
+		}
+		IngestionFlags other = (IngestionFlags) o;
+		return coverageGap == other.coverageGap && chainLinkFailure == other.chainLinkFailure
+				&& equivocation == other.equivocation && late == other.late && policyMismatch == other.policyMismatch
+				&& reservedMembers.equals(other.reservedMembers);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(coverageGap, chainLinkFailure, equivocation, late, policyMismatch, reservedMembers);
+	}
+
+	@Override
+	public String toString() {
+		return "IngestionFlags [coverageGap=" + coverageGap + ", chainLinkFailure=" + chainLinkFailure
+				+ ", equivocation=" + equivocation + ", late=" + late + ", policyMismatch=" + policyMismatch
+				+ ", reservedMembers=" + reservedMembers + "]";
+	}
+
+}

@@ -60,7 +60,7 @@ public class AuthorizeRestWebServiceValidatorTest {
         final RedirectUri redirectUri = mock(RedirectUri.class);
 
         final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
-        authorizeRestWebServiceValidator.validatePkce("", redirectUriResponse, new Client());
+        authorizeRestWebServiceValidator.validatePkce("", null, redirectUriResponse, new Client());
     }
 
 
@@ -73,7 +73,32 @@ public class AuthorizeRestWebServiceValidatorTest {
         final Client client = new Client();
         client.getAttributes().setRequirePkce(true);
 
-        authorizeRestWebServiceValidator.validatePkce("", redirectUriResponse, client);
+        authorizeRestWebServiceValidator.validatePkce("", null, redirectUriResponse, client);
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePkce_withPlainCodeChallengeMethod_shouldFail() {
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+        authorizeRestWebServiceValidator.validatePkce("codeChallenge", "plain", redirectUriResponse, new Client());
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validatePkce_withBlankCodeChallengeMethod_shouldFail() {
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+        authorizeRestWebServiceValidator.validatePkce("codeChallenge", null, redirectUriResponse, new Client());
+    }
+
+    @Test
+    public void validatePkce_withS256CodeChallengeMethod_shouldPass() {
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        final RedirectUriResponse redirectUriResponse = new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class));
+        authorizeRestWebServiceValidator.validatePkce("codeChallenge", "S256", redirectUriResponse, new Client());
     }
 
     @Test
@@ -271,14 +296,12 @@ public class AuthorizeRestWebServiceValidatorTest {
         Client cimdClient = new Client();
         cimdClient.setClientId(cimdClientId);
 
-        when(clientIdMetadataService.isCimdClientId(cimdClientId)).thenReturn(true);
-        when(clientIdMetadataService.getClient(cimdClientId)).thenReturn(cimdClient);
+        when(clientIdMetadataService.resolveClient(cimdClientId)).thenReturn(cimdClient);
 
         Client result = authorizeRestWebServiceValidator.validateClient(cimdClientId, "state", false);
 
         assertEquals(cimdClientId, result.getClientId());
-        verify(clientIdMetadataService).isCimdClientId(cimdClientId);
-        verify(clientIdMetadataService).getClient(cimdClientId);
+        verify(clientIdMetadataService).resolveClient(cimdClientId);
         verify(clientService, never()).getClient(anyString());
     }
 
@@ -288,15 +311,13 @@ public class AuthorizeRestWebServiceValidatorTest {
         Client dbClient = new Client();
         dbClient.setClientId(clientId);
 
-        when(clientIdMetadataService.isCimdClientId(clientId)).thenReturn(false);
-        when(clientService.getClient(clientId)).thenReturn(dbClient);
+        when(clientIdMetadataService.resolveClient(clientId)).thenReturn(dbClient);
 
         Client result = authorizeRestWebServiceValidator.validateClient(clientId, "state", false);
 
         assertEquals(clientId, result.getClientId());
-        verify(clientIdMetadataService).isCimdClientId(clientId);
-        verify(clientIdMetadataService, never()).getClient(anyString());
-        verify(clientService).getClient(clientId);
+        verify(clientIdMetadataService).resolveClient(clientId);
+        verify(clientService, never()).getClient(anyString());
     }
 
     @Test(expectedExceptions = WebApplicationException.class)

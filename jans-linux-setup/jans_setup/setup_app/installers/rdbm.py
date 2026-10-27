@@ -1,12 +1,6 @@
 import os
 import re
-import io
-import sys
-import time
-import sqlalchemy
-import shutil
 import random
-import glob
 import tempfile
 
 from pathlib import Path
@@ -41,7 +35,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return '`' if Config.rdbm_type in ('mysql',) else '"'
 
     def install(self):
-
+        Config.set_rdbm_schema()
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE:
             if base.argsp.reset_rdbm_db:
@@ -100,6 +94,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         if not Config.rdbm_user:
             Config.rdbm_user = 'jans'
 
+        if base.argsp.t and Config.rdbm_host == 'localhost':
+            Config.rdbm_host = Config.hostname
+
         if Config.rdbm_install_type == InstallTypes.LOCAL:
             base.argsp.n = True
             packageUtils.check_and_install_packages()
@@ -110,11 +107,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.fix_unit_file('mysql')
                     self.enable('mysql')
                     Config.backend_service = 'mysql.service'
-                    for l in open('/var/log/mysql/mysqld.log'):
-                        if 'A temporary password is generated for' in l:
-                            n = l.find('root@localhost:')
-                            mysql_tmp_root_passwd = l[n+15:].strip()
-                            break
+                    with open('/var/log/mysql/mysqld.log') as f:
+                        for l in f:
+                            if 'A temporary password is generated for' in l:
+                                n = l.find('root@localhost:')
+                                mysql_tmp_root_passwd = l[n+15:].strip()
+                                break
                     Config.mysql_root_password = self.get_rdbm_pw()
                     self.run(f'''mysql -u root -p'{mysql_tmp_root_passwd}' -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{Config.mysql_root_password}'" --connect-expired-password''', shell=True)
 
@@ -128,11 +126,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 result, conn = self.dbUtils.sqlconnection(log=False)
                 user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
+                user_allowed_host = '%' if base.argsp.t else Config.rdbm_host
                 if not result:
                     sql_cmd_list = [
-                        "CREATE DATABASE {}".format(Config.rdbm_db),
-                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(Config.rdbm_user, Config.rdbm_password),
-                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(Config.rdbm_db, Config.rdbm_user),
+                        f"CREATE DATABASE {Config.rdbm_db}",
+                        f"CREATE USER '{Config.rdbm_user}'@'{user_allowed_host}' IDENTIFIED BY '{Config.rdbm_password}'",
+                        f"GRANT ALL PRIVILEGES ON {Config.rdbm_db}.* TO '{Config.rdbm_user}'@'{user_allowed_host}'",
                         ]
                     for cmd in sql_cmd_list:
                         self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
@@ -177,21 +176,40 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             conf_file = '/etc/mysql/mysql.conf.d/mysqld.cnf'
 
         # enforce SSL
-        conf_file_s = self.readFile(conf_file)
-        conf_file_content = conf_file_s.splitlines()
-        ssl_key_s = 'require_secure_transport'
-        for i, l in enumerate(conf_file_content):
-            if l.strip().startswith(ssl_key_s):
-                conf_file_content[i] = f'{ssl_key_s} = ON'
-                break
-        else:
-            conf_file_content.append(f'{ssl_key_s} = ON')
+        key_value_dict = {'require_secure_transport': 'ON'}
+        if base.argsp.t:
+            key_value_dict['bind-address'] = Config.rdbm_host
 
-        self.writeFile(conf_file, '\n'.join(conf_file_content))
+        self.config_modifier(conf_file, key_value_dict)
 
         mysql_data1_dir = '/var/lib/mysql'
         cert_fn = os.path.join(mysql_data1_dir, 'ca.pem')
         self.import_rootcert(cert_fn)
+
+    def config_modifier(self, conf_file, key_value_dict, sep='='):
+        conf_file_s = self.readFile(conf_file)
+        conf_file_content = conf_file_s.splitlines()
+        modified_keys = []
+
+        def get_line(skey):
+            return f'{skey} {sep} {key_value_dict[skey]}'
+
+        for i, l in enumerate(conf_file_content):
+            if l.strip().startswith('#'):
+                continue
+            n = l.find(sep)
+            if n > -1:
+                skey = l[:n-1].strip()
+                if skey in key_value_dict:
+                    conf_file_content[i] = get_line(skey)
+                    modified_keys.append(skey)
+
+        for skey in key_value_dict:
+            if skey not in  modified_keys:
+                conf_file_content.append(get_line(skey))
+
+        conf_file_content_txt = '\n'.join(conf_file_content)
+        self.writeFile(conf_file, conf_file_content_txt)
 
 
     def postgresql_config(self):
@@ -226,6 +244,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 hba_file_content.append('\n# Added by Janssen setup')
                 hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    127.0.0.1/32    {password_encryption_type}')
                 hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    ::1/128    {password_encryption_type}')
+                if base.argsp.t:
+                    hba_file_content.append(f'hostssl    {Config.rdbm_db}    {Config.rdbm_user}    0.0.0.0/0    {password_encryption_type}')
 
             hba_file_content.append('')
 
@@ -241,26 +261,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_chmod, '600', fn])
 
             conf_file = os.path.join(conf_dir, 'postgresql.conf')
-            conf_file_s = self.readFile(conf_file)
-            conf_file_content = conf_file_s.splitlines()
-            key_value_dict = {'ssl': 'on', 'ssl_cert_file': crt_fn, 'ssl_key_file': key_fn}
-            conf_status =  {k: False for k in key_value_dict}
-
-            for i, l in enumerate(conf_file_content):
-                if l.strip().startswith('#'):
-                    continue
-                n = l.find('=')
-                if n > -1:
-                    skey = l[:n-1].strip()
-                    if skey in key_value_dict:
-                        conf_file_content[i] = f"{skey} = '{key_value_dict[skey]}'"
-                        conf_status[skey] = True
-
-            for skey in conf_status:
-                if not conf_status[skey]:
-                    conf_file_content.append(f"{skey} = '{key_value_dict[skey]}'")
-
-            self.writeFile(conf_file, '\n'.join(conf_file_content))
+            key_value_dict = {'ssl': "'on'", 'ssl_cert_file': f"'{crt_fn}'", 'ssl_key_file': f"'{key_fn}'"}
+            if base.argsp.t:
+                key_value_dict['listen_addresses'] = f"'{Config.rdbm_host}'"
+            self.config_modifier(conf_file, key_value_dict)
 
     def import_rootcert(self, cert_fn):
         self.import_cert_into_keystore(cert_fn, f'jans_{Config.rdbm_type}')
@@ -319,12 +323,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         return col_def
 
+
     def create_tables(self, jans_schema_files):
         self.logIt("Creating tables for {}".format(jans_schema_files))
         tables = []
         all_schema = {}
         all_attribs = {}
-        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD {};' % (self.qchar, self.qchar)
+
+        if Config.rdbm_type == 'pgsql':
+            create_schema_cmd = f'CREATE SCHEMA IF NOT EXISTS {Config.rdbm_schema};'
+            tables.append(create_schema_cmd)
+            self.dbUtils.exec_rdbm_query(create_schema_cmd)
 
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
@@ -368,16 +377,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if Config.rdbm_type == 'pgsql':
                     desc = self.get_attr_description(attrname)
                     if desc:
-                        col_comments.append('''COMMENT ON COLUMN "{}"."{}" IS '{}';'''.format(sql_tbl_name, attrname, desc))
+                        col_comments.append('''COMMENT ON COLUMN {}."{}" IS '{}';'''.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), attrname, desc))
 
             if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
+
                 if Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE {} (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), doc_id_type, ', '.join(sql_tbl_cols))
                 else:
-                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(self.dbUtils.get_table_name_with_schema(sql_tbl_name), doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
-                
+
                 for comment_sql in col_comments:
                     self.dbUtils.exec_rdbm_query(comment_sql)
                     tables.append(comment_sql)
@@ -388,7 +398,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             attr = all_attribs[attrname]
             if attr.get('sql', {}).get('add_table'):
                 col_def = self.get_col_def(attrname, sql_tbl_name)
-                sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
+                add_to_table = attr['sql']['add_table']
+                alter_table_sql_cmd = 'ALTER TABLE `{}` ADD {};'
+                if Config.rdbm_type == 'pgsql':
+                    alter_table_sql_cmd = alter_table_sql_cmd.replace('`', '')
+                sql_cmd = alter_table_sql_cmd.format(self.dbUtils.get_table_name_with_schema(add_to_table), col_def)
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
@@ -399,9 +413,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return re.sub(r'[^0-9a-zA-Z\s]+','_', attrname)
 
 
-    def create_indexes(self):
+    def create_pgsql_index_cmd(self, tbl_name, indexstr):
+        sql_cmd = 'CREATE INDEX ON {} {};'.format(
+                        self.dbUtils.get_table_name_with_schema(str(tbl_name)),
+                        indexstr
+                        )
+        return sql_cmd
 
-        indexes = []
+    def create_indexes(self):
 
         sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
         sql_indexes = base.readJsonFile(sql_indexes_fn)
@@ -424,8 +443,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if attr.name == 'doc_id':
                     continue
                 ind_name = self.get_index_name(attr.name)
-                data_type = self.get_sql_col_type(attr, tblCls)
-                data_type = data_type.replace('VARCHAR', 'CHAR')
 
                 if isinstance(attr.type, self.dbUtils.json_dialects_instance):
 
@@ -442,10 +459,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                         )
                                 self.dbUtils.exec_rdbm_query(sql_cmd)
                             elif Config.rdbm_type == 'pgsql':
-                                sql_cmd ='CREATE INDEX ON "{}" {};'.format(
-                                        tblCls,
-                                        tmp_str.safe_substitute({'field':attr.name})
-                                        )
+                                sql_cmd = self.create_pgsql_index_cmd(tblCls, tmp_str.safe_substitute({'field':attr.name}))
                                 self.dbUtils.exec_rdbm_query(sql_cmd)
 
 
@@ -464,10 +478,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
-                        sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
-                                    tblCls,
-                                    attr.name
-                                )
+                        sql_cmd = self.create_pgsql_index_cmd(tblCls, f'("{attr.name}")')
                         self.dbUtils.exec_rdbm_query(sql_cmd)
 
             for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
@@ -480,19 +491,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                 elif Config.rdbm_type == 'pgsql':
-                    sql_cmd = 'CREATE INDEX ON "{}" {};'.format(
-                                tblCls,
-                                custom_index
-                                )
+                    sql_cmd = self.create_pgsql_index_cmd(tblCls, custom_index)
                     self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def create_unique_indexes(self):
         #Create uniqueness for columns jansPerson.uid and jansPerson.mail
         for table, column in (('jansPerson', 'mail'), ('jansPerson', 'uid')):
             if Config.rdbm_type in ('mysql',):
-                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{table}` (`{column}`)'
+                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{self.dbUtils.get_table_name_with_schema(table)}` (`{column}`)'
             elif Config.rdbm_type == 'pgsql':
-                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON "{table}"("{column}")'
+                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON {self.dbUtils.get_table_name_with_schema(table)}("{column}")'
             self.dbUtils.exec_rdbm_query(sql_cmd)
 
 
@@ -548,13 +556,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 set_sslmode('disable')
 
-        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true' 
+        Config.rdbm_enable_ssl = 'false' if Config.rdbm_sslmode == 'disable' else 'true'
 
-        Config.set_rdbm_schema()
         if Config.rdbm_type in ('pgsql', 'mysql'):
             Config.rdbm_password_enc = self.obscure(Config.rdbm_password)
-            src_temp_fn = os.path.join(Config.templateFolder, 'jans-{}.properties'.format(Config.rdbm_type))
-            targtet_fn = os.path.join(Config.configFolder, Config.jansRDBMProperties)
+            src_temp_fn = os.path.join(Config.template_folder, 'jans-{}.properties'.format(Config.rdbm_type))
+            targtet_fn = os.path.join(Config.config_folder, Config.jans_rdbm_properties)
             rendered_tmp = self.render_template(src_temp_fn)
             self.writeFile(targtet_fn, rendered_tmp)
 

@@ -19,14 +19,14 @@ import pytest
 # test cases for load policy store with error
 test_cases_err = [
     # cases with policy errors
-    ("policy-store_policy_err_base64.json",
+    ("policy-store_policy_err_base64.yaml",
      "unable to decode policy_content as base64"),
-    ("policy-store_policy_err_broken_utf8.json",
+    ("policy-store_policy_err_broken_utf8.yaml",
      "unable to decode policy_content to utf8 string"),
     ("policy-store_policy_err_broken_policy.yaml",
      "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: this policy is missing the `resource` variable in the scope"),
     # cases with schema errors
-    ("policy-store_schema_err_base64.json",
+    ("policy-store_schema_err_base64.yaml",
      "unable to decode cedar policy schema base64"),
     ("policy-store_schema_err.yaml",
      "unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
@@ -73,12 +73,8 @@ def test_load_policy_store_ok():
 def test_policy_store_source_wrong_type():
     # map fixture to variable with shorter name for readability
 
-    try:
+    with pytest.raises(ValueError):
         load_bootstrap_config("invalid_config.abc")
-    except ValueError:
-        pass
-    else:
-        assert False, "ValueError was not raised when a policy store has an unsupported file type"
 
 
 def test_trusted_issuer_loading_info_defaults():
@@ -97,3 +93,58 @@ def test_trusted_issuer_loading_info_defaults():
     assert len(loaded_ids) == loaded
     for issuer_id in loaded_ids:
         assert instance.is_trusted_issuer_loaded_by_name(issuer_id) is True
+
+
+def test_policy_store_id_legacy():
+    policy_store_location = join(TEST_FILES_PATH, "policy-store_ok.yaml")
+    config = load_bootstrap_config(policy_store_location)
+    instance = Cedarling(config)
+    assert instance.policy_store_id() == "a1bf93115de86de760ee0bea1d529b521489e5a11747"
+
+
+def test_legacy_json_policy_store_rejected():
+    with pytest.raises(ValueError, match="Legacy JSON policy store format is no longer supported"):
+        load_bootstrap_config(join(TEST_FILES_PATH, "policy-store_generated.json"))
+
+
+def test_legacy_json_policy_store_local_rejected():
+    with pytest.raises(ValueError, match="Legacy JSON policy store format is no longer supported"):
+        load_bootstrap_config(config_cb=lambda c: c.update({
+            "CEDARLING_POLICY_STORE_LOCAL_FN": None,
+            "CEDARLING_POLICY_STORE_LOCAL": "{}",
+        }))
+
+
+
+SIGSTORE_ENFORCE = {
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
+}
+
+
+def test_sigstore_enforce_requires_cjar_source():
+    # policy-store_ok.yaml can't be signed, so enforcing must fail at startup
+    config = load_bootstrap_config(config_cb=lambda c: c.update(SIGSTORE_ENFORCE))
+    with pytest.raises(ValueError, match="is not a `.cjar` archive"):
+        Cedarling(config)
+
+
+def test_sigstore_enforce_requires_signer():
+    with pytest.raises(ValueError, match="CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY"):
+        load_bootstrap_config(
+            policy_store_location="store.cjar",
+            config_cb=lambda c: c.update({"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce"}),
+        )
+
+
+def test_sigstore_enforce_rejects_cjar_without_bundle(tmp_path):
+    # the signature is checked before the archive is parsed, so any bytes will do
+    archive = tmp_path / "store.cjar"
+    archive.write_bytes(b"archive")
+    config = load_bootstrap_config(
+        policy_store_location=str(archive),
+        config_cb=lambda c: c.update(SIGSTORE_ENFORCE),
+    )
+    with pytest.raises(ValueError, match="store.cjar.sigstore.json"):
+        Cedarling(config)

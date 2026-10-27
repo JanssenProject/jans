@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.orm.model.fido2.UserVerification;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -19,6 +20,9 @@ public class AssertionOptions  {
     private Long timeout;
     @JsonProperty(value = "session_id")
     private String sessionId;
+    // Optional native-client context (#14607) — absence must not change behavior.
+    @JsonProperty("telemetry")
+    private NativeClientTelemetry telemetry;
     
     // 1. allowCredentials (An array of objects used to restrict the list of acceptable credentials. An empty array indicates that any credential is acceptable.)
     private List<PublicKeyCredentialDescriptor> allowCredentials;
@@ -90,11 +94,20 @@ public class AssertionOptions  {
 		this.allowCredentials = allowCredentials;
 	}
 
+	public NativeClientTelemetry getTelemetry() {
+		return telemetry;
+	}
+
+	public void setTelemetry(NativeClientTelemetry telemetry) {
+		this.telemetry = telemetry;
+	}
+
 	@Override
 	public String toString() {
 		return "AssertionOptions [username=" + username + ", userVerification=" + userVerification + ", rpId="
 				+ rpId + ", extensions=" + extensions + ", timeout=" + timeout + ", sessionId=" + sessionId
-				+ ", allowCredentials=" + allowCredentials.toString() + ", credentialId=" + credentialId + "]";
+				+ ", allowCredentials=" + allowCredentials.toString() + ", credentialId=" + credentialId
+				+ ", telemetry=" + telemetry + "]";
 	}
 
 	

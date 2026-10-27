@@ -201,6 +201,54 @@ cosign verify \
 
 ---
 
+## Verifying Helm Charts
+
+Charts are published three ways from the same build: as release assets on the
+matching tag, as OCI artifacts in GHCR, and indexed at
+`https://docs.jans.io/charts` (the index points at the release assets).
+
+Fetch the chart. Either source gives the same file, but the signature bundle
+and the provenance are release assets, so download them alongside it:
+
+```bash
+helm repo add janssen https://docs.jans.io/charts
+helm pull janssen/janssen --version <VERSION>
+
+gh release download v<VERSION> --repo JanssenProject/jans \
+  --pattern 'janssen-<VERSION>.tgz.bundle' \
+  --pattern 'helm-charts.intoto.jsonl'
+```
+
+With `janssen-<VERSION>.tgz`, its `.bundle` and `helm-charts.intoto.jsonl` in
+the working directory:
+
+```bash
+slsa-verifier verify-artifact janssen-<VERSION>.tgz \
+  --provenance-path helm-charts.intoto.jsonl \
+  --source-uri github.com/JanssenProject/jans \
+  --source-tag v<VERSION>
+
+cosign verify-blob \
+  --bundle janssen-<VERSION>.tgz.bundle \
+  --certificate-identity-regexp "https://github.com/JanssenProject/jans/.github/workflows/release-helm-charts\\.yml@refs/tags/.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  janssen-<VERSION>.tgz
+```
+
+Verify the OCI copy and its registry attestation:
+
+```bash
+helm pull oci://ghcr.io/janssenproject/charts/janssen --version <VERSION>
+
+gh attestation verify oci://ghcr.io/janssenproject/charts/janssen:<VERSION> \
+  --repo JanssenProject/jans
+```
+
+Charts released before v2.0.0 predate Cosign signing and carry neither a
+`.bundle` sidecar nor provenance.
+
+---
+
 ## Artifact Families and Provenance Files
 
 | Artifact family                     | Provenance file                  | Workflow job                                     |
@@ -212,9 +260,11 @@ cosign verify \
 | Cedarling Go libraries              | `cedarling-go.intoto.jsonl`      | `provenance-cedarling-go`                        |
 | Cedarling KrakenD plugins           | `cedarling-krakend.intoto.jsonl` | `provenance-cedarling-krakend`                   |
 | Cedarling UniFFI / Kotlin           | `cedarling-uniffi.intoto.jsonl`  | `provenance-cedarling-uniffi`                    |
-| Cedarling PostgreSQL extension      | `cedarling-pg.intoto.jsonl`      | `provenance-cedarling-pg`                        |
 | Demo source zips / Chrome extension | `demo.intoto.jsonl`              | `provenance-demo`                                |
+| Maven artifacts                     | `maven-artifacts.intoto.jsonl`   | `provenance-maven`                               |
+| Helm charts                         | `helm-charts.intoto.jsonl`       | `provenance-charts`                              |
 | Docker images (GHCR)                | Registry attestation             | `docker` (via `actions/attest-build-provenance`) |
+| Helm charts (GHCR)                  | Registry attestation             | `publish` (via `actions/attest-build-provenance`) |
 
 ---
 

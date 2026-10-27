@@ -9,7 +9,7 @@ import argparse
 from collections import OrderedDict
 try:
     from ldap.schema.models import AttributeType, ObjectClass
-except:
+except ImportError:
     print("This tool requires python3-ldap package. Please install and re-run")
     sys.exit()
 
@@ -192,7 +192,7 @@ rdbmInstaller.rdbmProperties()
 jansInstaller.renderTemplateInOut(
                     Config.jans_properties_fn,
                     os.path.join(Config.install_dir, 'templates'),
-                    Config.configFolder
+                    Config.config_folder
                 )
 
 if os.path.exists(Config.ox_ldap_properties):

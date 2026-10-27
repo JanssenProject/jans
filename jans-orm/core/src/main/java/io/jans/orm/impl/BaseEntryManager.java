@@ -40,6 +40,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeEnum;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
+import io.jans.orm.annotation.BinaryData;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
@@ -49,9 +50,12 @@ import io.jans.orm.annotation.LanguageTag;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.annotation.Password;
 import io.jans.orm.annotation.SchemaEntry;
+import io.jans.orm.annotation.Version;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
+import io.jans.orm.exception.UnsupportedOperationException;
+import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
@@ -69,6 +73,7 @@ import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.SensitiveDataMasker;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -80,17 +85,20 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
+	private static final int ENTRY_EXPIRATION_LIMIT = 1576800000;
+
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
-			JsonObject.class, LanguageTag.class, Password.class };
+			JsonObject.class, BinaryData.class, LanguageTag.class, Password.class };
 	private static final Class<?>[] LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION = { CustomObjectClass.class };
 	private static final Class<?>[] LDAP_DN_PROPERTY_ANNOTATION = { DN.class };
 	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
+	private static final Class<?>[] LDAP_VERSION_PROPERTY_ANNOTATION = { Version.class };
 
 	public static final String OBJECT_CLASS = "objectClass";
 	public static final String USER_PASSWORD = "userPassword";
-	private static final String MASKED = "*masked*";
+	private static final String MASKED = SensitiveDataMasker.MASKED;
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -131,6 +139,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		Class<?> entryClass = entry.getClass();
 		checkEntryClass(entryClass, false);
 		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
+		initVersionPropertyIfNeeded(entry, entryClass);
 
 		Object dnValue = getDNValue(entry, entryClass);
 
@@ -223,10 +233,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return countEntries(dnValue.toString(), entryClass, searchFilter);
 	}
 
+	/**
+	 * Merges the entry without compare-and-set version checking. For versioned entities, callers must
+	 * use {@link #updateWithVersion(Object)} when concurrent-write detection is required.
+	 */
 	@SuppressWarnings("unchecked")
 	protected Void merge(Object entry, boolean isSchemaUpdate, boolean isConfigurationUpdate, AttributeModificationType schemaModificationType) {
 		if (entry == null) {
-			throw new MappingException("Entry for check if exists is null");
+			throw new MappingException("Entry to update is null");
 		}
 
 		Class<?> entryClass = entry.getClass();
@@ -234,6 +248,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		// Determine entry update method
 		boolean forceUpdate = isUseEntryForceUpdate(entryClass);
+
+		PropertyAnnotation versionProperty = getVersionProperty(entryClass);
+		if ((versionProperty != null) && forceUpdate) {
+			throw new MappingException(String.format(
+					"Entry '%s' uses forceUpdate, which is not supported together with @Version", entryClass));
+		}
 
 		String[] objectClasses = getObjectClasses(entry, entryClass);
 
@@ -272,14 +292,30 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				entry, propertiesAnnotations, attributesToPersistMap, attributesFromLdap, schemaModificationType, isSchemaUpdate,
 				isConfigurationUpdate, forceUpdate);
 
+		String versionAttributeName = null;
+		Long newVersionValue = null;
+		if (versionProperty != null) {
+			// Version column is always bumped unconditionally, never diffed like a normal field
+			versionAttributeName = getVersionAttributeName(entryClass, versionProperty.getPropertyName(), propertiesAnnotations);
+			AttributeData currentVersionAttribute = getAttributesMap(attributesFromLdap).get(versionAttributeName);
+			long currentVersionValue = getLongAttributeValue(currentVersionAttribute);
+
+			newVersionValue = Long.valueOf(currentVersionValue + 1);
+			applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue.longValue());
+		}
+
 		merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
-		
+
 		if (isValidateAfterUpdate()) {
 			if (!isSchemaUpdate && !forceUpdate) {
 				// Compare loaded entry data after merge
-				
+
 				// Step 1. Rebuild map with attributes which we planned to persist
 				attributesToPersistMap = getAttributesMap(attributesToPersist);
+				if (versionProperty != null) {
+					// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
+					attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
+				}
 
 				// Step 2. Load current entry from DB
 				List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
@@ -297,6 +333,184 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return null;
+	}
+
+	@Override
+	public Void updateWithVersion(Object entry) {
+		if (entry == null) {
+			throw new MappingException("Entry to update is null");
+		}
+
+		Class<?> entryClass = entry.getClass();
+		checkEntryClass(entryClass, false);
+
+		PropertyAnnotation versionProperty = getVersionProperty(entryClass);
+		if (versionProperty == null) {
+			throw new UnsupportedOperationException(String.format(
+					"Entry '%s' does not support versioned update (updateWithVersion) -- it has no @Version property",
+					entryClass));
+		}
+
+		String versionPropertyName = versionProperty.getPropertyName();
+
+		Getter versionGetter = getGetter(entryClass, versionPropertyName);
+		if (versionGetter == null) {
+			throw new MappingException("Entry should has getter for property " + versionPropertyName);
+		}
+
+		Setter versionSetter = getSetter(entryClass, versionPropertyName);
+		if (versionSetter == null) {
+			throw new MappingException("Entry should has setter for property " + versionPropertyName);
+		}
+
+		Object expectedVersionObject = versionGetter.get(entry);
+		if (expectedVersionObject == null) {
+			throw new MappingException(String.format(
+					"Entry '%s' @Version field must be initialized -- call persist() or find() first", entryClass));
+		}
+
+		Class<?> parameterType = ReflectHelper.getSetterType(versionSetter);
+		if (!(parameterType.equals(Long.class) || parameterType.equals(Long.TYPE))) {
+			throw new MappingException(String.format(
+					"Entry '%s' @Version field must be Long/long", entryClass));
+		}
+
+		long expectedVersionValue = ((Long) expectedVersionObject).longValue();
+
+		boolean forceUpdate = isUseEntryForceUpdate(entryClass);
+		if (forceUpdate) {
+			throw new MappingException(String.format(
+					"Entry '%s' uses forceUpdate, which is not supported together with @Version", entryClass));
+		}
+
+		String[] objectClasses = getObjectClasses(entry, entryClass);
+
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+		Map<String, PropertyAnnotation> propertiesAnnotationsMap = prepareEntryPropertiesTypes(entryClass, propertiesAnnotations);
+
+		Object dnValue = getDNValue(entry, entryClass);
+
+		Integer expirationValue = getExpirationValue(entry, entryClass, true);
+
+		List<AttributeData> attributesToPersist = getAttributesListForPersist(entry, propertiesAnnotations);
+		Map<String, AttributeData> attributesToPersistMap = getAttributesMap(attributesToPersist);
+
+		List<String> currentLdapReturnAttributesList = buildAttributesListForUpdate(entry, objectClasses, propertiesAnnotations);
+		currentLdapReturnAttributesList.add("objectClass");
+
+		List<AttributeData> attributesFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap,
+				currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+
+		if (LOG.isTraceEnabled()) {
+			dumpAttributes("attributesFromLdap", attributesFromLdap);
+			dumpAttributes("attributesToPersist", attributesToPersist);
+		}
+
+		List<AttributeDataModification> attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
+				entry, propertiesAnnotations, attributesToPersistMap, attributesFromLdap, null, false, false, forceUpdate);
+
+		String versionAttributeName = getVersionAttributeName(entryClass, versionPropertyName, propertiesAnnotations);
+
+		long newVersionValue = expectedVersionValue + 1;
+		applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue);
+
+		boolean updated = mergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
+				versionAttributeName, Long.valueOf(expectedVersionValue), Long.valueOf(newVersionValue));
+
+		if (!updated) {
+			throw new VersionMismatchException(dnValue.toString(), Long.valueOf(expectedVersionValue));
+		}
+
+		if (isValidateAfterUpdate()) {
+			// Compare loaded entry data after merge
+
+			// Step 1. Rebuild map with attributes which we planned to persist
+			attributesToPersistMap = getAttributesMap(attributesToPersist);
+			if (versionProperty != null) {
+				// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
+				attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
+			}
+
+			// Step 2. Load current entry from DB
+			List<AttributeData> attributesAfterMergeFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+
+			// Step 3. Compare loaded entry data with initial entry data
+			List<AttributeDataModification> attributeDataModificationsAftermerge = prepareAttributeDataModifications(entryClass,
+					dnValue, entry, propertiesAnnotations, attributesToPersistMap, attributesAfterMergeFromLdap, null,
+					false, false, forceUpdate);
+
+			if (attributeDataModificationsAftermerge.size() > 0) {
+				LOG.warn("Detected changes which not exists in enry after merge. Entry DN: {}, missing changes: {}",
+						dnValue, attributeDataModificationsAftermerge);
+			}
+		}
+
+		versionSetter.set(entry, Long.valueOf(newVersionValue));
+
+		return null;
+	}
+
+	/**
+	 * Per-backend hook for {@link #updateWithVersion(Object)}. Concrete with a default throw (not
+	 * abstract) so every existing backend subclass keeps compiling before its own CAS support lands.
+	 */
+	protected boolean mergeWithVersion(String dn, String[] objectClasses,
+			List<AttributeDataModification> attributeDataModifications, Integer expiration, String versionAttributeName,
+			Object expectedVersionValue, Object newVersionValue) {
+		throw new UnsupportedOperationException(String.format(
+				"Versioned update (updateWithVersion) is not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	private String getVersionAttributeName(Class<?> entryClass, String versionPropertyName,
+			List<PropertyAnnotation> propertiesAnnotations) {
+		// versionProperty's own annotation list only carries @Version itself, so look up @AttributeName here.
+		for (PropertyAnnotation propertyAnnotation : propertiesAnnotations) {
+			if (!versionPropertyName.equals(propertyAnnotation.getPropertyName())) {
+				continue;
+			}
+
+			Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertyAnnotation.getAnnotations(), AttributeName.class);
+			if (ldapAttribute == null) {
+				break;
+			}
+
+			String versionAttributeName = ((AttributeName) ldapAttribute).name();
+			if (StringHelper.isEmpty(versionAttributeName)) {
+				versionAttributeName = versionPropertyName;
+			}
+
+			return versionAttributeName.toLowerCase();
+		}
+
+		throw new MappingException(String.format(
+				"Entry '%s' @Version property '%s' should also have @AttributeName annotation", entryClass, versionPropertyName));
+	}
+
+	private void applyVersionBump(List<AttributeDataModification> attributeDataModifications, String versionAttributeName,
+			long newVersionValue) {
+		attributeDataModifications
+				.removeIf(modification -> versionAttributeName.equalsIgnoreCase(getModificationAttributeName(modification)));
+
+		attributeDataModifications.add(new AttributeDataModification(AttributeModificationType.REPLACE,
+				new AttributeData(versionAttributeName, Long.valueOf(newVersionValue))));
+	}
+
+	private long getLongAttributeValue(AttributeData attribute) {
+		if (attribute == null) {
+			return 0L;
+		}
+
+		Object value = attribute.getValue();
+		if (value == null) {
+			return 0L;
+		}
+
+		return Long.parseLong(String.valueOf(value));
+	}
+
+	private String getModificationAttributeName(AttributeDataModification modification) {
+		AttributeData attribute = modification.getAttribute() != null ? modification.getAttribute() : modification.getOldAttribute();
+		return attribute == null ? null : attribute.getName();
 	}
 
 	private List<AttributeDataModification> prepareAttributeDataModifications(Class<?> entryClass, Object dnValue,
@@ -987,6 +1201,45 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return propertiesAnnotations.get(0);
 	}
 
+	protected PropertyAnnotation getVersionProperty(Class<?> entryClass) {
+		List<PropertyAnnotation> propertiesAnnotations = getEntryVersionAnnotations(entryClass);
+		if (propertiesAnnotations.size() == 0) {
+			return null;
+		}
+
+		if (propertiesAnnotations.size() > 1) {
+			throw new MappingException(
+					String.format("Entry '%s' should have exactly one property with annotation Version", entryClass));
+		}
+
+		return propertiesAnnotations.get(0);
+	}
+
+	private void initVersionPropertyIfNeeded(Object entry, Class<?> entryClass) {
+		PropertyAnnotation versionProperty = getVersionProperty(entryClass);
+		if (versionProperty == null) {
+			return;
+		}
+
+		String versionPropertyName = versionProperty.getPropertyName();
+
+		Getter versionGetter = getGetter(entryClass, versionPropertyName);
+		if (versionGetter == null) {
+			throw new MappingException("Entry should has getter for property " + versionPropertyName);
+		}
+
+		if (versionGetter.get(entry) != null) {
+			return;
+		}
+
+		Setter versionSetter = getSetter(entryClass, versionPropertyName);
+		if (versionSetter == null) {
+			throw new MappingException("Entry should has setter for property " + versionPropertyName);
+		}
+
+		versionSetter.set(entry, Long.valueOf(0L));
+	}
+
 	protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
 			Map<String, List<AttributeData>> entriesAttributes) {
 		return createEntities(entryClass, propertiesAnnotations, entriesAttributes, true);
@@ -1508,23 +1761,34 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
 			Object entry, boolean multiValued, boolean jsonObject) {
+		return getAttributeData(propertyName, ldapAttributeName, propertyValueGetter, entry, multiValued, jsonObject, false);
+	}
+
+	private AttributeData getAttributeData(String propertyName, String ldapAttributeName, Getter propertyValueGetter,
+			Object entry, boolean multiValued, boolean jsonObject, boolean binaryData) {
 		Object propertyValue = propertyValueGetter.get(entry);
 		if (propertyValue == null) {
 			return null;
 		}
 
-		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, propertyValue, multiValued);
+		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, binaryData, propertyValue, multiValued);
 
 		return attributeData;
 	}
 
-	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, Object propertyValue, boolean multiValued) {
+	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, boolean binaryData, Object propertyValue, boolean multiValued) {
 		Object[] attributeValues = new Object[1];
 		boolean jsonValue = false;
+		boolean binaryValue = false;
 
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues, multiValued);
 		if (nativeType) {
 			// We do conversion in getNativeAttributeValue method already
+		} else if (binaryData && (propertyValue instanceof byte[])) {
+			// Pass raw binary value to backend. Backend stores it in binary column without
+			// base64 conversion or applies base64 encoding if DB not supports binary types
+			binaryValue = true;
+			attributeValues[0] = propertyValue;
 		} else if (propertyValue instanceof AttributeEnum) {
 			attributeValues[0] = ((AttributeEnum) propertyValue).getValue();
 		} else if (propertyValue instanceof AttributeEnum[]) {
@@ -1559,7 +1823,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
-					+ " return type or has annotation JsonObject");
+					+ " return type or has annotation JsonObject or BinaryData");
 		}
 
 		if (LOG.isDebugEnabled()) {
@@ -1579,7 +1843,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 		
-		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue);
+		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue, binaryValue);
 	}
 
 	/*
@@ -1717,10 +1981,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				JsonObject.class);
 		boolean jsonObject = ldapJsonObject != null;
 
-		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject);
+		Annotation ldapBinaryData = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
+				BinaryData.class);
+		boolean binaryData = ldapBinaryData != null;
+
+		AttributeData attribute = getAttributeData(propertyName, ldapAttributeName, getter, entry, multiValued, jsonObject, binaryData);
 
 		Annotation passwordObject = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), Password.class);
-		if (passwordObject != null) {
+		if ((passwordObject != null) && (attribute != null)) {
 			attribute = new PasswordAttributeData(attribute, ((Password) passwordObject).skipHashed());
 		}
 
@@ -1866,6 +2134,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return getEntryClassAnnotations(entryClass, "exp_", LDAP_EXPIRATION_PROPERTY_ANNOTATION);
 	}
 
+	protected <T> List<PropertyAnnotation> getEntryVersionAnnotations(Class<T> entryClass) {
+		return getEntryClassAnnotations(entryClass, "version_", LDAP_VERSION_PROPERTY_ANNOTATION);
+	}
+
 	protected <T> List<PropertyAnnotation> getEntryCustomObjectClassAnnotations(Class<T> entryClass) {
 		return getEntryClassAnnotations(entryClass, "custom_", LDAP_CUSTOM_OBJECT_CLASS_PROPERTY_ANNOTATION);
 	}
@@ -1956,12 +2228,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
 			AttributeData attribute, boolean jsonObject) {
-		if (attribute == null) {
+		if ((attribute == null) || (propertyValueSetter == null)) {
 			return;
 		}
 
-		LOG.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName,
-				attribute.getName(), Arrays.toString(attribute.getValues())));
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("LdapProperty: %s, AttributeName: %s, AttributeValue: %s", propertyName,
+					attribute.getName(), maskSensitiveAttributeValues(attribute)));
+		}
 
 		Class<?> parameterType = ReflectHelper.getSetterType(propertyValueSetter);
 		if (parameterType.equals(String.class)) {
@@ -2027,6 +2301,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				}
 			}
 			propertyValueSetter.set(entry, ldapEnums);
+		} else if (!jsonObject && parameterType.equals(byte[].class)) {
+			propertyValueSetter.set(entry, toBinaryValue(attribute));
 		} else if (jsonObject) {
 			Object stringValue = attribute.getValue();
 			Object jsonValue = convertJsonToValue(parameterType, stringValue);
@@ -2034,7 +2310,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has setter with String, Boolean, Integer, Long, Date, String[], List<String>, AttributeEnum or AttributeEnum[]"
-					+ " parameter type or has annotation JsonObject");
+					+ " parameter type or has annotation JsonObject or BinaryData");
 		}
 	}
 
@@ -2056,6 +2332,25 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return Arrays.asList(attributeData.getValues());
+	}
+
+	private byte[] toBinaryValue(AttributeData attribute) {
+		Object propertyValueObject = attribute.getValue();
+		if (propertyValueObject == null) {
+			return null;
+		}
+
+		if (propertyValueObject instanceof byte[]) {
+			// DB with native binary type support returns raw binary value
+			return (byte[]) propertyValueObject;
+		}
+
+		if (propertyValueObject instanceof String) {
+			// DB without native binary type support returns base64 encoded string
+			return Base64.decodeBase64((String) propertyValueObject);
+		}
+
+		throw new MappingException(String.format("Failed to convert attribute '%s' value to binary value", attribute.getName()));
 	}
 
 	private Boolean toBooleanValue(AttributeData attribute) {
@@ -2214,7 +2509,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			resultExpirationValue = 0;
 		}
 
-        return resultExpirationValue;
+		// TTL can't be greater than 50 years (in seconds)
+		if (resultExpirationValue > ENTRY_EXPIRATION_LIMIT) {
+			resultExpirationValue = ENTRY_EXPIRATION_LIMIT;
+		}
+
+		return resultExpirationValue;
 	}
 
 	private <T> String getEntryKey(T entry, boolean caseSensetive, Getter[] propertyGetters) {
@@ -2590,6 +2890,21 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		sb.append(']');
 
 		return sb.toString();
+	}
+
+	private String maskSensitiveAttributeValues(AttributeData attribute) {
+		if (StringHelper.equalsIgnoreCase(USER_PASSWORD, attribute.getName())) {
+			return MASKED;
+		}
+
+		Object[] values = attribute.getValues();
+		String[] maskedValues = new String[values.length];
+		for (int i = 0; i < values.length; i++) {
+			Object value = values[i];
+			maskedValues[i] = (value == null) ? null : SensitiveDataMasker.maskJsonValues(value.toString());
+		}
+
+		return Arrays.toString(maskedValues);
 	}
 
 	protected boolean isValidateAfterUpdate() {

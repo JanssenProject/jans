@@ -7,13 +7,18 @@
 //!
 //! This module is extracted from `loader.rs` for maintainability.
 
-use super::super::archive_handler::ArchiveVfs;
+use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
-use super::super::issuer_parser::IssuerParser;
-use super::super::manager::PolicyStoreManager;
+use super::super::formats::ReadStoreError;
+use super::super::formats::v1::trusted_issuer::IssuerParser;
+use super::super::migration::MigrationError;
+use super::super::migration::v1_to_v2::V1ToV2Error;
+use super::super::policy_parser;
+use super::super::test_utils::read_v0_files;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
 use super::*;
+use std::fmt::Write as FmtWrite;
 use std::fs::{self, File};
 use std::io::{Cursor, Read, Write};
 use std::path::{Path, PathBuf};
@@ -69,7 +74,37 @@ impl VfsFileSystem for ErrorInjectorVfs {
     }
 }
 
-type PhysicalLoader = DefaultPolicyStoreLoader<PhysicalVfs>;
+/// Parse and validate Cedar policies from loaded policy files.
+fn parse_policies(
+    policy_files: &[StoreFile],
+) -> Result<Vec<policy_parser::ParsedPolicy>, PolicyStoreError> {
+    let mut parsed_policies = Vec::new();
+    for file in policy_files {
+        let parsed_list = policy_parser::PolicyParser::parse_policy(&file.content, &file.name)?;
+        parsed_policies.extend(parsed_list);
+    }
+    Ok(parsed_policies)
+}
+
+/// Parse and validate Cedar templates from loaded template files.
+fn parse_templates(
+    template_files: &[StoreFile],
+) -> Result<Vec<policy_parser::ParsedTemplate>, PolicyStoreError> {
+    let mut parsed_templates = Vec::new();
+    for file in template_files {
+        let parsed_list = policy_parser::PolicyParser::parse_template(&file.content, &file.name)?;
+        parsed_templates.extend(parsed_list);
+    }
+    Ok(parsed_templates)
+}
+
+/// Create a Cedar `PolicySet` from parsed policies and templates.
+fn create_policy_set(
+    policies: Vec<policy_parser::ParsedPolicy>,
+    templates: Vec<policy_parser::ParsedTemplate>,
+) -> Result<cedar_policy::PolicySet, PolicyStoreError> {
+    policy_parser::PolicyParser::create_policy_set(policies, templates)
+}
 
 /// Helper to create a minimal valid policy store directory for testing.
 fn create_test_policy_store(dir: &Path) -> std::io::Result<()> {
@@ -166,10 +201,10 @@ fn create_test_archive(
 
 #[test]
 fn test_validate_nonexistent_directory() {
-    let loader = DefaultPolicyStoreLoader::new_physical();
+    let store_vfs = PhysicalVfs::new();
     let path = PathBuf::from("/nonexistent/path");
     let path_str = path.to_str().unwrap_or("/nonexistent/path");
-    let result = loader.validate_directory_structure(path_str);
+    let result = read_v0_files(&store_vfs, path_str, false);
     let err = result.expect_err("Expected error for nonexistent directory");
     assert!(
         matches!(&err, PolicyStoreError::PathNotFound { .. })
@@ -187,8 +222,8 @@ fn test_validate_directory_missing_metadata() {
     fs::write(dir.join("schema.cedarschema"), "test").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_directory_structure(dir.to_str().unwrap());
+    let store_vfs = PhysicalVfs::new();
+    let result = read_v0_files(&store_vfs, dir.to_str().unwrap(), false);
 
     let err = result.expect_err("Expected error for missing metadata.json");
     assert!(
@@ -210,8 +245,8 @@ fn test_validate_directory_missing_schema_is_optional() {
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_directory_structure(dir.to_str().unwrap());
+    let store_vfs = PhysicalVfs::new();
+    let result = read_v0_files(&store_vfs, dir.to_str().unwrap(), false);
 
     result.expect("Expected success: schema.cedarschema is now optional");
 }
@@ -225,8 +260,8 @@ fn test_validate_directory_missing_policies_dir() {
     fs::write(dir.join("metadata.json"), "{}").unwrap();
     fs::write(dir.join("schema.cedarschema"), "test").unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_directory_structure(dir.to_str().unwrap());
+    let store_vfs = PhysicalVfs::new();
+    let result = read_v0_files(&store_vfs, dir.to_str().unwrap(), false);
 
     let err = result.expect_err("Expected error for missing policies directory");
     assert!(
@@ -247,10 +282,9 @@ fn test_validate_directory_success() {
     // Create valid structure
     create_test_policy_store(dir).unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.validate_directory_structure(dir.to_str().unwrap());
-
-    assert!(result.is_ok());
+    let store_vfs = PhysicalVfs::new();
+    read_v0_files(&store_vfs, dir.to_str().unwrap(), false)
+        .expect("a complete store directory should load");
 }
 
 #[test]
@@ -261,16 +295,16 @@ fn test_load_directory_success() {
     // Create valid policy store
     create_test_policy_store(dir).unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Verify loaded data
-    assert_eq!(loaded_directory.metadata.cedar_version, "4.4.0");
+    let metadata = raw_metadata(&loaded_directory);
+    assert_eq!(metadata["cedar_version"], "4.4.0", "cedar_version mismatch");
     assert_eq!(
-        loaded_directory.metadata.policy_store.name,
-        "Test Policy Store"
+        metadata["policy_store"]["name"], "Test Policy Store",
+        "policy store name mismatch"
     );
     assert!(
         loaded_directory.schema.is_some(),
@@ -302,9 +336,8 @@ fn test_load_directory_with_optional_components() {
     fs::create_dir(dir.join("trusted-issuers")).unwrap();
     fs::write(dir.join("trusted-issuers/issuer1.json"), "{}").unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load with optional components to succeed");
 
     assert_eq!(loaded_directory.templates.len(), 1);
@@ -322,8 +355,8 @@ fn test_load_directory_invalid_policy_extension() {
     // Add file with wrong extension
     fs::write(dir.join("policies/bad.txt"), "invalid").unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load_directory(dir.to_str().unwrap(), true);
+    let store_vfs = PhysicalVfs::new();
+    let result = read_v0_files(&store_vfs, dir.to_str().unwrap(), true);
 
     let err = result.expect_err("Expected error for invalid policy file extension");
     assert!(
@@ -345,8 +378,8 @@ fn test_load_directory_invalid_json() {
     fs::write(dir.join("schema.cedarschema"), "schema").unwrap();
     fs::create_dir(dir.join("policies")).unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let result = loader.load_directory(dir.to_str().unwrap(), true);
+    let store_vfs = PhysicalVfs::new();
+    let result = read_v0_files(&store_vfs, dir.to_str().unwrap(), true);
 
     let err = result.expect_err("Expected error for invalid JSON in metadata.json");
     assert!(
@@ -362,16 +395,16 @@ fn test_load_directory_invalid_json() {
 #[test]
 fn test_parse_policies_success() {
     let policy_files = vec![
-        PolicyFile {
+        StoreFile {
             name: "policy1.cedar".to_string(),
             content: r"permit(principal, action, resource);".to_string(),
         },
-        PolicyFile {
+        StoreFile {
             name: "policy2.cedar".to_string(),
             content: r"forbid(principal, action, resource);".to_string(),
         },
     ];
-    let result = PhysicalLoader::parse_policies(&policy_files);
+    let result = parse_policies(&policy_files);
 
     let parsed = result.expect("failed to parse policies");
     assert_eq!(parsed.len(), 2);
@@ -383,7 +416,7 @@ fn test_parse_policies_success() {
 
 #[test]
 fn test_parse_policies_with_id_annotation() {
-    let policy_files = vec![PolicyFile {
+    let policy_files = vec![StoreFile {
         name: "my_policy.cedar".to_string(),
         content: r#"
             // @id("custom-id-123")
@@ -396,7 +429,7 @@ fn test_parse_policies_with_id_annotation() {
         .to_string(),
     }];
 
-    let result = PhysicalLoader::parse_policies(&policy_files);
+    let result = parse_policies(&policy_files);
     let parsed = result.expect("failed to parse policies with id annotation");
     assert_eq!(parsed.len(), 1);
     assert_eq!(parsed[0].id.to_string(), "custom-id-123");
@@ -404,12 +437,12 @@ fn test_parse_policies_with_id_annotation() {
 
 #[test]
 fn test_parse_policies_invalid_syntax() {
-    let policy_files = vec![PolicyFile {
+    let policy_files = vec![StoreFile {
         name: "invalid.cedar".to_string(),
         content: "this is not valid cedar syntax".to_string(),
     }];
 
-    let result = PhysicalLoader::parse_policies(&policy_files);
+    let result = parse_policies(&policy_files);
     let err = result.expect_err("Expected CedarParsing error for invalid syntax");
 
     assert!(
@@ -424,12 +457,12 @@ fn test_parse_policies_invalid_syntax() {
 
 #[test]
 fn test_parse_templates_success() {
-    let template_files = vec![PolicyFile {
+    let template_files = vec![StoreFile {
         name: "template1.cedar".to_string(),
         content: r"permit(principal == ?principal, action, resource);".to_string(),
     }];
 
-    let result = PhysicalLoader::parse_templates(&template_files);
+    let result = parse_templates(&template_files);
     let parsed = result.expect("failed to parse templates");
     assert_eq!(parsed.len(), 1);
     assert_eq!(parsed[0].filename, "template1.cedar");
@@ -439,25 +472,25 @@ fn test_parse_templates_success() {
 #[test]
 fn test_create_policy_set_integration() {
     let policy_files = vec![
-        PolicyFile {
+        StoreFile {
             name: "allow.cedar".to_string(),
             content: r"permit(principal, action, resource);".to_string(),
         },
-        PolicyFile {
+        StoreFile {
             name: "deny.cedar".to_string(),
             content: r"forbid(principal, action, resource);".to_string(),
         },
     ];
 
-    let template_files = vec![PolicyFile {
+    let template_files = vec![StoreFile {
         name: "user_template.cedar".to_string(),
         content: r"permit(principal == ?principal, action, resource);".to_string(),
     }];
 
-    let policies = PhysicalLoader::parse_policies(&policy_files).unwrap();
-    let templates = PhysicalLoader::parse_templates(&template_files).unwrap();
+    let policies = parse_policies(&policy_files).unwrap();
+    let templates = parse_templates(&template_files).unwrap();
 
-    let result = PhysicalLoader::create_policy_set(policies, templates);
+    let result = create_policy_set(policies, templates);
     assert!(result.is_ok());
 
     let policy_set = result.unwrap();
@@ -500,13 +533,12 @@ fn test_load_and_parse_policies_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse the policies
-    let parsed_policies = PhysicalLoader::parse_policies(&loaded_directory.policies).unwrap();
+    let parsed_policies = parse_policies(&loaded_directory.policies).unwrap();
 
     // Should have 3 policies: 1 from create_test_policy_store helper + 2 from this test
     assert_eq!(parsed_policies.len(), 3);
@@ -518,7 +550,7 @@ fn test_load_and_parse_policies_end_to_end() {
     assert!(ids.contains(&"edit_policy".to_string())); // Derived from filename
 
     // Create a policy set
-    let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![]).unwrap();
+    let policy_set = create_policy_set(parsed_policies, vec![]).unwrap();
     assert!(!policy_set.is_empty());
 }
 
@@ -573,9 +605,8 @@ fn test_load_and_parse_schema_end_to_end() {
     fs::write(dir.join("schema.cedarschema"), schema_content).unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Schema should be loaded
@@ -587,10 +618,11 @@ fn test_load_and_parse_schema_end_to_end() {
     // Use the already-parsed schema from the loader
     let parsed = loaded_directory
         .schema
+        .as_ref()
         .expect("Schema should be present in loaded directory");
     // Get the Cedar schema object
     let schema = parsed.get_schema();
-    assert!(!format!("{schema:?}").is_empty());
+    assert_ne!(format!("{schema:?}"), "");
 }
 
 #[test]
@@ -644,9 +676,8 @@ fn test_load_and_parse_entities_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Entities should be loaded
@@ -717,9 +748,8 @@ fn test_entity_with_complex_attributes() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse entities
@@ -761,7 +791,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("jans.json"),
         r#"{
             "id": "jans_server",
-            "name": "Jans Authorization Server",
+            "name": "Jans",
             "description": "Primary Jans OpenID Connect Provider",
             "configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -782,7 +812,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("google.json"),
         r#"{
             "id": "google_oauth",
-            "name": "Google OAuth",
+            "name": "Google",
             "description": "Google OAuth 2.0 Provider",
             "configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -796,9 +826,8 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Issuers should be loaded
@@ -829,9 +858,250 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"jans_server".to_string()));
     assert!(ids.contains(&"google_oauth".to_string()));
 
-    // Create issuer map
-    let issuer_map = IssuerParser::create_issuer_map(all_issuers);
-    assert_eq!(issuer_map.len(), 2, "Map should have 2 issuers");
+    // Build the runtime store and check the issuer map
+    let store = read_from_vfs(
+        &store_vfs,
+        dir.to_str().expect("temp dir should be UTF-8"),
+        false,
+        None,
+    )
+    .expect("store with two issuers should parse")
+    .store;
+    // Google's only token is `trusted: false`, so nothing of it is migrated.
+    let issuer_map = store.token_types.jwt_issuers();
+    assert_eq!(
+        issuer_map
+            .keys()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>(),
+        vec!["Jans"],
+        "only the issuer with trusted tokens should remain"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_end_to_end() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    // Create custom-issuers directory with one issuer file.
+    let ci_dir = dir.join("custom-issuers");
+    fs::create_dir(&ci_dir).unwrap();
+    fs::write(
+        ci_dir.join("acme.json"),
+        r#"{
+            "id": "acme",
+            "tokens_mappings": {
+                "Acme::CustomToken": {
+                    "required": true,
+                    "required_claims": ["sub"]
+                }
+            }
+        }"#,
+    )
+    .unwrap();
+
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
+        .expect("directory load should succeed");
+
+    // Loader half: the file is read from custom-issuers/.
+    assert_eq!(
+        loaded_directory.custom_issuers.len(),
+        1,
+        "should load 1 custom issuer file"
+    );
+
+    // Manager half: convert wires it into PolicyStore.custom_issuers.
+    // strict=false so the assertion does not depend on a schema being present.
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
+        .expect("conversion should succeed")
+        .store;
+    assert_acme_custom_token(&store);
+}
+
+/// The `acme` custom issuer's `Acme::CustomToken` reached the runtime store.
+fn assert_acme_custom_token(store: &crate::common::policy_store::PolicyStoreWithID) {
+    let token = store
+        .token_types
+        .get("Acme::CustomToken")
+        .expect("acme should declare the Acme::CustomToken type");
+    assert_eq!(
+        token.issuer().to_string(),
+        "acme",
+        "issuer should be the file id"
+    );
+    assert!(
+        matches!(token.kind(), crate::common::policy_store::TokenTypeKind::Custom { metadata, .. } if metadata.required_claims.contains("sub")),
+        "required_claims should be converted"
+    );
+}
+
+const ACME_JSON: &str = r#"{
+    "id": "acme",
+    "tokens_mappings": {
+        "Acme::CustomToken": {
+            "required": true,
+            "required_claims": ["sub"]
+        }
+    }
+}"#;
+
+// Build a minimal valid archive containing `custom-issuers/acme.json`.
+fn make_archive_with_custom_issuer(entries: &[(&str, &str)]) -> Vec<u8> {
+    let options = || {
+        FileOptions::<ExtendedFileOptions>::default()
+            .compression_method(CompressionMethod::Deflated)
+    };
+    let mut bytes = Vec::new();
+    {
+        let cursor = Cursor::new(&mut bytes);
+        let mut zip = zip::ZipWriter::new(cursor);
+
+        zip.start_file("metadata.json", options()).unwrap();
+        zip.write_all(
+            br#"{"cedar_version":"4.4.0","policy_store":{"id":"fedcba654321","name":"Test","version":"1.0.0"}}"#,
+        )
+        .unwrap();
+
+        zip.start_file("schema.cedarschema", options()).unwrap();
+        zip.write_all(b"namespace Acme { entity CustomToken; }")
+            .unwrap();
+
+        zip.start_file("policies/default.cedar", options()).unwrap();
+        zip.write_all(b"permit(principal, action, resource);")
+            .unwrap();
+
+        for (path, content) in entries {
+            zip.start_file(*path, options()).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+
+        zip.finish().unwrap();
+    }
+    bytes
+}
+
+#[test]
+fn test_load_custom_issuers_archive_vfs_end_to_end() {
+    let archive_bytes = make_archive_with_custom_issuer(&[("custom-issuers/acme.json", ACME_JSON)]);
+
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes.clone(), ArchiveLimits::default())
+        .expect("ArchiveVfs from buffer");
+    let loaded_directory =
+        read_v0_files(&archive_vfs, ".", true).expect("load_directory should succeed");
+
+    assert_eq!(
+        loaded_directory.custom_issuers.len(),
+        1,
+        "ArchiveVfs: should discover 1 custom issuer file"
+    );
+
+    let store = read_from_vfs(&archive_vfs, ".", false, None)
+        .expect("reading the archive should succeed")
+        .store;
+    assert_acme_custom_token(&store);
+
+    let store2 = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())
+        .expect("read_policy_store_archive_bytes should succeed")
+        .store;
+    assert!(
+        store2.token_types.get("Acme::CustomToken").is_some(),
+        "acme issuer must survive round-trip through archive_bytes loader"
+    );
+}
+
+/// Two files declaring one entity type cannot be merged into one entry.
+#[test]
+fn test_load_custom_issuers_archive_vfs_duplicate_entity_type_errors() {
+    let archive_bytes = make_archive_with_custom_issuer(&[
+        (
+            "custom-issuers/a.json",
+            r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
+        ),
+        (
+            "custom-issuers/b.json",
+            r#"{ "id": "other", "tokens_mappings": { "A::T": {} } }"#,
+        ),
+    ]);
+
+    let err = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())
+        .expect_err("an entity type declared in two files should fail migration");
+    assert!(
+        matches!(
+            &err,
+            ReadStoreError::Migration(MigrationError::V1ToV2(
+                V1ToV2Error::DuplicateEntityType { entity_type, file_a, file_b }
+            ))
+                if entity_type == "A::T"
+                    && file_a == "custom-issuers/a.json"
+                    && file_b == "custom-issuers/b.json"
+        ),
+        "expected DuplicateEntityType naming both files, got: {err:?}"
+    );
+    assert!(
+        err.to_string().starts_with("spec version 1 to 2: "),
+        "the message should name the migration step that failed, got: {err}"
+    );
+}
+
+#[test]
+fn test_load_custom_issuers_absent_yields_empty() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
+        .expect("directory load should succeed");
+
+    assert!(
+        loaded_directory.custom_issuers.is_empty(),
+        "no custom-issuers/ dir -> empty"
+    );
+}
+
+/// v2 has no issuer id: files sharing one are one issuer with every token type.
+#[test]
+fn test_load_custom_issuers_shared_id_merges() {
+    let temp_dir = TempDir::new().unwrap();
+    let dir = temp_dir.path();
+    create_test_policy_store(dir).expect("Failed to create test policy store");
+
+    let ci_dir = dir.join("custom-issuers");
+    fs::create_dir(&ci_dir).unwrap();
+    fs::write(
+        ci_dir.join("a.json"),
+        r#"{ "id": "dup", "tokens_mappings": { "A::Alpha": {} } }"#,
+    )
+    .unwrap();
+    fs::write(
+        ci_dir.join("b.json"),
+        r#"{ "id": "dup", "tokens_mappings": { "B::Beta": {} } }"#,
+    )
+    .unwrap();
+
+    let store_vfs = PhysicalVfs::new();
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
+        .expect("custom issuers sharing an id should load")
+        .store;
+    for entity_type in ["A::Alpha", "B::Beta"] {
+        let token = store
+            .token_types
+            .get(entity_type)
+            .expect("both token types should be kept");
+        assert_eq!(
+            token.issuer().to_string(),
+            "dup",
+            "{entity_type} issuer mismatch"
+        );
+    }
+}
+
+/// The raw `metadata.json` the loader read, as JSON.
+fn raw_metadata(files: &formats::Files) -> serde_json::Value {
+    serde_json::from_str(&files.metadata_json).expect("metadata.json should be valid JSON")
 }
 
 #[test]
@@ -875,9 +1145,8 @@ fn test_parse_issuer_with_token_metadata() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Parse issuers
@@ -901,7 +1170,7 @@ fn test_parse_issuer_with_token_metadata() {
 }
 
 #[test]
-fn test_detect_duplicate_issuer_ids() {
+fn test_issuers_sharing_v1_id_both_load() {
     // Create in-memory filesystem
     let vfs = MemoryVfs::new();
 
@@ -943,12 +1212,12 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    // Create trusted-issuers directory with duplicate IDs
+    // v2 has no issuer id: two files sharing one are two issuers
     vfs.create_file(
         "trusted-issuers/file1.json",
         r#"{
             "id": "issuer1",
-            "name": "Issuer One",
+            "name": "One",
             "description": "First instance",
             "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -965,7 +1234,7 @@ action "read" appliesTo {
         "trusted-issuers/file2.json",
         r#"{
             "id": "issuer1",
-            "name": "Issuer One Duplicate",
+            "name": "OneCopy",
             "description": "Duplicate instance",
             "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -978,34 +1247,14 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    // Load the policy store using the in-memory filesystem
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let loaded_directory = loader
-        .load_directory("/", true)
-        .expect("Expected in-memory directory load to succeed");
-
-    // Parse issuers
-    let mut all_issuers = Vec::new();
-
-    for issuer_file in &loaded_directory.trusted_issuers {
-        let parsed_issuers = IssuerParser::parse_issuer(&issuer_file.content, &issuer_file.name)
-            .expect("Should parse issuers");
-        all_issuers.extend(parsed_issuers);
-    }
-
-    // Detect duplicates
-    let validation = IssuerParser::validate_issuers(&all_issuers);
-    let errors = validation.expect_err("Should detect duplicate issuer IDs");
-    assert_eq!(errors.len(), 1, "Should have 1 duplicate error");
+    let store = read_from_vfs(&vfs, "/", false, None)
+        .expect("issuers sharing a v1 id should load")
+        .store;
+    let issuers = store.token_types.jwt_issuers();
     assert!(
-        errors[0].contains("issuer1"),
-        "Error should mention the duplicate issuer ID 'issuer1', got: {}",
-        errors[0]
-    );
-    assert!(
-        errors[0].contains("file1.json") || errors[0].contains("file2.json"),
-        "Error should mention the source file, got: {}",
-        errors[0]
+        issuers.contains_key("One") && issuers.contains_key("OneCopy"),
+        "both issuers should be kept, got: {:?}",
+        issuers.keys().collect::<Vec<_>>()
     );
 }
 
@@ -1050,10 +1299,8 @@ fn test_issuer_missing_required_field() {
     .unwrap();
 
     // Load the policy store using in-memory filesystem
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let loaded_directory = loader
-        .load_directory("/", true)
-        .expect("Expected in-memory directory load to succeed");
+    let loaded_directory =
+        read_v0_files(&vfs, "/", true).expect("Expected in-memory directory load to succeed");
 
     // Parse issuers - should fail
     let result = IssuerParser::parse_issuer(
@@ -1098,7 +1345,7 @@ fn test_complete_policy_store_with_issuers() {
         issuers_dir.join("issuer.json"),
         r#"{
             "id": "main_issuer",
-            "name": "Main Issuer",
+            "name": "Main",
             "description": "Primary authentication provider",
             "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -1111,13 +1358,15 @@ fn test_complete_policy_store_with_issuers() {
     .unwrap();
 
     // Load the policy store
-    let loader = DefaultPolicyStoreLoader::new_physical();
-    let loaded_directory = loader
-        .load_directory(dir.to_str().unwrap(), true)
+    let store_vfs = PhysicalVfs::new();
+    let loaded_directory = read_v0_files(&store_vfs, dir.to_str().unwrap(), true)
         .expect("Expected directory load to succeed");
 
     // Verify all components are loaded
-    assert_eq!(loaded_directory.metadata.name(), "Test Policy Store");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Test Policy Store"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1131,13 +1380,13 @@ fn test_complete_policy_store_with_issuers() {
     // Schema — already parsed by the loader
     let parsed_schema = loaded_directory
         .schema
+        .as_ref()
         .expect("Schema should be loaded for test policy store");
 
     // Policies
     let parsed_policies =
-        PhysicalLoader::parse_policies(&loaded_directory.policies).expect("Should parse policies");
-    let policy_set = PhysicalLoader::create_policy_set(parsed_policies, vec![])
-        .expect("Should create policy set");
+        parse_policies(&loaded_directory.policies).expect("Should parse policies");
+    let policy_set = create_policy_set(parsed_policies, vec![]).expect("Should create policy set");
 
     // Entities (parse without schema validation since this test focuses on issuers)
     let mut all_entities = Vec::new();
@@ -1160,14 +1409,26 @@ fn test_complete_policy_store_with_issuers() {
             .expect("Should parse issuers");
         all_issuers.extend(parsed_issuers);
     }
-    let issuer_map = IssuerParser::create_issuer_map(all_issuers);
+    assert_eq!(all_issuers.len(), 1, "Should parse one issuer");
 
     // Verify everything works together
     assert!(!policy_set.is_empty());
     assert_eq!(entity_store.iter().count(), 1);
-    assert!(!format!("{:?}", parsed_schema.get_schema()).is_empty());
-    assert_eq!(issuer_map.len(), 1);
-    assert!(issuer_map.contains_key("main_issuer"));
+    assert_ne!(format!("{:?}", parsed_schema.get_schema()), "");
+
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
+        .expect("complete store should parse")
+        .store;
+    let issuer_map = store.token_types.jwt_issuers();
+    assert_eq!(
+        issuer_map.len(),
+        1,
+        "only the issuer with tokens should load"
+    );
+    assert!(
+        issuer_map.contains_key("Main"),
+        "the issuer should be named Main"
+    );
 }
 
 #[test]
@@ -1227,20 +1488,24 @@ fn test_archive_vfs_end_to_end_from_file() {
     zip.finish().unwrap();
 
     // Step 1: Create ArchiveVfs from file path
-    let archive_vfs =
-        ArchiveVfs::from_file(&archive_path).expect("Should create ArchiveVfs from .cjar file");
+    let archive_vfs = ArchiveVfs::from_file(&archive_path, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from .cjar file");
 
     // Step 2: Create loader with ArchiveVfs
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
 
     // Step 3: Load policy store from archive root
-    let loaded_directory = loader
-        .load_directory(".", true)
-        .expect("Should load policy store from archive");
+    let loaded_directory =
+        read_v0_files(&archive_vfs, ".", true).expect("Should load policy store from archive");
 
     // Step 4: Verify all components loaded correctly
-    assert_eq!(loaded_directory.metadata.name(), "Archive Test Store");
-    assert_eq!(loaded_directory.metadata.policy_store.id, "abcdef123456");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Archive Test Store"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "abcdef123456"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1252,7 +1517,10 @@ fn test_archive_vfs_end_to_end_from_file() {
 
     // Step 5: Verify components can be parsed
 
-    let parsed_schema = loaded_directory.schema.expect("Should have parsed schema");
+    let parsed_schema = loaded_directory
+        .schema
+        .as_ref()
+        .expect("Should have parsed schema");
 
     let parsed_entities = EntityParser::parse_entities(
         &loaded_directory.entities[0].content,
@@ -1270,18 +1538,22 @@ fn test_archive_vfs_end_to_end_from_bytes() {
     let archive_bytes = create_test_archive("WASM Archive Store", "fedcba654321", &[], &[]);
 
     // Create ArchiveVfs from bytes (works in WASM!)
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
     // Create loader and load policy store
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader
-        .load_directory(".", true)
+    let loaded_directory = read_v0_files(&archive_vfs, ".", true)
         .expect("Should load policy store from archive bytes");
 
     // Verify loaded correctly
-    assert_eq!(loaded_directory.metadata.name(), "WASM Archive Store");
-    assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba654321");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "WASM Archive Store"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "fedcba654321"
+    );
     assert!(
         loaded_directory.schema.is_some(),
         "expected loaded_directory.schema to be Some but was None"
@@ -1344,12 +1616,10 @@ fn test_archive_vfs_with_multiple_policies() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs");
 
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader
-        .load_directory(".", true)
-        .expect("Should load policies");
+    let loaded_directory = read_v0_files(&archive_vfs, ".", true).expect("Should load policies");
 
     // Verify all policies loaded recursively from subdirectories
     assert_eq!(loaded_directory.policies.len(), 3);
@@ -1404,16 +1674,20 @@ fn test_archive_vfs_vs_physical_vfs_equivalence() {
         zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let loaded_directory = loader
-        .load_directory(".", true)
-        .expect("Should load directory from archive");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
+    let loaded_directory =
+        read_v0_files(&archive_vfs, ".", true).expect("Should load directory from archive");
 
     // Verify results are identical regardless of VFS implementation
-    assert_eq!(loaded_directory.metadata.policy_store.id, "fedcba987654");
-    assert_eq!(loaded_directory.metadata.name(), "Equivalence Test");
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["id"],
+        "fedcba987654"
+    );
+    assert_eq!(
+        raw_metadata(&loaded_directory)["policy_store"]["name"],
+        "Equivalence Test"
+    );
     assert_eq!(loaded_directory.policies.len(), 1);
     let parsed_schema = loaded_directory
         .schema
@@ -1465,11 +1739,11 @@ fn test_load_schema_from_schemas_directory() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should succeed");
+    let result = read_v0_files(&vfs, ".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present from schemas/ directory with User and Resource");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
@@ -1522,11 +1796,11 @@ fn test_load_schema_from_schemas_directory_deterministic_order() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should succeed");
+    let result = read_v0_files(&vfs, ".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present for deterministic order test");
     let fragment = parsed_schema.get_fragment();
     let json_str = fragment.clone().to_json_string().expect("json");
@@ -1574,11 +1848,11 @@ fn test_load_schema_single_file_takes_precedence_over_schemas_dir() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should succeed");
+    let result = read_v0_files(&vfs, ".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present from single file (precedence test)");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
@@ -1620,8 +1894,7 @@ fn test_load_schema_from_schemas_dir_empty_directory_returns_none() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true);
+    let result = read_v0_files(&vfs, ".", true);
 
     let err = result.expect_err("Expected EmptySchemaDirectory error for empty schemas/ dir");
     assert!(
@@ -1665,12 +1938,9 @@ fn test_load_schema_from_schemas_dir_invalid_extension() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Should skip non-.cedarschema files");
+    let result = read_v0_files(&vfs, ".", true).expect("Should skip non-.cedarschema files");
 
-    let parsed_schema = result.schema.expect("Schema should be present");
+    let parsed_schema = result.schema.as_ref().expect("Schema should be present");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
@@ -1717,11 +1987,11 @@ fn test_load_schema_from_schemas_dir_with_multiple_namespaces() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true).expect("Should succeed");
+    let result = read_v0_files(&vfs, ".", true).expect("Should succeed");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present for multi-namespace test");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
@@ -1785,16 +2055,14 @@ fn test_load_schema_from_schemas_dir_in_archive() {
         zip.finish().unwrap();
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Archive load should succeed");
+    let result = read_v0_files(&archive_vfs, ".", true).expect("Archive load should succeed");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present from schemas/ dir in archive");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
@@ -1836,8 +2104,7 @@ fn test_load_schema_from_schemas_dir_not_a_directory() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true);
+    let result = read_v0_files(&vfs, ".", true);
 
     let err = result.expect_err("Expected NotADirectory error");
     assert!(
@@ -1875,8 +2142,7 @@ fn test_load_schema_from_schemas_dir_io_error() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true);
+    let result = read_v0_files(&vfs, ".", true);
 
     let err = result.expect_err("Expected error when IO fails on schemas/ dir");
     assert!(
@@ -1910,13 +2176,11 @@ fn test_load_schema_from_schemas_dir_empty_file() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Empty file is valid Cedar schema fragment");
+    let result = read_v0_files(&vfs, ".", true).expect("Empty file is valid Cedar schema fragment");
 
     let parsed_schema = result
         .schema
+        .as_ref()
         .expect("Schema should be present for empty file test");
     // Empty file produces an empty schema (no entity types)
     assert_eq!(
@@ -1958,12 +2222,9 @@ fn test_load_schema_from_schemas_dir_mixed_extensions() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Should skip .txt files");
+    let result = read_v0_files(&vfs, ".", true).expect("Should skip .txt files");
 
-    let parsed_schema = result.schema.expect("Schema should be present");
+    let parsed_schema = result.schema.as_ref().expect("Schema should be present");
     let entity_types: Vec<_> = parsed_schema
         .get_schema()
         .entity_types()
@@ -2006,8 +2267,7 @@ fn test_load_directory_schema_read_error_propagated() {
     )
     .unwrap();
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader.load_directory(".", true);
+    let result = read_v0_files(&vfs, ".", true);
 
     let err = result
         .expect_err("Expected FileReadError when schema file read returns non-NotFound IO error");
@@ -2053,13 +2313,9 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     )
     .expect("Should create test.cedar");
 
-    let loader = DefaultPolicyStoreLoader::new(vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Should load directory with shared namespace schemas");
-
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed with shared namespaces across files");
+    let policy_store = read_from_vfs(&vfs, ".", false, None)
+        .expect("the store should read with shared namespaces across files")
+        .store;
 
     let cedar_schema = policy_store
         .schema
@@ -2125,16 +2381,12 @@ fn test_archive_shared_namespace_full_pipeline() {
         zip.finish().expect("Should finalize archive");
     }
 
-    let archive_vfs =
-        ArchiveVfs::from_buffer(archive_bytes).expect("Should create ArchiveVfs from bytes");
+    let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
+        .expect("Should create ArchiveVfs from bytes");
 
-    let loader = DefaultPolicyStoreLoader::new(archive_vfs);
-    let result = loader
-        .load_directory(".", true)
-        .expect("Should load archive with shared namespace schemas");
-
-    let policy_store = PolicyStoreManager::convert_to_legacy(result, false)
-        .expect("convert_to_legacy should succeed for archive with shared namespaces");
+    let policy_store = read_from_vfs(&archive_vfs, ".", false, None)
+        .expect("the archive should read with shared namespaces")
+        .store;
 
     let cedar_schema = policy_store
         .schema
@@ -2157,5 +2409,49 @@ fn test_archive_shared_namespace_full_pipeline() {
     assert!(
         type_names.contains(&"App::Admin".to_string()),
         "Archive schema should contain App::Admin; got: {type_names:?}"
+    );
+}
+
+#[test]
+fn test_max_recursion_depth_exceeded() {
+    let vfs = MemoryVfs::new();
+
+    vfs.create_file(
+        "metadata.json",
+        br#"{
+        "cedar_version": "4.4.0",
+        "policy_store": {
+            "id": "abcdef1234567890",
+            "name": "Deep Nesting Test",
+            "version": "1.0.0"
+        }
+    }"#,
+    )
+    .unwrap();
+
+    vfs.create_file(
+        "schema.cedarschema",
+        b"namespace App { entity User; entity Resource; action \"read\" appliesTo { principal: [User], resource: [Resource] }; }",
+    )
+    .unwrap();
+
+    // Build a directory tree deeper than MAX_RECURSION_DEPTH (64).
+    // Place a .cedar file at the bottom so the only failure path is the depth check.
+    let depth = 66;
+    let mut path = String::from("policies");
+    for i in 0..depth {
+        let _ = write!(path, "/level{i}");
+    }
+    let file_path = format!("{path}/deep.cedar");
+    vfs.create_file(&file_path, b"permit(principal, action, resource);")
+        .unwrap();
+
+    let result = read_v0_files(&vfs, ".", true);
+
+    let err = result.expect_err("Should fail with MaxDepthExceeded");
+    let err_msg = err.to_string();
+    assert!(
+        err_msg.contains("Maximum directory recursion depth"),
+        "Error should mention max depth, got: {err_msg}"
     );
 }

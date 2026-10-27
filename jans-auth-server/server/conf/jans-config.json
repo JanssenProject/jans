@@ -23,6 +23,7 @@
       "status_list",
       "session_status_list",
       "access_evaluation",
+      "client_id_metadata_document",
       "identity_assertion_authz_grant"
     ],
     "issuer":"${config.oxauth.issuer}",
@@ -76,8 +77,6 @@
     ],
     "grantTypesSupported":[
         "authorization_code",
-        "implicit",
-        "password",
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -442,6 +441,7 @@
     "clientWhiteList": ["*"],
     "clientBlackList": ["*.attacker.com/*"],
     "legacyIdTokenClaims": false,
+    "strictTokenRedirectUriValidation": true,
     "customHeadersWithAuthorizationResponse": true,
     "updateUserLastLogonTime": true,
     "updateClientAccessTime":true,
@@ -546,6 +546,12 @@
         "serializeRules": {
           "JAVA": ["java", "sun", "com.sun", "jdk"],
           "KRYO": []
+        },
+        "trackingSettings": {
+            "enabled": false,
+            "skipTemplateViews": false,
+            "skipInstructionFrequencies": false,
+            "excludedFlows": [ ]
         }
     },
     "blockWebviewAuthorizationEnabled": false,

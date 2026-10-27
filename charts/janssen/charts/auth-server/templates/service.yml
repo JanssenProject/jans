@@ -30,7 +30,8 @@ spec:
 {{ toYaml . | indent 4 }}
   {{- end }}
 
-{{- if and (index .Values.global "auth-server" "lockEnabled") (index .Values.global "auth-server" "ingress" "lockAuditEnabled") }}
+{{- /* Bound to lockEnabled: auth-server serves gRPC whenever Lock is on, so the service always exists. Exposing it is a separate decision made by the route/ingress flags. */ -}}
+{{- if index .Values.global "auth-server" "lockEnabled" }}
 ---
 apiVersion: v1
 kind: Service

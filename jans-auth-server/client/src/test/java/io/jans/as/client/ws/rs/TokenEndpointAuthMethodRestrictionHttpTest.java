@@ -13,6 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -138,6 +139,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -215,6 +217,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -293,6 +296,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -369,15 +373,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -457,6 +462,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -534,6 +540,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -612,6 +619,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -688,15 +696,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -717,12 +726,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * Request authorization code.
      * Call to Token Endpoint with Auth Method <code>client_secret_Jwt</code>.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwt(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwt");
 
         // 1. Register client
@@ -775,11 +783,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -800,12 +809,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * If token_endpoint_auth_signing_alg is omitted in client registration,
      * only symmetric algorithm supported by the OP and the RP can be used.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtHS256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS256");
 
         // 1. Register client
@@ -858,11 +866,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -884,12 +893,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * If token_endpoint_auth_signing_alg is omitted in client registration,
      * only symmetric algorithm supported by the OP and the RP can be used.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtHS384(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS384");
 
         // 1. Register client
@@ -942,11 +950,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -968,12 +977,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
      * If token_endpoint_auth_signing_alg is omitted in client registration,
      * any algorithm supported by the OP and the RP can be used.
      */
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtHS512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtHS512");
 
         // 1. Register client
@@ -1026,11 +1034,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1111,17 +1120,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1197,17 +1207,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1283,17 +1294,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1369,17 +1381,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1455,17 +1468,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1541,17 +1555,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1627,17 +1642,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS256));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1713,17 +1729,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1799,17 +1816,18 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setCryptoProvider(cryptoProvider);
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
@@ -1822,12 +1840,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256");
 
         // 1. Register client
@@ -1884,11 +1901,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1906,12 +1924,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail1(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail1");
 
         // 1. Register client
@@ -1968,11 +1985,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -1990,12 +2008,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail2(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS256Fail2");
 
         // 1. Register client
@@ -2052,11 +2069,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2074,12 +2092,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384");
 
         // 1. Register client
@@ -2136,11 +2153,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2158,12 +2176,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail1(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail1");
 
         // 1. Register client
@@ -2220,11 +2237,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2242,12 +2260,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail2(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS384Fail2");
 
         // 1. Register client
@@ -2304,11 +2321,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2326,12 +2344,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512");
 
         // 1. Register client
@@ -2388,11 +2405,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2410,12 +2428,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 .check();
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail1(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail1");
 
         // 1. Register client
@@ -2472,11 +2489,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2494,12 +2512,11 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertNotNull(tokenResponse.getErrorDescription(), "The error description is null");
     }
 
-    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "dnName", "keyStoreFile", "keyStoreSecret",
-            "sectorIdentifierUri"})
+    @Parameters({"redirectUris", "redirectUri", "userId", "userSecret", "sectorIdentifierUri"})
     @Test
     public void tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail2(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String dnName, final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) throws Exception {
         showTitle("tokenEndpointAuthMethodClientSecretJwtSigningAlgHS512Fail2");
 
         // 1. Register client
@@ -2556,11 +2573,12 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2640,6 +2658,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2717,6 +2736,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2793,15 +2813,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setCryptoProvider(cryptoProvider);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -2835,7 +2856,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -2881,15 +2902,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -2966,6 +2988,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3044,6 +3067,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         // 4. Get Access Token
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3123,6 +3147,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
@@ -3151,7 +3176,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3197,15 +3222,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3232,7 +3258,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3278,15 +3304,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3313,7 +3340,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3359,15 +3386,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3394,7 +3422,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3440,15 +3468,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3475,7 +3504,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3521,15 +3550,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3556,7 +3586,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3602,15 +3632,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3637,7 +3668,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3683,15 +3714,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3718,7 +3750,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3764,15 +3796,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3799,7 +3832,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3845,15 +3878,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3881,7 +3915,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -3930,15 +3964,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -3966,7 +4001,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4015,15 +4050,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4051,7 +4087,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4100,15 +4136,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4136,7 +4173,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4186,15 +4223,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4222,7 +4260,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4272,15 +4310,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4308,7 +4347,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4358,15 +4397,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4394,7 +4434,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4444,15 +4484,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4480,7 +4521,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4530,15 +4571,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4566,7 +4608,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4616,15 +4658,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4652,7 +4695,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4702,15 +4745,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4738,7 +4782,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4788,15 +4832,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4824,7 +4869,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4874,15 +4919,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4910,7 +4956,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -4960,15 +5006,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -4996,7 +5043,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5046,15 +5093,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5082,7 +5130,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5132,15 +5180,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5168,7 +5217,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5218,15 +5267,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5254,7 +5304,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5304,15 +5354,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5340,7 +5391,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5390,15 +5441,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5426,7 +5478,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5476,15 +5528,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5512,7 +5565,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5562,15 +5615,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5598,7 +5652,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5648,15 +5702,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5684,7 +5739,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5734,15 +5789,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5770,7 +5826,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5820,15 +5876,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5856,7 +5913,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5906,15 +5963,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -5942,7 +6000,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -5992,15 +6050,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6028,7 +6087,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6078,15 +6137,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6114,7 +6174,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6164,15 +6224,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6200,7 +6261,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6250,15 +6311,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6286,7 +6348,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6336,15 +6398,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6372,7 +6435,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6422,15 +6485,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6458,7 +6522,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6508,15 +6572,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6544,7 +6609,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6594,15 +6659,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6630,7 +6696,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6680,15 +6746,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6716,7 +6783,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6766,15 +6833,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6802,7 +6870,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6852,15 +6920,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6888,7 +6957,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -6938,15 +7007,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -6974,7 +7044,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7024,15 +7094,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7060,7 +7131,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7110,15 +7181,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7146,7 +7218,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7196,15 +7268,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7232,7 +7305,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7282,15 +7355,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7318,7 +7392,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7368,15 +7442,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7404,7 +7479,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7454,15 +7529,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7490,7 +7566,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7540,15 +7616,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7576,7 +7653,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7626,15 +7703,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7661,7 +7739,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7711,15 +7789,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7747,7 +7826,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7797,15 +7876,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7833,7 +7913,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7883,15 +7963,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -7919,7 +8000,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -7969,15 +8050,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8005,7 +8087,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8055,15 +8137,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.PS512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.PS512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8091,7 +8174,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8141,15 +8224,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8177,7 +8261,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8227,15 +8311,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.RS384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.RS384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8263,7 +8348,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8313,15 +8398,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES256);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES256));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8349,7 +8435,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8399,15 +8485,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES384);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES384));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 
@@ -8435,7 +8522,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
-        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setJwks(TestCryptoContext.getInstance().getJwksAsString());
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(Tester.standardScopes);
 
@@ -8485,15 +8572,16 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         String authorizationCode = authorizationResponse.getCode();
 
         // 4. Get Access Token
-        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        AuthCryptoProvider cryptoProvider = TestCryptoContext.getInstance().getCryptoProvider();
 
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
         tokenRequest.setAuthenticationMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         tokenRequest.setAlgorithm(SignatureAlgorithm.ES512);
         tokenRequest.setCryptoProvider(cryptoProvider);
-        tokenRequest.setKeyId(keyId);
+        tokenRequest.setKeyId(TestCryptoContext.getInstance().getKeyId(Algorithm.ES512));
         tokenRequest.setAudience(tokenEndpoint);
         tokenRequest.setCode(authorizationCode);
+        applyCodeVerifier(tokenRequest);
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
 

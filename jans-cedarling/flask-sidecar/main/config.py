@@ -32,7 +32,6 @@ def parse_bool_env(var_name: str, default: str = "False") -> bool:
     return value.lower() in ("true", "1", "yes")
 
 
-
 class BaseConfig:
     API_TITLE = "Cedarling Sidecar"
     API_VERSION = "v1"
@@ -64,6 +63,7 @@ class BaseConfig:
     CEDARLING_BOOTSTRAP_CONFIG = None
 
     SIDECAR_DEBUG_RESPONSE = parse_bool_env("SIDECAR_DEBUG_RESPONSE")
+    SIDECAR_TRACE_WORKLOAD_ID = os.getenv("SIDECAR_TRACE_WORKLOAD_ID")
 
 
 class TestingConfig(BaseConfig):

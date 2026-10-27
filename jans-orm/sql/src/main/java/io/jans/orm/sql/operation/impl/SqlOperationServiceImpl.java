@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +211,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
 				} else {
 					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
-					sqlInsertQuery.values(attribute.getValue());
+					sqlInsertQuery.values(convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
 				}
 			}
 			
@@ -237,41 +238,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean updateEntryImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods) throws PersistenceException {
 		try {
-			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
-
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
-
-			for (AttributeDataModification attributeMod : mods) {
-				AttributeData attribute = attributeMod.getAttribute();
-				Path path = Expressions.stringPath(attribute.getName());
-
-				AttributeType attributeType = getAttributeType(columTypes, attribute);
-				if (attributeType == null) {
-		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
-				}
-
-				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
-				
-				AttributeModificationType type = attributeMod.getModificationType();
-                if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
-					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
-    				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
-    				}
-                } else if (AttributeModificationType.REPLACE == type) {
-					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
-    				} else {
-    					sqlUpdateQuery.set(path, attribute.getValue());
-    				}
-                } else if (AttributeModificationType.REMOVE == type) {
-    				sqlUpdateQuery.setNull(path);
-                } else {
-                    throw new UnsupportedOperationException("Operation type '" + type + "' is not implemented");
-                }
-			}
+			SQLUpdateClause sqlUpdateQuery = buildUpdateClause(tableMapping, tableRelationalPath, mods);
 
 			Predicate whereExp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
 					Expressions.constant(key));
@@ -282,6 +250,84 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         } catch (QueryException ex) {
             throw new PersistenceException("Failed to update entry", ex);
         }
+	}
+
+	@Override
+	public boolean updateEntryWithVersion(String key, String objectClass, List<AttributeDataModification> mods,
+			String versionAttributeName, Object expectedVersionValue) throws UnsupportedOperationException, PersistenceException {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+        boolean result = updateEntryWithVersionImpl(tableMapping, key, mods, versionAttributeName, expectedVersionValue);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+
+        return result;
+	}
+
+	private boolean updateEntryWithVersionImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods,
+			String versionAttributeName, Object expectedVersionValue) throws PersistenceException {
+		try {
+			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+			SQLUpdateClause sqlUpdateQuery = buildUpdateClause(tableMapping, tableRelationalPath, mods);
+
+			Predicate docIdPredicate = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
+					Expressions.constant(key));
+			Predicate versionPredicate = ExpressionUtils.eq(Expressions.path(Object.class, versionAttributeName),
+					Expressions.constant(expectedVersionValue));
+			Predicate whereExp = ExpressionUtils.allOf(docIdPredicate, versionPredicate);
+
+			long rowInserted = sqlUpdateQuery.where(whereExp).execute();
+
+			return rowInserted == 1;
+        } catch (QueryException ex) {
+            throw new PersistenceException("Failed to update entry", ex);
+        }
+	}
+
+	/**
+	 * Shared SET-clause builder for {@link #updateEntryImpl} and {@link #updateEntryWithVersionImpl} --
+	 * only the WHERE predicate differs between a plain update and a versioned (CAS) one.
+	 */
+	private SQLUpdateClause buildUpdateClause(TableMapping tableMapping, RelationalPathBase<Object> tableRelationalPath,
+			List<AttributeDataModification> mods) throws PersistenceException {
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+
+		SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
+
+		for (AttributeDataModification attributeMod : mods) {
+			AttributeData attribute = attributeMod.getAttribute();
+			Path path = Expressions.stringPath(attribute.getName());
+
+			AttributeType attributeType = getAttributeType(columTypes, attribute);
+			if (attributeType == null) {
+	            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+			}
+
+			boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
+
+			AttributeModificationType type = attributeMod.getModificationType();
+            if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
+				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
+				} else {
+					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
+				}
+            } else if (AttributeModificationType.REPLACE == type) {
+				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
+				} else {
+					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
+				}
+            } else if (AttributeModificationType.REMOVE == type) {
+				sqlUpdateQuery.setNull(path);
+            } else {
+                throw new UnsupportedOperationException("Operation type '" + type + "' is not implemented");
+            }
+		}
+
+		return sqlUpdateQuery;
 	}
 
     @Override
@@ -441,19 +487,6 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 		Expression<?> attributesExp = buildSelectAttributes(attributes);
 
-		SQLQuery<?> sqlSelectQuery;
-		if (expression == null) {
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
-		} else {
-			Predicate whereExp = (Predicate) expression.expression();
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
-		}
-
-        SQLQuery<?> baseQuery = sqlSelectQuery;
-        if (orderBy != null) {
-            baseQuery = sqlSelectQuery.orderBy(orderBy);
-        }
-
         List<EntryData> searchResultList = new LinkedList<EntryData>();
 
         String queryStr = null;
@@ -473,7 +506,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        currentLimit = Math.min(pageSize, count - resultCount);
 	                    }
 	
-	                    query = baseQuery.limit(currentLimit).offset(start + resultCount);
+	                    // Build new query for every iteration. SQLQuery can't be executed
+                    // second time because it releases connection after getResults() call
+                    query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy)
+                    		.limit(currentLimit).offset(start + resultCount);
 
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
@@ -510,7 +546,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	    		}
 	        } else {
 	    		try {
-	                SQLQuery<?> query = baseQuery;
+	                SQLQuery<?> query = buildBaseSearchQuery(tableRelationalPath, attributesExp, expression, orderBy);
 	                if (count > 0) {
 	                    query = query.limit(count);
 	                }
@@ -764,6 +800,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 						}
 
 						attributeValueObjects = new Object[] { value };
+					} else if (attributeObject instanceof byte[]) {
+						// Binary column. Pass raw binary value without base64 conversion
+						attributeValueObjects = new Object[] { attributeObject };
+					} else if (attributeObject instanceof java.sql.Blob) {
+						java.sql.Blob blobValue = (java.sql.Blob) attributeObject;
+						attributeValueObjects = new Object[] { blobValue.getBytes(1, (int) blobValue.length()) };
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
@@ -906,6 +948,23 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		expresisons.add(Expressions.path(Object.class, docAlias, DOC_ID));
 
 		return Expressions.list(expresisons.toArray(new Expression<?>[0]));
+	}
+
+	private SQLQuery<?> buildBaseSearchQuery(RelationalPathBase<Object> tableRelationalPath, Expression<?> attributesExp,
+			ConvertedExpression expression, OrderSpecifier<?>[] orderBy) {
+		SQLQuery<?> sqlSelectQuery;
+		if (expression == null) {
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
+		} else {
+			Predicate whereExp = (Predicate) expression.expression();
+			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+		}
+
+		if (orderBy != null) {
+			sqlSelectQuery = sqlSelectQuery.orderBy(orderBy);
+		}
+
+		return sqlSelectQuery;
 	}
 
 	private RelationalPathBase<Object> buildTableRelationalPath(TableMapping tableMapping) {
@@ -1170,6 +1229,38 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
 		}
+	}
+
+	/*
+	 * Prepare single valued attribute value before binding it to DB column
+	 */
+	private Object convertValueToDbColumn(TableMapping tableMapping, AttributeType attributeType, Object value) {
+		if (value instanceof byte[]) {
+			if (isBinaryColumn(tableMapping.getTableName(), attributeType.getType())) {
+				// Store raw binary value without base64 conversion
+				return value;
+			}
+
+			// Fallback to base64 encoded string if DB column is not binary
+			return Base64.encodeBase64String((byte[]) value);
+		}
+
+		return value;
+	}
+
+	@Override
+	public boolean isBinaryColumn(String tableName, String columnTypeName) {
+		if (columnTypeName == null) {
+			return false;
+		}
+
+		return SqlOperationService.BINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.VARBINARY_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.TINYBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.MEDIUMBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.LONGBLOB_TYPE_NAME.equals(columnTypeName)
+				|| SqlOperationService.BYTEA_TYPE_NAME.equals(columnTypeName);
 	}
 
 	public boolean isJsonColumn(String tableName, String columnTypeName) {

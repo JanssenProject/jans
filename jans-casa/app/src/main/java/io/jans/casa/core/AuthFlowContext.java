@@ -21,6 +21,8 @@ public class AuthFlowContext implements Serializable {
     
     private String state;
 
+    private String codeVerifier;
+
     private boolean hasSessionAtOP;
 
     public RedirectStage getStage() {
@@ -53,6 +55,14 @@ public class AuthFlowContext implements Serializable {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getCodeVerifier() {
+        return codeVerifier;
+    }
+
+    public void setCodeVerifier(String codeVerifier) {
+        this.codeVerifier = codeVerifier;
     }
 
     @PostConstruct

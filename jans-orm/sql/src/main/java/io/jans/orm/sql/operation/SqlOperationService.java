@@ -45,6 +45,17 @@ public interface SqlOperationService extends PersistenceOperationService {
 	String LONGTEXT_TYPE_NAME = "longtext";
 	String TIMESTAMP = "timestamp";
 
+	// MySQL/MariaDB binary column types
+	String BINARY_TYPE_NAME = "binary";
+	String VARBINARY_TYPE_NAME = "varbinary";
+	String TINYBLOB_TYPE_NAME = "tinyblob";
+	String BLOB_TYPE_NAME = "blob";
+	String MEDIUMBLOB_TYPE_NAME = "mediumblob";
+	String LONGBLOB_TYPE_NAME = "longblob";
+
+	// PostgreSQL binary column type
+	String BYTEA_TYPE_NAME = "bytea";
+
     static String DN = "dn";
     static String UID = "uid";
     static String[] UID_ARRAY = new String[] { "uid" };
@@ -64,6 +75,9 @@ public interface SqlOperationService extends PersistenceOperationService {
     boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException;
 
     boolean updateEntry(String key, String objectClass, List<AttributeDataModification> mods) throws UnsupportedOperationException, PersistenceException;
+
+    boolean updateEntryWithVersion(String key, String objectClass, List<AttributeDataModification> mods, String versionAttributeName,
+            Object expectedVersionValue) throws UnsupportedOperationException, PersistenceException;
 
     boolean delete(String key, String objectClass) throws EntryNotFoundException;
 	long delete(String key, String objectClass, ConvertedExpression expression, int count) throws DeleteException;
@@ -103,6 +117,8 @@ public interface SqlOperationService extends PersistenceOperationService {
 	DatabaseMetaData getMetadata();
 
 	boolean isJsonColumn(String tableName, String attributeType);
+
+	boolean isBinaryColumn(String tableName, String attributeType);
 
 	TableMapping getTabeMapping(String key, String objectClass);
 

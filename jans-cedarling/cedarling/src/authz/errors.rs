@@ -28,19 +28,21 @@ pub enum MultiIssuerValidationError {
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
 
-    #[error("Missing issuer claim in JWT")]
-    MissingIssuer,
-
     #[error("JWT claims are not a JSON object: {0}")]
     InvalidClaims(&'static str),
+
+    #[error(transparent)]
+    CustomToken(#[from] crate::jwt::CustomTokenError),
 }
 
 /// Error type for token input validation
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 pub enum TokenInputError {
+    /// The token mapping string was empty.
     #[error("Empty mapping string")]
     EmptyMapping,
 
+    /// The token payload was empty.
     #[error("Empty payload")]
     EmptyPayload,
 }

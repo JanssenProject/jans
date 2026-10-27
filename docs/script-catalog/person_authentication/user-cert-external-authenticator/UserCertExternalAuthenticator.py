@@ -14,6 +14,7 @@ from io.jans.as.server.service import UserService
 from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
 from io.jans.service import EncryptionService
+from java.lang import Throwable
 from java.util import Arrays
 from io.jans.as.common.cert.fingerprint import FingerprintHelper
 from io.jans.as.common.cert.validation import GenericCertificateVerifier
@@ -51,7 +52,7 @@ class PersonAuthentication(PersonAuthenticationType):
         chain_cert_file_path = configurationAttributes.get("chain_cert_file_path").getValue2()
 
         self.chain_certs = CertUtil.loadX509CertificateFromFile(chain_cert_file_path)
-        if self.chain_certs == None:
+        if self.chain_certs is None:
             print "Cert. Initialization. Failed to load chain certificates from '%s'" % chain_cert_file_path
             return False
 
@@ -139,7 +140,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Validate if user selected certificate
             cert_x509 = self.getSessionAttribute("cert_x509")
-            if cert_x509 == None:
+            if cert_x509 is None:
                 print "Cert. Authenticate for step 2. User not selected any certs"
                 identity.setWorkingParameter("cert_selected", False)
                     
@@ -173,7 +174,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. Attempting to find user by jansExtUid attribute value %s" % cert_user_external_uid
 
             find_user_by_external_uid = userService.getUserByAttribute("jansExtUid", cert_user_external_uid)
-            if find_user_by_external_uid == None:
+            if find_user_by_external_uid is None:
                 print "Cert. Authenticate for step 2. Failed to find user"
                 
                 if self.map_user_cert:
@@ -189,7 +190,6 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 2. foundUserName: " + foundUserName
 
             logged_in = False
-            userService = CdiUtil.bean(UserService)
             logged_in = authenticationService.authenticate(foundUserName)
         
             print "Cert. Authenticate for step 2. Setting count steps to 2"
@@ -200,7 +200,7 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Cert. Authenticate for step 3"
 
             cert_user_external_uid = self.getSessionAttribute("cert_user_external_uid")
-            if cert_user_external_uid == None:
+            if cert_user_external_uid is None:
                 print "Cert. Authenticate for step 3. cert_user_external_uid is empty"
                 return False
 
@@ -217,10 +217,10 @@ class PersonAuthentication(PersonAuthenticationType):
             # Check if there is user which has cert_user_external_uid
             # Avoid mapping user cert to more than one IDP account
             find_user_by_external_uid = userService.getUserByAttribute("jansExtUid", cert_user_external_uid)
-            if find_user_by_external_uid == None:
+            if find_user_by_external_uid is None:
                 # Add cert_user_external_uid to user's external GUID list
                 find_user_by_external_uid = userService.addUserAttribute(user_name, "jansExtUid", cert_user_external_uid)
-                if find_user_by_external_uid == None:
+                if find_user_by_external_uid is None:
                     print "Cert. Authenticate for step 3. Failed to update current user"
                     return False
 
@@ -245,7 +245,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Try to get certificate from header X-ClientCert
             clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
-            if clientCertificate != None:
+            if clientCertificate is not None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'X-ClientCert' header"
@@ -253,7 +253,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             # Try to get certificate from attribute jakarta.servlet.request.X509Certificate
             x509Certificates = request.getAttribute('jakarta.servlet.request.X509Certificate')
-            if (x509Certificates != None) and (len(x509Certificates) > 0):
+            if (x509Certificates is not None) and (len(x509Certificates) > 0):
                 identity.setWorkingParameter("cert_x509", self.certToString(x509Certificates[0]))
                 print "Cert. Prepare for step 2. Storing user certificate obtained from 'jakarta.servlet.request.X509Certificate' attribute"
                 return True
@@ -268,7 +268,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         cert_count_login_steps = self.getSessionAttribute("cert_count_login_steps")
-        if cert_count_login_steps != None:
+        if cert_count_login_steps is not None:
             return cert_count_login_steps
         else:
             return 3
@@ -295,7 +295,6 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def processBasicAuthentication(self, credentials):
-        userService = CdiUtil.bean(UserService)
         authenticationService = CdiUtil.bean(AuthenticationService)
 
         user_name = credentials.getUsername()
@@ -309,7 +308,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         find_user_by_uid = authenticationService.getAuthenticatedUser()
-        if (find_user_by_uid == None):
+        if (find_user_by_uid is None):
             print "Cert. Process basic authentication. Failed to find user '%s'" % user_name
             return None
         
@@ -324,11 +323,11 @@ class PersonAuthentication(PersonAuthenticationType):
         
         # Try to get attribute from persistent session
         session_id = identity.getSessionId()
-        if session_id == None:
+        if session_id is None:
             return None
 
         session_attributes = session_id.getSessionAttributes()
-        if session_attributes == None:
+        if session_attributes is None:
             return None
 
         if session_attributes.containsKey(attribute_name):
@@ -365,7 +364,7 @@ class PersonAuthentication(PersonAuthenticationType):
         return True
 
     def certToString(self, x509Certificate):
-        if x509Certificate == None:
+        if x509Certificate is None:
             return None
         return base64.b64encode(x509Certificate.getEncoded())
 
@@ -388,7 +387,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(cert_creds_file, 'r')
         try:
             creds = json.loads(f.read())
-        except:
+        except (Exception, Throwable):
             print "Cert. Initialize recaptcha. Failed to load credentials from file: %s" % cert_creds_file
             return False
         finally:
@@ -396,7 +395,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         try:
             recaptcha_creds = creds["recaptcha"]
-        except:
+        except (Exception, Throwable):
             print "Cert. Initialize recaptcha. Invalid credentials file '%s' format:" % cert_creds_file
             return False
         
@@ -411,13 +410,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
             try:
                 site_key = encryptionService.decrypt(site_key)
-            except:
+            except (Exception, Throwable):
                 # Ignore exception. Value is not encrypted
                 print "Cert. Initialize recaptcha. Assuming that 'site_key' in not encrypted"
 
             try:
                 secret_key = encryptionService.decrypt(secret_key)
-            except:
+            except (Exception, Throwable):
                 # Ignore exception. Value is not encrypted
                 print "Cert. Initialize recaptcha. Assuming that 'secret_key' in not encrypted"
 
@@ -453,7 +452,7 @@ class PersonAuthentication(PersonAuthenticationType):
         try:
             http_service_response = httpService.executePost(http_client, recaptcha_validation_url, None, recaptcha_validation_headers, recaptcha_validation_request)
             http_response = http_service_response.getHttpResponse()
-        except:
+        except (Exception, Throwable):
             print "Cert. Validate recaptcha response. Exception: ", sys.exc_info()[1]
             return False
 
@@ -469,7 +468,7 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             http_service_response.closeConnection()
 
-        if response_string == None:
+        if response_string is None:
             print "Cert. Validate recaptcha response. Get empty response from validation server"
             return False
         

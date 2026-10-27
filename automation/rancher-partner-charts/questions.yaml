@@ -41,7 +41,7 @@ questions:
 # ======================
 # Test environment group
 # ======================
-- variable: global.cloud.testEnviroment
+- variable: global.cloud.testEnvironment
   default: false
   type: boolean
   group: "Test Environment"

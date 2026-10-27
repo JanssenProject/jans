@@ -131,8 +131,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     private StatusListIndexService statusListIndexService;
 
     @Override
-    public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
-        return requestUserInfo(accessToken, authorization, request, securityContext);
+    public Response requestUserInfoGet(String authorization, HttpServletRequest request, SecurityContext securityContext) {
+        return requestUserInfo(null, authorization, request, securityContext);
     }
 
     @Override

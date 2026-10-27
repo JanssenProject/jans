@@ -3,29 +3,25 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Policy Store Manager - Converts new format to legacy format.
+//! Policy Store Manager - builds the runtime [`PolicyStore`] from the parts of a
+//! directory/archive store whose format does not depend on the spec version.
 //!
-//! This module provides the conversion layer between `LoadedPolicyStore` (new directory/archive format)
-//! and `PolicyStore` (legacy format used by the rest of Cedarling).
-//!
-//! # Architecture
+//! The current format version converts metadata and issuers itself and hands
+//! them in; everything here is shared by all versions.
 //!
 //! ```text
-//! LoadedPolicyStore (new)          PolicyStore (legacy)
-//! ├── metadata                  →  name, version, description, cedar_version
-//! ├── schema (raw string)       →  schema: CedarSchema
-//! ├── policies: Vec<PolicyFile> →  policies: PoliciesContainer
-//! ├── trusted_issuers           →  trusted_issuers: HashMap<String, TrustedIssuer>
-//! └── entities                  →  default_entities: HashMap<String, Value>
+//! StoreContent (on-disk)           PolicyStore (runtime)
+//! ├── schema (parsed)           →  schema: CedarSchema
+//! ├── policies, templates       →  policies: PoliciesContainer
+//! └── entities                  →  default_entities: DefaultEntitiesWithWarns
 //! ```
 
 use super::entity_parser::EntityParser;
-use super::issuer_parser::IssuerParser;
-use super::loader::LoadedPolicyStore;
+use super::formats::StoreContent;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
 use super::schema_parser::ParsedSchema;
-use super::{PoliciesContainer, PolicyStore, TrustedIssuer};
+use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
@@ -47,9 +43,37 @@ pub enum ConversionError {
     #[error("Failed to convert policies: {0}")]
     PolicyConversion(String),
 
-    /// Trusted issuer conversion failed
-    #[error("Failed to convert trusted issuers: {0}")]
-    IssuerConversion(String),
+    /// A trusted issuer file could not be parsed
+    #[error("Failed to parse trusted issuer '{file}': {source}")]
+    TrustedIssuerParse {
+        file: String,
+        #[source]
+        source: Box<super::errors::PolicyStoreError>,
+    },
+
+    /// A custom issuer file could not be parsed
+    #[error(transparent)]
+    CustomIssuerParse(#[from] super::errors::CustomIssuerParseError),
+
+    /// `trusted-issuers.json` could not be parsed
+    #[error("Failed to parse '{file}': {source}")]
+    TrustedIssuersFile {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
+
+    /// Token types conflict across issuers
+    #[error("Invalid token types: {0}")]
+    TokenTypes(#[from] super::TokenTypesError),
+
+    /// An issuer name is not a valid issuer identity
+    #[error("Invalid issuer: {0}")]
+    InvalidIssuerName(#[from] super::InvalidIssuerName),
+
+    /// A token type is not a valid Cedar entity type
+    #[error("Invalid token type: {0}")]
+    InvalidEntityType(#[from] super::InvalidEntityType),
 
     /// Entity conversion failed
     #[error("Failed to convert entities: {0}")]
@@ -60,41 +84,32 @@ pub enum ConversionError {
     PolicySetCreation(String),
 }
 
-/// Policy Store Manager handles conversion between new and legacy formats.
+/// Policy Store Manager converts loaded stores into the runtime [`PolicyStore`].
 pub(crate) struct PolicyStoreManager;
 
 impl PolicyStoreManager {
-    /// Convert a `LoadedPolicyStore` (new format) to `PolicyStore` (legacy format).
+    /// Builds the runtime `PolicyStore` from version-agnostic content plus the
+    /// issuers already converted by the current format version.
     ///
-    /// This is the main entry point for converting policy stores loaded from
-    /// directory or archive format into the legacy format used by the rest of Cedarling.
-    ///
-    /// When `strict_schema_validation` is `true`, a missing schema causes an error.
-    /// When `false`, missing schema is allowed (schemaless mode).
-    pub(crate) fn convert_to_legacy(
-        loaded: LoadedPolicyStore,
-        strict_schema_validation: bool,
+    /// A missing schema is accepted here: whether one is required is decided
+    /// when the store is read, which fails with `MissingSchemaSource`.
+    pub(crate) fn build(
+        content: &StoreContent,
+        version: String,
+        token_types: TokenTypes,
     ) -> Result<PolicyStore, ConversionError> {
-        // 1. Convert schema (now optional)
-        let cedar_schema = match loaded.schema {
-            Some(ref parsed_schema) => Some(Self::convert_parsed_schema(parsed_schema)?),
-            None if strict_schema_validation => {
-                return Err(ConversionError::SchemaConversion(
-                    "missing required schema in policy store".to_string(),
-                ));
-            },
-            None => None,
-        };
+        let cedar_schema = content
+            .schema
+            .as_ref()
+            .map(Self::convert_parsed_schema)
+            .transpose()?;
 
         // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
-            Self::convert_policies_and_templates(&loaded.policies, &loaded.templates)?;
+            Self::convert_policies_and_templates(&content.policies, &content.templates)?;
 
-        // 3. Convert trusted issuers
-        let trusted_issuers = Self::convert_trusted_issuers(&loaded.trusted_issuers)?;
-
-        // 4. Convert entities
-        let raw_entities = Self::convert_entities(&loaded.entities, None)?;
+        // 3. Convert entities
+        let raw_entities = Self::convert_entities(&content.entities, None)?;
 
         // Convert raw entities to DefaultEntitiesWithWarns
         let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
@@ -102,11 +117,11 @@ impl PolicyStoreManager {
         })?;
 
         Ok(PolicyStore {
-            version: Some(loaded.metadata.policy_store.version),
+            version: Some(version),
             schema: cedar_schema,
-            schema_source_exists: loaded.schema_source_exists,
+            schema_source_exists: content.schema_source_exists,
             policies: policies_container,
-            trusted_issuers,
+            token_types,
             default_entities,
         })
     }
@@ -157,8 +172,8 @@ impl PolicyStoreManager {
     /// - `policy_set: cedar_policy::PolicySet` (includes both policies and templates)
     /// - `raw_policy_info: HashMap<String, RawPolicy>` (for descriptions)
     fn convert_policies_and_templates(
-        policy_files: &[super::loader::PolicyFile],
-        template_files: &[super::loader::PolicyFile],
+        policy_files: &[super::loader::StoreFile],
+        template_files: &[super::loader::StoreFile],
     ) -> Result<PoliciesContainer, ConversionError> {
         if policy_files.is_empty() && template_files.is_empty() {
             // Return empty policy set
@@ -197,46 +212,13 @@ impl PolicyStoreManager {
             PolicyParser::create_policy_set(parsed_policies.clone(), parsed_templates.clone())
                 .map_err(|e| ConversionError::PolicySetCreation(e.to_string()))?;
 
-        // Build raw_policy_info for descriptions (policies only, templates don't have descriptions in legacy format)
+        // Build raw_policy_info for descriptions (policies only, templates carry no descriptions)
         let raw_policy_info = parsed_policies
             .into_iter()
             .map(|p| (p.id.to_string(), format!("Policy from {}", p.filename)))
             .collect();
 
         Ok(PoliciesContainer::new(policy_set, raw_policy_info))
-    }
-
-    /// Convert issuer files to `HashMap<String, TrustedIssuer>`.
-    fn convert_trusted_issuers(
-        issuer_files: &[super::loader::IssuerFile],
-    ) -> Result<Option<HashMap<String, TrustedIssuer>>, ConversionError> {
-        if issuer_files.is_empty() {
-            return Ok(None);
-        }
-
-        let mut all_issuers = Vec::new();
-        for file in issuer_files {
-            let parsed = IssuerParser::parse_issuer(&file.content, &file.name).map_err(|e| {
-                ConversionError::IssuerConversion(format!("Failed to parse '{}': {}", file.name, e))
-            })?;
-            all_issuers.extend(parsed);
-        }
-
-        // Validate for duplicates - include content in error for debugging
-        if let Err(errors) = IssuerParser::validate_issuers(&all_issuers) {
-            // Return validation errors directly, joined into a single string
-            let error_details = errors
-                .iter()
-                .map(std::string::ToString::to_string)
-                .collect::<Vec<_>>()
-                .join("; ");
-            return Err(ConversionError::IssuerConversion(error_details));
-        }
-
-        // Create issuer map
-        let issuer_map = IssuerParser::create_issuer_map(all_issuers);
-
-        Ok(Some(issuer_map))
     }
 
     /// Convert entity files to `HashMap<String, serde_json::Value>`.
@@ -252,7 +234,7 @@ impl PolicyStoreManager {
     /// * `entity_files` - The entity files to convert
     /// * `logger` - Optional logger for hierarchy warnings
     fn convert_entities(
-        entity_files: &[super::loader::EntityFile],
+        entity_files: &[super::loader::StoreFile],
         logger: Option<&Logger>,
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
         if entity_files.is_empty() {
@@ -321,22 +303,7 @@ impl PolicyStoreManager {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::common::policy_store::loader::{EntityFile, IssuerFile, PolicyFile};
-    use crate::common::policy_store::metadata::{PolicyStoreInfo, PolicyStoreMetadata};
-
-    fn create_test_metadata() -> PolicyStoreMetadata {
-        PolicyStoreMetadata {
-            cedar_version: "4.0.0".to_string(),
-            policy_store: PolicyStoreInfo {
-                id: "test123".to_string(),
-                name: "Test Store".to_string(),
-                description: Some("A test policy store".to_string()),
-                version: "1.0.0".to_string(),
-                created_date: None,
-                updated_date: None,
-            },
-        }
-    }
+    use crate::common::policy_store::loader::StoreFile;
 
     fn parse_schema(content: &str) -> ParsedSchema {
         ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
@@ -365,7 +332,7 @@ mod tests {
         let cedar_schema = result.unwrap();
         // Verify schema has expected entity types
         let entity_types: Vec<_> = cedar_schema.schema.entity_types().collect();
-        assert!(!entity_types.is_empty());
+        assert_ne!(entity_types, [] as [&cedar_policy::EntityTypeName; 0]);
     }
 
     #[test]
@@ -382,16 +349,16 @@ mod tests {
     #[test]
     fn test_convert_policies_valid() {
         let policy_files = vec![
-            PolicyFile {
+            StoreFile {
                 name: "allow.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             },
-            PolicyFile {
+            StoreFile {
                 name: "deny.cedar".to_string(),
                 content: "forbid(principal, action, resource);".to_string(),
             },
         ];
-        let template_files: Vec<PolicyFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
 
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
@@ -407,11 +374,11 @@ mod tests {
 
     #[test]
     fn test_convert_policies_with_templates() {
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "allow.cedar".to_string(),
             content: "permit(principal, action, resource);".to_string(),
         }];
-        let template_files = vec![PolicyFile {
+        let template_files = vec![StoreFile {
             name: "template.cedar".to_string(),
             content: "permit(principal == ?principal, action, resource);".to_string(),
         }];
@@ -433,7 +400,7 @@ mod tests {
         // A single policy file with two @id-annotated policies, and a single
         // template file with two @id-annotated templates. Exercises the full
         // parser -> manager pipeline (same path cjar/directory loading uses).
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "combined.cedar".to_string(),
             content: concat!(
                 "@id(\"p1\") permit(principal, action, resource);\n",
@@ -441,7 +408,7 @@ mod tests {
             )
             .to_string(),
         }];
-        let template_files = vec![PolicyFile {
+        let template_files = vec![StoreFile {
             name: "tpls.cedar".to_string(),
             content: concat!(
                 "@id(\"t1\") permit(principal == ?principal, action, resource);\n",
@@ -470,8 +437,8 @@ mod tests {
 
     #[test]
     fn test_convert_policies_empty() {
-        let policy_files: Vec<PolicyFile> = vec![];
-        let template_files: Vec<PolicyFile> = vec![];
+        let policy_files: Vec<StoreFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
         assert!(result.is_ok());
@@ -482,11 +449,11 @@ mod tests {
 
     #[test]
     fn test_convert_policies_invalid() {
-        let policy_files = vec![PolicyFile {
+        let policy_files = vec![StoreFile {
             name: "invalid.cedar".to_string(),
             content: "this is not valid cedar policy".to_string(),
         }];
-        let template_files: Vec<PolicyFile> = vec![];
+        let template_files: Vec<StoreFile> = vec![];
 
         let result =
             PolicyStoreManager::convert_policies_and_templates(&policy_files, &template_files);
@@ -498,48 +465,8 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_trusted_issuers_valid() {
-        let issuer_files = vec![IssuerFile {
-            name: "issuer.json".to_string(),
-            content: r#"{
-        "id": "test_issuer",
-        "name": "Test Issuer",
-        "description": "A test issuer",
-        "configuration_endpoint": "https://test.com/.well-known/openid-configuration",
-        "token_metadata": {
-            "access_token": {
-                "entity_type_name": "Test::access_token"
-            }
-        }
-    }"#
-            .to_string(),
-        }];
-
-        let result = PolicyStoreManager::convert_trusted_issuers(&issuer_files);
-        assert!(
-            result.is_ok(),
-            "Issuer conversion failed: {:?}",
-            result.err()
-        );
-
-        let issuers = result.unwrap();
-        assert!(issuers.is_some());
-        let issuers = issuers.unwrap();
-        assert_eq!(issuers.len(), 1);
-        assert!(issuers.contains_key("test_issuer"));
-    }
-
-    #[test]
-    fn test_convert_trusted_issuers_empty() {
-        let issuer_files: Vec<IssuerFile> = vec![];
-        let result = PolicyStoreManager::convert_trusted_issuers(&issuer_files);
-        assert!(result.is_ok());
-        assert!(result.unwrap().is_none());
-    }
-
-    #[test]
     fn test_convert_entities_valid() {
-        let entity_files = vec![EntityFile {
+        let entity_files = vec![StoreFile {
             name: "users.json".to_string(),
             content: r#"[
         {
@@ -566,55 +493,29 @@ mod tests {
 
     #[test]
     fn test_convert_entities_empty() {
-        let entity_files: Vec<EntityFile> = vec![];
+        let entity_files: Vec<StoreFile> = vec![];
         let result = PolicyStoreManager::convert_entities(&entity_files, None);
         assert!(result.is_ok());
         assert!(result.unwrap().is_none());
     }
 
     #[test]
-    fn test_convert_to_legacy_without_schema_strict_true_errors() {
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
+    fn test_build_without_schema_succeeds() {
+        let content = StoreContent {
             schema: None,
             schema_source_exists: false,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
             entities: vec![],
-            trusted_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
-        let err = result.expect_err(
-            "Expected error when strict_schema_validation is true but schema is missing",
-        );
-        assert!(
-            matches!(&err, ConversionError::SchemaConversion(msg) if msg.contains("missing required schema")),
-            "Expected SchemaConversion error about missing schema, got: {err:?}"
-        );
-    }
-
-    #[test]
-    fn test_convert_to_legacy_without_schema_strict_false_succeeds() {
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
-            schema: None,
-            schema_source_exists: false,
-            policies: vec![PolicyFile {
-                name: "test.cedar".to_string(),
-                content: "permit(principal, action, resource);".to_string(),
-            }],
-            templates: vec![],
-            entities: vec![],
-            trusted_issuers: vec![],
-        };
-
-        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
-        let store = result
-            .expect("Should succeed when strict_schema_validation is false even without schema");
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
+        let store =
+            result.expect("a schemaless store should build; strictness is checked when reading");
         assert!(
             store.schema.is_none(),
             "schema should be None when no schema was loaded"
@@ -622,7 +523,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_with_schema_strict_false_succeeds() {
+    fn test_build_with_schema_succeeds() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -634,22 +535,20 @@ mod tests {
         }
     "#,
         );
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
+        let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
             entities: vec![],
-            trusted_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, false);
-        let store =
-            result.expect("Should succeed with schema even when strict_schema_validation is false");
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
+        let store = result.expect("a store with a schema should build");
         assert!(
             store.schema.is_some(),
             "schema should be Some when schema content was provided"
@@ -657,7 +556,7 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_to_legacy_minimal() {
+    fn test_build_minimal() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -669,31 +568,33 @@ mod tests {
         }
     "#,
         );
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
+        let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
             entities: vec![],
-            trusted_issuers: vec![],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
         assert_eq!(store.version, Some("1.0.0".to_string()));
         assert!(!store.policies.get_set().is_empty());
-        assert!(store.trusted_issuers.is_none());
+        assert!(
+            store.token_types.jwt_issuers().is_empty(),
+            "a store without issuers should declare none"
+        );
         assert_eq!(store.default_entities.entities().len(), 0);
     }
 
     #[test]
-    fn test_convert_to_legacy_full() {
+    fn test_build_full() {
         let schema = parse_schema(
             r#"
         namespace TestApp {
@@ -705,47 +606,34 @@ mod tests {
         }
     "#,
         );
-        let loaded = LoadedPolicyStore {
-            metadata: create_test_metadata(),
+        let content = StoreContent {
             schema: Some(schema),
             schema_source_exists: true,
-            policies: vec![PolicyFile {
+            policies: vec![StoreFile {
                 name: "test.cedar".to_string(),
                 content: "permit(principal, action, resource);".to_string(),
             }],
             templates: vec![],
-            entities: vec![EntityFile {
+            entities: vec![StoreFile {
                 name: "users.json".to_string(),
                 content:
                     r#"[{"uid": {"type": "User", "id": "alice"}, "attrs": {}, "parents": []}]"#
                         .to_string(),
             }],
-            trusted_issuers: vec![IssuerFile {
-                name: "issuer.json".to_string(),
-                content: r#"{
-            "id": "main",
-            "name": "Main Issuer",
-            "description": "Primary issuer",
-            "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
-            "token_metadata": {
-                "access_token": {
-                    "entity_type_name": "Test::access_token"
-                }
-            }
-        }"#
-                .to_string(),
-            }],
         };
 
-        let result = PolicyStoreManager::convert_to_legacy(loaded, true);
+        let token_types =
+            TokenTypes::build([crate::common::policy_store::TestJwtIssuer::default()], [])
+                .expect("the default issuer should be valid");
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), token_types);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
-        assert!(store.trusted_issuers.is_some());
         assert!(store.default_entities.entities().len() > 0);
-
-        let issuers = store.trusted_issuers.unwrap();
-        assert!(issuers.contains_key("main"));
+        assert!(
+            store.token_types.jwt_issuers().contains_key("Jans"),
+            "the Jans issuer should be loaded"
+        );
 
         assert_eq!(store.default_entities.entities().len(), 1);
     }

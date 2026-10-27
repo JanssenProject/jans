@@ -11,6 +11,8 @@ import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
 import io.jans.lock.service.openid.OpenIdProtection;
+import io.jans.lock.service.security.AuthenticatedClientContext;
+import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.net.InetAddressUtility;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.Priority;
@@ -72,17 +74,21 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 		log.debug("REST call to '{}' intercepted", path);
 
 		if (LockProtectionMode.OAUTH.equals(appConfiguration.getProtectionMode()) || (appConfiguration.getProtectionMode() == null)) {
-			Response authorizationResponse = protectionService.processAuthorization(extractBearerToken(), resourceInfo);
-	        boolean success = authorizationResponse == null;
+			AuthorizationOutcome outcome = protectionService.authorize(extractBearerToken(), resourceInfo);
+	        boolean success = outcome.isAllowed();
 
 	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.OPENID_AUTHZ_FILTER);
 	        applicationAuditLogger.log(auditLogEntry, success);
 
 			if (success) {
+				// Record the authenticated client for downstream services (e.g. TRACE domain
+				// resolution) so they never parse or introspect the token again
+				AuthenticatedClientContext.store(httpRequest, outcome.getClient());
+
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
 			} else {
-				requestContext.abortWith(authorizationResponse);
+				requestContext.abortWith(outcome.getErrorResponse());
 			}
 		}
 	}

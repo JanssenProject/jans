@@ -1,3 +1,4 @@
+import contextlib
 import warnings
 import sys
 import os
@@ -6,8 +7,6 @@ import json
 import logging
 import copy
 import hashlib
-import pymysql
-import time
 
 from types import MappingProxyType
 from setup_app.pylib.parse_dn import parse_dn
@@ -18,7 +17,7 @@ warnings.filterwarnings("ignore")
 
 from setup_app import static
 from setup_app.config import Config
-from setup_app.static import InstallTypes, BackendTypes, colors, SearchScopes
+from setup_app.static import BackendTypes, colors, SearchScopes
 from setup_app.utils import base
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
@@ -107,7 +106,7 @@ class DBUtils:
 
         except Exception as e:
             if log:
-                base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e), True))
+                base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e)), True)
             return False, e
 
 
@@ -159,9 +158,11 @@ class DBUtils:
             except Exception as e:
                 base.logIt("ERROR executing query {}".format(e.args))
                 base.logIt("ERROR executing query {}".format(e.args), True)
+        return None
 
 
     def get_jans_auth_conf_dynamic(self):
+        dn = jans_auth_conf_dynamic = None
         if Config.rdbm_type in ('mysql', 'pgsql'):
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
             dn = result['dn'] 
@@ -216,10 +217,10 @@ class DBUtils:
                     ret_val = dict(result.__dict__)
                     ret_val.pop('_sa_instance_state', None)
                     return ret_val
+        return None
 
     def dn_exists_rdbm(self, dn, table):
         base.logIt("Checking dn {} exists in table {}".format(dn, table))
-        backend_location = self.get_backend_location_for_dn(dn)
         sqlalchemy_table = self.Base.classes[table].__table__
 
         with self.local_session.begin() as session:
@@ -237,7 +238,6 @@ class DBUtils:
                 self.rdm_automapper()
 
             s_table = None
-            where_clause = ''
             search_list = []
 
             if '&' in search_filter:
@@ -260,7 +260,7 @@ class DBUtils:
                     break
 
             if not s_table:
-                return
+                return None
 
             sqlalchemy_table = self.Base.classes[s_table]
 
@@ -301,6 +301,7 @@ class DBUtils:
                         ret_val = dict(result.__dict__)
                         ret_val.pop('_sa_instance_state', None)
                         return ret_val
+        return None
 
 
     def add2strlist(self, client_id, strlist):
@@ -318,6 +319,7 @@ class DBUtils:
             return static.BackendTypes.MYSQL
         elif Config.rdbm_type == 'pgsql':
             return static.BackendTypes.PGSQL
+        return None
 
     def delete_dn(self, dn):
         if self.dn_exists(dn):
@@ -369,12 +371,12 @@ class DBUtils:
                 if jans_attr.get('multivalued'):
                     return 'JSON'
                 return jans_attr['syntax']
-        else:
-            opendj_syntax = self.opendj_attributes_syntax.get(attrname)
-            if opendj_syntax is None:
-                opendj_syntax = '1.3.6.1.4.1.1466.115.121.1.15'
 
-            return opendj_syntax
+        opendj_syntax = self.opendj_attributes_syntax.get(attrname)
+        if opendj_syntax is None:
+            opendj_syntax = '1.3.6.1.4.1.1466.115.121.1.15'
+
+        return opendj_syntax
 
     def get_rootdn(self, dn):
         dn_parsed = parse_dn(dn)
@@ -386,14 +388,25 @@ class DBUtils:
 
         return ','.join(dnl)
 
+    def exec_raw_sql_cmd(self, cmd, *, fetchone=True):
+        with self.local_session.begin() as session:
+            slq_query = session.execute(sqlalchemy.text(cmd))
+            if fetchone:
+                slq_query_result = slq_query.fetchone()
+            else:
+                slq_query_result = slq_query.fetchall()
+            return slq_query_result
 
     def rdm_automapper(self, force=False):
         if not force and self.Base:
             return
 
-        base.logIt("Reflecting ORM tables")
+        reflect_args = {'bind': self.engine}
+        if Config.rdbm_type == 'pgsql':
+            reflect_args['schema'] = Config.rdbm_schema
 
-        self.metadata.reflect(self.engine)
+        base.logIt(f"Reflecting ORM tables with arguments {reflect_args}")
+        self.metadata.reflect(**reflect_args)
         self.Base = sqlalchemy.ext.automap.automap_base(metadata=self.metadata)
         self.Base.prepare()
 
@@ -426,21 +439,36 @@ class DBUtils:
                 result = qury_result.first()
                 if result:
                     return result[0]
+        return None
+
+
+    def get_table_name_with_schema(self, tbl_name, *, quoted=True):
+        ret_val = tbl_name
+        if Config.rdbm_type == 'pgsql':
+            if quoted:
+                ret_val = f'{Config.rdbm_schema}."{tbl_name}"'
+            else:
+                ret_val = f'{Config.rdbm_schema}.{tbl_name}'
+
+        return ret_val
 
     def table_exists(self, table):
 
         metadata = sqlalchemy.MetaData()
-        try:
-            metadata.reflect(self.engine, only=[table])
-        except:
-            pass
+        reflect_args = {'bind': self.engine, 'only':[table]}
+        if Config.rdbm_type == 'pgsql':
+            reflect_args['schema'] = Config.rdbm_schema
 
-        return table in metadata
+        with contextlib.suppress(Exception):
+            metadata.reflect(**reflect_args)
+
+        return self.get_table_name_with_schema(table, quoted=False) in metadata
 
     def is_schema_rdbm_json(self, attrname):
         for attr in self.jans_attributes:
             if attrname in attr['names']:
                 return attr.get('rdbm_json_column')
+        return None
 
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
@@ -478,10 +506,8 @@ class DBUtils:
             json_data = []
             for d in val:
                 if d and isinstance(d, str):
-                    try:
+                    with contextlib.suppress(Exception):
                         d = json.loads(d)
-                    except Exception as e:
-                        pass
                 json_data.append(d)
 
             return json_data
@@ -518,8 +544,6 @@ class DBUtils:
     def import_ldif(self, ldif_files, bucket=None, force=None):
 
         base.logIt("Importing ldif file(s): {} ".format(', '.join(ldif_files)))
-
-        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for ldif_fn in ldif_files:
             base.logIt("Importing entries from " + ldif_fn)
@@ -612,8 +636,6 @@ class DBUtils:
     def import_templates(self, templates):
 
         base.logIt("Importing templates file(s): {} ".format(', '.join(templates)))
-
-        sql_data_fn = os.path.join(Config.output_dir, Config.rdbm_type, 'jans_data.sql')
 
         for template in templates:
             base.logIt("Importing entries from " + template)
@@ -715,6 +737,7 @@ class DBUtils:
         for jans_scope in self.jans_scopes:
             if jans_scope['jansId'] == jansid:
                 return jans_scope
+        return None
 
 
 dbUtils = DBUtils()

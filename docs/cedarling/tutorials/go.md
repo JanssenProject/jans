@@ -135,7 +135,7 @@ config := map[string]any{
     "CEDARLING_APPLICATION_NAME":      "MyApp",
     "CEDARLING_LOG_LEVEL":             "INFO",
     "CEDARLING_LOG_TYPE":              "std_out",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -179,7 +179,7 @@ See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-f
 
 Cedarling provides two main interfaces for performing authorization checks:
 
-- [**Multi-Issuer Authorization**](#multi-issuer-authorization) processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on `token_metadata` configuration.
+- [**Multi-Issuer Authorization**](#multi-issuer-authorization) processes JWT tokens from multiple issuers. Token data is mapped to Cedar entities based on the token types declared in the policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 - [**Unsigned Authorization**](#unsigned-authorization) allows you to pass a principal directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data.
 
 #### Multi-Issuer Authorization

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.jans.fido2.model.telemetry.NativeClientTelemetry;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -84,6 +86,23 @@ class Fido2MetricsDataTest {
         device.setBrowser("Firefox");
         data.setDeviceInfo(device);
         assertEquals(device, data.getDeviceInfo());
+
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setPlatform("android");
+        data.setNativeClientTelemetry(telemetry);
+        assertEquals(telemetry, data.getNativeClientTelemetry());
+    }
+
+    @Test
+    void testNativeClientTelemetryJsonUsesSnakeCaseKey() throws Exception {
+        Fido2MetricsData data = new Fido2MetricsData();
+        NativeClientTelemetry telemetry = new NativeClientTelemetry();
+        telemetry.setPlatform("android");
+        data.setNativeClientTelemetry(telemetry);
+
+        String json = objectMapper.writeValueAsString(data);
+
+        assertTrue(json.contains("\"native_client_telemetry\""), "missing native_client_telemetry key");
     }
 
     @Test

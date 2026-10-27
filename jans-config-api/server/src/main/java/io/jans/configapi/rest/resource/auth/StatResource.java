@@ -7,6 +7,7 @@ import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AuthService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.util.AuthUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,16 +23,19 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+
 
 @Path(ApiConstants.STATISTICS)
 public class StatResource extends ConfigBaseResource {
 
-    private final String statUrl = "/jans-auth/restv1/internal/stat";
+    private static final String STAT_URL = "/jans-auth/restv1/internal/stat";
 
     @Inject
-    Logger logger;
+    Logger log;
 
     @Inject
     ConfigurationService configurationService;
@@ -71,13 +75,55 @@ public class StatResource extends ConfigBaseResource {
             @Parameter(description = "Start-Month for which the stat report is to be fetched") @QueryParam(value = "start_month") String startMonth,
             @Parameter(description = "End-Month for which the stat report is to be fetched") @QueryParam(value = "end_month") String endMonth,
             @Parameter(description = "Report format") @QueryParam(value = "format") String format) {
+        if (log.isDebugEnabled()) {
+            log.debug("Statistics search param - month:{}, startMonth:{}, endMonth:{}, format:{}", escapeLog(month),
+                    escapeLog(startMonth), escapeLog(endMonth), escapeLog(format));
+        }
+
         if (StringUtils.isBlank(format)) {
             format = "";
         }
-        String url = getIssuer() + this.statUrl;
-        JsonNode jsonNode = this.authService.getStat(url, authorization, month, startMonth, endMonth, format);
-        logger.trace("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
-        return Response.ok(jsonNode.get("response")).build();
+
+        if (StringUtils.isBlank(month) || month.equalsIgnoreCase("null")) {
+            month = "";
+        }
+
+        if (StringUtils.isBlank(startMonth) || startMonth.equalsIgnoreCase("null")) {
+            startMonth = "";
+        }
+        
+        if (StringUtils.isBlank(endMonth) || endMonth.equalsIgnoreCase("null")) {
+            endMonth = "";
+        }
+        
+        JsonNode jsonNode = null;
+        StringBuilder sb = new StringBuilder().append(" month:{").append(month).append("}").append(", startMonth:{")
+                .append(startMonth).append("}").append(", endMonth:{").append(endMonth).append("}").append(", format:{")
+                .append(format).append("}");
+        try {
+            String url = getIssuer() + STAT_URL;
+            jsonNode = this.authService.getStat(url, authorization, month, startMonth, endMonth, format);
+            log.debug("StatResource::getUserStatistics() - jsonNode:{} ", jsonNode);
+            return Response.ok(jsonNode.get("response")).build();
+        } catch (WebApplicationException wex) {
+            sb.append(" ApplicationException while fetching stats is - ").append("wex.getResponse().getStatus():{")
+                    .append(wex.getResponse().getStatus()).append(" }, wex.getResponse().getEntity():{")
+                    .append(wex.getResponse().getEntity()).append(" }, is:{")
+                    .append(AuthUtil.getStackTraceAsString(wex)).append("}");
+
+            log.error(sb.toString(), wex.getMessage(), wex.fillInStackTrace());
+            if (wex.getResponse().getStatus() >= 500) {
+                throwInternalServerException(wex);
+            }
+            throwBadRequestException(wex.getMessage());
+        } catch (Exception ex) {
+            sb.append(" Exception while fetching stats is - ").append(", is:{")
+                    .append(AuthUtil.getStackTraceAsString(ex)).append("}");
+
+            log.error(sb.toString());
+            throwInternalServerException(ex);
+        }
+        return Response.ok(jsonNode).build();
     }
 
     private String getIssuer() {

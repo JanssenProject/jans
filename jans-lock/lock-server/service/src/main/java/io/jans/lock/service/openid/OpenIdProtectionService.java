@@ -1,6 +1,5 @@
 package io.jans.lock.service.openid;
 
-import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
@@ -33,15 +32,25 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.lock.service.OpenIdService;
+import io.jans.lock.service.security.AuthenticatedClient;
+import io.jans.lock.service.security.AuthorizationOutcome;
+import io.jans.lock.service.security.BearerChallenge;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class OpenIdProtectionService implements OpenIdProtection {
+
+    /** OAuth {@code client_id} claim; not among the {@link JwtClaimName} constants. */
+    static final String CLIENT_ID_CLAIM = "client_id";
+
+    /** Part of the AS error text when the token used on the introspection endpoint lacks a scope the AS requires. */
+    static final String INTROSPECTION_SCOPE_REASON = "used to access introspection endpoint does not have";
 
     @Inject
     private Logger log;
@@ -74,21 +83,35 @@ public class OpenIdProtectionService implements OpenIdProtection {
      * <p>Accepts either a JWT or an opaque token. For opaque tokens, performs token introspection. For JWTs, validates issuer, expiration,
      * cryptographic signature (HMAC-signed tokens are rejected), and required scopes for the target resource.</p>
      *
+     * <p>This is the legacy allow/deny view of {@link #authorize}; the decision logic lives there.</p>
+     *
      * @param bearerToken Authorization bearer token
      * @param resourceInfo information about the target resource used to determine required scopes
-     * @return a Response describing the authorization failure (UNAUTHORIZED, FORBIDDEN, or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
+     * @return a Response describing the authorization failure (UNAUTHORIZED for a missing, expired, inactive or invalid token, FORBIDDEN for a missing scope,
+     *         or INTERNAL_SERVER_ERROR) or `null` if authorization succeeds
      */
     public Response processAuthorization(String bearerToken, ResourceInfo resourceInfo) {
+        return authorize(bearerToken, resourceInfo).getErrorResponse();
+    }
+
+    /**
+     * Same decision as {@link #processAuthorization}, additionally reporting the authenticated
+     * client on allow: {@code client_id} (fallback {@code azp}) from the JWT claims, or
+     * {@code client_id} from the introspection response. The client id may be {@code null} when
+     * the token carries none; that is not a denial here.
+     */
+    @Override
+    public AuthorizationOutcome authorize(String bearerToken, ResourceInfo resourceInfo) {
         try {
             boolean authFound = StringUtils.isNotEmpty(bearerToken);
             log.debug("Authorization header{} found", authFound ? "" : " not");
-            
+
             if (!authFound) {
                 log.debug("Request is missing authorization header");
                 // See section 3.12 RFC 7644
-                return simpleResponse(UNAUTHORIZED, "No authorization header found");
+                return AuthorizationOutcome.denied(BearerChallenge.missingCredentials("No authorization header found"));
             }
-            
+
             bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
             log.debug("Validating bearer token");
 
@@ -101,67 +124,126 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 IntrospectionResponse iresp = null;
                 try {
                     iresp = introspectionService.introspectToken("Bearer " + bearerToken, bearerToken);
+                } catch (WebApplicationException e) {
+                    log.error(e.getMessage());
+                    if (isInvalidTokenRejection(e.getResponse())) {
+                        // The AS authenticates the introspection call with the token itself, so it answers 401 for an expired, revoked or unknown token
+                        return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token", "The access token is expired, revoked or invalid"));
+                    }
                 } catch (Exception e) {
                     log.error(e.getMessage());
                 }
 
-                return processIntrospectionResponse(iresp, scopes);
+                Response introspectionFailure = processIntrospectionResponse(iresp, scopes);
+                if (introspectionFailure != null) {
+                    return AuthorizationOutcome.denied(introspectionFailure);
+                }
+
+                return AuthorizationOutcome.allowed(new AuthenticatedClient(iresp.getClientId(), false));
             }
 
             // Process the JWT: validate isuer, expiration and signature
             JwtClaims claims = jwt.getClaims();
 
             if (!oidcConfig.getIssuer().equals(claims.getClaimAsString(JwtClaimName.ISSUER))) {
-                return simpleResponse(FORBIDDEN, "Invalid token issuer");
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token issuer", "The access token issuer is invalid"));
             }
 
             int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
             if (1000L * exp < System.currentTimeMillis()) {
-                return simpleResponse(FORBIDDEN, "Expired token");
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Expired token", "The access token expired"));
             }
 
             AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
             SignatureAlgorithm signatureAlg = jwt.getHeader().getSignatureAlgorithm();
-            
+
             if (AlgorithmFamily.HMAC.equals(signatureAlg.getFamily())) {
                 // It is "expensive" to get the associated client secret
-                return simpleResponse(INTERNAL_SERVER_ERROR,
-                        "HMAC algorithm not allowed for token signature. Please use an algorithm in the EC, ED, or RSA family for signing");
+                return AuthorizationOutcome.denied(simpleResponse(INTERNAL_SERVER_ERROR,
+                        "HMAC algorithm not allowed for token signature. Please use an algorithm in the EC, ED, or RSA family for signing"));
             }
-                
+
             Map<?, ?> jwks = mapper.readValue(new URL(oidcConfig.getJwksUri()), Map.class);
-            boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), 
+            boolean valid = cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(),
                     jwt.getHeader().getKeyId(), new JSONObject(jwks), null, signatureAlg);
 
-            List<String> tokenScopes = claims.getClaimAsStringList("scope");    //tokenScopes is never null
-            if (valid && tokenScopes.containsAll(scopes)) {
-            	return null;
+            if (!valid) {
+                log.error("Invalid token signature");
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token signature", "The access token signature is invalid"));
             }
- 
-            String msg = "Invalid token signature or insufficient scopes";
+
+            List<String> tokenScopes = claims.getClaimAsStringList("scope");    //tokenScopes is never null
+            if (tokenScopes.containsAll(scopes)) {
+                return AuthorizationOutcome.allowed(new AuthenticatedClient(clientIdFromClaims(claims), true));
+            }
+
+            String msg = "Insufficient scopes";
             log.error("{}. Token scopes: {}", msg, tokenScopes);
-            
+
             // See section 3.12 RFC 7644
-            return simpleResponse(FORBIDDEN, msg);
+            return AuthorizationOutcome.denied(BearerChallenge.insufficientScope(msg, "The access token lacks a required scope", scopes));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage());
+            return AuthorizationOutcome.denied(simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage()));
         }
     }
 
-    public Response processIntrospectionResponse(IntrospectionResponse iresponse, List<String> scopes) {
-        Response response = null;
-        List<String> tokenScopes = Optional.ofNullable(iresponse).map(IntrospectionResponse::getScope)
-                .orElse(null);
-
-        if (tokenScopes == null || !iresponse.isActive() || !tokenScopes.containsAll(scopes)) {
-            String msg = "Invalid token or insufficient scopes";
-            log.error("{}. Token scopes: {}", msg, tokenScopes);
-            // See section 3.12 RFC 7644
-            response = simpleResponse(Response.Status.FORBIDDEN, msg);
+    /**
+     * @return the {@code client_id} claim, falling back to {@code azp}; {@code null} if neither is present
+     */
+    static String clientIdFromClaims(JwtClaims claims) {
+        if (claims == null) {
+            return null;
         }
 
-        return response;
+        String clientId = claims.getClaimAsString(CLIENT_ID_CLAIM);
+        if (StringUtils.isBlank(clientId)) {
+            clientId = claims.getClaimAsString(JwtClaimName.AUTHORIZED_PARTY);
+        }
+
+        return StringUtils.isBlank(clientId) ? null : clientId;
+    }
+
+    /**
+     * The AS also answers 401 when a valid token lacks the scope its configuration requires for
+     * introspection; that is no evidence the token is invalid, so it is not reported as such.
+     */
+    private boolean isInvalidTokenRejection(Response response) {
+        if (response.getStatus() != UNAUTHORIZED.getStatusCode()) {
+            return false;
+        }
+
+        String body;
+        try {
+            body = response.hasEntity() ? response.readEntity(String.class) : "";
+        } catch (Exception e) {
+            body = "";
+        }
+
+        return !StringUtils.contains(body, INTROSPECTION_SCOPE_REASON);
+    }
+
+    public Response processIntrospectionResponse(IntrospectionResponse iresponse, List<String> scopes) {
+        if (iresponse == null) {
+            // Introspection failed: the token was not judged, so a new token would not help
+            log.error("Token introspection returned no response");
+            return simpleResponse(Response.Status.FORBIDDEN, "Invalid token or insufficient scopes");
+        }
+
+        if (!iresponse.isActive()) {
+            log.error("Inactive token");
+            return BearerChallenge.invalidToken("Inactive token", "The access token is expired, revoked or invalid");
+        }
+
+        List<String> tokenScopes = iresponse.getScope();
+        if (tokenScopes == null || !tokenScopes.containsAll(scopes)) {
+            String msg = "Insufficient scopes";
+            log.error("{}. Token scopes: {}", msg, tokenScopes);
+            // See section 3.12 RFC 7644
+            return BearerChallenge.insufficientScope(msg, "The access token lacks a required scope", scopes);
+        }
+
+        return null;
     }
 
     private Jwt tokenAsJwt(String token) {

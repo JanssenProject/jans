@@ -244,7 +244,10 @@
   },
   "jansLogEntry": {
     "fields": [
-      "eventTime"
+      "eventTime",
+      "jansRequestId",
+      "jansPolicyStoreId",
+      "jansPolicyStoreVersion"
     ]
   },
   "jansTelemetryEntry": {
@@ -255,6 +258,46 @@
   "jansHealthEntry": {
     "fields": [
       "eventTime"
+    ]
+  },
+  "jansTraceRecord": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceRecordId",
+      "jansTraceExecKey",
+      "jansTraceExecId",
+      "jansTraceChainPosKey",
+      "jansTraceReceiptSeq",
+      "jansTraceTokenKeys",
+      "jansTracePolicyStoreId",
+      "jansTracePolicyStoreVersion",
+      "jansTraceBundleHash"
+    ]
+  },
+  "jansTraceReceipt": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceReceiptSeq",
+      "jansTraceReceiptState"
+    ]
+  },
+  "jansTracePolicyRelease": {
+    "fields": [
+      "jansId",
+      "jansTracePolicyStoreId",
+      "jansTraceLastServedAtMs"
+    ]
+  },
+  "jansTraceChain": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
+    ]
+  },
+  "jansTraceProducerKey": {
+    "fields": [
+      "jansTraceDomainId",
+      "jansTraceProducerId"
     ]
   },
   "__common__": {

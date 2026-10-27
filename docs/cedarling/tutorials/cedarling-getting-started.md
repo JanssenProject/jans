@@ -22,7 +22,7 @@ You can integrate Cedarling into your application using the following language l
 - [Golang](./go.md)
 - [Java](./java.md)
 
-Alternatively, you can use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
+Alternatively, you can use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a drop-in deployment.
 
 From here, you can either jump directly to the language-specific examples above or continue reading for a high-level overview of how Cedarling works.
 
@@ -32,10 +32,13 @@ From here, you can either jump directly to the language-specific examples above 
 
 The main way you will interact with Cedarling are through the following interfaces
 
-- [Initialization](#initialization)
-- [Authorization](#authorization)
-- [Context Data API](#context-data-api)
-- [Logging](#logging)
+- [Getting Started with Cedarling](#getting-started-with-cedarling)
+  - [Cedarling Interfaces](#cedarling-interfaces)
+    - [Initialization](#initialization)
+    - [Authorization](#authorization)
+    - [Context Data API](#context-data-api)
+    - [Logging](#logging)
+  - [What's next?](#whats-next)
 
 ### Initialization
 
@@ -71,9 +74,12 @@ The bootstrap configuration and policy store directly influence how Cedarling pe
 === "JavaScript"
 
     ```js
-    import initWasm, { init } from "/pkg/cedarling_wasm.js";
+    import { init } from "@janssenproject/cedarling_wasm";
 
-    let cedarling = await init({});
+    const cedarling = await init({
+      CEDARLING_APPLICATION_NAME: "My App",
+      CEDARLING_POLICY_STORE_URI: "https://example.com/policy-store.cjar",
+    });
     ```
 
 === "Python"
@@ -172,7 +178,7 @@ Cedarling provides two authorization methods. Not sure which to use? See the [qu
 **Multi-Issuer Authorization (Token-based) — Recommended**
 
 - Uses `authorize_multi_issuer` to process JWT tokens from multiple issuers.
-- Token data is mapped to Cedar entities based on `token_metadata` configuration in the policy store.
+- Token data is mapped to Cedar entities based on the token types declared in the policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 - Authorization decisions are made based on context values derived from token payloads.
 - **Recommended for most production deployments** where you have JWT tokens from trusted identity providers.
 
@@ -225,19 +231,19 @@ The Context Data API allows you to push external data into the Cedarling evaluat
 
     ```js
     // Push data with optional TTL (5 minutes = 300 seconds)
-    cedarling.push_data_ctx("user:123", {
+    cedarling.pushDataCtx("user:123", {
       role: ["admin", "editor"],
       country: "US"
-    }, 300);
+    }, 300n);
 
     // Get data
-    const value = cedarling.get_data_ctx("user:123");
+    const value = cedarling.getDataCtx("user:123");
     if (value) {
       console.log(`User roles: ${value.role}`);
     }
 
     // Get statistics
-    const stats = cedarling.get_stats_ctx();
+    const stats = cedarling.getStatsCtx();
     console.log(`Entries: ${stats.entry_count}/${stats.max_entries}`);
     ```
 
@@ -407,5 +413,5 @@ You're now ready to dive deeper into Cedarling. From here, you could either:
 
 - See how you can use [RBAC with Cedarling using signed tokens (TBAC)](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac) — the recommended starting point.
 - Explore how to use [Cedarling's Unsigned interface](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity) for custom auth flows or testing.
-- Use the [Cedarling Sidecar](../developer/sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
+- Use the [Cedarling Sidecar](../sidecar/cedarling-sidecar-overview.md) for a quick, zero-code deployment.
 - Learn more about [why Cedarling exists](../README.md#why-zero-trust-needs-cedarlings) and the problems it solves.

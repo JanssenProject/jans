@@ -83,7 +83,7 @@ public class TestSessionWorkflow extends BaseTest {
 
             // Get the access token
             TokenClient tokenClient1 = new TokenClient(tokenEndpoint);
-            TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret);
+            TokenResponse tokenResponse1 = tokenClient1.execAuthorizationCode(code1, redirectUri, clientId, clientSecret, codeVerifier(code1));
 
             String accessToken1 = tokenResponse1.getAccessToken();
             Assert.assertNotNull("accessToken1 is null", accessToken1);
@@ -129,7 +129,7 @@ public class TestSessionWorkflow extends BaseTest {
 
             // Get the access token
             TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
-            TokenResponse tokenResponse2 = tokenClient2.execAuthorizationCode(code2, redirectUri, clientId, clientSecret);
+            TokenResponse tokenResponse2 = tokenClient2.execAuthorizationCode(code2, redirectUri, clientId, clientSecret, codeVerifier(code2));
 
             String accessToken2 = tokenResponse2.getAccessToken();
             Assert.assertNotNull("accessToken2 is null", accessToken2);

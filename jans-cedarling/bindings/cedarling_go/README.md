@@ -142,7 +142,7 @@ config := map[string]any{
     "CEDARLING_APPLICATION_NAME":     "MyApp",
     "CEDARLING_LOG_LEVEL":            "INFO",
     "CEDARLING_LOG_TYPE":             "std_out",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
 }
 
 instance, err := cedarling_go.NewCedarling(config)
@@ -349,6 +349,24 @@ fmt.Printf("Total size: %d bytes\n", stats.TotalSizeBytes)
 fmt.Printf("Capacity usage: %.2f%%\n", stats.CapacityUsagePercent)
 ```
 
+#### Drain Metrics
+
+Destructive read: returns a metrics snapshot and resets the counters.
+
+```go
+snapshot, err := instance.DrainMetrics()
+if err != nil {
+    // Handle error: disabled collection or Lock telemetry owns the collector
+}
+fmt.Printf("Requests: %d\n", snapshot.OperationalStats["authz.requests_total"])
+fmt.Printf("Interval: %v\n", snapshot.Interval)
+```
+
+Requires `CEDARLING_METRICS_COLLECTION=enabled`. Fails whenever
+`CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if the Lock server has no
+telemetry endpoint. `Interval` is a `time.Duration` and crosses the binding as
+nanoseconds, so sub-second intervals are reported exactly.
+
 #### Using Data in Cedar Policies
 
 Data pushed via the Context Data API is automatically available in Cedar policies under the `context.data` namespace:
@@ -367,10 +385,10 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 ### Trusted Issuer Loading Info
 
-When trusted issuers are configured in the policy store, you can query loading status:
+When the policy store declares JWT issuers in `trusted-issuers.json`, you can query loading status. Issuers are identified by their `issuer` name in that file.
 
 ```go
-loadedByName := instance.IsTrustedIssuerLoadedByName("issuer_id")
+loadedByName := instance.IsTrustedIssuerLoadedByName("Acme")
 loadedByIss := instance.IsTrustedIssuerLoadedByIss("https://issuer.example.org")
 totalIssuers := instance.TotalIssuers()
 loadedCount := instance.LoadedTrustedIssuersCount()
@@ -387,11 +405,6 @@ Cedarling supports multiple ways to load policy stores. See [Policy Store Format
 **Example configurations:**
 
 ```go
-// From a local JSON file
-config := map[string]any{
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.json",
-}
-
 // From a directory with human-readable Cedar files
 config := map[string]any{
     "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store/",
@@ -413,7 +426,16 @@ config := map[string]any{
 
 // From Lock Server
 config := map[string]any{
-    "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store",
+    "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
+}
+
+// Load a .cjar only if its Sigstore bundle verifies (any .cjar source).
+// The bundle defaults to the archive location plus ".sigstore.json".
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_URI":                       "https://example.com/policy-store.cjar",
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE":             "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY":    "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
 }
 ```
 
@@ -428,7 +450,7 @@ config := map[string]any{
     "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
     "CEDARLING_LOG_TYPE":             "std_out",
     "CEDARLING_LOG_LEVEL":            "DEBUG",
-    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.json",
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/test-policy-store.yaml",
 }
 ```
 

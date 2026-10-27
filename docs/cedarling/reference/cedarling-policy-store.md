@@ -14,29 +14,28 @@ The Policy Store provides:
 
 1. **Cedar Schema**: The Cedar schema encoded in Base64.
 2. **Cedar Policies**: The Cedar policies encoded in Base64.
-3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
+3. **Trusted Issuers**: Every accepted token type, JWT and custom, with its issuer (see [`trusted-issuers.json`](#trusted-issuersjson)).
 4. **Default Entities**: Optional static entities that are loaded at startup and available for all policy evaluations (see [below](#default-entities)).
 
-For a comprehensive JSON schema defining the structure of the policy store, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). You test the validity of your policy store with this schema at [https://www.jsonschemavalidator.net/].
-
-**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK` and `CEDARLING_POLICY_STORE_URI` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
+For a JSON schema defining the legacy single-file policy store structure used in test fixtures, see: [policy_store_schema.json](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json). For production environments, use the [folder-based policy store format](#2-new-directory-based-format).
 
 ## Policy Store Formats
 
-Cedarling supports two policy store formats and automatically detects the correct format based on the file extension (for local files) or the response body content (for URIs):
+Cedarling supports the folder-based policy store format (as a directory or `.cjar` archive) and automatically detects the format based on the file extension (for local files) or response body content (for URIs):
 
 | Configuration | Detection |
 |---------------|-----------|
-| `CEDARLING_POLICY_STORE_URI`, response body is a cjar or zip archive | Cedar Archive from URL |
-| `CEDARLING_POLICY_STORE_URI`, response body is JSON | Legacy JSON from Lock Server |
+| `CEDARLING_POLICY_STORE_URI` | Cedar Archive (`.cjar` or zip archive) from URL |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` pointing to directory | Directory-based format |
 | `CEDARLING_POLICY_STORE_LOCAL_FN` with `.cjar` extension | Cedar Archive file |
-| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.json` extension | JSON file |
-| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension | YAML file |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with `.yaml`/`.yml` extension | YAML file (supported for test suites) |
 
-### 1. Legacy Single-File Format (JSON/YAML)
+!!! warning "Legacy JSON Format Removed"
+    Support for converting legacy JSON policy stores (originally produced by Agama Lab or Lock Server) has been removed. Consumers must migrate to the folder-based policy store format (directory or `.cjar` archive). YAML remains supported exclusively for test suites.
 
-The original format stores all policies and schema in a single JSON or YAML file with Base64-encoded content. This is documented in detail in the sections below.
+### 1. Legacy Single-File Format (YAML Test Suites)
+
+The legacy single-file format stores policies and schema in a single YAML file with Base64-encoded content, supported exclusively for test suites. This structure is documented in detail in the sections below.
 
 ### 2. New Directory-Based Format
 
@@ -54,7 +53,7 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: Directory containing .cedar template files
 ├── entities/               # Optional: Directory containing .json entity files
-└── trusted-issuers/        # Optional: Directory containing .json issuer configs
+└── trusted-issuers.json    # Optional: Every accepted token type (JWT and custom)
 ```
 
 The schema can be provided in one of two ways (but not both):
@@ -70,6 +69,7 @@ Contains policy store identification and versioning:
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
@@ -81,6 +81,14 @@ Contains policy store identification and versioning:
   }
 }
 ```
+
+`policy_store_spec_version` declares which revision of the policy store file
+format the store is written in. See
+[Policy store specification versions](#policy-store-specification-versions).
+
+For `.cjar`/directory stores the ID comes from `metadata.json`. It must be
+hex (8-64 characters), otherwise loading fails with `InvalidPolicyStoreId`.
+It may be omitted, in which case the getter reports none.
 
 #### Policy Files
 
@@ -199,41 +207,103 @@ Example with parent relationships (`entities/users.json`):
 ]
 ```
 
-#### Trusted Issuer Files
+#### trusted-issuers.json
 
-Trusted issuer configuration files in the `trusted-issuers/` directory define identity providers that can issue tokens. **Each file describes exactly one issuer** as a JSON object with the issuer's fields at the top level:
+`trusted-issuers.json` lists every token type the store accepts, JWT and custom
+alike, as one JSON object keyed by Cedar entity type. Each entry fully describes
+one token type, including its issuer and its kind. A store without the file
+accepts no tokens.
 
 ```json
 {
-  "name": "Jans Server",
-  "description": "Primary Janssen Identity Provider",
-  "openid_configuration_endpoint": "https://jans.example.com/.well-known/openid-configuration",
-  "token_metadata": {
-    "access_token": {
-      "trusted": true,
-      "entity_type_name": "Jans::Access_token",
-      "token_id": "jti"
+  "Acme::Access_token": {
+    "type": "jwt",
+    "issuer": "Acme",
+    "configuration_endpoints": {
+      "configuration": "https://idp.acme.com/.well-known/openid-configuration"
     },
-    "id_token": {
-      "trusted": true,
-      "entity_type_name": "Jans::Id_token",
-      "token_id": "jti"
-    }
+    "token_id": "jti",
+    "required_claims": ["jti", "iss", "aud", "sub", "exp"]
+  },
+  "Acme::Id_token": {
+    "type": "jwt",
+    "issuer": "Acme",
+    "configuration_endpoints": {
+      "configuration": "https://idp.acme.com/.well-known/openid-configuration"
+    },
+    "required_claims": ["iss", "aud", "sub", "exp"]
+  },
+  "Partner::Access_token": {
+    "type": "jwt",
+    "issuer": "Partner",
+    "configuration_endpoints": {
+      "jwks": "https://auth.partner.io/keys",
+      "iss": "https://auth.partner.io"
+    },
+    "required_claims": ["iss", "exp"]
+  },
+  "Dolphin::Dolphin_token": {
+    "type": "custom",
+    "issuer": "Dolphin",
+    "required_claims": ["sub"]
   }
 }
 ```
 
-Each trusted issuer file includes:
+The file's JSON Schema is [`trusted_issuers_schema.json`](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/schema/trusted_issuers_schema.json); the load rules below that it cannot express are checked when the store loads.
 
-- **`name`**: Human-readable name for the issuer (used as namespace for `TrustedIssuer` entity).
-- **`description`**: Optional description of the issuer.
-- **`openid_configuration_endpoint`**: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, `configuration_endpoint` is also accepted.
-- **`token_metadata`**: Map of token names to their metadata configuration (see [Token Metadata Schema](#token-metadata-schema)).
-- **`id`**: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the `.json` suffix removed.
+| Field | Kind | Required | Meaning |
+| --- | --- | --- | --- |
+| key | all | yes | Cedar entity type. A request `TokenInput.mapping` must equal it exactly. Its last segment, lowercased, is the type part of the `context.tokens` key. |
+| `type` | all | yes | `jwt` or `custom`; selects which other fields are allowed. |
+| `issuer` | all | yes | Issuer identity, a single Cedar identifier (`^[A-Za-z_][A-Za-z0-9_]*$`) that is not a Cedar reserved word (`if`, `true`, `in`, `__cedar`, ...). It is the namespace of the issuer's `TrustedIssuer` entity (`Acme::TrustedIssuer`) and, lowercased, the prefix of its `context.tokens` keys (`acme_access_token`), so renaming it changes what policies see. |
+| `configuration_endpoints.configuration` | jwt | one of two forms | OIDC discovery URL: the issuer URL followed by `/.well-known/openid-configuration`. The expected `iss` is that issuer URL, path included; keys come from the discovered `jwks_uri`. |
+| `configuration_endpoints.jwks` + `configuration_endpoints.iss` | jwt | one of two forms | Static form, without discovery: keys come from `jwks`, and the expected `iss` is given explicitly. It has no status list: with `CEDARLING_JWT_STATUS_VALIDATION` on, a token from it that carries a `status` claim is rejected, and the load logs a warning naming the issuer. |
+| `token_id` | jwt | no, default `jti` | Claim used as the token entity id; must not be empty. |
+| `required_claims` | all | no, default `[]` | Claim names, none empty and none repeated. JWT: the claims must be present, and registered claims ([RFC 7519 §4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)) such as `exp` or `nbf` are validated. Custom: the claims must be present in the processor output. |
 
-To register multiple issuers, add one file per issuer to the `trusted-issuers/` directory.
+Unknown fields are rejected, so a misspelled field, or a JWT-only field such as
+`configuration_endpoints` on a `custom` entry, fails the load with a message
+naming it.
 
-> **Note:** The embedded `trusted_issuers` map shown in the [Trusted Issuers Schema](#trusted-issuers-schema) section below (used inside a monolithic `cedarling_store.json` or a Lock Master JSON response) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the `openid_configuration_endpoint` field name, with `configuration_endpoint` accepted as a backward-compatible alias.
+These rules are checked when the store loads, and a violation fails the load:
+
+- Each entity type appears once. A duplicate key is an error rather than
+  "last one wins".
+- All entries with the same `issuer` describe one issuer: they must have the same
+  `type` and, for JWT, the same `iss` and key source. Cedarling fetches the
+  discovery document and the keys once per issuer.
+- Different issuers may share an `iss` and its keys, for example one identity
+  provider serving two applications with different schemas. Each gets its own
+  `TrustedIssuer` entity. Two static entries that declare the same `iss` with
+  different `jwks` are rejected.
+- Every `context.tokens` key is unique: `Acme` and `ACME` would both produce
+  `acme_access_token`.
+- No token type may derive `total_token_count`, which Cedarling reserves for the
+  number of tokens in the request.
+- An entry uses exactly one key-source form: `configuration` together with
+  `jwks`, or `jwks` without `iss`, is rejected.
+- `configuration`, `jwks` and `iss` must be `http` or `https` URLs; `http` is
+  accepted for local setups only and should not be used in production. A static
+  `iss` must not have a query or fragment, as an issuer identifier never does.
+
+Two key sources that only turn out to share an `iss` after discovery, with
+different JWKS, are both rejected: there is no order between them, so neither
+issuer loads, and each is logged at `ERROR` naming the issuers and both JWKS.
+An issuer whose discovery fails takes no part in this check.
+
+A JWT is accepted only for its entry's issuer: its `iss` must equal the expected
+`iss`, and the discovery document's `issuer` must equal it too, or that issuer
+fails to load. Custom tokens are validated by a registered `CustomTokenProcessor`
+instead of the JWT pipeline, see
+[Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing).
+A custom issuer has no `TrustedIssuer` entity, and a custom token's `iss`
+attribute is its lowercased `issuer` string.
+
+Every token type is optional: a token that fails validation or processing is
+dropped and the request continues with the remaining tokens. A policy that needs
+a token must require it, see
+[Token failures and `forbid` policies](./cedarling-multi-issuer.md#token-failures-and-forbid-policies).
 
 #### Cedar Archive (.cjar) Format
 
@@ -244,21 +314,361 @@ The directory structure can be packaged as a `.cjar` file (ZIP archive) for dist
 cd policy-store && zip -r ../policy-store.cjar .
 ```
 
-**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `init_from_archive_bytes()` for custom fetch scenarios.
+**Note:** In WASM environments, only URL-based and inline string sources are available. Use `CEDARLING_POLICY_STORE_URI` with a `.cjar` URL or `initFromArchiveBytes()` for custom fetch scenarios.
+
+## Policy store specification versions
+
+`metadata.json` carries `policy_store_spec_version`, an integer naming the
+revision of the **file format** a store is written in. It is distinct from the
+two other versions in the file: `policy_store.version` is your own content
+version, and `cedar_version` is the Cedar language version. Cedarling reads the
+spec version before anything else in the store, so an unsupported format fails
+with a version error instead of a confusing schema or policy error.
+
+The current version is **2**. The oldest version Cedarling still reads is **0**.
+
+| `policy_store_spec_version` | Behavior |
+| --- | --- |
+| omitted, or `null` | Read as version 0, migrated to the current version, with a warning |
+| `0` | Read as version 0, migrated to the current version, with a warning |
+| `1` | Read as version 1, migrated to the current version, with a warning |
+| `2` | Read as version 2, no warning |
+| `3` or higher | Error: newer than this Cedarling supports |
+| not a non-negative integer (`"1"`, `-1`, `1.5`) | Error |
+
+Each version below is a numbered entry of the specification. Any change to the
+policy store file format bumps `policy_store_spec_version` and adds its entry to
+this section in the same pull request.
+
+The directory layout is part of the file format. A spec version fixes where
+each file lives (`policies/`, `trusted-issuers.json`, `schema.cedarschema` and
+so on), so moving, renaming, or merging files is also a new spec version. The one
+exception is `metadata.json`: Cedarling reads it before it knows the version, so
+it stays at the root of the store in every version.
+
+### Version 0
+
+**Status:** supported, outdated. **Change type:** baseline.
+
+The original directory-based and `.cjar` format. It predates
+`policy_store_spec_version`, so any store that omits the field is read as
+version 0. An explicit `0` means the same thing.
+
+```json
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+### Version 1
+
+**Status:** supported, outdated. **Change type:** additive.
+
+**What changed:** `metadata.json` gains the required `policy_store_spec_version`
+field. No other file changes.
+
+**Why:** without a declared format version, Cedarling cannot tell which revision
+of the format a store follows, so a breaking change would be silently misread
+instead of migrated or rejected.
+
+Before (version 0):
+
+```json
+{
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+After (version 1):
+
+```json
+{
+  "policy_store_spec_version": 1,
+  "cedar_version": "4.4.0",
+  "policy_store": {
+    "id": "abc123def456",
+    "name": "My Application Policies"
+  }
+}
+```
+
+**Upgrading from version 0:**
+
+1. Add `"policy_store_spec_version": 1` at the root of `metadata.json`.
+2. No other file in the store needs to change.
+3. Run `cedarling-cli validate` against the store. It should pass with no
+   "outdated" warning.
+
+A version 0 store keeps loading, so upgrading is not urgent, but every load logs
+the warning below.
+
+### Version 2
+
+**Status:** current. **Change type:** breaking, migrated automatically.
+
+**What changed:** the `trusted-issuers/` and `custom-issuers/` directories are
+replaced by one [`trusted-issuers.json`](#trusted-issuersjson), a map keyed by
+Cedar entity type in which each entry describes one token type and its issuer.
+A version 2 store that still contains either directory loads, ignores it and
+logs a warning.
+
+**Why:** version 1 described JWT and custom tokens in two shapes keyed
+differently (JWT tokens by a token name with a separate `entity_type_name`,
+custom tokens by entity type), while a request names a token by its entity type.
+One map keyed by entity type removes the token name, the issuer id and the
+lookup between them, and lets every conflict be checked in one place when the
+store loads.
+
+Before (version 1), `trusted-issuers/acme.json`:
+
+```json
+{
+  "name": "Acme",
+  "description": "Acme identity provider",
+  "configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "entity_type_name": "Acme::Access_token",
+      "token_id": "jti",
+      "required_claims": ["exp"]
+    },
+    "id_token": { "trusted": false, "entity_type_name": "Acme::Id_token" }
+  }
+}
+```
+
+and `custom-issuers/dolphin.json`:
+
+```json
+{
+  "tokens_mappings": {
+    "Dolphin::Dolphin_token": { "required": true, "required_claims": ["sub"] }
+  }
+}
+```
+
+After (version 2), `trusted-issuers.json`:
+
+```json
+{
+  "Acme::Access_token": {
+    "type": "jwt",
+    "issuer": "Acme",
+    "configuration_endpoints": {
+      "configuration": "https://idp.acme.com/.well-known/openid-configuration"
+    },
+    "token_id": "jti",
+    "required_claims": ["exp"]
+  },
+  "Dolphin::Dolphin_token": {
+    "type": "custom",
+    "issuer": "dolphin",
+    "required_claims": ["sub"]
+  }
+}
+```
+
+and `"policy_store_spec_version": 2` in `metadata.json`.
+
+**Migration:** a version 0 or 1 store is migrated in memory when it loads:
+
+| Version 1 | Version 2 |
+| --- | --- |
+| `trusted-issuers/X.json`, `token_metadata.<key>` | entry keyed by its `entity_type_name`: `type: jwt`, `issuer` = the file's `name`, `configuration_endpoints.configuration` = its endpoint, same `token_id` and `required_claims` |
+| `custom-issuers/X.json`, `tokens_mappings.<type>` | entry keyed by `<type>`: `type: custom`, `issuer` = the file's id, sanitized as before so its `context.tokens` keys stay the same, same `required_claims` |
+| `trusted: false` | entry dropped, as version 1 never accepted those tokens; an issuer left with no tokens is dropped |
+| `required: true` | ignored, with a warning: every token is optional |
+| `description`, issuer `id`, token key | dropped |
+| `name` that is not a single Cedar identifier (`Gluu Server`, `A::B`) | error |
+| endpoint not of the form `<iss>/.well-known/openid-configuration` | error |
+| endpoint with a path before `/.well-known/openid-configuration` | warning: `iss` keeps the path, see below |
+| the same entity type in two files, in either directory | error naming both files |
+
+**Behavior changes to review when upgrading:**
+
+- **`required` is gone.** A missing or failing custom token no longer fails the
+  request. A policy that depends on a token must require it:
+
+    ```cedar
+    forbid (principal, action, resource)
+    unless { context has tokens.acme_access_token };
+    ```
+
+- **A request `mapping` must equal a configured entity type.** There is no
+  fallback from token names such as `access_token` to default entity types.
+- **`iss` keeps its path.** Version 1 identified an issuer by the origin of its
+  configuration endpoint: the `TrustedIssuer` entity id and `issuer_entity_id`
+  had no path, and tokens were matched to issuers by origin (with signature
+  validation on, the full `iss` was still checked against discovery). Version 2
+  expects the endpoint without `/.well-known/openid-configuration`, path
+  included, so path-based issuers (Keycloak realms,
+  `login.microsoftonline.com/{tenant}/v2.0`) are told apart. For those issuers
+  the `TrustedIssuer` entity id and `issuer_entity_id.path` now carry the path.
+  Issuers at the origin root are unaffected.
+- **Discovery must match.** The discovery document's `issuer` must equal the
+  expected `iss`, or that issuer fails to load.
+- **Issuers are identified by name.** `TrustedIssuerLoadingInfo`
+  (`is_trusted_issuer_loaded_by_name`, `loaded_trusted_issuer_ids`,
+  `failed_trusted_issuer_ids`) reports issuer names (`Acme`) instead of
+  version 1 file ids (`acme`).
+- **Conflicts fail the load.** Files that shared an id are no longer rejected:
+  JWT files stay separate issuers by name, and custom files merge into one
+  issuer. A duplicate entity type, two descriptions of one issuer that disagree,
+  or colliding `context.tokens` keys fail the load instead of one silently
+  replacing another.
+
+**Upgrading from version 1:**
+
+1. Write `trusted-issuers.json` from your issuer files as in the table above,
+   then delete the `trusted-issuers/` and `custom-issuers/` directories.
+2. Set `"policy_store_spec_version": 2` in `metadata.json`.
+3. Add `forbid … unless` policies for tokens that were `required`.
+4. Run `cedarling-cli validate` against the store. It should pass with no
+   warning.
+
+A version 1 store keeps loading through the migration, so upgrading is not
+urgent, but every load logs the warnings below.
+
+### Unknown fields
+
+Unknown keys in `metadata.json` are ignored in every version. In version 2,
+unknown keys in `trusted-issuers.json` entries are rejected with an error naming
+them. In versions 0 and 1, unknown keys in trusted-issuer files are ignored, so a
+misspelled optional key is silently dropped, and unknown keys in custom-issuer
+files are rejected. Migration carries over every field the newer version has a
+place for and reports what it cannot carry over.
+
+### Warnings
+
+Warnings are non-fatal: the store loads and is migrated to the current version
+in memory. Cedarling logs them once at startup at `WARN`, and the
+`cedarling-cli validate` report lists them as diagnostics that do not change
+whether validation passes. The background refresh worker de-duplicates them, so
+a periodic refresh of an outdated store does not repeat the same warning.
+
+When the field is missing:
+
+```text
+policy store format is outdated: metadata.json has no policy_store_spec_version, so it was read as spec version 0; please update the policy store to spec version 2
+```
+
+When the field declares a supported but older version:
+
+```text
+policy store format is outdated: policy_store_spec_version is 1; please update the policy store to spec version 2
+```
+
+When migrating a version 1 custom token that was `required`:
+
+```text
+spec version 1 to 2: 'required' on custom token '<entity type>' in 'custom-issuers/<file>' is ignored: every token is optional; require it in policy with `forbid (principal, action, resource) unless { context has tokens.<key> };`
+```
+
+When migrating a version 1 issuer whose endpoint has a path:
+
+```text
+spec version 1 to 2: issuer in 'trusted-issuers/<file>' now has iss '<iss>', path included: its TrustedIssuer entity id and issuer_entity_id.path carry the path, where v1 used the origin
+```
+
+When a version 2 store still contains `trusted-issuers/` or `custom-issuers/`:
+
+```text
+spec version 2: policy store directory 'trusted-issuers/' is ignored: this spec version reads trusted issuers from trusted-issuers.json only
+```
+
+### Errors
+
+These fail closed — the store is not loaded.
+
+```text
+Invalid metadata in file metadata.json: policy_store_spec_version must be a non-negative integer, got <value>
+```
+
+```text
+Unsupported policy store: policy_store_spec_version <found> is newer than the latest version this Cedarling supports (2); upgrade Cedarling
+```
+
+```text
+Unsupported policy store: policy_store_spec_version <found> is no longer supported; the oldest supported version is 0
+```
+
+The last error cannot occur while version 0 is still supported; it appears once a
+release drops support for the oldest version.
+
+A version 0 or 1 store that cannot be expressed in version 2 (see the
+[migration table](#version-2)) fails with:
+
+```text
+Failed to migrate the policy store: spec version 1 to 2: <reason naming the file>
+```
+
+The message names the migration step that failed.
 
 ## Advanced: Loading from Bytes
 
 For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:
 
-- **WASM**: Use `init_from_archive_bytes(config, bytes)` function
+- **WASM**: Use `initFromArchiveBytes(config, bytes)` function
 - **Rust**: Use `PolicyStoreSource::ArchiveBytes(Vec<u8>)` or `load_policy_store_archive_bytes()` function
 
 ```javascript
 // WASM example with custom fetch
 const response = await fetch(url, { headers: { Authorization: "..." } });
 const bytes = new Uint8Array(await response.arrayBuffer());
-const cedarling = await init_from_archive_bytes(config, bytes);
+const cedarling = await initFromArchiveBytes(config, bytes);
 ```
+
+## Verifying policy store signatures
+
+Agama Lab publishes each `.cjar` with a Sigstore (cosign keyless) bundle, `<store>.cjar.sigstore.json`, that signs the whole archive. With [`CEDARLING_POLICY_STORE_SIGSTORE_MODE`](./cedarling-properties.md#verifying-policy-store-signatures) set to `enforce`, Cedarling loads a `.cjar` only if that bundle verifies for the configured signer:
+
+```json
+"CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+"CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+```
+
+The bundle is verified offline against the public Sigstore trust root (Fulcio, Rekor and CT log keys) built into Cedarling. The check runs on the downloaded or read archive bytes before they are parsed, and the same bytes are then loaded. It is equivalent to:
+
+```bash
+cosign verify-blob store.cjar \
+  --bundle store.cjar.sigstore.json \
+  --certificate-identity "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com" \
+  --certificate-oidc-issuer https://accounts.google.com
+```
+
+If the bundle is missing, does not verify, or was signed by someone else, Cedarling fails to start. During [background refresh](#background-refresh) the current store is kept and the attempt is recorded as `VerificationError`. Each verified load is logged at `INFO`:
+
+```text
+policy store signature verified: identity=asset-signer@... issuer=https://accounts.google.com archive_sha256=<hex> rekor_integrated_time=<unix seconds>
+```
+
+### Where the bundle comes from
+
+| Policy store source | Bundle location |
+|---|---|
+| `CEDARLING_POLICY_STORE_URI` or `CEDARLING_POLICY_STORE_CJAR_URL` | The archive URL with `.sigstore.json` appended to its path |
+| `CEDARLING_POLICY_STORE_LOCAL_FN` with a `.cjar` file | The archive path with `.sigstore.json` appended |
+| [Lock Server](./cedarling-lock-server.md#loading-policy-stores-from-lock-server) | Set `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the full URL `https://<lock-host>/jans-lock/api/v1/policy/{policy_store_id}/sigstore`. It is fetched with the same client as the store, so the Lock access token is sent |
+| Archive bytes (`initFromArchiveBytes`, `load_from_json_with_archive_bytes`) | `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is required |
+
+`CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` overrides the location for any source. Directory and YAML policy stores cannot be signed, so `enforce` with them fails at startup.
+
+### Limitations
+
+- A signature proves who published an archive, not that it is the latest one. Someone who controls the policy store URL can serve an older, validly signed archive.
+- Refresh re-checks the signature only when the archive changes. A new bundle for the same archive is not fetched.
+- If a new archive is published before its bundle, the next refresh fails and is retried with backoff.
+- Bundles must carry a Rekor v1 transparency log entry with an inclusion proof, as `cosign sign-blob --bundle` writes them today.
+- The trust root is built into each Cedarling release. A build older than a Sigstore root rotation stops verifying new signatures until it is upgraded.
 
 ## Background refresh
 
@@ -267,6 +677,10 @@ For URL-based policy store sources (`CEDARLING_POLICY_STORE_URI` pointing at a L
 ### Per-request consistency
 
 Every public Cedarling method snapshots the current `Authz` via `Arc<ArcSwap<Authz>>::load()` at entry and uses that snapshot for the duration of the call. A refresh that lands mid-request can never produce a partially-updated view — in-flight authorizations always finish against the pre-swap policy store. The post-swap store is visible to all *subsequent* calls.
+
+The `policy_store_id()` getter reports the currently published store, so the
+value can change after a refresh to a store with a different ID and callers
+must not cache it.
 
 ### Strategy ladder
 
@@ -284,7 +698,7 @@ A `Cache-Control: max-age` / `Expires` hint in any successful response may **sho
 
 ### Failure handling
 
-Failures (network, HTTP, parse, rebuild) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
+Failures (network, HTTP, parse, rebuild, and, with `CEDARLING_POLICY_STORE_SIGSTORE_MODE=enforce`, a missing or invalid signature bundle) leave the previously loaded `Authz` in place and exponentially back off the next attempt — `interval × 2^failures`, capped at 600 seconds, with ±10% jitter. The worker recovers automatically on the next success.
 
 ### Metrics
 
@@ -295,7 +709,7 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.last_attempt_secs` | Unix timestamp of the most recent tick attempt |
 | `policy_store_refresh.last_success_secs` | Unix timestamp of the most recent `Success` or `NotModified` outcome |
 | `policy_store_refresh.consecutive_failures` | Current failure streak (resets to zero on success) |
-| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError |
+| `policy_store_refresh.last_outcome` | Integer enum: `1`=Success, `2`=NotModified, `3`=HttpError, `4`=NetworkError, `5`=ParseError, `6`=RebuildError, `7`=DecodeError, `8`=VerificationError |
 | `policy_store_refresh.strategy_current` | Integer enum: `1`=Conditional, `2`=HeadThenGet, `3`=PlainGet |
 | `policy_store_refresh.conditional_to_head_transitions` | Cumulative count of `Conditional → HeadThenGet` degrades |
 | `policy_store_refresh.head_to_plain_transitions` | Cumulative count of `HeadThenGet → PlainGet` degrades |
@@ -308,14 +722,16 @@ The refresh worker emits the following keys into the `operational_stats` map of 
 | `policy_store_refresh.outcome_parse_error` | Cumulative count of `ParseError` outcomes (body couldn't be parsed) |
 | `policy_store_refresh.outcome_rebuild_error` | Cumulative count of `RebuildError` outcomes (body parsed, but `JwtService` / `EntityBuilder` / trusted-issuer rebuild failed) |
 | `policy_store_refresh.outcome_decode_error` | Cumulative count of `DecodeError` outcomes (HTTP transaction succeeded but reading the response body failed — e.g. TCP drop mid-stream, transfer-encoding issue) |
+| `policy_store_refresh.outcome_verification_error` | Cumulative count of `VerificationError` outcomes (the refreshed `.cjar` failed its Sigstore signature check, including a missing bundle). Failing to fetch the bundle counts like any other fetch failure instead: no response (timeout, connection refused) is `NetworkError`, a `5xx` is `HttpError`, and a failure while reading the bundle body is `DecodeError` |
 
-## Legacy Single-File Format (JSON)
+## Legacy Single-File Format (YAML Test Suites)
 
-The following sections document the legacy single-file JSON format.
+!!! note "YAML Test Fixtures Only"
+    The legacy JSON format has been removed in favor of folder-based policy stores (`.cjar` archives or directories). The single-file schema below is supported exclusively via YAML for automated test suites.
 
-### JSON Schema
+### Structure
 
-The JSON Schema accepted by Cedarling is defined as follows:
+The structure accepted for YAML test fixtures is defined as follows:
 
 ```json
 {
@@ -327,16 +743,21 @@ The JSON Schema accepted by Cedarling is defined as follows:
           "policies": { ... },
           "schema": { ... },
           "trusted_issuers": { ... },
+          "custom_issuers": { ... },
           "default_entities": { ... }
       }
   }
 }
 ```
 
+The ID is the `policy_stores` map key, is not required to be hex, and is not
+validated.
+
 - **cedar_version** : (_String_) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (_Object_) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (_String_ | _Object_) Base64 encoded JSON Object. See [schema](#schema) below.
-- **trusted_issuers** : (_Object of {unique_id => IdentitySource}(#trusted-issuer-schema)_) List of metadata for Identity Sources.
+- **trusted_issuers** : (_Object of {unique_id => IdentitySource}_) Metadata for JWT issuers. See [Trusted Issuers Schema](#trusted-issuers-schema).
+- **custom_issuers** : (_Object of {issuer_name => CustomIssuer}_) Optional map of custom (non-JWT) issuers validated by a registered `CustomTokenProcessor`, each `{ "tokens_mappings": { "<entity type>": { "required_claims": [...] } } }`. The issuer is identified by its name, sanitized (lowercased, with `.`, space and `-` replaced by `_`), which is also its `context.tokens` key prefix. See [Custom (Non-JWT) Token Processing](./cedarling-multi-issuer.md#custom-non-jwt-token-processing).
 - **default_entities** : (_Object_) Optional map of entity IDs to encoded/default entity payloads. See [Default Entities](#default-entities).
 
 ### `schema`
@@ -494,23 +915,24 @@ Here is a non-normative example of the `policies` field:
 
 ## Trusted Issuers Schema
 
+This shape is used only by the [legacy single-file YAML format](#legacy-single-file-format-yaml-test-suites).
+Directory and `.cjar` stores use [`trusted-issuers.json`](#trusted-issuersjson).
+Once loaded, both follow the same rules.
+
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
 "trusted_issuers": {
   "trusted_issuer_id" : {
     "name": "name_of_the_trusted_issuer",
-    "description": "description for the trusted issuer",
     "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
     "token_metadata": {
-      "access_tokens": {
-        "trusted": true,
+      "access_token": {
+        "entity_type_name": "Acme::Access_token",
         "token_id": "jti",
         ...
       },
-      "id_tokens": { ... },
-      "userinfo_tokens": { ... },
-      "tx_tokens": { ... },
+      "id_token": { ... },
       ...
     }
   },
@@ -521,11 +943,12 @@ This record contains the information needed to validate tokens from this issuer:
 }
 ```
 
-- **name** : (_String_) The name of the trusted issuer.
-- **description** : (_String_) A brief description of the trusted issuer, providing context for administrators.
-- **openid_configuration_endpoint** : (_String_) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
-- **trusted_issuer_id** : (_Object_, _optional_) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the [Trusted Issuer](./cedarling-entities.md#trusted-issuer) that Cedarling automatically creates at startup.
-- **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema).
+- **name** : (_String_) The issuer identity: a single Cedar identifier, used as the `issuer` of each of its token types.
+- **openid_configuration_endpoint** : (_String_) The OpenID Connect discovery URL: the issuer URL followed by `/.well-known/openid-configuration`. The issuer URL, path included, is the expected `iss`.
+- **trusted_issuer_id** : (_Object_, _optional_) Metadata related to a particular issuer. You can add as many trusted issuers you want. The key itself is not used.
+- **token_metadata** : (_Object_, _optional_) Tokens metadata in a map of _token name_ -> _token metadata_. See [Token Metadata Schema](#token-metadata-schema). An issuer without token types is not loaded.
+
+Any other field is rejected, including `description` on the issuer and `trusted` on a token, which older fixtures used.
 
 ### Token Metadata Schema
 
@@ -533,21 +956,19 @@ The Token Entity Metadata Schema defines how tokens are mapped and validated wit
 
 ```json
 {
-  "trusted": true,
   "entity_type_name": "Acme::Access_token",
   "token_id": "jti",
   "required_claims": ["iss", "exp", "some_custom_claim"]
 }
 ```
 
-- `"trusted"` (bool, Default: true): Allows toggling configuration without deleting the object. When set to `false`, tokens of this type will be ignored.
-- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`.
+- `"entity_type_name"` (string, required): The type name of the Cedar Entity that will be created from the token; for example: `"Acme::Access_token"`. A request `mapping` must equal it, and it must be unique across all issuers.
 - `"token_id"` (string, Default: `"jti"`): The JWT claim that will be used as the ID for the Token Entity.
 - `"required_claims"` (array[string], Default: `[]`): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under [RFC 7519 Section 4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (e.g., `exp`, `nbf`), the claim will also be validated according to the standard.
 
-## Example Policy store
+## Example Policy Store (Legacy Single-File Structure)
 
-Here is a non-normative example of a `cedarling_store.json` file:
+Here is a non-normative example of the legacy single-file structure (supported in YAML test suites):
 
 ```json
 {
@@ -562,21 +983,17 @@ Here is a non-normative example of a `cedarling_store.json` file:
   "trusted_issuers": {
     "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb": {
       "name": "Google",
-      "description": "Consumer IDP",
       "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
       "token_metadata": {
         "access_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Access_token",
           "token_id": "jti"
         },
         "id_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Id_token",
           "token_id": "jti"
         },
         "userinfo_token": {
-          "trusted": true,
           "entity_type_name": "Jans::Userinfo_token",
           "token_id": "jti"
         }
@@ -694,9 +1111,9 @@ entity Tokens = {
 
 The naming follows this pattern:
 
-- **Issuer name**: From trusted issuer metadata `name` field, or hostname from JWT `iss` claim
-- **Token type**: Extracted from the `mapping` field (e.g., "Jans::Access_Token" → "access_token")
-- Both converted to lowercase with underscores replacing special characters
+- **Issuer name**: The `issuer` of the token's entry in [`trusted-issuers.json`](#trusted-issuersjson), lowercased
+- **Token type**: The last segment of the `mapping` field, lowercased (e.g., "Jans::Access_Token" → "access_token")
+- The key is computed once when the store loads and must be unique; a token type without a configured entry gets no key
 
 ### Schema Requirements for Multi-Issuer
 
@@ -951,37 +1368,32 @@ permit(
 
 ### Trusted Issuer Configuration for Multi-Issuer
 
-The `name` field in trusted issuer configuration is critical for multi-issuer authorization:
+The `issuer` field in [`trusted-issuers.json`](#trusted-issuersjson) is critical
+for multi-issuer authorization:
 
 ```json
-"trusted_issuers": {
-  "acme_issuer_id": {
-    "name": "Acme",  // Used in token collection naming: "acme_access_token" and depict namespace for `TrustedIssuer` cedar type
-    "description": "Acme Corporation IDP",
-    "openid_configuration_endpoint": "https://idp.acme.com/.well-known/openid-configuration",
-    "token_metadata": {
-      "access_token": {
-        "entity_type_name": "Jans::Access_Token",
-        "token_id": "jti"
-      }
+{
+  "Jans::Access_Token": {
+    "type": "jwt",
+    "issuer": "Acme",
+    "configuration_endpoints": {
+      "configuration": "https://idp.acme.com/.well-known/openid-configuration"
     }
   },
-  "dolphin_issuer_id": {
-    "name": "Dolphin",  // Used in token collection naming: "dolphin_dolphintoken" and depict namespace for `TrustedIssuer` cedar type
-    "description": "Dolphin Service Provider",
-    "openid_configuration_endpoint": "https://idp.dolphin.sea/.well-known/openid-configuration",
-    "token_metadata": {
-      "dolphin_token": {
-        "entity_type_name": "Acme::DolphinToken",
-        "token_id": "jti"
-      }
+  "Acme::DolphinToken": {
+    "type": "jwt",
+    "issuer": "Dolphin",
+    "configuration_endpoints": {
+      "configuration": "https://idp.dolphin.sea/.well-known/openid-configuration"
     }
   }
 }
 ```
 
-**Note**: The `name` field ensures predictable and secure token entity naming in the policy evaluation context.
-And is used as **namespace** for `TrustedIssuer` cedar type.
+Here `Jans::Access_Token` tokens appear as `context.tokens.acme_access_token` and
+`Acme::DolphinToken` tokens as `context.tokens.dolphin_dolphintoken`. The
+`issuer` is also the namespace of the `TrustedIssuer` Cedar type
+(`Acme::TrustedIssuer`), independent of the token's own namespace.
 
 ## Policy and Schema Authoring
 

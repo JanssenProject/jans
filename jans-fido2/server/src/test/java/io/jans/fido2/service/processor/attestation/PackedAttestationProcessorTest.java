@@ -56,6 +56,9 @@ class PackedAttestationProcessorTest {
     private PackedAttestationProcessor packedAttestationProcessor;
 
     @Mock
+    private io.jans.fido2.service.RpPolicyService rpPolicyService;
+
+    @Mock
     private Logger log;
 
     @Mock
@@ -111,8 +114,7 @@ class PackedAttestationProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
 
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(
                 new WebApplicationException(Response.status(400).entity("test exception").build())
         );
@@ -129,7 +131,7 @@ class PackedAttestationProcessorTest {
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
-        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList());
+        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList(), any());
         verifyNoInteractions(certificateVerifier, coseService, authenticatorDataVerifier, base64Service);
     }
 
@@ -151,11 +153,10 @@ class PackedAttestationProcessorTest {
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
         X509TrustManager tm = mock(X509TrustManager.class);
-        when(attestationCertificateService.populateTrustManager(authData, certificates)).thenReturn(tm);
+        when(attestationCertificateService.populateTrustManager(authData, certificates, null)).thenReturn(tm);
         when(tm.getAcceptedIssuers()).thenReturn(new X509Certificate[]{});
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -165,7 +166,7 @@ class PackedAttestationProcessorTest {
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
-        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList());
+        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList(), any());
         verifyNoInteractions(certificateVerifier, coseService, authenticatorDataVerifier, base64Service);
     }
 
@@ -192,15 +193,14 @@ class PackedAttestationProcessorTest {
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
         X509TrustManager tm = mock(X509TrustManager.class);
-        when(attestationCertificateService.populateTrustManager(authData, certificates)).thenReturn(tm);
+        when(attestationCertificateService.populateTrustManager(authData, certificates, null)).thenReturn(tm);
         X509Certificate verifiedCert = mock(X509Certificate.class);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(verifiedCert);
         when(tm.getAcceptedIssuers()).thenReturn(new X509Certificate[]{mock(X509Certificate.class)});
         when(certificateVerifier.isSelfSigned(any())).thenReturn(true);
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -210,7 +210,7 @@ class PackedAttestationProcessorTest {
 
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
-        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList());
+        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList(), any());
         verify(authenticatorDataVerifier).verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
         verifyNoMoreInteractions(authenticatorDataVerifier);
         verifyNoInteractions(coseService, base64Service);
@@ -253,18 +253,17 @@ class PackedAttestationProcessorTest {
         List<X509Certificate> certificates = Collections.singletonList(compliantAttestationCertificate());
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
         X509TrustManager tm = mock(X509TrustManager.class);
-        when(attestationCertificateService.populateTrustManager(authData, certificates)).thenReturn(tm);
+        when(attestationCertificateService.populateTrustManager(authData, certificates, null)).thenReturn(tm);
         X509Certificate verifiedCert = mock(X509Certificate.class);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenReturn(verifiedCert);
         when(tm.getAcceptedIssuers()).thenReturn(new X509Certificate[]{mock(X509Certificate.class)});
         when(certificateVerifier.isSelfSigned(any())).thenReturn(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
         packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
-        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList());
+        verify(attestationCertificateService).populateTrustManager(any(AuthData.class), anyList(), any());
         verify(certificateVerifier).verifyAttestationCertificates(anyList(), anyList());
         verify(authenticatorDataVerifier).verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
         verify(certificateVerifier).isSelfSigned(any(X509Certificate.class));
@@ -290,8 +289,7 @@ class PackedAttestationProcessorTest {
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -299,8 +297,7 @@ class PackedAttestationProcessorTest {
         assertEquals(400, res.getResponse().getStatus());
         assertEquals("test exception", res.getResponse().getEntity());
 
-        verify(appConfiguration).getFido2Configuration();
-        verify(fido2Configuration).getAttestationMode();
+        verify(rpPolicyService).resolveAttestationMode(org.mockito.ArgumentMatchers.any());
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
 
@@ -322,14 +319,13 @@ class PackedAttestationProcessorTest {
         String signature = "test-signature";
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
+        when(rpPolicyService.resolveAttestationMode(org.mockito.ArgumentMatchers.any())).thenReturn(AttestationMode.MONITOR.getValue());
 
         packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
         verify(base64Service, times(2)).urlEncodeToString(any());
-        verify(appConfiguration).getFido2Configuration(); // Explicit verification
+        verify(rpPolicyService).resolveAttestationMode(org.mockito.ArgumentMatchers.any());
         verifyNoInteractions(certificateService, log, certificateVerifier);
     }
 }

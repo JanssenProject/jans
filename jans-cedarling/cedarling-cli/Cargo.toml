@@ -14,7 +14,7 @@ cedarling = { workspace = true, features = ["tools"] }
 clap = { version = "4.5", features = ["derive", "env"] }
 anyhow = "1"
 serde = { workspace = true }
-serde_yaml_ng = "0.10"
+serde-saphyr = "1.3.0"
 serde_json = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 colored = "3"

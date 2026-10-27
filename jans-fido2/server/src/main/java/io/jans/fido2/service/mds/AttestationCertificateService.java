@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.CertificateService;
@@ -48,6 +49,9 @@ public class AttestationCertificateService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private RpPolicyService rpPolicyService;
 
 	@Inject
 	private KeyStoreCreator keyStoreCreator;
@@ -137,8 +141,8 @@ public class AttestationCertificateService {
 		return certificateService.getCertificates(x509certificates);
 	}
 
-	public String getAttestationAuthenticatorName(AuthData authData) {
-		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
+	public String getAttestationAuthenticatorName(AuthData authData, String origin) {
+		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData, origin);
 		JsonNode metaDataStatement = null;
 		if ((metadataForAuthenticator != null)) {
 			if (metadataForAuthenticator.has(DESCRIPTION)) {
@@ -162,13 +166,12 @@ public class AttestationCertificateService {
 	 * (reject on metadata-fetch failure / blocked status). {@code disabled} and {@code monitor} retain
 	 * the previous lenient behavior so existing deployments are unaffected.
 	 */
-	private boolean isAttestationEnforced() {
-		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-		return (fido2Configuration != null) && AttestationMode.ENFORCED.getValue()
-				.equalsIgnoreCase(fido2Configuration.getAttestationMode());
+	private boolean isAttestationEnforced(String origin) {
+		return AttestationMode.ENFORCED.getValue()
+				.equalsIgnoreCase(rpPolicyService.resolveAttestationMode(origin));
 	}
 
-	private JsonNode getMetadataForAuthenticator(AuthData authData) {
+	private JsonNode getMetadataForAuthenticator(AuthData authData, String origin) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		JsonNode metadataForAuthenticator;
@@ -193,7 +196,7 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-				if (isAttestationEnforced()) {
+				if (isAttestationEnforced(origin)) {
 					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
 					// fall back to empty metadata (which would let attestation succeed unverified).
 					throw ex;
@@ -206,7 +209,7 @@ public class AttestationCertificateService {
 
 	
 
-	public JsonNode getMetadataForU2fAuthenticator(String attestationCertificateKeyIdentifiers) {
+	public JsonNode getMetadataForU2fAuthenticator(String attestationCertificateKeyIdentifiers, String origin) {
 
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		JsonNode metadataForAuthenticator;
@@ -229,7 +232,7 @@ public class AttestationCertificateService {
 				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-				if (isAttestationEnforced()) {
+				if (isAttestationEnforced(origin)) {
 					// CONF-22: in enforced mode a metadata-fetch/lookup failure must reject, not silently
 					// fall back to empty metadata (which would let attestation succeed unverified).
 					throw ex;
@@ -241,14 +244,14 @@ public class AttestationCertificateService {
 	}
 
 	
-	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
-		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
+	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates, String origin) {
+		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData, origin);
 		return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
 	}
 
-	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates) {
+	public X509TrustManager populateTrustManager(AuthData authData, List<X509Certificate> attestationCertificates, String origin) {
 		String aaguid = Hex.encodeHexString(authData. getAaguid());
-		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates);
+		List<X509Certificate> trustedCertificates = getAttestationRootCertificates(authData, attestationCertificates, origin);
 		if ((trustedCertificates == null) || trustedCertificates.isEmpty()) {
 			log.error("Failed to get trusted certificates");
 			return null;

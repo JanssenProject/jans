@@ -28,6 +28,12 @@ public final class Fido2MetricsConstants {
     public static final String FAILURE_RATE = "failureRate";
     public static final String COMPLETION_RATE = "completionRate";
     public static final String DROP_OFF_RATE = "dropOffRate";
+    /**
+     * Explains any rate in the same response that is null, or that had to be capped or read against a
+     * different denominator than usual. Absent when every rate was computed as it should be. An
+     * unknown rate must not be rendered as a zero.
+     */
+    public static final String RATE_NOTE = "rateNote";
 
     // Aggregation Types
     public static final String HOURLY = "HOURLY";
@@ -121,6 +127,7 @@ public final class Fido2MetricsConstants {
     // Query parameter names
     public static final String PARAM_START_TIME = "startTime";
     public static final String PARAM_END_TIME = "endTime";
+    public static final String PARAM_OPERATION_TYPE = "operationType";
     
     // Fallback method constants
     public static final String FALLBACK_METHOD_PASSWORD = "PASSWORD";
@@ -160,6 +167,7 @@ public final class Fido2MetricsConstants {
     public static final int MAX_LENGTH_USER_AGENT = 512;
     public static final int MAX_LENGTH_FALLBACK_REASON = 512;
     public static final int MAX_LENGTH_ERROR_REASON = 1024;
+    public static final int MAX_LENGTH_CLIENT_CORRELATION_ID = 128;
 
     /**
      * Applied to the individual members of the serialized deviceInfo blob. That
@@ -167,4 +175,10 @@ public final class Fido2MetricsConstants {
      * from bloating the row rather than a schema limit.
      */
     public static final int MAX_LENGTH_DEVICE_INFO_FIELD = 128;
+
+    /**
+     * Applied to the individual members of the serialized nativeClientTelemetry blob (#14607),
+     * same policy as {@link #MAX_LENGTH_DEVICE_INFO_FIELD}.
+     */
+    public static final int MAX_LENGTH_NATIVE_TELEMETRY_FIELD = 128;
 }

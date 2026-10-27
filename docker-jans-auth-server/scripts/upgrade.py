@@ -24,15 +24,20 @@ logger = logging.getLogger("jans-auth")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
+# mirrors LOCK_TEST_CLIENT_ID in docker-jans-persistence-loader/scripts/test_data_setup.py
+LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+
 
 def _transform_lock_dynamic_config(conf, manager):
     should_update = False
 
     # add missing top-level keys
     hostname = manager.config.get("hostname")
+    client_id = manager.config.get("lock_client_id")
+
     for missing_key, value in [
         ("baseEndpoint", f"https://{hostname}/jans-auth/api/v1"),
-        ("clientId", manager.config.get("lock_client_id")),
+        ("clientId", client_id),
         ("clientPassword", manager.secret.get("lock_client_encoded_pw")),
         ("tokenUrl", f"https://{hostname}/jans-auth/restv1/token"),
         ("statEnabled", True),
@@ -53,6 +58,28 @@ def _transform_lock_dynamic_config(conf, manager):
         ("auditPersistenceMode", "internal"),
         ("grpcConfiguration", {
             "serverMode": "bridge",
+        }),
+        ("traceConfiguration", {
+            "enabled": True,
+            "defaultEvidenceDomainId": "",
+            "clientDomainBindings": [
+                {
+                    "clientId": client_id,
+                    "evidenceDomainId": "default",
+                    "allowedProducerIds": ["*"],
+                },
+            ],
+            "latenessThresholdSeconds": 300,
+            "maxRequestBytes": 262144,
+            "maxJsonDepth": 32,
+            "maxStringLength": 8192,
+            "maxArrayLength": 256,
+            "maxObjectMembers": 256,
+            "receiptAllocationRetryLimit": 8,
+            "receiptRepairIntervalSeconds": 300,
+            "pendingReceiptTimeoutSeconds": 120,
+            "maxBulkRecords": 100,
+            "maxBulkRequestBytes": 4194304,
         }),
     ]:
         if missing_key not in conf:
@@ -80,6 +107,31 @@ def _transform_lock_dynamic_config(conf, manager):
     if conf["protectionMode"] == "CEDARLING":
         conf["protectionMode"] = "cedarling"
         should_update = True
+
+    # lock config is created after persistence-loader imports test data, so bind the test client here
+    if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
+        bindings = conf["traceConfiguration"].setdefault("clientDomainBindings", [])
+        if not any(binding.get("clientId") == LOCK_TEST_CLIENT_ID for binding in bindings):
+            bindings.append({
+                "clientId": LOCK_TEST_CLIENT_ID,
+                "evidenceDomainId": "default",
+                "allowedProducerIds": ["*"],
+            })
+            should_update = True
+
+    # add new traceConfiguration post v2.5.x
+    for tconf_k, tconf_v in [
+        ("defaultAllowedProducerIds", []),
+        ("maxFutureSkewSeconds", 300),
+        ("cryptoProvider", "JAVA"),
+        ("policyMismatchGraceSeconds", 300),
+        ("policyReleaseRetentionDays", 30),
+        ("correlationRetryLimit", 3),
+        ("chainRegistrationMode", "PRE_REGISTERED"),
+    ]:
+        if tconf_k not in conf["traceConfiguration"]:
+            conf["traceConfiguration"][tconf_k] = tconf_v
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update

@@ -14,18 +14,21 @@
 
 use chrono::{DateTime, Utc};
 use hdrhistogram::Histogram;
+use serde::Serialize;
 use std::{
     collections::HashMap,
     sync::{
         Mutex, RwLock,
         atomic::{AtomicI64, Ordering},
     },
+    time::Duration,
 };
 
 use crate::{
     authz::error_metrics::ErrorMetricKey,
     init::policy_store_refresh::{RefreshOutcome, RefreshStrategy},
     log::Decision,
+    trace::{EmitterEvent, TraceRecordStatus},
 };
 
 const INTERVAL_LOCK_POISONED: &str = "interval lock poisoned";
@@ -110,15 +113,112 @@ pub(crate) struct PolicyStatsSnapshot {
     deny_count: i64,
 }
 
+/// Serde helper writing [`MetricsSnapshot::interval`] as fractional seconds
+/// under the `interval_secs` key.
+///
+/// This is the canonical JSON shape for the public Rust API. `Duration`'s own
+/// `Serialize` emits a `{ secs, nanos }` object, which is a poor public JSON
+/// shape, and whole seconds would silently report `0` for any interval shorter
+/// than a second. Float seconds keep the field a single number without
+/// discarding the sub-second part.
+///
+/// Language bindings that expose a native duration type set it directly rather
+/// than reading this key (Go sends whole nanoseconds, Python and the rest
+/// convert to their own type), and the Lock telemetry ticker builds its own
+/// `MetricsLogEntry`. This impl is what Rust consumers get.
+mod interval_serde {
+    use serde::Serializer;
+    use std::time::Duration;
+
+    pub(super) fn serialize<S>(duration: &Duration, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_f64(duration.as_secs_f64())
+    }
+}
+
 /// Telemetry snapshot containing the three metric maps and interval duration.
 ///
-/// Produced by [`MetricsCollector::snapshot_and_reset`].
-#[derive(Debug, Clone)]
-pub(crate) struct MetricsSnapshot {
+/// Destructive read: produced by [`MetricsCollector::snapshot_and_reset`],
+/// which returns the counters and resets them.
+#[derive(Debug, Clone, Serialize)]
+pub struct MetricsSnapshot {
+    /// Per-policy evaluation counts (`policy_id`, `policy_id.allow`, `policy_id.deny`).
     pub policy_stats: HashMap<String, i64>,
+    /// Classified error counters keyed by the error's metric key.
     pub error_counters: HashMap<String, i64>,
+    /// Operational counters and gauges (authorization, cache, JWT, data, lock).
     pub operational_stats: HashMap<String, i64>,
-    pub interval_secs: i64,
+    /// Duration of the snapshot interval with sub-second precision.
+    /// Serialized as `interval_secs`, fractional seconds.
+    #[serde(rename = "interval_secs", serialize_with = "interval_serde::serialize")]
+    pub interval: Duration,
+}
+
+impl MetricsSnapshot {
+    /// [`Self::interval`] as whole seconds, saturating, for the Lock proto
+    /// `TelemetryEntry` field 8 (`audit.proto`), which is an `int64`.
+    pub(crate) fn interval_secs_i64(&self) -> i64 {
+        i64::try_from(self.interval.as_secs()).unwrap_or(i64::MAX)
+    }
+}
+
+/// Error returned by [`crate::Cedarling::drain_metrics`] when
+/// local metric snapshots are not available.
+#[derive(Debug, thiserror::Error)]
+pub enum MetricsError {
+    /// Local metrics collection is disabled at bootstrap. Enable it by setting
+    /// `CEDARLING_METRICS_COLLECTION=enabled`.
+    #[error("metrics collection is disabled")]
+    Disabled,
+    /// The metrics collector is owned by the Lock telemetry ticker, so local
+    /// snapshots would steal its counters. Enabling
+    /// `CEDARLING_METRICS_COLLECTION` will not help.
+    /// Returned whenever `CEDARLING_LOCK_TELEMETRY_INTERVAL` is set, even if
+    /// the Lock server has no telemetry endpoint and metrics are not shipped
+    /// anywhere: the ticker is spawned based on the interval alone.
+    #[error("metrics collection is owned by the lock telemetry ticker")]
+    LockTelemetry,
+}
+
+/// How metric snapshots are exposed. Computed once at bootstrap.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum MetricsMode {
+    /// Metrics are not collected; local snapshots fail with
+    /// [`MetricsError::Disabled`].
+    Disabled,
+    /// Metrics are collected locally and can be snapshotted by the caller.
+    Local,
+    /// A Lock telemetry ticker owns the collector; local snapshots fail with
+    /// [`MetricsError::LockTelemetry`].
+    LockTelemetry,
+}
+
+impl MetricsMode {
+    /// Whether the collector records at all. [`MetricsMode::LockTelemetry`]
+    /// collects like [`MetricsMode::Local`]; the two differ only in who is
+    /// allowed to drain.
+    pub(crate) fn collects(self) -> bool {
+        !matches!(self, Self::Disabled)
+    }
+}
+
+/// Resolve the collector mode from the lock-telemetry and local-collection flags.
+///
+/// Lock telemetry always takes precedence: when it is active, the ticker owns
+/// the collector and local snapshotting would steal its counters.
+pub(crate) fn resolve_metrics_mode(
+    lock_telemetry_active: bool,
+    metrics_collection: bool,
+) -> MetricsMode {
+    if lock_telemetry_active {
+        MetricsMode::LockTelemetry
+    } else if metrics_collection {
+        MetricsMode::Local
+    } else {
+        MetricsMode::Disabled
+    }
 }
 
 /// All state that resets at each telemetry interval.
@@ -160,9 +260,20 @@ struct IntervalState {
     jwt_validations_success: AtomicI64,
     jwt_validations_failed: AtomicI64,
 
+    custom_token_total: AtomicI64,
+    custom_token_success: AtomicI64,
+    custom_token_failed: AtomicI64,
+    custom_token_timing_recorder: Mutex<TimingRecorder>,
+    last_custom_token_time_us: AtomicI64,
+
     data_push_ops: AtomicI64,
     data_get_ops: AtomicI64,
     data_remove_ops: AtomicI64,
+
+    /// One counter per [`TraceRecordStatus::ALL`] entry, in the same order.
+    trace_record_statuses: [AtomicI64; TraceRecordStatus::ALL.len()],
+    /// One counter per [`EmitterEvent::ALL`] entry, in the same order.
+    trace_emitter_events: [AtomicI64; EmitterEvent::ALL.len()],
 
     policy_stats: RwLock<HashMap<String, PolicyStats>>,
     error_counters: RwLock<HashMap<String, i64>>,
@@ -192,9 +303,16 @@ impl IntervalState {
             jwt_validations_total: AtomicI64::new(0),
             jwt_validations_success: AtomicI64::new(0),
             jwt_validations_failed: AtomicI64::new(0),
+            custom_token_total: AtomicI64::new(0),
+            custom_token_success: AtomicI64::new(0),
+            custom_token_failed: AtomicI64::new(0),
+            custom_token_timing_recorder: Mutex::new(TimingRecorder::new()),
+            last_custom_token_time_us: AtomicI64::new(0),
             data_push_ops: AtomicI64::new(0),
             data_get_ops: AtomicI64::new(0),
             data_remove_ops: AtomicI64::new(0),
+            trace_record_statuses: Default::default(),
+            trace_emitter_events: Default::default(),
             policy_stats: RwLock::new(HashMap::new()),
             error_counters: RwLock::new(HashMap::new()),
         }
@@ -204,6 +322,7 @@ impl IntervalState {
     ///
     /// Accepts pre-computed values that require context outside `IntervalState`
     /// (eval-time percentiles, uptime, policy count).
+    #[allow(clippy::too_many_lines)] // flat metric-map literal; splitting hurts readability
     fn to_operational_stats(
         &self,
         now: DateTime<Utc>,
@@ -212,6 +331,11 @@ impl IntervalState {
     ) -> HashMap<String, i64> {
         let (p50, p95, p99, max_time) = self
             .timing_recorder
+            .lock()
+            .expect(TIMING_LOCK_POISONED)
+            .drain_and_compute();
+        let (ct_p50, ct_p95, ct_p99, ct_max) = self
+            .custom_token_timing_recorder
             .lock()
             .expect(TIMING_LOCK_POISONED)
             .drain_and_compute();
@@ -297,6 +421,26 @@ impl IntervalState {
                 "jwt.validations_failed".to_string(),
                 load(&self.jwt_validations_failed),
             ),
+            (
+                "multi_issuer.custom_token_total".to_string(),
+                load(&self.custom_token_total),
+            ),
+            (
+                "multi_issuer.custom_token_success".to_string(),
+                load(&self.custom_token_success),
+            ),
+            (
+                "multi_issuer.custom_token_failed".to_string(),
+                load(&self.custom_token_failed),
+            ),
+            (
+                "multi_issuer.custom_token_last_time_us".to_string(),
+                load(&self.last_custom_token_time_us),
+            ),
+            ("multi_issuer.custom_token_time_p50_us".to_string(), ct_p50),
+            ("multi_issuer.custom_token_time_p95_us".to_string(), ct_p95),
+            ("multi_issuer.custom_token_time_p99_us".to_string(), ct_p99),
+            ("multi_issuer.custom_token_time_max_us".to_string(), ct_max),
             ("data.push_ops".to_string(), load(&self.data_push_ops)),
             ("data.get_ops".to_string(), load(&self.data_get_ops)),
             ("data.remove_ops".to_string(), load(&self.data_remove_ops)),
@@ -329,6 +473,7 @@ struct PolicyStoreRefreshMetrics {
     outcome_parse_error: AtomicI64,
     outcome_rebuild_error: AtomicI64,
     outcome_decode_error: AtomicI64,
+    outcome_verification_error: AtomicI64,
 }
 
 impl PolicyStoreRefreshMetrics {
@@ -346,6 +491,7 @@ impl PolicyStoreRefreshMetrics {
             RefreshOutcome::ParseError => &self.outcome_parse_error,
             RefreshOutcome::RebuildError => &self.outcome_rebuild_error,
             RefreshOutcome::DecodeError => &self.outcome_decode_error,
+            RefreshOutcome::VerificationError => &self.outcome_verification_error,
         };
         per_outcome.fetch_add(1, Ordering::Relaxed);
 
@@ -358,7 +504,8 @@ impl PolicyStoreRefreshMetrics {
             | RefreshOutcome::NetworkError
             | RefreshOutcome::ParseError
             | RefreshOutcome::RebuildError
-            | RefreshOutcome::DecodeError => {
+            | RefreshOutcome::DecodeError
+            | RefreshOutcome::VerificationError => {
                 self.consecutive_failures.fetch_add(1, Ordering::Relaxed);
             },
         }
@@ -466,6 +613,11 @@ impl PolicyStoreRefreshMetrics {
             "policy_store_refresh.outcome_decode_error",
             &self.outcome_decode_error,
         );
+        insert_if_nonzero(
+            ops,
+            "policy_store_refresh.outcome_verification_error",
+            &self.outcome_verification_error,
+        );
     }
 }
 
@@ -478,7 +630,9 @@ impl PolicyStoreRefreshMetrics {
 /// every counter is reset by construction.
 #[derive(Debug)]
 pub(crate) struct MetricsCollector {
-    enabled: bool,
+    /// Resolved once at bootstrap. Decides both whether `record_*` does
+    /// anything and who may drain, so the two can never disagree.
+    mode: MetricsMode,
     /// State that persists across intervals
     init_time: DateTime<Utc>,
     policy_count: AtomicI64,
@@ -492,36 +646,36 @@ pub(crate) struct MetricsCollector {
 }
 
 impl MetricsCollector {
-    pub(crate) fn new(initial_policy_count: usize) -> Self {
+    /// The `instance.policy_count` gauge starts at zero; callers publish the
+    /// real count with [`Self::set_policy_count`] once the policy store is
+    /// loaded, and again after every refresh.
+    pub(crate) fn new(mode: MetricsMode) -> Self {
         let now = Utc::now();
         Self {
-            enabled: true,
+            mode,
             init_time: now,
-            policy_count: AtomicI64::new(saturating_usize_to_i64(initial_policy_count)),
+            policy_count: AtomicI64::new(0),
             interval: RwLock::new(Box::new(IntervalState::new(now))),
             refresh: PolicyStoreRefreshMetrics::default(),
         }
     }
 
-    pub(crate) fn disabled() -> Self {
-        Self {
-            enabled: false,
-            init_time: Utc::now(),
-            policy_count: AtomicI64::new(0),
-            interval: RwLock::new(Box::new(IntervalState::new(Utc::now()))),
-            refresh: PolicyStoreRefreshMetrics::default(),
-        }
+    /// The mode this collector was built with, used by
+    /// [`crate::Cedarling::drain_metrics`] to decide whether a local drain is
+    /// allowed and which error to return when it is not.
+    pub(crate) fn mode(&self) -> MetricsMode {
+        self.mode
     }
 
     /// Records a refresh-worker tick outcome. Always runs regardless of
-    /// `enabled`, since refresh state should be observable even if telemetry
+    /// the collector mode, since refresh state should be observable even if telemetry
     /// emission to Lock is disabled.
     pub(crate) fn record_policy_store_refresh(&self, outcome: RefreshOutcome) {
         self.refresh.record(outcome);
     }
 
     /// Records the current strategy and cumulative transition counts after a
-    /// refresh tick. Always runs regardless of `enabled` for the same reason as
+    /// refresh tick. Always runs regardless of the collector mode for the same reason as
     /// [`Self::record_policy_store_refresh`].
     pub(crate) fn record_policy_store_refresh_strategy(
         &self,
@@ -548,7 +702,7 @@ impl MetricsCollector {
         is_unsigned: bool,
         evaluated_policies: impl Iterator<Item = (&'a str, Decision)>,
     ) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -623,7 +777,7 @@ impl MetricsCollector {
     /// flow-specific pair (`authz.batch_unsigned{,_items}` or
     /// `authz.batch_multi_issuer{,_items}`).
     pub(crate) fn record_batch(&self, item_count: usize, is_unsigned: bool) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -652,7 +806,7 @@ impl MetricsCollector {
 
     /// Increments `authz.errors_total` counter.
     pub(crate) fn record_authz_error(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -665,7 +819,7 @@ impl MetricsCollector {
 
     /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
     pub(crate) fn record_error(&self, err: &impl ErrorMetricKey) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
         self.increment_error(err.metric_key());
@@ -673,7 +827,7 @@ impl MetricsCollector {
 
     /// Increments a classified error counter by raw key string.
     pub(crate) fn increment_error(&self, key: &str) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -686,7 +840,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_hit(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -698,7 +852,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_miss(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -710,7 +864,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_cache_eviction(&self, count: usize) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -722,7 +876,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_jwt_validation(&self, success: bool) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -741,8 +895,32 @@ impl MetricsCollector {
         }
     }
 
+    pub(crate) fn record_custom_token(&self, success: bool, elapsed_us: i64) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        interval.custom_token_total.fetch_add(1, Ordering::Relaxed);
+        if success {
+            interval
+                .custom_token_success
+                .fetch_add(1, Ordering::Relaxed);
+        } else {
+            interval.custom_token_failed.fetch_add(1, Ordering::Relaxed);
+        }
+        interval
+            .last_custom_token_time_us
+            .store(elapsed_us, Ordering::Relaxed);
+        interval
+            .custom_token_timing_recorder
+            .lock()
+            .expect(TIMING_LOCK_POISONED)
+            .record(elapsed_us);
+    }
+
     pub(crate) fn record_data_push(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -754,7 +932,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_get(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -766,7 +944,7 @@ impl MetricsCollector {
     }
 
     pub(crate) fn record_data_remove(&self) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -777,8 +955,41 @@ impl MetricsCollector {
             .fetch_add(1, Ordering::Relaxed);
     }
 
+    /// Counts the TRACE record status of one decision.
+    pub(crate) fn record_trace_status(&self, status: TraceRecordStatus) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        if let Some((_, counter)) = TraceRecordStatus::ALL
+            .iter()
+            .zip(&interval.trace_record_statuses)
+            .find(|(known, _)| **known == status)
+        {
+            counter.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    /// Counts `count` occurrences of what the TRACE emitter did.
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn record_trace_emitter(&self, event: EmitterEvent, count: usize) {
+        if !self.mode.collects() {
+            return;
+        }
+
+        let interval = self.interval.read().expect(INTERVAL_LOCK_POISONED);
+        if let Some((_, counter)) = EmitterEvent::ALL
+            .iter()
+            .zip(&interval.trace_emitter_events)
+            .find(|(known, _)| **known == event)
+        {
+            counter.fetch_add(saturating_usize_to_i64(count), Ordering::Relaxed);
+        }
+    }
+
     pub(crate) fn set_policy_count(&self, count: usize) {
-        if !self.enabled {
+        if !self.mode.collects() {
             return;
         }
 
@@ -805,7 +1016,10 @@ impl MetricsCollector {
             std::mem::replace(&mut *guard, Box::new(IntervalState::new(now)))
         };
 
-        let interval_secs = now.signed_duration_since(old.start).num_seconds();
+        let interval = now
+            .signed_duration_since(old.start)
+            .to_std()
+            .unwrap_or(Duration::ZERO);
 
         let policy_stats = {
             let map = old
@@ -832,12 +1046,22 @@ impl MetricsCollector {
 
         let mut ops = old.to_operational_stats(now, self.init_time, &self.policy_count);
         self.refresh.inject_if_nonzero(&mut ops);
+        // Only non-zero, so a Cedarling without TRACE reports no `trace.*` keys.
+        for (status, counter) in TraceRecordStatus::ALL
+            .iter()
+            .zip(&old.trace_record_statuses)
+        {
+            insert_if_nonzero(&mut ops, status.metric_key(), counter);
+        }
+        for (event, counter) in EmitterEvent::ALL.iter().zip(&old.trace_emitter_events) {
+            insert_if_nonzero(&mut ops, event.metric_key(), counter);
+        }
 
         MetricsSnapshot {
             policy_stats,
             error_counters,
             operational_stats: ops,
-            interval_secs,
+            interval,
         }
     }
 }
@@ -871,7 +1095,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_increments_authz_counters() {
-        let collector = MetricsCollector::new(5);
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Deny, true, std::iter::empty());
@@ -907,8 +1131,27 @@ mod tests {
     }
 
     #[test]
+    fn record_custom_token_tracks_totals_and_latency() {
+        let collector = MetricsCollector::new(MetricsMode::Local);
+
+        collector.record_custom_token(true, 120);
+        collector.record_custom_token(true, 240);
+        collector.record_custom_token(false, 60);
+
+        let snap = collector.snapshot_and_reset();
+        let ops = &snap.operational_stats;
+
+        assert_eq!(ops.get("multi_issuer.custom_token_total"), Some(&3));
+        assert_eq!(ops.get("multi_issuer.custom_token_success"), Some(&2));
+        assert_eq!(ops.get("multi_issuer.custom_token_failed"), Some(&1));
+        assert_eq!(ops.get("multi_issuer.custom_token_last_time_us"), Some(&60));
+        // Latency histogram populated (max is the slowest recorded sample).
+        assert_eq!(ops.get("multi_issuer.custom_token_time_max_us"), Some(&240));
+    }
+
+    #[test]
     fn record_evaluation_updates_policy_stats() {
-        let collector = MetricsCollector::new(3);
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_evaluation(
             50,
@@ -951,13 +1194,13 @@ mod tests {
     fn record_error_aggregates_by_metric_key() {
         use crate::authz::MultiIssuerValidationError;
 
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
 
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("jwt.decode_failed"));
         collector.record_error(&TestError("data.invalid_key"));
         collector.record_error(&MultiIssuerValidationError::EmptyTokenArray);
-        collector.record_error(&MultiIssuerValidationError::MissingIssuer);
+        collector.record_error(&MultiIssuerValidationError::InvalidContextJson);
         collector.increment_error("data.invalid_key");
 
         let snap = collector.snapshot_and_reset();
@@ -978,15 +1221,16 @@ mod tests {
             "multi_issuer.empty_token_array count must be 1"
         );
         assert_eq!(
-            snap.error_counters.get("multi_issuer.missing_issuer"),
+            snap.error_counters.get("multi_issuer.invalid_context"),
             Some(&1),
-            "multi_issuer.missing_issuer count must be 1"
+            "multi_issuer.invalid_context count must be 1"
         );
     }
 
     #[test]
     fn snapshot_and_reset_zeros_counters_preserves_gauges() {
-        let collector = MetricsCollector::new(10);
+        let collector = MetricsCollector::new(MetricsMode::Local);
+        collector.set_policy_count(10);
         collector.record_evaluation(500, Decision::Allow, false, std::iter::empty());
         collector.record_cache_hit();
         collector.record_jwt_validation(true);
@@ -1034,12 +1278,13 @@ mod tests {
         // reflect the new value on subsequent snapshots. Without this the
         // gauge would stay pinned at the bootstrap value indefinitely while
         // authorization decisions used the new set.
-        let collector = MetricsCollector::new(5);
+        let collector = MetricsCollector::new(MetricsMode::Local);
+        collector.set_policy_count(5);
         let snap_initial = collector.snapshot_and_reset();
         assert_eq!(
             snap_initial.operational_stats.get("instance.policy_count"),
             Some(&5),
-            "initial gauge must report the bootstrap count",
+            "initial gauge must report the count published at bootstrap",
         );
 
         collector.set_policy_count(50);
@@ -1137,7 +1382,7 @@ mod tests {
 
     #[test]
     fn record_evaluation_clears_eval_times_after_snapshot() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_evaluation(200, Decision::Allow, false, std::iter::empty());
 
@@ -1158,7 +1403,7 @@ mod tests {
 
     #[test]
     fn record_cache_operations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_cache_hit();
         collector.record_cache_hit();
         collector.record_cache_miss();
@@ -1184,7 +1429,7 @@ mod tests {
 
     #[test]
     fn record_jwt_validations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(true);
         collector.record_jwt_validation(false);
@@ -1209,7 +1454,7 @@ mod tests {
 
     #[test]
     fn record_data_operations() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_data_push();
         collector.record_data_get();
         collector.record_data_get();
@@ -1235,7 +1480,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_keys_omitted_when_zero() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         let snap = collector.snapshot_and_reset();
         for key in snap.operational_stats.keys() {
             assert!(
@@ -1247,7 +1492,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_keys_emitted_after_tick() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
@@ -1277,7 +1522,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_strategy_keys_track_transitions() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 1, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
@@ -1300,7 +1545,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_consecutive_failures_resets_on_success() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
@@ -1323,7 +1568,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_consecutive_failures_increments_only_on_errors() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
         collector.record_policy_store_refresh(RefreshOutcome::NotModified);
         let snap = collector.snapshot_and_reset();
@@ -1337,7 +1582,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_error_outcomes_distinguishable() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::HttpError);
         collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
@@ -1375,7 +1620,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_rebuild_error_bumps_consecutive_failures() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
         collector.record_policy_store_refresh(RefreshOutcome::RebuildError);
         let snap = collector.snapshot_and_reset();
@@ -1388,8 +1633,27 @@ mod tests {
     }
 
     #[test]
+    fn policy_store_refresh_verification_error_counts_as_failure() {
+        let collector = MetricsCollector::new(MetricsMode::Local);
+        collector.record_policy_store_refresh(RefreshOutcome::VerificationError);
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.outcome_verification_error"),
+            Some(&1),
+            "VerificationError must increment its own per-outcome counter",
+        );
+        assert_eq!(
+            snap.operational_stats
+                .get("policy_store_refresh.consecutive_failures"),
+            Some(&1),
+            "VerificationError counts as a failure for the streak",
+        );
+    }
+
+    #[test]
     fn policy_store_refresh_decode_error_distinct_from_network_error() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
         collector.record_policy_store_refresh(RefreshOutcome::DecodeError);
         collector.record_policy_store_refresh(RefreshOutcome::NetworkError);
@@ -1419,7 +1683,7 @@ mod tests {
         // Per-outcome counters are *cumulative* (not interval-scoped) so they
         // must not zero on snapshot.
 
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         collector.record_policy_store_refresh(RefreshOutcome::Success);
         let _ = collector.snapshot_and_reset();
@@ -1434,7 +1698,7 @@ mod tests {
 
     #[test]
     fn policy_store_refresh_strategy_current_overwrites_on_each_call() {
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::HeadThenGet, 5, 1, 0, 2);
         let snap = collector.snapshot_and_reset();
@@ -1457,7 +1721,7 @@ mod tests {
         // but a worker that has actively reported "current = Conditional (1)"
         // MUST be visible — distinguishing "not running" from "running and
         // healthy" is the whole point of the sparse encoding.
-        let collector = MetricsCollector::new(0);
+        let collector = MetricsCollector::new(MetricsMode::Local);
         collector.record_policy_store_refresh_strategy(RefreshStrategy::Conditional, 0, 0, 0, 0);
         let snap = collector.snapshot_and_reset();
         assert_eq!(
@@ -1469,7 +1733,7 @@ mod tests {
 
     #[test]
     fn disabled_collector_noops() {
-        let collector = MetricsCollector::disabled();
+        let collector = MetricsCollector::new(MetricsMode::Disabled);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
         collector.record_authz_error();
@@ -1494,6 +1758,59 @@ mod tests {
         assert!(
             snap.error_counters.is_empty(),
             "error_counters must be empty when disabled"
+        );
+    }
+
+    #[test]
+    fn resolve_metrics_mode_lock_telemetry_wins() {
+        assert_eq!(
+            resolve_metrics_mode(true, true),
+            MetricsMode::LockTelemetry,
+            "lock telemetry must take precedence even when local collection is on"
+        );
+        assert_eq!(
+            resolve_metrics_mode(true, false),
+            MetricsMode::LockTelemetry,
+            "lock telemetry must take precedence with local collection off"
+        );
+    }
+
+    #[test]
+    fn resolve_metrics_mode_local_requires_flag() {
+        assert_eq!(
+            resolve_metrics_mode(false, true),
+            MetricsMode::Local,
+            "local collection on and no lock telemetry must enable local snapshots"
+        );
+        assert_eq!(
+            resolve_metrics_mode(false, false),
+            MetricsMode::Disabled,
+            "local collection off must disable snapshots"
+        );
+    }
+
+    #[test]
+    fn snapshot_interval_serializes_as_fractional_secs() {
+        let snap = MetricsSnapshot {
+            policy_stats: HashMap::new(),
+            error_counters: HashMap::new(),
+            operational_stats: HashMap::new(),
+            interval: Duration::new(61, 500_000_000),
+        };
+        let json = serde_json::to_value(&snap).expect("snapshot must serialize");
+        assert_eq!(
+            json.get("interval_secs"),
+            Some(&serde_json::json!(61.5)),
+            "Duration must serialize as fractional seconds under the interval_secs key, keeping the sub-second part, got {json}"
+        );
+        assert!(
+            json.get("interval").is_none(),
+            "renamed field must not leak an interval key, got {json}"
+        );
+        assert_eq!(
+            snap.interval_secs_i64(),
+            61,
+            "proto conversion must truncate sub-second part"
         );
     }
 }

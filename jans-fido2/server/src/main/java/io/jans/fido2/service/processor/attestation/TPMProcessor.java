@@ -40,7 +40,9 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseKeyType;
+import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
@@ -80,6 +82,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
 	@Inject
 	private Logger log;
+
+	@Inject
+	private io.jans.fido2.service.RpPolicyService rpPolicyService;
 
 	@Inject
 	private CertificateService certificateService;
@@ -138,8 +143,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		byte[] hashedBuffer = getHashedBuffer(alg, authData.getAttestationBuffer(), clientDataHash);
 
 		// if attestation mode is enabled in the global config
-		if (appConfiguration.getFido2Configuration().getAttestationMode()
-				.equalsIgnoreCase(AttestationMode.DISABLED.getValue()) == false) {
+		if (!AttestationMode.DISABLED.getValue()
+				.equalsIgnoreCase(rpPolicyService.resolveAttestationMode(credential.getRpId()))) {
 			Iterator<JsonNode> i = attStmt.get("x5c").elements();
 
 			
@@ -155,7 +160,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				List<X509Certificate> certificates = certificateService.getCertificates(certificatePath);
 				List<X509Certificate> aikCertificates = certificateService.getCertificates(aikCertificatePath);
 				List<X509Certificate> trustAnchorCertificates = attestationCertificateService
-						.getAttestationRootCertificates(authData, aikCertificates);
+						.getAttestationRootCertificates(authData, aikCertificates, credential.getRpId());
 				X509Certificate aikCertificate = aikCertificates.get(0);
 
 				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
@@ -195,7 +200,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
 		credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
 		credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
-		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
+		credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData, credential.getRpId()));
 		credIdAndCounters.setSignatureAlgorithm(alg);
 	}
 
@@ -216,6 +221,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
 		// algorithm used for attestation
 		CoseKeyType keyType = CoseKeyType.fromNumericValue(keyToUse);
+		if (keyType == null) {
+			throw new Fido2RuntimeException("Unsupported COSE key type " + keyToUse);
+		}
 
 		log.debug("keyToUse {}", keyToUse);
 		log.debug("algorithmToUse : {}", algorithmToUse);
@@ -229,7 +237,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
 		switch (keyType) {
 		case RSA:
-			if (algorithmToUse == -65535 || algorithmToUse == -257) {
+			if (algorithmToUse == CoseRSAAlgorithm.RS65535.getNumericValue()
+				|| algorithmToUse == CoseRSAAlgorithm.RS256.getNumericValue()) {
 				byte[] keyBufferFromTPM = Arrays.copyOfRange(tpm, 2, tpm.length);
 				byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
 				if (!Arrays.equals(keyBufferFromTPM, rsaKeyN)) {
@@ -243,7 +252,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 			}
 			break;
 		case EC2:
-			if (algorithmToUse == -7) {
+			if (algorithmToUse == CoseEC2Algorithm.ES256.getNumericValue()) {
 				byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
 				byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
 				byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)
@@ -285,7 +294,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		default:
 			log.error("verifyTPMSCertificateName :{}", tpmtPublic.nameAlg.asEnum());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 		// this is not really certificate info but nameAlgID + hex.encode(pubAreaDigest)
 		// reverse engineered from FIDO Certification tool
@@ -303,7 +312,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 		if (tpmsAttest.magic.toInt() != TPM_GENERATED.VALUE.toInt()) {
 			log.error("{}:{}", tpmsAttest.magic.toInt(), TPM_GENERATED.VALUE.toInt());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 	}
 
@@ -326,7 +335,6 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				byte[] inner = ASN1OctetString.getInstance(ext).getOctets();
 				aaguidInCert = ASN1OctetString.getInstance(inner).getOctets();
 			} catch (RuntimeException e) {
-				log.error("Malformed id-fido-gen-ce-aaguid extension in AIK certificate", e);
 				throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
 						"Problem with TPM attestation : malformed id-fido-gen-ce-aaguid extension", e);
 			}
@@ -383,7 +391,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 				| SignatureException e) {
 			log.error("Problem with AIK certificate {}", e.getMessage());
 			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR,
-					"Problem with TPM attestation");
+					PROBLEM_WITH_TPM_ATTESTATION);
 		}
 	}
 

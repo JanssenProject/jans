@@ -7,13 +7,15 @@ import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.core.cedarling.service.security.api.ProtectedCedarlingApi;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.lock.service.CedarlingProtectionService;
+import io.jans.lock.service.security.AuthenticatedClientContext;
+import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.net.InetAddressUtility;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.ContainerRequestContext;
-import jakarta.ws.rs.core.Response;
 
 /**
  * A RestEasy filter to centralize protection of APIs based on path pattern
@@ -26,6 +28,14 @@ public class CedarlingAuthorizationProcessingFilter extends io.jans.core.cedarli
 
 	@Inject
 	private AppConfiguration appConfiguration;
+
+	/**
+	 * Lock's concrete protection service: the same {@code @ApplicationScoped} instance the base
+	 * class's {@code protectionService} resolves to, injected by its own type so the richer
+	 * {@link CedarlingProtectionService#authorize} is reachable without a cast.
+	 */
+	@Inject
+	private CedarlingProtectionService cedarlingProtectionService;
 
 	/**
 	 * This method performs the protection check of service invocations: it provokes
@@ -44,17 +54,21 @@ public class CedarlingAuthorizationProcessingFilter extends io.jans.core.cedarli
 		log.debug("REST call to '{}' intercepted", path);
 		
 		if (LockProtectionMode.CEDARLING.equals(appConfiguration.getProtectionMode())) {
-            Response authorizationResponse = protectionService.processAuthorization(extractBearerToken(), resourceInfo);
-			boolean success = authorizationResponse == null;
+			AuthorizationOutcome outcome = cedarlingProtectionService.authorize(extractBearerToken(), resourceInfo);
+			boolean success = outcome.isAllowed();
 
 	        AuditLogEntry auditLogEntry = new AuditLogEntry(InetAddressUtility.getIpAddress(httpRequest), AuditActionType.CEDARLING_AUTHZ_FILTER);
 	        cedarlingApplicationAuditLogger.log(auditLogEntry, success);
 
 	        if (success) {
+				// Record the authenticated client for downstream services (e.g. TRACE domain
+				// resolution) so they never parse the token again
+				AuthenticatedClientContext.store(httpRequest, outcome.getClient());
+
 				// Actual processing of request proceeds
 				log.debug("Authorization passed");
 			} else {
-				requestContext.abortWith(authorizationResponse);
+				requestContext.abortWith(outcome.getErrorResponse());
 			}
 		}
 	}

@@ -1,0 +1,6 @@
+{
+  "peach": "This sorting order",
+  "p\u00e9ch\u00e9": "is wrong according to French",
+  "p\u00each\u0065": "but canonicalization MUST",
+  "sin":   "ignore locale"
+}

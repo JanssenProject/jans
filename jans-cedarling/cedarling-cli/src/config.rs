@@ -27,7 +27,7 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
             .unwrap_or("")
             .to_lowercase();
         let parsed: BootstrapConfigRaw = if ext == "yaml" || ext == "yml" {
-            serde_yaml_ng::from_str(&content).context("failed to parse config as YAML")?
+            serde_saphyr::from_str(&content).context("failed to parse config as YAML")?
         } else {
             serde_json::from_str(&content).context("failed to parse config as JSON")?
         };
@@ -162,7 +162,7 @@ mod tests {
         with_env_vars(
             &[
                 ("CEDARLING_JWT_SIG_VALIDATION", "disabled"),
-                ("CEDARLING_POLICY_STORE_LOCAL", "tests/test_store.yaml"),
+                ("CEDARLING_POLICY_STORE_LOCAL_FN", "tests/test_store.yaml"),
             ],
             || {
                 let mut args = dummy_args();

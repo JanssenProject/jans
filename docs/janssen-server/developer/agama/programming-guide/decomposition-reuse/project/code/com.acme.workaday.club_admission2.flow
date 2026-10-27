@@ -1,0 +1,11 @@
+Flow com.acme.workaday.club_admission2
+    Basepath ""
+    Configs conf
+
+obj = Trigger com.acme.workaday.club_application conf.interests conf.allowed.min conf.allowed.max
+When obj.success is true
+   Log "Applicant % has been admitted" obj.data.name
+   Trigger com.acme.basic.referrals
+   Finish true
+
+Finish false

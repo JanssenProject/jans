@@ -20,6 +20,7 @@ import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.token.ClientAssertionType;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.ClientService;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.Pair;
@@ -130,7 +131,8 @@ public class ClientAssertion {
 
     public Pair<Client, ClientService> verifyClient(String subject) throws InvalidJwtException {
         ClientService clientService = CdiUtil.bean(ClientService.class);
-        Client client = clientService.getClient(subject);
+        ClientIdMetadataService clientIdMetadataService = CdiUtil.bean(ClientIdMetadataService.class);
+        Client client = clientIdMetadataService.resolveClient(subject);
         if (client != null) {
             return new Pair<>(client, clientService);
         }

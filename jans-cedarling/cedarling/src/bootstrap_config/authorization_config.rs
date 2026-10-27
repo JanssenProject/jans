@@ -17,6 +17,25 @@ pub struct AuthorizationConfig {
     /// When `true` (default), a schema is required and policies/entities are validated
     /// against it. When `false`, Cedarling runs without schema-based validation.
     pub strict_schema_validation: bool,
+
+    /// Timeout in milliseconds applied to a
+    /// [`CustomTokenProcessor::process`](crate::CustomTokenProcessor::process)
+    /// call for **non-JWT** custom tokens. `0` (default) disables the timeout;
+    /// a positive value races `process` against the deadline, producing a
+    /// distinct timeout error.
+    ///
+    /// Corresponds to `CEDARLING_CUSTOM_TOKEN_PROCESSOR_TIMEOUT_MILLIS`.
+    #[serde(default)]
+    pub custom_token_processor_timeout_millis: u64,
+
+    /// Whether to enable local collection of telemetry metrics, exposed via
+    /// [`Cedarling::drain_metrics`](crate::Cedarling::drain_metrics).
+    ///
+    /// Disabled (default) unless `CEDARLING_METRICS_COLLECTION` is set to `enabled`.
+    /// Takes effect only when no Lock telemetry ticker is active; lock telemetry
+    /// always owns the collector.
+    #[serde(default)]
+    pub metrics_collection: bool,
 }
 
 impl Default for AuthorizationConfig {
@@ -24,6 +43,8 @@ impl Default for AuthorizationConfig {
         Self {
             decision_log_default_jwt_id: "jti".to_string(),
             strict_schema_validation: true,
+            custom_token_processor_timeout_millis: 0,
+            metrics_collection: false,
         }
     }
 }

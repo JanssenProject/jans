@@ -53,7 +53,7 @@ public class AuthorizeActionTest {
     private Logger log;
 
     @Mock
-    private ClientService clientService;
+    private ClientIdMetadataService clientIdMetadataService;
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
@@ -147,7 +147,7 @@ public class AuthorizeActionTest {
 
         // force throw exception
         final RuntimeException exception = new RuntimeException();
-        when(clientService.getClient(anyString())).thenThrow(exception);
+        when(clientIdMetadataService.resolveClient(anyString())).thenThrow(exception);
 
         authorizeAction.checkPermissionGranted();
 
@@ -193,7 +193,7 @@ public class AuthorizeActionTest {
 
         assertTrue(result.isEmpty());
         verify(authorizeAction, never()).fetchRequestUriContent(anyString(), any());
-        verify(clientService, never()).getClient(anyString());
+        verify(clientIdMetadataService, never()).resolveClient(anyString());
     }
 
     @Test
@@ -204,7 +204,7 @@ public class AuthorizeActionTest {
 
         Client client = new Client();
         client.setRequestUris(new String[]{"https://allowed.example/jwt"});
-        when(clientService.getClient("c1")).thenReturn(client);
+        when(clientIdMetadataService.resolveClient("c1")).thenReturn(client);
 
         List<String> result = authorizeAction.getRequestedClaims();
 
@@ -220,7 +220,7 @@ public class AuthorizeActionTest {
 
         Client client = new Client();
         client.setRequestUris(new String[0]);
-        when(clientService.getClient("c1")).thenReturn(client);
+        when(clientIdMetadataService.resolveClient("c1")).thenReturn(client);
         when(appConfiguration.getRequestUriBlockList()).thenReturn(Lists.newArrayList("http://169.254.169.254/*"));
 
         List<String> result = authorizeAction.getRequestedClaims();
@@ -237,7 +237,7 @@ public class AuthorizeActionTest {
 
         Client client = new Client();
         client.setRequestUris(new String[]{"https://allowed.example/jwt"});
-        when(clientService.getClient("c1")).thenReturn(client);
+        when(clientIdMetadataService.resolveClient("c1")).thenReturn(client);
         doReturn(null).when(authorizeAction).fetchRequestUriContent(anyString(), any());
 
         List<String> result = authorizeAction.getRequestedClaims();
@@ -254,7 +254,7 @@ public class AuthorizeActionTest {
         authorizeAction.getRequestedClaims();
         authorizeAction.getRequestedClaims();
 
-        verify(clientService, times(1)).getClient("c1");
+        verify(clientIdMetadataService, times(1)).resolveClient("c1");
     }
 
     @Test
@@ -263,7 +263,7 @@ public class AuthorizeActionTest {
         authorizeAction.setClaims("{\"userinfo\":{\"email\":null,\"given_name\":null},\"id_token\":{\"auth_time\":{\"essential\":true}}}");
 
         Client client = new Client();
-        when(clientService.getClient("c1")).thenReturn(client);
+        when(clientIdMetadataService.resolveClient("c1")).thenReturn(client);
 
         List<String> result = authorizeAction.getRequestedClaims();
 

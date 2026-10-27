@@ -5209,6 +5209,7 @@ paths:
                   - modify_ssa_response
                   - fido2_extension
                   - lock_extension
+                  - shib_post_authn_approval
               examples:
                 Response json example:
                   description: Response json example
@@ -15694,9 +15695,9 @@ components:
           type: string
         selected:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -16339,6 +16340,8 @@ components:
           type: boolean
         cookieDomain:
           type: string
+        cookieSameSite:
+          type: string
         enabledOAuthAuditLogging:
           type: boolean
         jmsBrokerURISet:
@@ -16362,6 +16365,8 @@ components:
           type: array
           items:
             type: string
+        strictTokenRedirectUriValidation:
+          type: boolean
         legacyIdTokenClaims:
           type: boolean
         customHeadersWithAuthorizationResponse:
@@ -16448,6 +16453,8 @@ components:
         errorReasonEnabled:
           type: boolean
         removeRefreshTokensForClientOnLogout:
+          type: boolean
+        allowStartupOnJwksUriFetchFailure:
           type: boolean
         skipRefreshTokenDuringRefreshing:
           type: boolean
@@ -16596,6 +16603,7 @@ components:
             - ssa
             - client_id_metadata_document
             - identity_assertion_authz_grant
+            - spiffe_client_auth
         httpLoggingEnabled:
           type: boolean
         httpLoggingExcludePaths:
@@ -16664,6 +16672,19 @@ components:
           format: int32
         authorizationResponseIssParameterSupported:
           type: boolean
+        spiffeTrustDomains:
+          type: array
+          items:
+            $ref: "#/components/schemas/SpiffeTrustDomainConfiguration"
+        spiffeBundleMaxResponseSize:
+          type: integer
+          format: int32
+        spiffeBundleConnectTimeoutMs:
+          type: integer
+          format: int32
+        spiffeBundleReadTimeoutMs:
+          type: integer
+          format: int32
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -16806,8 +16827,6 @@ components:
         maxItemsLoggedInCollections:
           type: integer
           format: int32
-        disableTCHV:
-          type: boolean
         pageMismatchErrorPage:
           type: string
         interruptionErrorPage:
@@ -16830,6 +16849,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        trackingSettings:
+          $ref: "#/components/schemas/TrackingSettings"
     KeyExtractor:
       type: object
       properties:
@@ -16883,6 +16904,16 @@ components:
             $ref: "#/components/schemas/KeyExtractor"
         wellFormed:
           type: boolean
+    SpiffeTrustDomainConfiguration:
+      type: object
+      properties:
+        trustDomain:
+          type: string
+        bundleEndpointUrl:
+          type: string
+        bundleCacheLifetimeInMinutes:
+          type: integer
+          format: int32
     SsaConfiguration:
       type: object
       properties:
@@ -16940,6 +16971,19 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrackingSettings:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        skipTemplateViews:
+          type: boolean
+        skipInstructionFrequencies:
+          type: boolean
+        excludedFlows:
+          type: array
+          items:
+            type: string
     TrustedIssuerConfig:
       type: object
       properties:
@@ -16947,6 +16991,10 @@ components:
           type: array
           items:
             type: string
+        jwks:
+          type: string
+        jwksUri:
+          type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -17257,6 +17305,7 @@ components:
           enum:
           - pairwise
           - public
+          - ephemeral
         idTokenSignedResponseAlg:
           type: string
         idTokenEncryptedResponseAlg:
@@ -17286,6 +17335,7 @@ components:
           - access_token
           - tls_client_auth
           - self_signed_tls_client_auth
+          - spiffe_jwt
           - none
         tokenEndpointAuthSigningAlg:
           type: string
@@ -17550,6 +17600,10 @@ components:
         cimdExpiresAt:
           type: integer
           format: int64
+        spiffeId:
+          type: string
+        spiffeBundleEndpoint:
+          type: string
     CustomObjectAttribute:
       type: object
       properties:
@@ -17612,7 +17666,29 @@ components:
         disableLoggerTimer:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
-            changes. Default value `true`Default value `false`.
+            changes. Default value `false`.
+        userRolePermissionValidationEnabled:
+          type: boolean
+          description: Flag to enable/disable User Role-Permission mapping check while
+            authentication. Default value `true`.
+        validateUserInumInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable validating `User-inum` in Introspection
+            response. Default value `true`.
+        fetchUserRoleInIntrospectionFlag:
+          type: boolean
+          description: Flag to enable/disable to get user-role in Introspection response.
+            Default value `true`.
+        userRolePermissionExcludedClients:
+          type: array
+          description: "Client IDs exempt from the User Role-Permission mapping check.\
+            \ Only honoured for tokens that carry no user, so a user token is always\
+            \ checked. Empty by default."
+          items:
+            type: string
+            description: "Client IDs exempt from the User Role-Permission mapping\
+              \ check. Only honoured for tokens that carry no user, so a user token\
+              \ is always checked. Empty by default."
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -17882,7 +17958,8 @@ components:
           description: Authorization token to access URI
         policyStoreUri:
           type: string
-          description: URI to policy store. Policy store can be either json/zip
+          description: "URI to policy store. Policy store can be json, zip or a .cjar\
+            \ archive (served by Lock under its policy_store.id)"
       description: List of Policy Sources
     SmtpConfiguration:
       type: object
@@ -17992,6 +18069,7 @@ components:
           - modify_ssa_response
           - fido2_extension
           - lock_extension
+          - shib_post_authn_approval
         programmingLanguage:
           type: string
           enum:
@@ -18584,6 +18662,10 @@ components:
         statusListIndex:
           type: integer
           format: int32
+        redirectUri:
+          type: string
+        ephemeralSub:
+          type: string
     TokenEntity:
       type: object
       properties:
@@ -18645,6 +18727,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18655,10 +18741,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

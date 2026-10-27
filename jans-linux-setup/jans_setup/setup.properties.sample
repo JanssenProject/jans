@@ -30,8 +30,8 @@ hostname=
 admin_password=
 
 ### This information is needed for self signed certificate
-orgName=
-countryCode=
+org_name=
+country_code=
 city=
 state=
 admin_email=

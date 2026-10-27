@@ -21,6 +21,7 @@ import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.ClientIdMetadataService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.util.ServerUtil;
@@ -74,6 +75,9 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
     @Inject
     private ClientService clientService;
 
+    @Inject
+    private ClientIdMetadataService clientIdMetadataService;
+
     @Override
     public Response deviceAuthorization(String clientId, String scope, HttpServletRequest httpRequest,
                                         HttpServletResponse httpResponse, SecurityContext securityContext) {
@@ -90,7 +94,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
             SessionClient sessionClient = identity.getSessionClient();
             Client client = sessionClient != null ? sessionClient.getClient() : null;
             if (client == null) {
-                client = clientService.getClient(clientId);
+                client = clientIdMetadataService.resolveClient(clientId);
                 if (!clientService.isPublic(client)) {
                     log.trace("Client is not public and not authenticated. Skip device authorization, clientId: {}", clientId);
                     throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, INVALID_CLIENT, "");

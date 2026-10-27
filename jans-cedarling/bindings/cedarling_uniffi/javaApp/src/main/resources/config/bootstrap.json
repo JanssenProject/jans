@@ -18,7 +18,7 @@
   "CEDARLING_LOG_LEVEL": "DEBUG",
   "CEDARLING_LOG_TTL": 120,
   "CEDARLING_LOG_TYPE": "memory",
-  "CEDARLING_POLICY_STORE_LOCAL_FN": "./src/main/resources/config/policy-store.json",
+  "CEDARLING_POLICY_STORE_LOCAL_FN": "./src/main/resources/config/policy-store.yaml",
   "CEDARLING_POLICY_STORE_URI": "",
   "id": "67d412fb-5dd9-4f85-9bd3-7b6471d90aa3"
 }

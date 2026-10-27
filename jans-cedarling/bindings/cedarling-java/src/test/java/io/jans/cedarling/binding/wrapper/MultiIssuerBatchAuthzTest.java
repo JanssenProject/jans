@@ -20,6 +20,7 @@ import java.util.Map;
 import uniffi.cedarling_uniffi.AuthorizeException;
 import uniffi.cedarling_uniffi.BatchAuthorizeMultiIssuerResponse;
 import uniffi.cedarling_uniffi.BatchItem;
+import uniffi.cedarling_uniffi.JsonValue;
 import uniffi.cedarling_uniffi.BatchItemError;
 import uniffi.cedarling_uniffi.BatchItemMultiIssuerOutcome;
 import uniffi.cedarling_uniffi.EntityData;
@@ -201,7 +202,8 @@ public class MultiIssuerBatchAuthzTest {
         BatchItem badItem = new BatchItem(
                 EntityData.Companion.fromJson(resource.toString()),
                 "this is not a valid uid",
-                new JSONObject().toString());
+                new JsonValue("{}")
+        );
         List<BatchItem> items = new ArrayList<>();
         items.add(sameItem());
         items.add(badItem);

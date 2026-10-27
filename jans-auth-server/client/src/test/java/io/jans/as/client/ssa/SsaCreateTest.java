@@ -52,7 +52,7 @@ public class SsaCreateTest extends BaseTest {
         List<String> softwareRoles = Collections.singletonList("password");
         List<String> ssaGrantTypes = Collections.singletonList("client_credentials");
         SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description,
-                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.TRUE, lifetime);
+                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.FALSE, lifetime);
 
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse)
@@ -87,7 +87,7 @@ public class SsaCreateTest extends BaseTest {
         List<String> softwareRoles = Collections.singletonList("password");
         List<String> ssaGrantTypes = Collections.singletonList("client_credentials");
         SsaCreateResponse ssaCreateResponse = ssaCreateClient.execSsaCreate(accessToken, orgId, expirationDate, description,
-                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.TRUE, lifetime);
+                softwareId, softwareRoles, ssaGrantTypes, Boolean.TRUE, Boolean.FALSE, lifetime);
 
         showClient(ssaCreateClient);
         AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), ssaCreateResponse)

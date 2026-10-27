@@ -44,10 +44,10 @@ spec:
     value: {{ .Values.global.lbIp }}
   {{- end }}
   listeners:
-  - name: http
+  - name: {{ .Values.gateway.httpSectionName | default "http" }}
     port: {{ .Values.gateway.httpPort }}
     protocol: HTTP
-  - name: https
+  - name: {{ .Values.gateway.httpsSectionName | default "https" }}
     port: {{ .Values.gateway.httpsPort }}
     protocol: HTTPS
     tls:

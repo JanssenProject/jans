@@ -1,4 +1,5 @@
 import os
+import re
 import typing as _t
 from pathlib import Path
 from contextlib import suppress
@@ -164,6 +165,21 @@ def _max_memory_from_sysconf() -> int:
     return os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
 
 
+NGINX_LOG_LEVELS = ("debug", "info", "notice", "warn", "error", "crit", "alert", "emerg")
+
+# Validated before rendering: a stray ';' in an env var would inject arbitrary nginx directives,
+# and the wrong arity (a count where nginx wants a bare size) makes nginx refuse to start.
+NGINX_SIZE_RE = re.compile(r"^\d+[kKmM]?$")
+NGINX_COUNT_SIZE_RE = re.compile(r"^\d+ \d+[kKmM]?$")
+
+NGINX_BUFFER_TUNABLES = (
+    ("CN_AIO_NGINX_PROXY_BUFFER_SIZE", "proxy_buffer_size", NGINX_SIZE_RE),
+    ("CN_AIO_NGINX_PROXY_BUFFERS", "proxy_buffers", NGINX_COUNT_SIZE_RE),
+    ("CN_AIO_NGINX_PROXY_BUSY_BUFFERS_SIZE", "proxy_busy_buffers_size", NGINX_SIZE_RE),
+    ("CN_AIO_NGINX_LARGE_CLIENT_HEADER_BUFFERS", "large_client_header_buffers", NGINX_COUNT_SIZE_RE),
+)
+
+
 def render_nginx_default_conf(enabled_programs, nginx_includes):
     upstream_includes = []
     location_includes = []
@@ -183,10 +199,34 @@ def render_nginx_default_conf(enabled_programs, nginx_includes):
             else:
                 location_includes.append(val)
 
+    # Emitted only when set: nginx's own defaults here are page-size dependent (buffers) or come
+    # from the base nginx.conf (error_log), so a literal default would silently override them.
+    tunables = []
+
+    log_level = (os.environ.get("CN_AIO_NGINX_LOG_LEVEL") or "").strip()
+    if log_level:
+        if log_level in NGINX_LOG_LEVELS:
+            tunables.append(f"error_log /var/log/nginx/error.log {log_level};")
+        else:
+            print(f"[warn] ignoring CN_AIO_NGINX_LOG_LEVEL={log_level!r}: not an nginx log level")
+
+    buffer_tunables = []
+    for env_name, directive, pattern in NGINX_BUFFER_TUNABLES:
+        value = (os.environ.get(env_name) or "").strip()
+        if not value:
+            continue
+        if not pattern.match(value):
+            want = "a size" if pattern is NGINX_SIZE_RE else "a count and a size"
+            print(f"[warn] ignoring {env_name}={value!r}: {directive} takes {want}")
+            continue
+        buffer_tunables.append(f"{directive} {value};")
+    tunables.extend(buffer_tunables)
+
     # context for rendered templates
     ctx = {
         "upstream_includes": "\n".join(upstream_includes),
         "location_includes": "\n\t".join(location_includes),
+        "tunables": "\n" + "\n".join(tunables) + "\n" if tunables else "",
     }
     tmpl = Path("/app/templates/nginx/nginx-default.conf").read_text().strip()
     Path("/etc/nginx/http.d/default.conf").write_text(tmpl % ctx)

@@ -51,11 +51,11 @@ Minimal example setup.properties file:
 ```shell
 ip=10.146.197.201
 hostname=flex.gluu.org
-orgName=Gluu
+org_name=Gluu
 admin_email=flex@gluu.org
 city=Austin
 state=Texas
-countryCode=US
+country_code=US
 installLdap=True
 admin_password=MyAdminPassword
 ldapPass=MyLdapPassword
