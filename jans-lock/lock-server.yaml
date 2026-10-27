@@ -1,16 +1,16 @@
 openapi: 3.0.1
 info:
-  title: Jans Lock API
   contact:
     name: Contact
     url: https://github.com/JanssenProject/jans/discussions
   license:
     name: License
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  title: Jans Lock API
   version: OAS Version
 servers:
-- url: https://jans.local.io
-  description: The Jans server
+- description: The Jans server
+  url: https://jans.local.io
 tags:
 - name: Lock - Server Configuration
 - name: Lock - Stat
@@ -20,505 +20,1111 @@ tags:
 - name: Lock - Audit Trace
 - name: Lock - Audit Trace Admin
 paths:
-  /api/v1/configuration:
-    get:
-      tags:
-      - Lock - Server Configuration
-      summary: Request .well-known data
-      description: Request .well-know Lock server configuration
-      operationId: getConfiguration
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: string
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
   /.well-known/lock-server-configuration:
     get:
-      tags:
-      - Lock - Server Configuration
-      summary: Request .well-known data
       description: Request .well-know Lock server configuration
       operationId: doGet
       responses:
         "200":
-          description: Ok
           content:
             application/json:
               schema:
                 type: string
+          description: Ok
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
-  /api/v1/audit/health/bulk:
+          description: InternalServerError
+      summary: Request .well-known data
+      tags:
+      - Lock - Server Configuration
+  /api/v1/audit/health:
     post:
+      description: Save health data
+      operationId: processHealthRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HealthEntry"
+        description: Health entry
+      responses:
+        "200":
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+      summary: Save health data
       tags:
       - Lock - Audit Health
-      summary: Bulk save health data
+  /api/v1/audit/health/bulk:
+    post:
       description: Bulk save health data
       operationId: processBulkHealthRequest
       requestBody:
-        description: Bulk health entry
         content:
           application/json:
             schema:
               type: array
               items:
                 $ref: "#/components/schemas/HealthEntry"
+        description: Bulk health entry
       responses:
         "200":
           description: Ok
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /api/v1/audit/log/bulk:
+      summary: Bulk save health data
+      tags:
+      - Lock - Audit Health
+  /api/v1/audit/log:
     post:
+      description: Save log data
+      operationId: processLogRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogEntry"
+        description: Log entry
+      responses:
+        "200":
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+      summary: Save log data
       tags:
       - Lock - Audit Log
-      summary: Bulk save log data
+  /api/v1/audit/log/bulk:
+    post:
       description: Bulk save log data
       operationId: processBulkLogRequest
       requestBody:
-        description: Bulk log entry
         content:
           application/json:
             schema:
               type: array
               items:
                 $ref: "#/components/schemas/LogEntry"
+        description: Bulk log entry
       responses:
         "200":
           description: Ok
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.write
-  /api/v1/audit/telemetry/bulk:
+      summary: Bulk save log data
+      tags:
+      - Lock - Audit Log
+  /api/v1/audit/telemetry:
     post:
+      description: Save telemetry data
+      operationId: processTelemetryRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelemetryEntry"
+        description: Telemetry entry
+      responses:
+        "200":
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+      summary: Save telemetry data
       tags:
       - Lock - Audit Telemetry
-      summary: Bulk save telemetry data
+  /api/v1/audit/telemetry/bulk:
+    post:
       description: Bulk save telemetry data
       operationId: processBulkTelemetryRequest
       requestBody:
-        description: Bulk telemetry entry
         content:
           application/json:
             schema:
               type: array
               items:
                 $ref: "#/components/schemas/TelemetryEntry"
+        description: Bulk telemetry entry
       responses:
         "200":
           description: Ok
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/lock/telemetry.write
-  /api/v1/audit/health:
-    post:
-      tags:
-      - Lock - Audit Health
-      summary: Save health data
-      description: Save health data
-      operationId: processHealthRequest
-      requestBody:
-        description: Health entry
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/HealthEntry"
-      responses:
-        "200":
-          description: Ok
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/health.write
-  /api/v1/audit/log:
-    post:
-      tags:
-      - Lock - Audit Log
-      summary: Save log data
-      description: Save log data
-      operationId: processLogRequest
-      requestBody:
-        description: Log entry
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/LogEntry"
-      responses:
-        "200":
-          description: Ok
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/log.write
-  /api/v1/audit/telemetry:
-    post:
+      summary: Bulk save telemetry data
       tags:
       - Lock - Audit Telemetry
-      summary: Save telemetry data
-      description: Save telemetry data
-      operationId: processTelemetryRequest
+  /api/v1/audit/trace:
+    post:
+      description: Verify and ingest a single signed TRACE assertion
+      operationId: submitRecord
       requestBody:
-        description: Telemetry entry
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TelemetryEntry"
+              type: object
+        description: TRACE assertion
       responses:
-        "200":
-          description: Ok
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceAcceptanceResponse"
+          description: Accepted
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/telemetry.write
-  /api/v1/policy:
-    get:
-      tags:
-      - Lock - Policy
-      summary: Request policies URI list
-      description: Request policies URI list
-      operationId: getPoliciesUriList
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
               schema:
                 type: string
-        "400":
-          description: Bad Request
+              style: simple
+        "403":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or the request is not allowed for the\
+            \ client"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "409":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LockApiError"
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Conflict
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LockApiError"
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/policy/{uri}:
-    get:
+        - https://jans.io/oauth/lock/trace.write
+      summary: Submit a TRACE evidence record
       tags:
-      - Lock - Policy
-      summary: Request policy data
-      description: "Request policy data. Returns legacy policy JSON, or the .cjar\
-        \ archive for archive sources (keyed by policy_store.id)"
-      operationId: getPolicyByUri
+      - Lock - Audit Trace
+  /api/v1/audit/trace/admin/producer-chains:
+    get:
+      description: List registered producer chains in the caller's evidence domain
+      operationId: listProducerChains
       parameters:
-      - name: uri
-        in: path
-        description: Policy URI
-        required: true
+      - description: Restrict the result to one producer id
+        in: query
+        name: producer_id
         schema:
           type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerChainListResponse"
           description: Ok
-          content:
-            application/json:
-              schema:
-                type: string
-            application/zip:
-              schema:
-                type: string
-                description: Policy store archive (.cjar)
-                format: binary
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
               schema:
-                $ref: "#/components/schemas/LockApiError"
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/policy/{uri}/sigstore:
-    get:
+        - https://jans.io/oauth/lock/trace.admin
+      summary: List producer chains
       tags:
-      - Lock - Policy
-      summary: Request policy store Sigstore bundle
-      description: Request the Sigstore bundle published next to a .cjar policy store
-        source
-      operationId: getPolicySigstoreBundle
+      - Lock - Audit Trace Admin
+    post:
+      description: Pre-register a producer chain
+      operationId: registerProducerChain
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerChainRegistrationRequest"
+        description: Producer chain registration request
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerChainResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+      summary: Register a producer chain
+      tags:
+      - Lock - Audit Trace Admin
+  /api/v1/audit/trace/admin/producer-keys:
+    get:
+      description: List registered producer keys in the caller's evidence domain
+      operationId: listProducerKeys
       parameters:
-      - name: uri
-        in: path
-        description: Policy store id
-        required: true
+      - description: Restrict the result to one producer id
+        in: query
+        name: producer_id
         schema:
           type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyListResponse"
           description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+      summary: List producer keys
+      tags:
+      - Lock - Audit Trace Admin
+    post:
+      description: Register a producer's Ed25519 verification key
+      operationId: registerProducerKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerKeyRegistrationRequest"
+        description: Producer key registration request
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyResponse"
+          description: Created
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+      summary: Register a producer key
+      tags:
+      - Lock - Audit Trace Admin
+  /api/v1/audit/trace/admin/producer-keys/revoke:
+    post:
+      description: Revoke a registered producer key (idempotent)
+      operationId: revokeProducerKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProducerKeyRevokeRequest"
+        description: Producer key revocation request
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProducerKeyResponse"
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.admin
+      summary: Revoke a producer key
+      tags:
+      - Lock - Audit Trace Admin
+  /api/v1/audit/trace/bulk:
+    post:
+      description: "Verify and ingest a JSON array of signed TRACE assertions, continuing\
+        \ past per-item failures. One producer per batch"
+      operationId: submitBulkRecords
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+        description: JSON array of TRACE assertions
+      responses:
+        "207":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceBulkIngestionResponse"
+          description: Multi-Status (per-item outcomes in the body)
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or the request is not allowed for the\
+            \ client"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.write
+      summary: Submit a batch of TRACE evidence records
+      tags:
+      - Lock - Audit Trace
+  /api/v1/audit/trace/executions/{trace_execution_id}:
+    get:
+      description: "All direct records of an execution, ordered by receipt sequence"
+      operationId: getExecution
+      parameters:
+      - in: path
+        name: trace_execution_id
+        required: true
+        schema:
+          type: string
+      - description: Disambiguate a bare trace_execution_id used by more than one
+          authority
+        in: query
+        name: execution_authority
+        schema:
+          type: string
+      - description: Paging offset
+        in: query
+        name: start
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - description: "Paging size, 1-1000"
+        in: query
+        name: count
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceExecutionResponse"
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or the request is not allowed for the\
+            \ client"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
+      summary: Retrieve one TRACE execution
+      tags:
+      - Lock - Audit Trace
+  /api/v1/audit/trace/records:
+    get:
+      description: "Records whose trace.policy names the given policy store id, version\
+        \ or bundle hash, optionally within a receipt time range, ordered by receipt\
+        \ sequence"
+      operationId: searchRecords
+      parameters:
+      - description: trace.policy.policy_store_id to match
+        in: query
+        name: policy_store_id
+        schema:
+          type: string
+      - description: trace.policy.policy_store_version to match
+        in: query
+        name: policy_store_version
+        schema:
+          type: string
+      - description: trace.policy.bundle_hash to match
+        in: query
+        name: bundle_hash
+        schema:
+          type: string
+      - description: "Earliest received_at, RFC 3339, inclusive"
+        in: query
+        name: received_from
+        schema:
+          type: string
+      - description: "Latest received_at, RFC 3339, inclusive"
+        in: query
+        name: received_to
+        schema:
+          type: string
+      - description: Paging offset
+        in: query
+        name: start
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - description: "Paging size, 1-1000"
+        in: query
+        name: count
+        schema:
+          type: integer
+          format: int32
+          default: 100
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceRecordSearchResponse"
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or the request is not allowed for the\
+            \ client"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
+      summary: Search TRACE records by policy store release
+      tags:
+      - Lock - Audit Trace
+  /api/v1/audit/trace/records/{record_id}:
+    get:
+      description: Domain-scoped retrieval of a stored envelope by record identity
+      operationId: getRecord
+      parameters:
+      - in: path
+        name: record_id
+        required: true
+        schema:
+          type: string
+      - description: Disambiguate a bare record_id used by more than one producer
+        in: query
+        name: producer_id
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceRecordResponse"
+          description: Ok
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Bad Request
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or the request is not allowed for the\
+            \ client"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: Conflict
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TraceErrorResponse"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/trace.readonly
+      summary: Retrieve one TRACE record
+      tags:
+      - Lock - Audit Trace
+  /api/v1/configuration:
+    get:
+      description: Request .well-know Lock server configuration
+      operationId: getConfiguration
+      responses:
+        "200":
           content:
             application/json:
               schema:
                 type: string
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/policy.readonly
-  /api/v1/policy/stores:
-    get:
-      tags:
-      - Lock - Policy
-      summary: List loaded policy store archives
-      description: "List loaded .cjar policy stores with version, source and bundle\
-        \ hash"
-      operationId: getPolicyStores
-      responses:
-        "200":
           description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  description: PolicyStore
-        "401":
-          description: Unauthorized
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/policy.readonly
+          description: InternalServerError
+      summary: Request .well-known data
+      tags:
+      - Lock - Server Configuration
   /api/v1/internal/stat:
     get:
-      tags:
-      - Lock - Stat
-      summary: Request stat data
       description: Request stat data
       operationId: statGet
       parameters:
-      - name: month
-        in: query
+      - in: query
+        name: month
         schema:
           type: string
-      - name: start-month
-        in: query
+      - in: query
+        name: start-month
         schema:
           type: string
-      - name: end-month
-        in: query
+      - in: query
+        name: end-month
         schema:
           type: string
-      - name: format
-        in: query
+      - in: query
+        name: format
         schema:
           type: string
       responses:
         "200":
-          description: Ok
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/FlatStatResponse"
+          description: Ok
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
         "403":
-          description: Future stat is disabled on server
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or future stat is disabled on server"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/lock/stat.readonly
-    post:
+      summary: Request stat data
       tags:
       - Lock - Stat
-      summary: Request stat data
+    post:
       description: Request stat data
       operationId: statPost
       requestBody:
@@ -527,687 +1133,394 @@ paths:
             schema:
               type: object
               properties:
-                month:
-                  type: string
-                start-month:
-                  type: string
                 end-month:
                   type: string
                 format:
                   type: string
+                month:
+                  type: string
+                start-month:
+                  type: string
       responses:
         "200":
-          description: Ok
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/FlatStatResponse"
+          description: Ok
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
         "403":
-          description: Future stat is disabled on server
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: "Access token lacks a required scope (WWW-Authenticate: Bearer\
+            \ error=\"insufficient_scope\"), or future stat is disabled on server"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/lock/stat.readonly
-  /api/v1/audit/trace/admin/producer-chains:
+      summary: Request stat data
+      tags:
+      - Lock - Stat
+  /api/v1/policy:
     get:
-      tags:
-      - Lock - Audit Trace Admin
-      summary: List producer chains
-      description: List registered producer chains in the caller's evidence domain
-      operationId: listProducerChains
-      parameters:
-      - name: producer_id
-        in: query
-        description: Restrict the result to one producer id
-        schema:
-          type: string
+      description: Request policies URI list
+      operationId: getPoliciesUriList
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                type: string
           description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProducerChainListResponse"
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
         "403":
-          description: Forbidden
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
               schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.admin
-    post:
-      tags:
-      - Lock - Audit Trace Admin
-      summary: Register a producer chain
-      description: Pre-register a producer chain
-      operationId: registerProducerChain
-      requestBody:
-        description: Producer chain registration request
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProducerChainRegistrationRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProducerChainResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.admin
-  /api/v1/audit/trace/admin/producer-keys:
-    get:
-      tags:
-      - Lock - Audit Trace Admin
-      summary: List producer keys
-      description: List registered producer keys in the caller's evidence domain
-      operationId: listProducerKeys
-      parameters:
-      - name: producer_id
-        in: query
-        description: Restrict the result to one producer id
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProducerKeyListResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.admin
-    post:
-      tags:
-      - Lock - Audit Trace Admin
-      summary: Register a producer key
-      description: Register a producer's Ed25519 verification key
-      operationId: registerProducerKey
-      requestBody:
-        description: Producer key registration request
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProducerKeyRegistrationRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProducerKeyResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.admin
-  /api/v1/audit/trace/admin/producer-keys/revoke:
-    post:
-      tags:
-      - Lock - Audit Trace Admin
-      summary: Revoke a producer key
-      description: Revoke a registered producer key (idempotent)
-      operationId: revokeProducerKey
-      requestBody:
-        description: Producer key revocation request
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ProducerKeyRevokeRequest"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ProducerKeyResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/LockApiError"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/trace.admin
-  /api/v1/audit/trace/executions/{trace_execution_id}:
-    get:
+        - https://jans.io/oauth/lock/policy.readonly
+      summary: Request policies URI list
       tags:
-      - Lock - Audit Trace
-      summary: Retrieve one TRACE execution
-      description: "All direct records of an execution, ordered by receipt sequence"
-      operationId: getExecution
+      - Lock - Policy
+  /api/v1/policy/stores:
+    get:
+      description: "List loaded .cjar policy stores with version, source and bundle\
+        \ hash"
+      operationId: getPolicyStores
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: PolicyStore
+          description: Ok
+        "401":
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/policy.readonly
+      summary: List loaded policy store archives
+      tags:
+      - Lock - Policy
+  /api/v1/policy/{uri}:
+    get:
+      description: "Request policy data. Returns legacy policy JSON, or the .cjar\
+        \ archive for archive sources (keyed by policy_store.id)"
+      operationId: getPolicyByUri
       parameters:
-      - name: trace_execution_id
+      - description: Policy URI
         in: path
+        name: uri
         required: true
         schema:
           type: string
-      - name: execution_authority
-        in: query
-        description: Disambiguate a bare trace_execution_id used by more than one
-          authority
-        schema:
-          type: string
-      - name: start
-        in: query
-        description: Paging offset
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: count
-        in: query
-        description: "Paging size, 1-1000"
-        schema:
-          type: integer
-          format: int32
-          default: 100
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                type: string
+            application/zip:
+              schema:
+                type: string
+                format: binary
+                description: Policy store archive (.cjar)
           description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceExecutionResponse"
         "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
         "401":
-          description: Unauthorized
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
+              schema:
+                type: string
+              style: simple
         "403":
-          description: Forbidden
-          content:
-            application/json:
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
               schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/trace.readonly
-  /api/v1/audit/trace/records/{record_id}:
-    get:
+        - https://jans.io/oauth/lock/policy.readonly
+      summary: Request policy data
       tags:
-      - Lock - Audit Trace
-      summary: Retrieve one TRACE record
-      description: Domain-scoped retrieval of a stored envelope by record identity
-      operationId: getRecord
+      - Lock - Policy
+  /api/v1/policy/{uri}/sigstore:
+    get:
+      description: Request the Sigstore bundle published next to a .cjar policy store
+        source
+      operationId: getPolicySigstoreBundle
       parameters:
-      - name: record_id
+      - description: Policy store id
         in: path
+        name: uri
         required: true
         schema:
           type: string
-      - name: producer_id
-        in: query
-        description: Disambiguate a bare record_id used by more than one producer
-        schema:
-          type: string
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                type: string
           description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceRecordResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
         "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-          content:
-            application/json:
+          description: "Missing, expired, revoked or invalid access token"
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge; error="invalid_token" when a token was
+                sent
               schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
+                type: string
+              style: simple
+        "403":
+          description: Access token lacks a required scope
+          headers:
+            WWW-Authenticate:
+              description: Bearer challenge with error="insufficient_scope"
+              schema:
+                type: string
+              style: simple
         "404":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LockApiError"
           description: Not Found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
         "500":
-          description: InternalServerError
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
+                $ref: "#/components/schemas/LockApiError"
+          description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/trace.readonly
-  /api/v1/audit/trace/records:
-    get:
+        - https://jans.io/oauth/lock/policy.readonly
+      summary: Request policy store Sigstore bundle
       tags:
-      - Lock - Audit Trace
-      summary: Search TRACE records by policy store release
-      description: "Records whose trace.policy names the given policy store id, version\
-        \ or bundle hash, optionally within a receipt time range, ordered by receipt\
-        \ sequence"
-      operationId: searchRecords
-      parameters:
-      - name: policy_store_id
-        in: query
-        description: trace.policy.policy_store_id to match
-        schema:
-          type: string
-      - name: policy_store_version
-        in: query
-        description: trace.policy.policy_store_version to match
-        schema:
-          type: string
-      - name: bundle_hash
-        in: query
-        description: trace.policy.bundle_hash to match
-        schema:
-          type: string
-      - name: received_from
-        in: query
-        description: "Earliest received_at, RFC 3339, inclusive"
-        schema:
-          type: string
-      - name: received_to
-        in: query
-        description: "Latest received_at, RFC 3339, inclusive"
-        schema:
-          type: string
-      - name: start
-        in: query
-        description: Paging offset
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: count
-        in: query
-        description: "Paging size, 1-1000"
-        schema:
-          type: integer
-          format: int32
-          default: 100
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceRecordSearchResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.readonly
-  /api/v1/audit/trace/bulk:
-    post:
-      tags:
-      - Lock - Audit Trace
-      summary: Submit a batch of TRACE evidence records
-      description: "Verify and ingest a JSON array of signed TRACE assertions, continuing\
-        \ past per-item failures. One producer per batch"
-      operationId: submitBulkRecords
-      requestBody:
-        description: JSON array of TRACE assertions
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: object
-      responses:
-        "207":
-          description: Multi-Status (per-item outcomes in the body)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceBulkIngestionResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.write
-  /api/v1/audit/trace:
-    post:
-      tags:
-      - Lock - Audit Trace
-      summary: Submit a TRACE evidence record
-      description: Verify and ingest a single signed TRACE assertion
-      operationId: submitRecord
-      requestBody:
-        description: TRACE assertion
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        "202":
-          description: Accepted
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceAcceptanceResponse"
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "401":
-          description: Unauthorized
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "409":
-          description: Conflict
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TraceErrorResponse"
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/trace.write
+      - Lock - Policy
 components:
   schemas:
+    FlatStatResponse:
+      type: object
+      properties:
+        response:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatResponseItem"
+    HealthEntry:
+      type: object
+      description: Health audit entry
+      properties:
+        baseDn:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+          description: Creation date of the entry
+          example: 2026-07-24T15:33:06.875Z
+        dn:
+          type: string
+        engineStatus:
+          type: object
+          additionalProperties:
+            type: string
+        eventTime:
+          type: string
+          format: date-time
+          description: Time when the event occurred
+          example: 2026-07-24T15:33:06.875Z
+        inum:
+          type: string
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+        service:
+          type: string
+          description: Service name
+          example: Lock Server
+        status:
+          type: string
+          description: Health status
+          example: running
+    JsonNode:
+      type: object
+      description: "The complete producer-signed assertion as a parsed JSON value.\
+        \ A re-emission: member order, whitespace and number formatting can differ\
+        \ from the received text. Use assertion_raw for the exact text"
     LockApiError:
       type: object
       properties:
         code:
           type: string
-        message:
-          type: string
         description:
           type: string
-    HealthEntry:
-      type: object
-      properties:
-        inum:
+        message:
           type: string
-        creationDate:
-          type: string
-          description: Creation date of the entry
-          format: date-time
-          example: 2026-07-24T15:33:06.875Z
-        eventTime:
-          type: string
-          description: Time when the event occurred
-          format: date-time
-          example: 2026-07-24T15:33:06.875Z
-        service:
-          type: string
-          description: Service name
-          example: Lock Server
-        nodeName:
-          type: string
-          description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
-        status:
-          type: string
-          description: Health status
-          example: running
-        engineStatus:
-          type: object
-          additionalProperties:
-            type: string
-      description: Health audit entry
     LogEntry:
       type: object
+      description: Log audit entry
       properties:
-        inum:
-          type: string
-        creationDate:
-          type: string
-          description: Creation date of the entry
-          format: date-time
-          example: 2026-07-24T15:33:02.937Z
-        eventTime:
-          type: string
-          description: Time when the event occurred
-          format: date-time
-          example: 2026-07-24T15:33:02.937Z
-        service:
-          type: string
-          description: Service name
-          example: Lock Server
-        nodeName:
-          type: string
-          description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
-        eventType:
-          type: string
-          description: Type of event
-          example: Decision
-        severityLevel:
-          type: string
-          description: Severity level
-          example: warning
-          enum:
-          - info
-          - warning
-          - error
-          - critical
         action:
           type: string
           description: Action performed
           example: Jans::Action::"POST"
-        decisionResult:
+        baseDn:
           type: string
-          description: Decision result
-          example: ALLOW
-          enum:
-          - ALLOW
-          - DENY
-        requestedResource:
-          type: string
-          description: Requested resource identifier
-          example: Jans::HTTP_Request::"lock_audit_log_write"
-        principalId:
-          type: string
-          description: Principal (user) identifier
-          example: ACC0001
         clientId:
           type: string
           description: Client identifier
           example: CLI001
-        jti:
-          type: string
-          description: JWT ID - unique identifier for the token
-          example: 550e8400-e29b-41d4-a716-446655440000
         contextInformation:
           type: object
           additionalProperties:
             type: string
             description: Additional context information as key-value pairs
           description: Additional context information as key-value pairs
-        requestId:
+        creationDate:
           type: string
-          description: Cedarling request_id of the decision; contextInformation request_id
-            wins when present
-          example: 0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d
+          format: date-time
+          description: Creation date of the entry
+          example: 2026-07-24T15:33:02.937Z
+        decisionResult:
+          type: string
+          description: Decision result
+          enum:
+          - ALLOW
+          - DENY
+          example: ALLOW
+        dn:
+          type: string
+        eventTime:
+          type: string
+          format: date-time
+          description: Time when the event occurred
+          example: 2026-07-24T15:33:02.937Z
+        eventType:
+          type: string
+          description: Type of event
+          example: Decision
+        inum:
+          type: string
+        jti:
+          type: string
+          description: JWT ID - unique identifier for the token
+          example: 550e8400-e29b-41d4-a716-446655440000
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
         policyStoreId:
           type: string
           description: Policy store id used for the decision; contextInformation policystore_id
@@ -1218,99 +1531,49 @@ components:
           description: Policy store version used for the decision; contextInformation
             policystore_version wins when present
           example: 1.2.3
-      description: Log audit entry
-    TelemetryEntry:
-      type: object
-      properties:
-        inum:
+        principalId:
           type: string
-        creationDate:
+          description: Principal (user) identifier
+          example: ACC0001
+        requestId:
           type: string
-          description: Creation date of the entry
-          format: date-time
-          example: 2026-07-24T15:33:06.872Z
+          description: Cedarling request_id of the decision; contextInformation request_id
+            wins when present
+          example: 0198a5e2-7c1f-7b3e-9d2a-3f4e5a6b7c8d
+        requestedResource:
+          type: string
+          description: Requested resource identifier
+          example: Jans::HTTP_Request::"lock_audit_log_write"
         service:
           type: string
           description: Service name
           example: Lock Server
-        nodeName:
+        severityLevel:
           type: string
-          description: Node name or identifier
-          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
-        status:
-          type: string
-          description: Service status
-          example: running
-        policyStats:
-          type: object
-          additionalProperties:
-            type: integer
-            description: Per-policy evaluation counters as key-value pairs
-            format: int64
-          description: Per-policy evaluation counters as key-value pairs
-        errorCounters:
-          type: object
-          additionalProperties:
-            type: integer
-            description: Error counters broken down by error type
-            format: int64
-          description: Error counters broken down by error type
-        operationalStats:
-          type: object
-          additionalProperties:
-            type: integer
-            description: "Operational statistics (requests, decisions, eval times)\
-              \ as key-value pairs"
-            format: int64
-          description: "Operational statistics (requests, decisions, eval times) as\
-            \ key-value pairs"
-        intervalSecs:
-          type: integer
-          description: Telemetry collection interval in seconds
-          format: int64
-          example: 5
-      description: Telemetry audit entry
-    FlatStatResponse:
-      type: object
-      properties:
-        response:
-          type: array
-          items:
-            $ref: "#/components/schemas/StatResponseItem"
-    StatResponseItem:
-      type: object
-      properties:
-        month:
-          type: string
-        monthly_active_users:
-          type: integer
-          format: int64
-        monthly_active_clients:
-          type: integer
-          format: int64
-        operations_by_type:
-          type: object
-          additionalProperties:
-            type: object
-            additionalProperties:
-              type: integer
-              format: int64
+          description: Severity level
+          enum:
+          - info
+          - warning
+          - error
+          - critical
+          example: warning
     ProducerChainListResponse:
       type: object
+      description: Producer chain list response
       properties:
         chains:
           type: array
           description: Registered producer chains in the caller's evidence domain
           items:
             $ref: "#/components/schemas/ProducerChainResponse"
-      description: Producer chain list response
-    ProducerChainResponse:
+    ProducerChainRegistrationRequest:
       type: object
+      description: Producer chain registration request
       properties:
-        evidence_domain_id:
+        producer_chain_id:
           type: string
-          description: Evidence domain the chain is registered in
-          example: default
+          description: Producer chain id
+          example: chain-1
         producer_id:
           type: string
           description: Opaque stable producer id
@@ -1319,62 +1582,103 @@ components:
           type: string
           description: Producer instance id
           example: instance-1
-        producer_chain_id:
-          type: string
-          description: Producer chain id
-          example: chain-1
-        registered_by:
-          type: string
-          description: Client id that registered the chain
-          example: 2200.abcd
-        genesis_kind:
-          type: string
-          description: "How the chain came to exist: registered through the admin\
-            \ API, or registered by the first genesis record Lock observed"
-          example: pre_registered_genesis
-          enum:
-          - pre_registered_genesis
-          - first_observed_genesis
+    ProducerChainResponse:
+      type: object
+      description: Registered producer chain
+      properties:
         created_at:
           type: string
           description: RFC 3339 timestamp the chain was registered
           example: 2026-01-01T00:00:00Z
-      description: Registered producer chain
+        evidence_domain_id:
+          type: string
+          description: Evidence domain the chain is registered in
+          example: default
+        genesis_kind:
+          type: string
+          description: "How the chain came to exist: registered through the admin\
+            \ API, or registered by the first genesis record Lock observed"
+          enum:
+          - pre_registered_genesis
+          - first_observed_genesis
+          example: pre_registered_genesis
+        producer_chain_id:
+          type: string
+          description: Producer chain id
+          example: chain-1
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
+        producer_instance_id:
+          type: string
+          description: Producer instance id
+          example: instance-1
+        registered_by:
+          type: string
+          description: Client id that registered the chain
+          example: 2200.abcd
     ProducerKeyListResponse:
       type: object
+      description: Producer key list response
       properties:
         keys:
           type: array
           description: Registered producer keys in the caller's evidence domain
           items:
             $ref: "#/components/schemas/ProducerKeyResponse"
-      description: Producer key list response
-    ProducerKeyResponse:
+    ProducerKeyRegistrationRequest:
       type: object
+      description: Producer key registration request
       properties:
-        evidence_domain_id:
-          type: string
-          description: Evidence domain the key is registered in
-          example: default
-        producer_id:
-          type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
+        authorized_event_kinds:
+          type: array
+          description: "Event kinds the key may sign; required, non-empty, no duplicates"
+          enum:
+          - AUTHORIZATION_DECISION
+          - CAPABILITY_INVOKED
+          - RUNTIME_EFFECT
+          example:
+          - AUTHORIZATION_DECISION
+          items:
+            type: string
+            description: "Event kinds the key may sign; required, non-empty, no duplicates"
+            enum:
+            - AUTHORIZATION_DECISION
+            - CAPABILITY_INVOKED
+            - RUNTIME_EFFECT
+            example: "[\"AUTHORIZATION_DECISION\"]"
         kid:
           type: string
           description: Key id
           example: 2026-01-key-1
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         public_key_jwk:
           type: object
           additionalProperties:
             type: string
-            description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
+            description: RFC 8037 OKP Ed25519 JWK
             example: "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"...\"}"
-          description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
+          description: RFC 8037 OKP Ed25519 JWK
           example:
-            kty: OKP
             crv: Ed25519
+            kty: OKP
             x: '...'
+        valid_from:
+          type: string
+          description: RFC 3339 timestamp the key becomes valid
+          example: 2026-01-01T00:00:00Z
+        valid_until:
+          type: string
+          description: "RFC 3339 timestamp the key expires, or null for no expiry"
+          example: 2027-01-01T00:00:00Z
+    ProducerKeyResponse:
+      type: object
+      description: Registered producer key
+      properties:
         authorized_event_kinds:
           type: array
           description: Event kinds the key may sign
@@ -1384,82 +1688,41 @@ components:
             type: string
             description: Event kinds the key may sign
             example: "[\"AUTHORIZATION_DECISION\"]"
-        valid_from:
-          type: string
-          description: RFC 3339 timestamp the key becomes valid
-          example: 2026-01-01T00:00:00Z
-        valid_until:
-          type: string
-          description: "RFC 3339 timestamp the key expires, or null for no expiry"
-          example: 2027-01-01T00:00:00Z
-        revoked_at:
-          type: string
-          description: "RFC 3339 timestamp the key was revoked, or null if active"
-          example: 2026-06-01T00:00:00Z
-        registered_by:
-          type: string
-          description: Client id that registered the key
-          example: 2200.abcd
         created_at:
           type: string
           description: RFC 3339 timestamp the key was registered
           example: 2026-01-01T00:00:00Z
-      description: Registered producer key
-    ProducerChainRegistrationRequest:
-      type: object
-      properties:
-        producer_id:
+        evidence_domain_id:
           type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
-        producer_instance_id:
-          type: string
-          description: Producer instance id
-          example: instance-1
-        producer_chain_id:
-          type: string
-          description: Producer chain id
-          example: chain-1
-      description: Producer chain registration request
-    ProducerKeyRegistrationRequest:
-      type: object
-      properties:
-        producer_id:
-          type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
+          description: Evidence domain the key is registered in
+          example: default
         kid:
           type: string
           description: Key id
           example: 2026-01-key-1
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
         public_key_jwk:
           type: object
           additionalProperties:
             type: string
-            description: RFC 8037 OKP Ed25519 JWK
+            description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
             example: "{\"kty\":\"OKP\",\"crv\":\"Ed25519\",\"x\":\"...\"}"
-          description: RFC 8037 OKP Ed25519 JWK
+          description: RFC 8037 OKP Ed25519 JWK (kty/crv/x only)
           example:
-            kty: OKP
             crv: Ed25519
+            kty: OKP
             x: '...'
-        authorized_event_kinds:
-          type: array
-          description: "Event kinds the key may sign; required, non-empty, no duplicates"
-          example:
-          - AUTHORIZATION_DECISION
-          items:
-            type: string
-            description: "Event kinds the key may sign; required, non-empty, no duplicates"
-            example: "[\"AUTHORIZATION_DECISION\"]"
-            enum:
-            - AUTHORIZATION_DECISION
-            - CAPABILITY_INVOKED
-            - RUNTIME_EFFECT
-          enum:
-          - AUTHORIZATION_DECISION
-          - CAPABILITY_INVOKED
-          - RUNTIME_EFFECT
+        registered_by:
+          type: string
+          description: Client id that registered the key
+          example: 2200.abcd
+        revoked_at:
+          type: string
+          description: "RFC 3339 timestamp the key was revoked, or null if active"
+          example: 2026-06-01T00:00:00Z
         valid_from:
           type: string
           description: RFC 3339 timestamp the key becomes valid
@@ -1468,84 +1731,119 @@ components:
           type: string
           description: "RFC 3339 timestamp the key expires, or null for no expiry"
           example: 2027-01-01T00:00:00Z
-      description: Producer key registration request
     ProducerKeyRevokeRequest:
       type: object
+      description: Producer key revocation request
       properties:
-        producer_id:
-          type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
         kid:
           type: string
           description: Key id
           example: 2026-01-key-1
-      description: Producer key revocation request
-    JsonNode:
-      type: object
-      description: "The complete producer-signed assertion as a parsed JSON value.\
-        \ A re-emission: member order, whitespace and number formatting can differ\
-        \ from the received text. Use assertion_raw for the exact text"
-    TraceExecutionResponse:
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
+    StatResponseItem:
       type: object
       properties:
-        execution_authority:
+        month:
           type: string
-          description: The execution's authority
-          example: spiffe://example.org/agent/planner
-        trace_execution_id:
-          type: string
-          description: Execution id
-          example: exec-01J...
-        ordering:
-          type: string
-          description: "Fixed: records are ordered by receipt_sequence"
-          example: receipt_sequence
-        completeness:
-          type: string
-          description: "Fixed: Lock never asserts completeness of an execution's records"
-          example: not_assessed
-        records:
-          type: array
-          description: "The execution's direct records, ordered by receipt_sequence"
-          items:
-            $ref: "#/components/schemas/TraceRecordResponse"
-      description: "Direct TRACE records of one execution, ordered by receipt sequence"
-    TraceIngestionResponse:
-      type: object
-      properties:
-        receipt_sequence:
+        monthly_active_clients:
           type: integer
-          description: Position in the domain's receipt chain
           format: int64
-          example: 108422
-        received_at:
+        monthly_active_users:
+          type: integer
+          format: int64
+        operations_by_type:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+              format: int64
+    TelemetryEntry:
+      type: object
+      description: Telemetry audit entry
+      properties:
+        baseDn:
           type: string
-          description: RFC 3339 UTC timestamp Lock received the record
-          example: 2026-06-11T00:41:02.123Z
-        prev_receipt_hash:
+        creationDate:
           type: string
-          description: sha256:<hex> hash of the previous receipt in the domain's chain
-        receipt_hash:
+          format: date-time
+          description: Creation date of the entry
+          example: 2026-07-24T15:33:06.872Z
+        dn:
           type: string
-          description: sha256:<hex> hash of this receipt
-        receipt_state:
+        errorCounters:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+            description: Error counters broken down by error type
+          description: Error counters broken down by error type
+        intervalSecs:
+          type: integer
+          format: int64
+          description: Telemetry collection interval in seconds
+          example: 5
+        inum:
           type: string
-          description: "State of this record's receipt entry: COMMITTED, or PENDING\
-            \ while the claim is not yet settled"
-          example: COMMITTED
-        coverage_gap_flag:
+        nodeName:
+          type: string
+          description: Node name or identifier
+          example: 04bbe9ef-a853-417c-a2b8-5328b62936e2
+        operationalStats:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+            description: "Operational statistics (requests, decisions, eval times)\
+              \ as key-value pairs"
+          description: "Operational statistics (requests, decisions, eval times) as\
+            \ key-value pairs"
+        policyStats:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+            description: Per-policy evaluation counters as key-value pairs
+          description: Per-policy evaluation counters as key-value pairs
+        service:
+          type: string
+          description: Service name
+          example: Lock Server
+        status:
+          type: string
+          description: Service status
+          example: running
+    TraceAcceptanceResponse:
+      type: object
+      description: TRACE record acceptance response
+      properties:
+        accepted:
           type: boolean
-          description: True when this record's predecessor in its producer chain is
-            missing
+          description: Always true; rejections are reported as structured errors instead
+          example: true
         chain_link_failure_flag:
           type: boolean
           description: True when this record's prev_record_hash does not match its
             predecessor
+        content_digest:
+          type: string
+          description: sha256:<hex> digest of the full signed assertion
+          example: sha256:abc123...
+        coverage_gap_flag:
+          type: boolean
+          description: True when this record's predecessor in its producer chain is
+            missing
         equivocation_flag:
           type: boolean
           description: True when another record already occupies this producer-chain
             position
+        idempotent_replay:
+          type: boolean
+          description: True when this identity already existed with the same content
+            digest
         late_flag:
           type: boolean
           description: True when the record arrived after the configured lateness
@@ -1555,6 +1853,23 @@ components:
           description: True when trace.policy names a policy store Lock serves with
             a release this node did not serve at signed_at or within policyMismatchGraceSeconds
             before it
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
+        receipt_sequence:
+          type: integer
+          format: int64
+          description: Position in the domain's receipt chain
+          example: 108422
+        received_at:
+          type: string
+          description: RFC 3339 UTC timestamp Lock received the record
+          example: 2026-06-11T00:41:02.123Z
+        record_id:
+          type: string
+          description: Signed record id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
         reserved_member_flag:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed
@@ -1569,155 +1884,50 @@ components:
             description: "The first 32 paths of the ignored Lock-derived members,\
               \ for example trace.trust_tier; their values inside assertion are producer-supplied\
               \ and unused"
-      description: Receipt-chain position and ingestion flags for a TRACE record
-    TraceRecordResponse:
-      type: object
-      properties:
-        producer_id:
-          type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
-        record_id:
-          type: string
-          description: Signed record id
-          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
-        assertion:
-          $ref: "#/components/schemas/JsonNode"
-        assertion_raw:
-          type: string
-          description: "The exact accepted assertion text, byte for byte as received.\
-            \ Verify the signature and content_digest over its JCS form"
-        content_digest:
-          type: string
-          description: sha256:<hex> digest of the full signed assertion
-          example: sha256:abc123...
-        verification:
-          $ref: "#/components/schemas/TraceVerificationResponse"
-        ingestion:
-          $ref: "#/components/schemas/TraceIngestionResponse"
-      description: A single TRACE record envelope
-    TraceVerificationResponse:
-      type: object
-      properties:
-        signature_valid:
-          type: boolean
-          description: True when the Ed25519 signature verified against the registered
-            key
-        key_id:
-          type: string
-          description: kid of the key the record was verified against
-          example: key-1
-        key_thumbprint:
-          type: string
-          description: "RFC 7638 thumbprint of the key the record was verified against,\
-            \ sha256:<hex>; absent on records stored before it was recorded"
-          example: sha256:90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89
-        key_authorized:
-          type: boolean
-          description: "True when the key existed, was valid and unrevoked at ingestion,\
-            \ was registered for the producer and authorized for the event kind; absent\
-            \ on records stored before it was recorded"
-        verified_at:
-          type: string
-          description: RFC 3339 UTC timestamp verification was performed at
-          example: 2026-06-11T00:41:02.123Z
-        algorithm:
-          type: string
-          description: Signature algorithm
-          example: Ed25519
-      description: Signature verification outcome for a TRACE record
-    TraceErrorResponse:
-      type: object
-      properties:
-        error:
-          type: string
-          description: TRACE error id
-          example: invalid_assertion
-        error_description:
-          type: string
-          description: Human-readable error description
-        reason:
-          type: string
-          description: "Machine-readable detail, present only when error reporting\
-            \ is enabled"
-          example: missing:trace.signed_at
-      description: Structured TRACE error response
-    TraceRecordSearchResponse:
-      type: object
-      properties:
-        records:
-          type: array
-          description: "Matching records, ordered by receipt_sequence"
-          items:
-            $ref: "#/components/schemas/TraceRecordResponse"
-        ordering:
-          type: string
-          description: "Fixed: records are ordered by receipt_sequence"
-          example: receipt_sequence
-      description: "TRACE records matching a policy store release search, ordered\
-        \ by receipt sequence"
     TraceBulkIngestionResponse:
       type: object
+      description: TRACE bulk ingestion response
       properties:
         results:
           type: array
           description: "One entry per submitted array element, in request order"
           items:
             $ref: "#/components/schemas/TraceBulkResultEntry"
-      description: TRACE bulk ingestion response
     TraceBulkResultEntry:
       type: object
+      description: One item's outcome within a TRACE bulk ingestion response
       properties:
-        index:
-          type: integer
-          description: Position of this assertion in the submitted array
-          format: int32
-          example: 0
         accepted:
           type: boolean
           description: True when this item was verified and ingested
-        producer_id:
-          type: string
-          description: Opaque stable producer id. Always present when accepted; present
-            when rejected only if the element carried a readable top-level string
-            producer
-          example: cedarling-fleet-1
-        record_id:
-          type: string
-          description: Signed record id. Always present when accepted; present when
-            rejected only if the element carried a readable top-level string record_id
-          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
+        chain_link_failure_flag:
+          type: boolean
+          description: "Present when accepted: true when this record's prev_record_hash\
+            \ does not match its predecessor"
         content_digest:
           type: string
           description: "Present when accepted: sha256:<hex> digest of the full signed\
             \ assertion"
           example: sha256:abc123...
-        receipt_sequence:
-          type: integer
-          description: "Present when accepted: position in the domain's receipt chain"
-          format: int64
-          example: 108422
-        received_at:
-          type: string
-          description: "Present when accepted: RFC 3339 UTC timestamp Lock received\
-            \ the record"
-          example: 2026-06-11T00:41:02.123Z
-        idempotent_replay:
-          type: boolean
-          description: "Present when accepted: true when this identity already existed\
-            \ with the same content digest"
         coverage_gap_flag:
           type: boolean
           description: "Present when accepted: true when this record's predecessor\
             \ in its producer chain is missing"
-        chain_link_failure_flag:
-          type: boolean
-          description: "Present when accepted: true when this record's prev_record_hash\
-            \ does not match its predecessor"
         equivocation_flag:
           type: boolean
           description: "Present when accepted: true when another record already occupies\
             \ this producer-chain position"
+        error:
+          $ref: "#/components/schemas/TraceErrorResponse"
+        idempotent_replay:
+          type: boolean
+          description: "Present when accepted: true when this identity already existed\
+            \ with the same content digest"
+        index:
+          type: integer
+          format: int32
+          description: Position of this assertion in the submitted array
+          example: 0
         late_flag:
           type: boolean
           description: "Present when accepted: true when the record arrived after\
@@ -1727,6 +1937,27 @@ components:
           description: "Present when accepted: true when trace.policy names a policy\
             \ store Lock serves with a release this node did not serve at signed_at\
             \ or within policyMismatchGraceSeconds before it"
+        producer_id:
+          type: string
+          description: Opaque stable producer id. Always present when accepted; present
+            when rejected only if the element carried a readable top-level string
+            producer
+          example: cedarling-fleet-1
+        receipt_sequence:
+          type: integer
+          format: int64
+          description: "Present when accepted: position in the domain's receipt chain"
+          example: 108422
+        received_at:
+          type: string
+          description: "Present when accepted: RFC 3339 UTC timestamp Lock received\
+            \ the record"
+          example: 2026-06-11T00:41:02.123Z
+        record_id:
+          type: string
+          description: Signed record id. Always present when accepted; present when
+            rejected only if the element carried a readable top-level string record_id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
         reserved_member_flag:
           type: boolean
           description: "Present when accepted: true when Lock-derived members the\
@@ -1740,49 +1971,59 @@ components:
             type: string
             description: "Present when accepted: the first 32 paths of the ignored\
               \ Lock-derived members"
-        error:
-          $ref: "#/components/schemas/TraceErrorResponse"
-      description: One item's outcome within a TRACE bulk ingestion response
-    TraceAcceptanceResponse:
+    TraceErrorResponse:
       type: object
+      description: Structured TRACE error response
       properties:
-        accepted:
-          type: boolean
-          description: Always true; rejections are reported as structured errors instead
-          example: true
-        producer_id:
+        error:
           type: string
-          description: Opaque stable producer id
-          example: cedarling-fleet-1
-        record_id:
+          description: TRACE error id
+          example: invalid_assertion
+        error_description:
           type: string
-          description: Signed record id
-          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
-        content_digest:
+          description: Human-readable error description
+        reason:
           type: string
-          description: sha256:<hex> digest of the full signed assertion
-          example: sha256:abc123...
-        receipt_sequence:
-          type: integer
-          description: Position in the domain's receipt chain
-          format: int64
-          example: 108422
-        received_at:
+          description: "Machine-readable detail, present only when error reporting\
+            \ is enabled"
+          example: missing:trace.signed_at
+    TraceExecutionResponse:
+      type: object
+      description: "Direct TRACE records of one execution, ordered by receipt sequence"
+      properties:
+        completeness:
           type: string
-          description: RFC 3339 UTC timestamp Lock received the record
-          example: 2026-06-11T00:41:02.123Z
-        idempotent_replay:
-          type: boolean
-          description: True when this identity already existed with the same content
-            digest
-        coverage_gap_flag:
-          type: boolean
-          description: True when this record's predecessor in its producer chain is
-            missing
+          description: "Fixed: Lock never asserts completeness of an execution's records"
+          example: not_assessed
+        execution_authority:
+          type: string
+          description: The execution's authority
+          example: spiffe://example.org/agent/planner
+        ordering:
+          type: string
+          description: "Fixed: records are ordered by receipt_sequence"
+          example: receipt_sequence
+        records:
+          type: array
+          description: "The execution's direct records, ordered by receipt_sequence"
+          items:
+            $ref: "#/components/schemas/TraceRecordResponse"
+        trace_execution_id:
+          type: string
+          description: Execution id
+          example: exec-01J...
+    TraceIngestionResponse:
+      type: object
+      description: Receipt-chain position and ingestion flags for a TRACE record
+      properties:
         chain_link_failure_flag:
           type: boolean
           description: True when this record's prev_record_hash does not match its
             predecessor
+        coverage_gap_flag:
+          type: boolean
+          description: True when this record's predecessor in its producer chain is
+            missing
         equivocation_flag:
           type: boolean
           description: True when another record already occupies this producer-chain
@@ -1796,6 +2037,26 @@ components:
           description: True when trace.policy names a policy store Lock serves with
             a release this node did not serve at signed_at or within policyMismatchGraceSeconds
             before it
+        prev_receipt_hash:
+          type: string
+          description: sha256:<hex> hash of the previous receipt in the domain's chain
+        receipt_hash:
+          type: string
+          description: sha256:<hex> hash of this receipt
+        receipt_sequence:
+          type: integer
+          format: int64
+          description: Position in the domain's receipt chain
+          example: 108422
+        receipt_state:
+          type: string
+          description: "State of this record's receipt entry: COMMITTED, or PENDING\
+            \ while the claim is not yet settled"
+          example: COMMITTED
+        received_at:
+          type: string
+          description: RFC 3339 UTC timestamp Lock received the record
+          example: 2026-06-11T00:41:02.123Z
         reserved_member_flag:
           type: boolean
           description: True when Lock-derived members the producer placed in its signed
@@ -1810,22 +2071,91 @@ components:
             description: "The first 32 paths of the ignored Lock-derived members,\
               \ for example trace.trust_tier; their values inside assertion are producer-supplied\
               \ and unused"
-      description: TRACE record acceptance response
+    TraceRecordResponse:
+      type: object
+      description: A single TRACE record envelope
+      properties:
+        assertion:
+          $ref: "#/components/schemas/JsonNode"
+        assertion_raw:
+          type: string
+          description: "The exact accepted assertion text, byte for byte as received.\
+            \ Verify the signature and content_digest over its JCS form"
+        content_digest:
+          type: string
+          description: sha256:<hex> digest of the full signed assertion
+          example: sha256:abc123...
+        ingestion:
+          $ref: "#/components/schemas/TraceIngestionResponse"
+        producer_id:
+          type: string
+          description: Opaque stable producer id
+          example: cedarling-fleet-1
+        record_id:
+          type: string
+          description: Signed record id
+          example: 9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41
+        verification:
+          $ref: "#/components/schemas/TraceVerificationResponse"
+    TraceRecordSearchResponse:
+      type: object
+      description: "TRACE records matching a policy store release search, ordered\
+        \ by receipt sequence"
+      properties:
+        ordering:
+          type: string
+          description: "Fixed: records are ordered by receipt_sequence"
+          example: receipt_sequence
+        records:
+          type: array
+          description: "Matching records, ordered by receipt_sequence"
+          items:
+            $ref: "#/components/schemas/TraceRecordResponse"
+    TraceVerificationResponse:
+      type: object
+      description: Signature verification outcome for a TRACE record
+      properties:
+        algorithm:
+          type: string
+          description: Signature algorithm
+          example: Ed25519
+        key_authorized:
+          type: boolean
+          description: "True when the key existed, was valid and unrevoked at ingestion,\
+            \ was registered for the producer and authorized for the event kind; absent\
+            \ on records stored before it was recorded"
+        key_id:
+          type: string
+          description: kid of the key the record was verified against
+          example: key-1
+        key_thumbprint:
+          type: string
+          description: "RFC 7638 thumbprint of the key the record was verified against,\
+            \ sha256:<hex>; absent on records stored before it was recorded"
+          example: sha256:90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89
+        signature_valid:
+          type: boolean
+          description: True when the Ed25519 signature verified against the registered
+            key
+        verified_at:
+          type: string
+          description: RFC 3339 UTC timestamp verification was performed at
+          example: 2026-06-11T00:41:02.123Z
   securitySchemes:
     oauth2:
-      type: oauth2
       flows:
         clientCredentials:
-          tokenUrl: "https://{op-hostname}/.../token"
           scopes:
-            https://jans.io/oauth/lock/policy.readonly: View policy related information
             https://jans.io/oauth/lock/health.write: Write audit health entries
             https://jans.io/oauth/lock/log.write: Write audit log entries
-            https://jans.io/oauth/lock/telemetry.write: Write telemetry health entries
+            https://jans.io/oauth/lock/policy.readonly: View policy related information
             https://jans.io/oauth/lock/stat.readonly: View stat related information
-            https://jans.io/oauth/lock/trace.write: Permission to submit TRACE evidence
-              records
-            https://jans.io/oauth/lock/trace.readonly: Permission to read TRACE records
-              and executions
+            https://jans.io/oauth/lock/telemetry.write: Write telemetry health entries
             https://jans.io/oauth/lock/trace.admin: Permission to manage TRACE producer
               keys and chains
+            https://jans.io/oauth/lock/trace.readonly: Permission to read TRACE records
+              and executions
+            https://jans.io/oauth/lock/trace.write: Permission to submit TRACE evidence
+              records
+          tokenUrl: "https://{op-hostname}/.../token"
+      type: oauth2

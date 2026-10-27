@@ -790,7 +790,7 @@ global:
       webfingerEnabled: true
       # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
-      # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
+      # -- Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService
       lockAuditEnabled: false
       # -- Enable endpoint /.well-known/authzen-configuration
       authzenConfigEnabled: true
@@ -1271,7 +1271,7 @@ gateway-api:
     oauthServerConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled)
     lockConfigEnabled: false
-    # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled)
+    # -- Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService (if enabled, global.auth-server.lockEnabled must be enabled)
     lockAuditEnabled: false
     # -- Enable Casa endpoints /jans-casa
     casaEnabled: false
@@ -1291,7 +1291,7 @@ gateway-api:
   additionalConfig:
     # -- Configuration for NGINX Fabric.
     nginx:
-      # -- Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`.
+      # -- Enable URL rewrite to forward Lock gRPC requests (`/io.jans.lock.audit.AuditService`, `/io.jans.lock.trace.TraceService`, `/io.jans.lock.trace.TraceAdminService`) to the same paths under `/jans-auth`.
       # Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500).
       # See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup.
       enableAuditGrpcRewriteSnippets: false
