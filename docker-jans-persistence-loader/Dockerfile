@@ -7,9 +7,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdb
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-psycopg2 \
-    && apk add --no-cache --virtual .build-deps git wget \
-    && mkdir -p /usr/java/latest \
-    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+    && apk add --no-cache --virtual .build-deps git wget
 
 # ===========
 # Assets sync
@@ -173,6 +171,13 @@ COPY templates /app/templates
 RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json
 
 RUN chmod +x /app/scripts/entrypoint.sh
+
+RUN ln -sf /usr/lib/jvm/jre /opt/java
+
+# a workaround to block compromised emudhra certs while waiting updates from jvm distro
+COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
+RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
+    && rm -f /tmp/emudhra_blocked.certs
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000

@@ -246,6 +246,11 @@ RUN cp /app/templates/nginx/*-upstream.conf /etc/nginx/jans-aio/ \
 
 RUN touch /run/nginx/nginx.pid
 
+# a workaround to block compromised emudhra certs while waiting updates from jvm distro
+COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
+RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
+    && rm -f /tmp/emudhra_blocked.certs
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \
     && addgroup jans root

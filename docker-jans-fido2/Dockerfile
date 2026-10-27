@@ -249,6 +249,11 @@ RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
 
+# a workaround to block compromised emudhra certs while waiting updates from jvm distro
+COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
+RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
+    && rm -f /tmp/emudhra_blocked.certs
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 

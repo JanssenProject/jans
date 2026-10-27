@@ -280,6 +280,11 @@ RUN ln -sf /usr/lib/jvm/jre /opt/java
 # extra java.security (activated when admin-ui plugin is enabled)
 COPY contrib/java.security ${JETTY_BASE}/jans-config-api/etc/jetty/security/java.security
 
+# a workaround to block compromised emudhra certs while waiting updates from jvm distro
+COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
+RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
+    && rm -f /tmp/emudhra_blocked.certs
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
