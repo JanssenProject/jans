@@ -24,7 +24,7 @@ use crate::log::{
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
 };
 use crate::trace::{
-    DecisionFacts, DraftError, Outcome, TokenRef, TraceRecordStatus, TraceRecorder, token_facts,
+    DecisionFacts, DraftError, Outcome, TokenFacts, TraceRecordStatus, TraceRecorder, token_facts,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
@@ -36,6 +36,7 @@ use request::{
 };
 use serde_json::json;
 use smol_str::SmolStr;
+use std::borrow::Borrow;
 use std::cell::OnceCell;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
@@ -372,10 +373,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || {
-                token_facts(&validated_tokens, &request.tokens, &self.config.log_service)
-                    .map(Arc::from)
-            },
+            || token_facts(&validated_tokens, &request.tokens),
         );
 
         // Decision log
@@ -498,11 +496,9 @@ impl Authz {
         let trace_tokens = OnceCell::new();
         let trace_token_facts = || {
             trace_tokens
-                .get_or_init(|| {
-                    token_facts(&validated_tokens, &request.tokens, &self.config.log_service)
-                        .map(Arc::from)
-                })
-                .clone()
+                .get_or_init(|| token_facts(&validated_tokens, &request.tokens))
+                .as_ref()
+                .map_err(Clone::clone)
         };
         let trace_context = self.trace_context(&request.options);
 
@@ -784,7 +780,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || Ok(Arc::from([])),
+            || Ok(TokenFacts::default()),
         );
 
         // Decision log
@@ -934,7 +930,7 @@ impl Authz {
                 &item.action,
                 &resource_uid,
                 decision,
-                || Ok(Arc::from([])),
+                || Ok(TokenFacts::default()),
             );
 
             self.log_decision(
@@ -1250,23 +1246,26 @@ impl Authz {
 
     /// Hands the TRACE record of one decision to the emitter; `None` when TRACE is
     /// disabled. `tokens` runs only when the record is built.
-    fn record_trace(
+    fn record_trace<T: Borrow<TokenFacts>>(
         &self,
         request_id: Uuid,
         trace_context: Option<&Arc<TraceContext>>,
         action: &str,
         resource: &EntityUid,
         allowed: bool,
-        tokens: impl FnOnce() -> Result<Arc<[TokenRef]>, DraftError>,
+        tokens: impl FnOnce() -> Result<T, DraftError>,
     ) -> Option<TraceRecordStatus> {
         let trace = self.config.trace.as_ref()?;
         Some(
             trace.record(request_id, trace_context, &self.config.policy_store, || {
+                let tokens = tokens()?;
+                let tokens: &TokenFacts = tokens.borrow();
+                trace.warn_left_out(request_id, tokens);
                 Ok(DecisionFacts {
                     action: action.to_string(),
                     resource_type: resource.type_name().to_string(),
                     outcome: Outcome::from_allowed(allowed),
-                    tokens: tokens()?,
+                    tokens: Arc::clone(&tokens.refs),
                 })
             }),
         )

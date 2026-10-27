@@ -39,6 +39,8 @@ pub(crate) struct TraceRecorder {
     metrics: Arc<MetricsCollector>,
     /// Shared by the clones, so all of them log one full queue once.
     queue: Arc<QueueState>,
+    /// Shared by the clones, like `queue`.
+    warned: Arc<WarnedOnce>,
 }
 
 /// Whether the emitter queue turns records away. Under a steady load above
@@ -52,6 +54,16 @@ struct QueueState {
     /// The emitter does not start again, so its stop is warned once and
     /// apart from a full queue.
     stopped: AtomicBool,
+}
+
+/// Causes that come from the configuration or from how a client calls, so
+/// they repeat on every decision. Each kind is warned the first time and
+/// logged at DEBUG after; the metrics count every decision.
+#[derive(Default)]
+struct WarnedOnce {
+    over_limit: AtomicBool,
+    invalid_field: AtomicBool,
+    custom_token_left_out: AtomicBool,
 }
 
 impl TraceRecorder {
@@ -69,6 +81,7 @@ impl TraceRecorder {
             log,
             metrics,
             queue: Arc::default(),
+            warned: Arc::default(),
         }
     }
 
@@ -129,11 +142,23 @@ impl TraceRecorder {
                 return TraceRecordStatus::NotEmittedMissingContext;
             },
             Err(err @ DraftError::OverLimit { .. }) => {
-                self.warn(request_id, &err.to_string());
+                self.warn_first(
+                    &self.warned.over_limit,
+                    request_id,
+                    "later ones are logged at DEBUG and counted in \
+                     `trace.not_emitted_over_limit`",
+                    || format!("TRACE record not emitted: {err}"),
+                );
                 return TraceRecordStatus::NotEmittedOverLimit;
             },
             Err(err @ DraftError::InvalidField { .. }) => {
-                self.warn(request_id, &err.to_string());
+                self.warn_first(
+                    &self.warned.invalid_field,
+                    request_id,
+                    "later ones are logged at DEBUG and counted in \
+                     `trace.not_emitted_invalid_field`",
+                    || format!("TRACE record not emitted: {err}"),
+                );
                 return TraceRecordStatus::NotEmittedInvalidField;
             },
         };
@@ -194,6 +219,52 @@ impl TraceRecorder {
         );
     }
 
+    /// Notes the custom tokens [`token_facts`] left out of the record of
+    /// `request_id`.
+    pub(crate) fn warn_left_out(&self, request_id: Uuid, tokens: &TokenFacts) {
+        for mapping in &tokens.left_out {
+            self.warn_first(
+                &self.warned.custom_token_left_out,
+                request_id,
+                "later ones are logged at DEBUG",
+                || {
+                    format!(
+                        "custom token `{mapping}` has no issuer Lock accepts; it is left out of \
+                         the TRACE record"
+                    )
+                },
+            );
+        }
+    }
+
+    /// WARN for the first of its kind, with `later` saying where the rest go,
+    /// and DEBUG for the rest. The message is built only when its level is
+    /// logged, so a repeated cause costs no allocation at a higher log level.
+    fn warn_first(
+        &self,
+        first: &AtomicBool,
+        request_id: Uuid,
+        later: &str,
+        message: impl Fn() -> String,
+    ) {
+        // The `load` keeps the repeated case to one read on the authorize path.
+        let is_first = !first.load(Ordering::Relaxed) && !first.swap(true, Ordering::Relaxed);
+        let level = if is_first {
+            LogLevel::WARN
+        } else {
+            LogLevel::DEBUG
+        };
+        self.log
+            .log_fn(BaseLogEntry::new_system(level, request_id).with_fn(|base| {
+                let message = if is_first {
+                    format!("{}; {later}", message())
+                } else {
+                    message()
+                };
+                LogEntry::new(base).set_message(message)
+            }));
+    }
+
     fn warn(&self, request_id: Uuid, reason: &str) {
         self.log.log_any(
             LogEntry::new(BaseLogEntry::new_system(LogLevel::WARN, request_id))
@@ -207,22 +278,31 @@ fn signed_at() -> u64 {
     u64::try_from(Utc::now().timestamp()).unwrap_or_default()
 }
 
+/// The tokens a decision used, as the record references them.
+#[derive(Debug, Default, PartialEq)]
+pub(crate) struct TokenFacts {
+    pub(crate) refs: Arc<[TokenRef]>,
+    /// Mappings of the custom tokens left out of `refs`, for
+    /// [`TraceRecorder::warn_left_out`].
+    pub(crate) left_out: Vec<String>,
+}
+
 /// References to the tokens a multi-issuer decision used, in request order. The
 /// `issuer` and `jti` come from the token claims; the `mapping` and the raw text
 /// come from the request input at the token's index.
 ///
-/// A custom token whose issuer Lock would reject is left out with a warning:
-/// Cedarling cannot name its issuer, and the decision still has a record. A JWT
-/// stays in, so an issuer Lock rejects stops the record instead.
+/// A custom token whose issuer Lock would reject is left out and named in
+/// `left_out`: Cedarling cannot name its issuer, and the decision still has a
+/// record. A JWT stays in, so an issuer Lock rejects stops the record instead.
 pub(crate) fn token_facts(
     validated: &HashMap<String, ValidatedToken>,
     inputs: &[TokenInput],
-    log: &Logger,
-) -> Result<Vec<TokenRef>, DraftError> {
+) -> Result<TokenFacts, DraftError> {
     let mut ordered: Vec<&ValidatedToken> = validated.values().collect();
     ordered.sort_by_key(|validated| validated.index);
 
     let mut refs = Vec::with_capacity(ordered.len());
+    let mut left_out = Vec::new();
     for validated in ordered {
         let position = refs.len();
         // The index comes from validating these same inputs, so this does not
@@ -238,17 +318,7 @@ pub(crate) fn token_facts(
 
         if matches!(token.iss, Some(TokenIssuer::Custom(_))) && !issuer.is_some_and(is_lock_issuer)
         {
-            log.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                    LogLevel::WARN,
-                    None,
-                ))
-                .set_message(format!(
-                    "custom token `{}` has no issuer Lock accepts; it is left out of the TRACE \
-                     record",
-                    input.mapping
-                )),
-            );
+            left_out.push(input.mapping.clone());
             continue;
         }
 
@@ -263,7 +333,10 @@ pub(crate) fn token_facts(
         })?;
         refs.push(token_ref);
     }
-    Ok(refs)
+    Ok(TokenFacts {
+        refs: refs.into(),
+        left_out,
+    })
 }
 
 #[cfg(test)]
@@ -303,7 +376,7 @@ mod tests {
         cjar_store(&fixtures::minimal_valid()).store
     }
 
-    fn facts(tokens: Vec<TokenRef>) -> DecisionFacts {
+    fn facts(tokens: impl Into<Arc<[TokenRef]>>) -> DecisionFacts {
         DecisionFacts {
             action: "TestApp::Action::\"read\"".to_string(),
             resource_type: "TestApp::Resource".to_string(),
@@ -672,20 +745,24 @@ mod tests {
                 custom("Acme::DolphinToken", claims.clone(), 1),
             ]);
 
-            let refs = token_facts(&tokens, &inputs, &log)
+            let tokens = token_facts(&tokens, &inputs)
                 .expect("a custom token Lock cannot name is left out, not an error");
+            assert_eq!(
+                tokens.left_out,
+                ["Acme::DolphinToken"],
+                "the left-out token is named by its mapping ({claims})"
+            );
+
+            let (tx, mut rx) = mpsc::channel(1);
+            let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics());
+            recorder.warn_left_out(gen_uuid7(), &tokens);
             assert!(
                 warned(&log, "Acme::DolphinToken"),
                 "leaving out a token should be warned with its mapping ({claims})"
             );
-
-            let (tx, mut rx) = mpsc::channel(1);
-            let status = TraceRecorder::new(Some(tx), log, metrics()).record(
-                gen_uuid7(),
-                Some(&trace()),
-                &store,
-                || Ok(facts(refs)),
-            );
+            let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || {
+                Ok(facts(tokens.refs))
+            });
             assert_eq!(
                 status,
                 TraceRecordStatus::Emitted,
@@ -714,9 +791,9 @@ mod tests {
             json!({"iss": "https://dolphin.example.com", "jti": "d-1"}),
             0,
         )]);
-        let refs = token_facts(&tokens, &inputs, &TEST_LOGGER).expect("token facts build");
+        let tokens = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
-            refs,
+            *tokens.refs,
             [TokenRef::new(
                 "https://dolphin.example.com",
                 "Acme::DolphinToken",
@@ -733,15 +810,15 @@ mod tests {
         let inputs = [input("Jans::Access_Token", "header.payload.sig")];
         let tokens = by_mapping([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
         let log = memory_log();
-        let refs = token_facts(&tokens, &inputs, &log)
-            .expect("a JWT stays in the list even without an issuer");
-        assert_eq!(refs.len(), 1, "the JWT is not left out");
+        let tokens =
+            token_facts(&tokens, &inputs).expect("a JWT stays in the list even without an issuer");
+        assert_eq!(tokens.refs.len(), 1, "the JWT is not left out");
 
         let status = TraceRecorder::new(None, log.clone(), metrics()).record(
             gen_uuid7(),
             Some(&trace()),
             &minimal_store(),
-            || Ok(facts(refs)),
+            || Ok(facts(tokens.refs)),
         );
         assert_eq!(
             status,
@@ -759,7 +836,9 @@ mod tests {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
         let tokens = by_mapping([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
-        let refs = token_facts(&tokens, &inputs, &TEST_LOGGER).expect("token facts build");
+        let refs = token_facts(&tokens, &inputs)
+            .expect("token facts build")
+            .refs;
         assert_eq!(
             refs[0].id,
             TokenId::Fingerprint(token_fingerprint(raw)),
@@ -780,7 +859,9 @@ mod tests {
             jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
             jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
         ]);
-        let refs = token_facts(&tokens, &inputs, &TEST_LOGGER).expect("token facts build");
+        let refs = token_facts(&tokens, &inputs)
+            .expect("token facts build")
+            .refs;
         let types: Vec<_> = refs.iter().map(|token| token.token_type.as_str()).collect();
         assert_eq!(
             types,
@@ -798,11 +879,176 @@ mod tests {
             json!({"iss": ISSUER, "jti": raw}),
             0,
         )]);
-        let err = token_facts(&tokens, &inputs, &TEST_LOGGER)
+        let err = token_facts(&tokens, &inputs)
             .expect_err("a jti that holds the token must not be signed");
         assert!(
             matches!(&err, DraftError::InvalidField { path } if path == "trace.event.tokens[0].jti"),
             "expected InvalidField for jti, got {err:?}"
+        );
+    }
+
+    fn over_limit() -> DecisionFacts {
+        let mut facts = facts(Vec::new());
+        facts.action = "a".repeat(513);
+        facts
+    }
+
+    fn invalid_field() -> DecisionFacts {
+        facts(vec![
+            TokenRef::new(
+                "",
+                "Jans::Access_Token",
+                Some("jti-1"),
+                "header.payload.sig",
+            )
+            .expect("test token ref should build"),
+        ])
+    }
+
+    fn left_out() -> TokenFacts {
+        TokenFacts {
+            refs: Arc::from([]),
+            left_out: vec!["Acme::DolphinToken".to_string()],
+        }
+    }
+
+    #[test]
+    fn repeated_over_limit_is_warned_once_then_logged_at_debug() {
+        let log = memory_log();
+        let metrics = metrics();
+        let recorder = TraceRecorder::new(None, log.clone(), metrics.clone());
+        let clone = recorder.clone();
+        let store = minimal_store();
+        for recorder in [&recorder, &clone, &recorder] {
+            let status = recorder.record(gen_uuid7(), Some(&trace()), &store, || Ok(over_limit()));
+            assert_eq!(
+                status,
+                TraceRecordStatus::NotEmittedOverLimit,
+                "each decision is over the limit"
+            );
+        }
+
+        let logs = log.pop_logs();
+        let at = |level: &str| -> Vec<String> {
+            logs.iter()
+                .filter(|entry| entry["level"] == level)
+                .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+                .collect()
+        };
+        let warnings = at("WARN");
+        assert_eq!(
+            warnings.len(),
+            1,
+            "one cause is warned once, also through a clone: {warnings:?}"
+        );
+        assert!(
+            warnings[0].contains("trace.event.decision.action")
+                && warnings[0].contains("trace.not_emitted_over_limit"),
+            "the warning names the field and where the rest are counted: {}",
+            warnings[0]
+        );
+        let debugs = at("DEBUG");
+        assert_eq!(
+            debugs.len(),
+            2,
+            "the later decisions are logged at DEBUG: {debugs:?}"
+        );
+        assert!(
+            debugs
+                .iter()
+                .all(|message| message.contains("trace.event.decision.action")),
+            "the DEBUG entries keep the field: {debugs:?}"
+        );
+        assert_eq!(
+            metrics
+                .snapshot_and_reset()
+                .operational_stats
+                .get("trace.not_emitted_over_limit"),
+            Some(&3),
+            "every decision is counted"
+        );
+    }
+
+    #[test]
+    fn each_kind_is_warned_once_on_its_own() {
+        let log = memory_log();
+        let recorder = TraceRecorder::new(None, log.clone(), metrics());
+        let store = minimal_store();
+        let record = |facts: fn() -> DecisionFacts| {
+            recorder.record(gen_uuid7(), Some(&trace()), &store, || Ok(facts()))
+        };
+
+        let mut warnings = Vec::new();
+        for _ in 0..2 {
+            assert_eq!(
+                record(over_limit),
+                TraceRecordStatus::NotEmittedOverLimit,
+                "an action over the limit is over the limit"
+            );
+            assert_eq!(
+                record(invalid_field),
+                TraceRecordStatus::NotEmittedInvalidField,
+                "an empty issuer is an invalid field"
+            );
+            recorder.warn_left_out(gen_uuid7(), &left_out());
+            warnings.extend(messages(&log, "WARN"));
+        }
+
+        assert_eq!(
+            warnings.len(),
+            3,
+            "each kind is warned once, whatever the other kinds did: {warnings:?}"
+        );
+        for needle in [
+            "trace.event.decision.action",
+            "trace.event.tokens[0].issuer",
+            "Acme::DolphinToken",
+        ] {
+            assert!(
+                warnings.iter().any(|message| message.contains(needle)),
+                "a warning names {needle}: {warnings:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn repeated_cause_is_not_built_above_its_log_level() {
+        let log = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::WARN,
+            },
+            PdpID::new(),
+            None,
+        ));
+        let recorder = TraceRecorder::new(None, log.clone(), metrics());
+        let first = AtomicBool::new(false);
+        let built = Cell::new(0);
+        for _ in 0..3 {
+            recorder.warn_first(
+                &first,
+                gen_uuid7(),
+                "later ones are logged at DEBUG",
+                || {
+                    built.set(built.get() + 1);
+                    "cause".to_string()
+                },
+            );
+        }
+
+        assert_eq!(
+            built.get(),
+            1,
+            "only the WARN message is built when DEBUG is not logged"
+        );
+        assert_eq!(
+            messages(&log, "WARN"),
+            ["cause; later ones are logged at DEBUG"],
+            "the first one is warned with where the rest go"
         );
     }
 }

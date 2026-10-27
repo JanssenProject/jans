@@ -155,7 +155,7 @@ Properties:
 
 Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
 
-**Limitation: TRACE fully describes JWT tokens only.** A record lists the tokens of an `authorize_multi_issuer` call by issuer, token type and `jti` (or a fingerprint when there is no `jti`). The token type is the request `mapping` as is, for example `Jans::Access_Token`. Lock accepts only an `https` issuer, or `http` with host `localhost`. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed only when the processor returns such an issuer as the `iss` claim. Otherwise the token is left out of the record and Cedarling logs a warning; the record is still sent. A JWT whose `iss` Lock would reject means no record for that decision.
+**Limitation: TRACE fully describes JWT tokens only.** A record lists the tokens of an `authorize_multi_issuer` call by issuer, token type and `jti` (or a fingerprint when there is no `jti`). The token type is the request `mapping` as is, for example `Jans::Access_Token`. Lock accepts only an `https` issuer, or `http` with host `localhost`. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed only when the processor returns such an issuer as the `iss` claim. Otherwise the token is left out of the record; the record is still sent. The first such token is logged at `WARN`, later ones at `DEBUG`. A JWT whose `iss` Lock would reject means no record for that decision.
 
 #### How records are sent
 
@@ -192,8 +192,8 @@ With TRACE enabled, every decision log entry has a `trace_record_status` field (
 |---|---|
 | `emitted` | The record was handed to the emitter. Whether Lock Server accepted it shows in the emitter logs and the `trace.accepted` metric. |
 | `not_emitted_missing_context` | The call had no TRACE context, or a required context field was empty. |
-| `not_emitted_over_limit` | A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed facts. |
-| `not_emitted_invalid_field` | A value Lock Server rejects, such as a JWT issuer that is not `https`, or a policy store that cannot back a record: a `.cjar` whose `metadata.json` has no `policy_store.id` or `policy_store.version`. A store like this is reported with one `WARN` when it is loaded. |
+| `not_emitted_over_limit` | A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed facts. The first one is logged at `WARN` with the field, later ones at `DEBUG`. |
+| `not_emitted_invalid_field` | A value Lock Server rejects, such as a JWT issuer that is not `https`, or a policy store that cannot back a record: a `.cjar` whose `metadata.json` has no `policy_store.id` or `policy_store.version`. A store like this is reported with one `WARN` when it is loaded. Any other value is logged at `WARN` with the field the first time, later ones at `DEBUG`. |
 | `not_emitted_queue_full` | The queue to the emitter is full. |
 | `not_emitted_stopped` | The emitter has stopped: Cedarling was shut down, or the emitter ended unexpectedly, which is logged at `ERROR` when it happens. This instance emits no more records. Reported with one `WARN`. |
 | `not_emitted_no_endpoint` | There is no TRACE endpoint to send to. |

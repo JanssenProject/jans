@@ -27,7 +27,7 @@ pub(crate) use emitter::{EmitterHandle, EmitterParams, spawn_emitter};
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use key::ProducerKey;
 pub use producer_id::{ParseProducerIdError, ProducerId};
-pub(crate) use record::{DecisionFacts, DraftError, Outcome, PolicyFacts, TokenRef};
-pub(crate) use recorder::{TraceRecorder, token_facts};
+pub(crate) use record::{DecisionFacts, DraftError, Outcome, PolicyFacts};
+pub(crate) use recorder::{TokenFacts, TraceRecorder, token_facts};
 pub use signing_kid::{ParseTraceSigningKidError, TraceSigningKid};
 pub(crate) use status::{EmitterEvent, TraceRecordStatus};
