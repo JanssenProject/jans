@@ -127,7 +127,6 @@ nav:
       - Customization:
         - janssen-server/developer/customization/README.md
         - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
-        - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
     - Implementation Design:
       - Implementation Design: contribute/implementation-design/README.md
       - Agama:
