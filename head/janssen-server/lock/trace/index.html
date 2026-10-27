@@ -1930,6 +1930,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#grpc-transport" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        gRPC transport
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#deployment-constraints" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2606,6 +2617,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#grpc-transport" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        gRPC transport
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -3900,6 +3922,125 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <p>The receipt chain is local tamper evidence only. It has no signed checkpoints and no independent external anchor. It does not protect against an operator who can rewrite the whole chain, including every hash. Do not describe the receipt chain as proof of integrity against such an operator, and do not describe TRACE evidence as settled, complete, or externally anchored.</p>
 </div>
 <p>Producer order, Lock receipt order, and causal relationships are separate things. Producer order is what one producer signed in sequence. Receipt order is when Lock accepted records. <code>parent_record_ids</code> carries the causal relationships a producer asserted. None of them is a global event clock.</p>
+<h2 id="grpc-transport">gRPC transport<a class="headerlink" href="#grpc-transport" title="Permanent link">#</a></h2>
+<p>TRACE is also available over gRPC, next to the REST API. The gRPC methods call the same code as the REST endpoints, so validation, evidence domains, receipts, error ids and audit logging are identical. The definitions are in <code>lock-server/service/src/main/proto/grpc/trace.proto</code>.</p>
+<p>gRPC is served in the mode set by <code>grpcConfiguration.serverMode</code> (<code>bridge</code>, <code>plain_server</code> or <code>tls_server</code>). The front proxy must route the two TRACE services, as it does for the audit service:</p>
+<ul>
+<li><code>io.jans.lock.trace.TraceService</code></li>
+<li><code>io.jans.lock.trace.TraceAdminService</code></li>
+</ul>
+<p>The Apache template of the VM installer, the all-in-one nginx configuration and the Helm gateway routes (<code>lockAuditEnabled</code>) include them. A custom proxy needs the same rules.</p>
+<table>
+<thead>
+<tr>
+<th>gRPC method</th>
+<th>REST equivalent</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TraceService/SubmitRecord</code></td>
+<td><code>POST /audit/trace</code></td>
+<td><code>trace.write</code></td>
+</tr>
+<tr>
+<td><code>TraceService/SubmitBulkRecords</code></td>
+<td><code>POST /audit/trace/bulk</code></td>
+<td><code>trace.write</code></td>
+</tr>
+<tr>
+<td><code>TraceService/GetRecord</code></td>
+<td><code>GET /audit/trace/records/{record_id}</code></td>
+<td><code>trace.readonly</code></td>
+</tr>
+<tr>
+<td><code>TraceService/SearchRecords</code></td>
+<td><code>GET /audit/trace/records</code></td>
+<td><code>trace.readonly</code></td>
+</tr>
+<tr>
+<td><code>TraceService/GetExecution</code></td>
+<td><code>GET /audit/trace/executions/{trace_execution_id}</code></td>
+<td><code>trace.readonly</code></td>
+</tr>
+<tr>
+<td><code>TraceAdminService/RegisterProducerKey</code></td>
+<td><code>POST /audit/trace/admin/producer-keys</code></td>
+<td><code>trace.admin</code></td>
+</tr>
+<tr>
+<td><code>TraceAdminService/ListProducerKeys</code></td>
+<td><code>GET /audit/trace/admin/producer-keys</code></td>
+<td><code>trace.admin</code></td>
+</tr>
+<tr>
+<td><code>TraceAdminService/RevokeProducerKey</code></td>
+<td><code>POST /audit/trace/admin/producer-keys/revoke</code></td>
+<td><code>trace.admin</code></td>
+</tr>
+<tr>
+<td><code>TraceAdminService/RegisterProducerChain</code></td>
+<td><code>POST /audit/trace/admin/producer-chains</code></td>
+<td><code>trace.admin</code></td>
+</tr>
+<tr>
+<td><code>TraceAdminService/ListProducerChains</code></td>
+<td><code>GET /audit/trace/admin/producer-chains</code></td>
+<td><code>trace.admin</code></td>
+</tr>
+</tbody>
+</table>
+<p>Send the access token in the <code>authorization: Bearer &lt;token&gt;</code> metadata entry. The scope and Cedarling policy checks are the ones of the matching REST endpoint.</p>
+<ul>
+<li><strong>Assertions travel as bytes.</strong> <code>SubmitRecordRequest.assertion</code> and <code>SubmitBulkRecordsRequest.records</code> carry the exact bytes the producer signed, and Lock hands them unchanged to the REST pipeline. Do not re-serialize the assertion on the client.</li>
+<li><strong>Retrieval.</strong> <code>RecordEnvelope.assertion_raw</code> is the exact accepted text. <code>RecordEnvelope.assertion</code> is the same value re-emitted as JSON, as in REST.</li>
+<li><strong>Optional fields.</strong> An unset optional field behaves like an absent REST query parameter. <code>SearchRecordsRequest</code> and <code>GetExecutionRequest</code> use <code>start</code> 0 and <code>count</code> 100 when unset.</li>
+<li><strong>Bulk results.</strong> <code>BulkResultEntry.flags</code> and <code>receipt_sequence</code> are set only for accepted entries, and <code>error</code> only for rejected ones.</li>
+<li><strong>Message size.</strong> Lock accepts inbound gRPC messages of up to <code>maxBulkRequestBytes</code> (4 MiB by default, at most 16 MiB) plus 64 KiB of envelope. The server reads the value at startup, so restart Lock after you change it. The limit applies to every gRPC method, including the audit service. The servlet bridge (<code>bridge</code> mode) accepts at least 10 MiB. A bulk body over <code>maxBulkRequestBytes</code> but inside the transport limit fails with <code>INVALID_ARGUMENT</code>; a larger message is rejected by gRPC with <code>RESOURCE_EXHAUSTED</code>.</li>
+</ul>
+<p>Errors use the gRPC status code that matches the HTTP status of the REST error. The status description is the structured JSON error body described in the <a href="#error-catalog">error catalog</a>.</p>
+<table>
+<thead>
+<tr>
+<th>HTTP status</th>
+<th>gRPC status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400</td>
+<td><code>INVALID_ARGUMENT</code></td>
+</tr>
+<tr>
+<td>401</td>
+<td><code>UNAUTHENTICATED</code></td>
+</tr>
+<tr>
+<td>403</td>
+<td><code>PERMISSION_DENIED</code></td>
+</tr>
+<tr>
+<td>404</td>
+<td><code>NOT_FOUND</code></td>
+</tr>
+<tr>
+<td>409</td>
+<td><code>ALREADY_EXISTS</code>, or <code>FAILED_PRECONDITION</code> for <code>ambiguous_identifier</code></td>
+</tr>
+<tr>
+<td>500</td>
+<td><code>INTERNAL</code></td>
+</tr>
+</tbody>
+</table>
+<p>An unexpected server error returns <code>INTERNAL</code> with the description <code>Internal error</code> and no detail. A gRPC method that has no protected REST counterpart is rejected with <code>PERMISSION_DENIED</code>.</p>
+<p>Example with <code>grpcurl</code>, run from the root of the Janssen repository (the <code>-import-path</code> folder holds <code>trace.proto</code>):</p>
+<div class="highlight"><pre><span></span><code>grpcurl<span class="w"> </span>-import-path<span class="w"> </span>jans-lock/lock-server/service/src/main/proto/grpc<span class="w"> </span>-proto<span class="w"> </span>trace.proto<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;authorization: Bearer </span><span class="nv">$TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;record_id&quot;: &quot;9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jans.example.org:443<span class="w"> </span>io.jans.lock.trace.TraceService/GetRecord
+</code></pre></div>
 <h2 id="deployment-constraints">Deployment constraints<a class="headerlink" href="#deployment-constraints" title="Permanent link">#</a></h2>
 <p><strong>Multi-node deployments.</strong> The database ORM gives Lock two things for TRACE: per-entry compare-and-swap through <code>PersistenceEntryManager.updateWithVersion</code> (it throws <code>VersionMismatchException</code>; added in commit <code>393cd48bac9</code>, PR #15255) and primary-key uniqueness on insert. It has no multi-entry transaction and no sequence allocator. Lock does not target Couchbase or Spanner for TRACE, because they do not implement the compare-and-swap. The protocol below is the selected protocol under these persistence APIs. It is not the only possible protocol.</p>
 <ol>
@@ -3925,7 +4066,6 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
 <h2 id="deferred-features">Deferred features<a class="headerlink" href="#deferred-features" title="Permanent link">#</a></h2>
 <p>The current release does not implement:</p>
 <ul>
-<li>gRPC transport for TRACE (REST only);</li>
 <li>a quarantine store for rejected records: rejected records are not stored;</li>
 <li>Lock-side management through the config-api Lock plugin and the Jans CLI/TUI;</li>
 <li>settlement assessments or Lock-signed settlement receipts;</li>
@@ -4010,7 +4150,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 24, 2026
+    October 27, 2026
   </span>
 
     
