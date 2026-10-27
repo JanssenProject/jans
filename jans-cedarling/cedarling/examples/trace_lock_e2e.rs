@@ -18,6 +18,8 @@
 //! - `TRACE_EXECUTION_ID`: execution the records are filed under
 //! - `DECISIONS`: number of decisions, default 20
 //! - `TRACE_PRODUCER_ID`: default `cedarling-fleet-1`
+//! - `LOCK_ACCEPT_INVALID_CERTS`: `true` skips TLS certificate checks, for a local Lock with a
+//!   self-signed certificate; default `false`
 //!
 //! Run: `cargo run --example trace_lock_e2e`
 
@@ -89,7 +91,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
 
-    // `shut_down` sends every record still queued, with full retries.
+    // `shut_down` sends what is still queued once, without retries; what Lock
+    // does not take is counted in `trace.dropped`.
     cedarling.shut_down().await;
     let metrics = cedarling.drain_metrics()?;
     let mut trace: Vec<_> = metrics
@@ -121,7 +124,7 @@ fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
         health_interval: None,
         telemetry_interval: None,
         listen_sse: false,
-        accept_invalid_certs: true,
+        accept_invalid_certs: std::env::var("LOCK_ACCEPT_INVALID_CERTS").is_ok_and(|v| v == "true"),
         transport: LockTransport::Rest,
         ..Default::default()
     };
