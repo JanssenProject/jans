@@ -7,6 +7,7 @@
 package io.jans.configapi.plugin.fido2.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,6 +26,7 @@ import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
+import io.jans.configapi.security.service.OpenIdService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
@@ -49,6 +51,7 @@ public class Fido2ReadinessServiceTest {
 
     private Fido2Util fido2Util;
     private AuthUtil authUtil;
+    private OpenIdService openIdService;
     private Fido2ReadinessService service;
 
     @BeforeMethod
@@ -58,7 +61,10 @@ public class Fido2ReadinessServiceTest {
         service = new Fido2ReadinessService();
         service.fido2Util = fido2Util;
         authUtil = mock(AuthUtil.class);
+        when(authUtil.getIssuer()).thenReturn(ISSUER);
         service.authUtil = authUtil;
+        openIdService = mock(OpenIdService.class);
+        service.openIdService = openIdService;
         introspect("inum-1234", "client-1");
         service.log = mock(Logger.class);
     }
@@ -66,8 +72,14 @@ public class Fido2ReadinessServiceTest {
     private void introspect(String inum, String clientId) {
         IntrospectionResponse introspection = mock(IntrospectionResponse.class);
         when(introspection.getClientId()).thenReturn(clientId);
-        when(authUtil.getIntrospectionResponse(anyString())).thenReturn(introspection);
-        when(authUtil.getJsonNodeKeyValue(any(), eq("inum"))).thenReturn(inum);
+        if (inum != null) {
+            when(introspection.getAuthorizationDetails()).thenReturn(new ObjectMapper().createObjectNode().put("inum", inum));
+        }
+        try {
+            when(openIdService.getIntrospectionResponse(anyString(), anyString(), anyString())).thenReturn(introspection);
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     private static HttpServiceResponse upstream(int status, String body, String retryAfter) throws Exception {
@@ -143,11 +155,20 @@ public class Fido2ReadinessServiceTest {
     }
 
     @Test
-    public void principal_fallsBackToClientId_thenUnknown() {
+    public void introspection_isCalledWithHeaderTokenAndIssuer_inThatOrder() throws Exception {
+        service.principalOf("Bearer abc");
+
+        verify(openIdService).getIntrospectionResponse("Bearer abc", "abc", ISSUER);
+        assertNull(service.principalOf("abc"));
+    }
+
+    @Test
+    public void principal_fallsBackToClientId_thenUnknown() throws Exception {
         introspect(null, "client-1");
         assertEquals(service.principalOf("Bearer abc"), "client-1");
 
-        when(authUtil.getIntrospectionResponse(anyString())).thenThrow(new IllegalStateException("down"));
+        when(openIdService.getIntrospectionResponse(anyString(), anyString(), anyString()))
+                .thenThrow(new IllegalStateException("down"));
         assertNull(service.principalOf("Bearer abc"));
         assertNull(service.principalOf(null));
         assertEquals(Fido2ReadinessService.sanitize(service.principalOf("Bearer abc")), "unknown");

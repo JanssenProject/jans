@@ -13,6 +13,7 @@ import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
+import io.jans.configapi.security.service.OpenIdService;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.model.net.HttpServiceResponse;
 
@@ -50,6 +51,7 @@ public class Fido2ReadinessService {
     private static final String RETRY_AFTER = "Retry-After";
     private static final String FIDO2_RP_BASE_URL = "/jans-fido2/restv1" + Constants.RP + "/";
     private static final String READINESS = "/readiness";
+    private static final String BEARER = "Bearer ";
     private static final String USER_INUM = "inum";
     private static final String UNKNOWN = "unknown";
     private static final int MAX_PRINCIPAL_LENGTH = 128;
@@ -87,6 +89,9 @@ public class Fido2ReadinessService {
 
     @Inject
     AuthUtil authUtil;
+
+    @Inject
+    OpenIdService openIdService;
 
     public String getReadinessUrl(String rpConfigId) {
         return fido2Util.getIssuer() + FIDO2_RP_BASE_URL + encodeSegment(rpConfigId) + READINESS;
@@ -152,16 +157,20 @@ public class Fido2ReadinessService {
      * Never taken from a request header, so the FIDO2 server's audit cannot be told who the caller is.
      */
     String principalOf(String token) {
-        if (StringUtils.isBlank(token)) {
+        if (StringUtils.isBlank(token) || !token.startsWith(BEARER)) {
             return null;
         }
         try {
-            IntrospectionResponse introspection = authUtil.getIntrospectionResponse(token);
+            IntrospectionResponse introspection = openIdService.getIntrospectionResponse(token,
+                    token.substring(BEARER.length()).trim(), authUtil.getIssuer());
             if (introspection == null) {
                 return null;
             }
-            String inum = authUtil.getJsonNodeKeyValue(introspection.getAuthorizationDetails(), USER_INUM);
-            return StringUtils.isNotBlank(inum) ? inum : introspection.getClientId();
+            JsonNode details = introspection.getAuthorizationDetails();
+            if (details != null && details.hasNonNull(USER_INUM) && !details.get(USER_INUM).asText().isBlank()) {
+                return details.get(USER_INUM).asText();
+            }
+            return introspection.getClientId();
         } catch (Exception ex) {
             log.warn("Unable to resolve the caller of the Fido2 native app readiness check: {}", ex.getMessage());
             return null;
