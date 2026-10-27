@@ -12,16 +12,17 @@ pub(crate) mod test_utils;
 pub(crate) mod token_entity_metadata;
 
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
+use crate::trace::PolicyFacts;
 
 pub(crate) mod archive_handler;
-pub(crate) mod custom_issuer_parser;
 pub(crate) mod entity_parser;
 pub(crate) mod errors;
-pub(crate) mod issuer_parser;
+pub(crate) mod formats;
 pub(crate) mod legacy_store;
 pub(crate) mod loader;
 pub(crate) mod manager;
 pub(crate) mod metadata;
+pub(crate) mod migration;
 pub(crate) mod policy_parser;
 pub(crate) mod schema_parser;
 #[cfg(feature = "tools")]
@@ -33,6 +34,7 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet, hash_map::Entry};
+use std::sync::Arc;
 use url::Url;
 
 pub(crate) use custom_issuer_metadata::{CustomIssuerMetadata, CustomTokenMetadata};
@@ -171,6 +173,44 @@ pub(crate) struct PolicyStoreWithID {
     /// Optional metadata from new format policy stores.
     /// Contains `cedar_version`, `policy_store` info (name, version, description, etc.)
     pub(crate) metadata: Option<metadata::PolicyStoreMetadata>,
+    /// `sha256:<hex>` of the raw `.cjar` bytes this store was parsed from; `None`
+    /// for stores without an archive (YAML, directory). Lives with the store, so
+    /// a refresh swaps the hash together with the policies it identifies.
+    /// Private and set only where the archive bytes are read, so a `.cjar` store
+    /// cannot exist without its hash.
+    bundle_hash: Option<jans_trace_core::Digest>,
+    /// What a TRACE record says about this store, derived from `bundle_hash` and
+    /// `metadata` when the store is read, so it is swapped together with them and
+    /// shared by every record instead of copied; `None` when the store cannot
+    /// back a record.
+    trace_policy: Option<Arc<PolicyFacts>>,
+}
+
+impl PolicyStoreWithID {
+    /// A store that was not read from a `.cjar` (legacy YAML), so it has no `bundle_hash`.
+    pub(crate) fn without_archive(
+        id: String,
+        store: PolicyStore,
+        metadata: Option<metadata::PolicyStoreMetadata>,
+    ) -> Self {
+        Self {
+            id,
+            store,
+            metadata,
+            bundle_hash: None,
+            trace_policy: None,
+        }
+    }
+
+    /// Hash of the `.cjar` this store came from; `None` without an archive.
+    pub(crate) fn bundle_hash(&self) -> Option<jans_trace_core::Digest> {
+        self.bundle_hash
+    }
+
+    /// What a TRACE record says about this store; `None` when it cannot back one.
+    pub(crate) fn trace_policy(&self) -> Option<&Arc<PolicyFacts>> {
+        self.trace_policy.as_ref()
+    }
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -883,7 +923,10 @@ mod policy_metadata_tests {
         assert_eq!(result, ["/trial", "/upgrade"]);
 
         assert_eq!(container.annotation_values(ids.iter(), "audit"), ["true"]);
-        assert!(container.annotation_values(ids.iter(), "absent").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "absent"),
+            [] as [std::string::String; 0]
+        );
     }
 
     #[test]
@@ -910,7 +953,10 @@ mod policy_metadata_tests {
         let ids = [PolicyId::new("plain")];
 
         assert!(container.annotations_map(ids.iter()).is_empty());
-        assert!(container.annotation_values(ids.iter(), "any").is_empty());
+        assert_eq!(
+            container.annotation_values(ids.iter(), "any"),
+            [] as [std::string::String; 0]
+        );
 
         let by_policy = container.annotations_by_policy(ids.iter());
         assert_eq!(by_policy.len(), 1);

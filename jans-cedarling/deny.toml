@@ -18,6 +18,11 @@ ignore = [
     # our own profiling data and never parses untrusted XML.
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
+    # basic-toml is pulled in by UniFFI's binding-generation dependency chain:
+    # uniffi -> uniffi_bindgen -> askama_derive. No safe upstream upgrade is available yet.
+    "RUSTSEC-2026-0374",
+    # See rationale in jans-cedarling/.cargo/audit.toml
+    "RUSTSEC-2026-0387",
 ]
 
 [licenses]

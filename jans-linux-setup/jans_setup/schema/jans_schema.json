@@ -3907,6 +3907,39 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Cedarling decision request_id",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansRequestId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Policy store id used for a decision",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansPolicyStoreId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Policy store version used for a decision",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansPolicyStoreVersion"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "contextInformation",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -4951,19 +4984,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "TRACE capability keys referenced by the record",
-      "equality": "caseExactMatch",
-      "names": [
-        "jansTraceCapKeys"
-      ],
-      "oid": "jansAttr",
-      "multivalued": true,
-      "rdbm_json_column": true,
-      "substr": "caseExactSubStringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "TRACE token keys referenced by the record",
       "equality": "caseExactMatch",
       "names": [
@@ -5116,6 +5136,82 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "TRACE record trace.policy.policy_store_id",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePolicyStoreId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record trace.policy.policy_store_version",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTracePolicyStoreVersion"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record trace.policy.bundle_hash",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceBundleHash"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record policy-mismatch flag",
+      "equality": "booleanMatch",
+      "names": [
+        "jansTracePolicyMismatch"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE policy release first served time, epoch milliseconds",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceFirstServedAtMs"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE policy release last served time, epoch milliseconds",
+      "equality": "integerMatch",
+      "names": [
+        "jansTraceLastServedAtMs"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE record paths of ignored Lock-derived members",
+      "equality": "caseExactMatch",
+      "multivalued": true,
+      "names": [
+        "jansTraceReservedMembers"
+      ],
+      "oid": "jansAttr",
+      "rdbm_json_column": true,
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "TRACE record key referenced by a receipt",
       "equality": "caseExactMatch",
       "names": [
@@ -5166,6 +5262,30 @@
         "jansTraceRegisteredBy"
       ],
       "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE chain genesis kind: pre_registered_genesis or first_observed_genesis",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceGenesisKind"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseExactSubStringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "TRACE event kinds a producer key may sign",
+      "equality": "caseExactMatch",
+      "names": [
+        "jansTraceAuthorizedEventKinds"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
       "substr": "caseExactSubStringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
@@ -5224,6 +5344,16 @@
       "oid": "jansAttr",
       "ordering": "generalizedTimeOrderingMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jans big integer version",
+      "equality": "integerMatch",
+      "names": [
+        "jansVersion"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.2.840.113556.1.4.906",
       "x_origin": "Jans created attribute"
     }
   ],
@@ -6722,7 +6852,10 @@
         "principalId",
         "clientId",
         "jti",
-        "contextInformation"
+        "contextInformation",
+        "jansRequestId",
+        "jansPolicyStoreId",
+        "jansPolicyStoreVersion"
       ],
       "must": [
         "objectclass"
@@ -6946,7 +7079,6 @@
         "jansTraceChainPosKey",
         "jansTraceSeqNum",
         "jansTracePrevRecordHash",
-        "jansTraceCapKeys",
         "jansTraceTokenKeys",
         "jansTraceAssertion",
         "jansTraceContentDigest",
@@ -6961,6 +7093,12 @@
         "jansTraceEquivocation",
         "jansTraceLate",
         "jansTraceNodeId",
+        "jansTracePolicyStoreId",
+        "jansTracePolicyStoreVersion",
+        "jansTraceBundleHash",
+        "jansTracePolicyMismatch",
+        "jansTraceReservedMembers",
+        "jansVersion",
         "creationDate"
       ],
       "must": [
@@ -6991,6 +7129,7 @@
         "jansTraceReceiptHash",
         "jansTraceReceiptState",
         "jansTraceNodeId",
+        "jansVersion",
         "creationDate"
       ],
       "must": [
@@ -7014,6 +7153,7 @@
         "jansTraceProducerInstanceId",
         "jansTraceProducerChainId",
         "jansTraceRegisteredBy",
+        "jansTraceGenesisKind",
         "creationDate"
       ],
       "must": [
@@ -7032,14 +7172,39 @@
       "kind": "STRUCTURAL",
       "may": [
         "jansId",
+        "jansTracePolicyStoreId",
+        "jansTraceBundleHash",
+        "jansTracePolicyStoreVersion",
+        "jansTraceFirstServedAtMs",
+        "jansTraceLastServedAtMs",
+        "jansVersion"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTracePolicyRelease"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
         "jansTraceDomainId",
         "jansTraceProducerId",
         "jansTraceKid",
         "jansTracePublicKeyJwk",
+        "jansTraceAuthorizedEventKinds",
         "jansTraceValidFrom",
         "jansTraceValidUntil",
         "jansTraceRevokedAt",
         "jansTraceRegisteredBy",
+        "jansVersion",
         "creationDate"
       ],
       "must": [

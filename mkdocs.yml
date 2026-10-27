@@ -127,7 +127,6 @@ nav:
       - Customization:
         - janssen-server/developer/customization/README.md
         - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
-        - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
     - Implementation Design:
       - Implementation Design: contribute/implementation-design/README.md
       - Agama:
@@ -396,7 +395,6 @@ nav:
         - Accounts Linking:
           - casa/plugins/accts-linking/account-linking-index.md
           - Agama Project: casa/plugins/accts-linking/accts-linking-agama.md
-        - BioID: casa/plugins/bioid.md
         - Consent Management: casa/plugins/consent-management.md
         - Custom Branding: casa/plugins/custom-branding.md
         - Email OTP: casa/plugins/email-otp.md
@@ -550,6 +548,7 @@ nav:
     - Lock:
       - Lock: janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
+      - TRACE Evidence: janssen-server/lock/trace.md
 
   # ====================
   # 9. PRODUCT, RELEASES & SUPPORT
@@ -630,9 +629,6 @@ nav:
       - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
       - Android: cedarling/developer/mobile-apps/cedarling-android.md
       - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
-    - Sidecar:
-      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
-      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
       - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
@@ -645,6 +641,9 @@ nav:
       - Overview: cedarling/integrations/terraform-authz-overview.md
       - Unsigned Flow: cedarling/integrations/terraform-authz.md
       - JWT Flow: cedarling/integrations/terraform-authz-jwt.md
+  - Sidecar:
+      - Overview: cedarling/sidecar/cedarling-sidecar-overview.md
+      - Tutorial: cedarling/sidecar/cedarling-sidecar-tutorial.md
 
 
 plugins:

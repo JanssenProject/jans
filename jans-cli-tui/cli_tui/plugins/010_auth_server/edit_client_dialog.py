@@ -1,3 +1,4 @@
+import contextlib
 import copy
 import json
 import asyncio
@@ -28,7 +29,6 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText, HTML
-from prompt_toolkit.eventloop import get_event_loop
 
 from utils.static import DialogResult, cli_style, common_strings, ISOFORMAT
 from utils.multi_lang import _
@@ -286,16 +286,31 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         client_secret_next_widget.handler = partial(change_view_hide, client_secret_widget)
 
-        #require_pkce = self.data.get('attributes', {}).get('redirectUrisRegex')
-        #if require_pkce is None:
-        #    require_pkce = self.myparent.app_configuration.get('requirePkce', False)
-
         token_endpoint_authmethods = [('none', 'none')]
         for method in schema['properties']['tokenEndpointAuthMethod']['enum']:
             if method == 'none':
                 continue
             token_endpoint_authmethods.append((method, method))
 
+        current_grant_types = self.data.get('grantTypes') or []
+        grant_types_supported = self.myparent.app_configuration.get('grantTypesSupported') or []
+        grant_types_list = [(grant_type, grant_type.split(':')[-1]) for grant_type in grant_types_supported]
+        # check if grant_types_list contains current_grant_types
+        for current_grant_type in current_grant_types:
+            if current_grant_type not in grant_types_supported:
+                grant_types_list.append((current_grant_type, current_grant_type))
+
+        if grant_types_list:
+            grant_types_supperted_checkbox_widget = self.myparent.getTitledCheckBoxList(
+                _("Grant"),
+                name='grantTypes',
+                values=grant_types_list,
+                current_values=current_grant_types,
+                jans_help=self.myparent.get_help_from_schema(
+                    schema, 'grantTypes'),
+                style='class:outh-client-checkboxlist')
+        else:
+            grant_types_supperted_checkbox_widget = Window()
 
         basic_tab_widgets = [
             self.myparent.getTitledText(
@@ -362,22 +377,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'sectorIdentifierUri'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledCheckBoxList(
-                _("Grant"),
-                name='grantTypes',
-                values=[
-                    ('authorization_code', 'Authorization Code'),
-                    ('refresh_token', 'Refresh Token'),
-                    ('urn:ietf:params:oauth:grant-type:uma-ticket', 'UMA Ticket'),
-                    ('client_credentials', 'Client Credentials'),
-                    ('password', 'Password'),
-                    ('implicit', 'Implicit'),
-                    ('urn:ietf:params:oauth:grant-type:device_code', 'Device Code'),
-                    ],
-                current_values=self.data.get('grantTypes', []),
-                jans_help=self.myparent.get_help_from_schema(
-                    schema, 'grantTypes'),
-                style='class:outh-client-checkboxlist'),
+            grant_types_supperted_checkbox_widget,
 
             self.myparent.getTitledCheckBoxList(
                 _("Response Types"),
@@ -1219,7 +1219,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             return
 
         def on_text_changed(event):
-            search_text = event.text
             matching_items = []
             search_text = event.text
             for item in scopes_list:
@@ -1401,7 +1400,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                 inum = scope_dn.split(',')[0].split('=')[1]
                 scope_result = {}
-                try:
+                with contextlib.suppress(Exception):
                     scope_response = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-oauth-scopes-by-inum',
                         url_suffix=URL_SUFFIX_FORMATTER.format(inum),
@@ -1410,8 +1409,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         data={}
                     )
                     scope_result = scope_response.json()
-                except Exception:
-                    display_name = 'None'
 
                 display_name = scope_result.get(
                     'displayName') or scope_result.get('inum')

@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use anyhow::{Context, Result, bail};
-use cedarling::{Cedarling, RequestUnsigned};
+use cedarling::{AuthorizeOptions, Cedarling, RequestUnsigned};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
@@ -32,7 +32,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
     let content = fs::read_to_string(&test_file_path)
         .with_context(|| format!("failed to read test file: {}", test_file_path.display()))?;
 
-    let test_file: TestFile = serde_yaml_ng::from_str(&content)
+    let test_file: TestFile = serde_saphyr::from_str(&content)
         .with_context(|| format!("failed to parse YAML in {}", test_file_path.display()))?;
 
     if test_file.tests.is_empty() {
@@ -53,6 +53,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
             action: test.request.action,
             resource: test.request.resource.into(),
             context: test.request.context,
+            options: AuthorizeOptions::default(),
         };
 
         match cedarling.authorize_unsigned(req).await {

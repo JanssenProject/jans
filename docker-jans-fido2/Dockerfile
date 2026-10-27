@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29eb40082e5df7c4d3452bc1b6c674d39357048
+FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdbe9a11849cd2e6af0d2661eaa10400a124c19d
 
 # ===============
 # Alpine packages
@@ -9,14 +9,14 @@ FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache openssl python3 tini curl py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
 # Jetty
 # =====
 
-ARG JETTY_VERSION=12.1.8
+ARG JETTY_VERSION=12.1.14
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -46,7 +46,7 @@ RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-02-27 08:28'
+ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
 # Override CN_RELEASE_DOWNLOAD_URL at build time to install a locally-built WAR (e.g. the AIO
 # integration CI serves the PR-built artifacts) instead of the published release.
@@ -71,7 +71,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ARG JANS_SOURCE_VERSION=1f9dcae94e09bc6a672f02685fe01397035292e8
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -116,10 +116,12 @@ RUN WGET_RETRY="--tries=5 --timeout=30 --waitretry=10 --retry-connrefused --retr
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========

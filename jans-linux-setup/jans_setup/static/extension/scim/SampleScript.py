@@ -1,7 +1,6 @@
 # Visit https://www.gluu.org/docs/gluu-server/user-management/scim-scripting/ to learn more
 from io.jans.model.custom.script.type.scim import ScimType
 
-import java
 
 class ScimEventHandler(ScimType):
 

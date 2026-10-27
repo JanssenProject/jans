@@ -190,6 +190,8 @@ public class DiscoveryService {
 
         Util.putArray(jsonObj, appConfiguration.getDpopSigningAlgValuesSupported(), DPOP_SIGNING_ALG_VALUES_SUPPORTED);
 
+        Util.putArray(jsonObj, Arrays.asList("S256"), CODE_CHALLENGE_METHODS_SUPPORTED);
+
         Util.putArray(jsonObj, appConfiguration.getDisplayValuesSupported(), DISPLAY_VALUES_SUPPORTED);
 
         Util.putArray(jsonObj, appConfiguration.getClaimTypesSupported(), CLAIM_TYPES_SUPPORTED);

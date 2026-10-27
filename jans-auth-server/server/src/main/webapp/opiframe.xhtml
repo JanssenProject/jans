@@ -16,6 +16,9 @@
         window.addEventListener("message", receiveMessage, false);
 
         function receiveMessage(e) {
+            if (!e.origin || e.origin === "null" || typeof e.data !== "string") {
+                return;
+            }
             var message = e.data;
             var clientId = message.split(' ')[0];
             var sessionState = message.split(' ')[1];

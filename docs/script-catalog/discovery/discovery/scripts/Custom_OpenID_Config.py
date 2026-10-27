@@ -6,7 +6,6 @@
 #    3. Get ip address of the client making the request
 #
 from io.jans.model.custom.script.type.discovery import DiscoveryType
-from java.lang import String
 
 class Discovery(DiscoveryType):
     def __init__(self, currentTimeMillis):

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Tests for {@link TraceErrorResponseType} against design decision D-10's id/status table.
+ * Tests for {@link TraceErrorResponseType} against the documented id/status table of the error catalog.
  */
 class TraceErrorResponseTypeTest {
 
@@ -32,7 +32,7 @@ class TraceErrorResponseTypeTest {
 			assertEquals(type.getParameter(), type.toString());
 			assertTrueUnique(ids, type.getParameter());
 		}
-		assertEquals(21, TraceErrorResponseType.values().length);
+		assertEquals(20, TraceErrorResponseType.values().length);
 	}
 
 	private static void assertTrueUnique(Set<String> ids, String id) {
@@ -46,7 +46,6 @@ class TraceErrorResponseTypeTest {
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.INVALID_REQUEST.httpStatus());
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.INVALID_ASSERTION.httpStatus());
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.UNSUPPORTED_PROFILE.httpStatus());
-		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.DOMAIN_FIELD_FORBIDDEN.httpStatus());
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.PRODUCER_MISMATCH.httpStatus());
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.UNKNOWN_PRODUCER_KEY.httpStatus());
 		assertSame(Status.BAD_REQUEST, TraceErrorResponseType.KEY_NOT_VALID.httpStatus());

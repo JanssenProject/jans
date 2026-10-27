@@ -104,10 +104,10 @@ async fn test_log_memory_logger() {
     // Assert
     match &strategy.logger() {
         LogStrategyLogger::MemoryLogger(memory_logger) => {
-            assert!(!memory_logger.get_log_ids().is_empty());
+            assert_ne!(memory_logger.get_log_ids(), [] as [std::string::String; 0]);
             memory_logger.pop_logs();
             // after popping, the memory logger should be empty
-            assert!(memory_logger.get_log_ids().is_empty());
+            assert_eq!(memory_logger.get_log_ids(), [] as [std::string::String; 0]);
             // it is empty after popping, so we can continue testing
         },
         _ => panic!("Expected MemoryLogger"),

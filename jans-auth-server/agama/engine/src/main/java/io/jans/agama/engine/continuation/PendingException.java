@@ -6,6 +6,8 @@ import org.mozilla.javascript.NativeContinuation;
 public class PendingException extends ContinuationPending {
 
     private boolean allowCallbackResume;
+    private String currentQname;
+    private int currentLine;
     
     public PendingException(NativeContinuation continuation) {
         super(continuation);
@@ -22,6 +24,22 @@ public class PendingException extends ContinuationPending {
 
     public void setAllowCallbackResume(boolean allowCallbackResume) {
         this.allowCallbackResume = allowCallbackResume;
+    }
+    
+    public String getCurrentQname() {
+        return currentQname;
+    }
+    
+    public void setCurrentQname(String currentQname) {
+        this.currentQname = currentQname;
+    }
+    
+    public int getCurrentLine() {
+        return currentLine;
+    }
+    
+    public void setCurrentLine(int currentLine) {
+        this.currentLine = currentLine;
     }
     
 }

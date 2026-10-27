@@ -1,0 +1,3 @@
+# Generated code lives apart from the hand-written Java API in `io.jans.trace`.
+[bindings.kotlin]
+package_name = "io.jans.trace.uniffi"

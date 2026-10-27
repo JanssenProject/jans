@@ -66,9 +66,6 @@ public class GrpcAuditServlet extends HttpServlet {
     // Use AtomicReference for thread-safe lazy initialization
     private static final AtomicReference<ServletAdapter> adapterRef = new AtomicReference<>();
 
-    public GrpcAuditServlet() {
-    }
-
     @PostConstruct
     public void initializeGrpc() {
         log.info("gRPC adapter initialization");
@@ -128,13 +125,35 @@ public class GrpcAuditServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        handleGrpcRequest(req, resp, false);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        safeHandle(req, resp, false);
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
-        handleGrpcRequest(req, resp, true);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        safeHandle(req, resp, true);
+    }
+
+    private void safeHandle(HttpServletRequest req, HttpServletResponse resp, boolean post) {
+        try {
+            handleGrpcRequest(req, resp, post);
+        } catch (IOException ex) {
+            log.debug("I/O error while processing request", ex);
+        } catch (ServletException ex) {
+            log.error("Failed to process request", ex);
+            sendServerError(resp);
+        }
+    }
+
+    private void sendServerError(HttpServletResponse resp) {
+        if (resp.isCommitted()) {
+            return;
+        }
+        try {
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (IOException ex) {
+            log.debug("Failed to send error response", ex);
+        }
     }
 
     @Override
@@ -288,8 +307,7 @@ public class GrpcAuditServlet extends HttpServlet {
 
 		public static boolean isGrpcRequest(HttpServletRequest request) {
 			String contentType = request.getContentType();
-	        boolean isGrpcRequest = contentType != null && contentType.startsWith("application/grpc");
-			return isGrpcRequest;
+			return contentType != null && contentType.startsWith("application/grpc");
 		}
 	}
 }

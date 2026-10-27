@@ -123,6 +123,68 @@ class RequestedPartySerializationTest {
         assertNull(parsed.getPolicy().getAttestationMode());
     }
 
+    private static final String NATIVE_APPS_JSON = "{\"id\":\"example.com\",\"origins\":[\"https://login.example.com\"],"
+            + "\"androidApps\":[{\"packageName\":\"com.example.app\","
+            + "\"sha256CertFingerprints\":[\"AB:CD:EF\"],\"distribution\":\"play-store\"}],"
+            + "\"iosApps\":[{\"teamId\":\"T9A667JL6T\",\"bundleId\":\"com.example.app\"}]}";
+
+    @Test
+    void nativeAppsSurviveARoundTrip() throws Exception {
+        RequestedParty parsed = mapper.readValue(NATIVE_APPS_JSON, RequestedParty.class);
+        RequestedParty reparsed = mapper.readValue(mapper.writeValueAsString(parsed), RequestedParty.class);
+
+        AndroidApp android = reparsed.getAndroidApps().get(0);
+        assertEquals("com.example.app", android.getPackageName());
+        assertEquals(Arrays.asList("AB:CD:EF"), android.getSha256CertFingerprints());
+        assertEquals("play-store", android.getDistribution());
+        assertEquals("T9A667JL6T", reparsed.getIosApps().get(0).getTeamId());
+        assertEquals("com.example.app", reparsed.getIosApps().get(0).getBundleId());
+        assertEquals(Arrays.asList("https://login.example.com"), reparsed.getOrigins());
+    }
+
+    /** A relying party stored before native apps were modelled must parse with empty lists, not null. */
+    @Test
+    void aRelyingPartyWithoutNativeAppsParsesWithEmptyLists() throws Exception {
+        RequestedParty parsed = mapper.readValue("{\"id\":\"example.com\",\"origins\":[]}", RequestedParty.class);
+
+        assertTrue(parsed.getAndroidApps().isEmpty());
+        assertTrue(parsed.getIosApps().isEmpty());
+    }
+
+    /** Existing API clients must see exactly what they saw before: no empty native-app keys appear. */
+    @Test
+    void aRelyingPartyWithoutNativeAppsSerialisesAsItDidBefore() throws Exception {
+        RequestedParty requestedParty = new RequestedParty();
+        requestedParty.setId("example.com");
+        requestedParty.setOrigins(Arrays.asList("https://login.example.com"));
+
+        String json = apiMapper.writeValueAsString(requestedParty);
+
+        assertFalse(json.contains("androidApps"), json);
+        assertFalse(json.contains("iosApps"), json);
+    }
+
+    /** The omission above would also hold if native apps never reached the wire, so pin the other half. */
+    @Test
+    void nativeAppsThatAreSetAreStillSerialised() throws Exception {
+        String json = apiMapper.writeValueAsString(mapper.readValue(NATIVE_APPS_JSON, RequestedParty.class));
+
+        assertTrue(json.contains("\"androidApps\""), json);
+        assertTrue(json.contains("\"sha256CertFingerprints\":[\"AB:CD:EF\"]"), json);
+        assertTrue(json.contains("\"iosApps\""), json);
+    }
+
+    @Test
+    void unknownFieldsAreIgnoredOnNativeApps() throws Exception {
+        String json = "{\"id\":\"example.com\",\"androidApps\":[{\"packageName\":\"a.b\",\"aFutureField\":1}],"
+                + "\"iosApps\":[{\"teamId\":\"T\",\"aFutureField\":1}]}";
+
+        RequestedParty parsed = mapper.readValue(json, RequestedParty.class);
+
+        assertEquals("a.b", parsed.getAndroidApps().get(0).getPackageName());
+        assertEquals("T", parsed.getIosApps().get(0).getTeamId());
+    }
+
     /** The policy must not leak into the string form used in debug logs without its value. */
     @Test
     void policyToStringNamesItsField() {

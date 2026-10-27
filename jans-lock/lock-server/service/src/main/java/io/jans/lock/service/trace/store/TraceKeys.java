@@ -6,21 +6,25 @@
 
 package io.jans.lock.service.trace.store;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
-import io.jans.lock.service.trace.canon.CanonicalHashes;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
+import io.jans.lock.trace.crypto.TraceHashes;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
- * The D-6 composite-key function and the four DN builders (design decision D-6, D-7):
+ * The composite-key functions (instance methods, canonicalizing through the injected
+ * {@link TraceCryptoProvider}) and the four static DN builders:
  *
  * <pre>
  * key(type, c1, ..., cn) = lowercaseHex( SHA-256( UTF-8( JCS( [type, c1, ..., cn] ) ) ) )
@@ -34,25 +38,33 @@ import io.jans.lock.service.trace.model.TokenRef;
  *
  * @author Yuriy Movchan
  */
-public final class TraceKeys {
+@ApplicationScoped
+public class TraceKeys {
 
-	private TraceKeys() {
+	@Inject
+	private TraceCryptoProvider cryptoProvider;
+
+	public TraceKeys() {
+	}
+
+	public TraceKeys(TraceCryptoProvider cryptoProvider) {
+		this.cryptoProvider = cryptoProvider;
 	}
 
 	/** Key type {@code rec}: {@code (domain, producer_id, record_id)}. */
-	public static String recordKey(RecordIdentity id) {
+	public String recordKey(RecordIdentity id) {
 		Objects.requireNonNull(id, "id");
 		return key("rec", id.getDomainId(), id.getProducerId(), id.getRecordId());
 	}
 
 	/** Key type {@code exec}: {@code (domain, execution_authority, trace_execution_id)}. */
-	public static String executionKey(ExecutionIdentity id) {
+	public String executionKey(ExecutionIdentity id) {
 		Objects.requireNonNull(id, "id");
 		return key("exec", id.getDomainId(), id.getExecutionAuthority(), id.getTraceExecutionId());
 	}
 
 	/** Key type {@code chain}: {@code (domain, producer_id, producer_instance_id, producer_chain_id)}. */
-	public static String chainKey(ChainIdentity id) {
+	public String chainKey(ChainIdentity id) {
 		Objects.requireNonNull(id, "id");
 		return key("chain", id.getDomainId(), id.getProducerId(), id.getProducerInstanceId(),
 				id.getProducerChainId());
@@ -62,16 +74,11 @@ public final class TraceKeys {
 	 * Key type {@code pos}: {@code (domain, producer_id, producer_instance_id, producer_chain_id,
 	 * sequence_number)}.
 	 */
-	public static String chainPositionKey(ChainPosition position) {
+	public String chainPositionKey(ChainPosition position) {
 		Objects.requireNonNull(position, "position");
 		ChainIdentity chain = position.getChainIdentity();
 		return key("pos", chain.getDomainId(), chain.getProducerId(), chain.getProducerInstanceId(),
 				chain.getProducerChainId(), Long.toString(position.getSequenceNumber()));
-	}
-
-	/** Key type {@code cap}: {@code (domain, capability_id)}. */
-	public static String capabilityKey(String domainId, String capabilityId) {
-		return key("cap", domainId, capabilityId);
 	}
 
 	/**
@@ -80,7 +87,7 @@ public final class TraceKeys {
 	 * ({@code "jti"}/{@code "fp"}) is itself a key component, so the two branches never collide;
 	 * {@link TokenRef#getTokenType()} is not part of the key.
 	 */
-	public static String tokenKey(String domainId, TokenRef token) {
+	public String tokenKey(String domainId, TokenRef token) {
 		Objects.requireNonNull(token, "token");
 		if (token.getJti() != null) {
 			return key("tok", domainId, token.getIssuer(), "jti", token.getJti());
@@ -89,13 +96,23 @@ public final class TraceKeys {
 	}
 
 	/** Key type {@code pkey}: {@code (domain, producer_id, kid)}. */
-	public static String producerKeyKey(String domainId, String producerId, String kid) {
+	public String producerKeyKey(String domainId, String producerId, String kid) {
 		return key("pkey", domainId, producerId, kid);
 	}
 
 	/** Key type {@code rcpt}: {@code (domain, receipt_sequence)}. */
-	public static String receiptKey(String domainId, long receiptSequence) {
+	public String receiptKey(String domainId, long receiptSequence) {
 		return key("rcpt", domainId, Long.toString(receiptSequence));
+	}
+
+	/** Key type {@code prel}: {@code (policy_store_id, bundle_hash)}; not domain-scoped. */
+	public String policyReleaseKey(String policyStoreId, String bundleHash) {
+		return key("prel", policyStoreId, bundleHash);
+	}
+
+	/** {@code jansId=<key>,ou=policyReleases,<baseDn>}. */
+	public static String policyReleaseDn(String baseDn, String key) {
+		return dn(baseDn, "policyReleases", key);
 	}
 
 	/** {@code jansId=<key>,ou=records,<baseDn>}. */
@@ -124,15 +141,14 @@ public final class TraceKeys {
 		return "jansId=" + key + ",ou=" + ou + "," + baseDn;
 	}
 
-	private static String key(String type, String... components) {
+	private String key(String type, String... components) {
 		Objects.requireNonNull(type, "type");
 		ArrayNode array = JsonNodeFactory.instance.arrayNode(components.length + 1);
 		array.add(type);
 		for (String component : components) {
 			array.add(Objects.requireNonNull(component, "key component"));
 		}
-		String hash = CanonicalHashes.sha256Prefixed(JcsCanonicalizer.canonicalizeToUtf8(array));
-		return hash.substring(CanonicalHashes.SHA256_PREFIX.length());
+		return TraceHashes.sha256Hex(cryptoProvider.canonicalize(array).getBytes(StandardCharsets.UTF_8));
 	}
 
 }

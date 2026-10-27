@@ -52,6 +52,7 @@ components:
       - id
       type: object
     Error:
+      additionalProperties: false
       properties:
         code:
           description: Error code
@@ -86,6 +87,7 @@ components:
       - subject
       type: object
     PaginationMetadata:
+      additionalProperties: false
       properties:
         first_page:
           type: integer

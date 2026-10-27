@@ -202,10 +202,9 @@
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
-			<artifactId>mockito-testng</artifactId>
-			<version>0.5.2</version>
+			<artifactId>mockito-core</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>		    
 
 		<!-- Others -->
 		<dependency>

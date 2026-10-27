@@ -1,11 +1,9 @@
 import copy
-import asyncio
 
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, HorizontalAlign
 
 from prompt_toolkit.layout import ScrollablePane
-from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Frame, Dialog
 from prompt_toolkit.application import Application
 from wui_components.widget_collections import get_logging_level_widget

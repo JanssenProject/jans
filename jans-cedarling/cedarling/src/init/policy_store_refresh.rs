@@ -21,6 +21,7 @@ use arc_swap::ArcSwap;
 use chrono::{DateTime, Utc};
 use futures::channel::oneshot;
 use futures::future::{Either, select};
+use std::collections::HashSet;
 use std::hash::Hasher;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -33,6 +34,7 @@ use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
 use crate::common::policy_store::archive_handler::ArchiveLimits;
+use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, PolicyStoreWarning};
 use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
@@ -44,6 +46,9 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 use super::authz_builder::{BuildAuthzError, build_authz};
 
 use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
+use super::policy_store_signature::{
+    ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
+};
 
 /// Upper bound on exponential backoff between failed refresh attempts.
 const REFRESH_FAILURE_BACKOFF_MAX_SECS: u64 = 600;
@@ -69,6 +74,8 @@ pub(crate) enum RefreshOutcome {
     RebuildError = 6,
     /// Response received but body read failed (TCP drop, decode error, etc.).
     DecodeError = 7,
+    /// Body fetched but its Sigstore signature check failed.
+    VerificationError = 8,
 }
 
 impl RefreshOutcome {
@@ -254,6 +261,8 @@ impl AuthzRebuilder {
             self.data_store.clone(),
             self.metrics.clone(),
             prior_jwt,
+            // The recorder outlives the swap, so the emitter and its chain do too.
+            prior_authz.trace_recorder(),
         )
         .await
     }
@@ -269,6 +278,41 @@ fn issuers_unchanged(
 
 pub(crate) type RebuildError = BuildAuthzError;
 
+/// Remembers which policy-store format warnings have already been logged, so a
+/// periodic refresh landing on the same store does not repeat them every tick.
+#[derive(Default)]
+struct WarningDedup {
+    logged: HashSet<PolicyStoreWarning>,
+    last_spec_version: Option<u32>,
+}
+
+impl WarningDedup {
+    /// Starts from what bootstrap already logged, so the first refresh is quiet.
+    fn seeded(format: &FormatReport) -> Self {
+        Self {
+            logged: format.warnings.iter().copied().collect(),
+            last_spec_version: format.spec_version,
+        }
+    }
+
+    /// Records a freshly parsed store and returns the warnings to log now.
+    ///
+    /// Any change of format version starts the set over, including a rollback to
+    /// an older one, so suppression only lasts while the store stays put.
+    fn take_new(&mut self, format: &FormatReport) -> Vec<PolicyStoreWarning> {
+        if format.spec_version != self.last_spec_version {
+            self.logged.clear();
+        }
+        self.last_spec_version = format.spec_version;
+        format
+            .warnings
+            .iter()
+            .filter(|warning| self.logged.insert(**warning))
+            .copied()
+            .collect()
+    }
+}
+
 /// Mutable per-source state — what we learned from the previous response.
 #[derive(Default)]
 struct RefreshState {
@@ -276,6 +320,7 @@ struct RefreshState {
     last_body_hash: Option<u64>,
     consecutive_failures: u32,
     strategy: StrategyState,
+    warnings: WarningDedup,
 }
 
 impl RefreshState {
@@ -365,22 +410,28 @@ impl RefreshSource {
         }
     }
 
-    fn url(&self) -> &str {
+    pub(crate) fn url(&self) -> &str {
         match self {
             Self::LockServer { url } | Self::CjarUrl { url } | Self::Uri { url } => url,
         }
     }
 
+    /// Parses fetched bytes, checking the archive signature first when `verifier` is set.
     async fn parse(
         &self,
-        bytes: &[u8],
+        bytes: Vec<u8>,
+        http_client: &HttpClient,
+        verifier: Option<&ArchiveVerifier>,
         strict_schema_validation: bool,
         limits: ArchiveLimits,
-    ) -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
-            return parse_cjar_bytes(bytes, strict_schema_validation, limits).await;
+            let signed_by =
+                check_if_enabled(verifier, http_client, Some(self.url()), &bytes).await?;
+            let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
+            return Ok((parsed, signed_by));
         }
-        if crate::common::policy_store::is_json_bytes(bytes) {
+        if crate::common::policy_store::is_json_bytes(&bytes) {
             return Err(PolicyStoreLoadError::LegacyJsonNotSupported);
         }
         Err(PolicyStoreLoadError::Archive(
@@ -403,14 +454,18 @@ impl Drop for PolicyStoreRefreshHandle {
     }
 }
 
-/// Snapshot of the bootstrap-load result that the refresh worker uses to
-/// short-circuit its very first periodic tick. Carried as a small named
-/// struct rather than two loose parameters so the spawn-site signature
-/// stays under the clippy `too_many_arguments` threshold without needing
-/// a `#[allow]` attribute.
+/// Snapshot of the bootstrap-load result that the refresh worker starts from:
+/// `body_hash` and `validators` let the very first periodic tick short-circuit,
+/// `format` seeds the dedup set so bootstrap's warnings are not logged a second
+/// time, and `policy_store_http_client` reuses the client the bootstrap fetch
+/// used. Carried as a small named struct rather than loose parameters so the
+/// spawn-site signature stays under the clippy `too_many_arguments` threshold
+/// without needing a `#[allow]` attribute.
 pub(crate) struct RefreshWorkerSeed {
-    pub initial_body_hash: Option<u64>,
-    pub initial_validators: CacheHeadersState,
+    pub body_hash: Option<u64>,
+    pub validators: CacheHeadersState,
+    pub format: FormatReport,
+    pub policy_store_http_client: Option<HttpClient>,
 }
 
 /// Read-only worker context — handles and config that don't change between
@@ -437,6 +492,9 @@ pub(crate) struct WorkerContext {
     /// `304` back with zero body bytes downloaded — the optimal first-tick
     /// path. Empty for non-URL sources.
     pub(crate) initial_validators: CacheHeadersState,
+    /// What the bootstrap store's format reported. Bootstrap already logged it,
+    /// so it seeds the dedup set and is not repeated on the first refresh.
+    pub(crate) initial_format: FormatReport,
     /// Forwarded from `BootstrapConfig.authorization_config` so each refresh
     /// tick enforces the same "schema must be present" invariant the
     /// bootstrap load did. Without this, a refresh against a store that
@@ -446,6 +504,8 @@ pub(crate) struct WorkerContext {
     /// Forwarded from `BootstrapConfig.policy_store_config` so a refreshed
     /// `.cjar` is held to the same size limits as the bootstrap load.
     pub(crate) archive_limits: ArchiveLimits,
+    /// Checks each refreshed archive's signature before it is parsed; `None` when disabled.
+    pub(crate) verifier: Option<ArchiveVerifier>,
 }
 
 /// Spawn the background refresh worker. Returns a [`PolicyStoreRefreshHandle`]
@@ -467,6 +527,7 @@ async fn run_worker(ctx: WorkerContext, shutdown_rx: oneshot::Receiver<()>) {
     let mut state = RefreshState {
         last_body_hash: ctx.initial_body_hash,
         validators: ctx.initial_validators.clone(),
+        warnings: WarningDedup::seeded(&ctx.initial_format),
         ..RefreshState::default()
     };
     let mut shutdown_rx = shutdown_rx;
@@ -663,35 +724,54 @@ async fn parse_swap_and_record(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     let start = Utc::now();
-    let parsed = match ctx
+    let (parsed, signed_by) = match ctx
         .source
-        .parse(&bytes, ctx.strict_schema_validation, ctx.archive_limits)
+        .parse(
+            bytes,
+            &ctx.http_client,
+            ctx.verifier.as_ref(),
+            ctx.strict_schema_validation,
+            ctx.archive_limits,
+        )
         .await
     {
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
+            let (outcome, kind) = classify_parse_error(&e);
             ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::ERROR,
                     None,
                 ))
-                .set_message(format!(
-                    "policy store refresh: parse failure for {url}: {e}"
-                )),
+                .set_message(format!("policy store refresh: {kind} for {url}: {e}")),
             );
-            return RefreshOutcome::ParseError;
+            return outcome;
         },
     };
+
+    // Report format warnings before the rebuild: they describe the fetched
+    // store, which the operator must fix regardless of whether the rebuild
+    // that follows succeeds.
+    for warning in state.warnings.take_new(&parsed.format) {
+        ctx.log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(warning.to_string()),
+        );
+    }
 
     // Capture the refreshed policy count BEFORE `parsed` is moved into
     // `rebuild`. Used to refresh the `instance.policy_count` gauge after the
     // swap — otherwise the gauge would stay pinned to the bootstrap value
     // forever even though authorization decisions use the new set.
-    let new_policy_count = parsed.policies.get_set().num_of_policies();
+    let new_policy_count = parsed.store.policies.get_set().num_of_policies();
+    let bundle_hash_note_val = bundle_hash_note(parsed.store.bundle_hash());
 
     let prior_authz = ctx.authz_swap.load_full();
-    let new_authz = match ctx.rebuilder.rebuild(parsed, &prior_authz).await {
+    let new_authz = match ctx.rebuilder.rebuild(parsed.store, &prior_authz).await {
         Ok(a) => a,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
@@ -724,12 +804,40 @@ async fn parse_swap_and_record(
             LogLevel::INFO,
             None,
         ))
-        .set_message(format!(
-            "policy store refresh: swapped new store from {url} in {elapsed} ms"
-        )),
+        .set_message(match signed_by {
+            Some(signed_by) => format!(
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}, signature verified: {signed_by}"
+            ),
+            None => format!(
+                "policy store refresh: swapped new store from {url} in {elapsed} ms{bundle_hash_note_val}"
+            ),
+        }),
     );
 
     RefreshOutcome::Success
+}
+
+/// Logged with every swap, as at startup, so operators can compare the new store
+/// with the `bundle_hash` Lock serves for it.
+fn bundle_hash_note(bundle_hash: Option<jans_trace_core::Digest>) -> String {
+    bundle_hash.map_or_else(String::new, |hash| format!(", bundle_hash: {hash}"))
+}
+
+/// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
+/// A bundle that could not be fetched counts like any fetch failure; a missing one (404) does not.
+fn classify_parse_error(e: &PolicyStoreLoadError) -> (RefreshOutcome, &'static str) {
+    match e {
+        PolicyStoreLoadError::Signature(SignatureError::BundleFetch { source, .. })
+            if source.status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
+        {
+            let (kind, outcome) = classify_fetch_error(source);
+            (outcome, kind)
+        },
+        PolicyStoreLoadError::Signature(_) => {
+            (RefreshOutcome::VerificationError, "signature check failure")
+        },
+        _ => (RefreshOutcome::ParseError, "parse failure"),
+    }
 }
 
 fn fetch_error(
@@ -804,6 +912,116 @@ fn etag_opaque_tag(etag: &str) -> &str {
 mod tests {
     use super::*;
     use std::collections::HashMap;
+
+    const MISSING: PolicyStoreWarning = PolicyStoreWarning::MissingSpecVersion {
+        assumed: 0,
+        current: 1,
+    };
+    const OUTDATED: PolicyStoreWarning = PolicyStoreWarning::OutdatedSpecVersion {
+        found: 0,
+        current: 1,
+    };
+
+    /// A report as the parser would produce for a store on `spec_version`.
+    fn report(spec_version: u32, warnings: &[PolicyStoreWarning]) -> FormatReport {
+        FormatReport {
+            spec_version: Some(spec_version),
+            warnings: warnings.to_vec(),
+        }
+    }
+
+    #[test]
+    fn swap_log_names_bundle_hash() {
+        let hash = jans_trace_core::inputs::compute_bundle_hash(b"archive");
+        assert_eq!(
+            bundle_hash_note(Some(hash)),
+            format!(", bundle_hash: {hash}"),
+            "a refreshed .cjar store should log its bundle_hash for comparison with Lock"
+        );
+        assert_eq!(
+            bundle_hash_note(None),
+            "",
+            "a store that is not an archive has no bundle_hash to log"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_logs_each_warning_once() {
+        let mut dedup = WarningDedup::default();
+
+        assert_eq!(
+            dedup.take_new(&report(0, &[MISSING])),
+            vec![MISSING],
+            "a warning not seen before should be logged"
+        );
+        assert!(
+            dedup.take_new(&report(0, &[MISSING])).is_empty(),
+            "a refresh landing on the same version must not re-log the same warning"
+        );
+        assert_eq!(
+            dedup.take_new(&report(0, &[MISSING, OUTDATED])),
+            vec![OUTDATED],
+            "only the warning not seen before should be logged"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_resets_on_newer_spec_version() {
+        let mut dedup = WarningDedup::default();
+        dedup.take_new(&report(0, &[OUTDATED]));
+
+        assert_eq!(
+            dedup.take_new(&report(1, &[OUTDATED])),
+            vec![OUTDATED],
+            "a newer format version should clear the set so warnings are reported again"
+        );
+    }
+
+    /// An operator who rolls a store back to an outdated format should be told
+    /// again, so a version change in either direction clears the set.
+    #[test]
+    fn warning_dedup_rewarns_after_a_rollback() {
+        let mut dedup = WarningDedup::default();
+        assert_eq!(
+            dedup.take_new(&report(0, &[OUTDATED])),
+            vec![OUTDATED],
+            "the outdated store should warn the first time"
+        );
+        assert!(
+            dedup.take_new(&report(1, &[])).is_empty(),
+            "moving to the current version has nothing to warn about"
+        );
+        assert_eq!(
+            dedup.take_new(&report(0, &[OUTDATED])),
+            vec![OUTDATED],
+            "rolling back to the outdated format must warn again"
+        );
+        assert!(
+            dedup.take_new(&report(0, &[OUTDATED])).is_empty(),
+            "staying on that version must keep deduping"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_seeded_from_bootstrap_does_not_relog() {
+        // Bootstrap logged its warnings already, so the worker starts seeded.
+        let mut dedup = WarningDedup::seeded(&report(0, &[MISSING]));
+
+        assert!(
+            dedup.take_new(&report(0, &[MISSING])).is_empty(),
+            "the first refresh must not repeat what bootstrap already logged"
+        );
+    }
+
+    #[test]
+    fn warning_dedup_logs_nothing_for_a_current_store() {
+        let mut dedup = WarningDedup::default();
+
+        assert!(
+            dedup.take_new(&report(1, &[])).is_empty(),
+            "a store with no warnings should log nothing"
+        );
+    }
 
     #[test]
     fn choose_for_tick_from_plain_get_probes_head_then_get() {
@@ -1725,6 +1943,184 @@ mod tests {
             outcome,
             RefreshOutcome::HttpError,
             "HttpStatusError variant must surface as HttpError, got {outcome:?}",
+        );
+    }
+}
+
+#[cfg(test)]
+mod signature_tests {
+    use std::time::Duration;
+
+    use mockito::Server;
+    use sigstore_verifier::SigstoreBlobVerifier;
+    use sigstore_verifier::testing::TestSigner;
+
+    use super::*;
+    use crate::bootstrap_config::SigstoreSigner;
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::http::HttpClientConfig;
+    use crate::init::policy_store_signature::SignatureError;
+
+    fn http_client() -> HttpClient {
+        HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            retry_delay: Duration::from_millis(1),
+            request_timeout: Duration::from_secs(2),
+            max_response_size_bytes: None,
+        })
+        .expect("http client")
+    }
+
+    fn verifier(signer: &TestSigner) -> ArchiveVerifier {
+        let expected = SigstoreSigner {
+            cert_identity: TestSigner::IDENTITY.to_string(),
+            cert_oidc_issuer: TestSigner::ISSUER.to_string(),
+            bundle_uri: None,
+        };
+        let trust = SigstoreBlobVerifier::new(&signer.trust_root()).expect("test trust root");
+        ArchiveVerifier::new(&expected, trust)
+    }
+
+    /// Parses `archive` as a refresh of `/store.cjar`, with `bundle` served next to it.
+    async fn refresh(
+        archive: Vec<u8>,
+        bundle: Option<Vec<u8>>,
+        verifier: Option<&ArchiveVerifier>,
+    ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
+        let mut server = Server::new_async().await;
+        let bundle_mock = server.mock("GET", "/store.cjar.sigstore.json");
+        match bundle {
+            Some(bundle) => bundle_mock.with_body(bundle),
+            None => bundle_mock.with_status(404),
+        }
+        .create_async()
+        .await;
+        let source = RefreshSource::CjarUrl {
+            url: format!("{}/store.cjar", server.url()),
+        };
+        source
+            .parse(
+                archive,
+                &http_client(),
+                verifier,
+                false,
+                ArchiveLimits::default(),
+            )
+            .await
+    }
+
+    fn archive() -> Vec<u8> {
+        fixtures::minimal_valid()
+            .build_archive()
+            .expect("test archive builds")
+    }
+
+    #[tokio::test]
+    async fn signed_refresh_parses() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let bundle = signer.sign(&archive);
+        let (_, signed_by) = refresh(archive, Some(bundle), Some(&verifier(&signer)))
+            .await
+            .expect("a correctly signed refresh must parse");
+        assert_eq!(
+            signed_by.map(|v| v.identity).as_deref(),
+            Some(TestSigner::IDENTITY),
+            "a verified refresh reports its signer for logging"
+        );
+    }
+
+    #[tokio::test]
+    async fn modified_or_unsigned_refresh_is_rejected_as_verification_error() {
+        let signer = TestSigner::new();
+        let archive = archive();
+        let mut tampered = archive.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 1;
+
+        let modified = refresh(
+            tampered,
+            Some(signer.sign(&archive)),
+            Some(&verifier(&signer)),
+        )
+        .await
+        .expect_err("a refresh changed after signing must not parse");
+        let unsigned = refresh(archive, None, Some(&verifier(&signer)))
+            .await
+            .expect_err("a refresh without a bundle must not parse");
+
+        for err in [modified, unsigned] {
+            assert!(
+                matches!(err, PolicyStoreLoadError::Signature(_)),
+                "expected a signature error, got {err:?}"
+            );
+            assert_eq!(
+                classify_parse_error(&err).0,
+                RefreshOutcome::VerificationError,
+                "signature failures get their own refresh outcome"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn refresh_without_verifier_ignores_bundle() {
+        refresh(archive(), None, None)
+            .await
+            .expect("with signature checks off a refresh parses without a bundle");
+    }
+
+    #[tokio::test]
+    async fn bundle_transport_failures_are_fetch_outcomes() {
+        let mut server = Server::new_async().await;
+        server
+            .mock("GET", "/store.cjar.sigstore.json")
+            .with_status(500)
+            .create_async()
+            .await;
+        let signer = TestSigner::new();
+        let verifier = verifier(&signer);
+        let http = http_client();
+        let archive = archive();
+
+        let server_error = verifier
+            .check(
+                &http,
+                Some(&format!("{}/store.cjar", server.url())),
+                &archive,
+            )
+            .await
+            .expect_err("a 500 bundle response must fail");
+        // Port 1 is never listening, so the request fails before any response.
+        let unreachable = verifier
+            .check(&http, Some("http://127.0.0.1:1/store.cjar"), &archive)
+            .await
+            .expect_err("an unreachable bundle host must fail");
+
+        assert_eq!(
+            classify_parse_error(&PolicyStoreLoadError::Signature(server_error)).0,
+            RefreshOutcome::HttpError,
+            "a 5xx while fetching the bundle is an HTTP error, not a signature failure"
+        );
+        assert_eq!(
+            classify_parse_error(&PolicyStoreLoadError::Signature(unreachable)).0,
+            RefreshOutcome::NetworkError,
+            "a connection failure while fetching the bundle is a network error"
+        );
+    }
+
+    #[test]
+    fn other_parse_failures_stay_parse_errors() {
+        let err = PolicyStoreLoadError::Archive("broken".to_string());
+        assert_eq!(
+            classify_parse_error(&err).0,
+            RefreshOutcome::ParseError,
+            "a broken archive is a parse error"
+        );
+        let err = PolicyStoreLoadError::Signature(SignatureError::NoBundleLocation);
+        assert_eq!(
+            classify_parse_error(&err).0,
+            RefreshOutcome::VerificationError,
+            "any signature error is a verification error"
         );
     }
 }

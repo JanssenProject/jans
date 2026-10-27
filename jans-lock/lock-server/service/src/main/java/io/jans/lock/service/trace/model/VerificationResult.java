@@ -9,8 +9,8 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * Signature verification outcome carried by the store layer (design §10, T-1). This is a plain
- * value copy independent of the {@code TraceVerification} ORM POJO (task 03) — the store
+ * Signature verification outcome carried by the store layer (design §10). This is a plain
+ * value copy independent of the {@code TraceVerification} ORM POJO — the store
  * abstraction never depends on ORM/JSON-column types.
  *
  * @author Yuriy Movchan
@@ -25,7 +25,28 @@ public final class VerificationResult {
 
 	private final String algorithm;
 
+	private final String keyThumbprint;
+
+	private final Boolean keyAuthorized;
+
+	/**
+	 * Builds a result without the key thumbprint and authorization summary: the shape of rows
+	 * stored before those members existed.
+	 */
 	public VerificationResult(boolean signatureValid, String keyId, long verifiedAtMs, String algorithm) {
+		this(signatureValid, keyId, verifiedAtMs, algorithm, null, null);
+	}
+
+	/**
+	 * @param keyThumbprint {@code sha256:<hex>} RFC 7638 thumbprint of the key used, or
+	 *        {@code null} for a row stored before the thumbprint was recorded
+	 * @param keyAuthorized the admission summary, or {@code null} for a row stored before it was
+	 *        recorded
+	 */
+	public VerificationResult(boolean signatureValid, String keyId, long verifiedAtMs, String algorithm,
+			String keyThumbprint, Boolean keyAuthorized) {
+		this.keyThumbprint = keyThumbprint;
+		this.keyAuthorized = keyAuthorized;
 		this.signatureValid = signatureValid;
 		this.keyId = Objects.requireNonNull(keyId, "keyId");
 		this.verifiedAtMs = verifiedAtMs;
@@ -48,6 +69,21 @@ public final class VerificationResult {
 		return algorithm;
 	}
 
+	/**
+	 * @return the thumbprint of the key the record was verified against, or {@code null} for a
+	 *         legacy row
+	 */
+	public String getKeyThumbprint() {
+		return keyThumbprint;
+	}
+
+	/**
+	 * @return whether the key was admitted for this record, or {@code null} for a legacy row
+	 */
+	public Boolean getKeyAuthorized() {
+		return keyAuthorized;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -58,18 +94,20 @@ public final class VerificationResult {
 		}
 		VerificationResult other = (VerificationResult) o;
 		return signatureValid == other.signatureValid && verifiedAtMs == other.verifiedAtMs
-				&& keyId.equals(other.keyId) && algorithm.equals(other.algorithm);
+				&& keyId.equals(other.keyId) && algorithm.equals(other.algorithm)
+				&& Objects.equals(keyThumbprint, other.keyThumbprint) && Objects.equals(keyAuthorized, other.keyAuthorized);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(signatureValid, keyId, verifiedAtMs, algorithm);
+		return Objects.hash(signatureValid, keyId, verifiedAtMs, algorithm, keyThumbprint, keyAuthorized);
 	}
 
 	@Override
 	public String toString() {
 		return "VerificationResult [signatureValid=" + signatureValid + ", keyId=" + keyId + ", verifiedAtMs="
-				+ verifiedAtMs + ", algorithm=" + algorithm + "]";
+				+ verifiedAtMs + ", algorithm=" + algorithm + ", keyThumbprint=" + keyThumbprint + ", keyAuthorized="
+				+ keyAuthorized + "]";
 	}
 
 }

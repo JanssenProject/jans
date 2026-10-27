@@ -19,7 +19,8 @@ def renew_license():
             return
     
     prop = {'bindDN':'', 'bindPassword':'', 'servers':''}
-    content = open(ldap_properties_fn).readlines()
+    with open(ldap_properties_fn) as f:
+        content = f.readlines()
     for l in content:
         ls = l.strip()
         if ls and not ls[0] == '#':
@@ -44,7 +45,7 @@ def renew_license():
     ldap_conn = ldap3.Connection(server, user=prop['bindDN'], password=encoded_password)
     try:
         ldap_conn.bind()
-    except:
+    except Exception:
         print("Can't connect to ldap server")
         return
 
@@ -92,13 +93,13 @@ def renew_license():
         url_metadata_fd = urllib.urlopen(url_metadata)
         metadata_s = url_metadata_fd.read()
 
-    except:
+    except Exception:
         print("Can't read from", url_metadata)
         return
 
     try:
         metadata = json.loads(metadata_s)
-    except:
+    except Exception:
         print("Can't load json from", metadata_s)
         return
         
@@ -120,13 +121,13 @@ def renew_license():
         url_fd = urllib.urlopen(url)
         data_s = url_fd.read()
 
-    except:
+    except Exception:
         print("Can't read from", url)
         return
 
     try:
         data = json.loads(data_s)
-    except:
+    except Exception:
         print("Can't load json from", data)
         return
 

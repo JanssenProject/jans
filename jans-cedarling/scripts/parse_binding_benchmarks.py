@@ -94,9 +94,10 @@ def parse_kv(text: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 # Example lines:
 #   ✅ authz_authorize_unsigned/new/estimates.json: 371266 ns <= 1000000 ns
+#   ⚪ cedarling_startup/new/estimates.json: 5000000 ns (not checked against 1000000 ns)
 # ---------------------------------------------------------------------------
 _RUST_RE = re.compile(
-    r"^[✅❌]\s+(.+?):\s+(\d+(?:\.\d+)?)\s+ns\b",
+    r"^[✅❌⚪]\s+(.+?):\s+(\d+(?:\.\d+)?)\s+ns\b",
     re.MULTILINE,
 )
 
@@ -373,7 +374,11 @@ def main() -> int:
             file=sys.stderr,
         )
         return 2
-    text = open(args.files[0]).read() if args.files else sys.stdin.read()
+    if args.files:
+        with open(args.files[0]) as f:
+            text = f.read()
+    else:
+        text = sys.stdin.read()
     binding_name, parse_fn = PARSERS[args.format]
     rows = parse_fn(text)
     print(render_markdown(binding_name, rows))

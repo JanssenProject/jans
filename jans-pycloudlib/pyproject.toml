@@ -24,14 +24,13 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12"
 ]
 dependencies = [
     # handle CVE-2025-50181, CVE-2025-50182, GHSA-mf9v-mfxr-j63j, GHSA-qccp-gfcp-xxvc
-    "urllib3>=2.7.0",
+    "urllib3>=2.8.0",
 
     # pulled in by requests; handle CVE-2026-45409, GHSA-65pc-fj4g-8rjx
     "idna>=3.15",
@@ -39,8 +38,8 @@ dependencies = [
     "requests>=2.22.0",
     "python-consul>=1.0.1",
     "hvac>=0.7.0",
-    # don't use v36 until patches available
-    "kubernetes>=11.0,<36.0",
+    # skip v36 as it is broken, see https://github.com/JanssenProject/jans/issues/14156
+    "kubernetes!=36.*",
 
     # the ldap3 library is not removed for the following reasons:
     #
@@ -54,6 +53,9 @@ dependencies = [
     "backoff>=2.1.2",
     "docker>=3.7.2",
     "cryptography>=50.0.0",
+
+    # conform to post-quantum cryptography support https://github.com/JanssenProject/jans/issues/15059
+    "grpcio>=1.83.0",
     "google-cloud-secret-manager>=2.2.0",
     "pymysql>=1.0.2",
     "sqlalchemy>=2.0",
@@ -80,7 +82,7 @@ dependencies = [
     "cloud-sql-python-connector[pg8000]>=1.0.0",
     "pg8000>=1.30.0",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.scripts]
 jans-pycloudlib = "jans.pycloudlib.cli:cli"

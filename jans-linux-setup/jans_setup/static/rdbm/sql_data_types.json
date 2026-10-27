@@ -990,6 +990,92 @@
       "type": "VARCHAR"
     }
   },
+  "jansRequestId": {
+    "mysql": {
+      "size": 64,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 64,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPolicyStoreId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansPolicyStoreVersion": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceFirstServedAtMs": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTraceLastServedAtMs": {
+    "mysql": {
+      "type": "BIGINT"
+    },
+    "pgsql": {
+      "type": "BIGINT"
+    }
+  },
+  "jansTracePolicyStoreId": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTracePolicyStoreVersion": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceBundleHash": {
+    "mysql": {
+      "size": 255,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 255,
+      "type": "VARCHAR"
+    }
+  },
+  "jansTraceGenesisKind": {
+    "mysql": {
+      "size": 32,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 32,
+      "type": "VARCHAR"
+    }
+  },
   "jansTraceReceiptState": {
     "mysql": {
       "size": 16,

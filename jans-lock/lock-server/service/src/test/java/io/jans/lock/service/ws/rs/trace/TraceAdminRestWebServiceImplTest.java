@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -66,9 +67,8 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Tests for {@link TraceAdminRestWebServiceImpl}: the happy paths for all five admin operations,
- * the disabled-feature/unbound-client/duplicate/not-found error paths (task 15 acceptance
- * criteria), and a fixture check that every {@link TraceAdminRestWebService} method carries both
- * protection annotations with matching {@code id}/{@code path} (task 15's "Tests" section).
+ * the disabled-feature/unbound-client/duplicate/not-found error paths, and a fixture check that every {@link TraceAdminRestWebService} method carries both
+ * protection annotations with matching {@code id}/{@code path}.
  */
 class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
@@ -151,9 +151,10 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	private static TraceProducerKeyEntry producerKey() {
 		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
 		key.setDomainId(DOMAIN);
-		key.setProducerId("cedarling-fleet-1/1.0.0");
+		key.setProducerId("cedarling-fleet-1");
 		key.setKid("kid-1");
 		key.setPublicKeyJwk(jwk());
+		key.setAuthorizedEventKinds(List.of("AUTHORIZATION_DECISION"));
 		key.setValidFrom(new Date(1000L));
 		key.setRegisteredBy(CLIENT_ID);
 		key.setCreationDate(new Date(1000L));
@@ -183,13 +184,14 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRegisterProducerKey_HappyPath_Returns201WithFilteredJwk() {
 		ProducerKeyRegistrationRequest request = new ProducerKeyRegistrationRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setKid("kid-1");
 		request.setPublicKeyJwk(jwk());
+		request.setAuthorizedEventKinds(List.of("AUTHORIZATION_DECISION"));
 		request.setValidFrom("1970-01-01T00:00:01Z");
 
-		when(producerKeyRegistry.register(eq(DOMAIN), eq("cedarling-fleet-1/1.0.0"), eq("kid-1"), any(), eq(1000L),
-				isNull(), eq(CLIENT_ID), eq(5000L))).thenReturn(producerKey());
+		when(producerKeyRegistry.register(eq(DOMAIN), eq("cedarling-fleet-1"), eq("kid-1"), any(),
+				eq(List.of("AUTHORIZATION_DECISION")), eq(1000L), isNull(), eq(CLIENT_ID), eq(5000L))).thenReturn(producerKey());
 
 		Response response = impl.registerProducerKey(request);
 
@@ -201,19 +203,40 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals(DOMAIN, body.getEvidenceDomainId());
 		assertEquals("kid-1", body.getKid());
 		assertEquals(Map.of("kty", "OKP", "crv", "Ed25519", "x", "abc"), body.getPublicKeyJwk());
+		assertEquals(List.of("AUTHORIZATION_DECISION"), body.getAuthorizedEventKinds());
 		assertEquals(null, body.getRevokedAt());
 		verify(applicationAuditLogger).log(any(), eq(true));
 	}
 
 	@Test
-	void testRegisterProducerKey_Duplicate_Returns409() {
+	void testRegisterProducerKey_InvalidAuthorizedEventKinds_Returns400InvalidKey() {
 		ProducerKeyRegistrationRequest request = new ProducerKeyRegistrationRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setKid("kid-1");
 		request.setPublicKeyJwk(jwk());
 		request.setValidFrom("1970-01-01T00:00:01Z");
 
-		when(producerKeyRegistry.register(anyString(), anyString(), anyString(), anyMap(), anyLong(), any(),
+		when(producerKeyRegistry.register(anyString(), anyString(), anyString(), anyMap(), any(), anyLong(), any(),
+				anyString(), anyLong()))
+				.thenThrow(new TraceValidationException(TraceErrorResponseType.INVALID_KEY, "authorized_event_kinds"));
+
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.registerProducerKey(request));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		verify(applicationAuditLogger).log(any(), eq(false));
+	}
+
+	@Test
+	void testRegisterProducerKey_Duplicate_Returns409() {
+		ProducerKeyRegistrationRequest request = new ProducerKeyRegistrationRequest();
+		request.setProducerId("cedarling-fleet-1");
+		request.setKid("kid-1");
+		request.setPublicKeyJwk(jwk());
+		request.setAuthorizedEventKinds(List.of("AUTHORIZATION_DECISION"));
+		request.setValidFrom("1970-01-01T00:00:01Z");
+
+		when(producerKeyRegistry.register(anyString(), anyString(), anyString(), anyMap(), anyList(), anyLong(), any(),
 				anyString(), anyLong()))
 				.thenThrow(new TraceConflictException(TraceErrorResponseType.KEY_ALREADY_EXISTS, "duplicate_key"));
 
@@ -227,7 +250,7 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRegisterProducerKey_BadTimestamp_Returns400InvalidKey() {
 		ProducerKeyRegistrationRequest request = new ProducerKeyRegistrationRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setKid("kid-1");
 		request.setPublicKeyJwk(jwk());
 		request.setValidFrom("not-a-timestamp");
@@ -274,9 +297,9 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testListProducerKeys_HappyPath_Returns200() {
-		when(producerKeyRegistry.list(DOMAIN, "cedarling-fleet-1/1.0.0")).thenReturn(List.of(producerKey()));
+		when(producerKeyRegistry.list(DOMAIN, "cedarling-fleet-1")).thenReturn(List.of(producerKey()));
 
-		Response response = impl.listProducerKeys("cedarling-fleet-1/1.0.0");
+		Response response = impl.listProducerKeys("cedarling-fleet-1");
 
 		assertEquals(200, response.getStatus());
 		ProducerKeyListResponse body = (ProducerKeyListResponse) response.getEntity();
@@ -289,10 +312,10 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRevokeProducerKey_KnownKey_Returns200() {
 		ProducerKeyRevokeRequest request = new ProducerKeyRevokeRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setKid("kid-1");
 
-		when(producerKeyRegistry.revoke(DOMAIN, "cedarling-fleet-1/1.0.0", "kid-1", 5000L))
+		when(producerKeyRegistry.revoke(DOMAIN, "cedarling-fleet-1", "kid-1", 5000L))
 				.thenReturn(Optional.of(producerKeyRevokedAt(5000L)));
 
 		Response response = impl.revokeProducerKey(request);
@@ -305,10 +328,10 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRevokeProducerKey_UnknownKey_Returns404() {
 		ProducerKeyRevokeRequest request = new ProducerKeyRevokeRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setKid("kid-1");
 
-		when(producerKeyRegistry.revoke(DOMAIN, "cedarling-fleet-1/1.0.0", "kid-1", 5000L))
+		when(producerKeyRegistry.revoke(DOMAIN, "cedarling-fleet-1", "kid-1", 5000L))
 				.thenReturn(Optional.empty());
 
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
@@ -321,7 +344,7 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRevokeProducerKey_MissingKid_Returns400() {
 		ProducerKeyRevokeRequest request = new ProducerKeyRevokeRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
 				() -> impl.revokeProducerKey(request));
@@ -334,11 +357,11 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 	@Test
 	void testRegisterProducerChain_HappyPath_Returns201() {
 		ProducerChainRegistrationRequest request = new ProducerChainRegistrationRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setProducerInstanceId("instance-1");
 		request.setProducerChainId("chain-1");
 
-		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
+		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
 		TraceChainEntry registration = newChainEntity(chainIdentity, 5000L, CLIENT_ID);
 		when(producerChainRegistry.register(chainIdentity, CLIENT_ID, 5000L)).thenReturn(registration);
 
@@ -347,13 +370,14 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals(201, response.getStatus());
 		ProducerChainResponse body = (ProducerChainResponse) response.getEntity();
 		assertEquals("chain-1", body.getProducerChainId());
+		assertEquals("pre_registered_genesis", body.getGenesisKind());
 		assertEquals(DOMAIN, body.getEvidenceDomainId());
 	}
 
 	@Test
 	void testRegisterProducerChain_Duplicate_Returns409() {
 		ProducerChainRegistrationRequest request = new ProducerChainRegistrationRequest();
-		request.setProducerId("cedarling-fleet-1/1.0.0");
+		request.setProducerId("cedarling-fleet-1");
 		request.setProducerInstanceId("instance-1");
 		request.setProducerChainId("chain-1");
 
@@ -370,7 +394,7 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testListProducerChains_HappyPath_Returns200() {
-		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
+		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
 		TraceChainEntry registration = newChainEntity(chainIdentity, 5000L, CLIENT_ID);
 		when(producerChainRegistry.list(DOMAIN, null)).thenReturn(List.of(registration));
 
@@ -382,7 +406,27 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals("chain-1", body.getChains().get(0).getProducerChainId());
 	}
 
-	// -- annotation fixture check (task 15 "Tests" section) ------------------------------------------
+	@Test
+	void testListProducerChains_GenesisKind_ExposedPerChain() {
+		ChainIdentity preRegisteredId = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
+		ChainIdentity observedId = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-2");
+		TraceChainEntry preRegistered = newChainEntity(preRegisteredId, 5000L, CLIENT_ID);
+		TraceChainEntry observed = newChainEntity(observedId, 5000L, CLIENT_ID);
+		observed.setGenesisKind(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED);
+		ChainIdentity noAttributeId = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-3");
+		TraceChainEntry noAttribute = newChainEntity(noAttributeId, 5000L, CLIENT_ID);
+		noAttribute.setGenesisKind(null);
+		when(producerChainRegistry.list(DOMAIN, null)).thenReturn(List.of(preRegistered, observed, noAttribute));
+
+		Response response = impl.listProducerChains(null);
+
+		ProducerChainListResponse body = (ProducerChainListResponse) response.getEntity();
+		assertEquals("pre_registered_genesis", body.getChains().get(0).getGenesisKind());
+		assertEquals("first_observed_genesis", body.getChains().get(1).getGenesisKind());
+		assertEquals("pre_registered_genesis", body.getChains().get(2).getGenesisKind());
+	}
+
+	// -- annotation fixture check ------------------------------------------
 
 	@Test
 	void testInterfaceMethods_CarryBothProtectionAnnotationsWithMatchingIdAndPath() throws Exception {

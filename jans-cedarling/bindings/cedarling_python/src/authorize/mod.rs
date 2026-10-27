@@ -7,6 +7,7 @@
 use pyo3::prelude::*;
 use pyo3::Bound;
 
+pub(crate) mod authorize_options;
 pub(crate) mod authorize_result;
 mod authorize_result_response;
 pub(crate) mod batch_authorize_response;
@@ -15,6 +16,7 @@ pub(crate) mod batch_item_error;
 pub(crate) mod batch_item_result;
 mod decision;
 mod diagnostics;
+pub(crate) mod dropped_token;
 pub(crate) mod entity_data;
 pub(crate) mod errors;
 pub(crate) mod multi_issuer_authorize_result;
@@ -26,6 +28,7 @@ pub(crate) mod request_batch_unsigned;
 pub(crate) mod request_multi_issuer;
 pub(crate) mod request_unsigned;
 pub(crate) mod token_input;
+pub(crate) mod trace_context;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<policy_evaluation_error::PolicyEvaluationError>()?;
@@ -47,8 +50,12 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
     m.add_class::<authorize_result::AuthorizeResult>()?;
     m.add_class::<multi_issuer_authorize_result::MultiIssuerAuthorizeResult>()?;
+    m.add_class::<dropped_token::DroppedToken>()?;
+    m.add_class::<dropped_token::DropReason>()?;
     m.add_class::<policy_effect::PolicyEffect>()?;
     m.add_class::<policy_metadata::PolicyMetadata>()?;
+    m.add_class::<trace_context::TraceContext>()?;
+    m.add_class::<authorize_options::AuthorizeOptions>()?;
 
     let submodule = PyModule::new(m.py(), "authorize_errors")?;
     errors::authorize_errors_module(&submodule)?;

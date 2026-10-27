@@ -55,6 +55,7 @@
 						</goals>
 						<configuration>
 							<protocVersion>3.25.1</protocVersion>
+							<protocArtifact>com.google.protobuf:protoc:3.25.1</protocArtifact>
 							<!-- Bundle google/protobuf/timestamp.proto into the descriptor. -->
 							<includeStdTypes>true</includeStdTypes>
 							<inputDirectories>
@@ -109,13 +110,6 @@
 		<dependency>
 			<groupId>jakarta.ejb</groupId>
 			<artifactId>jakarta.ejb-api</artifactId>
-		</dependency>
-
-		<!-- Servlet (production scope) -->
-		<dependency>
-			<groupId>jakarta.servlet</groupId>
-			<artifactId>jakarta.servlet-api</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<!-- REST -->
@@ -197,17 +191,9 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!--
-			grpc-netty-shaded bundles its own Netty so it does not conflict
-			with the Netty version pulled in by WireMock / Jetty.
-			Pin to the same gRPC minor version that wiremock-grpc-extension
-			1.0.0-beta.4 uses internally (~1.62.x) to avoid binary
-			incompatibilities between grpc-core and the transport layer.
-		-->
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
-			<version>1.62.2</version>
 			<scope>test</scope>
 		</dependency>
 

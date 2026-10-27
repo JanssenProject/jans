@@ -1,22 +1,20 @@
 import json
 import asyncio
 from functools import partial
-from typing import Optional, Sequence, Any
+from typing import Optional, Any
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.containers import HSplit, VSplit
-from prompt_toolkit.widgets import Button, Dialog, Label
+from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit.widgets import Button, Dialog
 
-from cli import config_cli
 from utils.static import DialogResult, cli_style, common_strings
 from utils.utils import DialogUtils
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_tab import JansTab
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from prompt_toolkit.layout import Window
 
 
 class ViewProperty(JansGDialog, DialogUtils):

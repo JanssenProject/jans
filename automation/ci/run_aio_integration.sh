@@ -117,9 +117,14 @@ set -e
 MVN_PAR="-T 4"   # the backgrounded cargo build holds the other four until it finishes
 MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
-for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-config-api jans-fido2; do
+# jans-core/cedarling (and config-api, which consumes it) need cedarling-java, so they are built
+# after the native lib below.
+for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-fido2; do
   pl=""
-  case "$mod" in jans-auth-server | jans-scim | jans-config-api | jans-fido2) pl="$NO_FIPS" ;; esac
+  case "$mod" in
+    jans-core) pl="-pl !cedarling" ;;
+    jans-auth-server | jans-scim | jans-fido2) pl="$NO_FIPS" ;;
+  esac
   echo "::group::build $mod"
   mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
     $pl -f "$mod/pom.xml" clean install
@@ -140,14 +145,26 @@ if [ "$ced_ok" = 1 ]; then
     sleep 1
   done
 fi
-[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock will be skipped"
+[ "$CED_READY" = 1 ] || echo "[warn] cedarling native prep failed; cedarling-java + jans-lock tests will be skipped"
 echo "::endgroup::"
+
+# Without the local native lib (empty $CED_OPTS) cedarling-java falls back to the nightly release's.
+set -e
+echo "::group::build cedarling-java + jans-core-cedarling + jans-config-api"
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae $CED_OPTS \
+  -f jans-cedarling/bindings/cedarling-java/pom.xml clean install
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
+  -pl cedarling -f jans-core/pom.xml clean install
+mvn $MVN_PAR -B -ntp -s "$MVN_SETTINGS" -Dcfg=default -Dmaven.test.skip=true $MVN_SKIPS -fae \
+  $NO_FIPS -f jans-config-api/pom.xml clean install
+echo "::endgroup::"
+set +e
 
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
 # failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
-for mod in agama jans-cedarling/bindings/cedarling-java jans-lock/lock-server; do
+for mod in agama jans-lock/lock-server; do
   case "$mod" in
-    *cedarling*|*lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
+    *lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac
   pl=""
   case "$mod" in *lock-server) pl="$NO_FIPS" ;; esac
@@ -161,7 +178,7 @@ if [ -z "${AIO_IMAGE:-}" ]; then
   LOCAL_RELEASE="$REPO_ROOT/local-release"
   mkdir -p "$LOCAL_RELEASE"
   find "$HOME/.m2/repository/io/jans" -type f -path "*/0.0.0-nightly/*" \
-    \( -name '*.war' -o -name '*-distribution.jar' -o -name '*-agama-pw.gama' \) \
+    \( -name '*.war' -o -name '*-distribution.jar' -o -name '*-agama-pw.gama' -o -name '*-service-deps-pack.zip' \) \
     -exec cp -f {} "$LOCAL_RELEASE/" \;
   echo "serving local artifacts on :8088"; ls "$LOCAL_RELEASE"
   ( cd "$LOCAL_RELEASE" && exec python3 -m http.server 8088 >/dev/null 2>&1 ) &
@@ -202,14 +219,21 @@ else
     }
   done
   [ "$img_rc" -eq 0 ] || exit 1
-  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema must be
-  # overlaid or the loader creates the tables from the pinned one.
+  # The images pin jans-linux-setup at JANS_SOURCE_VERSION, so this checkout's schema and SQL
+  # column types/indexes must be overlaid or the loader creates the tables from the pinned ones.
   for svc in persistence-loader config-api auth-server scim fido2; do
-    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup/schema >/dev/null <<EOF
+    docker build -q -t "local/$svc:ci" -f - jans-linux-setup/jans_setup >/dev/null <<EOF
 FROM local/$svc:ci
-COPY jans_schema.json custom_schema.json /app/schema/
+COPY schema/jans_schema.json schema/custom_schema.json /app/schema/
+COPY static/rdbm/sql_data_types.json /app/static/rdbm/
 EOF
   done
+  docker build -q -t local/persistence-loader:ci -f - jans-linux-setup/jans_setup >/dev/null <<EOF
+FROM local/persistence-loader:ci
+COPY static/rdbm /app/static/rdbm
+COPY templates/test /app/templates/test
+COPY schema/jans_test_schema.json /app/templates/test/
+EOF
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
     --build-arg JANS_CONFIG_API_IMAGE=local/config-api:ci \
@@ -439,9 +463,10 @@ echo "::group::run integration suites"
 # auth-client is the slowest (HtmlUnit browser flows), hence the generous timeout.
 for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
              jans-fido2:jans-fido2/client jans-orm:jans-orm/integration-test \
-             jans-auth-server:jans-auth-server/client; do
+             jans-auth-server:jans-auth-server/client jans-lock:jans-lock/lock-server/client; do
   mod="${entry%%:*}"; dir="${entry#*:}"
   want_module "$mod" || { echo "[info] skipping $dir ($mod not selected)"; continue; }
+  [ "$mod" = jans-lock ] && [ "$CED_READY" != 1 ] && { echo "[info] skipping $dir (lock-server not built)"; continue; }
   echo "::group::test $dir"
   suitelog="aio-logs/test-$(printf '%s' "$dir" | tr / _).log"
   rc=0; timed_out=0
@@ -489,7 +514,7 @@ want_module jans-core && { timeout -k 30 600 mvn $OPTS -f jans-core/pom.xml test
 want_module jans-auth-server && { timeout -k 30 600 mvn $OPTS -f jans-auth-server/pom.xml -pl model,common,server test > aio-logs/unit-jans-auth-server.log 2>&1 || note_unit $? jans-auth-server; }
 want_module agama && { timeout -k 30 600 mvn $OPTS -f agama/pom.xml test > aio-logs/unit-agama.log 2>&1 || note_unit $? agama; }
 [ "$CED_READY" = 1 ] && want_module jans-cedarling && { timeout -k 30 600 mvn $OPTS $CED_OPTS -f jans-cedarling/bindings/cedarling-java/pom.xml test > aio-logs/unit-cedarling-java.log 2>&1 || note_unit $? cedarling-java; }
-[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS $NO_FIPS -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
+[ "$CED_READY" = 1 ] && want_module jans-lock && { timeout -k 30 600 mvn $OPTS $CED_OPTS -pl '!server-fips,!client' -f jans-lock/lock-server/pom.xml test > aio-logs/unit-jans-lock.log 2>&1 || note_unit $? jans-lock; }
 # fido2-server units: exclude the two *DeviceRegistration* TestNG tests (need an embedded Weld+DB
 # harness that does not exist here) and the MDS test (hits mds3.fido.tools over the network).
 want_module jans-fido2 && { timeout -k 30 600 mvn $OPTS -Dtest='!Fido2DeviceRegistration*,!FetchMdsProviderServiceTest' -f jans-fido2/server/pom.xml test > aio-logs/unit-fido2-server.log 2>&1 || note_unit $? fido2-server; }

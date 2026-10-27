@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29eb40082e5df7c4d3452bc1b6c674d39357048
+FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdbe9a11849cd2e6af0d2661eaa10400a124c19d
 
 # ===============
 # Alpine packages
@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache python3 curl tini py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps git wget \
     && mkdir -p /usr/java/latest \
     && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=f95ce65c8f056490d403e5367f022bb766dc19e3
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
@@ -48,7 +48,8 @@ RUN git clone --depth ${GIT_CLONE_DEPTH} --filter blob:none --no-checkout https:
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/site/site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli \
-    && cp -R ${JANS_SETUP_DIR}/templates/test /app/templates/test
+    && cp -R ${JANS_SETUP_DIR}/templates/test /app/templates/test \
+    && cp ${JANS_SETUP_DIR}/schema/jans_test_schema.json /app/templates/test/
 
 WORKDIR /
 
@@ -59,10 +60,12 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # =======
@@ -140,10 +143,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_PERSISTENCE_IMPORT_BUILTIN_LDIF=true \
     CN_DOCUMENT_STORE_TYPE=DB \
-    CN_JACKRABBIT_RMI_URL="" \
-    CN_JACKRABBIT_URL=http://localhost:8080 \
-    CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
-    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \

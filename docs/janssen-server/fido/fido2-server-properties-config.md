@@ -107,7 +107,7 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `metadataRefreshInterval` | Integer | `1296000` | Expiration time in seconds (e.g., 15 days) before checking and reloading the FIDO Alliance MDS TOC. |
 | <span id="servermetadatafolder">`serverMetadataFolder`</span> | String | `"/etc/jans/conf/fido2/server_metadata"` | Folder where local vendor metadata statement JSON files are placed manually. |
 | `enabledFidoAlgorithms` | Array of Strings | `["RS256", "ES256"]` | Enabled cryptographic signing algorithms allowed for credentials. Accepted names: `RS256`, `RS384`, `RS512`, `RS65535`, `PS256`, `PS384`, `PS512`, `ES256`, `ES384`, `ES512`, `ESP256`, `ESP384`, `EdDSA`, `Ed25519`, `Ed448`, `ML-DSA-44`, `ML-DSA-65`, `ML-DSA-87` — the algorithms the server can both advertise and complete a registration with. When unset, the server advertises `RS256`, `ES256` and `EdDSA`. An unrecognised name is ignored. A recognised name the deployment cannot actually complete a registration with is logged at `ERROR` and left out of `pubKeyCredParams` — see [Advertised algorithms](#advertised-algorithms). |
-| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a `policy` object — see [Per-relying-party policy](#per-relying-party-policy). |
+| `rp` | Array of Objects | `[ { "id": "https://jans.io", "origins": ["jans.io"] } ]` | Relying Party (RP) configuration mapping expected IDs to valid origins. Each entry may also carry a `policy` object — see [Per-relying-party policy](#per-relying-party-policy). It may also list `androidApps` and `iosApps` — see [Native applications of a relying party](#native-applications-of-a-relying-party). |
 | `metadataServers` | Array of Objects | `[ { "url": "https://mds.fidoalliance.org/" } ]` | External FIDO Metadata Service endpoints to download statement catalogs. |
 | `disableMetadataService` | Boolean | `false` | If set to `true`, the FIDO2 server skips validating authenticators against the MDS3 service. |
 | `mdsDownloadStartupRetries` | Integer | `3` | Number of times the MDS TOC download is *retried* at server startup when the TOC blob is missing (a missing TOC prevents attestation validation). This is in addition to the initial attempt, so the default of `3` means up to 4 downloads. `0` disables retries. Retries stop early once the blob is present, and are skipped when the metadata server answers HTTP 429, since it has explicitly asked the server to back off. |
@@ -121,6 +121,11 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
 | `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
 | `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike `lockAuditEnabled`, `lockAuditEndpoint` and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect. |
+| `nativeReadinessEnabled` | Boolean | `false` | Makes the native app readiness endpoint available. When `false` the endpoint does no work. |
+| `nativeReadinessAllowExternalFetch` | Boolean | `false` | Allows the readiness checks to make outbound requests to a relying party's `/.well-known` association files. Outbound requests need both this and `nativeReadinessEnabled`. |
+| `nativeReadinessMaxResponseBytes` | Integer | `131072` | Maximum number of bytes read from one association file. The server also enforces a fixed upper bound, so a mis-set value cannot remove the limit. |
+| `nativeReadinessTimeoutMs` | Integer | `3000` | Overall deadline in milliseconds for fetching one association file. The server also enforces a fixed upper bound. |
+| `nativeReadinessCacheTtlSeconds` | Integer | `3600` | Time in seconds a readiness result is served from cache before the files are fetched again. |
 
 ### Lock Server audit delivery
 
@@ -171,6 +176,46 @@ changing on upgrade.
 Only `attestationMode` is settable per RP today. Further fields are added alongside the change that
 enforces them, so that anything listed here is a policy actually in effect rather than a value that is
 merely stored.
+
+### Native applications of a relying party
+
+An entry under `rp` may also list the Android and iOS apps that share its RP ID, next to the web
+`origins`:
+
+```json
+{
+  "id": "example.com",
+  "origins": ["https://login.example.com"],
+  "androidApps": [
+    {
+      "packageName": "com.example.app",
+      "sha256CertFingerprints": ["AB:CD:EF:..."],
+      "distribution": "play-store"
+    }
+  ],
+  "iosApps": [
+    { "teamId": "T9A667JL6T", "bundleId": "com.example.app" }
+  ]
+}
+```
+
+| Field | Meaning |
+| :--- | :--- |
+| `androidApps[].packageName` | Android application package name |
+| `androidApps[].sha256CertFingerprints` | SHA-256 fingerprints of the app signing certificate, colon-separated hex |
+| `androidApps[].distribution` | `play-store` or `self-signed`: which signing certificate the fingerprints belong to |
+| `iosApps[].teamId` | Apple Developer Team ID |
+| `iosApps[].bundleId` | Application bundle identifier |
+
+This is the single place an RP's native apps are recorded. It is what the `assetlinks.json` and
+`apple-app-site-association` files are meant to be generated from, and what a deployed copy of them can be
+checked against.
+
+**These fields are recorded but not enforced.** Whether an origin is accepted is decided only by `origins`
+(see above); a package name, fingerprint, team ID or bundle ID listed here neither allows nor blocks a
+ceremony. When an origin is rejected, the server log says which RPs were considered and that configured native
+apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
+these fields existed, and nothing needs changing on upgrade.
 
 ### Advertised algorithms
 

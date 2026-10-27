@@ -9,10 +9,8 @@ from io.jans.as.model.jwt import Jwt
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
 from io.jans.orm import PersistenceEntryManager
-from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.model.config.adminui import AdminConf
-from io.jans.as.common.model.session import SessionId
 from org.json import JSONObject
 from java.lang import String, System
 from java.util import HashSet
@@ -80,7 +78,7 @@ class UpdateToken(UpdateTokenType):
             jwtClaims = userInfoJwt.getClaims()
             self.validateAudience(context, jwtClaims, adminUIConfig)
             self.validateExpiration(jwtClaims)
-            userInum = self.validateUserInum(jwtClaims)
+            self.validateUserInum(jwtClaims)
 
             jansAdminUIRoleClaim = jwtClaims.getClaim("jansAdminUIRole")
             if jansAdminUIRoleClaim is None:
@@ -109,7 +107,7 @@ class UpdateToken(UpdateTokenType):
                 scopes.add(ele.getPermission())
 
     def validateSignature(self, userInfoJwt):
-        if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() == None:
+        if userInfoJwt.getHeader().getSignatureAlgorithm().getAlgorithm() is None:
             print "Exception occured. Unsigned JWT not allowed. The User-Info JWT is not valid"
             raise BadRequestException("Unsigned JWT not allowed. The User-Info JWT is not valid")
 

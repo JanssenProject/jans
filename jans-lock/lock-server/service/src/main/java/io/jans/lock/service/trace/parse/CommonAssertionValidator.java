@@ -18,7 +18,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.trace.TraceConstants;
-import io.jans.lock.service.trace.crypto.StrictBase64Url;
+import io.jans.lock.service.trace.TraceIssuers;
+import io.jans.lock.trace.crypto.StrictBase64Url;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -26,7 +27,7 @@ import jakarta.inject.Inject;
 /**
  * Validates the common fields every TRACE assertion must carry regardless of {@code event_kind}
  * (design §7.1) and fills in {@link ParsedAssertion}'s typed accessors. Event-kind-specific rules
- * (design §7.2) are task 09's job, not this class's.
+ * (design §7.2) belong to the event-kind validators, not this class.
  *
  * @author Yuriy Movchan
  */
@@ -51,6 +52,10 @@ public class CommonAssertionValidator {
 	@Inject
 	private AppConfiguration appConfiguration;
 
+	private static final String TRACE = "trace";
+
+	private static final String RECORD_ID = "record_id";
+
 	private Clock clock = Clock.systemUTC();
 
 	/**
@@ -60,14 +65,14 @@ public class CommonAssertionValidator {
 	public void validate(ParsedAssertion assertion) {
 		ObjectNode root = assertion.getRoot();
 
-		rejectDomainField(root);
+		ReservedMemberPaths reservedMembers = findReservedMembers(root);
 
-		ObjectNode trace = requireObject(root, "trace", "trace");
+		ObjectNode trace = requireObject(root, TRACE, TRACE);
 		ObjectNode producerChainNode = requireObject(root, "producer_chain", "producer_chain");
 
 		String producer = requireNonEmptyString(root, "producer", "producer", null);
 		String kid = requireNonEmptyString(root, "kid", "kid", null);
-		String recordId = requireNonEmptyString(root, "record_id", "record_id", null);
+		String recordId = requireNonEmptyString(root, RECORD_ID, RECORD_ID, null);
 		if (!isUuid(recordId) && !isUlid(recordId)) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "record_id_format");
 		}
@@ -86,8 +91,8 @@ public class CommonAssertionValidator {
 
 		long signedAt = requireIntegralInRange(trace, "signed_at", "trace.signed_at", 0, MAX_SAFE_INTEGER);
 		long nowSeconds = Instant.now(clock).getEpochSecond();
-		long latenessThresholdSeconds = appConfiguration.getTraceConfiguration().getLatenessThresholdSeconds();
-		if (signedAt > nowSeconds + latenessThresholdSeconds) {
+		long maxFutureSkewSeconds = appConfiguration.getTraceConfiguration().getMaxFutureSkewSeconds();
+		if (signedAt > nowSeconds + maxFutureSkewSeconds) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
 					"signed_at_in_future");
 		}
@@ -98,6 +103,8 @@ public class CommonAssertionValidator {
 				MAX_SHORT_STRING);
 		requireObject(trace, "event", "trace.event");
 		JsonNode subject = trace.get("subject");
+		validateOptionalTraceMembers(trace);
+		validateOptionalSubjectMembers(subject);
 
 		String producerChainProducerId = requireNonEmptyString(producerChainNode, "producer_id",
 				"producer_chain.producer_id", null);
@@ -114,6 +121,8 @@ public class CommonAssertionValidator {
 					"prev_record_hash_format");
 		}
 
+		validateChainLink(producerChainNode, sequenceNumber);
+
 		if (!TraceConstants.PRODUCER_PATTERN.matcher(producer).matches()) {
 			throw new TraceValidationException(TraceValidationException.ERROR_PRODUCER_MISMATCH, "producer_format");
 		}
@@ -121,6 +130,8 @@ public class CommonAssertionValidator {
 			throw new TraceValidationException(TraceValidationException.ERROR_PRODUCER_MISMATCH,
 					"producer_chain_mismatch");
 		}
+
+		validateProducerVersion(root);
 
 		List<ParsedAssertion.ParentRecordId> parentRecordIds = parseParentRecordIds(root);
 
@@ -149,12 +160,219 @@ public class CommonAssertionValidator {
 				producerChainId, sequenceNumber, prevRecordHash));
 		assertion.setParentRecordIds(parentRecordIds);
 		assertion.setSignature(signature);
+		assertion.setReservedMembers(reservedMembers.getPaths(), reservedMembers.getTotal());
 	}
 
-	private void rejectDomainField(ObjectNode root) {
-		if (root.has(TraceConstants.DOMAIN_FIELD) || root.path("trace").has(TraceConstants.DOMAIN_FIELD)) {
-			throw new TraceValidationException(TraceValidationException.ERROR_DOMAIN_FIELD_FORBIDDEN,
-					TraceConstants.DOMAIN_FIELD);
+	/**
+	 * Type-checks the optional GovOps profile members of {@code trace} (profile §2). Event-kind
+	 * rules and closed vocabularies deferred to the full design are not enforced here.
+	 */
+	private void validateOptionalTraceMembers(ObjectNode trace) {
+		for (String field : new String[] { "execution_epoch_id", "previous_epoch_id", "parent_execution_id" }) {
+			optionalNonEmptyString(trace, field, "trace." + field, MAX_SHORT_STRING);
+		}
+
+		validateOperationIds(trace.get("operation_ids"));
+		validateSession(trace);
+
+		optionalNonEmptyString(trace, "evidence_origin", "trace.evidence_origin", null);
+		optionalNonEmptyString(trace, "measurement_point", "trace.measurement_point", null);
+
+		JsonNode recorder = trace.get("recorder");
+		if (isPresent(recorder) && !recorder.isObject() && !recorder.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:trace.recorder");
+		}
+
+		optionalObject(trace, "attestation_ref", "trace.attestation_ref");
+
+		optionalStrings(optionalObject(trace, "workload_authentication", "trace.workload_authentication"),
+				"trace.workload_authentication.", "authentication_layer", "method", "authenticated_workload_id",
+				"proof_ref");
+		optionalStrings(optionalObject(trace, "model", "trace.model"), "trace.model.", "provider", "model_id",
+				"version");
+	}
+
+	private void optionalStrings(JsonNode node, String pathPrefix, String... fields) {
+		if (node == null) {
+			return;
+		}
+		for (String field : fields) {
+			optionalString(node, field, pathPrefix + field);
+		}
+	}
+
+	private void validateOperationIds(JsonNode operationIds) {
+		if (!isPresent(operationIds)) {
+			return;
+		}
+		if (!operationIds.isArray()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:trace.operation_ids");
+		}
+		for (int i = 0; i < operationIds.size(); i++) {
+			checkNonEmptyString(operationIds.get(i), "trace.operation_ids[" + i + "]", null);
+		}
+	}
+
+	private void validateSession(ObjectNode trace) {
+		optionalNonEmptyString(trace, "session_id", "trace.session_id", null);
+		if (isPresent(trace.get("session_id")) || isPresent(trace.get("session_issuer"))) {
+			String sessionIssuer = requireNonEmptyString(trace, "session_issuer", "trace.session_issuer", null);
+			if (!TraceIssuers.isValid(sessionIssuer)) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+						"invalid:trace.session_issuer");
+			}
+		}
+	}
+
+	/** Type-checks {@code trace.subject} (GovOps profile §3): an object whose sponsor/org members are string or object. */
+	private void validateOptionalSubjectMembers(JsonNode subject) {
+		if (!isPresent(subject)) {
+			return;
+		}
+		if (!subject.isObject()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:trace.subject");
+		}
+		for (String field : new String[] { "human_sponsor", "delegating_org" }) {
+			JsonNode node = subject.get(field);
+			if (isPresent(node) && !node.isObject() && !node.isTextual()) {
+				throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+						"type:trace.subject." + field);
+			}
+		}
+	}
+
+	/**
+	 * Type-checks {@code producer_chain.chain_link} (GovOps profile §5). The member exists only on a
+	 * genesis ({@code sequence_number == 1}); anywhere else it is {@code invalid_genesis}. Full link
+	 * validation against the prior chain stays deferred (MVP design §8).
+	 */
+	private void validateChainLink(ObjectNode producerChainNode, long sequenceNumber) {
+		JsonNode chainLink = producerChainNode.get("chain_link");
+		if (!isPresent(chainLink)) {
+			return;
+		}
+		if (!chainLink.isObject()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:producer_chain.chain_link");
+		}
+		if (sequenceNumber != 1) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_GENESIS,
+					"chain_link_on_non_genesis");
+		}
+		optionalNonEmptyString(chainLink, "prev_producer_chain_id", "producer_chain.chain_link.prev_producer_chain_id",
+				null);
+	}
+
+	private boolean isPresent(JsonNode node) {
+		return node != null && !node.isNull();
+	}
+
+	private void checkNonEmptyString(JsonNode node, String path, Integer maxLength) {
+		if (!node.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+		}
+		if (node.textValue().isEmpty()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "empty:" + path);
+		}
+		if (maxLength != null && node.textValue().length() > maxLength) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "length:" + path);
+		}
+	}
+
+	private void optionalNonEmptyString(JsonNode parent, String field, String path, Integer maxLength) {
+		JsonNode node = parent.get(field);
+		if (isPresent(node)) {
+			checkNonEmptyString(node, path, maxLength);
+		}
+	}
+
+	private void optionalString(JsonNode parent, String field, String path) {
+		JsonNode node = parent.get(field);
+		if (isPresent(node) && !node.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+		}
+	}
+
+	/** @return the member when present and an object, {@code null} when absent */
+	private JsonNode optionalObject(JsonNode parent, String field, String path) {
+		JsonNode node = parent.get(field);
+		if (!isPresent(node)) {
+			return null;
+		}
+		if (!node.isObject()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION, "type:" + path);
+		}
+		return node;
+	}
+
+	private void validateProducerVersion(ObjectNode root) {
+		if (!root.has(TraceConstants.PRODUCER_VERSION_FIELD)) {
+			return;
+		}
+		JsonNode node = root.get(TraceConstants.PRODUCER_VERSION_FIELD);
+		if (!node.isTextual()) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"type:" + TraceConstants.PRODUCER_VERSION_FIELD);
+		}
+		int length = node.textValue().length();
+		if (length < 1 || length > TraceConstants.MAX_PRODUCER_VERSION_LENGTH) {
+			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_ASSERTION,
+					"length:" + TraceConstants.PRODUCER_VERSION_FIELD);
+		}
+	}
+
+	/**
+	 * Lists the paths of members Lock derives itself ({@link TraceConstants#DOMAIN_FIELD} and
+	 * {@link TraceConstants#LOCK_DERIVED_MEMBERS}) found at the top level, in {@code trace},
+	 * {@code trace.policy}, {@code trace.event} and in each {@code decision}/{@code invocation}
+	 * fact (GovOps profile §12). Such members are ignored, never rejected: the record is flagged
+	 * and Lock's own values are used. Members of other objects (parent edges, {@code tokens[]})
+	 * are not reserved. A non-object container is skipped and left to the shape checks.
+	 */
+	private ReservedMemberPaths findReservedMembers(ObjectNode root) {
+		ReservedMemberPaths found = new ReservedMemberPaths();
+		collectReservedMembers(root, "", found);
+		JsonNode trace = root.get(TRACE);
+		if (trace == null || !trace.isObject()) {
+			return found;
+		}
+		collectReservedMembers(trace, "trace.", found);
+		collectReservedMembersOfObject(trace.get("policy"), "trace.policy.", found);
+		JsonNode event = trace.get("event");
+		if (event == null || !event.isObject()) {
+			return found;
+		}
+		collectReservedMembers(event, TraceConstants.TRACE_EVENT_PATH, found);
+		for (String field : new String[] { "decision", "invocation" }) {
+			collectReservedMembersOfObject(event.get(field), TraceConstants.TRACE_EVENT_PATH + field + ".", found);
+		}
+		for (String field : new String[] { "decisions", "invocations" }) {
+			JsonNode entries = event.get(field);
+			if (entries != null && entries.isArray()) {
+				for (int i = 0; i < entries.size(); i++) {
+					collectReservedMembersOfObject(entries.get(i), TraceConstants.TRACE_EVENT_PATH + field + "[" + i + "].", found);
+				}
+			}
+		}
+		return found;
+	}
+
+	private static void collectReservedMembersOfObject(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
+		if (node != null && node.isObject()) {
+			collectReservedMembers(node, pathPrefix, found);
+		}
+	}
+
+	private static void collectReservedMembers(JsonNode node, String pathPrefix, ReservedMemberPaths found) {
+		if (node.has(TraceConstants.DOMAIN_FIELD)) {
+			found.add(pathPrefix + TraceConstants.DOMAIN_FIELD);
+		}
+		for (String member : TraceConstants.LOCK_DERIVED_MEMBERS) {
+			if (node.has(member)) {
+				found.add(pathPrefix + member);
+			}
 		}
 	}
 
@@ -176,7 +394,7 @@ public class CommonAssertionValidator {
 						"type:" + path);
 			}
 			String producerId = requireNonEmptyString(entry, "producer_id", path + ".producer_id", null);
-			String recordId = requireNonEmptyString(entry, "record_id", path + ".record_id", null);
+			String recordId = requireNonEmptyString(entry, RECORD_ID, path + "." + RECORD_ID, null);
 			String relationshipType = requireNonEmptyString(entry, "relationship_type", path + ".relationship_type",
 					null);
 			result.add(new ParsedAssertion.ParentRecordId(producerId, recordId, relationshipType));

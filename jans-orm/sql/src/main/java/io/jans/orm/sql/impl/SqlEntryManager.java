@@ -66,6 +66,8 @@ import io.jans.orm.util.StringHelper;
  */
 public class SqlEntryManager extends BaseEntryManager<SqlOperationService> implements Serializable {
 
+	private static final String MESSAGE_FAILED_TO_UPDATE_ENTRY = "Failed to update entry: '%s'";
+
 	private static final long serialVersionUID = 2127241817126412574L;
 
     private static final Logger LOG = LoggerFactory.getLogger(SqlEntryManager.class);
@@ -76,9 +78,9 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter(false);
 
-    private List<DeleteNotifier> subscribers;
+    private final List<DeleteNotifier> subscribers;
     
-    private boolean validateAfterUpdate;
+    private final boolean validateAfterUpdate;
 
     protected SqlEntryManager(SqlOperationService operationService) {
         this.operationService = operationService;
@@ -230,60 +232,85 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
         // Update entry
         try {
-            List<AttributeDataModification> modifications = new ArrayList<AttributeDataModification>(attributeDataModifications.size());
-            for (AttributeDataModification attributeDataModification : attributeDataModifications) {
-                AttributeData attribute = attributeDataModification.getAttribute();
-                AttributeData oldAttribute = attributeDataModification.getOldAttribute();
-
-                String attributeName = null;
-                Object[] attributeValues = null;
-                Boolean multiValued = null;
-                Boolean jsonValue = null;
-                Boolean binaryValue = null;
-                if (attribute != null) {
-                    attributeName = attribute.getName();
-                    attributeValues = attribute.getValues();
-                    multiValued = attribute.getMultiValued();
-                    jsonValue = attribute.getJsonValue();
-                    binaryValue = attribute.getBinaryValue();
-                }
-
-                String oldAttributeName = null;
-                Object[] oldAttributeValues = null;
-                if (oldAttribute != null) {
-                    oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = oldAttribute.getValues();
-                }
-                
-                AttributeDataModification modification = null;
-                AttributeModificationType modificationType = attributeDataModification.getModificationType();
-				if ((AttributeModificationType.ADD == modificationType) ||
-                	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
-                } else {
-                    if ((AttributeModificationType.REMOVE == modificationType)) {
-                		// REMOVE for already empty table cells not reaches this method. For entities with
-                		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
-                		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
-                    } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
-                    }
-                }
-
-                if (modification != null) {
-                    modifications.add(modification);
-                }
-            }
+            List<AttributeDataModification> modifications = buildSqlModifications(baseObjectClass, attributeDataModifications);
 
             if (modifications.size() > 0) {
                 boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), baseObjectClass, modifications);
                 if (!result) {
-                    throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
+                    throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn));
                 }
             }
         } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn), ex);
+            throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn), ex);
         }
+    }
+
+    @Override
+    protected boolean mergeWithVersion(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications,
+            Integer expiration, String versionAttributeName, Object expectedVersionValue, Object newVersionValue) {
+    	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
+
+        try {
+            List<AttributeDataModification> modifications = buildSqlModifications(baseObjectClass, attributeDataModifications);
+            String internalVersionAttributeName = toInternalAttribute(baseObjectClass, versionAttributeName);
+
+            // Unlike merge(), this call must never be skipped for an empty diff -- the version
+            // bump (and therefore the CAS check) always has to reach the database.
+            return getOperationService().updateEntryWithVersion(toSQLKey(dn).getKey(), baseObjectClass, modifications,
+                    internalVersionAttributeName, expectedVersionValue);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format(MESSAGE_FAILED_TO_UPDATE_ENTRY, dn), ex);
+        }
+    }
+
+    private List<AttributeDataModification> buildSqlModifications(String baseObjectClass,
+            List<AttributeDataModification> attributeDataModifications) {
+        List<AttributeDataModification> modifications = new ArrayList<AttributeDataModification>(attributeDataModifications.size());
+        for (AttributeDataModification attributeDataModification : attributeDataModifications) {
+            AttributeData attribute = attributeDataModification.getAttribute();
+            AttributeData oldAttribute = attributeDataModification.getOldAttribute();
+
+            String attributeName = null;
+            Object[] attributeValues = null;
+            Boolean multiValued = null;
+            Boolean jsonValue = null;
+            Boolean binaryValue = null;
+            if (attribute != null) {
+                attributeName = attribute.getName();
+                attributeValues = attribute.getValues();
+                multiValued = attribute.getMultiValued();
+                jsonValue = attribute.getJsonValue();
+                binaryValue = attribute.getBinaryValue();
+            }
+
+            String oldAttributeName = null;
+            Object[] oldAttributeValues = null;
+            if (oldAttribute != null) {
+                oldAttributeName = oldAttribute.getName();
+                oldAttributeValues = oldAttribute.getValues();
+            }
+
+            AttributeDataModification modification = null;
+            AttributeModificationType modificationType = attributeDataModification.getModificationType();
+			if ((AttributeModificationType.ADD == modificationType) ||
+            	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
+                modification = createModification(attribute, modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
+            } else {
+                if ((AttributeModificationType.REMOVE == modificationType)) {
+            		// REMOVE for already empty table cells not reaches this method. For entities with
+            		// forceUpdate DB state is unknown, hence REMOVE should set null to table cell
+            		modification = createModification(attribute, AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, binaryValue, oldAttributeValues);
+                } else if ((AttributeModificationType.REPLACE == modificationType)) {
+                    modification = createModification(attribute, AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, binaryValue, attributeValues);
+                }
+            }
+
+            if (modification != null) {
+                modifications.add(modification);
+            }
+        }
+
+        return modifications;
     }
 
     @Override
@@ -414,6 +441,22 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     }
 
     @Override
+    public <T> List<T> findEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+            SortOrder sortOrder, int start, int count, int chunkSize) {
+        if (StringHelper.isEmptyString(baseDN)) {
+            throw new MappingException("Base DN to find entries is null");
+        }
+
+        PagedResult<EntryData> searchResult = findEntriesImpl(baseDN, entryClass, filter, SearchScope.SUB, ldapReturnAttributes, sortBy, sortOrder,
+                false, null, SearchReturnDataType.SEARCH, start, count, chunkSize);
+        if (searchResult.getEntriesCount() == 0) {
+            return new ArrayList<T>(0);
+        }
+
+        return createEntities(baseDN, entryClass, searchResult);
+    }
+
+    @Override
     public <T> PagedResult<T> findPagedEntries(String baseDN, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
             SortOrder sortOrder, int start, int count, int chunkSize) {
         if (StringHelper.isEmptyString(baseDN)) {
@@ -442,6 +485,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
             String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, BatchOperation<T> batchOperation, SearchReturnDataType returnDataType, int start,
             int count, int chunkSize) {
+        return findEntriesImpl(baseDN, entryClass, filter, scope, ldapReturnAttributes, sortBy, sortOrder, true, batchOperation, returnDataType, start,
+                count, chunkSize);
+    }
+
+    @SuppressWarnings("java:S107")
+    protected <T> PagedResult<EntryData> findEntriesImpl(String baseDN, Class<T> entryClass, Filter filter, SearchScope scope,
+            String[] ldapReturnAttributes, String sortBy, SortOrder sortOrder, boolean applyDefaultSort, BatchOperation<T> batchOperation,
+            SearchReturnDataType returnDataType, int start, int count, int chunkSize) {
         // Check entry class
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
@@ -467,8 +518,9 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         LOG.trace("objectClasses: {}", ArrayHelper.toString(objectClasses));
         LOG.trace("Search filter: {}", searchFilter);
 
-        // Prepare default sort
-        OrderSpecifier<?>[] defaultSort = getDefaultSort(entryClass);
+        // Prepare default sort. An explicit sort can replace it: a trailing default sort key makes the database sort
+        // all matching rows instead of reading them in index order
+        OrderSpecifier<?>[] defaultSort = (applyDefaultSort || StringHelper.isEmpty(sortBy)) ? getDefaultSort(entryClass) : null;
 
         if (StringHelper.isNotEmpty(sortBy)) {
             OrderSpecifier<?> requestedSort = buildSort(sortBy, sortOrder);
@@ -519,7 +571,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 			result = convertedExpression.toString();
 		} catch (Exception ex) {
 			// QueryDSL can't convert filter
-			LOG.error(String.format("QueryDSL can't build query based on filter: '%s'", result));
+			LOG.error("QueryDSL can't build query based on filter: '{}'", result);
 		}
 
 		return result;

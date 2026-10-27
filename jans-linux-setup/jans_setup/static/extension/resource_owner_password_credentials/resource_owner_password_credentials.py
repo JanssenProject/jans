@@ -1,7 +1,6 @@
 from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
-from java.lang import String
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def __init__(self, currentTimeMillis):

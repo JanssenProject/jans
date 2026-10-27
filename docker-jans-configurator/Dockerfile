@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29eb40082e5df7c4d3452bc1b6c674d39357048
+FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdbe9a11849cd2e6af0d2661eaa10400a124c19d
 
 # ===============
 # Alpine packages
@@ -6,7 +6,7 @@ FROM bellsoft/liberica-openjre-alpine:17.0.18@sha256:2557430a37dffda23f34fc6ce29
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache openssl python3 curl tini py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps wget git
 
 # ===========
@@ -17,7 +17,7 @@ RUN apk update \
 
 ENV CN_VERSION=0.0.0-nightly
 ENV CN_RELEASE_TAG=nightly
-ENV CN_BUILD_DATE='2026-08-05T12:20:33Z'
+ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
 ENV CN_SOURCE_URL=https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -28,7 +28,7 @@ RUN mkdir -p /opt/jans/configurator/javalibs \
 # Assets sync
 # ===========
 
-ARG JANS_SOURCE_VERSION=958e7b9d161cdd94c4468fc975abd58f9e3bfd14
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 
 ARG GIT_CLONE_DEPTH=100
@@ -48,10 +48,12 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # =======

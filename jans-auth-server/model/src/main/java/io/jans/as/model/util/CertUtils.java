@@ -185,10 +185,16 @@ public class CertUtils {
             return false;
         }
 
-        X500Name n1 = new X500Name(BCStyleExtended.INSTANCE, rdn1);
-        X500Name n2 = new X500Name(BCStyleExtended.INSTANCE, rdn2);
+        try {
+            X500Name n1 = new X500Name(BCStyleExtended.INSTANCE, rdn1);
+            X500Name n2 = new X500Name(BCStyleExtended.INSTANCE, rdn2);
 
-        return n1.equals(n2);
+            return n1.equals(n2);
+        } catch (IllegalArgumentException e) {
+            // BC 1.86+ rejects malformed attribute values (e.g. non 2-char country code)
+            log.debug("Failed to parse RDN: {}", e.getMessage());
+            return false;
+        }
     }
 
     public static X509Certificate getIssuer(final X509Certificate certificate, final List<X509Certificate> issuers) {

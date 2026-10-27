@@ -74,6 +74,76 @@ pub struct MultiIssuerAuthorizeResult {
     pub response: Response,
     pub decision: bool,
     pub request_id: String,
+    pub dropped_tokens: Vec<DroppedToken>,
+}
+
+use cedarling::{DropReason, TokenInputError};
+
+// UniFFI exports the core enums directly; a mismatch with the core definition
+// fails to compile, so there is no hand-written mapping to drift.
+#[uniffi::remote(Enum)]
+pub enum TokenInputError {
+    EmptyMapping,
+    EmptyPayload,
+}
+
+#[uniffi::remote(Enum)]
+pub enum DropReason {
+    InvalidInput(TokenInputError),
+    JwtValidationFailed,
+    DuplicateToken,
+    DuplicateMapping,
+    NoProcessorRegistered,
+    CustomProcessingFailed,
+    CustomProcessingTimedOut,
+    EntityBuildFailed,
+}
+
+/// Why a token was dropped. `kind()`, `detail()` and `message()` return the
+/// same values as the core JSON `reason` object; `variant` is the typed reason.
+#[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
+pub struct DropReasonInfo {
+    pub variant: DropReason,
+}
+
+#[uniffi::export]
+impl DropReasonInfo {
+    /// Stable snake-case slug, e.g. `"jwt_validation_failed"`.
+    pub fn kind(&self) -> String {
+        self.variant.slug().to_string()
+    }
+
+    /// Stable detail slug for `invalid_input` (`"empty_mapping"` /
+    /// `"empty_payload"`); `None` otherwise.
+    pub fn detail(&self) -> Option<String> {
+        self.variant.detail().map(str::to_string)
+    }
+
+    /// Claim-free human-readable message; non-empty for every reason.
+    pub fn message(&self) -> String {
+        self.variant.message()
+    }
+}
+
+/// A token dropped during multi-issuer authorization, identified by its input
+/// `mapping` and zero-based `index`, with the claim-free `reason`.
+#[derive(Debug, uniffi::Record)]
+pub struct DroppedToken {
+    pub mapping: String,
+    // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
+    // than a JVM-hostile ULong; usize casts fit trivially.
+    pub index: i64,
+    pub reason: DropReasonInfo,
+}
+
+impl From<core::DroppedToken> for DroppedToken {
+    fn from(d: core::DroppedToken) -> Self {
+        Self {
+            reason: DropReasonInfo { variant: d.reason },
+            mapping: d.mapping,
+            index: d.index as i64,
+        }
+    }
 }
 
 impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
@@ -82,6 +152,7 @@ impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
             response: result.response.into(),
             decision: result.decision,
             request_id: result.request_id,
+            dropped_tokens: result.dropped_tokens.into_iter().map(Into::into).collect(),
         }
     }
 }

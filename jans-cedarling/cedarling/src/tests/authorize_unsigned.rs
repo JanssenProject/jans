@@ -251,10 +251,9 @@ async fn test_annotations_of_determining_policies() {
 
     let redirects = cedarling.annotation_values(reason.iter().copied(), "redirect");
     assert_eq!(redirects, ["/upgrade"]);
-    assert!(
-        cedarling
-            .annotation_values(reason.iter().copied(), "absent")
-            .is_empty()
+    assert_eq!(
+        cedarling.annotation_values(reason.iter().copied(), "absent"),
+        [] as [std::string::String; 0]
     );
 
     let by_policy = cedarling.annotations_by_policy(reason.iter().copied());

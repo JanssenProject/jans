@@ -45,7 +45,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.0-alpha05")
     implementation("com.google.guava:guava:33.1.0-jre")
     implementation("com.android.support:support-annotations:28.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.11")
     val room_version = "2.5.2"
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")

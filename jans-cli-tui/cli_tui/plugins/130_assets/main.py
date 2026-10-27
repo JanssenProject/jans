@@ -1,20 +1,17 @@
 import os
-import copy
 import asyncio
 
-from typing import Any, Optional
+from typing import Any
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
     VSplit, Window, FormattedTextControl
 
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Dialog
 from prompt_toolkit.application import Application
 from prompt_toolkit.formatted_text import HTML
 
-from wui_components.widget_collections import get_logging_level_widget
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
@@ -176,10 +173,11 @@ class Plugin(DialogUtils):
         display_name_widget = common_data.app.getTitledText(_("File Name"), name='fileName', value=data.get('fileName'), style=cli_style.edit_text_required)
 
         def read_asset(path):
-            self.asset_file_path = path
-            display_name_widget.me.text = os.path.basename(path)
+            path = common_data.app.accept_upload_path(path)
+            if path:
+                self.asset_file_path = path
+                display_name_widget.me.text = os.path.basename(path)
 
-        asset_browse_button = Button(text="Browse", handler=display_file_browser_dialog)
         inum_widget = common_data.app.getTitledText(_("inum"), name='inum', value=data.get('inum'), read_only=True, style=cli_style.read_only)
         jans_level_widget =  common_data.app.getTitledWidget(
                                 _("Level"),
@@ -274,7 +272,7 @@ class Plugin(DialogUtils):
         self.app.stop_progressing()
 
         try:
-            result = response.json()
+            response.json()
         except Exception as e:
             self.app.show_message(_("Error getting Assets"), str(e), tobefocused=self.app.center_container)
             return

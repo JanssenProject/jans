@@ -6,7 +6,6 @@
 #
 
 from io.jans.model.custom.script.type.introspection import IntrospectionType
-from java.lang import String
 
 class Introspection(IntrospectionType):
     def __init__(self, currentTimeMillis):

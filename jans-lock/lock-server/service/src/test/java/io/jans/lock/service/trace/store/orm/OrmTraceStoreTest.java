@@ -23,14 +23,14 @@ import io.jans.lock.service.trace.store.TraceStoreContractTest;
 
 /**
  * Runs the shared {@link TraceStoreContractTest} suite against {@link OrmTraceStore}, backed by
- * {@link FakeEntryManagerBehavior} instead of a live database (task 13 acceptance criteria).
+ * {@link FakeEntryManagerBehavior} instead of a live database.
  *
  * <p>Overrides the record fixture only to give each record a realistic {@code assertion} body: the
  * base fixture's {@code {"trace":{}}} placeholder has no {@code producer_chain} or
  * {@code trace.event} block, but {@code OrmTraceStore}'s read path recovers a record's
- * {@code producer_instance_id}/{@code producer_chain_id}, capability ids and token references by
+ * {@code producer_instance_id}/{@code producer_chain_id} and token references by
  * re-parsing the stored assertion (see {@link TraceEntityMapper}), because {@code TraceRecordEntry}
- * (T-1) only ever stores their hashed keys.
+ * only ever stores their hashed keys.
  *
  * @author Yuriy Movchan
  */
@@ -44,7 +44,7 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 	@Override
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			String chainProducerId, String chainInstanceId, String chainId, long seq, long receiptSeq,
-			List<String> capabilityIds, List<TokenRef> tokenRefs) {
+			List<TokenRef> tokenRefs) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, producerId, recordId);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, execAuthority, execId);
 		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, chainProducerId, chainInstanceId, chainId);
@@ -53,10 +53,10 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 		ReceiptEntry receipt = new ReceiptEntry(receiptSeq, 2000L + receiptSeq, TraceConstants.ZERO_HASH,
 				"sha256:" + String.format("%064d", receiptSeq));
 		IngestionFlags flags = new IngestionFlags(false, false, false, false);
-		String assertion = buildAssertion(chainProducerId, chainInstanceId, chainId, seq, capabilityIds, tokenRefs);
+		String assertion = buildAssertion(chainProducerId, chainInstanceId, chainId, seq, tokenRefs);
 		return new StoredTraceRecord(identity, assertion, "sha256:" + String.format("%064d", receiptSeq), verification,
-				receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, capabilityIds, tokenRefs,
-				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq);
+				receipt, flags, execution, chainPosition, TraceConstants.ZERO_HASH, tokenRefs,
+				TraceConstants.EVENT_KIND_CAPABILITY_INVOKED, 500L, "node-1", 3000L + receiptSeq, 0L);
 	}
 
 	/**
@@ -64,16 +64,7 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 	 * {@code trace.event} fields {@link TraceEntityMapper#toStoredTraceRecord} re-derives on read.
 	 */
 	private static String buildAssertion(String chainProducerId, String chainInstanceId, String chainId, long seq,
-			List<String> capabilityIds, List<TokenRef> tokenRefs) {
-		StringBuilder capabilitiesJson = new StringBuilder("[");
-		for (int i = 0; i < capabilityIds.size(); i++) {
-			if (i > 0) {
-				capabilitiesJson.append(",");
-			}
-			capabilitiesJson.append("{\"capability_id\":\"").append(capabilityIds.get(i)).append("\"}");
-		}
-		capabilitiesJson.append("]");
-
+			List<TokenRef> tokenRefs) {
 		StringBuilder tokensJson = new StringBuilder("[");
 		for (int i = 0; i < tokenRefs.size(); i++) {
 			if (i > 0) {
@@ -91,7 +82,7 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 		}
 		tokensJson.append("]");
 
-		return "{\"trace\":{\"event\":{\"capability_ids\":" + capabilitiesJson + ",\"tokens\":" + tokensJson
+		return "{\"trace\":{\"event\":{\"tokens\":" + tokensJson
 				+ "}},\"producer_chain\":{\"producer_id\":\"" + chainProducerId + "\",\"producer_instance_id\":\""
 				+ chainInstanceId + "\",\"producer_chain_id\":\"" + chainId + "\",\"sequence_number\":" + seq + "}}";
 	}

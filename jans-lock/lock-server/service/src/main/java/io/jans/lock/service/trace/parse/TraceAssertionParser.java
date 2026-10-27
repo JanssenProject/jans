@@ -32,15 +32,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
-import io.jans.lock.service.trace.canon.JcsCanonicalizer;
-import io.jans.lock.service.trace.canon.JcsException;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.trace.crypto.TraceCryptoException;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
  * Turns an incoming TRACE request body into a {@link ParsedAssertion}: bounded reading, strict
- * UTF-8 decoding, and JSON parsing under the request limits (design §14, decision D-12), all
+ * UTF-8 decoding, and JSON parsing under the request limits (design §14), all
  * before any cryptographic work is done. Common-field validation (design §7.1) is
  * {@link CommonAssertionValidator}'s job, not this class's.
  *
@@ -53,6 +53,9 @@ public class TraceAssertionParser {
 
 	@Inject
 	private AppConfiguration appConfiguration;
+
+	@Inject
+	private TraceCryptoProvider cryptoProvider;
 
 	/**
 	 * @param body the raw request body stream; never read beyond {@code maxRequestBytes + 1} bytes
@@ -77,8 +80,8 @@ public class TraceAssertionParser {
 		walk(root, config.getMaxArrayLength(), config.getMaxObjectMembers());
 
 		try {
-			JcsCanonicalizer.canonicalize(root);
-		} catch (JcsException ex) {
+			cryptoProvider.canonicalize(root);
+		} catch (TraceCryptoException ex) {
 			throw new TraceValidationException(TraceValidationException.ERROR_INVALID_REQUEST, "not_canonicalizable",
 					ex);
 		}

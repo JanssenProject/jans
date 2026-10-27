@@ -262,6 +262,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "agama/agama.xhtml": "postlogin.htm",
             "agama/consent.xhtml": "agama/consent_authorize.htm",
         }),
+        # add tracking settings
+        ("trackingSettings", {
+            "enabled": False,
+            "skipTemplateViews": False,
+            "skipInstructionFrequencies": False,
+            "excludedFlows": [],
+        }),
     ]:
         if new_key not in conf["agamaConfiguration"]:
             conf["agamaConfiguration"][new_key] = value
@@ -360,8 +367,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
 
 def get_ldif_mappings_hook(group, optional_scopes=None):
-    optional_scopes = optional_scopes or []
-
     def default_files():
         return [
             "base.ldif",

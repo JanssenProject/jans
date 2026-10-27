@@ -1,7 +1,6 @@
 import os
 import pathlib
 import shutil
-import site
 
 IAMPACKAGED = False
 APP_ROOT = pathlib.Path(__file__).parent.as_posix()

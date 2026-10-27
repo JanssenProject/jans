@@ -2,12 +2,11 @@ from typing import Callable, Optional
 from prompt_toolkit.application import get_app
 from prompt_toolkit.filters import to_filter
 
-from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text,to_formatted_text
+from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
-from prompt_toolkit.widgets import Label, Frame, Box, Button
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
-from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.widgets import Frame, Box, Button
+from prompt_toolkit.layout.containers import HSplit
 
 
 class JansLabelContainer:

@@ -43,6 +43,7 @@ When creating the SSA, ensure you:
     - `https://jans.io/oauth/lock/log.write`
     - `https://jans.io/oauth/lock/health.write`
     - `https://jans.io/oauth/lock/telemetry.write`
+    - `https://jans.io/oauth/lock/policy.readonly` (to load policy stores from Lock Server)
 
 After creation, **export the SSA token** and save it securely.
 
@@ -180,7 +181,7 @@ Next, create a JSON file named `script_schema.json` with the following content:
         },
         {
                 "value1": "scope_list",
-                "value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write",
+                "value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly",
                 "hide": false,
                 "description": "space-separated scopes that will be added by the script"
         },
@@ -235,7 +236,7 @@ A successful response will contain the following scopes:
 
 ```json
 {
-  "scope": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write"
+  "scope": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly"
 }
 ```
 
@@ -254,7 +255,7 @@ Here's a table of the available properties:
 | Property | Description | Allowed Values | Default |
 | --- | --- | --- | --- |
 | `CEDARLING_LOCK` | Toggles the all the Lock Server integration features. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URI to fetch Lock Server metadata (`.well-known/lock-master-configuration`). Required if `CEDARLING_LOCK` is `enabled`. | String | `""` |
+| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URI to fetch Lock Server metadata (`.well-known/lock-server-configuration`). Required if `CEDARLING_LOCK` is `enabled`. | String | `""` |
 | `CEDARLING_LOCK_DYNAMIC_CONFIGURATION` (WIP) | Toggles listening for Server-Sent Events (SSE) config updates. | `enabled`, `disabled` | `disabled` |
 | `CEDARLING_LOCK_SSA_JWT` | SSA JWT used for DCR. This is required if you followed the [auth server setup](#auth-server-setup). | String | `""` |
 | `CEDARLING_LOCK_ACCESS_TOKEN_JWT` | Pre-issued access token for Lock Server authentication. When set, **bypasses the SSA → DCR → access token flow entirely**. **Primarily intended for testing / local development** to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and `CEDARLING_LOCK_SSA_JWT` are set, this property takes precedence. **Not available on WASM builds.** | String | `""` |
@@ -266,3 +267,9 @@ Here's a table of the available properties:
 | `CEDARLING_LOCK_TRANSPORT` | The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. | `rest`, `grpc` | `rest` |
 | `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` | Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. | uint | `100` |
 | `CEDARLING_LOCK_LOG_MAX_RETRIES` | Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff. | uint | `5` |
+
+## Loading Policy Stores from Lock Server
+
+Lock Server can serve `.cjar` policy stores registered as policy sources, for example through the Config API `POST /jans-config-api/lock/policy-stores`. Lock serves each store at `/jans-lock/api/v1/policy/{policy_store_id}`.
+
+Point Cedarling at that URL with `CEDARLING_POLICY_STORE_URI` and enable Lock integration. When the URL has the same origin (scheme, host and port) as `CEDARLING_LOCK_SERVER_CONFIGURATION_URI`, Cedarling sends its Lock access token with policy store requests, including periodic refresh. The URL must use `https` (plain `http` is accepted only for `localhost` and loopback addresses). The token needs the `https://jans.io/oauth/lock/policy.readonly` scope. Requests to other hosts never carry the token.

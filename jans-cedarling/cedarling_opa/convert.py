@@ -7,6 +7,7 @@
 This script converts a supported .cjar archive (containing rego policies) to an OPA policy bundle.
 """
 
+import sys
 import typing as _t
 import json
 import shutil
@@ -221,7 +222,7 @@ def main():
         )
     except Exception as e:
         print(f"Error: {e}")
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":
