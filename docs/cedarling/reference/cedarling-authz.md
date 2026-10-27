@@ -595,7 +595,7 @@ Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer 
 
 Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
 
-The only option today is `trace`, the TRACE execution context of the call. TRACE is still in development: Cedarling accepts the context but does not emit TRACE records yet (see [TRACE properties](./cedarling-properties.md#trace-properties)).
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
 
 | Field | Required | Meaning |
 |---|---|---|
@@ -622,6 +622,21 @@ The host passes already normalized values. Cedarling does not parse HTTP headers
   }
 }
 ```
+
+With TRACE enabled, the decision log entry of every decision says what happened to its record in `trace_record_status`. In a batch, each item has its own decision log entry and its own status. The field is absent when TRACE is disabled.
+
+```json
+{
+    "log_kind": "Decision",
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
+    "action": "Jans::Action::\"Read\"",
+    "resource": "Jans::Issue::\"2\"",
+    "decision": "ALLOW",
+    "trace_record_status": "emitted"
+}
+```
+
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
 
 In Rust, attach options with `with_options`:
 

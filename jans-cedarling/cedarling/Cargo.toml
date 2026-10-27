@@ -39,6 +39,7 @@ base64 = { workspace = true, features = ["std", "simd-unsafe"] }
 url = "2.5.8"
 jsonwebtoken = { workspace = true }
 reqwest = { workspace = true }
+bytes = "1.12.1"
 typed-builder = "0.23.2"
 semver = { version = "1.0.28", features = ["serde"] }
 derive_more = { workspace = true, features = [
@@ -118,7 +119,7 @@ sigstore-verifier = { workspace = true, features = ["test-support"] }
 jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
 criterion = { version = "0.8.2", features = ["async_tokio"] }
-tokio = { workspace = true, features = ["rt-multi-thread"] }
+tokio = { workspace = true, features = ["rt-multi-thread", "test-util"] }
 stats_alloc = "0.1.10"
 tempfile = "3.8"
 tokio-stream = "0.1.18"
@@ -159,6 +160,10 @@ harness = false
 
 [[bench]]
 name = "authz_authorize_batch_benchmark"
+harness = false
+
+[[bench]]
+name = "trace_benchmark"
 harness = false
 
 [[example]]

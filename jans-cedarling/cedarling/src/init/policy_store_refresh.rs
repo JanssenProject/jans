@@ -264,6 +264,8 @@ impl AuthzRebuilder {
             self.data_store.clone(),
             self.metrics.clone(),
             prior_jwt,
+            // The recorder outlives the swap, so the emitter and its chain do too.
+            prior_authz.trace_recorder(),
         )
         .await
     }

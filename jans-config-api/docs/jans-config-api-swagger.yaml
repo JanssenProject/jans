@@ -16827,8 +16827,6 @@ components:
         maxItemsLoggedInCollections:
           type: integer
           format: int32
-        disableTCHV:
-          type: boolean
         pageMismatchErrorPage:
           type: string
         interruptionErrorPage:
@@ -16978,6 +16976,14 @@ components:
       properties:
         enabled:
           type: boolean
+        skipTemplateViews:
+          type: boolean
+        skipInstructionFrequencies:
+          type: boolean
+        excludedFlows:
+          type: array
+          items:
+            type: string
     TrustedIssuerConfig:
       type: object
       properties:
@@ -17299,6 +17305,7 @@ components:
           enum:
           - pairwise
           - public
+          - ephemeral
         idTokenSignedResponseAlg:
           type: string
         idTokenEncryptedResponseAlg:
@@ -18657,6 +18664,8 @@ components:
           format: int32
         redirectUri:
           type: string
+        ephemeralSub:
+          type: string
     TokenEntity:
       type: object
       properties:
@@ -18718,6 +18727,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18728,10 +18741,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

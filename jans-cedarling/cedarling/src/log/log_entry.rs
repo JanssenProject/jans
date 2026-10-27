@@ -17,6 +17,7 @@ use crate::common::policy_store::PoliciesContainer;
 use crate::common::policy_store::token_types::EntityTypeName;
 use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
+use crate::trace::TraceRecordStatus;
 use cedar_policy::EntityUid;
 use rand::Rng;
 use rand::{SeedableRng, rngs::StdRng};
@@ -363,6 +364,10 @@ pub(crate) struct DecisionLogEntry {
     /// logs are unchanged.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub dropped_tokens: Vec<DroppedToken>,
+    /// What happened to the TRACE record of this decision. Absent when TRACE is
+    /// disabled.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trace_record_status: Option<TraceRecordStatus>,
 }
 
 /// Telemetry log entry following the 3-map model.

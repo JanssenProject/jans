@@ -319,6 +319,14 @@ pub enum BootstrapConfigLoadingError {
     /// Error returned when a TRACE bulk limit is zero.
     #[error("`{0}` must be greater than 0")]
     ZeroTraceBulkLimit(&'static str),
+
+    /// Error returned when `CEDARLING_TRACE_BULK_MAX_BYTES` cannot hold the largest
+    /// record Lock accepts, so such a record could never be sent.
+    #[error("`CEDARLING_TRACE_BULK_MAX_BYTES` must be at least {min} to hold one record")]
+    TraceBulkMaxBytesTooSmall {
+        /// Bytes of the largest record Lock accepts, plus the array brackets.
+        min: usize,
+    },
 }
 
 impl From<url::ParseError> for BootstrapConfigLoadingError {

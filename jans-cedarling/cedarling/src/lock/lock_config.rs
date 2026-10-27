@@ -43,6 +43,9 @@ pub(super) struct AuditEndpoints {
         default
     )]
     pub telemetry: Option<Url>,
+    /// Already the bulk path, unlike the endpoints above.
+    #[serde(rename = "trace_bulk_endpoint", default)]
+    pub trace_bulk: Option<Url>,
 }
 
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
@@ -196,10 +199,34 @@ mod test {
                     // should resolve to the `/bulk` endpoint automatically
                     log: Some("https://test.com/audit/log/bulk".parse().unwrap()),
                     health: None,
-                    telemetry: None
+                    telemetry: None,
+                    trace_bulk: None,
                 },
                 config_endpoints: ConfigEndpoints::default(),
             }
+        );
+    }
+
+    #[test]
+    fn well_known_trace_bulk_endpoint_is_taken_as_is() {
+        let src = json!({
+            "version": "1.0",
+            "issuer": "test.com",
+            "audit": {
+                "trace_bulk_endpoint": "https://test.com/jans-lock/api/v1/audit/trace/bulk",
+            },
+        });
+
+        let deserialized =
+            serde_json::from_value::<LockConfig>(src).expect("deserialize audit endpoints");
+
+        assert_eq!(
+            deserialized
+                .audit_endpoints
+                .trace_bulk
+                .map(|url| url.0.to_string()),
+            Some("https://test.com/jans-lock/api/v1/audit/trace/bulk".to_string()),
+            "Lock already publishes the bulk path, so no second `/bulk` is appended"
         );
     }
 }

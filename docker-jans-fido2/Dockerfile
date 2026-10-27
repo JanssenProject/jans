@@ -71,7 +71,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-fido2 \
     /app/static/fido2
 
-ARG JANS_SOURCE_VERSION=1f1c8a6188b23f1f41e8df01a516be2302a5dd95
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 

@@ -31,6 +31,7 @@ pub(super) use v2 as current;
 use std::borrow::Cow;
 use std::convert::Infallible;
 use std::fmt;
+use std::sync::Arc;
 
 use jans_trace_core::Digest;
 use serde::de::{IgnoredAny, MapAccess, Visitor};
@@ -43,6 +44,7 @@ use super::manager::ConversionError;
 use super::migration::v1_to_v2::V1ToV2Warning;
 use super::migration::{IntoCurrent, MigrationError};
 use super::schema_parser::ParsedSchema;
+use crate::trace::PolicyFacts;
 
 /// Where every spec version keeps its metadata.
 ///
@@ -385,12 +387,14 @@ pub(super) fn read_policy_store(
 
     let (store, metadata) = current::into_runtime(doc)?;
 
+    let trace_policy = PolicyFacts::from_archive(bundle_hash, Some(&metadata)).map(Arc::new);
     Ok(ParsedPolicyStore {
         store: PolicyStoreWithID {
             id: metadata.policy_store.id.clone(),
             store,
             metadata: Some(metadata),
             bundle_hash,
+            trace_policy,
         },
         format: FormatReport {
             spec_version: Some(selected.spec_version),

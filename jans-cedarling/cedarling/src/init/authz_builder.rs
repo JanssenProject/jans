@@ -18,6 +18,7 @@ use crate::entity_builder::EntityBuilder;
 use crate::http::HttpClient;
 use crate::jwt::JwtService;
 use crate::log::Logger;
+use crate::trace::TraceRecorder;
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum BuildAuthzError {
@@ -32,6 +33,7 @@ pub(crate) enum BuildAuthzError {
 /// Pass `prior_jwt_service = Some(existing)` to reuse a [`JwtService`] when
 /// the JWT issuers are unchanged (refresh path). Pass `None` to always build
 /// fresh (bootstrap path). Bootstrap-specific logging stays in the caller.
+/// `trace` is `None` when TRACE is disabled.
 #[allow(clippy::too_many_arguments)]
 pub(crate) async fn build_authz(
     policy_store: PolicyStoreWithID,
@@ -42,6 +44,7 @@ pub(crate) async fn build_authz(
     data_store: Arc<DataStore>,
     metrics: Arc<MetricsCollector>,
     prior_jwt_service: Option<Arc<JwtService>>,
+    trace: Option<TraceRecorder>,
 ) -> Result<Authz, BuildAuthzError> {
     // `PolicyStore::token_types` was validated when the store was loaded.
     let jwt_service = match prior_jwt_service {
@@ -73,6 +76,9 @@ pub(crate) async fn build_authz(
         .map_err(|e| BuildAuthzError::EntityBuilder(e.to_string()))?,
     );
 
+    if let Some(recorder) = &trace {
+        recorder.warn_if_untraceable(&policy_store);
+    }
     let config = AuthzConfig {
         log_service: log.clone(),
         policy_store,
@@ -81,6 +87,7 @@ pub(crate) async fn build_authz(
         authorization: authorization_config.clone(),
         data_store,
         metrics,
+        trace,
     };
     Ok(Authz::new(config))
 }

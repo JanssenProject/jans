@@ -757,6 +757,7 @@ dependencies = [
  "arc-swap",
  "async-trait",
  "base64 0.23.1",
+ "bytes",
  "cedar-policy",
  "cedar-policy-core",
  "chrono",

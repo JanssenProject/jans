@@ -13,6 +13,7 @@ pub(crate) mod token_entity_metadata;
 pub(crate) mod token_types;
 
 use crate::common::{default_entities::DefaultEntitiesWithWarns, issuer_utils::IssClaim};
+use crate::trace::PolicyFacts;
 
 pub(crate) mod archive_handler;
 pub(crate) mod entity_parser;
@@ -34,6 +35,7 @@ use super::cedar_schema::CedarSchema;
 use cedar_policy::{ActionConstraint, Effect, EntityTypeName, EntityUid, Policy, PolicyId};
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
+use std::sync::Arc;
 use url::Url;
 
 #[cfg(test)]
@@ -108,6 +110,11 @@ pub(crate) struct PolicyStoreWithID {
     /// Private and set only where the archive bytes are read, so a `.cjar` store
     /// cannot exist without its hash.
     bundle_hash: Option<jans_trace_core::Digest>,
+    /// What a TRACE record says about this store, derived from `bundle_hash` and
+    /// `metadata` when the store is read, so it is swapped together with them and
+    /// shared by every record instead of copied; `None` when the store cannot
+    /// back a record.
+    trace_policy: Option<Arc<PolicyFacts>>,
 }
 
 impl PolicyStoreWithID {
@@ -122,12 +129,18 @@ impl PolicyStoreWithID {
             store,
             metadata,
             bundle_hash: None,
+            trace_policy: None,
         }
     }
 
     /// Hash of the `.cjar` this store came from; `None` without an archive.
     pub(crate) fn bundle_hash(&self) -> Option<jans_trace_core::Digest> {
         self.bundle_hash
+    }
+
+    /// What a TRACE record says about this store; `None` when it cannot back one.
+    pub(crate) fn trace_policy(&self) -> Option<&Arc<PolicyFacts>> {
+        self.trace_policy.as_ref()
     }
 }
 

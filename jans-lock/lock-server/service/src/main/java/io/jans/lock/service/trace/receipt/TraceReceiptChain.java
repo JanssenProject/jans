@@ -6,6 +6,7 @@
 
 package io.jans.lock.service.trace.receipt;
 
+import java.time.Clock;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +24,7 @@ import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
@@ -33,16 +35,33 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Allocates per-domain receipt-chain positions and hash-chains them safely across several Lock
- * nodes, using only primary-key uniqueness (design §9). jans-orm
- * offers no transactions, sequences or CAS, so correctness comes entirely from
- * {@link TraceStore#insertReceipt} rejecting a second claim at the same {@code (domainId, seq)};
- * the per-domain {@link ReentrantLock} below only reduces same-node contention and is never load
- * bearing.
+ * Allocates per-domain receipt-chain positions, hash-chains them safely across several Lock
+ * nodes and settles them (design §9). jans-orm offers no multi-entry transactions and no
+ * sequences, but it does offer per-entry compare-and-swap ({@code updateWithVersion}, commit
+ * {@code 393cd48bac9}). The protocol selected under those persistence APIs is not the only
+ * possible one:
+ * <ul>
+ * <li>Claim: correctness of the position comes from {@link TraceStore#insertReceipt} rejecting a
+ * second claim at the same {@code (domainId, seq)}; the per-domain {@link ReentrantLock} below only
+ * reduces same-node contention and is never load bearing.</li>
+ * <li>Settlement: a claim leaves {@code PENDING} once, to {@code COMMITTED} or {@code VOID}, by
+ * compare-and-swap ({@link TraceStore#settleReceipt}). Both are terminal; re-applying the stored
+ * state is a no-op and the other state is a {@link ReceiptSettlement#CONFLICT}.</li>
+ * <li>Authoritative read: a claim {@code (domain, seq)} is satisfied if and only if the record row
+ * for its identity exists and its embedded receipt sequence equals {@code seq} (and its
+ * {@code content_digest} equals the receipt's). Receipt state is a derived fact about the record
+ * row; see {@link #isClaimSatisfied}.</li>
+ * <li>Fencing: a worker must not insert its record after {@code TraceReceiptRepairTimer} had the
+ * right to void its claim; see {@link #isFenceExpired}. The fence narrows that window, it cannot
+ * close it.</li>
+ * <li>A later claim binds the {@code receipt_hash} of the head in any state; the hash does not
+ * depend on the state, so the chain stays valid whatever an unsettled position becomes.</li>
+ * </ul>
  *
  * <p>{@link #claim} is the only method that allocates a new sequence; {@link #commit} and
- * {@link #voidClaim} settle an already-allocated one and never throw — a failure is logged at
- * WARN and left for {@code TraceReceiptRepairTimer} to resolve later.
+ * {@link #voidClaim} settle an already-allocated one and never throw: a store failure is logged
+ * at WARN, reported as {@link ReceiptSettlement#FAILED} and left for
+ * {@code TraceReceiptRepairTimer} to resolve later.
  *
  * @author Yuriy Movchan
  */
@@ -60,6 +79,8 @@ public class TraceReceiptChain {
 
 	@Inject
 	private TraceCryptoProvider cryptoProvider;
+
+	private Clock clock = Clock.systemUTC();
 
 	private final ConcurrentHashMap<String, ReentrantLock> domainLocks = new ConcurrentHashMap<>();
 
@@ -102,7 +123,7 @@ public class TraceReceiptChain {
 
 				try {
 					store.insertReceipt(row);
-					return new ReceiptClaim(seq, prevReceiptHash, receiptHash, receivedAtMs);
+					return new ReceiptClaim(seq, prevReceiptHash, receiptHash, receivedAtMs, clock.millis());
 				} catch (DuplicateEntryException ex) {
 					log.debug("receipt position contended: domain={}, seq={}", domainId, seq);
 				}
@@ -115,33 +136,85 @@ public class TraceReceiptChain {
 	}
 
 	/**
-	 * Settles a claim as {@code COMMITTED} once the record row carrying it is visible. Best-effort: a failure is logged at WARN, not thrown — the repair timer
-	 * resolves a stuck {@code PENDING} row later.
+	 * Settles a claim as {@code COMMITTED} once the record row carrying it is visible. Best-effort: a
+	 * store failure is logged at WARN, not thrown, and reported as {@link ReceiptSettlement#FAILED};
+	 * the repair timer resolves a stuck {@code PENDING} row later. {@link ReceiptSettlement#CONFLICT}
+	 * means the claim is already {@code VOID} and is left to the caller to handle.
 	 */
-	public void commit(String domainId, long seq) {
-		try {
-			boolean updated = store.updateReceiptState(domainId, seq, TraceReceiptState.COMMITTED);
-			if (!updated) {
-				log.warn("Could not commit receipt: no row at domain={}, seq={}", domainId, seq);
-			}
-		} catch (TraceStorageException ex) {
-			log.warn("Failed to commit receipt: domain={}, seq={}", domainId, seq, ex);
-		}
+	public ReceiptSettlement commit(String domainId, long seq) {
+		return settle(domainId, seq, TraceReceiptState.COMMITTED);
 	}
 
 	/**
 	 * Settles a claim as {@code VOID} after the matching record insert lost a cross-node identity
 	 * race or otherwise failed. Best-effort, like {@link #commit}.
+	 * {@link ReceiptSettlement#CONFLICT} means the claim is already {@code COMMITTED}.
 	 */
-	public void voidClaim(String domainId, long seq) {
+	public ReceiptSettlement voidClaim(String domainId, long seq) {
+		return settle(domainId, seq, TraceReceiptState.VOID);
+	}
+
+	private ReceiptSettlement settle(String domainId, long seq, TraceReceiptState target) {
 		try {
-			boolean updated = store.updateReceiptState(domainId, seq, TraceReceiptState.VOID);
-			if (!updated) {
-				log.warn("Could not void receipt: no row at domain={}, seq={}", domainId, seq);
+			ReceiptSettlement outcome = store.settleReceipt(domainId, seq, target);
+			if (outcome == ReceiptSettlement.NOT_FOUND) {
+				log.warn("Could not settle receipt as {}: no row at domain={}, seq={}", target, domainId, seq);
 			}
+			return outcome;
 		} catch (TraceStorageException ex) {
-			log.warn("Failed to void receipt: domain={}, seq={}", domainId, seq, ex);
+			log.warn("Failed to settle receipt as {}: domain={}, seq={}", target, domainId, seq, ex);
+			return ReceiptSettlement.FAILED;
 		}
+	}
+
+	/**
+	 * The authoritative read for a claim: {@code true} if and only if the record row for the
+	 * receipt's identity exists, carries this receipt's sequence and has the receipt's
+	 * {@code content_digest}. A record under the same identity with another sequence belongs to
+	 * another claim (a lost duplicate-identity race) and does not satisfy this one.
+	 */
+	public boolean isClaimSatisfied(TraceReceiptEntry receipt) {
+		RecordIdentity identity = new RecordIdentity(receipt.getDomainId(), receipt.getProducerId(),
+				receipt.getRecordId());
+		return store.findRecord(identity)
+				.filter(record -> carriesClaim(record, receipt.getReceiptSeq(), receipt.getContentDigest())).isPresent();
+	}
+
+	/** @return {@code true} if {@code record} carries receipt sequence {@code seq} and {@code contentDigest} */
+	public static boolean carriesClaim(StoredTraceRecord record, long seq, String contentDigest) {
+		return record.getReceipt().getReceiptSequence() == seq && record.getContentDigest().equals(contentDigest);
+	}
+
+	/**
+	 * The ingest fence: how long after {@link ReceiptClaim#getClaimedAtMs()} a worker may still insert
+	 * its record. Derived as half of {@code pendingReceiptTimeoutSeconds}, so it stays strictly below
+	 * the age at which {@code TraceReceiptRepairTimer} may void the claim and leaves the other half
+	 * as margin for clock difference between nodes and a database round trip.
+	 */
+	public long fenceMs() {
+		return appConfiguration.getTraceConfiguration().getPendingReceiptTimeoutSeconds() * 1000L / 2;
+	}
+
+	/**
+	 * The latest age, counted from {@link ReceiptClaim#getReceivedAtMs()}, at which a worker may still
+	 * insert its record: three quarters of {@code pendingReceiptTimeoutSeconds}. The repair timer ages a
+	 * claim from {@code received_at}, which precedes the claim, so a claim made late would otherwise get a
+	 * fence that ends after the timer may void it. The remaining quarter is margin for clock difference
+	 * between nodes and a database round trip.
+	 */
+	public long receivedFenceMs() {
+		return appConfiguration.getTraceConfiguration().getPendingReceiptTimeoutSeconds() * 750L;
+	}
+
+	/**
+	 * @return {@code true} once this node's clock is past {@code claimedAtMs + fenceMs()} or past
+	 *         {@code receivedAtMs + receivedFenceMs()}, whichever comes first: the worker must not insert
+	 *         its record any more. Narrows, but cannot close, the window in which a record is inserted
+	 *         after the claim was voided.
+	 */
+	public boolean isFenceExpired(ReceiptClaim claim) {
+		long nowMs = clock.millis();
+		return nowMs > claim.getClaimedAtMs() + fenceMs() || nowMs > claim.getReceivedAtMs() + receivedFenceMs();
 	}
 
 	/**
@@ -211,12 +284,20 @@ public class TraceReceiptChain {
 			if (!record.isPresent()) {
 				return EntryStatus.RECORD_MISSING;
 			}
+			if (record.get().getReceipt().getReceiptSequence() != receipt.getReceiptSeq()) {
+				return EntryStatus.SEQUENCE_MISMATCH;
+			}
 			if (!record.get().getContentDigest().equals(receipt.getContentDigest())) {
 				return EntryStatus.DIGEST_MISMATCH;
 			}
 			return EntryStatus.OK;
 		case VOID:
-			return record.isPresent() ? EntryStatus.RECORD_UNEXPECTED : EntryStatus.OK;
+			// A record under this identity that carries another sequence belongs to the claim that won
+			// the identity race; it does not make this tombstone unexpected.
+			return record.isPresent()
+					&& carriesClaim(record.get(), receipt.getReceiptSeq(), receipt.getContentDigest())
+							? EntryStatus.RECORD_UNEXPECTED
+							: EntryStatus.OK;
 		case PENDING:
 		default:
 			return EntryStatus.OK;

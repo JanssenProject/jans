@@ -55,10 +55,7 @@ public class ExternalConfigService extends ExternalScriptService {
             ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
             JSONObject responseAsJsonObject, CustomScriptConfiguration customScriptConfiguration) {
         boolean isAuthorized = false;
-        logger.debug(
-                "External Config Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, this.customScriptConfigurations:{} ",
-                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject,
-                this.customScriptConfigurations);
+        logger.debug("External Config Authorization script ");
 
         try {
             ConfigApiType externalType = (ConfigApiType) customScriptConfiguration.getExternalType();
