@@ -25,6 +25,8 @@ The sidecar is a containerized Flask project that uses the `cedarling_python` bi
 
     - `-d` runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.
     - `SIDECAR_DEBUG_RESPONSE` will cause the sidecar to return extra diagnostic information for each query if set to `True`. This may be useful to check which policies are being used to reach a decision.
+    - `SIDECAR_TRACE_WORKLOAD_ID` (optional) sets the TRACE `workload_id` used when a request has no `Audit-Workload-ID` header. See [TRACE correlation](#trace-correlation).
+    - `GUNICORN_GRACEFUL_TIMEOUT` (optional, default `8`) is how many seconds Gunicorn waits on shutdown for in-flight requests and then the TRACE flush. It must cover the longest request plus the flush and stay below the platform stop grace period (Docker and Cloud Run 10 seconds, Kubernetes `terminationGracePeriodSeconds` 30 seconds by default).
     - Take note of the output of the command. This is the container ID of the sidecar.
     - The sidecar runs in the background on port 5000. OpenAPI documentation is available at `http://0.0.0.0:5000/swagger-ui`
     - To stop the sidecar, run `docker container stop <container ID>`
@@ -129,7 +131,7 @@ In this example the evaluation was `DENY`, so the decision was false. Additional
 
 ### TRACE correlation
 
-Callers that take part in Lock TRACE can send the correlation fields as headers on `/cedarling/evaluation`:
+Callers that take part in Lock TRACE can send the correlation fields as headers on `/cedarling/evaluation`. The sidecar passes them to Cedarling as the request's [TRACE context](../reference/cedarling-authz.md#authorize-options-and-trace-context):
 
 | Header | TRACE field |
 | --- | --- |
@@ -138,4 +140,27 @@ Callers that take part in Lock TRACE can send the correlation fields as headers 
 | `Audit-Workload-ID` | `workload_id` (optional) |
 | `Audit-Workload-Instance-ID` | `workload_instance_id` (optional) |
 
-`Audit-Trace-ID` and `Audit-Execution-Authority` must be sent together, otherwise the request is rejected with `400`. Each value is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. When present, `trace_execution_id` is returned in the response `context`.
+`Audit-Trace-ID` and `Audit-Execution-Authority` must be sent together, otherwise the request is rejected with `400`. Each value is trimmed and is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. Without these headers no TRACE context is sent.
+
+When `Audit-Workload-ID` is missing, `workload_id` is the first non-empty value of:
+
+1. `SIDECAR_TRACE_WORKLOAD_ID` environment variable
+2. `CEDARLING_APPLICATION_NAME` from the bootstrap configuration
+3. `cedarling-sidecar`
+
+TRACE records are submitted to Lock Server only by a Cedarling build that includes record emission ([#15485](https://github.com/JanssenProject/jans/pull/15485)), with `CEDARLING_TRACE` enabled and Lock Server set up for TRACE, see [TRACE properties](../reference/cedarling-properties.md#trace-properties). The sidecar already sends the TRACE context and flushes on shutdown.
+
+Cedarling queues records and sends them in the background. When the container stops, the Gunicorn worker finishes in-flight requests and then calls Cedarling `shut_down()` from its `worker_exit` hook, which sends the queued records once. Both steps share `GUNICORN_GRACEFUL_TIMEOUT`: the Gunicorn master kills the worker when it expires, and records still queued are lost.
+
+When present, `trace_execution_id` is returned in the response `context`. With such a build and TRACE enabled, `trace_record_status` from the Cedarling decision log is returned as well, for example `emitted` or `not_emitted_queue_full`:
+
+```json
+{
+  "context": {
+    "request_id": "019a2b1c-...",
+    "trace_execution_id": "exec-1",
+    "trace_record_status": "emitted"
+  },
+  "decision": true
+}
+```

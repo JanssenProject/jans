@@ -1403,6 +1403,8 @@
 <ul>
 <li><code>-d</code> runs the sidecar in daemon mode in the background. Omit this if you want to run the sidecar in the foreground to monitor logs in real time.</li>
 <li><code>SIDECAR_DEBUG_RESPONSE</code> will cause the sidecar to return extra diagnostic information for each query if set to <code>True</code>. This may be useful to check which policies are being used to reach a decision.</li>
+<li><code>SIDECAR_TRACE_WORKLOAD_ID</code> (optional) sets the TRACE <code>workload_id</code> used when a request has no <code>Audit-Workload-ID</code> header. See <a href="#trace-correlation">TRACE correlation</a>.</li>
+<li><code>GUNICORN_GRACEFUL_TIMEOUT</code> (optional, default <code>8</code>) is how many seconds Gunicorn waits on shutdown for in-flight requests and then the TRACE flush. It must cover the longest request plus the flush and stay below the platform stop grace period (Docker and Cloud Run 10 seconds, Kubernetes <code>terminationGracePeriodSeconds</code> 30 seconds by default).</li>
 <li>Take note of the output of the command. This is the container ID of the sidecar.</li>
 <li>The sidecar runs in the background on port 5000. OpenAPI documentation is available at <code>http://0.0.0.0:5000/swagger-ui</code></li>
 <li>To stop the sidecar, run <code>docker container stop &lt;container ID&gt;</code></li>
@@ -1495,7 +1497,7 @@
 </code></pre></div>
 <p>In this example the evaluation was <code>DENY</code>, so the decision was false. Additional information is returned in the <code>context</code> field.</p>
 <h3 id="trace-correlation">TRACE correlation<a class="headerlink" href="#trace-correlation" title="Permanent link">#</a></h3>
-<p>Callers that take part in Lock TRACE can send the correlation fields as headers on <code>/cedarling/evaluation</code>:</p>
+<p>Callers that take part in Lock TRACE can send the correlation fields as headers on <code>/cedarling/evaluation</code>. The sidecar passes them to Cedarling as the request's <a href="../../reference/cedarling-authz/#authorize-options-and-trace-context">TRACE context</a>:</p>
 <table>
 <thead>
 <tr>
@@ -1522,7 +1524,25 @@
 </tr>
 </tbody>
 </table>
-<p><code>Audit-Trace-ID</code> and <code>Audit-Execution-Authority</code> must be sent together, otherwise the request is rejected with <code>400</code>. Each value is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. When present, <code>trace_execution_id</code> is returned in the response <code>context</code>.</p>
+<p><code>Audit-Trace-ID</code> and <code>Audit-Execution-Authority</code> must be sent together, otherwise the request is rejected with <code>400</code>. Each value is trimmed and is at most 255 characters. The component that owns the unit of work creates these values; the sidecar does not generate them. They do not take part in the Cedar evaluation. Without these headers no TRACE context is sent.</p>
+<p>When <code>Audit-Workload-ID</code> is missing, <code>workload_id</code> is the first non-empty value of:</p>
+<ol>
+<li><code>SIDECAR_TRACE_WORKLOAD_ID</code> environment variable</li>
+<li><code>CEDARLING_APPLICATION_NAME</code> from the bootstrap configuration</li>
+<li><code>cedarling-sidecar</code></li>
+</ol>
+<p>TRACE records are submitted to Lock Server only by a Cedarling build that includes record emission (<a href="https://github.com/JanssenProject/jans/pull/15485">#15485</a>), with <code>CEDARLING_TRACE</code> enabled and Lock Server set up for TRACE, see <a href="../../reference/cedarling-properties/#trace-properties">TRACE properties</a>. The sidecar already sends the TRACE context and flushes on shutdown.</p>
+<p>Cedarling queues records and sends them in the background. When the container stops, the Gunicorn worker finishes in-flight requests and then calls Cedarling <code>shut_down()</code> from its <code>worker_exit</code> hook, which sends the queued records once. Both steps share <code>GUNICORN_GRACEFUL_TIMEOUT</code>: the Gunicorn master kills the worker when it expires, and records still queued are lost.</p>
+<p>When present, <code>trace_execution_id</code> is returned in the response <code>context</code>. With such a build and TRACE enabled, <code>trace_record_status</code> from the Cedarling decision log is returned as well, for example <code>emitted</code> or <code>not_emitted_queue_full</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;context&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;019a2b1c-...&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;trace_execution_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;exec-1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;trace_record_status&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;emitted&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;decision&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="p">}</span>
+</code></pre></div>
 
 
   <nav class="md-tags" >
@@ -1565,7 +1585,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 21, 2026
+    October 26, 2026
   </span>
 
     

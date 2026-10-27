@@ -2610,8 +2610,19 @@ link two authentication responses.</p>
   <code>sub</code>.</li>
 <li>A new authentication request creates a new grant and a new identifier. Janssen Server never reuses a value.</li>
 <li>No sector identifier is required for clients with the <code>ephemeral</code> type.</li>
-<li>Back-channel <code>logout_token</code> does not contain <code>sub</code> for these clients, because no grant exists at logout time. Use
-  <code>sid</code> to correlate the session.</li>
+<li>Grants without an end-user, such as <code>client_credentials</code>, have no ephemeral identifier. Their <code>sub</code> is the
+  <code>client_id</code>, as for other subject types.</li>
+<li>Back-channel logout is not supported for these clients, because a <code>logout_token</code> cannot carry a stable <code>sub</code>.
+  Registration and client update requests that set <code>backchannel_logout_uri</code> on an <code>ephemeral</code> client are rejected with
+  <code>invalid_client_metadata</code>. Logout skips the back-channel call for such clients if one is already stored.
+  The check also runs on the final client, after any update dynamic client registration script has run.</li>
+<li>A client update that switches a client to <code>ephemeral</code> can remove the stored <code>backchannel_logout_uri</code> in the same
+  request. Send <code>backchannel_logout_uri</code> with an empty value. If the request omits the parameter, Janssen Server keeps
+  the stored value.</li>
+<li>A token issued before the client switched to <code>ephemeral</code> has no stored identifier. Janssen Server rejects such a
+  token as invalid instead of returning a different <code>sub</code> on each call.</li>
+<li>Janssen Server also rejects a token that has a stored identifier but whose end-user no longer exists. It does not
+  fall back to the <code>client_id</code> as <code>sub</code>.</li>
 </ul>
 <h2 id="properties">Properties<a class="headerlink" href="#properties" title="Permanent link">#</a></h2>
 <p>Janssen Server allows customization concerning subject identifiers using the properties below:</p>
@@ -2692,7 +2703,7 @@ link two authentication responses.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 23, 2026
+    October 26, 2026
   </span>
 
     
