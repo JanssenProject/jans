@@ -1105,10 +1105,6 @@ components:
     HealthEntry:
       type: object
       properties:
-        dn:
-          type: string
-        baseDn:
-          type: string
         inum:
           type: string
         creationDate:
@@ -1226,10 +1222,6 @@ components:
     TelemetryEntry:
       type: object
       properties:
-        dn:
-          type: string
-        baseDn:
-          type: string
         inum:
           type: string
         creationDate:

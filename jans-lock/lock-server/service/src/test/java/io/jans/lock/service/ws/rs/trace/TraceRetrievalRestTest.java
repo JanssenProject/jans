@@ -28,6 +28,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
 import io.jans.lock.model.config.AppConfiguration;
@@ -49,6 +52,7 @@ import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.trace.crypto.bc.JcsCanonicalizer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -205,6 +209,25 @@ class TraceRetrievalRestTest extends BaseLockServiceTest {
 		assertEquals(raw, dto.getAssertionRaw());
 		assertNotNull(dto.getAssertion());
 		assertEquals("z", dto.getAssertion().fieldNames().next());
+	}
+
+	@Test
+	void testGetRecord_AssertionRawWithEscapesAndNumberForms_PreservedAndAssertionJcsEqual() throws Exception {
+		String raw = "{\"z\":\"\\ud83d\\ude00 \uD83D\uDE00 e\u0301 \u00e9 \u2028\",\"c\":\"a\\u0000b\\u001f\","
+				+ "\"n\":[1e2,1.50,-0,9007199254740993,123456789012345678901234567890,1E21],\"a\":{\"y\":1,\"x\":2}} \n";
+		traceStore.insertRecord(StoredTraceRecordFactory.builder().domainId("domain-a").producerId("producer-1")
+				.recordId("record-1").contentDigest("sha256:" + "1".repeat(64)).assertionRaw(raw).build());
+		boundToDomain("domain-a");
+
+		TraceRecordResponse dto = (TraceRecordResponse) impl.getRecord("record-1", "producer-1").getEntity();
+
+		assertEquals(raw, dto.getAssertionRaw());
+		assertEquals(-1, dto.getAssertionRaw().indexOf('\u0000'));
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode wire = mapper.readTree(mapper.writeValueAsString(dto));
+		assertEquals(raw, wire.get("assertion_raw").textValue());
+		assertEquals(JcsCanonicalizer.canonicalize(mapper.readTree(raw)),
+				JcsCanonicalizer.canonicalize(wire.get("assertion")));
 	}
 
 	@Test

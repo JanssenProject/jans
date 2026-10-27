@@ -14,6 +14,7 @@ import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ScopeConstants;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -24,6 +25,7 @@ import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.SubjectIdentifierGenerator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.model.token.IdTokenFactory;
@@ -130,6 +132,17 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public void init(User user, AuthorizationGrantType authorizationGrantType, Client client, Date authenticationTime) {
         super.init(user, authorizationGrantType, client, authenticationTime);
+        if (isEphemeralSubjectType(client, user)) {
+            setEphemeralSub(SubjectIdentifierGenerator.generateEphemeralSubjectIdentifier());
+        }
+    }
+
+    /**
+     * Ephemeral sub applies only to grants with an end-user. Grants without user (e.g. client_credentials)
+     * keep the client_id fallback sub.
+     */
+    public static boolean isEphemeralSubjectType(Client client, User user) {
+        return client != null && user != null && SubjectType.EPHEMERAL.equals(client.getSubjectType());
     }
 
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
@@ -217,6 +230,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         token.setCodeChallengeMethod(getCodeChallengeMethod());
         token.setClaims(getClaims());
         token.getAttributes().setRedirectUri(getRedirectUri());
+        token.getAttributes().setEphemeralSub(getEphemeralSub());
 
         final JwtAuthorizationRequest jwtRequest = getJwtAuthorizationRequest();
         if (jwtRequest != null && StringUtils.isNotBlank(jwtRequest.getEncodedJwt())) {
@@ -600,6 +614,14 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
+        if (isEphemeralSubjectType(getClient(), getUser())) {
+            if (StringUtils.isBlank(getEphemeralSub())) {
+                log.warn("Ephemeral sub is missing for grant of client: {}", getClientId());
+                return "";
+            }
+            return getEphemeralSub();
+        }
+
         final String sub = sectorIdentifierService.getSub(this);
         if (StringUtils.isBlank(sub)) {
             final String clientId = getClientId();

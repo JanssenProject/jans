@@ -282,6 +282,33 @@ public class TraceMvpAcceptanceTest {
 		assertEquals(0, harness.store().snapshot().size());
 	}
 
+	// -- future-skew rule -----------------------------------------------------------------------------
+
+	@Test
+	void futureSkew_rejectedRecordStoresNothingAndRetryAfterClockFixIsAccepted() {
+		KeyPair keyPair = registerPrimary();
+		long skew = harness.traceConfiguration().getMaxFutureSkewSeconds();
+		long signedAt = harness.now() / 1000L + skew + 1;
+		String json = TraceRecordBuilder.authorizationDecision().recordId(TraceRecordBuilder.freshRecordId())
+				.genesis().signedAt(signedAt).sign(keyPair.getPrivate());
+		TraceRequestContext context = ctx();
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> harness.ingest(json, context));
+
+		assertEquals(TraceErrorResponseType.INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("signed_at_in_future", ex.getReason());
+		assertEquals(0, harness.store().snapshot().size());
+		assertFalse(harness.store().findReceipt(DOMAIN, 1L).isPresent());
+
+		harness.setNow(harness.now() + 1_000L);
+		AcceptanceResult retried = harness.ingest(json, ctx());
+
+		assertTrue(retried.isAccepted());
+		assertFalse(retried.isIdempotentReplay());
+		assertEquals(1L, retried.getReceiptSequence());
+	}
+
 	// -- criterion 15 --------------------------------------------------------------------------
 
 	/**

@@ -70,3 +70,19 @@ def test_workflow_provenance_states_runner_variance_caveat():
     for marker in _RUNNER_CLAIM_MARKERS:
         assert marker in block, f"Provenance block missing caveat marker: {marker!r}"
         assert marker not in rest, f"caveat marker leaked outside Provenance: {marker!r}"
+
+
+def test_rust_parser_reads_excluded_benchmarks():
+    text = (
+        "✅ authz_authorize_unsigned/new/estimates.json: 371266 ns <= 1000000 ns\n"
+        "⚪ cedarling_startup/new/estimates.json: 5000000 ns "
+        "(not checked against 1000000 ns)\n"
+    )
+
+    rows = pbb.parse_rust(text)
+
+    assert [row["operation"] for row in rows] == [
+        "authz_authorize_unsigned/new/estimates.json",
+        "cedarling_startup/new/estimates.json",
+    ], "excluded benchmarks reach the summary too"
+    assert rows[1]["mean_us"] == 5000.0, "mean of an excluded benchmark in microseconds"

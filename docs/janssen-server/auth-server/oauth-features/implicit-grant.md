@@ -20,33 +20,38 @@ Instead, use Authorization code flow with PKCE -[OAuth 2.0 for Browser-Based App
 ### Sequence Diagram
 
 ```mermaid
+
 sequenceDiagram
+    title Implicit flow
+    autonumber 1
 
-title Implicit flow
-autonumber 1
+    participant User as Resource owner User
+    participant Client
+    participant JansAS as Jans AS
+    participant WebResource as Web - Hosted client resource
 
-participant Resource owner User
-Client->>Jans AS:Authorization Request
-activate Client
-activate Jans AS
-Resource owner User ->>Jans AS:User login and consent
-Jans AS-->>Client:Access Token in the URI fragment
-deactivate Client
-deactivate Jans AS
+    Client->>JansAS:Authorization Request
+    activate Client
+    activate JansAS
+    User->>JansAS:User login and consent
+    JansAS-->>Client:Access Token in the URI fragment
+    deactivate Client
+    deactivate JansAS
 
-Client ->>Jans AS:Validate Access Token
-activate Client
-activate Jans AS
-Jans AS-->>Client:Validate response
-deactivate Client
-deactivate Jans AS
+    Client->>JansAS:Validate Access Token
+    activate Client
+    activate JansAS
+    JansAS-->>Client:Validate response
+    deactivate Client
+    deactivate JansAS
 
-Client ->>Web - Hosted client resource:Call API with Access Token
-activate Client
-activate Jans AS
-Jans AS-->>Client:Protected resource
-deactivate Client
-deactivate Jans AS
+    Client->>WebResource:Call API with Access Token
+    activate Client
+    activate JansAS
+    JansAS-->>Client:Protected resource
+    deactivate Client
+    deactivate JansAS
+
 
 ```
 
