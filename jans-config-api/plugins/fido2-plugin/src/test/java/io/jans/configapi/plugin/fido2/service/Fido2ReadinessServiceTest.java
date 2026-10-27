@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.fido2.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -123,6 +124,25 @@ public class Fido2ReadinessServiceTest {
 
         assertEquals(outcome.getStatus(), 404);
         assertNull(outcome.getBody());
+    }
+
+    @Test
+    public void tooManyRequests_nonJsonBody_keepsStatusAndRetryAfter() throws Exception {
+        when(fido2Util.executePost(anyString(), anyMap(), anyString()))
+                .thenReturn(upstream(429, "<html>slow down</html>", "42"));
+
+        Outcome outcome = service.check("example.com", true, "Bearer abc", null);
+
+        assertEquals(outcome.getStatus(), 429);
+        assertEquals(outcome.getRetryAfter(), "42");
+        assertNull(outcome.getBody());
+    }
+
+    @Test(expectedExceptions = JsonProcessingException.class)
+    public void ok_nonJsonBody_isAnError() throws Exception {
+        when(fido2Util.executePost(anyString(), anyMap(), anyString())).thenReturn(upstream(200, "<html/>", null));
+
+        service.check("example.com", true, "Bearer abc", null);
     }
 
     @Test

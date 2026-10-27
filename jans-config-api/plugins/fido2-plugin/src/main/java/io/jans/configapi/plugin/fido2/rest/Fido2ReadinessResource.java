@@ -17,10 +17,13 @@ import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 import jakarta.inject.Inject;
@@ -53,6 +56,13 @@ public class Fido2ReadinessResource extends BaseResource {
     private static final String ERR_MSG = "Exception while running Fido2 native app readiness check is - ";
     private static final String USER_INUM = "User-inum";
 
+    /** Request body shape, for the generated API spec only; the body is read as a tree. */
+    @Schema(description = "Only recheck is read; other fields are ignored")
+    static class ReadinessRequest {
+        @Schema(description = "Skip the cached result (still rate limited)")
+        public boolean recheck;
+    }
+
     @Inject
     Logger logger;
 
@@ -73,13 +83,14 @@ public class Fido2ReadinessResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS }) })
+    @RequestBody(description = "Empty, or an object with recheck; other fields are ignored", required = false, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ReadinessRequest.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/readiness/fido2-readiness-response.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "No relying party is configured with this id"),
-            @ApiResponse(responseCode = "429", description = "Too many checks; see the Retry-After header"),
+            @ApiResponse(responseCode = "429", description = "Too many checks; see the Retry-After header", headers = @Header(name = "Retry-After", description = "Seconds to wait before asking again", schema = @Schema(type = "integer"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(Constants.RP_CONFIG_ID_READINESS)

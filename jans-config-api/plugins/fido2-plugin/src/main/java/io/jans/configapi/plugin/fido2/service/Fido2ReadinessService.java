@@ -115,7 +115,17 @@ public class Fido2ReadinessService {
         int status = httpResponse.getStatusLine().getStatusCode();
         String retryAfter = httpResponse.getFirstHeader(RETRY_AFTER) == null ? null
                 : httpResponse.getFirstHeader(RETRY_AFTER).getValue();
-        return new Outcome(status, parse(httpResponse.getEntity()), retryAfter);
+        JsonNode body;
+        try {
+            body = parse(httpResponse.getEntity());
+        } catch (JsonProcessingException ex) {
+            // a proxy in front of the FIDO2 server may answer 400/404/429 with a non-JSON page; keep the status
+            if (status == Response.Status.OK.getStatusCode()) {
+                throw ex;
+            }
+            body = null;
+        }
+        return new Outcome(status, body, retryAfter);
     }
 
     private static JsonNode parse(HttpEntity entity) throws JsonProcessingException {
@@ -125,6 +135,8 @@ public class Fido2ReadinessService {
         try {
             String content = EntityUtils.toString(entity, StandardCharsets.UTF_8);
             return StringUtils.isBlank(content) ? null : Jackson.asJsonNode(content);
+        } catch (JsonProcessingException ex) {
+            throw ex;
         } catch (IOException ex) {
             throw new WebApplicationException("Unable to read upstream response entity", ex);
         }

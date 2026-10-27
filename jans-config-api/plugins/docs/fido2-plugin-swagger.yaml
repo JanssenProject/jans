@@ -1627,7 +1627,7 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Empty, or an object with only recheck
+        description: Empty, or an object with recheck; other fields are ignored
         required: false
         content:
           application/json:

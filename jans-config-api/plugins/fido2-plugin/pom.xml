@@ -173,7 +173,7 @@
 				<executions>
 					<execution>
 						<id>unit-tests</id>
-						<phase>test</phase>
+						<phase>process-test-classes</phase>
 						<goals>
 							<goal>test</goal>
 						</goals>

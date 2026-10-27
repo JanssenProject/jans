@@ -1,0 +1,15 @@
+{
+    "enabled": true,
+    "externalFetch": true,
+    "platforms": {
+        "android": [
+            { "check": "reachability.status", "status": "pass", "reason": "HTTP 200" }
+        ],
+        "ios": [
+            { "check": "config.ios", "status": "warn", "reason": "0 iOS app(s) configured" }
+        ]
+    },
+    "checkedAt": "2026-10-20T12:00:00Z",
+    "fromCache": false,
+    "nextRecheckAllowedAt": "2026-10-20T12:01:00Z"
+}
