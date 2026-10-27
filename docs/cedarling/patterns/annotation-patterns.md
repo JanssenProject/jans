@@ -70,7 +70,7 @@ three reasons:
 - Remedies change at product speed. Message copy, upgrade offers, and escalation contacts would turn
   every product change into a policy release.
 - A policy that instructs the application is a policy whose meaning depends on the application
-  obeying. A policy that describes itself stays true whoever reads it.
+  following it. A policy that describes itself stays true whoever reads it.
 
 This matters most for step-up. Deciding which challenge to put in front of an accessor (a security
 key touch, a confirmation from a human, an approval from a data owner) is an organization-level
@@ -98,16 +98,13 @@ the `@checks` value.
 
 ## The Mental Model
 
-```text
-                 +-------------+
-  request -----> |  Cedarling  | ---> decision (Allow / Deny)
-                 |    (PDP)    | ---> reason(): determining policy IDs
-                 +-------------+               |
-                                               v
-                               annotations_by_policy / annotation_values
-                                               |
-                                               v
-                      application (PEP) or reasoning engine decides what to do
+```mermaid
+flowchart LR
+    request["request"] --> pdp["Cedarling (PDP)"]
+    pdp --> decision["decision: Allow / Deny"]
+    pdp --> reason["reason(): determining policy IDs"]
+    reason --> lookup["annotations_by_policy / annotation_values"]
+    lookup --> app["application (PEP) or reasoning engine decides what to do"]
 ```
 
 Three properties follow from this, and every pattern in this section respects them.
@@ -120,7 +117,7 @@ says what the policy found. Whether that leads to a request for owner approval, 
 security alert is decided elsewhere.
 
 Annotations are static. The value is a literal string fixed at authoring time. It cannot
-interpolate context, entity attributes, or the current counter value. Anything dynamic is resolved
+include context, entity attributes, or the current counter value. Anything dynamic is resolved
 by the application after it reads the label.
 
 ## Mechanics You Need to Know
@@ -152,22 +149,22 @@ denial.
 A fourth case looks just like the third. A policy whose expression errors at evaluation time, on
 integer overflow or on an attribute the entity does not carry, is dropped from the decision and
 reported in `diagnostics().errors()` instead of `reason()`. If that policy was the only `permit`,
-the result is a `Deny` with an empty `reason()`, indistinguishable from "nothing matched" to code
+the result is a `Deny` with an empty `reason()`, which looks the same as "nothing matched" to code
 that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy looks like an
 ordinary default deny for as long as nobody checks.
 
 A fifth case fills `reason()` with policies that did not fire at all. `authorize_unsigned` with no
-principal runs Cedar's partial evaluation, and when residuals remain, Cedarling synthesizes a
-fail-closed `Deny` whose `reason()` holds the residual policy IDs. Those policies were neither
-satisfied nor rejected: the request lacked what they needed to decide. Their labels describe rules
-that might have applied, so treat a principal-less denial as "undetermined" rather than as the
+principal runs Cedar's partial evaluation, and when some policies remain undecided, Cedarling
+returns a `Deny` whose `reason()` holds the IDs of those undecided policies. Those policies were
+neither satisfied nor rejected: the request lacked what they needed to decide. Their labels describe
+rules that might have applied, so treat a principal-less denial as "undetermined" rather than as the
 reason for a refusal.
 
-The default-deny row is the one that trips people up. If you want a label for a request that simply
-matches no `permit`, an annotated `forbid` has to exist and match, as the quota example does with its
-`forbid` at 100%. Otherwise, the application needs its own fallback for "denied, nothing more to
-say". Do not add a catch-all `forbid` just to hang an annotation on it: in Cedar `forbid` always
-wins, so a broad catch-all silently overrides every `permit` you have.
+The default-deny row is the one people most often get wrong. If you want a label for a request that
+simply matches no `permit`, an annotated `forbid` has to exist and match, as the quota example does
+with its `forbid` at 100%. Otherwise, the application needs its own fallback for "denied, nothing
+more to say". Do not add a catch-all `forbid` just to hang an annotation on it: in Cedar `forbid`
+always wins, so a broad catch-all silently overrides every `permit` you have.
 
 ### One Key per Policy, Several Values Means Several Policies
 
@@ -186,9 +183,9 @@ let found =
 // ["agent.human_intent_unconfirmed", "document.outside_operator_assignments"]
 ```
 
-Use `annotations_map` only when you know the keys cannot collide across policies, since it keeps
-one arbitrary value per key. `annotations_by_policy` is the loss-free view, and it is the one you
-want for audit logging because it records which policy reported what.
+Use `annotations_map` only when you know the same key is not used by several matching policies,
+since it keeps one arbitrary value per key. `annotations_by_policy` is the loss-free view, and it is
+the one you want for audit logging because it records which policy reported what.
 
 ### `reason()` Has No Order
 
@@ -253,7 +250,7 @@ Do not let an annotation override the decision. An enforcement point that lets a
 because the policy carried some label is not enforcing anything. If you need a policy that observes
 without blocking, express that in the policy logic instead of ignoring its verdict.
 
-Do not encode structure in one annotation. A JSON blob in a string is hard to review and easy to
+Do not encode structure in one annotation. A JSON document in a string is hard to review and easy to
 break. One condition per policy, one identifier per condition.
 
 Do not invent keys per policy. An annotation vocabulary is an interface between policy authors and
@@ -269,6 +266,6 @@ fallback, usually the generic handling for a plain denial.
 The three lookup methods have the same names in Rust, Python, and JavaScript, and are documented in
 the [Interfaces reference](../reference/cedarling-interfaces.md#annotation-lookup):
 
-- `annotations_map(policy_ids)` returns a merged map, lossy on duplicate keys
+- `annotations_map(policy_ids)` returns a merged map that keeps one value per duplicate key
 - `annotation_values(policy_ids, key)` returns all values of one key, duplicates preserved
 - `annotations_by_policy(policy_ids)` returns them grouped by policy ID, loss-free

@@ -24,7 +24,7 @@ immediate: buttons that would fail are disabled, and a click that cannot succeed
 a round trip.
 
 The API runs Cedarling too, over the same policy store, and re-evaluates every request. That is not
-redundancy: the browser copy exists for the interface, and the server copy protects the data.
+duplicate work: the browser copy exists for the interface, and the server copy protects the data.
 
 Now two different denials arrive at the same button.
 
@@ -32,7 +32,7 @@ The user is a viewer, and viewers do not generate reports. The browser knows the
 role is not going to change between the click and the request, and the server would say exactly the
 same thing. Rendering "you do not have access" locally is correct and costs nothing.
 
-The workspace has burned through its monthly quota. The browser is comparing against a counter it
+The workspace has used up its monthly quota. The browser is comparing against a counter it
 fetched when the page loaded, and the real figure lives in the metering service. That number may
 have moved in either direction: the month may have rolled over, an administrator may have raised the
 plan, or another tab may have consumed the remainder. A local denial here is a guess.
@@ -50,8 +50,8 @@ holds fresh.
 ```
 
 That is a description, not an instruction. It is true whoever evaluates the policy. The browser
-draws its own conclusion from it: a denial that rests on server-held input is not one it can vouch
-for. The server draws none, because for the server the input is fresh.
+draws its own conclusion from it: a denial that rests on server-held input is not one it can
+confirm. The server draws none, because for the server the input is fresh.
 
 ## Why This Is Safe
 
@@ -60,23 +60,23 @@ the server evaluates the same request again and grants nothing on the browser's 
 do is refuse something the server would have allowed, which is a correctness problem in the
 interface rather than a security problem.
 
-The pattern rests on that asymmetry. Sending the request anyway, after a local denial, gives away
-nothing: the authoritative answer is still the server's.
+The pattern relies on this one-way risk. Sending the request anyway, after a local denial, gives
+away nothing: the authoritative answer is still the server's.
 
 The reverse must never exist. Nothing lets a client skip the request after a local `Allow`, and
 nothing lets it disregard a denial from the server. Those would move the decision to the least
 trustworthy participant.
 
-The asymmetry is not free. It holds only while the following five conditions hold, and each one has
+This safety is not free. It holds only while the following five conditions hold, and each one has
 to be kept that way:
 
 - Every guarded call is authorized again on the server, from inputs the server resolved itself. A
   single endpoint that trusts the browser's decision, or that rebuilds the request from what the
   browser sent, ends the guarantee for that endpoint.
-- The client renders denials and never shapes data. The handling rules from the
-  [response shaping page](./annotation-response-shaping.md) are applied by whoever builds the
-  response, which is the server. A browser that masks columns it received in the clear is decorating
-  data it already has.
+- The client renders denials and never shapes data. The handling rules from the [response shaping
+  page](./annotation-response-shaping.md) are applied by whoever builds the response, which is the
+  server. A browser that masks columns it received in the clear only changes how data it already has
+  is displayed.
 - Everything the browser evaluates is treated as public. The embedded PDP holds the policy store and
   the entity attributes it reasons over, so thresholds, tier names, contract quotas, and risk tiers
   are readable by anyone who opens the developer tools. Ship only what you are willing to show, and
@@ -179,22 +179,22 @@ server-held field to an unlabeled policy should add one.
 
 ## The Flow
 
-```text
- User           Browser                    API                Metering
-  |                |                         |                    |
-  |-- click ------>|                         |                    |
-  |                | local authorize_unsigned                     |
-  |                | (reports_used from page load)                |
-  |                | Deny: forbid_generate_report_quota_exhausted |
-  |                | every denial reads server input              |
-  |<-- pending ----|                         |                    |
-  |                |-- POST /reports ------->|                    |
-  |                |                         |-- fresh counter -->|
-  |                |                         |<-------------------|
-  |                |                         | authorize_unsigned |
-  |                |                         | (authoritative)    |
-  |                |<-- 201, or 403 ---------|                    |
-  |<-- result -----|                         |                    |
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant API
+    participant Metering
+
+    User->>Browser: click
+    Note over Browser: local authorize_unsigned<br/>reports_used from page load<br/>Deny: forbid_generate_report_quota_exhausted<br/>every denial reads server input
+    Browser-->>User: pending
+    Browser->>API: POST /reports
+    API->>Metering: read counter
+    Metering-->>API: fresh counter
+    Note over API: authorize_unsigned (authoritative)
+    API-->>Browser: 201, or 403
+    Browser-->>User: result
 ```
 
 The pending state is an accurate report of what the browser knows, which at that point is nothing.
@@ -330,12 +330,12 @@ A handler is then one line, names one thing, and knows nothing about annotations
 const outcome = await guarded("generateReport", workspace);
 ```
 
-Two caveats keep this from becoming a worse idea than it replaces.
+Two warnings keep this from becoming worse than what it replaces.
 
 The mapping is a declaration, not a naming convention. Cedar actions describe what the user is
 doing, so they stay business-shaped: `Acme::Action::"GenerateReport"`, never
-`Acme::Action::"POST /reports"`. Naming actions after routes drags transport details into the policy
-vocabulary, and every URL change becomes a policy change.
+`Acme::Action::"POST /reports"`. Naming actions after routes brings transport details into the
+policy vocabulary, and every URL change becomes a policy change.
 
 The relationship is not always one to one. A batch endpoint performs several actions, and a BFF or
 GraphQL resolver may serve one action through several calls. The rule that survives those cases is
@@ -392,7 +392,7 @@ tell it, and treating it as a reason to relax a denial would make the policy opt
 in a comment where the server's enforcement point reads annotations; the shared policy store makes
 it easy to assume both sides act on every key.
 
-## Rules That Keep This Honest
+## Rules That Keep This Safe
 
 **Read the decision in one place.** The rule for when a local denial may be rendered is a property
 of the application, not of the action, so it belongs in a single wrapper that every guarded call
@@ -409,7 +409,7 @@ carried. The local policy that fired may not even be the one that denies at the 
 
 **Do not label everything.** Each provisional denial is a round trip the client-side PDP was
 supposed to save. If most policies read server input, the embedded PDP is a latency cost with no
-benefit, and calling the server unconditionally would be simpler and more honest.
+benefit, and calling the server unconditionally would be simpler and clearer.
 
 **Treat annotations as published.** The browser holds the policies and reads their annotations, so
 anything in a key or a `@detail` is readable by the people the policy constrains. Keep internal
@@ -420,8 +420,8 @@ identifiers, ticket numbers, and detection logic out of policies the client load
 Labeling policies is not the only option. An application can decide per action that a local denial
 is never rendered, which needs no annotations at all.
 
-That is the better choice when every denial for an action has the same provenance. Labeling
-policies earns its keep when one action mixes both kinds, which is the case here: the same button
+That is the better choice when every denial for an action has the same source. Labeling
+policies is worth it when one action mixes both kinds, which is the case here: the same button
 can be refused for a role the browser knows and for a quota it does not.
 
 ## What This Buys You

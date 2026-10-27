@@ -29,18 +29,19 @@ document classified `highly_confidential`, normally read only by the strategy an
 Nothing here is obviously an attack. There are three plausible explanations:
 
 - Dana genuinely needs the document and nobody told the access system.
-- The assistant over-reached and expanded a vague question into a search Dana never intended.
+- The assistant went too far and turned a broad question into a search Dana never meant to run.
 - Dana's credentials are being used by somebody else.
 
-A binary answer has to pick one. Denying blocks legitimate work and trains people to route around
+A binary answer has to pick one. Denying blocks legitimate work and teaches people to work around
 the tool. Allowing means an agent reads strategy documents at machine speed, and the security team
 finds out from a log review next week.
 
 ## Where the Challenge Is Decided
 
 The better answer is to ask: confirm with Dana that the access was intended, get the data owner to
-confirm the need, or require a security key. [Beyond Zero](https://queue.acm.org/detail.cfm?id=3819083)
-calls this a *challenge*, friction applied in the moment and in proportion to the risk.
+confirm the need, or require a security key. [Beyond
+Zero](https://queue.acm.org/detail.cfm?id=3819083) calls this a *challenge*, friction applied in the
+moment and in proportion to the risk.
 
 Choosing that challenge is not the policy's job. Which challenge to put in front of an accessor is
 an organization-level decision that spans applications, and it is usually made by a reasoning engine
@@ -51,7 +52,7 @@ its own challenge would be making that decision with a fraction of the informati
 What the policy can do is say precisely what is missing. Its `@checks` label names the condition
 that denied the request, and its `unless` clause names the evidence that would satisfy it. The
 reasoning engine takes the label as one input among many and decides what to do: run a challenge,
-refuse outright, or raise an alert.
+refuse, or raise an alert.
 
 Once a challenge is issued, the interaction becomes stateful. The accessor goes off to complete it,
 the challenge service records the result, and the next request arrives with richer context. The
@@ -68,8 +69,8 @@ this" by the principal type, which the engine enforces, rather than by reading a
 context that nothing prevents the caller from setting.
 
 The agent also has to stay attributable to the human who operates it. Lose that link and the agent
-has ambient authority nobody owns. An attribute of type `User` cannot express that link, because
-[only the principal and the resource are
+has access that no person is responsible for. An attribute of type `User` cannot express that link,
+because [only the principal and the resource are
 entities](./annotation-patterns.md#only-the-principal-and-the-resource-are-entities). So the agent
 carries its operator as an identifier, together with copies of the operator attributes the policies
 need, filled in by the server when it builds the request:
@@ -85,34 +86,29 @@ the decision, and stop protecting anything.
 
 ## The Flow
 
-```text
- Dana          App                  Cedarling        Reasoning engine     Challenge service
-  |             |                       |                    |                    |
-  |-- prompt -->|                       |                    |                    |
-  |             |-- 1. authorize ------>|                    |                    |
-  |             |   principal: Agent::"reportbot-7f3"         |                    |
-  |             |   attestations: []    |                    |                    |
-  |             |<-- Deny, reason: -----|                    |                    |
-  |             |    forbid_agent_read_sensitive_unconfirmed  |                    |
-  |             |    forbid_offscope_sensitive_read_by_agent  |                    |
-  |             |                       |                    |                    |
-  |             |-- 2. annotation_values(reason, "checks") -->|                    |
-  |             |   agent.human_intent_unconfirmed            |                    |
-  |             |   document.outside_operator_assignments     |                    |
-  |             |                       |                    |                    |
-  |             |-- 3. checks + signals ------------------->|                    |
-  |             |<-- decision: run two challenges -----------|                    |
-  |             |                       |                    |                    |
-  |             |-- 4. run challenges ---------------------------------------->|
-  |<-- "ReportBot wants to open strategy-fy27. Did you ask for this?" ---------|
-  |-- confirm ---------------------------------------------------------------->|
-  |             |                       |        (data owner approves too)    |
-  |             |<-- attested results, server-side, bound to this request ---|
-  |             |                       |                    |                    |
-  |             |-- 5. re-authorize --->|                    |                    |
-  |             |   attestations: [human_intent_confirmed, data_owner_approved]   |
-  |             |<-- Allow -------------|                    |                    |
-  |<-- answer --|                       |                    |                    |
+```mermaid
+sequenceDiagram
+    participant Dana
+    participant App
+    participant Cedarling
+    participant Engine as Reasoning engine
+    participant Service as Challenge service
+
+    Dana->>App: prompt
+    App->>Cedarling: 1. authorize<br/>principal: Agent::"reportbot-7f3"<br/>attestations: []
+    Cedarling-->>App: Deny<br/>forbid_agent_read_sensitive_unconfirmed<br/>forbid_offscope_sensitive_read_by_agent
+    App->>Cedarling: 2. annotation_values(reason, "checks")
+    Cedarling-->>App: agent.human_intent_unconfirmed<br/>document.outside_operator_assignments
+    App->>Engine: 3. checks + signals
+    Engine-->>App: run two challenges
+    App->>Service: 4. run challenges
+    Service->>Dana: ReportBot wants to open strategy-fy27. Did you ask for this?
+    Dana-->>Service: confirm
+    Note over Service: the data owner approves too
+    Service-->>App: results, stored server-side, bound to this request
+    App->>Cedarling: 5. authorize again<br/>attestations: [human_intent_confirmed, data_owner_approved]
+    Cedarling-->>App: Allow
+    App-->>Dana: answer
 ```
 
 Step 5 is the important one. The evidence goes back in as context, and the same policies are
@@ -226,7 +222,7 @@ unless {
 };
 ```
 
-Evaluated against Dana's request, the agent principal trips both agent policies:
+Evaluated against Dana's request, the agent principal matches both agent policies:
 
 ```text
 DENY   reason: forbid_agent_read_sensitive_unconfirmed
@@ -352,7 +348,7 @@ engine, the challenge service, and the application that assembles the context.
   agent can put `"human_intent_confirmed"` into the context, the policy enforces nothing.
 - Expire it. Cedar has no concept of elapsed time here, so the challenge service sets a lifetime on
   every attestation and the application drops expired ones before building the context. An
-  attestation with no expiry is one that a long-lived session rides forever.
+  attestation with no expiry is one that a long-lived session keeps using forever.
 - Bind it to the request. Evidence collected for one document should not silently authorize a bulk
   export of a thousand others. Scope the stored attestation to the action and resource it was
   collected for, or to a short window, whichever your risk model justifies.
@@ -362,8 +358,8 @@ engine, the challenge service, and the application that assembles the context.
   agent; `data_owner_approved` has to come from the team in `resource.owner_team`, never from the
   operator, or the operator approves their own off-scope read. Record who answered, and reject an
   answer from the wrong party.
-- Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs in
-  the same stream as the decision logs, where the reasoning engine can see it next time.
+- Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs
+  in the same stream as the decision logs, where the reasoning engine can see it next time.
 
 Because those records live on the server, a browser evaluating these same policies is working from a
 copy it cannot refresh, so its denials are provisional. See
@@ -372,8 +368,8 @@ copy it cannot refresh, so its denials are provisional. See
 ## Variation: Risk Carried by the Operator
 
 Risk attaches to the human, but the request arrives from the agent. The copied
-`operator_risk_tier` keeps the two connected, so an elevated-risk operator does not get a quieter
-path by sending an assistant:
+`operator_risk_tier` keeps the two connected, so an elevated-risk operator cannot skip the checks
+by sending an assistant:
 
 ```cedar
 @id("forbid_agent_read_for_elevated_risk_operator")
@@ -395,7 +391,7 @@ unless {
 
 ## Variation: Containment
 
-Some conditions should not be resolvable in the moment. After several failed challenges, or when an
+Some conditions should not be cleared in the moment. After several failed challenges, or when an
 investigation has already flagged the account, the right answer is a durable block that a person has
 to lift.
 
@@ -439,7 +435,7 @@ fails the request instead of slipping past the containment policy. Without a sch
 to check: the policy errors at evaluation, drops out of the decision, and the denial it should have
 produced never happens.
 
-Containment here is keyed on the human. Freezing one misbehaving agent while its operator keeps
+Containment here is keyed on the human. Blocking one badly behaving agent while its operator keeps
 working would need a risk attribute of the agent's own and a third policy.
 
 ## What This Buys You

@@ -18,16 +18,16 @@ tags:
 
 ## The Scenario
 
-Acme Payments onboards merchants in stages. A new merchant can log in immediately, but before they
-can accept a card payment they have to submit business details, connect a bank account, and pass an
-identity check. Later, once they are trading, a large withdrawal needs a second pair of eyes, and
-support staff occasionally need to open a merchant's records during an incident.
+Acme Payments registers new merchants in stages. A new merchant can log in immediately, but before
+they can accept a card payment they have to submit business details, connect a bank account, and
+pass an identity check. Later, once they are trading, a large withdrawal needs approval from a
+second person, and support staff occasionally need to open a merchant's records during an incident.
 
 Each of these is the same shape: the policy knows exactly which condition holds the request back,
 or on which basis it was let through. Written the usual way, that knowledge is duplicated: the
 onboarding wizard re-implements the prerequisite checks to know what to show, and the withdrawal
-handler re-implements the approval threshold to know when to ask. Both copies then drift away from
-the policies that actually decide.
+handler re-implements the approval threshold to know when to ask. Over time both copies stop
+matching the policies that actually decide.
 
 Labels remove the duplicate. Each policy reports the condition it found, and the application maps
 that condition to a screen, an approver, or an audit procedure. The rules live in the policies; the
@@ -174,9 +174,9 @@ path, send the merchant to the first open step, and render the rest as upcoming.
 
 The step list is the one place where the application repeats something from the policy store: the
 set of condition identifiers. Adding a fourth prerequisite therefore means a new policy *and* a new
-entry in the list. The `unknown` check above is what keeps that honest. A policy that ships first
-fails loudly in testing instead of leaving merchants stuck in front of a wizard that thinks they are
-done.
+entry in the list. The `unknown` check above is what catches a mismatch. A policy that is added
+first fails clearly in testing instead of leaving merchants stuck in front of a wizard that thinks
+they are done.
 
 The same policies answer for every entry point. An API call, the dashboard, and a mobile client all
 get the same remaining conditions, because they come from the decision rather than from each
@@ -184,7 +184,7 @@ client's copy of the flow.
 
 ## Part 2: Escalation and Approval
 
-A large withdrawal is not blocked outright. It needs someone else to agree.
+A large withdrawal is not simply blocked. It needs someone else to agree.
 
 Withdrawals need their own `permit`, or clearing the approval would leave the request matching
 nothing at all and Cedar would deny it by default, with nothing to explain why:
@@ -234,11 +234,11 @@ for check in &found {
 ```
 
 Several independent conditions can hold at once. If a second `forbid` covered a newly added
-destination account, a withdrawal that is both large and newly routed would trip both policies, and
+destination account, a withdrawal that is both large and newly routed would match both policies, and
 the loop above requests both approvals in one pass. Reading one arbitrary value with
 `annotations_map` would request one, and the retry would be refused again by a condition nobody
-mentioned: not an over-authorization, but a stuck flow that stays invisible until somebody sits
-through it.
+mentioned: not an over-authorization, but a flow that gets stuck, and nobody notices until a user
+runs into it.
 
 Once the approval is recorded, the request is re-evaluated with `approvals` in the context, and the
 same policy set allows it. The approval record has to be produced server-side. A client that can put
@@ -261,8 +261,9 @@ for this request", and `contains("finance_lead")` is a claim the policy can trus
 
 ## Part 3: Break-Glass Access
 
-Support staff sometimes need to open a merchant's records during an incident. Denying that outright
-means incidents take longer. Allowing it silently means an unmonitored path into customer data.
+Support staff sometimes need to open a merchant's records during an incident. Always denying it
+means incidents take longer. Allowing it without a record means an unwatched path into customer
+data.
 
 The middle option is a narrow `permit` that labels the basis it grants on:
 
@@ -294,7 +295,7 @@ permit. The justification is not. If it has to be a real gate, record it server-
 `justification_id` in the context, and add it to the `when` clause. Otherwise be clear that it is an
 audit duty, not a check.
 
-The time limit deserves the same scrutiny. `permit_support_break_glass` carries no time term, so
+The time limit needs the same care. `permit_support_break_glass` carries no time term, so
 re-authorizing the same request returns the same `Allow` for as long as the incident stays open. The
 application has to drop the grant when its period ends, *and* the server has to re-resolve the
 incident on every request and refuse one that has been closed. Neither covers the other.
@@ -309,7 +310,7 @@ Keep break-glass a separate, narrow policy rather than a relaxation of the norma
 policy an auditor will ask about first, and it is far easier to answer when it stands alone with a
 single `@id` and its own conditions.
 
-## Reading the Labels Generically
+## Reading the Labels in One Place
 
 Once several flows share the convention, the application can dispatch on the condition in one
 place:
