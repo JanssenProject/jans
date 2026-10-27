@@ -17,7 +17,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptState;
  * receipt-chain position from sequence 1 up to the domain's head (or {@code maxEntries},
  * whichever is smaller), reporting density, hash recomputation, {@code prev} linkage and, for a
  * {@code COMMITTED}/{@code VOID} position, whether the matching record row exists with the
- * expected {@code content_digest} (the receipt state is not part of the receipt hash, so {@code VOID} entries keep the chain dense and verifiable).
+ * expected receipt sequence and {@code content_digest} (the receipt state is not part of the receipt hash, so {@code VOID} entries keep the chain dense and verifiable).
  *
  * <p>Used by tests and the manual verification script; not part of any request path.
  *
@@ -42,6 +42,11 @@ public final class ChainVerificationReport {
 		RECORD_MISSING,
 		/** {@code COMMITTED} and the record exists, but its {@code content_digest} differs. */
 		DIGEST_MISMATCH,
+		/**
+		 * {@code COMMITTED} and the record exists, but it carries a different receipt sequence (the
+		 * claim is not satisfied by the stored record).
+		 */
+		SEQUENCE_MISMATCH,
 		/** {@code VOID} but a record row exists with this receipt's identity (tombstone violated). */
 		RECORD_UNEXPECTED
 	}

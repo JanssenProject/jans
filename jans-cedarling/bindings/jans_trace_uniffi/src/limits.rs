@@ -39,7 +39,7 @@ macro_rules! limit_accessors {
     ($($setter:ident, $getter:ident;)*) => {
         #[uniffi::export]
         impl Limits {
-            /// Starts from the core defaults (decision R16).
+            /// Starts from the core defaults.
             #[uniffi::constructor]
             pub fn new() -> Arc<Self> {
                 Arc::new(Self(jans_trace_core::Limits::default()))

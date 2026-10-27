@@ -181,7 +181,7 @@ public class Benchmark {
 
         return () ->
             cedarling
-                .authorizeUnsigned(principal, action, resource, context)
+                .authorizeUnsigned(principal, action, resource, context, null)
                 .getDecision();
     }
 
@@ -206,7 +206,7 @@ public class Benchmark {
 
         return () ->
             cedarling
-                .authorizeMultiIssuer(tokens, action, resource, context)
+                .authorizeMultiIssuer(tokens, action, resource, context, null)
                 .getDecision();
     }
 
@@ -222,7 +222,7 @@ public class Benchmark {
         List<BatchItem> items = buildBatchItems(scenario);
         return () -> {
             BatchAuthorizeUnsignedResponse resp =
-                cedarling.authorizeUnsignedBatch(principal, items);
+                cedarling.authorizeUnsignedBatch(principal, items, null);
             for (BatchItemUnsignedOutcome r : resp.getResults()) {
                 if (!(r instanceof BatchItemUnsignedOutcome.Success)) {
                     return false;
@@ -251,7 +251,7 @@ public class Benchmark {
         List<BatchItem> items = buildBatchItems(scenario);
         return () -> {
             BatchAuthorizeMultiIssuerResponse resp =
-                cedarling.authorizeMultiIssuerBatch(tokens, items);
+                cedarling.authorizeMultiIssuerBatch(tokens, items, null);
             for (BatchItemMultiIssuerOutcome r : resp.getResults()) {
                 if (!(r instanceof BatchItemMultiIssuerOutcome.Success)) {
                     return false;

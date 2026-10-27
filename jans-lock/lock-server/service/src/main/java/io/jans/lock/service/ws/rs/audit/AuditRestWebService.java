@@ -24,6 +24,7 @@ import io.jans.lock.model.core.LockApiError;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +38,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
@@ -57,7 +59,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
@@ -75,7 +78,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Bulk health entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = HealthEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
@@ -93,7 +97,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
@@ -111,7 +116,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Bulk log entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = LogEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
@@ -129,7 +135,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class)))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
@@ -147,7 +154,8 @@ public interface AuditRestWebService {
 	@RequestBody(description = "Bulk telemetry entry", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TelemetryEntry.class))))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST

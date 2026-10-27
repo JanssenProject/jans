@@ -18,7 +18,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=71405a5c47221b70a3f7b8034b8678bedabfa4cf
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
@@ -65,6 +65,7 @@ RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('s
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # =======
@@ -142,10 +143,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_PERSISTENCE_SKIP_INITIALIZED=false \
     CN_PERSISTENCE_IMPORT_BUILTIN_LDIF=true \
     CN_DOCUMENT_STORE_TYPE=DB \
-    CN_JACKRABBIT_RMI_URL="" \
-    CN_JACKRABBIT_URL=http://localhost:8080 \
-    CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
-    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \

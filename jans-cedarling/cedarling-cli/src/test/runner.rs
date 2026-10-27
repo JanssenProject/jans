@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use anyhow::{Context, Result, bail};
-use cedarling::{Cedarling, RequestUnsigned};
+use cedarling::{AuthorizeOptions, Cedarling, RequestUnsigned};
 use colored::Colorize;
 use std::collections::HashSet;
 use std::fs;
@@ -53,6 +53,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
             action: test.request.action,
             resource: test.request.resource.into(),
             context: test.request.context,
+            options: AuthorizeOptions::default(),
         };
 
         match cedarling.authorize_unsigned(req).await {

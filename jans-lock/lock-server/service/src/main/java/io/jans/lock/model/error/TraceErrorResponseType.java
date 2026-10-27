@@ -32,9 +32,6 @@ public enum TraceErrorResponseType implements IErrorType {
 	/** {@code trace.eat_profile} is not {@code tag:jans.io,2026:trace-v1}. */
 	UNSUPPORTED_PROFILE("unsupported_profile", BAD_REQUEST),
 
-	/** The body carries a top-level or {@code trace}-level {@code evidence_domain_id}. */
-	DOMAIN_FIELD_FORBIDDEN("domain_field_forbidden", BAD_REQUEST),
-
 	/** {@code producer} does not equal {@code producer_chain.producer_id}. */
 	PRODUCER_MISMATCH("producer_mismatch", BAD_REQUEST),
 

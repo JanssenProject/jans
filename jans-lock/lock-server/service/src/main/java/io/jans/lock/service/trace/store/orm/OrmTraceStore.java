@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.store.orm;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import io.jans.lock.model.config.BaseDnConfiguration;
 import io.jans.lock.model.config.StaticConfiguration;
 import io.jans.lock.model.trace.entity.TraceChainEntry;
+import io.jans.lock.model.trace.entity.TracePolicyReleaseEntry;
 import io.jans.lock.model.trace.entity.TraceProducerKeyEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
@@ -30,13 +32,17 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
+import io.jans.lock.service.trace.store.PolicyReleaseServed;
 import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.store.TraceStore;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.PagedResult;
@@ -57,6 +63,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class OrmTraceStore implements TraceStore {
 
+	private static final String ATTR_ID = "jansId";
 	private static final String ATTR_DOMAIN_ID = "jansTraceDomainId";
 	private static final String ATTR_RECORD_ID = "jansTraceRecordId";
 	private static final String ATTR_EXEC_KEY = "jansTraceExecKey";
@@ -65,13 +72,19 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_CHAIN_POS_KEY = "jansTraceChainPosKey";
 	private static final String ATTR_TOKEN_KEYS = "jansTraceTokenKeys";
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
+
+	private static final int RECEIPT_LOOKUP_BATCH = 100;
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
 	private static final String ATTR_RECEIPT_STATE = "jansTraceReceiptState";
 	private static final String ATTR_RECEIVED_AT_MS = "jansTraceReceivedAtMs";
 	private static final String ATTR_PRODUCER_ID = "jansTraceProducerId";
+	private static final String ATTR_POLICY_STORE_ID = "jansTracePolicyStoreId";
+	private static final String ATTR_POLICY_STORE_VERSION = "jansTracePolicyStoreVersion";
+	private static final String ATTR_BUNDLE_HASH = "jansTraceBundleHash";
+	private static final String ATTR_LAST_SERVED_AT_MS = "jansTraceLastServedAtMs";
 
 	/**
-	 * Bound on {@code updateReceiptState}/{@code revokeProducerKey}'s internal, caller-invisible
+	 * Bound on {@code settleReceipt}/{@code revokeProducerKey}'s internal, caller-invisible
 	 * compare-and-swap retry: unlike {@code updateRecordFlags}, neither method
 	 * has a multi-step "plan then insert" gap a caller needs to recover from, so a losing CAS here is
 	 * always safe to retry with a fresh read and the same idempotent recomputation, fully inside this
@@ -87,6 +100,9 @@ public class OrmTraceStore implements TraceStore {
 
 	@Inject
 	private StaticConfiguration staticConfiguration;
+
+	@Inject
+	private TraceKeys traceKeys;
 
 	@PostConstruct
 	public void init() {
@@ -121,6 +137,14 @@ public class OrmTraceStore implements TraceStore {
 		return "ou=keys," + baseDn();
 	}
 
+	private String policyReleasesBase() {
+		return "ou=policyReleases," + baseDn();
+	}
+
+	private String policyReleaseDn(String policyStoreId, String bundleHash) {
+		return TraceKeys.policyReleaseDn(baseDn(), traceKeys.policyReleaseKey(policyStoreId, bundleHash));
+	}
+
 	// -- duplicate-safe insert -------------------------------------------
 
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
@@ -142,17 +166,17 @@ public class OrmTraceStore implements TraceStore {
 	// -- records ------------------------------------------------------------------------------
 
 	@Override
-	public void insertRecord(StoredTraceRecord record) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.recordKey(record.getIdentity());
+	public void insertRecord(StoredTraceRecord stored) throws DuplicateEntryException, TraceStorageException {
+		String key = traceKeys.recordKey(stored.getIdentity());
 		String dn = TraceKeys.recordDn(baseDn(), key);
-		TraceRecordEntry entity = TraceEntityMapper.toEntity(record, dn);
+		TraceRecordEntry entity = TraceEntityMapper.toEntity(stored, dn, traceKeys);
 		duplicateSafeInsert(dn, TraceRecordEntry.class, entity, key);
 	}
 
 	@Override
 	public boolean updateRecordFlags(RecordIdentity id, IngestionFlags flags, long expectedVersion)
 			throws TraceStorageException {
-		String key = TraceKeys.recordKey(id);
+		String key = traceKeys.recordKey(id);
 		String dn = TraceKeys.recordDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceRecordEntry.class)) {
 			return false;
@@ -183,7 +207,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public Optional<StoredTraceRecord> findRecord(RecordIdentity id) {
-		String key = TraceKeys.recordKey(id);
+		String key = traceKeys.recordKey(id);
 		String dn = TraceKeys.recordDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceRecordEntry.class)) {
 			return Optional.empty();
@@ -216,7 +240,7 @@ public class OrmTraceStore implements TraceStore {
 		if (count <= 0) {
 			return Collections.emptyList();
 		}
-		String key = TraceKeys.executionKey(exec);
+		String key = traceKeys.executionKey(exec);
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, exec.getDomainId()),
 				Filter.createEqualityFilter(ATTR_EXEC_KEY, key));
 		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
@@ -242,7 +266,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position) {
-		String key = TraceKeys.chainPositionKey(position);
+		String key = traceKeys.chainPositionKey(position);
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
@@ -251,10 +275,38 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
-		String key = TraceKeys.tokenKey(domainId, token);
+		String key = traceKeys.tokenKey(domainId, token);
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_TOKEN_KEYS, key).multiValued());
 		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+	}
+
+	@Override
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start, int count) {
+		if (count <= 0) {
+			return Collections.emptyList();
+		}
+		List<Filter> filters = new ArrayList<>();
+		filters.add(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId));
+		if (query.getPolicyStoreId() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_POLICY_STORE_ID, query.getPolicyStoreId()));
+		}
+		if (query.getPolicyStoreVersion() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_POLICY_STORE_VERSION, query.getPolicyStoreVersion()));
+		}
+		if (query.getBundleHash() != null) {
+			filters.add(Filter.createEqualityFilter(ATTR_BUNDLE_HASH, query.getBundleHash()));
+		}
+		if (query.getReceivedFromMs() != null) {
+			filters.add(Filter.createGreaterOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedFromMs()));
+		}
+		if (query.getReceivedToMs() != null) {
+			filters.add(Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedToMs()));
+		}
+		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
+				TraceRecordEntry.class, Filter.createANDFilter(filters), null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
+				Math.max(0, start), count, count);
+		return toStoredList(paged.getEntries());
 	}
 
 	@Override
@@ -271,7 +323,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public void insertReceipt(TraceReceiptEntry entity) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.receiptKey(entity.getDomainId(), entity.getReceiptSeq());
+		String key = traceKeys.receiptKey(entity.getDomainId(), entity.getReceiptSeq());
 		String dn = TraceKeys.receiptDn(baseDn(), key);
 		entity.setId(key);
 		entity.setDn(dn);
@@ -279,32 +331,41 @@ public class OrmTraceStore implements TraceStore {
 	}
 
 	@Override
-	public boolean updateReceiptState(String domainId, long receiptSequence, TraceReceiptState state)
+	public ReceiptSettlement settleReceipt(String domainId, long receiptSequence, TraceReceiptState target)
 			throws TraceStorageException {
-		String key = TraceKeys.receiptKey(domainId, receiptSequence);
+		if (target == null || target == TraceReceiptState.PENDING) {
+			throw new IllegalArgumentException("A receipt settles to COMMITTED or VOID, not " + target);
+		}
+		String key = traceKeys.receiptKey(domainId, receiptSequence);
 		String dn = TraceKeys.receiptDn(baseDn(), key);
 		for (int attempt = 1; attempt <= INTERNAL_CAS_RETRY_LIMIT; attempt++) {
 			if (!persistenceEntryManager.contains(dn, TraceReceiptEntry.class)) {
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
 			TraceReceiptEntry entity;
 			try {
 				entity = persistenceEntryManager.find(dn, TraceReceiptEntry.class, null);
 			} catch (EntryPersistenceException e) {
 				log.debug("TRACE receipt {} disappeared before state update", key);
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
-			// Idempotent: re-setting the same absolute state is always safe to retry.
-			entity.setReceiptState(state.name());
+			TraceReceiptState current = entity.getReceiptStateEnum();
+			if (current == target) {
+				return ReceiptSettlement.ALREADY_SETTLED;
+			}
+			if (current != TraceReceiptState.PENDING) {
+				return ReceiptSettlement.CONFLICT;
+			}
+			entity.setReceiptState(target.name());
 			try {
 				persistenceEntryManager.updateWithVersion(entity);
-				return true;
+				return ReceiptSettlement.SETTLED;
 			} catch (VersionMismatchException e) {
-				log.debug("TRACE receipt {} version conflict updating state, retrying (attempt {}/{})", key, attempt,
+				log.debug("TRACE receipt {} version conflict updating state, re-reading (attempt {}/{})", key, attempt,
 						INTERNAL_CAS_RETRY_LIMIT);
 			} catch (EntryPersistenceException e) {
 				log.debug("TRACE receipt {} disappeared before state update", key);
-				return false;
+				return ReceiptSettlement.NOT_FOUND;
 			}
 		}
 		throw new TraceStorageException("merge_failed",
@@ -314,20 +375,19 @@ public class OrmTraceStore implements TraceStore {
 	@Override
 	public Optional<ReceiptHead> findReceiptHead(String domainId) {
 		Filter filter = Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId);
-		PagedResult<TraceReceiptEntry> paged = persistenceEntryManager.findPagedEntries(receiptsBase(),
-				TraceReceiptEntry.class, filter, new String[] { ATTR_RECEIPT_SEQ, ATTR_RECEIPT_HASH }, ATTR_RECEIPT_SEQ,
-				SortOrder.DESCENDING, 0, 1, 1);
-		if (paged.getEntries().isEmpty()) {
+		List<TraceReceiptEntry> heads = persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter,
+				new String[] { ATTR_RECEIPT_SEQ, ATTR_RECEIPT_HASH }, ATTR_RECEIPT_SEQ, SortOrder.DESCENDING, 0, 1, 1);
+		if (heads.isEmpty()) {
 			return Optional.empty();
 		}
-		TraceReceiptEntry entity = paged.getEntries().get(0);
+		TraceReceiptEntry entity = heads.get(0);
 		return Optional.of(new ReceiptHead(entity.getReceiptSeq() == null ? 0L : entity.getReceiptSeq(),
 				entity.getReceiptHash()));
 	}
 
 	@Override
 	public Optional<TraceReceiptEntry> findReceipt(String domainId, long receiptSequence) {
-		String key = TraceKeys.receiptKey(domainId, receiptSequence);
+		String key = traceKeys.receiptKey(domainId, receiptSequence);
 		String dn = TraceKeys.receiptDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceReceiptEntry.class)) {
 			return Optional.empty();
@@ -337,6 +397,93 @@ public class OrmTraceStore implements TraceStore {
 		} catch (EntryPersistenceException e) {
 			log.debug("TRACE receipt {} disappeared before read", key);
 			return Optional.empty();
+		}
+	}
+
+	@Override
+	public List<TraceReceiptEntry> findReceipts(String domainId, Collection<Long> receiptSequences) {
+		List<Long> sequences = new ArrayList<>(new LinkedHashSet<>(receiptSequences));
+		List<TraceReceiptEntry> result = new ArrayList<>(sequences.size());
+		for (int from = 0; from < sequences.size(); from += RECEIPT_LOOKUP_BATCH) {
+			List<Filter> sequenceFilters = sequences.subList(from, Math.min(sequences.size(), from + RECEIPT_LOOKUP_BATCH))
+					.stream().map(seq -> Filter.createEqualityFilter(ATTR_RECEIPT_SEQ, seq)).collect(Collectors.toList());
+			Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
+					Filter.createORFilter(sequenceFilters));
+			result.addAll(persistenceEntryManager.findEntries(receiptsBase(), TraceReceiptEntry.class, filter,
+					sequenceFilters.size()));
+		}
+		return result;
+	}
+
+	/**
+	 * One search by key, so "not found" is an empty result and any exception is a real failure.
+	 */
+	@Override
+	public Optional<TracePolicyReleaseEntry> findPolicyRelease(String policyStoreId, String bundleHash) {
+		String key = traceKeys.policyReleaseKey(policyStoreId, bundleHash);
+		try {
+			List<TracePolicyReleaseEntry> found = persistenceEntryManager.findEntries(policyReleasesBase(),
+					TracePolicyReleaseEntry.class, Filter.createEqualityFilter(ATTR_ID, key), 1);
+			return found.isEmpty() ? Optional.empty() : Optional.of(found.get(0));
+		} catch (BasePersistenceException e) {
+			throw new TraceStorageException("read_failed", "Failed to read policy release " + key, e);
+		}
+	}
+
+	@Override
+	public void insertPolicyRelease(TracePolicyReleaseEntry entry) throws DuplicateEntryException, TraceStorageException {
+		String key = traceKeys.policyReleaseKey(entry.getPolicyStoreId(), entry.getBundleHash());
+		String dn = TraceKeys.policyReleaseDn(baseDn(), key);
+		entry.setId(key);
+		entry.setDn(dn);
+		entry.setVersion(0L);
+		duplicateSafeInsert(dn, TracePolicyReleaseEntry.class, entry, key);
+	}
+
+	@Override
+	public boolean recordPolicyReleaseServed(String policyStoreId, String bundleHash, String policyStoreVersion,
+			long servedAtMs) throws TraceStorageException {
+		for (int attempt = 0; attempt < INTERNAL_CAS_RETRY_LIMIT; attempt++) {
+			Optional<TracePolicyReleaseEntry> found = findPolicyRelease(policyStoreId, bundleHash);
+			if (!found.isPresent()) {
+				return false;
+			}
+			TracePolicyReleaseEntry entry = found.get();
+			if (!PolicyReleaseServed.apply(entry, policyStoreVersion, servedAtMs)) {
+				return true;
+			}
+			try {
+				persistenceEntryManager.updateWithVersion(entry);
+				return true;
+			} catch (VersionMismatchException e) {
+				log.debug("TRACE policy release {} changed concurrently, retrying", entry.getId());
+			} catch (EntryPersistenceException e) {
+				throw new TraceStorageException("merge_failed", "Failed to update policy release " + entry.getId(), e);
+			}
+		}
+		throw new TraceStorageException(TraceStore.VERSION_CONFLICT_REASON, "Failed to update policy release for "
+				+ policyStoreId + " after " + INTERNAL_CAS_RETRY_LIMIT + " retries");
+	}
+
+	@Override
+	public List<TracePolicyReleaseEntry> findPolicyReleasesLastServedBefore(long cutoffMs, int limit) {
+		if (limit <= 0) {
+			return Collections.emptyList();
+		}
+		Filter filter = Filter.createLessOrEqualFilter(ATTR_LAST_SERVED_AT_MS, cutoffMs - 1);
+		return persistenceEntryManager.findEntries(policyReleasesBase(), TracePolicyReleaseEntry.class, filter, limit);
+	}
+
+	@Override
+	public boolean removePolicyReleaseLastServedBefore(String policyStoreId, String bundleHash, long cutoffMs)
+			throws TraceStorageException {
+		String key = traceKeys.policyReleaseKey(policyStoreId, bundleHash);
+		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_ID, key),
+				Filter.createLessOrEqualFilter(ATTR_LAST_SERVED_AT_MS, cutoffMs - 1));
+		try {
+			return persistenceEntryManager.remove(policyReleasesBase(), TracePolicyReleaseEntry.class, filter, 1) > 0;
+		} catch (BasePersistenceException e) {
+			throw new TraceStorageException("delete_failed", "Failed to remove policy release " + key, e);
 		}
 	}
 
@@ -358,7 +505,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public Optional<TraceChainEntry> findChain(ChainIdentity id) {
-		String key = TraceKeys.chainKey(id);
+		String key = traceKeys.chainKey(id);
 		String dn = TraceKeys.chainDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceChainEntry.class)) {
 			return Optional.empty();
@@ -375,7 +522,7 @@ public class OrmTraceStore implements TraceStore {
 	public void insertChain(TraceChainEntry entity) throws DuplicateEntryException, TraceStorageException {
 		ChainIdentity identity = new ChainIdentity(entity.getDomainId(), entity.getProducerId(),
 				entity.getProducerInstanceId(), entity.getProducerChainId());
-		String key = TraceKeys.chainKey(identity);
+		String key = traceKeys.chainKey(identity);
 		String dn = TraceKeys.chainDn(baseDn(), key);
 		entity.setId(key);
 		entity.setDn(dn);
@@ -392,7 +539,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
-		String key = TraceKeys.producerKeyKey(domainId, producerId, kid);
+		String key = traceKeys.producerKeyKey(domainId, producerId, kid);
 		String dn = TraceKeys.producerKeyDn(baseDn(), key);
 		if (!persistenceEntryManager.contains(dn, TraceProducerKeyEntry.class)) {
 			return Optional.empty();
@@ -407,7 +554,7 @@ public class OrmTraceStore implements TraceStore {
 
 	@Override
 	public void insertProducerKey(TraceProducerKeyEntry entity) throws DuplicateEntryException, TraceStorageException {
-		String key = TraceKeys.producerKeyKey(entity.getDomainId(), entity.getProducerId(), entity.getKid());
+		String key = traceKeys.producerKeyKey(entity.getDomainId(), entity.getProducerId(), entity.getKid());
 		String dn = TraceKeys.producerKeyDn(baseDn(), key);
 		entity.setId(key);
 		entity.setDn(dn);
@@ -417,7 +564,7 @@ public class OrmTraceStore implements TraceStore {
 	@Override
 	public boolean revokeProducerKey(String domainId, String producerId, String kid, long revokedAtMs)
 			throws TraceStorageException {
-		String key = TraceKeys.producerKeyKey(domainId, producerId, kid);
+		String key = traceKeys.producerKeyKey(domainId, producerId, kid);
 		String dn = TraceKeys.producerKeyDn(baseDn(), key);
 		for (int attempt = 1; attempt <= INTERNAL_CAS_RETRY_LIMIT; attempt++) {
 			if (!persistenceEntryManager.contains(dn, TraceProducerKeyEntry.class)) {

@@ -440,17 +440,27 @@ SCOPE_JSON="$(jq --arg p "$PRODUCER_PEP" --arg k "$KID_PEP" --arg i "$INSTANCE_P
 post_json "$API" "$WRITE_TOKEN" "$SCOPE_JSON"
 expect_status "write → AUTHORIZATION_DECISION signed by a key scoped to CAPABILITY_INVOKED" 400 "unknown_producer_key"
 
-DOMAIN_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '. + {evidence_domain_id: "other-domain"}')"
-post_json "$API" "$WRITE_TOKEN" "$DOMAIN_JSON"
-expect_status "write → body carrying evidence_domain_id" 400 "domain_field_forbidden"
+CHAIN_PDP_R="e2e-chain-pdp-reserved-${RUN_ID}"
+post_json "$API/admin/producer-chains" "$ADMIN_TOKEN" "$(chain_body "$PRODUCER_PDP" "$INSTANCE_PDP" "$CHAIN_PDP_R")"
+expect_status "admin → register chain for Lock-derived member records" 201
 
-CNF_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '. + {cnf: {jwk: {kty: "OKP"}}}')"
-post_json "$API" "$WRITE_TOKEN" "$CNF_JSON"
-expect_status "write → body carrying cnf" 400 "invalid_assertion"
+reserved_record() { # SEQ JQ_FILTER -> record signed with the filter applied, on its own chain and execution
+  EXEC_ID="e2e-exec-reserved-${RUN_ID}" build_authorization_decision "$(py uuid)" "$1" "$ZERO_HASH" "$NOW" "$CHAIN_PDP_R" \
+    | jq -c "$2" | py sign "$WORK/pdp.key"
+}
 
-TIER_JSON="$(build_authorization_decision "$(py uuid)" 2 "$DIGEST_AUTH" "$NOW" | jq -c '.trace.trust_tier = "attested"')"
-post_json "$API" "$WRITE_TOKEN" "$TIER_JSON"
-expect_status "write → body carrying trace.trust_tier" 400 "invalid_assertion"
+post_json "$API" "$WRITE_TOKEN" "$(reserved_record 1 '. + {evidence_domain_id: "other-domain"}')"
+expect_status "write → body carrying evidence_domain_id (ignored, flagged)" 202
+expect_jq "write → evidence_domain_id listed as ignored" \
+  '.reserved_member_flag == true and .reserved_members == ["evidence_domain_id"]'
+
+post_json "$API" "$WRITE_TOKEN" "$(reserved_record 2 '. + {cnf: {jwk: {kty: "OKP"}}}')"
+expect_status "write → body carrying cnf (ignored, flagged)" 202
+expect_jq "write → cnf listed as ignored" '.reserved_members == ["cnf"]'
+
+post_json "$API" "$WRITE_TOKEN" "$(reserved_record 3 '.trace.trust_tier = "attested"')"
+expect_status "write → body carrying trace.trust_tier (ignored, flagged)" 202
+expect_jq "write → trace.trust_tier listed as ignored" '.reserved_members == ["trace.trust_tier"]'
 
 if [[ -n "$WRONG_TOKEN" ]]; then
   post_json "$API" "$WRONG_TOKEN" "$AUTH_JSON"

@@ -10,6 +10,7 @@ use serde_json::Value;
 use uuid7::Uuid;
 
 use super::errors::{BatchValidationError, MultiIssuerValidationError, TokenInputError};
+use super::options::AuthorizeOptions;
 
 /// Authorization request data with an optional principal.
 ///
@@ -27,6 +28,19 @@ pub struct RequestUnsigned {
     pub resource: EntityData,
     /// context to be used in `cedar_policy`
     pub context: Value,
+    /// Per-call metadata that does not take part in evaluation. Omitted in JSON
+    /// means default options.
+    #[serde(default)]
+    pub options: AuthorizeOptions,
+}
+
+impl RequestUnsigned {
+    /// Attaches per-call options, such as the TRACE context.
+    #[must_use]
+    pub fn with_options(mut self, options: AuthorizeOptions) -> Self {
+        self.options = options;
+        self
+    }
 }
 
 /// Cedar policy entity data
@@ -101,6 +115,10 @@ pub struct AuthorizeMultiIssuerRequest {
     pub action: String,
     /// Optional additional context for policy evaluation (JSON format)
     pub context: Option<Value>,
+    /// Per-call metadata that does not take part in evaluation. Omitted in JSON
+    /// means default options.
+    #[serde(default)]
+    pub options: AuthorizeOptions,
 }
 
 impl AuthorizeMultiIssuerRequest {
@@ -112,6 +130,7 @@ impl AuthorizeMultiIssuerRequest {
             resource,
             action,
             context: None,
+            options: AuthorizeOptions::default(),
         }
     }
 
@@ -128,7 +147,15 @@ impl AuthorizeMultiIssuerRequest {
             resource,
             action,
             context,
+            options: AuthorizeOptions::default(),
         }
+    }
+
+    /// Attaches per-call options, such as the TRACE context.
+    #[must_use]
+    pub fn with_options(mut self, options: AuthorizeOptions) -> Self {
+        self.options = options;
+        self
     }
 
     /// Basic validation of JSON fields
@@ -181,13 +208,28 @@ pub struct BatchAuthorizeUnsignedRequest {
     pub principal: Option<EntityData>,
     /// Items to authorize. Results are returned in the same order.
     pub items: Vec<BatchItem>,
+    /// Per-call metadata shared by every item of the batch. Omitted in JSON
+    /// means default options.
+    #[serde(default)]
+    pub options: AuthorizeOptions,
 }
 
 impl BatchAuthorizeUnsignedRequest {
     /// Construct a new batch unsigned request.
     #[must_use]
     pub fn new(principal: Option<EntityData>, items: Vec<BatchItem>) -> Self {
-        Self { principal, items }
+        Self {
+            principal,
+            items,
+            options: AuthorizeOptions::default(),
+        }
+    }
+
+    /// Attaches per-call options, such as the TRACE context.
+    #[must_use]
+    pub fn with_options(mut self, options: AuthorizeOptions) -> Self {
+        self.options = options;
+        self
     }
 
     /// Validate the batch request structure. See [`BatchValidationError`] for
@@ -216,13 +258,28 @@ pub struct BatchAuthorizeMultiIssuerRequest {
     pub tokens: Vec<TokenInput>,
     /// Items to authorize. Results are returned in the same order.
     pub items: Vec<BatchItem>,
+    /// Per-call metadata shared by every item of the batch. Omitted in JSON
+    /// means default options.
+    #[serde(default)]
+    pub options: AuthorizeOptions,
 }
 
 impl BatchAuthorizeMultiIssuerRequest {
     /// Construct a new batch multi-issuer request.
     #[must_use]
     pub fn new(tokens: Vec<TokenInput>, items: Vec<BatchItem>) -> Self {
-        Self { tokens, items }
+        Self {
+            tokens,
+            items,
+            options: AuthorizeOptions::default(),
+        }
+    }
+
+    /// Attaches per-call options, such as the TRACE context.
+    #[must_use]
+    pub fn with_options(mut self, options: AuthorizeOptions) -> Self {
+        self.options = options;
+        self
     }
 
     /// Validate the batch request structure. See [`BatchValidationError`] for

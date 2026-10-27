@@ -19,16 +19,17 @@ This grant is commonly used for machine-to-machine (M2M) communication, where an
 ```mermaid
 
 sequenceDiagram
-    title Client Credentials Flow
-    autonumber
+    title Client credentials flow
+    autonumber 1
 
     participant Client as Resource owner Client
-    participant Jans as Jans AS
+    participant JansAS as Jans AS
 
-    Client->>Jans: Token Request (grant_type=client_credentials, client authentication)
-    activate Jans
-    Jans-->>Client: Access Token
-    deactivate Jans
+    activate Client
+    Client->>JansAS:Client Authentication
+    activate JansAS
+    JansAS-->>Client:Access Token
+    deactivate JansAS
 
 ```
 ### Testing

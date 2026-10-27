@@ -10,6 +10,7 @@ use std::str::FromStr;
 
 use crate::ErrorCode;
 use crate::error_code::HasErrorCode;
+use crate::key::PublicKey;
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use ed25519_dalek::pkcs8::DecodePrivateKey as _;
@@ -162,7 +163,7 @@ impl Ed25519Signer {
         })
     }
 
-    /// Loads the key format `openssl genpkey -algorithm ed25519` writes (decision R20).
+    /// Loads the key format `openssl genpkey -algorithm ed25519` writes.
     /// Takes the PEM text, not a path: reading the file is the host's job.
     pub fn from_pkcs8_pem(kid: impl Into<String>, pem: &str) -> Result<Self, PrivateKeyError> {
         let key = SigningKey::from_pkcs8_pem(pem).map_err(|e| PrivateKeyError {
@@ -177,6 +178,13 @@ impl Ed25519Signer {
     #[must_use]
     pub fn public_key_bytes(&self) -> [u8; 32] {
         self.key.verifying_key().to_bytes()
+    }
+
+    /// Infallible, unlike [`PublicKey::from_bytes`]: a key derived from a private key is
+    /// always on the curve and never small-order. Producers use it for the thumbprint `kid`.
+    #[must_use]
+    pub fn public_key(&self) -> PublicKey {
+        PublicKey::from_verifying_key(self.key.verifying_key())
     }
 }
 
@@ -276,6 +284,26 @@ mod tests {
                 hex::encode(signature),
                 case.signature,
                 "signature for RFC 8032 {name}"
+            );
+        }
+    }
+
+    #[test]
+    fn public_key_is_the_rfc8032_public_key() {
+        for (name, case) in [("TEST 1", TEST_1), ("TEST 2", TEST_2)] {
+            let signer = signer(case.secret);
+            let public_key = signer.public_key();
+            assert_eq!(
+                hex::encode(public_key.to_bytes()),
+                case.public,
+                "public key for RFC 8032 {name}"
+            );
+            assert_eq!(
+                public_key.thumbprint(),
+                crate::key::PublicKey::from_bytes(&signer.public_key_bytes())
+                    .expect("RFC 8032 public key is valid")
+                    .thumbprint(),
+                "thumbprint matches the key parsed from bytes for RFC 8032 {name}"
             );
         }
     }

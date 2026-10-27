@@ -446,6 +446,19 @@ For complete configuration documentation, see [cedarling-properties.md](../../..
 }
 ```
 
+### Verifying the Policy Store Signature
+
+Set these properties to load a `.cjar` only if its Sigstore bundle verifies for the expected signer. The bundle is read from the archive location plus `.sigstore.json` unless `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is set:
+
+```json
+{
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "/path/to/policy-store.cjar",
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+}
+```
+
 ## Building for Production
 
 - Set `CEDARLING_LOG_LEVEL` to `WARN` or `ERROR`

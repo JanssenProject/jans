@@ -268,22 +268,24 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assertEquals("invalid_signature", readTree(response).get("error").asText());
 	}
 
-	/** A record that sets evidence_domain_id is rejected, because Lock derives the domain from the client. */
+	/** A signed evidence_domain_id is ignored and flagged, because Lock derives the domain from the client. */
 	@Test
 	@Order(10)
-	void writeBodyWithEvidenceDomainIdIsRejected() throws Exception {
+	void writeBodyWithEvidenceDomainIdIsIgnoredAndFlagged() throws Exception {
 		AuthorizationDecision builder = new AuthorizationDecision().producer(producerA).kid(kidA)
 				.recordId(UUID.randomUUID().toString()).signedAt(Instant.now().getEpochSecond())
-				.traceExecutionId(traceExecutionId).executionAuthority(executionAuthority)
+				.traceExecutionId(traceExecutionId + "-reserved").executionAuthority(executionAuthority)
 				.producerInstanceId(instanceIdA).producerChainId(chainIdA).sequenceNumber(99)
-				.prevRecordHash(TraceAssertions.ZERO_HASH);
+				.prevRecordHash(TraceAssertions.contentDigest(recordA_signedJson));
 		var tree = builder.unsignedTree();
 		tree.put("evidence_domain_id", "attempted-domain-override");
 		String signedJson = TraceAssertions.sign(tree, keyA);
 
 		HttpResponse<String> response = submitRecord(signedJson, writeToken);
-		assertEquals(400, response.statusCode(), response.body());
-		assertEquals("domain_field_forbidden", readTree(response).get("error").asText());
+		assertEquals(202, response.statusCode(), response.body());
+		JsonNode body = readTree(response);
+		assertTrue(body.get("reserved_member_flag").asBoolean());
+		assertEquals("evidence_domain_id", body.get("reserved_members").get(0).asText());
 	}
 
 	/** A trace.readonly token cannot submit records; Lock answers 401 or 403. */

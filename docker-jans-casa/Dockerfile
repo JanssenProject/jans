@@ -46,7 +46,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/webapps \
 # casa plugins
 RUN set -e \
     && mkdir -p ${JETTY_BASE}/jans-casa/plugins \
-    && for casa_plugin in acct-linking authorized-clients bioid-plugin custom-branding strong-authn-settings; \
+    && for casa_plugin in acct-linking authorized-clients custom-branding strong-authn-settings; \
     do \
         wget -nv "https://github.com/JanssenProject/jans/releases/download/${CN_RELEASE_TAG}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar" || exit 1; \
     done
@@ -63,7 +63,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ARG JANS_SOURCE_VERSION=71405a5c47221b70a3f7b8034b8678bedabfa4cf
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -103,6 +103,7 @@ RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('s
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========
@@ -187,9 +188,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     PYTHON_HOME=/opt/jython \
     CN_DOCUMENT_STORE_TYPE=DB \
-    CN_JACKRABBIT_URL=http://localhost:8080 \
-    CN_JACKRABBIT_ADMIN_ID=admin \
-    CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     CN_CASA_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     CN_GOOGLE_SECRET_VERSION_ID=latest \

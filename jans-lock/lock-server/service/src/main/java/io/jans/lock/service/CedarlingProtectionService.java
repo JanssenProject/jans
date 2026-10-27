@@ -3,7 +3,6 @@ package io.jans.lock.service;
 import static io.jans.core.cedarling.service.CedarlingProtection.simpleResponse;
 import static jakarta.ws.rs.core.Response.Status.FORBIDDEN;
 import static jakarta.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 import java.net.URL;
 import java.util.List;
@@ -32,6 +31,7 @@ import io.jans.core.cedarling.model.CedarlingPermission;
 import io.jans.lock.service.security.AuthenticatedClient;
 import io.jans.lock.service.security.AuthenticatingProtection;
 import io.jans.lock.service.security.AuthorizationOutcome;
+import io.jans.lock.service.security.BearerChallenge;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.util.exception.MissingResourceException;
@@ -94,7 +94,7 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
             if (!authFound) {
                 log.info("Request is missing authorization header");
                 // See section 3.12 RFC 7644
-                return AuthorizationOutcome.denied(simpleResponse(UNAUTHORIZED, "No authorization header found"));
+                return AuthorizationOutcome.denied(BearerChallenge.missingCredentials("No authorization header found"));
             }
 
             bearerToken = bearerToken.replaceFirst("Bearer\\s+","");
@@ -107,19 +107,19 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
 
             Jwt jwt = tokenAsJwt(bearerToken);
             if (jwt == null) {
-                return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Provided token isn't JWT encoded"));
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Provided token isn't JWT encoded", "The access token is malformed"));
             }
 
             // Process the JWT: validate isuer, expiration and signature
             JwtClaims claims = jwt.getClaims();
 
             if (!oidcConfig.getIssuer().equals(claims.getClaimAsString(JwtClaimName.ISSUER))) {
-                return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Invalid token issuer"));
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token issuer", "The access token issuer is invalid"));
             }
 
             int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
             if (1000L * exp < System.currentTimeMillis()) {
-                return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Expired token"));
+                return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Expired token", "The access token expired"));
             }
 
             AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
@@ -154,7 +154,7 @@ public class CedarlingProtectionService extends io.jans.core.cedarling.service.C
             }
 
             // See section 3.12 RFC 7644
-            return AuthorizationOutcome.denied(simpleResponse(FORBIDDEN, "Invalid token signature"));
+            return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token signature", "The access token signature is invalid"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return AuthorizationOutcome.denied(simpleResponse(INTERNAL_SERVER_ERROR, "Failed to validate token"));

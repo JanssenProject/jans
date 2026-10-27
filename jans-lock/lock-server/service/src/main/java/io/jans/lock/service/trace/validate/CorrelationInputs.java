@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
@@ -40,6 +41,8 @@ public final class CorrelationInputs {
 
 	private final List<String> warnings;
 
+	private final PolicyRef policy;
+
 	private CorrelationInputs(Builder builder) {
 		this.executionAuthority = builder.executionAuthority;
 		this.traceExecutionId = builder.traceExecutionId;
@@ -49,6 +52,7 @@ public final class CorrelationInputs {
 		this.eventKind = builder.eventKind;
 		this.signedAt = builder.signedAt;
 		this.warnings = Collections.unmodifiableList(new ArrayList<>(builder.warnings));
+		this.policy = builder.policy;
 	}
 
 	public String getExecutionAuthority() {
@@ -87,6 +91,13 @@ public final class CorrelationInputs {
 		return warnings;
 	}
 
+	/**
+	 * @return the validated {@code trace.policy} release, or {@code null} when the record has none
+	 */
+	public PolicyRef getPolicy() {
+		return policy;
+	}
+
 	public static final class Builder {
 
 		private String executionAuthority;
@@ -104,6 +115,8 @@ public final class CorrelationInputs {
 		private long signedAt;
 
 		private final List<String> warnings = new ArrayList<>();
+
+		private PolicyRef policy;
 
 		public Builder executionAuthority(String executionAuthority) {
 			this.executionAuthority = executionAuthority;
@@ -137,6 +150,11 @@ public final class CorrelationInputs {
 
 		public Builder signedAt(long signedAt) {
 			this.signedAt = signedAt;
+			return this;
+		}
+
+		public Builder policy(PolicyRef policy) {
+			this.policy = policy;
 			return this;
 		}
 

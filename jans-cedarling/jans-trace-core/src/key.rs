@@ -4,7 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Producer public keys as Lock registers them: JWK OKP Ed25519 (RFC 8037), with the
-//! RFC 7638 thumbprint in TRACE digest form (decision R20).
+//! RFC 7638 thumbprint in TRACE digest form.
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
@@ -133,6 +133,11 @@ impl PublicKey {
         Ok(Self::from_bytes(&bytes)?)
     }
 
+    /// For keys known to be valid, such as one derived from a private key.
+    pub(crate) fn from_verifying_key(key: VerifyingKey) -> Self {
+        Self(key)
+    }
+
     #[must_use]
     pub fn to_bytes(&self) -> [u8; 32] {
         self.0.to_bytes()
@@ -189,7 +194,7 @@ mod tests {
         assert_eq!(
             thumbprint.to_string(),
             "sha256:90facafea9b1556698540f70c0117a22ea37bd5cf3ed3c47093c1707282b4b89",
-            "TRACE text form of the same bytes (decision R20)"
+            "TRACE text form of the same bytes"
         );
     }
 
