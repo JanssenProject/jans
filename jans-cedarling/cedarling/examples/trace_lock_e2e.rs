@@ -16,7 +16,7 @@
 //! - `TRACE_KEY_FILE`: Ed25519 PKCS#8 PEM, registered in Lock under its thumbprint `kid`
 //! - `POLICY_STORE_CJAR`: the `.cjar` Lock serves, so `bundle_hash` matches Lock's
 //! - `TRACE_EXECUTION_ID`: execution the records are filed under
-//! - `DECISIONS`: number of decisions, default 20
+//! - `DECISIONS`: number of decisions, at least 2, default 20
 //! - `TRACE_PRODUCER_ID`: default `cedarling-fleet-1`
 //! - `LOCK_ACCEPT_INVALID_CERTS`: `true` skips TLS certificate checks, for a local Lock with a
 //!   self-signed certificate; default `false`
@@ -49,6 +49,11 @@ fn env(name: &str) -> Result<String, Box<dyn std::error::Error>> {
 #[tokio::main(flavor = "multi_thread")]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let decisions: usize = std::env::var("DECISIONS").map_or(Ok(20), |n| n.parse())?;
+    if decisions < 2 {
+        return Err(
+            "DECISIONS must be at least 2: half of the decisions go through each batch API".into(),
+        );
+    }
     let execution_id = env("TRACE_EXECUTION_ID")?;
     let cedarling = Cedarling::new(&bootstrap_config()?).await?;
 
