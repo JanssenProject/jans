@@ -206,6 +206,54 @@ public class LicenseServiceTest {
     }
 
     @Test
+    public void testCheckLicense_RetriesPersistenceBeforeRepeatingDcr() {
+        LicenseConfiguration runtimeLicenseConfiguration = new LicenseConfiguration();
+        runtimeLicenseConfiguration.setHardwareId("hardware-key-123");
+        runtimeLicenseConfiguration.setLicenseKey("valid-license-key");
+        runtimeLicenseConfiguration.setScanApiHostname("https://scan.example");
+        runtimeLicenseConfiguration.setScanAuthServerHostname("https://auth.example");
+        runtimeLicenseConfiguration.setScanApiClientId("original-client");
+        runtimeLicenseConfiguration.setScanApiClientSecret("original-secret");
+        runtimeLicenseConfiguration.setLicenseValidUpto("");
+        when(auiConfiguration.getLicenseConfiguration()).thenReturn(runtimeLicenseConfiguration);
+        when(licenseConfig.getSsa()).thenReturn("ssa");
+        MainSettings mainSettings = mock(MainSettings.class);
+        when(adminConf.getMainSettings()).thenReturn(mainSettings);
+        when(mainSettings.getLicenseConfig()).thenReturn(licenseConfig);
+
+        LicenseDetailsService service = spy(licenseDetailsService);
+        DCRResponse dcrResponse = mock(DCRResponse.class);
+        when(dcrResponse.getOpHost()).thenReturn("https://auth.example");
+        when(dcrResponse.getClientId()).thenReturn("replacement-client");
+        when(dcrResponse.getClientSecret()).thenReturn("replacement-secret");
+        when(dcrResponse.getHardwareId()).thenReturn("hardware-key-123");
+        when(dcrResponse.getScanHostname()).thenReturn("https://scan.example");
+        doReturn(dcrResponse).when(service).executeDCR("ssa");
+
+        doThrow(new IllegalStateException("Temporary persistence failure"))
+                .doNothing().when(entryManager).merge(adminConf);
+        AtomicInteger tokenCalls = new AtomicInteger();
+        io.jans.as.client.TokenResponse replacementTokenResponse = new io.jans.as.client.TokenResponse();
+        replacementTokenResponse.setAccessToken("replacement-access-token");
+        doAnswer(invocation -> {
+            int tokenCall = tokenCalls.incrementAndGet();
+            Consumer<String> errorResponseConsumer = invocation.getArgument(3);
+            if (tokenCall <= 2) {
+                errorResponseConsumer.accept("{\"error\":\"invalid_client\"}");
+                return null;
+            }
+            return replacementTokenResponse;
+        }).when(service).getToken(any(TokenRequest.class), anyString(), isNull(), nullable(Consumer.class));
+
+        service.checkLicense();
+        service.checkLicense();
+
+        verify(service, times(1)).executeDCR("ssa");
+        verify(entryManager, times(2)).merge(adminConf);
+        assertEquals(runtimeLicenseConfiguration.getScanApiClientId(), "replacement-client");
+    }
+
+    @Test
     public void testCheckLicense_ConcurrentInvalidClientRegistersOnce() throws Exception {
         LicenseConfiguration runtimeLicenseConfiguration = new LicenseConfiguration();
         runtimeLicenseConfiguration.setHardwareId("hardware-key-123");

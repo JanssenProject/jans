@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
+import io.jans.as.client.TokenResponse;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
@@ -53,6 +54,20 @@ public class LicenseDetailsService extends BaseService {
 
     private final Object licenseClientRenewalLock = new Object();
     private volatile String dcrRetryFailedClientId;
+    private DCRResponse pendingLicenseClientDcrResponse;
+    private String pendingLicenseClientDcrSsa;
+
+    private static final class LicenseSyncTokenResult {
+        private final AUIConfiguration auiConfiguration;
+        private final TokenResponse tokenResponse;
+        private final GenericResponse failure;
+
+        private LicenseSyncTokenResult(AUIConfiguration auiConfiguration, TokenResponse tokenResponse, GenericResponse failure) {
+            this.auiConfiguration = auiConfiguration;
+            this.tokenResponse = tokenResponse;
+            this.failure = failure;
+        }
+    }
 
     //constants
     public static final String LICENSE_KEY = "licenseKey";
@@ -304,76 +319,13 @@ public class LicenseDetailsService extends BaseService {
         Integer httpStatus = null;
         try {
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-            String introspectionClientId = licenseConfiguration.getScanApiClientId();
-
-            AtomicBoolean invalidClientResponse = new AtomicBoolean();
-            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(),
-                    licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret(),
-                    errorResponse -> invalidClientResponse.set(isInvalidClientResponse(errorResponse)));
-            if (tokenResponse != null && !Strings.isNullOrEmpty(tokenResponse.getAccessToken())
-                    && Objects.equals(introspectionClientId, dcrRetryFailedClientId)) {
-                synchronized (licenseClientRenewalLock) {
-                    if (Objects.equals(introspectionClientId, dcrRetryFailedClientId)) {
-                        dcrRetryFailedClientId = null;
-                    }
-                }
+            LicenseSyncTokenResult tokenResult = obtainLicenseSyncToken(auiConfiguration, licenseConfiguration, persistedLicenseConfig);
+            if (tokenResult.failure != null) {
+                return tokenResult.failure;
             }
-            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
-                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                if (!invalidClientResponse.get()) {
-                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                }
-                synchronized (licenseClientRenewalLock) {
-                    auiConfiguration = auiConfigurationService.getAUIConfiguration();
-                    licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-                    String currentClientId = licenseConfiguration.getScanApiClientId();
-                    boolean dcrSaved = false;
-
-                    if (Objects.equals(introspectionClientId, currentClientId)) {
-                        if (!Strings.isNullOrEmpty(currentClientId) && currentClientId.equals(dcrRetryFailedClientId)) {
-                            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                        }
-                        if (persistedLicenseConfig == null || Strings.isNullOrEmpty(persistedLicenseConfig.getSsa())) {
-                            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
-                        }
-                        DCRResponse dcrResponse = executeDCR(persistedLicenseConfig.getSsa());
-                        if (dcrResponse == null) {
-                            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
-                        }
-
-                        AUIConfiguration currentAuiConfiguration = auiConfigurationService.getAUIConfiguration();
-                        LicenseConfiguration currentLicenseConfiguration = currentAuiConfiguration.getLicenseConfiguration();
-                        if (Objects.equals(introspectionClientId, currentLicenseConfiguration.getScanApiClientId())) {
-                            try {
-                                saveCreateClientInPersistence(persistedLicenseConfig.getSsa(), dcrResponse);
-                                dcrSaved = true;
-                            } catch (Exception e) {
-                                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
-                            }
-                            currentAuiConfiguration = auiConfigurationService.getAUIConfiguration();
-                            currentLicenseConfiguration = currentAuiConfiguration.getLicenseConfiguration();
-                        }
-
-                        auiConfiguration = currentAuiConfiguration;
-                        licenseConfiguration = currentLicenseConfiguration;
-                    }
-
-                    currentClientId = licenseConfiguration.getScanApiClientId();
-                    if (!Strings.isNullOrEmpty(currentClientId) && currentClientId.equals(dcrRetryFailedClientId)) {
-                        return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                    }
-                    tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(),
-                            licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
-                    if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
-                        log.info("Unable to get access token after client renewal from {}", licenseConfiguration.getScanAuthServerHostname());
-                        if (dcrSaved) {
-                            dcrRetryFailedClientId = currentClientId;
-                        }
-                        return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                    }
-                    dcrRetryFailedClientId = null;
-                }
-            }
+            auiConfiguration = tokenResult.auiConfiguration;
+            licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            TokenResponse tokenResponse = tokenResult.tokenResponse;
 
             String checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/isActive");
 
@@ -471,6 +423,105 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
         }
+    }
+
+    private LicenseSyncTokenResult obtainLicenseSyncToken(AUIConfiguration auiConfiguration,
+                                                          LicenseConfiguration licenseConfiguration,
+                                                          LicenseConfig persistedLicenseConfig) {
+        String failedClientId = licenseConfiguration.getScanApiClientId();
+        AtomicBoolean invalidClientResponse = new AtomicBoolean();
+        TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), failedClientId,
+                licenseConfiguration.getScanApiClientSecret(),
+                errorResponse -> invalidClientResponse.set(isInvalidClientResponse(errorResponse)));
+
+        if (hasAccessToken(tokenResponse)) {
+            clearFailedDcrRetry(failedClientId);
+            return new LicenseSyncTokenResult(auiConfiguration, tokenResponse, null);
+        }
+        log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+        if (!invalidClientResponse.get()) {
+            return licenseSyncTokenFailure(ErrorResponse.TOKEN_GENERATION_ERROR);
+        }
+
+        synchronized (licenseClientRenewalLock) {
+            auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            String currentClientId = licenseConfiguration.getScanApiClientId();
+            boolean dcrSaved = false;
+
+            if (Objects.equals(failedClientId, currentClientId)) {
+                if (isDcrRetryFailed(currentClientId)) {
+                    return licenseSyncTokenFailure(ErrorResponse.TOKEN_GENERATION_ERROR);
+                }
+                if (persistedLicenseConfig == null || Strings.isNullOrEmpty(persistedLicenseConfig.getSsa())) {
+                    return licenseSyncTokenFailure(ErrorResponse.LICENSE_SSA_MISSING);
+                }
+                if (pendingLicenseClientDcrResponse == null) {
+                    pendingLicenseClientDcrSsa = persistedLicenseConfig.getSsa();
+                    pendingLicenseClientDcrResponse = executeDCR(pendingLicenseClientDcrSsa);
+                    if (pendingLicenseClientDcrResponse == null) {
+                        pendingLicenseClientDcrSsa = null;
+                        return licenseSyncTokenFailure(ErrorResponse.ERROR_IN_DCR);
+                    }
+                }
+
+                AUIConfiguration currentAuiConfiguration = auiConfigurationService.getAUIConfiguration();
+                LicenseConfiguration currentLicenseConfiguration = currentAuiConfiguration.getLicenseConfiguration();
+                if (Objects.equals(failedClientId, currentLicenseConfiguration.getScanApiClientId())) {
+                    try {
+                        saveCreateClientInPersistence(pendingLicenseClientDcrSsa, pendingLicenseClientDcrResponse);
+                        dcrSaved = true;
+                    } catch (Exception e) {
+                        return licenseSyncTokenFailure(ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT);
+                    }
+                    pendingLicenseClientDcrResponse = null;
+                    pendingLicenseClientDcrSsa = null;
+                    currentAuiConfiguration = auiConfigurationService.getAUIConfiguration();
+                    currentLicenseConfiguration = currentAuiConfiguration.getLicenseConfiguration();
+                }
+
+                auiConfiguration = currentAuiConfiguration;
+                licenseConfiguration = currentLicenseConfiguration;
+            }
+
+            currentClientId = licenseConfiguration.getScanApiClientId();
+            if (isDcrRetryFailed(currentClientId)) {
+                return licenseSyncTokenFailure(ErrorResponse.TOKEN_GENERATION_ERROR);
+            }
+            tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), currentClientId,
+                    licenseConfiguration.getScanApiClientSecret());
+            if (!hasAccessToken(tokenResponse)) {
+                log.info("Unable to get access token after client renewal from {}", licenseConfiguration.getScanAuthServerHostname());
+                if (dcrSaved) {
+                    dcrRetryFailedClientId = currentClientId;
+                }
+                return licenseSyncTokenFailure(ErrorResponse.TOKEN_GENERATION_ERROR);
+            }
+
+            dcrRetryFailedClientId = null;
+            return new LicenseSyncTokenResult(auiConfiguration, tokenResponse, null);
+        }
+    }
+
+    private void clearFailedDcrRetry(String clientId) {
+        synchronized (licenseClientRenewalLock) {
+            if (Objects.equals(clientId, dcrRetryFailedClientId)) {
+                dcrRetryFailedClientId = null;
+            }
+        }
+    }
+
+    private boolean isDcrRetryFailed(String clientId) {
+        return !Strings.isNullOrEmpty(clientId) && clientId.equals(dcrRetryFailedClientId);
+    }
+
+    private boolean hasAccessToken(TokenResponse tokenResponse) {
+        return tokenResponse != null && !Strings.isNullOrEmpty(tokenResponse.getAccessToken());
+    }
+
+    private LicenseSyncTokenResult licenseSyncTokenFailure(ErrorResponse errorResponse) {
+        return new LicenseSyncTokenResult(null, null,
+                CommonUtils.createGenericResponse(false, 500, errorResponse.getDescription()));
     }
 
     /**
