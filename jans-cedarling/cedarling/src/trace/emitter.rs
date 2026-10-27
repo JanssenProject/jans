@@ -81,6 +81,7 @@ pub enum EmitterInitError {
 pub(crate) struct EmitterHandle {
     cancel: CancellationToken,
     join: Mutex<Option<JoinHandle<()>>>,
+    log: Logger,
 }
 
 impl EmitterHandle {
@@ -94,8 +95,18 @@ impl EmitterHandle {
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
             .take();
-        if let Some(join) = join {
-            join.await_result().await;
+        // A panic in `run` is caught in the task; this is the task itself
+        // cancelled or failing, which still must not fail the host's shutdown.
+        if let Some(join) = join
+            && let Err(err) = join.try_await_result().await
+        {
+            self.log.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    None,
+                ))
+                .set_message(format!("TRACE emitter did not finish: {err}")),
+            );
         }
     }
 }
@@ -118,6 +129,7 @@ pub(crate) fn spawn_emitter(
     let cancel = CancellationToken::new();
     let chain = ProducerChain::open(params.producer_id.clone(), params.pdp_id);
     let log = params.log.clone();
+    let handle_log = params.log.clone();
     let emitter = Emitter::new(params, &chain);
     let run = AssertUnwindSafe(emitter.run(chain, rx, cancel.clone())).catch_unwind();
     // A panic is a bug, but TRACE is side work: it is logged when it happens,
@@ -144,6 +156,7 @@ pub(crate) fn spawn_emitter(
     Ok(EmitterHandle {
         cancel,
         join: Mutex::new(Some(join)),
+        log: handle_log,
     })
 }
 
@@ -458,13 +471,22 @@ impl Emitter {
                 if outcome == RoundOutcome::Done {
                     outcome = RoundOutcome::Failed { retry_after: None };
                 }
-                chain = self.replace_chain();
+                // At shutdown the failure drops what is left, so a new chain
+                // would send nothing.
+                if matches!(mode, Mode::Running(_)) {
+                    chain = self.replace_chain();
+                    // The records to resend were of the replaced chain.
+                    resend = false;
+                }
             },
             // Lock forgot a chain it used, as after a restored database: a new
             // chain goes at once.
             GenesisState::Unregistered {
                 chain: ChainUse::InUse,
-            } => chain = self.replace_chain(),
+            } => {
+                chain = self.replace_chain();
+                resend = false;
+            },
             GenesisState::Unsigned | GenesisState::Pending | GenesisState::Accepted { .. } => {},
         }
         if resend {
@@ -590,7 +612,9 @@ impl Emitter {
             ),
             RequestRefusal::BodyTooLarge => format!(
                 "set CEDARLING_TRACE_BULK_MAX_BYTES (now {bytes}) to the \
-                 traceConfiguration.maxBulkRequestBytes of Lock Server or lower"
+                 traceConfiguration.maxBulkRequestBytes of Lock Server or lower; Cedarling \
+                 needs at least {}, so a lower Lock Server limit must be raised",
+                TraceConfig::MIN_BULK_MAX_BYTES
             ),
             RequestRefusal::Unexplained => format!(
                 "Lock Server gives the reason only with errorReasonEnabled; it refuses a request \
@@ -1979,6 +2003,86 @@ mod tests {
     }
 
     #[tokio::test(start_paused = true)]
+    async fn genesis_refused_at_shutdown_opens_no_chain() {
+        let lock = FakeLock::new([Reply::PerRecord(vec![Some("invalid_signature")])]);
+        let log = memory_log();
+        let metrics = metrics();
+        let mut params = params(lock.clone(), metrics.clone());
+        params.log = log.clone();
+        let emitter = start(params, 4, [draft(), draft(), draft()]);
+        // Before the emitter runs, so it takes the drafts while stopping.
+        emitter.handle.shut_down().await;
+
+        assert_eq!(
+            lock.bodies(0).await.len(),
+            1,
+            "only the genesis record is sent"
+        );
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("trace.chains_opened"),
+            None,
+            "no chain is opened that would send nothing"
+        );
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&2),
+            "the records after the genesis record are dropped"
+        );
+        let opened = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| {
+                entry["msg"]
+                    .as_str()
+                    .is_some_and(|message| message.contains("producer chain opened"))
+            })
+            .count();
+        assert_eq!(opened, 1, "only the first chain is announced");
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn records_to_resend_of_a_replaced_chain_cause_no_pause() {
+        // Lock took the chain, then forgot it; one record of the same response
+        // failed for a moment, but goes with the chain.
+        let lock = FakeLock::new([
+            Reply::AcceptAll,
+            Reply::AcceptAll,
+            Reply::PerRecord(vec![Some("chain_not_registered"), Some("storage_failure")]),
+        ]);
+        let mut params = params(lock.clone(), metrics());
+        params.bulk_max_records = NonZeroUsize::new(2).expect("non-zero");
+        let emitter = start(params, 8, [draft(), draft(), draft()]);
+        lock.bodies(2).await;
+        for _ in 0..2 {
+            emitter
+                .tx
+                .send(draft())
+                .await
+                .expect("the emitter is running");
+        }
+        lock.bodies(3).await;
+
+        let started = tokio::time::Instant::now();
+        emitter
+            .tx
+            .send(draft())
+            .await
+            .expect("the emitter is running");
+        let bodies = lock.bodies(4).await;
+        assert!(
+            started.elapsed() < WORKER_HTTP_RETRY_DUR,
+            "nothing is resent, so the new chain does not wait"
+        );
+        assert_eq!(
+            position(&records(&bodies[3])[0]).sequence,
+            1,
+            "the new chain starts at its genesis record"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test(start_paused = true)]
     async fn shutdown_does_not_resend_failed_records() {
         let lock = FakeLock::new([
             Reply::Retryable,
@@ -2124,6 +2228,10 @@ mod tests {
                 && bytes.contains("maxBulkRequestBytes")
                 && !bytes.contains("CEDARLING_TRACE_BULK_MAX_RECORDS"),
             "a body too large names the byte setting on both sides: {bytes}"
+        );
+        assert!(
+            bytes.contains(&format!("at least {}", TraceConfig::MIN_BULK_MAX_BYTES)),
+            "it says how low Cedarling can go, as a Lock limit below that must be raised: {bytes}"
         );
 
         let hidden = refusal_error(Reply::InvalidRequest(None)).await;

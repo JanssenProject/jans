@@ -218,7 +218,7 @@ impl TraceRecorder {
 
     /// WARN for the first of its kind, with `later` saying where the rest go,
     /// and DEBUG for the rest. The message is built only when its level is
-    /// logged, so a repeated cause costs no allocation at a higher log level.
+    /// logged.
     fn warn_first(
         &self,
         first: &AtomicBool,
