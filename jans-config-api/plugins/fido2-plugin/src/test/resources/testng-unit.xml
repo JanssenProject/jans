@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API-Fido2-Plugin-Unit" parallel="false">
+
+    <!-- No running Config API or database needed: these tests mock their collaborators. -->
+    <test name="Fido2Readiness">
+        <classes>
+            <class name="io.jans.configapi.plugin.fido2.service.Fido2ReadinessServiceTest" />
+            <class name="io.jans.configapi.plugin.fido2.service.Fido2ReadinessResourceTest" />
+        </classes>
+    </test>
+
+</suite>
