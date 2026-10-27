@@ -22,24 +22,24 @@ Janssen requires Proof Key for Code Exchange (PKCE) by default for the Authoriza
 ```mermaid
 
 sequenceDiagram
-    title Authorization code flow
-    autonumber 1
+    title Authorization Code Flow with PKCE
+    autonumber
 
-    participant User as Resource owner User 
+    participant User as Resource owner User
     participant Client
     participant Jans as Jans AS
     participant RS as Resource Server
 
-    activate User
-    Client->>Jans: Authorization Request
-    activate Client 
+    Client->>Client: Generate code_verifier and code_challenge (S256)
+    Client->>Jans: Authorization Request (code_challenge, code_challenge_method=S256)
+    activate Client
     activate Jans
     User->>Jans: User login and consent
     Jans-->>Client: Authorization code response
     deactivate Client
     deactivate Jans
 
-    Client->>Jans: Exchange code for Access Token
+    Client->>Jans: Exchange code for Access Token (code_verifier)
     activate Client
     activate Jans
     Jans-->>Client: Access Token with optional Refresh Token
@@ -62,13 +62,14 @@ sequenceDiagram
     deactivate Client
     deactivate RS
 
-    Client->>Jans: Refresh Token
-    activate Client
-    activate Jans
-    Jans-->>Client: Access Token with optional Refresh Token
-    deactivate Client
-    deactivate Jans
-    deactivate User
+    opt Refresh Token available
+        Client->>Jans: Refresh Token Request
+        activate Client
+        activate Jans
+        Jans-->>Client: Access Token with optional Refresh Token
+        deactivate Client
+        deactivate Jans
+    end
 
 ```
 
