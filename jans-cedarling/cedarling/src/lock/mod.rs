@@ -168,7 +168,7 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, TraceSink};
+pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
 
 /// The Lock access token Cedarling starts with.

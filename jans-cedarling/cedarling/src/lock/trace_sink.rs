@@ -14,7 +14,7 @@ use bytes::Bytes;
 use chrono::{DateTime, Utc};
 use reqwest::StatusCode;
 use reqwest::header::{CONTENT_TYPE, HeaderMap, RETRY_AFTER};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use tokio::sync::RwLock;
 
 use super::LockAccessToken;
@@ -74,6 +74,42 @@ pub(crate) enum PostBulkError {
         error: Option<String>,
         reason: Option<String>,
     },
+}
+
+/// Why Lock refused a whole bulk request Cedarling built, when the fix is in
+/// the configuration of Lock or Cedarling.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RequestRefusal {
+    /// More records than Lock's `maxBulkRecords`.
+    TooManyRecords,
+    /// A body over Lock's `maxBulkRequestBytes`.
+    BodyTooLarge,
+    /// `invalid_request` without a reason: Lock hides it unless its
+    /// `errorReasonEnabled` is on, the default being off.
+    Unexplained,
+}
+
+impl PostBulkError {
+    /// `None` for a refusal whose error and reason already say what is wrong.
+    pub(crate) fn refusal(&self) -> Option<RequestRefusal> {
+        let Self::Rejected {
+            status: 400,
+            error: Some(error),
+            reason,
+        } = self
+        else {
+            return None;
+        };
+        if error != "invalid_request" {
+            return None;
+        }
+        match reason.as_deref() {
+            Some("max_bulk_records_exceeded") => Some(RequestRefusal::TooManyRecords),
+            Some("bulk_body_too_large") => Some(RequestRefusal::BodyTooLarge),
+            None => Some(RequestRefusal::Unexplained),
+            Some(_) => None,
+        }
+    }
 }
 
 /// The Lock TRACE bulk endpoint and the client that posts to it. Holds its own
@@ -252,8 +288,14 @@ struct RawItem {
 #[derive(Deserialize)]
 struct ErrorBody {
     error: String,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "non_empty")]
     reason: Option<String>,
+}
+
+/// Lock sends `""` for a reason it hides (`errorReasonEnabled` off), which is
+/// no reason.
+fn non_empty<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
+    Ok(Option::<String>::deserialize(deserializer)?.filter(|reason| !reason.is_empty()))
 }
 
 impl From<RawItem> for BulkItemResult {
@@ -729,6 +771,79 @@ mod tests {
         assert!(
             matches!(err, NoTraceEndpoint::NotPublished),
             "expected NotPublished, got {err:?}"
+        );
+    }
+
+    fn refused(status: u16, error: Option<&str>, reason: Option<&str>) -> PostBulkError {
+        PostBulkError::Rejected {
+            status,
+            error: error.map(str::to_string),
+            reason: reason.map(str::to_string),
+        }
+    }
+
+    #[test]
+    fn refusal_tells_limits_and_a_hidden_reason_from_the_rest() {
+        let invalid = Some("invalid_request");
+        assert_eq!(
+            refused(400, invalid, Some("max_bulk_records_exceeded")).refusal(),
+            Some(RequestRefusal::TooManyRecords),
+            "too many records"
+        );
+        assert_eq!(
+            refused(400, invalid, Some("bulk_body_too_large")).refusal(),
+            Some(RequestRefusal::BodyTooLarge),
+            "a body too large"
+        );
+        assert_eq!(
+            refused(400, invalid, None).refusal(),
+            Some(RequestRefusal::Unexplained),
+            "invalid_request without a reason"
+        );
+        assert_eq!(
+            refused(400, invalid, Some("trace_disabled")).refusal(),
+            None,
+            "a reason that explains itself"
+        );
+        assert_eq!(
+            refused(400, Some("invalid_signature"), None).refusal(),
+            None,
+            "another error id"
+        );
+        assert_eq!(
+            refused(403, invalid, None).refusal(),
+            None,
+            "another status"
+        );
+        assert_eq!(
+            refused(400, None, None).refusal(),
+            None,
+            "a body that is not a Lock error"
+        );
+        assert_eq!(
+            retryable("Lock is down".to_string()).refusal(),
+            None,
+            "a retryable failure"
+        );
+    }
+
+    #[tokio::test]
+    async fn hidden_reason_is_no_reason() {
+        let mut server = Server::new_async().await;
+        let body = json!({"error": "invalid_request", "reason": ""});
+        let _bulk = bulk(&mut server, "old-token", 400, &body.to_string());
+
+        let err = sink(&server, None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a 4xx response should be an error");
+        assert!(
+            matches!(
+                err,
+                PostBulkError::Rejected { status: 400, ref error, reason: None }
+                    if error.as_deref() == Some("invalid_request")
+            ),
+            "expected Rejected {{ 400, invalid_request, no reason }}, got {err:?}"
         );
     }
 }

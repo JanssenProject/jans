@@ -38,7 +38,7 @@ use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
 use crate::http::{JoinHandle, spawn_task};
 use crate::http_utils::Backoff;
-use crate::lock::{BulkItemResult, BulkSink, PostBulkError, WORKER_HTTP_RETRY_DUR};
+use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 
@@ -544,6 +544,31 @@ impl Emitter {
         }
     }
 
+    /// What to change when Lock refuses every request Cedarling builds, so the
+    /// error names the setting on each side.
+    fn refusal_fix(&self, refusal: RequestRefusal) -> String {
+        let records = self.max_records;
+        let bytes = self.max_bytes;
+        match refusal {
+            RequestRefusal::TooManyRecords => format!(
+                "set CEDARLING_TRACE_BULK_MAX_RECORDS (now {records}) to the \
+                 traceConfiguration.maxBulkRecords of Lock Server or lower"
+            ),
+            RequestRefusal::BodyTooLarge => format!(
+                "set CEDARLING_TRACE_BULK_MAX_BYTES (now {bytes}) to the \
+                 traceConfiguration.maxBulkRequestBytes of Lock Server or lower"
+            ),
+            RequestRefusal::Unexplained => format!(
+                "Lock Server gives the reason only with errorReasonEnabled; it refuses a request \
+                 Cedarling builds this way when TRACE is disabled in Lock Server \
+                 (traceConfiguration.enabled) or when the request is over its \
+                 traceConfiguration.maxBulkRecords or maxBulkRequestBytes \
+                 (CEDARLING_TRACE_BULK_MAX_RECORDS is {records}, \
+                 CEDARLING_TRACE_BULK_MAX_BYTES is {bytes})"
+            ),
+        }
+    }
+
     /// Posts `body`, retrying a failed request with the same bytes.
     async fn send(&mut self, body: &Bytes, records: usize, mode: Mode<'_>) -> Sent {
         let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
@@ -551,10 +576,14 @@ impl Emitter {
             let (err, retry_after) = match self.sink.post_bulk(body).await {
                 Ok(results) => return Sent::Results(results),
                 Err(err @ PostBulkError::Rejected { .. }) => {
+                    let fix = err
+                        .refusal()
+                        .map(|refusal| format!("; {}", self.refusal_fix(refusal)))
+                        .unwrap_or_default();
                     self.log(
                         LogLevel::ERROR,
                         None,
-                        format!("{err}; its {records} TRACE records are lost"),
+                        format!("{err}; its {records} TRACE records are lost{fix}"),
                     );
                     self.count(EmitterEvent::Rejected, records);
                     return Sent::Lost { retry_after: None };
@@ -898,6 +927,8 @@ mod tests {
         Rejected,
         /// Per record: `None` accepted, `Some(id)` rejected with that error id.
         PerRecord(Vec<Option<&'static str>>),
+        /// The whole request refused with `400 invalid_request` and this reason.
+        InvalidRequest(Option<&'static str>),
     }
 
     /// Answers each request with the next scripted reply, then accepts all.
@@ -965,6 +996,11 @@ mod tests {
                     status: 403,
                     error: Some("access_denied".to_string()),
                     reason: None,
+                }),
+                Reply::InvalidRequest(reason) => Err(PostBulkError::Rejected {
+                    status: 400,
+                    error: Some("invalid_request".to_string()),
+                    reason: reason.map(str::to_string),
                 }),
                 Reply::PerRecord(errors) => Ok(errors
                     .into_iter()
@@ -1834,6 +1870,59 @@ mod tests {
             err,
             EmitterInitError::BulkMaxBytesTooSmall { min },
             "the error should name the minimum"
+        );
+    }
+
+    /// The `ERROR` for the first request, which Lock refuses with `reply`.
+    async fn refusal_error(reply: Reply) -> String {
+        let lock = FakeLock::new([reply]);
+        let log = memory_log();
+        let mut params = params(lock.clone(), metrics());
+        params.log = log.clone();
+        let emitter = start(params, 1, [draft()]);
+        lock.bodies(1).await;
+        emitter.handle.shut_down().await;
+        let errors: Vec<String> = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == "ERROR")
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .collect();
+        assert_eq!(errors.len(), 1, "the refusal is one ERROR: {errors:?}");
+        errors[0].clone()
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn refused_request_names_the_setting_to_change() {
+        let records = refusal_error(Reply::InvalidRequest(Some("max_bulk_records_exceeded"))).await;
+        assert!(
+            records.contains("CEDARLING_TRACE_BULK_MAX_RECORDS (now 100)")
+                && records.contains("maxBulkRecords")
+                && !records.contains("CEDARLING_TRACE_BULK_MAX_BYTES"),
+            "too many records names the record setting on both sides: {records}"
+        );
+
+        let bytes = refusal_error(Reply::InvalidRequest(Some("bulk_body_too_large"))).await;
+        assert!(
+            bytes.contains("CEDARLING_TRACE_BULK_MAX_BYTES (now 4194304)")
+                && bytes.contains("maxBulkRequestBytes")
+                && !bytes.contains("CEDARLING_TRACE_BULK_MAX_RECORDS"),
+            "a body too large names the byte setting on both sides: {bytes}"
+        );
+
+        let hidden = refusal_error(Reply::InvalidRequest(None)).await;
+        assert!(
+            hidden.contains("errorReasonEnabled")
+                && hidden.contains("traceConfiguration.enabled")
+                && hidden.contains("CEDARLING_TRACE_BULK_MAX_RECORDS is 100")
+                && hidden.contains("CEDARLING_TRACE_BULK_MAX_BYTES is 4194304"),
+            "a refusal without a reason names every cause Lock may hide: {hidden}"
+        );
+
+        let disabled = refusal_error(Reply::InvalidRequest(Some("trace_disabled"))).await;
+        assert!(
+            disabled.contains("trace_disabled") && !disabled.contains("CEDARLING_TRACE_BULK"),
+            "a refusal whose reason explains it gets no advice: {disabled}"
         );
     }
 }
