@@ -303,8 +303,10 @@ incident on every request and refuse one that has been closed. Neither covers th
 `context.incident_id` has to be built server-side from a validated incident record, exactly like the
 approvals above. The policy only checks that the value is non-empty, so if a client can put a string
 there, every support account holds a permanent break-glass key. Resolve the incident before
-authorizing, reject the request when it is unknown or already closed, and pass in what the server
-resolved rather than what the caller sent.
+authorizing, reject the request when it is unknown, already closed, or about a different merchant,
+and pass in what the server resolved rather than what the caller sent. The policy leaves `resource`
+open, so that last check is the only thing that keeps an incident on one merchant from opening the
+records of every other.
 
 Keep break-glass a separate, narrow policy rather than a relaxation of the normal one. It is the
 policy an auditor will ask about first, and it is far easier to answer when it stands alone with a
@@ -319,7 +321,7 @@ place:
 const reason = result.response.diagnostics.reason;
 
 if (!result.decision) {
-  const found = new Set(cedarling.annotation_values(reason, "checks"));
+  const found = new Set(cedarling.annotationValues(reason, "checks"));
 
   // The wizard owns the order; the policies only say which steps are open.
   const steps = ONBOARDING_STEPS.filter((step) => found.has(step.checks));

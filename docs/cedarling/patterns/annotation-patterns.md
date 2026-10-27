@@ -164,6 +164,11 @@ the result is a `Deny` with an empty `reason()`, which looks the same as "nothin
 that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy looks like an
 ordinary default deny for as long as nobody checks.
 
+The same rule works in the other direction, and there it is a security problem. If the policy that
+errored was a `forbid`, the matching `permit` still stands and the result is an `Allow`, granted
+while the condition that should have blocked it never ran. An enforcement point that acts on the
+decision has to check `errors()` first and refuse, or retry, when it is not empty.
+
 A fifth case fills `reason()` with policies that did not fire at all. `authorize_unsigned` with no
 principal runs Cedar's partial evaluation, and when some policies remain undecided, Cedarling
 returns a `Deny` whose `reason()` holds the IDs of those undecided policies. Those policies were
@@ -278,8 +283,10 @@ fallback, usually the generic handling for a plain denial.
 
 ## API Reference
 
-The three lookup methods have the same names in Rust, Python, and JavaScript, and are documented in
-the [Interfaces reference](../reference/cedarling-interfaces.md#annotation-lookup):
+The three lookup methods are documented in the
+[Interfaces reference](../reference/cedarling-interfaces.md#annotation-lookup). Rust and Python use
+the snake_case names below; the JavaScript binding exports them as `annotationsMap`,
+`annotationValues`, and `annotationsByPolicy`.
 
 - `annotations_map(policy_ids)` returns a merged map that keeps one value per duplicate key
 - `annotation_values(policy_ids, key)` returns all values of one key, duplicates preserved

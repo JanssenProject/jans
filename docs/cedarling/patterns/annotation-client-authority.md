@@ -127,13 +127,14 @@ namespace Acme {
     action "ExportRows" appliesTo {
         principal: [User],
         resource: [Workspace],
+        context: {}
     };
 }
 ```
 
 ## Policies
 
-The same three policies run in the browser and on the server. Only one of them reads server-held
+The same four policies run in the browser and on the server. Only one of them reads server-held
 input.
 
 ```cedar
@@ -143,6 +144,16 @@ permit (
     action == Acme::Action::"GenerateReport",
     resource
 );
+```
+
+```cedar
+@id("permit_export_rows")
+permit (
+    principal,
+    action == Acme::Action::"ExportRows",
+    resource
+)
+when { principal.role == "admin" };
 ```
 
 ```cedar
@@ -223,7 +234,7 @@ function localOutcome(result) {
     return { proceed: true, pending: true };
   }
 
-  const denials = Object.values(cedarling.annotations_by_policy(diagnostics.reason));
+  const denials = Object.values(cedarling.annotationsByPolicy(diagnostics.reason));
 
   // A denial resting only on what the browser itself knows, or nothing matched at all.
   const local = denials.find((a) => !a.server_input);
@@ -292,7 +303,7 @@ const guardedActions = {
 async function authorizeOnly(name, target) {
   const { action, resource, context } = guardedActions[name];
 
-  const result = await cedarling.authorize_unsigned(
+  const result = await cedarling.authorizeUnsigned(
     JSON.stringify({
       principal,
       action,
@@ -377,6 +388,11 @@ is the most provisional case there is, which is why `localOutcome` checks it bef
 // The API builds the context from what it owns, not from what the client sent.
 let request = report_request(&user, &workspace, metering.reports_used(&workspace)?);
 let result = cedarling.authorize_unsigned(request).await?;
+
+// A policy that errored was skipped, so an Allow here can hide a forbid that never ran.
+if result.response.diagnostics().errors().next().is_some() {
+    return Err(evaluation_failed(&result));
+}
 
 if !result.decision {
     let checks = cedarling.annotation_values(result.response.diagnostics().reason(), "checks");
