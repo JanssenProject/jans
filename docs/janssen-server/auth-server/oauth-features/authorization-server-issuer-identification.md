@@ -31,8 +31,9 @@ expected, and rejects the response if they do not match.
 ## How It Works
 
 When `authorizationResponseIssParameterSupported` is `true` in Janssen Server
-configuration, the `iss` parameter is appended to every authorization redirect sent back to
-the client's `redirect_uri`. This is the default.
+configuration, the `iss` parameter is appended to every non-JARM authorization redirect sent
+back to the client's `redirect_uri`, except for JARM responses, where the issuer is included
+in the JWT authorization response. This is the default.
 
 ### Successful Authorization Response
 

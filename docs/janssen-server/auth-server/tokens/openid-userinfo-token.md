@@ -11,7 +11,8 @@ tags:
 ## `Userinfo` JWT
 
 An OpenID Connect client, after obtaining an access token, can present it
-at the Userinfo endpoint to obtain the Userinfo JWT token.
+at the UserInfo endpoint to obtain a UserInfo response. The response is
+returned as JSON by default, or as a JWT when signing or encryption is configured.
 
 Clients should send the access token to the UserInfo endpoint using the
 HTTP `Authorization` header with the `Bearer` authentication scheme.

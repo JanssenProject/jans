@@ -16,12 +16,12 @@ The Janssen Authentication Server supports the JWT Bearer Grant using `grant_typ
 
 Janssen requires client authentication when using the JWT Bearer Grant.
 
-### Assertion Validation
+## Assertion Validation
 
 1. Janssen validates the JWT assertion's signature using the public keys obtained from the client's configured `jwks` or `jwks_uri`.
 2. `aud` claim of `assertion` must contain AS `issuer` or otherwise any `aud` claim value must starts from AS `issuer` (for example if Token Endpoint address is set in `aud` claim value)
 3. `iss` must not be blank. If AS `trustedSsaIssuers` configuration property is set then AS will validate `iss` value against `trustedSsaIssuers` configuration property.
-4. AS validates `exp` on expiration
+4. `exp` is required; an assertion without `exp` or with an expired `exp` is rejected
 5. AS validates `nbf` if it's present
 6. `sub` value must be not empty and not blank 
 
@@ -55,6 +55,7 @@ If `jwtGrantAllowUserByUidInAssertion` is `true` and `uid` claim value points to
 POST /token HTTP/1.1
 Host: authz.example.net
 Content-Type: application/x-www-form-urlencoded
+Authorization: Basic <base64 encoded>
 
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
 &assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.

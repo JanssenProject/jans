@@ -12,8 +12,7 @@ Userinfo endpoint is an OAuth2 protected endpoint that is used to retrieve claim
 Userinfo endpoint is defined in the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
 
 Send the access token that authorizes the UserInfo request in the HTTP
-`Authorization: Bearer` header. Do not send the endpoint-authenticating access token
-in the URL query string.
+`Authorization: Bearer` header. Do not send this access token in the URL query string.
 
 URL to access userinfo endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.

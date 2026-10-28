@@ -225,7 +225,6 @@ code=<YOUR_CODE>
 ```json title="Response"
 {
   "access_token": "<ACCESS_TOKEN>",
-  "refresh_token": "<REFRESH_TOKEN>",
   "id_token": "<ID_TOKEN>",
   "token_type": "Bearer",
   "expires_in": 299
