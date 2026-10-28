@@ -134,15 +134,20 @@ navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Tok
 Token endpoint supports below mentioned grant types.
 
 - [Authorization Code](../oauth-features/auth-code-grant.md)
-- [Implicit](../oauth-features/implicit-grant.md)
 - [Refresh Token](../oauth-features/README.md)
 - [Client Credentials](../oauth-features/client-credential-grant.md)
-- [Password](../oauth-features/password-grant.md)
 - [Token Exchange](../oauth-features/token-exchange.md)
 - [Transaction Tokens](../tokens/oauth-tx-tokens.md)
 - [Device Grant](../oauth-features/device-grant.md)
 - [JWT Grant](../oauth-features/jwt-grant.md)
+- [UMA](../uma-features/rpt-endpoint.md)
 - [CIBA](./backchannel-authentication.md)
+- [Password](../oauth-features/password-grant.md) (legacy; not recommended).
+  Not in the default `grantTypesSupported`. Add `password` to
+  `grantTypesSupported` and to the client's grant types to use it.
+
+The [Implicit](../oauth-features/implicit-grant.md) grant (legacy) does not
+use the token endpoint. Its tokens come from the authorization endpoint.
 
 Client can configure all the possible grant types it can request from token endpoint during client configuration.
 To select the available grant types using
