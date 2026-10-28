@@ -103,7 +103,10 @@ public class UserResourceFilter extends BaseFilter {
             return;
         }
 
-        IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
+        IntrospectionResponse introspectionResponse = null;
+        if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
+            introspectionResponse = getIntrospectionResponse(requestContext);
+        }
 
         if (isRolePermissionExemptClient(introspectionResponse)) {
             return;
