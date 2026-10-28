@@ -50,7 +50,9 @@ The Janssen Authentication Server supports the following OAuth specifications an
 
 ## Protocol Overview
 
-OAuth 2.1 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices).
+OAuth 2.0 is the industry-standard framework for authorization. OAuth 2.1 builds on
+OAuth 2.0 with updated security recommendations and safer defaults for authorization
+flows across different types of applications.
 
 For new applications, use the Authorization Code Grant with PKCE. OAuth 2.0 grants removed by OAuth 2.1 do remain available in Janssen when explicitly enabled.
 

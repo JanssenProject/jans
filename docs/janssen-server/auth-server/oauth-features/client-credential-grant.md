@@ -43,7 +43,7 @@ sequenceDiagram
    curl -X POST "https://my.jans.server/jans-auth/restv1/token" \
      -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET" \
      -d "grant_type=client_credentials" \
-     -d "scope=YOUR_SCOPE"
+     --data-urlencode "scope=YOUR_SCOPE"
 ```
 
    For a client registered with `client_secret_post`, send the credentials in the request body
@@ -53,7 +53,7 @@ sequenceDiagram
 ```bash
    curl -X POST "https://my.jans.server/jans-auth/restv1/token" \
      -d "grant_type=client_credentials" \
-     -d "client_id=YOUR_CLIENT_ID" \
-     -d "client_secret=YOUR_CLIENT_SECRET" \
-     -d "scope=YOUR_SCOPE"
+     --data-urlencode "client_id=YOUR_CLIENT_ID" \
+     --data-urlencode "client_secret=YOUR_CLIENT_SECRET" \
+     --data-urlencode "scope=YOUR_SCOPE"
 ```

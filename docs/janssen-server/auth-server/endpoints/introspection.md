@@ -29,7 +29,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 - `token_type_hint` - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
 - `response_as_jwt` - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
 
-The `token` parameter is the token being inspected and it is distinct from the access token
+The `token` parameter is the token being inspected, and it is distinct from the credential
 used to authenticate the caller to the introspection endpoint. Authenticate the request
 using the configured client authentication method or an `Authorization: Bearer` header
 where supported.
