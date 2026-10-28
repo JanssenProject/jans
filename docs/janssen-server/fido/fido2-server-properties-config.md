@@ -204,7 +204,7 @@ An entry under `rp` may also list the Android and iOS apps that share its RP ID,
 | `androidApps[].packageName` | Android application package name |
 | `androidApps[].sha256CertFingerprints` | SHA-256 fingerprints of the app signing certificate, colon-separated hex |
 | `androidApps[].distribution` | `play-store` or `self-signed`: which signing certificate the fingerprints belong to |
-| `iosApps[].teamId` | Apple Developer Team ID |
+| `iosApps[].teamId` | Apple Developer Team ID, or the app's App ID prefix when that differs (older apps) |
 | `iosApps[].bundleId` | Application bundle identifier |
 
 This is the single place an RP's native apps are recorded. It is what the `assetlinks.json` and
@@ -231,6 +231,17 @@ files the readiness check compares a deployed copy against.
 not configured or has no app of that platform. Nothing is served from Jans: both Apple and Android fetch
 `https://<rp-id>/.well-known/...` without following redirects, so deploy each file on the RP-ID host itself.
 Apple's file is named `apple-app-site-association`, with no `.json` extension.
+
+**Merge the exported entries into any file that is already there; do not replace it.** The exports describe
+only the passkey (`webcredentials` and `get_login_creds`) entries. A host that already serves these files may
+also use them for universal links or Android App Links, such as `applinks` in the Apple file or other
+statements in `assetlinks.json`, and overwriting the file removes those. Add the exported statements to the
+Android array, and the exported app IDs to `webcredentials.apps`, and leave everything else as it is.
+
+**Check that `teamId` is the app's App ID prefix.** Apple expects `<App ID prefix>.<bundle ID>` in
+`webcredentials.apps`. For most apps the prefix is the Team ID, but for older apps it can be a different value.
+Use the prefix shown for the app's App ID under Identifiers in your Apple Developer account (it is also the
+part before the bundle ID in the app's `application-identifier` entitlement), and record that value as `teamId`.
 
 After deploying, run the native app readiness check for the same RP
 (`POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, which needs `nativeReadinessEnabled` and
