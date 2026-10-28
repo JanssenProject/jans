@@ -1853,12 +1853,14 @@
 </ul>
 </blockquote>
 <h2 id="trusted-issuer">Trusted Issuer<a class="headerlink" href="#trusted-issuer" title="Permanent link">#</a></h2>
-<p>Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the <a href=".././cedarling-policy-store/#trusted-issuers-schema">policy store</a>.</p>
+<p>Cedarling creates a Trusted Issuer entity at startup for each JWT issuer declared in the policy store's <a href=".././cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a>.</p>
 <ul>
-<li><em>Namespace:</em> Corresponds to the trusted issuer name in the policy store.</li>
+<li><em>Namespace:</em> The entry's <code>issuer</code>, so <code>"issuer": "Acme"</code> gives <code>Acme::TrustedIssuer</code>.</li>
 <li><em>Type Name:</em> <code>TrustedIssuer</code></li>
-<li><em>Entity ID:</em> Set using the issuer URL (corresponds to <code>iss</code> in tokens).</li>
+<li><em>Entity ID:</em> The issuer's expected <code>iss</code>, path included (for example <code>https://kc.example/realms/a</code>). It matches the <code>iss</code> claim of its tokens.</li>
+<li><em>Attributes:</em> <code>issuer_entity_id</code> holds the <code>protocol</code>, <code>host</code> and <code>path</code> of that <code>iss</code>, so issuers that share a host but differ by path (Keycloak realms, Entra tenants) can be told apart in policies.</li>
 </ul>
+<p>Issuers that share one <code>iss</code> each get their own entity, in their own namespace. Custom (non-JWT) issuers have no <code>TrustedIssuer</code> entity.</p>
 <h2 id="principal-entities">Principal Entities<a class="headerlink" href="#principal-entities" title="Permanent link">#</a></h2>
 <p>Principals are created only in the <code>authorize_unsigned</code> interface. The caller optionally provides a single principal as <code>EntityData</code>, specifying the Cedar entity type, ID, and attributes explicitly.</p>
 <p>There is no fixed set of principal types -- any entity type defined in the Cedar schema can be used as a principal. Common examples include <code>User</code> and <code>Workload</code>, but these are just conventions defined in your schema.</p>
@@ -1974,8 +1976,8 @@ namespace MyApp {
 <h2 id="token-entities">Token Entities<a class="headerlink" href="#token-entities" title="Permanent link">#</a></h2>
 <p>Token entities are created only in the <code>authorize_multi_issuer</code> interface. Cedarling builds one entity per JWT token provided in the request.</p>
 <ul>
-<li><em>Type Name:</em> Determined by the <code>entity_type_name</code> attribute from the <a href=".././cedarling-policy-store/#token-metadata-schema">TEMS</a>, or derived from the token's mapping name.</li>
-<li><em>Entity ID:</em> Extracted from the <code>jti</code> (JWT ID) claim by default, configurable via <code>token_id</code> in TEMS.</li>
+<li><em>Type Name:</em> The token's <code>mapping</code>, which must equal an entity type declared in the policy store's <a href=".././cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a>.</li>
+<li><em>Entity ID:</em> Extracted from the <code>jti</code> (JWT ID) claim by default, configurable via the entry's <code>token_id</code>.</li>
 <li><em>Attributes:</em> JWT claims are mapped to entity attributes based on the Cedar schema. Reserved claims (<code>iss</code>, <code>jti</code>, <code>exp</code>) are typed correctly (entity reference, string, long). Synthetic attributes <code>token_type</code> and <code>validated_at</code> are added automatically.</li>
 <li><em>Tags:</em> Non-reserved JWT claims are also added as entity tags (<code>Set&lt;String&gt;</code>), enabling <code>hasTag</code>/<code>getTag</code> operations in policies.</li>
 </ul>
@@ -2134,7 +2136,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    June 15, 2026
+    October 27, 2026
   </span>
 
     

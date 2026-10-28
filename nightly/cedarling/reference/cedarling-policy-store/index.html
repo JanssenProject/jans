@@ -1118,21 +1118,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#trusted-issuer-files" class="md-nav__link">
+  <a href="#trusted-issuersjson" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Trusted Issuer Files
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-issuer-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Custom Issuer Files
+        trusted-issuers.json
       </span>
     </span>
   </a>
@@ -1188,6 +1177,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Version 1
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 2
       </span>
     </span>
   </a>
@@ -2174,21 +2174,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#trusted-issuer-files" class="md-nav__link">
+  <a href="#trusted-issuersjson" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Trusted Issuer Files
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-issuer-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Custom Issuer Files
+        trusted-issuers.json
       </span>
     </span>
   </a>
@@ -2244,6 +2233,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Version 1
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Version 2
       </span>
     </span>
   </a>
@@ -2861,7 +2861,7 @@
 <ol>
 <li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
 <li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
-<li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
+<li><strong>Trusted Issuers</strong>: Every accepted token type, JWT and custom, with its issuer (see <a href="#trusted-issuersjson"><code>trusted-issuers.json</code></a>).</li>
 <li><strong>Default Entities</strong>: Optional static entities that are loaded at startup and available for all policy evaluations (see <a href="#default-entities">below</a>).</li>
 </ol>
 <p>For a JSON schema defining the legacy single-file policy store structure used in test fixtures, see: <a href="https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/jans-cedarling/schema/policy_store_schema.json">policy_store_schema.json</a>. For production environments, use the <a href="#2-new-directory-based-format">folder-based policy store format</a>.</p>
@@ -2912,8 +2912,7 @@
 │   └── deny-guest.cedar
 ├── templates/              # Optional: Directory containing .cedar template files
 ├── entities/               # Optional: Directory containing .json entity files
-├── trusted-issuers/        # Optional: Directory containing .json issuer configs
-└── custom-issuers/         # Optional: Directory containing .json custom (non-JWT) issuer configs
+└── trusted-issuers.json    # Optional: Every accepted token type (JWT and custom)
 </code></pre></div>
 <p>The schema can be provided in one of two ways (but not both):</p>
 <ul>
@@ -2924,7 +2923,7 @@
 <h4 id="metadatajson">metadata.json<a class="headerlink" href="#metadatajson" title="Permanent link">#</a></h4>
 <p>Contains policy store identification and versioning:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;policy_store_spec_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;policy_store_spec_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4.4.0&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;policy_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;abc123def456&quot;</span><span class="p">,</span>
@@ -3037,74 +3036,139 @@ permit(
 <span class="w">  </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div>
-<h4 id="trusted-issuer-files">Trusted Issuer Files<a class="headerlink" href="#trusted-issuer-files" title="Permanent link">#</a></h4>
-<p>Trusted issuer configuration files in the <code>trusted-issuers/</code> directory define identity providers that can issue tokens. <strong>Each file describes exactly one issuer</strong> as a JSON object with the issuer's fields at the top level:</p>
+<h4 id="trusted-issuersjson">trusted-issuers.json<a class="headerlink" href="#trusted-issuersjson" title="Permanent link">#</a></h4>
+<p><code>trusted-issuers.json</code> lists every token type the store accepts, JWT and custom
+alike, as one JSON object keyed by Cedar entity type. Each entry fully describes
+one token type, including its issuer and its kind. A store without the file
+accepts no tokens.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans Server&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Primary Janssen Identity Provider&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.example.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
+<span class="w">  </span><span class="nt">&quot;Acme::Access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Each trusted issuer file includes:</p>
-<ul>
-<li><strong><code>name</code></strong>: Human-readable name for the issuer (used as namespace for <code>TrustedIssuer</code> entity).</li>
-<li><strong><code>description</code></strong>: Optional description of the issuer.</li>
-<li><strong><code>openid_configuration_endpoint</code></strong>: HTTPS URL for the OpenID Connect discovery endpoint. For backward compatibility, <code>configuration_endpoint</code> is also accepted.</li>
-<li><strong><code>token_metadata</code></strong>: Map of token names to their metadata configuration (see <a href="#token-metadata-schema">Token Metadata Schema</a>).</li>
-<li><strong><code>id</code></strong>: Optional issuer ID at the top level. If absent, the ID is derived from the filename with the <code>.json</code> suffix removed.</li>
-</ul>
-<p>To register multiple issuers, add one file per issuer to the <code>trusted-issuers/</code> directory.</p>
-<blockquote>
-<p><strong>Note:</strong> The embedded <code>trusted_issuers</code> map shown in the <a href="#trusted-issuers-schema">Trusted Issuers Schema</a> section below (used inside legacy single-file YAML test fixtures) uses a different shape — a map of issuer IDs to configurations. Per-file format and embedded format are not interchangeable. Both formats accept the <code>openid_configuration_endpoint</code> field name, with <code>configuration_endpoint</code> accepted as a backward-compatible alias.</p>
-</blockquote>
-<h4 id="custom-issuer-files">Custom Issuer Files<a class="headerlink" href="#custom-issuer-files" title="Permanent link">#</a></h4>
-<p>Custom (non-JWT) issuer configuration files in the <code>custom-issuers/</code> directory declare issuers whose tokens are validated by a registered <code>CustomTokenProcessor</code> instead of the JWT pipeline, see <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>. <strong>Each file describes exactly one issuer</strong> as a JSON object:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Acme::Id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span>
 <span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;Custom::SessionKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;aud&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Partner::Access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Partner&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;jwks&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://auth.partner.io/keys&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://auth.partner.io&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Dolphin::Dolphin_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Each custom issuer file includes:</p>
+<p>The file's JSON Schema is <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/schema/trusted_issuers_schema.json"><code>trusted_issuers_schema.json</code></a>; the load rules below that it cannot express are checked when the store loads.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Kind</th>
+<th>Required</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key</td>
+<td>all</td>
+<td>yes</td>
+<td>Cedar entity type. A request <code>TokenInput.mapping</code> must equal it exactly. Its last segment, lowercased, is the type part of the <code>context.tokens</code> key.</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>all</td>
+<td>yes</td>
+<td><code>jwt</code> or <code>custom</code>; selects which other fields are allowed.</td>
+</tr>
+<tr>
+<td><code>issuer</code></td>
+<td>all</td>
+<td>yes</td>
+<td>Issuer identity, a single Cedar identifier (<code>^[A-Za-z_][A-Za-z0-9_]*$</code>) that is not a Cedar reserved word (<code>if</code>, <code>true</code>, <code>in</code>, <code>__cedar</code>, ...). It is the namespace of the issuer's <code>TrustedIssuer</code> entity (<code>Acme::TrustedIssuer</code>) and, lowercased, the prefix of its <code>context.tokens</code> keys (<code>acme_access_token</code>), so renaming it changes what policies see.</td>
+</tr>
+<tr>
+<td><code>configuration_endpoints.configuration</code></td>
+<td>jwt</td>
+<td>one of two forms</td>
+<td>OIDC discovery URL: the issuer URL followed by <code>/.well-known/openid-configuration</code>. The expected <code>iss</code> is that issuer URL, path included; keys come from the discovered <code>jwks_uri</code>.</td>
+</tr>
+<tr>
+<td><code>configuration_endpoints.jwks</code> + <code>configuration_endpoints.iss</code></td>
+<td>jwt</td>
+<td>one of two forms</td>
+<td>Static form, without discovery: keys come from <code>jwks</code>, and the expected <code>iss</code> is given explicitly. It has no status list: with <code>CEDARLING_JWT_STATUS_VALIDATION</code> on, a token from it that carries a <code>status</code> claim is rejected, and the load logs a warning naming the issuer.</td>
+</tr>
+<tr>
+<td><code>token_id</code></td>
+<td>jwt</td>
+<td>no, default <code>jti</code></td>
+<td>Claim used as the token entity id; must not be empty.</td>
+</tr>
+<tr>
+<td><code>required_claims</code></td>
+<td>all</td>
+<td>no, default <code>[]</code></td>
+<td>Claim names, none empty and none repeated. JWT: the claims must be present, and registered claims (<a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 §4.1</a>) such as <code>exp</code> or <code>nbf</code> are validated. Custom: the claims must be present in the processor output.</td>
+</tr>
+</tbody>
+</table>
+<p>Unknown fields are rejected, so a misspelled field, or a JWT-only field such as
+<code>configuration_endpoints</code> on a <code>custom</code> entry, fails the load with a message
+naming it.</p>
+<p>These rules are checked when the store loads, and a violation fails the load:</p>
 <ul>
-<li><strong><code>tokens_mappings</code></strong>: (required, non-empty) Map of Cedar entity type names to their per-token configuration. The key is matched against the request token <code>mapping</code> to route it to the custom path, so one issuer may declare several token types.</li>
-<li><strong><code>tokens_mappings.&lt;type&gt;.required</code></strong>: (default <code>false</code>) When <code>true</code>, a processing failure or timeout fails the whole authorization request; otherwise the token is skipped and authorization continues. This is per token type, not per issuer.</li>
-<li><strong><code>tokens_mappings.&lt;type&gt;.required_claims</code></strong>: (default <code>[]</code>) Claims that must be present in the processor output.</li>
-<li><strong><code>id</code></strong>: Optional issuer id at the top level. If absent, the id is derived from the filename with the <code>.json</code> suffix removed. This id is the issuer name used in the <code>context.tokens.{issuer}_{token_type}</code> key.</li>
+<li>Each entity type appears once. A duplicate key is an error rather than
+  "last one wins".</li>
+<li>All entries with the same <code>issuer</code> describe one issuer: they must have the same
+  <code>type</code> and, for JWT, the same <code>iss</code> and key source. Cedarling fetches the
+  discovery document and the keys once per issuer.</li>
+<li>Different issuers may share an <code>iss</code> and its keys, for example one identity
+  provider serving two applications with different schemas. Each gets its own
+  <code>TrustedIssuer</code> entity. Two static entries that declare the same <code>iss</code> with
+  different <code>jwks</code> are rejected.</li>
+<li>Every <code>context.tokens</code> key is unique: <code>Acme</code> and <code>ACME</code> would both produce
+  <code>acme_access_token</code>.</li>
+<li>No token type may derive <code>total_token_count</code>, which Cedarling reserves for the
+  number of tokens in the request.</li>
+<li>An entry uses exactly one key-source form: <code>configuration</code> together with
+  <code>jwks</code>, or <code>jwks</code> without <code>iss</code>, is rejected.</li>
+<li><code>configuration</code>, <code>jwks</code> and <code>iss</code> must be <code>http</code> or <code>https</code> URLs; <code>http</code> is
+  accepted for local setups only and should not be used in production. A static
+  <code>iss</code> must not have a query or fragment, as an issuer identifier never does.</li>
 </ul>
-<p>An entity type name must be declared by only one custom issuer; two issuers declaring the same type is not yet supported (see <a href="https://github.com/JanssenProject/jans/issues/14747">issue #14747</a>). Issuer names that collapse to the same id after sanitization are rejected at startup.</p>
-<p>To register multiple custom issuers, add one file per issuer to the <code>custom-issuers/</code> directory.</p>
-<blockquote>
-<p><strong>Note:</strong> Unlike a trusted issuer, a custom issuer has no <code>openid_configuration_endpoint</code> and no signature or status validation. The registered processor is fully trusted for validating the payload.</p>
-</blockquote>
-<p>The same configuration can be embedded in a monolithic single-file store under a top-level <code>custom_issuers</code> key (issuer name → configuration):</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;custom_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;CustomKeys&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;Custom::ApiKey&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div>
+<p>Two key sources that only turn out to share an <code>iss</code> after discovery, with
+different JWKS, are both rejected: there is no order between them, so neither
+issuer loads, and each is logged at <code>ERROR</code> naming the issuers and both JWKS.
+An issuer whose discovery fails takes no part in this check.</p>
+<p>A JWT is accepted only for its entry's issuer: its <code>iss</code> must equal the expected
+<code>iss</code>, and the discovery document's <code>issuer</code> must equal it too, or that issuer
+fails to load. Custom tokens are validated by a registered <code>CustomTokenProcessor</code>
+instead of the JWT pipeline, see
+<a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.
+A custom issuer has no <code>TrustedIssuer</code> entity, and a custom token's <code>iss</code>
+attribute is its lowercased <code>issuer</code> string.</p>
+<p>Every token type is optional: a token that fails validation or processing is
+dropped and the request continues with the remaining tokens. A policy that needs
+a token must require it, see
+<a href=".././cedarling-multi-issuer/#token-failures-and-forbid-policies">Token failures and <code>forbid</code> policies</a>.</p>
 <h4 id="cedar-archive-cjar-format">Cedar Archive (.cjar) Format<a class="headerlink" href="#cedar-archive-cjar-format" title="Permanent link">#</a></h4>
 <p>The directory structure can be packaged as a <code>.cjar</code> file (ZIP archive) for distribution:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Create a .cjar archive from a policy store directory</span>
@@ -3118,7 +3182,7 @@ two other versions in the file: <code>policy_store.version</code> is your own co
 version, and <code>cedar_version</code> is the Cedar language version. Cedarling reads the
 spec version before anything else in the store, so an unsupported format fails
 with a version error instead of a confusing schema or policy error.</p>
-<p>The current version is <strong>1</strong>. The oldest version Cedarling still reads is <strong>0</strong>.</p>
+<p>The current version is <strong>2</strong>. The oldest version Cedarling still reads is <strong>0</strong>.</p>
 <table>
 <thead>
 <tr>
@@ -3137,10 +3201,14 @@ with a version error instead of a confusing schema or policy error.</p>
 </tr>
 <tr>
 <td><code>1</code></td>
-<td>Read as version 1, no warning</td>
+<td>Read as version 1, migrated to the current version, with a warning</td>
 </tr>
 <tr>
-<td><code>2</code> or higher</td>
+<td><code>2</code></td>
+<td>Read as version 2, no warning</td>
+</tr>
+<tr>
+<td><code>3</code> or higher</td>
 <td>Error: newer than this Cedarling supports</td>
 </tr>
 <tr>
@@ -3153,8 +3221,8 @@ with a version error instead of a confusing schema or policy error.</p>
 policy store file format bumps <code>policy_store_spec_version</code> and adds its entry to
 this section in the same pull request.</p>
 <p>The directory layout is part of the file format. A spec version fixes where
-each file lives (<code>policies/</code>, <code>trusted-issuers/</code>, <code>schema.cedarschema</code> and so
-on), so moving, renaming, or merging files is also a new spec version. The one
+each file lives (<code>policies/</code>, <code>trusted-issuers.json</code>, <code>schema.cedarschema</code> and
+so on), so moving, renaming, or merging files is also a new spec version. The one
 exception is <code>metadata.json</code>: Cedarling reads it before it knows the version, so
 it stays at the root of the store in every version.</p>
 <h3 id="version-0">Version 0<a class="headerlink" href="#version-0" title="Permanent link">#</a></h3>
@@ -3171,7 +3239,7 @@ version 0. An explicit <code>0</code> means the same thing.</p>
 <span class="p">}</span>
 </code></pre></div>
 <h3 id="version-1">Version 1<a class="headerlink" href="#version-1" title="Permanent link">#</a></h3>
-<p><strong>Status:</strong> current. <strong>Change type:</strong> additive.</p>
+<p><strong>Status:</strong> supported, outdated. <strong>Change type:</strong> additive.</p>
 <p><strong>What changed:</strong> <code>metadata.json</code> gains the required <code>policy_store_spec_version</code>
 field. No other file changes.</p>
 <p><strong>Why:</strong> without a declared format version, Cedarling cannot tell which revision
@@ -3205,11 +3273,159 @@ instead of migrated or rejected.</p>
 </ol>
 <p>A version 0 store keeps loading, so upgrading is not urgent, but every load logs
 the warning below.</p>
+<h3 id="version-2">Version 2<a class="headerlink" href="#version-2" title="Permanent link">#</a></h3>
+<p><strong>Status:</strong> current. <strong>Change type:</strong> breaking, migrated automatically.</p>
+<p><strong>What changed:</strong> the <code>trusted-issuers/</code> and <code>custom-issuers/</code> directories are
+replaced by one <a href="#trusted-issuersjson"><code>trusted-issuers.json</code></a>, a map keyed by
+Cedar entity type in which each entry describes one token type and its issuer.
+A version 2 store that still contains either directory loads, ignores it and
+logs a warning.</p>
+<p><strong>Why:</strong> version 1 described JWT and custom tokens in two shapes keyed
+differently (JWT tokens by a token name with a separate <code>entity_type_name</code>,
+custom tokens by entity type), while a request names a token by its entity type.
+One map keyed by entity type removes the token name, the issuer id and the
+lookup between them, and lets every conflict be checked in one place when the
+store loads.</p>
+<p>Before (version 1), <code>trusted-issuers/acme.json</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme identity provider&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_token&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Id_token&quot;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>and <code>custom-issuers/dolphin.json</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;tokens_mappings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Dolphin::Dolphin_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nt">&quot;required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>After (version 2), <code>trusted-issuers.json</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Acme::Access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;exp&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;Dolphin::Dolphin_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;custom&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dolphin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;sub&quot;</span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>and <code>"policy_store_spec_version": 2</code> in <code>metadata.json</code>.</p>
+<p><strong>Migration:</strong> a version 0 or 1 store is migrated in memory when it loads:</p>
+<table>
+<thead>
+<tr>
+<th>Version 1</th>
+<th>Version 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>trusted-issuers/X.json</code>, <code>token_metadata.&lt;key&gt;</code></td>
+<td>entry keyed by its <code>entity_type_name</code>: <code>type: jwt</code>, <code>issuer</code> = the file's <code>name</code>, <code>configuration_endpoints.configuration</code> = its endpoint, same <code>token_id</code> and <code>required_claims</code></td>
+</tr>
+<tr>
+<td><code>custom-issuers/X.json</code>, <code>tokens_mappings.&lt;type&gt;</code></td>
+<td>entry keyed by <code>&lt;type&gt;</code>: <code>type: custom</code>, <code>issuer</code> = the file's id, sanitized as before so its <code>context.tokens</code> keys stay the same, same <code>required_claims</code></td>
+</tr>
+<tr>
+<td><code>trusted: false</code></td>
+<td>entry dropped, as version 1 never accepted those tokens; an issuer left with no tokens is dropped</td>
+</tr>
+<tr>
+<td><code>required: true</code></td>
+<td>ignored, with a warning: every token is optional</td>
+</tr>
+<tr>
+<td><code>description</code>, issuer <code>id</code>, token key</td>
+<td>dropped</td>
+</tr>
+<tr>
+<td><code>name</code> that is not a single Cedar identifier (<code>Gluu Server</code>, <code>A::B</code>)</td>
+<td>error</td>
+</tr>
+<tr>
+<td>endpoint not of the form <code>&lt;iss&gt;/.well-known/openid-configuration</code></td>
+<td>error</td>
+</tr>
+<tr>
+<td>endpoint with a path before <code>/.well-known/openid-configuration</code></td>
+<td>warning: <code>iss</code> keeps the path, see below</td>
+</tr>
+<tr>
+<td>the same entity type in two files, in either directory</td>
+<td>error naming both files</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Behavior changes to review when upgrading:</strong></p>
+<ul>
+<li>
+<p><strong><code>required</code> is gone.</strong> A missing or failing custom token no longer fails the
+  request. A policy that depends on a token must require it:</p>
+<div class="highlight"><pre><span></span><code>forbid (principal, action, resource)
+unless { context has tokens.acme_access_token };
+</code></pre></div>
+</li>
+<li>
+<p><strong>A request <code>mapping</code> must equal a configured entity type.</strong> There is no
+  fallback from token names such as <code>access_token</code> to default entity types.</p>
+</li>
+<li><strong><code>iss</code> keeps its path.</strong> Version 1 identified an issuer by the origin of its
+  configuration endpoint: the <code>TrustedIssuer</code> entity id and <code>issuer_entity_id</code>
+  had no path, and tokens were matched to issuers by origin (with signature
+  validation on, the full <code>iss</code> was still checked against discovery). Version 2
+  expects the endpoint without <code>/.well-known/openid-configuration</code>, path
+  included, so path-based issuers (Keycloak realms,
+  <code>login.microsoftonline.com/{tenant}/v2.0</code>) are told apart. For those issuers
+  the <code>TrustedIssuer</code> entity id and <code>issuer_entity_id.path</code> now carry the path.
+  Issuers at the origin root are unaffected.</li>
+<li><strong>Discovery must match.</strong> The discovery document's <code>issuer</code> must equal the
+  expected <code>iss</code>, or that issuer fails to load.</li>
+<li><strong>Issuers are identified by name.</strong> <code>TrustedIssuerLoadingInfo</code>
+  (<code>is_trusted_issuer_loaded_by_name</code>, <code>loaded_trusted_issuer_ids</code>,
+  <code>failed_trusted_issuer_ids</code>) reports issuer names (<code>Acme</code>) instead of
+  version 1 file ids (<code>acme</code>).</li>
+<li><strong>Conflicts fail the load.</strong> Files that shared an id are no longer rejected:
+  JWT files stay separate issuers by name, and custom files merge into one
+  issuer. A duplicate entity type, two descriptions of one issuer that disagree,
+  or colliding <code>context.tokens</code> keys fail the load instead of one silently
+  replacing another.</li>
+</ul>
+<p><strong>Upgrading from version 1:</strong></p>
+<ol>
+<li>Write <code>trusted-issuers.json</code> from your issuer files as in the table above,
+   then delete the <code>trusted-issuers/</code> and <code>custom-issuers/</code> directories.</li>
+<li>Set <code>"policy_store_spec_version": 2</code> in <code>metadata.json</code>.</li>
+<li>Add <code>forbid … unless</code> policies for tokens that were <code>required</code>.</li>
+<li>Run <code>cedarling-cli validate</code> against the store. It should pass with no
+   warning.</li>
+</ol>
+<p>A version 1 store keeps loading through the migration, so upgrading is not
+urgent, but every load logs the warnings below.</p>
 <h3 id="unknown-fields">Unknown fields<a class="headerlink" href="#unknown-fields" title="Permanent link">#</a></h3>
-<p>In every version, unknown keys in <code>metadata.json</code> and in trusted-issuer files are
-ignored, so a misspelled optional key is silently dropped rather than reported.
-Unknown keys in custom-issuer files are rejected with an error. Migrating a store
-from one version to the next keeps every field the older version recognizes.</p>
+<p>Unknown keys in <code>metadata.json</code> are ignored in every version. In version 2,
+unknown keys in <code>trusted-issuers.json</code> entries are rejected with an error naming
+them. In versions 0 and 1, unknown keys in trusted-issuer files are ignored, so a
+misspelled optional key is silently dropped, and unknown keys in custom-issuer
+files are rejected. Migration carries over every field the newer version has a
+place for and reports what it cannot carry over.</p>
 <h3 id="warnings">Warnings<a class="headerlink" href="#warnings" title="Permanent link">#</a></h3>
 <p>Warnings are non-fatal: the store loads and is migrated to the current version
 in memory. Cedarling logs them once at startup at <code>WARN</code>, and the
@@ -3217,21 +3433,35 @@ in memory. Cedarling logs them once at startup at <code>WARN</code>, and the
 whether validation passes. The background refresh worker de-duplicates them, so
 a periodic refresh of an outdated store does not repeat the same warning.</p>
 <p>When the field is missing:</p>
-<div class="highlight"><pre><span></span><code>policy store format is outdated: metadata.json has no policy_store_spec_version, so it was read as spec version 0; please update the policy store to spec version 1
+<div class="highlight"><pre><span></span><code>policy store format is outdated: metadata.json has no policy_store_spec_version, so it was read as spec version 0; please update the policy store to spec version 2
 </code></pre></div>
 <p>When the field declares a supported but older version:</p>
-<div class="highlight"><pre><span></span><code>policy store format is outdated: policy_store_spec_version is 0; please update the policy store to spec version 1
+<div class="highlight"><pre><span></span><code>policy store format is outdated: policy_store_spec_version is 1; please update the policy store to spec version 2
+</code></pre></div>
+<p>When migrating a version 1 custom token that was <code>required</code>:</p>
+<div class="highlight"><pre><span></span><code>spec version 1 to 2: &#39;required&#39; on custom token &#39;&lt;entity type&gt;&#39; in &#39;custom-issuers/&lt;file&gt;&#39; is ignored: every token is optional; require it in policy with `forbid (principal, action, resource) unless { context has tokens.&lt;key&gt; };`
+</code></pre></div>
+<p>When migrating a version 1 issuer whose endpoint has a path:</p>
+<div class="highlight"><pre><span></span><code>spec version 1 to 2: issuer in &#39;trusted-issuers/&lt;file&gt;&#39; now has iss &#39;&lt;iss&gt;&#39;, path included: its TrustedIssuer entity id and issuer_entity_id.path carry the path, where v1 used the origin
+</code></pre></div>
+<p>When a version 2 store still contains <code>trusted-issuers/</code> or <code>custom-issuers/</code>:</p>
+<div class="highlight"><pre><span></span><code>spec version 2: policy store directory &#39;trusted-issuers/&#39; is ignored: this spec version reads trusted issuers from trusted-issuers.json only
 </code></pre></div>
 <h3 id="errors">Errors<a class="headerlink" href="#errors" title="Permanent link">#</a></h3>
 <p>These fail closed — the store is not loaded.</p>
 <div class="highlight"><pre><span></span><code>Invalid metadata in file metadata.json: policy_store_spec_version must be a non-negative integer, got &lt;value&gt;
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>Unsupported policy store: policy_store_spec_version &lt;found&gt; is newer than the latest version this Cedarling supports (1); upgrade Cedarling
+<div class="highlight"><pre><span></span><code>Unsupported policy store: policy_store_spec_version &lt;found&gt; is newer than the latest version this Cedarling supports (2); upgrade Cedarling
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Unsupported policy store: policy_store_spec_version &lt;found&gt; is no longer supported; the oldest supported version is 0
 </code></pre></div>
 <p>The last error cannot occur while version 0 is still supported; it appears once a
 release drops support for the oldest version.</p>
+<p>A version 0 or 1 store that cannot be expressed in version 2 (see the
+<a href="#version-2">migration table</a>) fails with:</p>
+<div class="highlight"><pre><span></span><code>Failed to migrate the policy store: spec version 1 to 2: &lt;reason naming the file&gt;
+</code></pre></div>
+<p>The message names the migration step that failed.</p>
 <h2 id="advanced-loading-from-bytes">Advanced: Loading from Bytes<a class="headerlink" href="#advanced-loading-from-bytes" title="Permanent link">#</a></h2>
 <p>For scenarios requiring custom fetch logic (e.g., auth headers), archive bytes can be loaded directly:</p>
 <ul>
@@ -3441,8 +3671,8 @@ validated.</p>
 <li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
 <li><strong>policies</strong> : (<em>Object</em>) Base64 encoded object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
 <li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) Base64 encoded JSON Object. See <a href="#schema">schema</a> below.</li>
-<li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
-<li><strong>custom_issuers</strong> : (<em>Object of {issuer_name =&gt; CustomIssuer}</em>) Optional map of custom (non-JWT) issuers validated by a registered <code>CustomTokenProcessor</code>. See <a href="#custom-issuer-files">Custom Issuer Files</a> and <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.</li>
+<li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}</em>) Metadata for JWT issuers. See <a href="#trusted-issuers-schema">Trusted Issuers Schema</a>.</li>
+<li><strong>custom_issuers</strong> : (<em>Object of {issuer_name =&gt; CustomIssuer}</em>) Optional map of custom (non-JWT) issuers validated by a registered <code>CustomTokenProcessor</code>, each <code>{ "tokens_mappings": { "&lt;entity type&gt;": { "required_claims": [...] } } }</code>. The issuer is identified by its name, sanitized (lowercased, with <code>.</code>, space and <code>-</code> replaced by <code>_</code>), which is also its <code>context.tokens</code> key prefix. See <a href=".././cedarling-multi-issuer/#custom-non-jwt-token-processing">Custom (Non-JWT) Token Processing</a>.</li>
 <li><strong>default_entities</strong> : (<em>Object</em>) Optional map of entity IDs to encoded/default entity payloads. See <a href="#default-entities">Default Entities</a>.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
@@ -3566,21 +3796,21 @@ validated.</p>
 <span class="w">  </span><span class="p">}</span>
 </code></pre></div>
 <h2 id="trusted-issuers-schema">Trusted Issuers Schema<a class="headerlink" href="#trusted-issuers-schema" title="Permanent link">#</a></h2>
+<p>This shape is used only by the <a href="#legacy-single-file-format-yaml-test-suites">legacy single-file YAML format</a>.
+Directory and <code>.cjar</code> stores use <a href="#trusted-issuersjson"><code>trusted-issuers.json</code></a>.
+Once loaded, both follow the same rules.</p>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;trusted_issuer_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description for the trusted issuer&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_token&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="err">...</span>
 <span class="w">      </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
-<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span>
 <span class="w">      </span><span class="err">...</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
@@ -3591,24 +3821,22 @@ validated.</p>
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
-<li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
-<li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
-<li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. Furthermore, the name this object is what will be used as the entity ID of the <a href=".././cedarling-entities/#trusted-issuer">Trusted Issuer</a> that Cedarling automatically creates at startup.</li>
-<li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+<li><strong>name</strong> : (<em>String</em>) The issuer identity: a single Cedar identifier, used as the <code>issuer</code> of each of its token types.</li>
+<li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The OpenID Connect discovery URL: the issuer URL followed by <code>/.well-known/openid-configuration</code>. The issuer URL, path included, is the expected <code>iss</code>.</li>
+<li><strong>trusted_issuer_id</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to a particular issuer. You can add as many trusted issuers you want. The key itself is not used.</li>
+<li><strong>token_metadata</strong> : (<em>Object</em>, <em>optional</em>) Tokens metadata in a map of <em>token name</em> -&gt; <em>token metadata</em>. See <a href="#token-metadata-schema">Token Metadata Schema</a>. An issuer without token types is not loaded.</li>
 </ul>
+<p>Any other field is rejected, including <code>description</code> on the issuer and <code>trusted</code> on a token, which older fixtures used.</p>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped and validated within Cedarling. It specifies the Cedar entity type for each token, which claim to use as the entity ID, and which claims are required.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::Access_token&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span>
 <span class="w">  </span><span class="nt">&quot;required_claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;iss&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;exp&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;some_custom_claim&quot;</span><span class="p">]</span>
 <span class="p">}</span>
 </code></pre></div>
 <ul>
-<li><code>"trusted"</code> (bool, Default: true): Allows toggling configuration without deleting the object. When set to <code>false</code>, tokens of this type will be ignored.</li>
-<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: <code>"Acme::Access_token"</code>.</li>
+<li><code>"entity_type_name"</code> (string, required): The type name of the Cedar Entity that will be created from the token; for example: <code>"Acme::Access_token"</code>. A request <code>mapping</code> must equal it, and it must be unique across all issuers.</li>
 <li><code>"token_id"</code> (string, Default: <code>"jti"</code>): The JWT claim that will be used as the ID for the Token Entity.</li>
 <li><code>"required_claims"</code> (array[string], Default: <code>[]</code>): A list of claims that must be present within the JWT to be considered valid. Additionally, if a required claim is a registered claim name under <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519 Section 4.1</a> (e.g., <code>exp</code>, <code>nbf</code>), the claim will also be validated according to the standard.</li>
 </ul>
@@ -3626,21 +3854,17 @@ validated.</p>
 <span class="w">  </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
 <span class="w">      </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;id_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="nt">&quot;userinfo_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">          </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Userinfo_token&quot;</span><span class="p">,</span>
 <span class="w">          </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
 <span class="w">        </span><span class="p">}</span>
@@ -3740,9 +3964,9 @@ context.tokens.dolphin_dolphintoken.getTag(&quot;waiver&quot;).contains(&quot;si
 </code></pre></div>
 <p>The naming follows this pattern:</p>
 <ul>
-<li><strong>Issuer name</strong>: From trusted issuer metadata <code>name</code> field, or hostname from JWT <code>iss</code> claim</li>
-<li><strong>Token type</strong>: Extracted from the <code>mapping</code> field (e.g., "Jans::Access_Token" → "access_token")</li>
-<li>Both converted to lowercase with underscores replacing special characters</li>
+<li><strong>Issuer name</strong>: The <code>issuer</code> of the token's entry in <a href="#trusted-issuersjson"><code>trusted-issuers.json</code></a>, lowercased</li>
+<li><strong>Token type</strong>: The last segment of the <code>mapping</code> field, lowercased (e.g., "Jans::Access_Token" → "access_token")</li>
+<li>The key is computed once when the store loads and must be unique; a token type without a configured entry gets no key</li>
 </ul>
 <h3 id="schema-requirements-for-multi-issuer">Schema Requirements for Multi-Issuer<a class="headerlink" href="#schema-requirements-for-multi-issuer" title="Permanent link">#</a></h3>
 <h4 id="1-token-entity-schema">1. Token Entity Schema<a class="headerlink" href="#1-token-entity-schema" title="Permanent link">#</a></h4>
@@ -3970,34 +4194,29 @@ type TokensContext = {
 };
 </code></pre></div>
 <h3 id="trusted-issuer-configuration-for-multi-issuer">Trusted Issuer Configuration for Multi-Issuer<a class="headerlink" href="#trusted-issuer-configuration-for-multi-issuer" title="Permanent link">#</a></h3>
-<p>The <code>name</code> field in trusted issuer configuration is critical for multi-issuer authorization:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;acme_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;acme_access_token&quot; and depict namespace for `TrustedIssuer` cedar type</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme Corporation IDP&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">      </span><span class="p">}</span>
+<p>The <code>issuer</code> field in <a href="#trusted-issuersjson"><code>trusted-issuers.json</code></a> is critical
+for multi-issuer authorization:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;Jans::Access_Token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.acme.com/.well-known/openid-configuration&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nt">&quot;dolphin_issuer_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span><span class="w">  </span><span class="c1">// Used in token collection naming: &quot;dolphin_dolphintoken&quot; and depict namespace for `TrustedIssuer` cedar type</span>
-<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin Service Provider&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.dolphin.sea/.well-known/openid-configuration&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;dolphin_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;entity_type_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Acme::DolphinToken&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;token_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span>
-<span class="w">      </span><span class="p">}</span>
+<span class="w">  </span><span class="nt">&quot;Acme::DolphinToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Dolphin&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;configuration_endpoints&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://idp.dolphin.sea/.well-known/openid-configuration&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p><strong>Note</strong>: The <code>name</code> field ensures predictable and secure token entity naming in the policy evaluation context.
-And is used as <strong>namespace</strong> for <code>TrustedIssuer</code> cedar type.</p>
+<p>Here <code>Jans::Access_Token</code> tokens appear as <code>context.tokens.acme_access_token</code> and
+<code>Acme::DolphinToken</code> tokens as <code>context.tokens.dolphin_dolphintoken</code>. The
+<code>issuer</code> is also the namespace of the <code>TrustedIssuer</code> Cedar type
+(<code>Acme::TrustedIssuer</code>), independent of the token's own namespace.</p>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
 <p>You can manually create your Cedar policies and schema in
 <a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>.
@@ -4115,7 +4334,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 19, 2026
+    October 27, 2026
   </span>
 
     

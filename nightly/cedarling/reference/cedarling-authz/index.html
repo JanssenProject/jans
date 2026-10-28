@@ -2301,21 +2301,11 @@ permit(
 </code></pre></div>
 <h3 id="token-collection-naming-convention">Token Collection Naming Convention<a class="headerlink" href="#token-collection-naming-convention" title="Permanent link">#</a></h3>
 <p>The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always <strong>lowercase</strong> and uses only <strong>underscores</strong> as separators, making it a valid Cedar identifier.</p>
-<p><strong>Pattern</strong>: <code>{issuer_name}_{token_type}</code></p>
-<p>Both components are individually normalized, then joined with a single underscore.</p>
-<p><strong>Step 1 — Issuer Name Resolution</strong>:</p>
-<ol>
-<li>Look up the JWT's <code>iss</code> claim in the trusted issuer configuration from the policy store</li>
-<li>If a matching trusted issuer is found, use its <code>name</code> field (e.g., <code>"Acme"</code>)</li>
-<li>If no trusted issuer matches, extract the hostname from the <code>iss</code> URL:<ul>
-<li>Strip the protocol (<code>https://</code>, <code>http://</code>)</li>
-<li>Take everything before the first <code>/</code></li>
-<li>Strip port numbers (everything after <code>:</code>)</li>
-<li>Example: <code>https://unknown.issuer.com:8080/auth</code> → <code>unknown.issuer.com</code></li>
-</ul>
-</li>
-<li><strong>Sanitize</strong>: replace all <code>.</code> (dots), <code></code> (spaces), and <code>-</code> (hyphens) with <code>_</code>, then convert to <strong>lowercase</strong></li>
-</ol>
+<p><strong>Pattern</strong>: <code>{issuer}_{token_type}</code></p>
+<p>The key is derived once, when the policy store loads, from the
+<code>trusted-issuers.json</code> entry the token's <code>mapping</code> names. The token's <code>iss</code> claim
+plays no part in it.</p>
+<p><strong>Step 1 — Issuer</strong>: the entry's <code>issuer</code>, lowercased (e.g. <code>"Acme"</code> --&gt; <code>acme</code>).</p>
 <p><strong>Step 2 — Token Type Simplification</strong>:</p>
 <ol>
 <li>Take the <code>mapping</code> field from the <code>TokenInput</code> (e.g., <code>"Jans::Access_Token"</code>)</li>
@@ -2323,59 +2313,50 @@ permit(
 <li>Convert to <strong>lowercase</strong></li>
 <li>Underscores within the token type name are preserved</li>
 </ol>
-<p><strong>Step 3 — Combine</strong>:</p>
-<p>Join the sanitized issuer name and simplified token type with <code>_</code>:</p>
-<div class="highlight"><pre><span></span><code>{sanitized_issuer}_{simplified_token_type}
+<p><strong>Step 3 — Combine</strong> with <code>_</code>:</p>
+<div class="highlight"><pre><span></span><code>{lowercase_issuer}_{simplified_token_type}
 </code></pre></div>
 <p><strong>Examples</strong>:</p>
 <table>
 <thead>
 <tr>
-<th>JWT <code>iss</code> claim</th>
-<th>Trusted issuer <code>name</code></th>
+<th>Entry <code>issuer</code></th>
 <th>Token <code>mapping</code></th>
 <th>Resulting key</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>https://idp.acme.com/auth</code></td>
 <td><code>"Acme"</code></td>
-<td><code>Jans::Access_Token</code></td>
+<td><code>Acme::Access_Token</code></td>
 <td><code>acme_access_token</code></td>
 </tr>
 <tr>
-<td><code>https://idp.acme.com/auth</code></td>
 <td><code>"Acme"</code></td>
-<td><code>Jans::Id_Token</code></td>
+<td><code>Acme::Id_Token</code></td>
 <td><code>acme_id_token</code></td>
 </tr>
 <tr>
-<td><code>https://idp.dolphin.sea/auth</code></td>
 <td><code>"Dolphin"</code></td>
-<td><code>Jans::Access_Token</code></td>
+<td><code>Dolphin::Access_Token</code></td>
 <td><code>dolphin_access_token</code></td>
 </tr>
 <tr>
-<td><code>https://idp.dolphin.sea/auth</code></td>
 <td><code>"Dolphin"</code></td>
 <td><code>Acme::DolphinToken</code></td>
 <td><code>dolphin_dolphintoken</code></td>
 </tr>
 <tr>
-<td><code>https://unknown.issuer.com/auth</code></td>
-<td><em>(not configured)</em></td>
-<td><code>Custom::Employee_Token</code></td>
-<td><code>unknown_issuer_com_employee_token</code></td>
-</tr>
-<tr>
-<td><code>https://login.microsoftonline.com/tenant</code></td>
 <td><code>"Microsoft"</code></td>
-<td><code>Jans::Id_Token</code></td>
+<td><code>Microsoft::Id_Token</code></td>
 <td><code>microsoft_id_token</code></td>
 </tr>
 </tbody>
 </table>
+<p>Each entity type belongs to one issuer, so a mapping names exactly one entry. A
+mapping with no entry gets no key: the token is dropped. A store where two
+token types derive the same key, or one derives <code>total_token_count</code>, does not
+load.</p>
 <p>Tokens are then accessible in Cedar policies as <code>context.tokens.{key}</code>, e.g.:</p>
 <div class="highlight"><pre><span></span><code>context.tokens.acme_access_token.hasTag(&quot;scope&quot;)
 </code></pre></div>
@@ -2388,8 +2369,8 @@ permit(
 </ul>
 <p><strong>Non-Deterministic Token Detection</strong>:</p>
 <ul>
-<li>System rejects requests with multiple tokens of the same type from the same issuer</li>
-<li>Example: Two "Jans::Access_Token" from "Acme" issuer will fail</li>
+<li>Only one token per mapping is used: the first accepted one</li>
+<li>Later tokens for the same mapping are dropped as <code>duplicate_token</code> and logged</li>
 <li>This prevents ambiguous policy evaluation</li>
 </ul>
 <h3 id="use-cases">Use Cases<a class="headerlink" href="#use-cases" title="Permanent link">#</a></h3>
