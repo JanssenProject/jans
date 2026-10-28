@@ -138,7 +138,7 @@ Run only when the file answered HTTP 200 and was not cut off at the size limit.
 | `content.parse` | | | The body is empty, is not valid JSON, is too deeply nested, or is not the expected shape (a JSON array for `assetlinks.json`, an object for `apple-app-site-association`). Nothing else is reported for that file. |
 | `content.android.package` | A statement lists the configured package. | | The package is not listed. |
 | `content.android.fingerprint` | Every configured fingerprint is listed. Comparison ignores case and colons. | The file lists fingerprints for the package that are not configured. The count is stated. | A configured fingerprint is missing, or an app has no fingerprint configured. |
-| `content.android.relation` | The statement carries `delegate_permission/common.get_login_creds`. | | It does not. |
+| `content.android.relation` | A statement for the package that lists each configured fingerprint carries `delegate_permission/common.get_login_creds`. | | No such statement does. The relation on a different statement than the one holding the fingerprints is not enough. |
 | `content.ios.app` | `webcredentials.apps` contains `TeamID.BundleID` (case-insensitive). | | It does not, or an app is configured without a team ID or bundle ID. |
 | `content.drift` | The file matches what Jans would generate from the configuration. | The deployed file differs, for example after a signing key rotation. Counts of missing and unexpected entries are stated. Order, whitespace and unrelated extra content are ignored. | Never. |
 | `content.ios.cdn` | | Always, for the Apple file, whether the other checks pass or fail. | Never. |
@@ -187,6 +187,9 @@ Fetching is the risky part of this feature, so it is deliberately narrow:
 
 A result is kept in memory, per server node, for `nativeReadinessCacheTtlSeconds` and never for less than 60
 seconds. A request served from the cache has `"fromCache": true` and makes no outbound request.
+
+The cache is keyed by the RP id only, so changing an RP's `androidApps` or `iosApps` does not invalidate it. After
+changing them, send `{"recheck": true}` to see a result for the new configuration.
 
 Sending `{"recheck": true}` (the "Recheck now" action) skips the cache, but not the rate limits. The limits are
 per server node, so in a cluster the installation-wide ceiling is the number of nodes times these values:

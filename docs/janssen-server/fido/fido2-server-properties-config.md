@@ -231,9 +231,10 @@ on.
 - `nativeReadinessAllowExternalFetch` is a second, separate opt-in. The server only contacts an RP's
   `/.well-known` files when both flags are `true`; with only `nativeReadinessEnabled` set it reports what is
   configured and does not fetch.
-- `nativeReadinessMaxResponseBytes` and `nativeReadinessTimeoutMs` bound each fetch. The server also applies a
-  fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value cannot make a fetch unbounded. A
-  value of zero or less falls back to the default.
+- `nativeReadinessMaxResponseBytes` (default 128 KiB) and `nativeReadinessTimeoutMs` (default 3 seconds) bound
+  each fetch. The server also applies a fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value
+  cannot make a fetch unbounded. A value of zero or less falls back to the default. The time limit covers the
+  HTTP fetch only; the name lookup happens before it starts and is bounded only by the server's DNS resolver.
 - `nativeReadinessCacheTtlSeconds` is how long a result is reused before the files are fetched again. It is
   never shorter than 60 seconds.
 
