@@ -103,10 +103,7 @@ public class UserResourceFilter extends BaseFilter {
             return;
         }
 
-        IntrospectionResponse introspectionResponse = null;
-        if (authUtil.isValidateUserInumInIntrospectionFlag() || !getExcludedClients().isEmpty()) {
-            introspectionResponse = getIntrospectionResponse(requestContext);
-        }
+        IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
 
         if (isRolePermissionExemptClient(introspectionResponse)) {
             return;
@@ -118,10 +115,13 @@ public class UserResourceFilter extends BaseFilter {
             throw new WebApplicationException("Header attribute `User-inum` missing",
                     Response.status(Response.Status.BAD_REQUEST).build());
         }
-        
-        // validate IntrospectionResponse
-        log.debug(" UserResourceFilter - validateDataInIntrospectionResponse ");
-        validateDataInIntrospectionResponse(introspectionResponse, userInum);
+
+        if (authUtil.isValidateUserInumInIntrospectionFlag()) {
+            // validate IntrospectionResponse
+            log.debug(" UserResourceFilter - validateDataInIntrospectionResponse ");
+            validateDataInIntrospectionResponse(introspectionResponse, userInum);
+
+        }
 
         // Find scopes as defined in resourceInfo
         Map<ProtectionScopeType, List<String>> resourceScopesByType = authUtil.getResourceScopesByType(resourceInfo);
@@ -179,10 +179,10 @@ public class UserResourceFilter extends BaseFilter {
         List<String> excludedClients = authUtil.getUserRolePermissionExcludedClients();
         return excludedClients == null ? Collections.emptyList() : excludedClients;
     }
-    
+
     private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
         log.info(" Verify DataInIntrospectionResponse");
-        
+
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
             return;
