@@ -96,8 +96,9 @@ The following diagram is a high-level picture of the Cedarling components:
 
 ![Cedarling components](../assets/cedarling/cedarling-components.png)
 
-* **Interfaces** perform the actions described above: initialization, authorization,
-  pushing context data, and reading logs, metrics, and policy annotations.
+* **Interfaces** provide initialization, authorization, pushing context data, and
+  reading logs, metrics, and policy annotations. See the
+  [interfaces reference](./reference/cedarling-interfaces.md).
 * **Policy Store Manager** loads the Policy Store from a local file, a URI, or the Lock
   Server, verifies its signature, and refreshes it. It provides the schema, the
   policies, and the list of trusted issuers.

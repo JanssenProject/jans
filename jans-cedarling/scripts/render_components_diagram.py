@@ -23,6 +23,8 @@ from html import escape
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_OUTPUT = os.path.join(REPO_ROOT, "docs/assets/cedarling/cedarling-components.png")
 
+CHROME_TIMEOUT_SECONDS = 60
+
 WIDTH = 1400
 HEIGHT = 790
 FONT = "'Ubuntu Sans', Inter, 'Segoe UI', 'DejaVu Sans', sans-serif"
@@ -256,7 +258,17 @@ def screenshot(svg, output, scale, chrome):
             f"--screenshot={os.path.abspath(output)}",
             f"file://{page}",
         ]
-        return subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode
+        try:
+            result = subprocess.run(
+                command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                text=True, timeout=CHROME_TIMEOUT_SECONDS,
+            )
+        except subprocess.TimeoutExpired:
+            print(f"Chrome did not finish within {CHROME_TIMEOUT_SECONDS}s", file=sys.stderr)
+            return 1
+        if result.returncode != 0:
+            print(result.stderr, file=sys.stderr)
+        return result.returncode
 
 
 def main():
