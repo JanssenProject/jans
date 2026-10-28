@@ -113,7 +113,8 @@ The following diagram is a high-level picture of the Cedarling components:
   returns the decision and diagnostics.
 * **Observability** records decision and system logs and metrics. With
   [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
-  record of each decision as evidence. In enterprise deployments, the optional
+  record, as evidence, of each decision whose request carries a
+  [TRACE context](./reference/cedarling-authz.md#authorize-options-and-trace-context). In enterprise deployments, the optional
   **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence
   for central storage, and can also provide the Policy Store.
 

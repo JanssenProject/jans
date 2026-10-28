@@ -240,7 +240,7 @@ def render_svg():
 def find_chrome():
     configured = os.environ.get("CHROME")
     if configured:
-        return configured
+        return shutil.which(configured)
     for name in ("google-chrome", "chromium", "chromium-browser", "chrome"):
         path = shutil.which(name)
         if path:
