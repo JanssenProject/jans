@@ -99,12 +99,12 @@ EDGES = [
     {"points": [(610, 518), (720, 518)], "label": "context.data", "at": (665, 496)},
     {"points": [(845, 566), (845, 620)], "label": "entities, context", "at": (845, 593)},
     {"points": [(720, 658), (610, 658)], "label": "decision", "at": (665, 636)},
-    {"points": [(290, 658), (380, 658)]},
+    {"points": [(380, 658), (290, 658)]},
     {"points": [(495, 696), (495, 752), (1215, 752), (1215, 714)],
      "label": "logs, telemetry, evidence", "at": (860, 752), "optional": True},
     {"points": [(1330, 658), (1378, 658), (1378, 62), (900, 62), (900, 140)],
      "label": "policy store", "at": (1150, 62), "optional": True},
-    {"points": [(60, 668), (22, 668), (22, 50), (560, 50), (560, 140)],
+    {"points": [(560, 140), (560, 50), (22, 50), (22, 668), (60, 668)],
      "label": "policy annotations", "at": (290, 50), "dotted": True},
 ]
 
@@ -263,7 +263,7 @@ def screenshot(svg, output, scale, chrome):
         try:
             result = subprocess.run(
                 command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-                text=True, timeout=CHROME_TIMEOUT_SECONDS,
+                text=True, errors="replace", timeout=CHROME_TIMEOUT_SECONDS,
             )
         except subprocess.TimeoutExpired:
             print(f"Chrome did not finish within {CHROME_TIMEOUT_SECONDS}s", file=sys.stderr)
