@@ -8,7 +8,9 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -164,17 +166,30 @@ public class AdminUISessionService {
     }
 
     /**
-     * Removes all AdminUISession entries whose expirationDate is earlier than the current time.
-     * This method queries sessions under the service's session base DN and deletes any persisted
-     * AdminUISession whose expiration date has already passed.
+    * Removes all AdminUISession entries whose session expiration date or stored user-info JWT
+    * expiration date is earlier than the current time.
      */
     public void removeAllExpiredSessions() {
         final Filter filter = Filter.createPresenceFilter(SID);
         List<AdminUISession> adminUISessions = persistenceEntryManager.findEntries(SESSION_DN, AdminUISession.class, filter);
         Date currentDate = new Date();
         adminUISessions.stream().filter(ele ->
-                        ((ele.getExpirationDate().getTime() - currentDate.getTime()) < 0))
+                        (ele.getExpirationDate() != null && ele.getExpirationDate().before(currentDate))
+                                || isUjwtExpired(ele.getUjwt(), currentDate))
                 .forEach(e -> persistenceEntryManager.remove(e));
+    }
+
+    public boolean isUjwtExpired(String ujwt, Date currentDate) {
+        if (Strings.isNullOrEmpty(ujwt)) {
+            return false;
+        }
+        try {
+            Date expirationDate = Jwt.parse(ujwt).getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            return expirationDate != null && expirationDate.before(currentDate);
+        } catch (InvalidJwtException e) {
+            logger.debug("Unable to parse user-info JWT while removing expired sessions", e);
+            return false;
+        }
     }
 
     /**
@@ -261,6 +276,69 @@ public class AdminUISessionService {
     }
 
     /**
+     * Renews the stored user-info JWT (ujwt) of an Admin UI session using its stored, encrypted refresh token.
+     * <p>
+     * Exchanges the refresh token for a new access token against the Admin UI web client's token endpoint,
+     * then calls the userinfo endpoint with that access token to obtain a fresh ujwt, and persists both the
+     * new ujwt (and, if rotated, the new refresh token) on the session record.
+     *
+     * @param adminUISession   the session whose ujwt should be renewed; must have a stored encrypted refresh token
+     * @param auiConfiguration configuration holding the Admin UI web client id/secret, token endpoint and userinfo endpoint
+     * @return the updated, persisted AdminUISession, or {@code null} if the ujwt could not be renewed
+     */
+    public AdminUISession refreshUserInfoJwt(AdminUISession adminUISession, AUIConfiguration auiConfiguration) {
+        try {
+            String encryptedRefreshToken = adminUISession.getEncryptedRefreshToken();
+            if (Strings.isNullOrEmpty(encryptedRefreshToken)) {
+                logger.warn("No refresh token stored for session {}, cannot renew user-info JWT.", adminUISession.getSessionId());
+                return null;
+            }
+            String refreshToken = encryptionService.decrypt(encryptedRefreshToken);
+
+            TokenRequest tokenRequest = new TokenRequest(GrantType.REFRESH_TOKEN);
+            tokenRequest.setGrantType(GrantType.REFRESH_TOKEN);
+            tokenRequest.setAuthUsername(auiConfiguration.getAuiWebServerClientId());
+            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuiWebServerClientSecret()));
+            tokenRequest.setRefreshToken(refreshToken);
+            tokenRequest.setRedirectUri(auiConfiguration.getAuiWebServerRedirectUrl());
+
+            Map<String, Object> tokenResponse = getToken(tokenRequest, auiConfiguration.getAuiWebServerTokenEndpoint(), null);
+            String accessToken = tokenResponse == null ? null : (String) tokenResponse.get("access_token");
+            if (Strings.isNullOrEmpty(accessToken)) {
+                logger.error("Failed to renew access token using refresh token for session {}", adminUISession.getSessionId());
+                return null;
+            }
+
+            Map<String, String> userInfoHeaders = new HashMap<>();
+            userInfoHeaders.put("Authorization", "Bearer " + accessToken);
+            userInfoHeaders.put("Accept", "application/jwt");
+            HttpServiceResponse userInfoResponse = httpService.executeGet(auiConfiguration.getAuiWebServerUserInfoEndpoint(), userInfoHeaders);
+            String newUjwt = null;
+            if (userInfoResponse != null && userInfoResponse.getHttpResponse() != null
+                    && userInfoResponse.getHttpResponse().getStatusLine() != null
+                    && userInfoResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                newUjwt = httpService.getContent(userInfoResponse.getHttpResponse().getEntity());
+            }
+            if (Strings.isNullOrEmpty(newUjwt)) {
+                logger.error("Failed to obtain a renewed user-info JWT for session {}", adminUISession.getSessionId());
+                return null;
+            }
+
+            adminUISession.setUjwt(newUjwt);
+            String rotatedRefreshToken = tokenResponse.get("refresh_token") == null ? null : tokenResponse.get("refresh_token").toString();
+            if (!Strings.isNullOrEmpty(rotatedRefreshToken)) {
+                adminUISession.setEncryptedRefreshToken(encryptionService.encrypt(rotatedRefreshToken));
+            }
+            adminUISession.setLastUpdated(new Date());
+            persistenceEntryManager.merge(adminUISession);
+            return adminUISession;
+        } catch (Exception e) {
+            logger.error("Error while renewing user-info JWT using refresh token for session {}", adminUISession.getSessionId(), e);
+            return null;
+        }
+    }
+
+    /**
      * Exchange token request parameters with the authorization server and return parsed token response parameters.
      *
      * @param tokenRequest  token request details (grant type, client credentials, redirect URI; may include authorization code and PKCE verifier)
@@ -283,6 +361,10 @@ public class AdminUISessionService {
 
             if (!Strings.isNullOrEmpty(userInfoJwt)) {
                 body.put("ujwt", userInfoJwt);
+            }
+
+            if (!Strings.isNullOrEmpty(tokenRequest.getRefreshToken())) {
+                body.put("refresh_token", tokenRequest.getRefreshToken());
             }
 
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {

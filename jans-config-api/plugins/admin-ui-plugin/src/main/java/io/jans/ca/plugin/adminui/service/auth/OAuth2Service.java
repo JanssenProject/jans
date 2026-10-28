@@ -152,11 +152,13 @@ public class OAuth2Service extends BaseService {
     /**
      * Create and persist an AdminUISession for the given sessionId using claims extracted from the provided user-info JWT.
      *
-     * @param sessionId the identifier for the admin UI session; used as the session's inum and to build its DN
-     * @param ujwt      the user-info JWT string containing an "inum" claim that identifies the user
+     * @param sessionId    the identifier for the admin UI session; used as the session's inum and to build its DN
+     * @param ujwt         the user-info JWT string containing an "inum" claim that identifies the user
+     * @param refreshToken the OAuth2 refresh token associated with the ujwt, if any; stored encrypted so that the
+     *                     ujwt can be renewed once it expires
      * @throws ApplicationException if the "inum" claim is missing from the provided JWT
      */
-    public void setAdminUISession(String sessionId, String ujwt) throws ApplicationException {
+    public void setAdminUISession(String sessionId, String ujwt, String refreshToken) throws ApplicationException {
         AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
         Date currentDate = new Date();
 
@@ -175,6 +177,13 @@ public class OAuth2Service extends BaseService {
         adminUISession.setDn(getDnForSession(sessionId));
         adminUISession.setSessionId(sessionId);
         adminUISession.setUjwt(ujwt);
+        if (!Strings.isNullOrEmpty(refreshToken)) {
+            try {
+                adminUISession.setEncryptedRefreshToken(encryptionService.encrypt(refreshToken));
+            } catch (Exception e) {
+                throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in encrypting refresh token.");
+            }
+        }
         adminUISession.setJansUsrDN(getDnForUser((String) claims.get("inum")));
         adminUISession.setCreationDate(currentDate);
         adminUISession.setLastUpdated(currentDate);

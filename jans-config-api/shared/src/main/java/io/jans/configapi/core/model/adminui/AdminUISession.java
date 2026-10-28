@@ -22,6 +22,8 @@ public class AdminUISession {
     private String jansUsrDN;
     @AttributeName(name = "jansUjwt")
     private String ujwt;
+    @AttributeName(name = "jansRefreshTkn")
+    private String encryptedRefreshToken;
     @AttributeName(name = "creationDate")
     private Date creationDate = new Date();
     @AttributeName(name = "exp")
@@ -99,6 +101,25 @@ public class AdminUISession {
      */
     public void setUjwt(String ujwt) {
         this.ujwt = ujwt;
+    }
+
+    /**
+     * Gets the encrypted refresh token associated with this admin UI session, used to
+     * obtain a new user-info JWT once the current one expires.
+     *
+     * @return the encrypted refresh token, or {@code null} if not set
+     */
+    public String getEncryptedRefreshToken() {
+        return encryptedRefreshToken;
+    }
+
+    /**
+     * Sets the encrypted refresh token associated with this admin UI session.
+     *
+     * @param encryptedRefreshToken the refresh token, already encrypted, to store with the session
+     */
+    public void setEncryptedRefreshToken(String encryptedRefreshToken) {
+        this.encryptedRefreshToken = encryptedRefreshToken;
     }
 
     /**

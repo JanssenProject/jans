@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
     private final Object cacheLock = new Object();
     private final Object configLock = new Object();
 
+    private static final String USER_INFO_JWT_HEADER = "User-Info-JWT";
     private static final String ADMIN_UI_SESSION_ID = "admin_ui_session_id";
     private static final String AUTHENTICATION_SCHEME = "Bearer";
     private static final String EXCLUDED_PATH_SESSION = "/app/admin-ui/oauth2/session";
@@ -89,6 +91,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 log.debug("Skipping AdminUICookieFilter due to presence of authorization token in header");
                 return;
             }
+            if (cookies.containsKey(ADMIN_UI_SESSION_ID)) {
+                initializeAdminUIConfiguration();
+            }
+
             Optional<String> ujwtOptional = fetchUJWTFromAdminUISession(cookies);
             //For request from Admin UI, return 403 error if Admin UI session is not present on server
             if (cookies.containsKey(ADMIN_UI_SESSION_ID)
@@ -101,7 +107,6 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 return;
             }
 
-            initializeAdminUIConfiguration();
             if (auiConfiguration == null) {
                 log.warn("Admin UI configuration could not be initialized. Skipping token injection.");
                 return;
@@ -115,6 +120,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 return;
             }
             requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
+            requestContext.getHeaders().putSingle(USER_INFO_JWT_HEADER, ujwtOptional.get());
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -253,6 +259,16 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
         log.debug("Admin UI session exist in persistence.");
         configApiSessionService.updateSessionExpiryDate(adminUISession);
         String ujwtString = adminUISession.getUjwt();
+
+        if (auiConfiguration != null && configApiSessionService.isUjwtExpired(ujwtString, new Date())) {
+            log.debug("User-info JWT expired for Admin UI session. Attempting renewal via stored refresh token.");
+            AdminUISession renewedSession = configApiSessionService.refreshUserInfoJwt(adminUISession, auiConfiguration);
+            if (renewedSession != null) {
+                ujwtString = renewedSession.getUjwt();
+            } else {
+                log.warn("Unable to renew user-info JWT for Admin UI session using refresh token.");
+            }
+        }
         return Optional.ofNullable(ujwtString);
     }
 
