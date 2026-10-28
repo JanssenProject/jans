@@ -174,7 +174,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return readScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/read-all")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals(ApiAccessConstants.SUPER_ADMIN_READ_ACCESS)).findFirst().orElse(null);
     }
 
     public String getSuperAdminWriteScope() {
@@ -182,7 +182,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return writeScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/write-all")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals(ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS)).findFirst().orElse(null);
     }
 
     public String getSuperAdminDeleteScope() {
@@ -190,7 +190,7 @@ public class AuthUtil {
         if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
             return deleteScope;
         }
-        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/delete-all")).findFirst().orElse(null);
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals(ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS)).findFirst().orElse(null);
     }
 
     public boolean hasSuperAdminReadScope(List<String> userScopes) {
