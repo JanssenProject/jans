@@ -50,6 +50,7 @@ public class Fido2ReadinessService {
     private static final String RETRY_AFTER = "Retry-After";
     private static final String FIDO2_RP_BASE_URL = "/jans-fido2/restv1" + Constants.RP + "/";
     private static final String READINESS = "/readiness";
+    private static final String ASSOCIATION = "/association/";
     private static final String BEARER = "Bearer ";
     private static final String USER_INUM = "inum";
     private static final String UNKNOWN = "unknown";
@@ -110,8 +111,47 @@ public class Fido2ReadinessService {
         String url = getReadinessUrl(rpConfigId);
         log.info("Fido2 native app readiness check, recheck:{}", recheck);
 
-        HttpServiceResponse serviceResponse = fido2Util.executePost(url, buildHeaders(token, principalOf(token)),
-                "{\"recheck\":" + recheck + "}");
+        return outcomeOf(fido2Util.executePost(url, buildHeaders(token, principalOf(token)),
+                "{\"recheck\":" + recheck + "}"));
+    }
+
+    /** The two association files a relying party's apps are described in, as the FIDO2 server exports them. */
+    public enum AssociationFile {
+        ASSETLINKS("assetlinks.json"), APPLE_APP_SITE_ASSOCIATION("apple-app-site-association");
+
+        private final String fileName;
+
+        AssociationFile(String fileName) {
+            this.fileName = fileName;
+        }
+
+        public String getFileName() {
+            return fileName;
+        }
+    }
+
+    public String getAssociationFileUrl(String rpConfigId, AssociationFile file) {
+        return fido2Util.getIssuer() + FIDO2_RP_BASE_URL + encodeSegment(rpConfigId) + ASSOCIATION + file.getFileName();
+    }
+
+    /**
+     * Fetches one association file of a configured relying party from the FIDO2 server, to be deployed on the
+     * RP-ID host. Same trust model as {@link #check}: the id only selects a configured entry.
+     *
+     * @return the FIDO2 server's status and the file as JSON; 404 when the RP is not configured or has no app
+     *         of that platform
+     */
+    public Outcome export(String rpConfigId, AssociationFile file, String token) throws JsonProcessingException {
+        if (StringUtils.isBlank(rpConfigId)) {
+            throw new WebApplicationException("The relying party id is required",
+                    Response.Status.BAD_REQUEST.getStatusCode());
+        }
+        log.info("Fido2 association file export, file:{}", file.getFileName());
+        return outcomeOf(fido2Util.executeGet(getAssociationFileUrl(rpConfigId, file),
+                buildHeaders(token, principalOf(token)), null));
+    }
+
+    private Outcome outcomeOf(HttpServiceResponse serviceResponse) throws JsonProcessingException {
         HttpResponse httpResponse = serviceResponse == null ? null : serviceResponse.getHttpResponse();
         if (httpResponse == null || httpResponse.getStatusLine() == null) {
             throw new WebApplicationException("Error while running the Fido2 native app readiness check",

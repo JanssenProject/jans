@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.fido2.rest.Fido2ReadinessResource;
+import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.AssociationFile;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -74,6 +75,36 @@ public class Fido2ReadinessResourceTest {
         assertTrue(Arrays.asList(api.superScopes()).contains(Constants.FIDO2_ADMIN_ACCESS));
         assertTrue(Arrays.asList(api.superScopes()).contains(ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS));
         assertEquals(api.groupScopes().length, 0, "a read scope must not be enough");
+    }
+
+    @Test
+    public void associationExports_needOnlyTheReadScope_withAdminAndSuperReadAsSuperScopes() throws Exception {
+        for (String name : new String[] { "getAssetLinks", "getAppleAppSiteAssociation" }) {
+            ProtectedApi api = Fido2ReadinessResource.class.getMethod(name, String.class, String.class)
+                    .getAnnotation(ProtectedApi.class);
+
+            assertEquals(Arrays.asList(api.scopes()), Arrays.asList(Constants.FIDO2_CONFIG_READ_ACCESS));
+            assertTrue(Arrays.asList(api.superScopes()).contains(Constants.FIDO2_ADMIN_ACCESS));
+            assertTrue(Arrays.asList(api.superScopes()).contains(ApiAccessConstants.SUPER_ADMIN_READ_ACCESS));
+        }
+    }
+
+    @Test
+    public void associationExport_isADownload_with404PassedOn_andOtherStatusesAn500() throws Exception {
+        when(service.export("example.com", AssociationFile.ASSETLINKS, "Bearer abc"))
+                .thenReturn(outcome(200, "[]", null));
+        when(service.export("example.com", AssociationFile.APPLE_APP_SITE_ASSOCIATION, "Bearer abc"))
+                .thenReturn(outcome(404, null, null));
+        when(service.export("bad.example", AssociationFile.ASSETLINKS, "Bearer abc"))
+                .thenReturn(outcome(502, "{\"secret\":1}", null));
+
+        Response ok = resource.getAssetLinks("example.com", "Bearer abc");
+        assertEquals(ok.getStatus(), 200);
+        assertEquals(ok.getHeaderString("Content-Disposition"), "attachment; filename=\"assetlinks.json\"");
+        assertEquals(resource.getAppleAppSiteAssociation("example.com", "Bearer abc").getStatus(), 404);
+        WebApplicationException e = expectThrows(WebApplicationException.class,
+                () -> resource.getAssetLinks("bad.example", "Bearer abc"));
+        assertEquals(e.getResponse().getStatus(), 500);
     }
 
     @Test
