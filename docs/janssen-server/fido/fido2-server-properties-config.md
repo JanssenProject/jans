@@ -217,6 +217,39 @@ ceremony. When an origin is rejected, the server log says which RPs were conside
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.
 
+To check that the `assetlinks.json` and `apple-app-site-association` files an RP has deployed match these
+entries, see [Native App Readiness](native-app-readiness.md).
+
+### Native app readiness
+
+The `nativeReadiness*` properties control a check that compares the `assetlinks.json` and
+`apple-app-site-association` files an RP has deployed with the `androidApps` and `iosApps` recorded under
+`rp` (see above). Everything is off by default, so an upgrade changes nothing until an administrator turns it
+on.
+
+- `nativeReadinessEnabled` is the master switch. While it is `false` the endpoint does no work.
+- `nativeReadinessAllowExternalFetch` is a second, separate opt-in. The server only contacts an RP's
+  `/.well-known` files when both flags are `true`; with only `nativeReadinessEnabled` set it reports what is
+  configured and does not fetch.
+- `nativeReadinessMaxResponseBytes` (default 128 KiB) and `nativeReadinessTimeoutMs` (default 3 seconds) bound
+  each fetch. The server also applies a fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value
+  cannot make a fetch unbounded. A value of zero or less falls back to the default. The time limit covers the
+  HTTP fetch only; the name lookup happens before it starts and is bounded only by the server's DNS resolver.
+- `nativeReadinessCacheTtlSeconds` is how long a result is reused before the files are fetched again. It is
+  never shorter than 60 seconds.
+
+The check is run with `POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, where `rpConfigId` is the RP `id`
+exactly as configured, URL-encoded. The body is empty or `{"recheck": true}`, which skips the cached result.
+The endpoint cannot be pointed at any other host: only the stored RP ID is ever fetched, and it must be a
+public host name. Like the other diagnostic endpoints, it relies on the infrastructure or the Config API
+plugin for authentication.
+
+The response lists, for `android` and `ios`, each check with a `status` of `pass`, `warn` or `fail` and a short
+`reason`, together with `checkedAt`, `fromCache` and `nextRecheckAllowedAt`. It never contains the content of
+the fetched files. A request that would exceed a rate limit gets HTTP 429 with a `Retry-After` header and
+causes no fetch. The limits apply per server node: one fetch per RP per minute, 20 files per minute in total,
+and 3 checks at a time. Each executed check is written to the server log as a `native-readiness-audit` line.
+
 ### Advertised algorithms
 
 The algorithms offered to the authenticator in `pubKeyCredParams` are not taken from `enabledFidoAlgorithms`
