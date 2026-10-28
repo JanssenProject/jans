@@ -75,9 +75,9 @@ NODES = {
                "title": "Policy store source", "desc": ["local file or URI"]},
     "issuers": {"group": "external", "box": (1100, 290, 230, 96),
                 "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "status list"]},
-    "lock": {"group": "external", "box": (1100, 588, 230, 140), "optional": True,
+    "lock": {"group": "external", "box": (1100, 602, 230, 112),
              "title": "Lock Server", "role": "Evidence Collector",
-             "desc": ["optional", "policy store, logs,", "health, telemetry"]},
+             "desc": ["policy store, logs,", "health, telemetry"]},
 }
 
 # Each edge is a polyline; the last point carries the arrowhead. Edges listed
@@ -100,7 +100,7 @@ EDGES = [
     {"points": [(845, 566), (845, 620)], "label": "entities, context", "at": (845, 593)},
     {"points": [(720, 658), (610, 658)], "label": "decision", "at": (665, 636)},
     {"points": [(290, 658), (380, 658)]},
-    {"points": [(495, 696), (495, 752), (1215, 752), (1215, 728)],
+    {"points": [(495, 696), (495, 752), (1215, 752), (1215, 714)],
      "label": "logs, telemetry, evidence", "at": (860, 752), "optional": True},
     {"points": [(1330, 658), (1378, 658), (1378, 62), (900, 62), (900, 140)],
      "label": "policy store", "at": (1150, 62), "optional": True},
@@ -146,21 +146,16 @@ def render_node(node):
     style = GROUPS[node["group"]]
     x, y, w, h = node["box"]
     stroke_width = 2.5 if node.get("emphasis") else 1.6
-    dash = ' stroke-dasharray="7 5"' if node.get("optional") else ""
     fill = "#14365e" if node.get("emphasis") else style["node"]
     parts = [
         f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="14" fill="{fill}" '
-        f'stroke="{style["accent"]}" stroke-width="{stroke_width}"{dash} filter="url(#shadow)"/>'
+        f'stroke="{style["accent"]}" stroke-width="{stroke_width}" filter="url(#shadow)"/>'
     ]
 
     lines = []
     if "role" in node:
         lines.append((node["role"], "role", style["accent"]))
-    for i, line in enumerate(node["desc"]):
-        if node.get("optional") and i == 0:
-            lines.append((line, "desc tag", style["accent"]))
-        else:
-            lines.append((line, "desc", DESC_COLOR))
+    lines += [(line, "desc", DESC_COLOR) for line in node["desc"]]
 
     title_height, line_height = 26, 21
     block = title_height + line_height * len(lines)
@@ -229,8 +224,6 @@ def render_svg():
         ".title { font-size: 20px; font-weight: 700; }"
         ".desc { font-size: 15.5px; }"
         ".role { font-size: 17px; font-weight: 700; }"
-        ".tag { font-size: 13px; font-weight: 700; letter-spacing: 0.12em;"
-        " text-transform: uppercase; }"
         ".edge { font-size: 13.5px; font-weight: 600; }"
         "</style>"
     )
