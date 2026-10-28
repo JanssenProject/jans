@@ -190,7 +190,7 @@ public class UserResource extends BaseResource {
         } catch (Exception ex) {
             handleException(ex, "FETCH_DATA_ERROR");
         }
-        
+
         return Response.ok(customUser).build();
     }
 
@@ -252,7 +252,7 @@ public class UserResource extends BaseResource {
         } catch (Exception ex) {
             handleException(ex, "CREATE_USER_ERROR");
         }
-        
+
         return Response.status(Response.Status.CREATED).entity(customUser).build();
     }
 
@@ -331,7 +331,7 @@ public class UserResource extends BaseResource {
         } catch (Exception ex) {
             handleException(ex, "UPDATE_USER_ERROR");
         }
-        
+
         return Response.ok(customUser).build();
 
     }
@@ -394,12 +394,16 @@ public class UserResource extends BaseResource {
 
             // validate user permission
             String patchUserInum = existingUser.getAttribute("inum");
-            User storedUser = userMgmtSrv.getUserBasedOnInum(patchUserInum);
-            checkResourceNotNull(storedUser, USER);
-            if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(existingUser.getDn())) {
-                throwBadRequestException("UPDATE_USER_PATCH_ERROR", "User DN does not match user inum");
+
+            if (StringUtils.isNotBlank(patchUserInum)) {
+                User storedUser = userMgmtSrv.getUserBasedOnInum(patchUserInum);
+                checkResourceNotNull(storedUser, USER);
+                if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(existingUser.getDn())) {
+                    throwBadRequestException("UPDATE_USER_PATCH_ERROR", "User DN does not match user inum");
+                }
             }
-            validateUserPermission(storedUser.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
+
+            validateUserPermission(inum, ApiConstants.WRITE_REQUEST);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);
@@ -419,7 +423,7 @@ public class UserResource extends BaseResource {
         } catch (Exception ex) {
             handleException(ex, "UPDATE_USER_PATCH_ERROR");
         }
-        
+
         return Response.ok(customUser).build();
     }
 
@@ -730,7 +734,9 @@ public class UserResource extends BaseResource {
 
         // Fetch logged in User details which for permission validation
         String loggedInUserInum = authUtil.getUserInum(getHttpHeaders());
-        logger.info(" UserResource - Header loggedInUserInum:{}", loggedInUserInum);
+        if (logger.isInfoEnabled()) {
+            logger.info(" UserResource - Header loggedInUserInum:{}", escapeLog(loggedInUserInum));
+        }
         if (StringUtils.isBlank(loggedInUserInum)) {
             logger.info("Logged in User details missing");
         }
@@ -791,8 +797,10 @@ public class UserResource extends BaseResource {
 
     private boolean isAdminUser(String loggedInUserInum, User loggedInUser, String httpRequestMethod)
             throws ApiApplicationException {
-        logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{} httpRequestMethod:{}", loggedInUserInum,
-                loggedInUser, httpRequestMethod);
+        if (logger.isInfoEnabled()) {
+            logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{} httpRequestMethod:{}",
+                    escapeLog(loggedInUserInum), loggedInUser, httpRequestMethod);
+        }
         boolean isAdmin = false;
 
         if (loggedInUser == null) {
@@ -824,8 +832,8 @@ public class UserResource extends BaseResource {
                     escapeLog(loggedInUserInum), loggedInUserRoleList, isAdmin);
         }
         return isAdmin;
-    }    
-    
+    }
+
     private void handleException(Exception ex, String errorCode) {
         if (ex instanceof WebApplicationException) {
             throw (WebApplicationException) ex;

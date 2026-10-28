@@ -63,10 +63,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -199,21 +197,25 @@ public class AuthUtil {
         if (userScopes == null || userScopes.isEmpty()) {
             return false;
         }
-        return userScopes.contains(getSuperAdminReadScope());
+        
+        String readScope = getSuperAdminReadScope();
+        return readScope != null && userScopes.contains(readScope);
     }
 
     public boolean hasSuperAdminWriteScope(List<String> userScopes) {
         if (userScopes == null || userScopes.isEmpty()) {
             return false;
         }
-        return userScopes.contains(getSuperAdminWriteScope());
+        String writeScope = getSuperAdminWriteScope();
+        return writeScope != null && userScopes.contains(writeScope);
     }
 
     public boolean hasSuperAdminDeleteScope(List<String> userScopes) {
         if (userScopes == null || userScopes.isEmpty()) {
             return false;
         }
-        return userScopes.contains(getSuperAdminDeleteScope());
+        String deleteScope = getSuperAdminDeleteScope();
+        return deleteScope != null && userScopes.contains(deleteScope);
     }
     
     public boolean hasSuperAdminScope(List<String> userScopes, final String httpRequestMethod) {
