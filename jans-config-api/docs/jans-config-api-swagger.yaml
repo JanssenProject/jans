@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
-          type: boolean
-        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16685,8 +16685,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16696,6 +16694,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -16827,6 +16827,8 @@ components:
         maxItemsLoggedInCollections:
           type: integer
           format: int32
+        disableTCHV:
+          type: boolean
         pageMismatchErrorPage:
           type: string
         interruptionErrorPage:
@@ -16976,14 +16978,6 @@ components:
       properties:
         enabled:
           type: boolean
-        skipTemplateViews:
-          type: boolean
-        skipInstructionFrequencies:
-          type: boolean
-        excludedFlows:
-          type: array
-          items:
-            type: string
     TrustedIssuerConfig:
       type: object
       properties:
@@ -17667,7 +17661,16 @@ components:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
             changes. Default value `false`.
-        userRolePermissionValidationEnabled:
+        roleAttributeName:
+          type: string
+          description: DB attribute name for storing user role
+        adminRoleNames:
+          type: array
+          description: Role names corresponding to `admin` role
+          items:
+            type: string
+            description: Role names corresponding to `admin` role
+        userPermissionValidationEnabled:
           type: boolean
           description: Flag to enable/disable User Role-Permission mapping check while
             authentication. Default value `true`.
@@ -17675,7 +17678,7 @@ components:
           type: boolean
           description: Flag to enable/disable validating `User-inum` in Introspection
             response. Default value `true`.
-        fetchUserRoleInIntrospectionFlag:
+        fetchUserDataInIntrospectionFlag:
           type: boolean
           description: Flag to enable/disable to get user-role in Introspection response.
             Default value `true`.
@@ -17765,6 +17768,12 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration.
+        superAdminScopes:
+          type: array
+          description: List of Super Admin oAuth scopes.
+          items:
+            type: string
+            description: List of Super Admin oAuth scopes.
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.
@@ -18727,10 +18736,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18741,6 +18746,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:
