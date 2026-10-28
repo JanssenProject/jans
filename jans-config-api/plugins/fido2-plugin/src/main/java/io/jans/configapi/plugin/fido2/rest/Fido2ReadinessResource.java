@@ -12,6 +12,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService;
+import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.AssociationFile;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -29,6 +30,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -104,6 +106,85 @@ public class Fido2ReadinessResource extends BaseResource {
             throw ex;
         } catch (Exception ex) {
             logger.error(ERR_MSG, ex);
+            throwInternalServerException(ex);
+        }
+        return null;
+    }
+
+    /**
+     * The {@code assetlinks.json} of one configured relying party, to be deployed on the RP-ID host.
+     *
+     * @param rpConfigId the RP id exactly as configured, URL-encoded
+     * @param token      the caller's Authorization header, forwarded to the FIDO2 server
+     * @return the file as a download, or 404 when the RP is not configured or has no Android app
+     */
+    @Operation(summary = "Export the assetlinks.json of a relying party.", description = "Generates the Android assetlinks.json from the relying party's configured Android apps, for deployment at https://<rp-id>/.well-known/assetlinks.json.", operationId = "get-fido2-assetlinks", tags = {
+            "Fido2 - Native Readiness" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "No relying party is configured with this id, or it has no Android app"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(Constants.RP_CONFIG_ID_ASSETLINKS)
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getAssetLinks(@PathParam("rpConfigId") String rpConfigId,
+            @HeaderParam("Authorization") String token) {
+        return exportAssociationFile(rpConfigId, AssociationFile.ASSETLINKS, token);
+    }
+
+    /**
+     * The {@code apple-app-site-association} of one configured relying party, to be deployed on the RP-ID host.
+     *
+     * @param rpConfigId the RP id exactly as configured, URL-encoded
+     * @param token      the caller's Authorization header, forwarded to the FIDO2 server
+     * @return the file as a download, or 404 when the RP is not configured or has no iOS app
+     */
+    @Operation(summary = "Export the apple-app-site-association of a relying party.", description = "Generates the Apple association file from the relying party's configured iOS apps, for deployment at https://<rp-id>/.well-known/apple-app-site-association (no .json extension).", operationId = "get-fido2-apple-app-site-association", tags = {
+            "Fido2 - Native Readiness" }, security = {
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { Constants.FIDO2_ADMIN_ACCESS }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "No relying party is configured with this id, or it has no iOS app"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @Path(Constants.RP_CONFIG_ID_AASA)
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, superScopes = { Constants.FIDO2_ADMIN_ACCESS,
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getAppleAppSiteAssociation(@PathParam("rpConfigId") String rpConfigId,
+            @HeaderParam("Authorization") String token) {
+        return exportAssociationFile(rpConfigId, AssociationFile.APPLE_APP_SITE_ASSOCIATION, token);
+    }
+
+    /** 200 and 404 are passed on as the FIDO2 server sent them; anything else is a 500 here. */
+    private Response exportAssociationFile(String rpConfigId, AssociationFile file, String token) {
+        logger.info("Fido2 association file export requested, file:{}", file.getFileName());
+        try {
+            Outcome outcome = fido2ReadinessService.export(rpConfigId, file, token);
+            int status = outcome.getStatus();
+            if (status != Response.Status.OK.getStatusCode() && status != Response.Status.NOT_FOUND.getStatusCode()) {
+                logger.error("Fido2 association file export failed upstream with status:{}", status);
+                throwInternalServerException("The FIDO2 server could not export the association file");
+            }
+            Response.ResponseBuilder builder = Response.status(status);
+            if (status == Response.Status.OK.getStatusCode() && outcome.getBody() != null) {
+                builder.entity(outcome.getBody()).header("Content-Disposition",
+                        "attachment; filename=\"" + file.getFileName() + "\"");
+            }
+            return builder.build();
+        } catch (WebApplicationException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            logger.error("Exception while exporting the Fido2 association file is - ", ex);
             throwInternalServerException(ex);
         }
         return null;

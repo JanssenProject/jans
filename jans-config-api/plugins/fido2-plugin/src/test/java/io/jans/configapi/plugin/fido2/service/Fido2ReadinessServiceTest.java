@@ -24,6 +24,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.AssociationFile;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
@@ -176,6 +177,35 @@ public class Fido2ReadinessServiceTest {
         assertNull(service.principalOf("Bearer abc"));
         assertNull(service.principalOf(null));
         assertEquals(Fido2ReadinessService.sanitize(service.principalOf("Bearer abc")), "unknown");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void associationFile_isFetchedFromTheEncodedRpSegment_withTheCallerToken() throws Exception {
+        when(fido2Util.executeGet(anyString(), anyMap(), isNull()))
+                .thenReturn(upstream(200, "[{\"relation\":[]}]", null));
+
+        Outcome outcome = service.export("https://jans.io", AssociationFile.ASSETLINKS, "Bearer abc");
+
+        ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
+        verify(fido2Util).executeGet(eq(BASE + "https%3A%2F%2Fjans.io/association/assetlinks.json"),
+                headers.capture(), isNull());
+        assertEquals(headers.getValue().get("Authorization"), "Bearer abc");
+        assertEquals(headers.getValue().get(Constants.REQUESTED_BY_HEADER), "inum-1234");
+        assertEquals(outcome.getStatus(), 200);
+        assertTrue(outcome.getBody().isArray());
+        assertEquals(service.getAssociationFileUrl("a.com", AssociationFile.APPLE_APP_SITE_ASSOCIATION),
+                BASE + "a.com/association/apple-app-site-association");
+    }
+
+    @Test
+    public void associationFile_notFound_isReturnedUnchanged_andBlankIdIsRejected() throws Exception {
+        when(fido2Util.executeGet(anyString(), anyMap(), isNull())).thenReturn(upstream(404, null, null));
+
+        assertEquals(service.export("nope.example", AssociationFile.ASSETLINKS, "Bearer abc").getStatus(), 404);
+        WebApplicationException e = expectThrows(WebApplicationException.class,
+                () -> service.export(" ", AssociationFile.ASSETLINKS, "Bearer abc"));
+        assertEquals(e.getResponse().getStatus(), 400);
     }
 
     @Test
