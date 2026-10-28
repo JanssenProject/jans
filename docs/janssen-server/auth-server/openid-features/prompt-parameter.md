@@ -7,7 +7,7 @@ tags:
   - prompt
 ---
 
-# Prompt CREATE
+# Prompt parameter
 
 `prompt=create` value indicates to the AS that the client desires that the user be shown
  the account creation page rather than the login flow.

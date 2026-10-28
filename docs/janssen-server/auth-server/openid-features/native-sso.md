@@ -30,6 +30,9 @@ Software vendor wanting to leverage native SSO feature should build the apps
 so during initial user authentication, the app would send `device_sso`
 scope in the authorization request.
 
+The presence of the `device_sso` scope in the authorization request would enable AS to
+return `device_secret` in the token response from the token endpoint.
+
 For native mobile applications, use the Authorization Code Flow with PKCE
 (`code_challenge_method=S256`) for initial user authentication. Include
 the `device_sso` scope in the authorization request along with the

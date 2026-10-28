@@ -87,3 +87,4 @@ sequenceDiagram
     - The application sends the authorization code and the original PKCE `code_verifier` to the Janssen token endpoint.
     - Janssen validates the authorization code and PKCE verifier, then issues an access token and, for an OpenID Connect request containing the `openid` scope, an ID token. A refresh token may also be issued when applicable.
     - The application validates the ID token to obtain authentication information about the user and uses the access token to access protected resources or retrieve user claims from the UserInfo endpoint.
+    

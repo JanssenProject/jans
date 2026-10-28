@@ -6,13 +6,17 @@ tags:
   - feature
 ---
 
-# OAuth 2.0 and OAuth 2.1
+# OAuth 2.1 and OAuth 2.0
 
-The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) supports OAuth 2.0 and OAuth 2.1-aligned authorization flows, along with related specifications and extensions.
+The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/main/jans-auth-server) follows OAuth 2.1 by default, along with related specifications and extensions. Out of the box:
 
-Janssen uses OAuth 2.1 security practices by default, including requiring Proof Key for Code Exchange (PKCE) with the `S256` challenge method for the Authorization Code Grant. The Implicit Grant and Resource Owner Password Credentials (ROPC) Grant are disabled by default, as these grant types are not included in OAuth 2.1.
+- The Authorization Code Grant requires Proof Key for Code Exchange (PKCE) with the `S256` challenge method. The `plain` method is not accepted.
+- The Implicit Grant and the Resource Owner Password Credentials (ROPC) Grant are not in the default supported grant types.
+- The UserInfo endpoint does not accept access tokens in the URL query.
+- Public clients receive a new refresh token on every refresh.
+- Authorization responses include the `iss` parameter.
 
-For backward compatibility, Janssen retains configuration options for legacy OAuth 2.0 functionality. Administrators can configure supported grant types and security settings according to their application requirements.
+For backward compatibility, Janssen still supports OAuth 2.0 features that OAuth 2.1 removes or discourages. See [Enabling Legacy OAuth 2.0 Features](#enabling-legacy-oauth-20-features).
 
 The Janssen Authentication Server supports the following OAuth specifications and related extensions:
 
@@ -46,9 +50,9 @@ The Janssen Authentication Server supports the following OAuth specifications an
 
 ## Protocol Overview
 
-OAuth 2.0 is an authorization framework that enables applications to obtain limited access to protected resources. OAuth 2.1 builds on OAuth 2.0 by incorporating updated security requirements and recommended practices for securing authorization flows.
+OAuth 2.1 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices).
 
-The Janssen Authentication Server supports OAuth 2.1-aligned authorization flows while retaining configurable legacy OAuth 2.0 functionality for backward compatibility. For new applications, the Authorization Code Grant with Proof Key for Code Exchange (PKCE) is recommended. Legacy grant types, such as the Implicit Grant and Resource Owner Password Credentials Grant, are disabled by default.
+For new applications, use the Authorization Code Grant with PKCE. OAuth 2.0 grants removed by OAuth 2.1 do remain available in Janssen when explicitly enabled.
 
 OAuth defines the following four primary roles:
 
@@ -65,6 +69,35 @@ OAuth defines the following four primary roles:
 
 - **authorization server** - The server issuing access tokens to the client after successfully
                              authenticating the resource owner and obtaining authorization.
+
+## Enabling Legacy OAuth 2.0 Features
+
+Janssen supports OAuth 2.0 features that OAuth 2.1 removes or discourages, so that existing
+applications keep working. Each feature has its own setting; there is no single switch.
+These options are not recommended for new integrations.
+
+| Legacy feature | Setting |
+| --- | --- |
+| [Implicit Grant](./implicit-grant.md) (`response_type=token`) | Add `implicit` to [`grantTypesSupported`](../../reference/json/properties/janssenauthserver-properties.md#granttypessupported) and to the client's grant types |
+| OpenID Connect `id_token` and hybrid response types, such as `code id_token` | Same as the Implicit Grant, or set [`allowIdTokenWithoutImplicitGrantType`](../../reference/json/properties/janssenauthserver-properties.md#allowidtokenwithoutimplicitgranttype) to `true` to allow `id_token` without the `implicit` grant |
+| [Password Grant](./password-grant.md) (Resource Owner Password Credentials) | Add `password` to [`grantTypesSupported`](../../reference/json/properties/janssenauthserver-properties.md#granttypessupported) and to the client's grant types |
+| Authorization Code without PKCE | Set [`requirePkce`](../../reference/json/properties/janssenauthserver-properties.md#requirepkce) to `false`. PKCE is still required for clients that have `requirePkce` enabled in their own attributes |
+| Authorization responses without the `iss` parameter | Set [`authorizationResponseIssParameterSupported`](../../reference/json/properties/janssenauthserver-properties.md#authorizationresponseissparametersupported) to `false`. See [Issuer Identification](./authorization-server-issuer-identification.md) |
+
+Server properties are set using
+[Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) via
+`Auth Server`->`Properties`. A client's grant types are set via
+`Auth Server`->`Clients`->select the client->`Basic`->`Grant`.
+
+For clients registered using dynamic client registration, the requested grant types must also be in
+[`grantTypesSupportedByDynamicRegistration`](../../reference/json/properties/janssenauthserver-properties.md#granttypessupportedbydynamicregistration).
+The default value already includes `implicit` and `password`.
+
+The following OAuth 2.0 behaviors cannot be re-enabled:
+
+- The PKCE `plain` code challenge method. Only `S256` is accepted.
+- Keeping the same refresh token for public clients. A public client always receives a new
+  refresh token on refresh, even when `skipRefreshTokenDuringRefreshing` is `true`.
 
 ## Have questions in the meantime?
 
