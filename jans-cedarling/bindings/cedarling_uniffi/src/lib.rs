@@ -10,7 +10,7 @@ use cedarling::{
     MetricsSnapshot as CoreMetricsSnapshot, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
-mod result;
+pub mod result;
 use result::{
     AuthorizeResult, BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
     MultiIssuerAuthorizeResult,
