@@ -1,0 +1,2304 @@
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Janssen Project Deployment and Operation References">
+      
+      
+        <meta name="author" content="Janssen, Inc.">
+      
+      
+        <link rel="canonical" href="https://docs.jans.io/head/cedarling/patterns/annotation-patterns/">
+      
+      
+        <link rel="prev" href="../../tutorials/swift/">
+      
+      
+        <link rel="next" href="../annotation-workflow/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
+      <meta name="generator" content="zensical-0.0.58">
+    
+    
+      
+        <title>Policy Annotation Patterns - Janssen Documentation</title>
+      
+    
+    
+      
+        
+      
+      <link rel="stylesheet" href="../../../assets/stylesheets/classic/main.38807bfb.min.css">
+      
+        
+          
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/classic/palette.c7ab7c71.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../css/tabs.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/mermaid-extra.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/home.css">
+    
+      <link rel="stylesheet" href="../../../stylesheets/navigation.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_scope.pathname.endsWith("/")||(__md_scope=new URL(__md_scope.pathname+"/",location)),__md_hash=e=>[...e].reduce(((e,t)=>(e<<5)-e+t.charCodeAt(0)),0),__md_get=(e,t=localStorage,_=__md_scope)=>JSON.parse(t.getItem(_.pathname+"."+e)),__md_set=(e,t,_=localStorage,a=__md_scope)=>{try{_.setItem(a.pathname+"."+e,JSON.stringify(t))}catch(e){}},document.documentElement.setAttribute("data-platform",navigator.platform)</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer" aria-label="Navigation"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#policy-annotation-patterns" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Janssen Documentation" class="md-header__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer" aria-label="Navigation">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Janssen Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Policy Annotation Patterns
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search" aria-label="Search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog" aria-label="Search">
+  <button type="button" class="md-search__button">
+    Search
+  </button>
+</div>
+      
+    
+    <div class="md-header__source">
+      
+        <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      
+    </div>
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      
+  
+  
+  
+  
+    
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../getting-started/" class="md-tabs__link">
+          
+  
+  Janssen Server
+
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+      
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../../agama/introduction/" class="md-tabs__link">
+          
+  
+  Agama
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+      
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../" class="md-tabs__link">
+          
+  
+  Cedarling
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Janssen Documentation" class="md-nav__button md-logo" aria-label="Janssen Documentation" data-md-component="logo">
+      
+  <img src="../../../assets/janssen_project.svg" alt="Janssen Documentation">
+
+    </a>
+    Janssen Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/JanssenProject/jans/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    
+  
+  
+  
+    <a href="../../../getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Janssen Server
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../../agama/introduction/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Agama
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Cedarling
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Cedarling
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedar-intro/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Cedar Introduction
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../quick-start/cedarling-quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Quick Start
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../tutorials/cedarling-getting-started/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Tutorials
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Patterns
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+  Patterns
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      
+        <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Policy Annotations
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="././" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Policy Annotations
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#annotations-inform-the-application-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Annotations Inform, the Application Decides
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotations Inform, the Application Decides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-vocabulary-used-on-these-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Vocabulary Used on These Pages
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-mental-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Mental Model
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels-on-an-allow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Labels on an Allow
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mechanics-you-need-to-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Mechanics You Need to Know
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mechanics You Need to Know">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-the-determining-policies-are-reported" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Only the Determining Policies Are Reported
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-key-per-policy-several-values-means-several-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        One Key per Policy, Several Values Means Several Policies
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reason-has-no-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>reason()</code> Has No Order
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#id-is-reserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>@id</code> Is Reserved
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lookup-is-independent-of-the-authorization-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Lookup Is Independent of the Authorization Method
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#only-the-principal-and-the-resource-are-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Only the Principal and the Resource Are Entities
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolve-annotations-promptly" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Resolve Annotations Promptly
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Anti-Patterns
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        API Reference
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../annotation-workflow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Multi-Step Flows
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../annotation-challenge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Step-Up and Evidence
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../annotation-client-authority/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Client-Side Denials
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../reference/cedarling-authz/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Reference
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../developer/cedarling-rust/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Developer
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../integrations/cedarling-krakend/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Integrations
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="../../sidecar/cedarling-sidecar-overview/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Sidecar
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#annotations-inform-the-application-decides" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Annotations Inform, the Application Decides
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Annotations Inform, the Application Decides">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-vocabulary-used-on-these-pages" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Vocabulary Used on These Pages
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-mental-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Mental Model
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels-on-an-allow" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Labels on an Allow
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mechanics-you-need-to-know" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Mechanics You Need to Know
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mechanics You Need to Know">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#only-the-determining-policies-are-reported" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Only the Determining Policies Are Reported
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#one-key-per-policy-several-values-means-several-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        One Key per Policy, Several Values Means Several Policies
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reason-has-no-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>reason()</code> Has No Order
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#id-is-reserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        <code>@id</code> Is Reserved
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-lookup-is-independent-of-the-authorization-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        The Lookup Is Independent of the Authorization Method
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#only-the-principal-and-the-resource-are-entities" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Only the Principal and the Resource Are Entities
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resolve-annotations-promptly" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Resolve Annotations Promptly
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anti-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Anti-Patterns
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        API Reference
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-path__item">
+        <a href="../../" class="md-path__link">
+          
+  
+  <span class="md-ellipsis">
+    Cedarling
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+      <li class="md-path__item">
+        <a href="././" class="md-path__link">
+          
+  
+  <span class="md-ellipsis">
+    Patterns
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
+              <article class="md-content__inner md-typeset">
+                
+  
+                  
+  
+  
+
+
+<h1 id="policy-annotation-patterns">Policy Annotation Patterns<a class="headerlink" href="#policy-annotation-patterns" title="Permanent link">#</a></h1>
+<p>A Cedar policy answers one question: is this action on this resource allowed, yes or no. That
+answer alone is often not enough to build a product. When a request is denied, the application
+wants to know <em>which</em> rule refused it, so it can explain the refusal, offer a way forward, or hand
+the case to something that can. When a request is allowed, it may want to know <em>on what basis</em>,
+because an allow under a break-glass rule is not the same event as an allow under a standing grant.</p>
+<p>Cedar annotations (<code>@key("value")</code>) let the policy author label each policy with what it checks,
+and Cedarling hands those labels back with the decision. The policy says what it found. The
+application, or a reasoning engine behind it, decides what to do about it.</p>
+<p>This section collects patterns for doing that. Each page describes a scenario, the policies, and
+the application code that reads the annotations.</p>
+<p>The code samples assume you know how an authorization request carries its principal, resource, and
+context. If that is new, read <a href="../../reference/cedarling-authz/">Authorization</a> and
+<a href="../../reference/cedarling-entities/">Entities</a> first; nothing here changes how a request is built.</p>
+<div class="admonition note">
+<p class="admonition-title">These are illustrative examples, not a specification</p>
+<p>Cedarling gives annotations no built-in meaning. <code>@checks</code>, <code>@detail</code>, <code>@server_input</code>, and
+every other key on these pages were chosen for the documentation: they are not reserved, not
+validated, and nothing in Cedarling reacts to them. An annotation only does something because
+<em>your</em> application reads that key.</p>
+<p>The one exception is <code>@id</code>, which Cedarling uses as the policy ID.</p>
+<p>The same goes for the scenarios themselves. The companies, entities, schemas, and flows exist
+to show what the mechanism makes possible. They are deliberately simplified, and they are
+neither reference architectures nor security advice for your system. Design your own
+vocabulary and your own policies around your own risk model.</p>
+</div>
+<p>The pages build on each other, so read them in this order if the mechanism is new to you.</p>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Problem it solves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href=".././annotation-workflow/">Multi-step flows and escalation</a></td>
+<td>Onboarding prerequisites, approvals, and break-glass access</td>
+</tr>
+<tr>
+<td><a href=".././annotation-challenge/">Step-up and evidence</a></td>
+<td>A denial that names what is missing, so a challenge service can collect it</td>
+</tr>
+<tr>
+<td><a href=".././annotation-client-authority/">Advisory denials in a client-side PDP</a></td>
+<td>Telling a browser which of its own denials rest on data it cannot see</td>
+</tr>
+</tbody>
+</table>
+<h2 id="annotations-inform-the-application-decides">Annotations Inform, the Application Decides<a class="headerlink" href="#annotations-inform-the-application-decides" title="Permanent link">#</a></h2>
+<p>Every pattern here uses annotations in one way: to describe the policy. A policy says what condition
+it tests, and nothing about what should happen next.</p>
+<div class="highlight"><pre><span></span><code>@checks(&quot;quota.reports.exhausted&quot;)
+</code></pre></div>
+<p>That label is all the application needs. Its own table maps <code>quota.reports.exhausted</code> to a
+translated message, an upgrade offer for a self-serve customer, a call to the account manager for an
+enterprise one, and a reset date from the billing system. None of that belongs in the policy, for
+three reasons:</p>
+<ul>
+<li>The right reaction depends on context the policy does not have: the customer's contract, the
+  channel the request came from, other signals collected across applications.</li>
+<li>Remedies change at product speed. Message copy, upgrade offers, and escalation contacts would turn
+  every product change into a policy release.</li>
+<li>A policy that instructs the application is a policy whose meaning depends on the application
+  following it. A policy that describes itself stays true whoever reads it.</li>
+</ul>
+<p>This matters most for step-up. Deciding which challenge to put in front of an accessor (a security
+key touch, a confirmation from a human, an approval from a data owner) is an organization-level
+decision, usually made by a reasoning engine or an identity orchestration service that weighs
+signals no single policy sees. The policy contributes one input to that decision: the condition it
+found. See <a href=".././annotation-challenge/">Step-up and evidence</a>.</p>
+<h3 id="the-vocabulary-used-on-these-pages">The Vocabulary Used on These Pages<a class="headerlink" href="#the-vocabulary-used-on-these-pages" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Carries</th>
+<th>Read by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@checks</code></td>
+<td>the condition the policy tests, as a stable identifier: <code>onboarding.bank_account_missing</code>, <code>quota.reports.exhausted</code></td>
+<td>application code</td>
+</tr>
+<tr>
+<td><code>@detail</code></td>
+<td>one sentence for the developer explaining the condition: "The workspace has used its full monthly report quota."</td>
+<td>logs and debugging tools, never end users</td>
+</tr>
+<tr>
+<td><code>@server_input</code></td>
+<td>the context field the policy reads that only the server holds fresh</td>
+<td>a client-side PDP</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>@checks</code> value names a state, not an action. <code>onboarding.bank_account_missing</code> stays accurate
+whatever the application does about it; <code>onboarding.redirect_to_bank_form</code> would be a remedy
+dressed up as a fact. Use dotted, lowercase identifiers, keep them stable once published, and treat
+them like an API: renaming one breaks every application table that maps it.</p>
+<p><code>@detail</code> is for people debugging the system, which is why it can be plain English and does not need
+a translation catalog. Text that end users read comes from the application's own catalog, keyed by
+the <code>@checks</code> value.</p>
+<h2 id="the-mental-model">The Mental Model<a class="headerlink" href="#the-mental-model" title="Permanent link">#</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    request["request"] --&gt; pdp["Cedarling (PDP)"]
+    pdp --&gt; decision["decision: Allow / Deny"]
+    pdp --&gt; reason["reason(): determining policy IDs"]
+    reason --&gt; lookup["annotations_by_policy / annotation_values"]
+    lookup --&gt; app["application (PEP) or reasoning engine decides what to do"]</code></pre>
+<p>Three properties follow from this, and every pattern in this section respects them.</p>
+<p>The decision stays binary. An annotation never changes <code>Allow</code> into <code>Deny</code> or the reverse. A label
+travels alongside a decision. It is never a third decision.</p>
+<p>The policy describes and the application acts. <code>@checks("document.outside_operator_assignments")</code>
+says what the policy found. Whether that leads to a request for owner approval, a refusal, or a
+security alert is decided elsewhere.</p>
+<p>Annotations are static. The value is a literal string fixed at authoring time. It cannot
+include context, entity attributes, or the current counter value. Anything dynamic is resolved
+by the application after it reads the label.</p>
+<h2 id="labels-on-an-allow">Labels on an Allow<a class="headerlink" href="#labels-on-an-allow" title="Permanent link">#</a></h2>
+<p>Labels usually turn up on denials, but a <code>permit</code> carries them just as well. On an <code>Allow</code>,
+<code>reason()</code> holds the satisfied <code>permit</code> policies, so the application can read their labels after a
+successful authorization. That covers "allowed, and here is something worth knowing":</p>
+<ul>
+<li>an entitlement that expires soon</li>
+<li>access through a temporary exception rather than a standing grant, like the break-glass rule on
+  the <a href=".././annotation-workflow/#part-3-break-glass-access">workflow page</a></li>
+</ul>
+<p>A <code>permit</code> written only to carry a label still grants access. It changes no decision only while a
+broader <code>permit</code> already allows the same requests; if someone later narrows that grant, the labeled
+policy becomes the one that allows them. Keep its conditions no wider than the grant it sits beside.</p>
+<h2 id="mechanics-you-need-to-know">Mechanics You Need to Know<a class="headerlink" href="#mechanics-you-need-to-know" title="Permanent link">#</a></h2>
+<p>These constraints shape how the patterns are written, so read them before designing an annotation
+vocabulary.</p>
+<h3 id="only-the-determining-policies-are-reported">Only the Determining Policies Are Reported<a class="headerlink" href="#only-the-determining-policies-are-reported" title="Permanent link">#</a></h3>
+<p><code>result.response.diagnostics().reason()</code> contains the policies that determined the outcome, and
+those are the only policies whose annotations you can resolve. Cedar reaches a decision in three
+ways, and each one reports something different:</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>How it happened</th>
+<th><code>reason()</code> contains</th>
+<th>Annotations you can read</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Allow</code></td>
+<td>at least one <code>permit</code> matched, no <code>forbid</code> did</td>
+<td>the satisfied <code>permit</code> policies</td>
+<td>the annotations on those <code>permit</code> policies</td>
+</tr>
+<tr>
+<td><code>Deny</code></td>
+<td>a <code>forbid</code> matched, whether or not a <code>permit</code> also did</td>
+<td>the satisfied <code>forbid</code> policies</td>
+<td>the annotations on those <code>forbid</code> policies</td>
+</tr>
+<tr>
+<td><code>Deny</code></td>
+<td>nothing matched at all, the default deny</td>
+<td>nothing, <code>reason()</code> is empty</td>
+<td>none</td>
+</tr>
+</tbody>
+</table>
+<p>The two <code>Deny</code> rows are different situations, not conflicting statements about one. In the first, a
+policy author wrote a rule that actively blocked the request, and that rule can describe itself. In
+the second, no rule blocked anything and no rule allowed anything either: Cedar denies by default,
+and a default has no policy behind it to carry an annotation.</p>
+<p><code>permit</code> annotations also never survive a <code>Deny</code>. When a <code>forbid</code> overrides a matching <code>permit</code>,
+only the <code>forbid</code> appears in <code>reason()</code>, so a label on the <code>permit</code> is not available to explain the
+denial.</p>
+<p>A fourth case looks just like the third. A policy whose expression errors at evaluation time, on
+integer overflow or on an attribute the entity does not carry, is dropped from the decision and
+reported in <code>diagnostics().errors()</code> instead of <code>reason()</code>. If that policy was the only <code>permit</code>,
+the result is a <code>Deny</code> with an empty <code>reason()</code>, which looks the same as "nothing matched" to code
+that reads only <code>reason()</code>. Log <code>errors()</code> alongside the decision, or a broken policy looks like an
+ordinary default deny for as long as nobody checks.</p>
+<p>The same rule works in the other direction, and there it is a security problem. If the policy that
+errored was a <code>forbid</code>, the matching <code>permit</code> still stands and the result is an <code>Allow</code>, granted
+while the condition that should have blocked it never ran. An enforcement point that acts on the
+decision has to check <code>errors()</code> first and refuse, or retry, when it is not empty.</p>
+<p>A fifth case fills <code>reason()</code> with policies that did not fire at all. <code>authorize_unsigned</code> with no
+principal runs Cedar's partial evaluation, and when some policies remain undecided, Cedarling
+returns a <code>Deny</code> whose <code>reason()</code> holds the IDs of those undecided policies. Those policies were
+neither satisfied nor rejected: the request lacked what they needed to decide. Their labels describe
+rules that might have applied, so treat a principal-less denial as "undetermined" rather than as the
+reason for a refusal.</p>
+<p>The default-deny row is the one people most often get wrong. If you want a label for a request that
+simply matches no <code>permit</code>, an annotated <code>forbid</code> has to exist and match, as
+<code>forbid_generate_report_quota_exhausted</code> does on the
+<a href=".././annotation-client-authority/">client-side page</a>. Otherwise, the application needs its own
+fallback for "denied, nothing more to say". Do not add a catch-all <code>forbid</code> just to hang an
+annotation on it: in Cedar <code>forbid</code> always wins, so a broad catch-all silently overrides every
+<code>permit</code> you have.</p>
+<h3 id="one-key-per-policy-several-values-means-several-policies">One Key per Policy, Several Values Means Several Policies<a class="headerlink" href="#one-key-per-policy-several-values-means-several-policies" title="Permanent link">#</a></h3>
+<p>Cedar rejects a duplicate annotation key on the same policy (<code>duplicate annotation: @checks</code>), so a
+single policy carries at most one <code>@checks</code>. Two independent conditions are two policies, each
+labeled, and both have to be satisfied for both to appear in <code>reason()</code>.</p>
+<p>This works in your favor. Independent conditions stay independent policies, and
+<code>annotation_values(reason, "checks")</code> collects every label that actually fired, duplicates
+preserved.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Two forbid policies matched, each describing a different missing piece of evidence.</span>
+<span class="kd">let</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="o">=</span>
+<span class="w">    </span><span class="n">cedarling</span><span class="p">.</span><span class="n">annotation_values</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">response</span><span class="p">.</span><span class="n">diagnostics</span><span class="p">().</span><span class="n">reason</span><span class="p">(),</span><span class="w"> </span><span class="s">&quot;checks&quot;</span><span class="p">);</span>
+<span class="c1">// [&quot;agent.human_intent_unconfirmed&quot;, &quot;document.outside_operator_assignments&quot;]</span>
+</code></pre></div>
+<p>Use <code>annotations_map</code> only when you know the same key is not used by several matching policies,
+since it keeps one arbitrary value per key. <code>annotations_by_policy</code> is the loss-free view, and it is
+the one you want for audit logging because it records which policy reported what.</p>
+<h3 id="reason-has-no-order"><code>reason()</code> Has No Order<a class="headerlink" href="#reason-has-no-order" title="Permanent link">#</a></h3>
+<p><code>reason()</code> is a set of policy IDs, so the policies come back in no particular order, and the lookup
+methods report values in whatever order they receive the IDs. Two consequences:</p>
+<ul>
+<li>Never pair two <code>annotation_values</code> results by position. The first value of one list does not
+  necessarily come from the same policy as the first value of the other.</li>
+<li>If several annotations on one policy only mean something together, such as <code>@checks</code> and
+  <code>@detail</code>, read them with <code>annotations_by_policy</code>, which keeps each policy's set intact.</li>
+</ul>
+<p>Anything that has to be presented in a specific order is ordered by the application. The
+<a href=".././annotation-workflow/">workflow page</a> does that for onboarding steps: the policies report which
+steps are missing, and the application's own step list decides the order.</p>
+<h3 id="id-is-reserved"><code>@id</code> Is Reserved<a class="headerlink" href="#id-is-reserved" title="Permanent link">#</a></h3>
+<p>Cedarling uses the <code>@id("...")</code> annotation as the policy ID. Keep it as the identifier and do not
+overload it with other meaning.</p>
+<p>It is not stripped from the results. <code>annotations_map</code> returns an <code>id</code> key, and every group from
+<code>annotations_by_policy</code> carries one, because all three methods read a policy's annotations without
+filtering. Forwarding "all annotations" to a browser or a log therefore ships your policy IDs too.</p>
+<p><code>@checks</code> is not a second <code>@id</code>. Several policies may report the same condition, for instance one
+written for a human principal and one for an agent, and they share one <code>@checks</code> value so the
+application handles them the same way. The <code>@id</code> still tells them apart in the decision log.</p>
+<h3 id="the-lookup-is-independent-of-the-authorization-method">The Lookup Is Independent of the Authorization Method<a class="headerlink" href="#the-lookup-is-independent-of-the-authorization-method" title="Permanent link">#</a></h3>
+<p>Every pattern here is written against <code>authorize_unsigned</code>, but nothing in the mechanism depends on
+it. <code>authorize_multi_issuer</code> reports the determining policies the same way, and the same three
+lookup methods resolve their annotations. Only the principal and context construction differ.</p>
+<h3 id="only-the-principal-and-the-resource-are-entities">Only the Principal and the Resource Are Entities<a class="headerlink" href="#only-the-principal-and-the-resource-are-entities" title="Permanent link">#</a></h3>
+<p><code>authorize_unsigned</code> builds two entities, the principal and the resource, and evaluates the request
+against those two alone. An attribute whose type is another entity, such as an agent's
+<code>operated_by: User</code>, cannot be built: Cedarling rejects the request because the referenced entity
+was never supplied. Put what the policies need on the principal or the resource directly, as the
+<a href=".././annotation-challenge/#modeling-the-agent">step-up page</a> does for an agent's operator, and keep
+nested records to primitive types and sets.</p>
+<h3 id="resolve-annotations-promptly">Resolve Annotations Promptly<a class="headerlink" href="#resolve-annotations-promptly" title="Permanent link">#</a></h3>
+<p>Annotation lookup resolves IDs against the <em>current</em> policy store. A concurrent policy-store
+refresh may swap the store between the authorization call and the lookup, in which case IDs that
+no longer resolve are silently dropped. Resolve immediately after <code>authorize*()</code>, in the same
+request handler.</p>
+<h2 id="anti-patterns">Anti-Patterns<a class="headerlink" href="#anti-patterns" title="Permanent link">#</a></h2>
+<p>Do not instruct the application. <code>@upsell("plan_business")</code>, <code>@notify("account_manager")</code>,
+<code>@redirect("/kyc/documents")</code>, and <code>@user_message("Please upgrade")</code> all decide, inside the policy,
+something the application is better placed to decide. Label the condition and map it to a reaction
+in code.</p>
+<p>Do not put secrets or personal data in annotations. Annotations travel with the policy store and
+land in decision logs. They are policy metadata, readable by anyone who can read the policy.</p>
+<p>Do not let an annotation override the decision. An enforcement point that lets a <code>Deny</code> proceed
+because the policy carried some label is not enforcing anything. If you need a policy that observes
+without blocking, express that in the policy logic instead of ignoring its verdict.</p>
+<p>Do not encode structure in one annotation. A JSON document in a string is hard to review and easy to
+break. One condition per policy, one identifier per condition.</p>
+<p>Do not invent keys per policy. An annotation vocabulary is an interface between policy authors and
+application developers, so keep a short, documented list of keys and of the <code>@checks</code> values in use,
+and treat adding one as an API change. A value that no code maps is a silent no-op, so test the
+application's table against the policy store: every <code>@checks</code> value in use has an entry, and every
+entry is still used.</p>
+<p>Do not assume an annotation will be there. Policies change independently of the application, so
+every lookup needs a sane default for "no label", and an unknown <code>@checks</code> value needs a defined
+fallback, usually the generic handling for a plain denial.</p>
+<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
+<p>The three lookup methods are documented in the
+<a href="../../reference/cedarling-interfaces/#annotation-lookup">Interfaces reference</a>. Rust and Python use
+the snake_case names below; the JavaScript binding exports them as <code>annotationsMap</code>,
+<code>annotationValues</code>, and <code>annotationsByPolicy</code>.</p>
+<ul>
+<li><code>annotations_map(policy_ids)</code> returns a merged map that keeps one value per duplicate key</li>
+<li><code>annotation_values(policy_ids, key)</code> returns all values of one key, duplicates preserved</li>
+<li><code>annotations_by_policy(policy_ids)</code> returns them grouped by policy ID, loss-free</li>
+</ul>
+
+
+  <nav class="md-tags" >
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedar</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">Cedarling</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">annotations</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">authorization / authz</span>
+      
+    
+      
+      
+      
+      
+        <span class="md-tag">lock</span>
+      
+    
+  </nav>
+
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    October 28, 2026
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    October 28, 2026
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+  
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026, The Janssen Project
+    </div>
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/JanssenProject/jans" target="_blank" rel="noopener" title="Janssen on GitHub" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M216.5 362.5c-66-8-112.5-55.5-112.5-117 0-25 9-52 24-70-6.5-16.5-5.5-51.5 2-66 20-2.5 47 8 63 22.5 19-6 39-9 63.5-9s44.5 3 62.5 8.5c15.5-14 43-24.5 63-22 7 13.5 8 48.5 1.5 65.5 16 19 24.5 44.5 24.5 70.5 0 61.5-46.5 108-113.5 116.5 17 11 28.5 35 28.5 62.5v52c0 15 12.5 23.5 27.5 17.5C441 459.5 512 369 512 257 512 115.5 397 0 255.5 0S0 115.5 0 257c0 111 70.5 203 165.5 237.5 13.5 5 26.5-4 26.5-17.5v-40c-7 3-16 5-24 5-33 0-52.5-18-66.5-51.5-5.5-13.5-11.5-21.5-23-23-6-.5-8-3-8-6 0-6 10-10.5 20-10.5 14.5 0 27 9 40 27.5 10 14.5 20.5 21 33 21s20.5-4.5 32-16c8.5-8.5 15-16 21-21"/></svg>
+    </a>
+  
+    
+    
+    
+    
+    <a href="https://jans.io/docs" target="_blank" rel="noopener" title="Janssen Website" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 7.3.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2026 Fonticons, Inc.--><path fill="currentColor" d="M419.5 96c-16.6 0-32.7 4.5-46.8 12.7-15.8-16-34.2-29.4-54.5-39.5 28.2-24 64.1-37.2 101.3-37.2C505.9 32 576 102 576 188.5c0 41.5-16.5 81.3-45.8 110.6l-71.1 71.1C429.8 399.5 390 416 348.5 416 262.1 416 192 346 192 259.5c0-1.5 0-3 .1-4.5.5-17.7 15.2-31.6 32.9-31.1s31.6 15.2 31.1 32.9v2.6c0 51.1 41.4 92.5 92.5 92.5 24.5 0 48-9.7 65.4-27.1l71.1-71.1c17.3-17.3 27.1-40.9 27.1-65.4 0-51.1-41.4-92.5-92.5-92.5zm-144.3 77.3c-1.9-.8-3.8-1.9-5.5-3.1-12.6-6.5-27-10.2-42.1-10.2-24.5 0-48 9.7-65.4 27.1l-71.1 71.1C73.8 275.5 64 299.1 64 323.6c0 51.1 41.4 92.5 92.5 92.5 16.5 0 32.6-4.4 46.7-12.6 15.8 16 34.2 29.4 54.6 39.5-28.2 23.9-64 37.2-101.3 37.2C70.1 480.2 0 410.2 0 323.7c0-41.5 16.5-81.3 45.8-110.6l71.1-71.1c29.3-29.3 69.1-45.8 110.6-45.8 86.6 0 156.5 70.6 156.5 156.9v3.9c-.4 17.7-15.1 31.6-32.8 31.2s-31.6-15.1-31.2-32.8v-2.3c0-33.7-18-63.3-44.8-79.6z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+  <!-- Cookie settings link: reopens the consent banner so choices can be changed -->
+  <div class="cookie-settings-footer">
+    <a href="#__consent">Change cookie settings</a>
+  </div>
+
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+      <div class="md-consent" data-md-component="consent" id="__consent" hidden>
+        <div class="md-consent__overlay"></div>
+        <aside class="md-consent__inner">
+          <form class="md-consent__form md-grid md-typeset" name="consent">
+            
+
+
+
+<h4>Cookie consent</h4>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<input class="md-toggle" type="checkbox" id="__settings" >
+<div class="md-consent__settings">
+  <ul class="task-list">
+    
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="github" checked>
+      <span class="task-list-indicator"></span>
+      GitHub
+    </label>
+  </li>
+
+      
+    
+    
+      
+        
+  
+  
+    
+    
+  
+  <li class="task-list-item">
+    <label class="task-list-control">
+      <input type="checkbox" name="analytics" >
+      <span class="task-list-indicator"></span>
+      Scarf &amp; Reo.dev analytics
+    </label>
+  </li>
+
+      
+    
+  </ul>
+</div>
+<div class="md-consent__controls">
+  
+    
+      <button class="md-button md-button--primary">Accept</button>
+    
+    
+    
+  
+    
+    
+      <button type="reset" class="md-button md-button--primary">Reject</button>
+    
+    
+  
+    
+    
+    
+      <label class="md-button" for="__settings">Manage settings</label>
+    
+  
+</div>
+          </form>
+        </aside>
+      </div>
+      <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate":null,"base":"../../..","features":["navigation.tracking","navigation.tabs","navigation.tabs.sticky","navigation.indexes","navigation.prune","navigation.path","navigation.top","navigation.instant","navigation.instant.progress","search.suggest","search.highlight","search.share","content.tabs.link","content.code.copy","content.code.select","content.code.annotate","toc.follow"],"search":"../../../assets/javascripts/workers/search.7d14d953.min.js","tags":null,"translations":{"clipboard.copied":"Copied to clipboard","clipboard.copy":"Copy to clipboard","search.result.more.one":"1 more on this page","search.result.more.other":"# more on this page","search.result.none":"No matching documents","search.result.one":"1 matching document","search.result.other":"# matching documents","search.result.placeholder":"Type to start searching","search.result.term.missing":"Missing","select.version":"Select version"},"version":{"default":"stable","provider":"mike"}}</script>
+    
+    
+
+      <script src="../../../assets/javascripts/bundle.6970bfe9.min.js"></script>
+      
+        <script src="../../../javascripts/skeleton-loader.js"></script>
+      
+        <script src="../../../javascripts/full-screen-sections.js"></script>
+      
+    
+
+<script src="https://help.gluu.org/widget/503f7c06-6e04-4f3d-abe0-61da60db5a23" defer async></script>
+
+  </body>
+</html>
