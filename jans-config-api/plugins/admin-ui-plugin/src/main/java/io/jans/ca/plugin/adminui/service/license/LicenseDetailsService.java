@@ -174,15 +174,19 @@ public class LicenseDetailsService extends BaseService {
      */
     private GenericResponse syncLicenseOIDCClientDetails(LicenseConfig licenseConfig) {
         String failedClientId = licenseConfig.getOidcClient().getClientId();
+        AtomicBoolean invalidClientResponse = new AtomicBoolean();
         TokenResponse tokenResponse = generateToken(
                 licenseConfig.getOidcClient().getOpHost(),
                 failedClientId,
-                licenseConfig.getOidcClient().getClientSecret());
+                licenseConfig.getOidcClient().getClientSecret(),
+                errorResponse -> invalidClientResponse.set(isInvalidClientResponse(errorResponse)));
 
         if (hasAccessToken(tokenResponse)) {
             return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
         }
-
+        if (!invalidClientResponse.get() || isDcrRetryFailed(failedClientId)) {
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+        }
         synchronized (licenseClientRenewalLock) {
             AdminConf appConf = entryManager.find(
                     AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
@@ -203,19 +207,19 @@ public class LicenseDetailsService extends BaseService {
             // If another renewal replaced the client, reuse its credentials.
             if (Objects.equals(failedClientId, currentClient.getClientId())) {
                 if (Strings.isNullOrEmpty(currentConfig.getSsa())) {
-                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.LICENSE_SSA_MISSING.getDescription());
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_SSA_MISSING.getDescription());
                 }
 
                 DCRResponse dcrResponse = executeDCR(currentConfig.getSsa());
                 if (dcrResponse == null) {
-                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.ERROR_IN_DCR.getDescription());
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
                 }
 
                 try {
                     saveCreateClientInPersistence(
                             currentConfig.getSsa(), dcrResponse);
                 } catch (Exception e) {
-                    return CommonUtils.createGenericResponse(false, 500,ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
+                    return CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_SAVING_LICENSE_CLIENT.getDescription());
                 }
 
                 currentClient = new OIDCClientSettings(
@@ -230,7 +234,7 @@ public class LicenseDetailsService extends BaseService {
                     currentClient.getClientSecret());
 
             if (!hasAccessToken(tokenResponse)) {
-                return CommonUtils.createGenericResponse(false, 500,ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             }
 
             return CommonUtils.createGenericResponse(true, 200, "No error in license configuration.");
