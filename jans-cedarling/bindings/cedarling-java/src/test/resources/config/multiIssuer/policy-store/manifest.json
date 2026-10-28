@@ -7,8 +7,8 @@
             "checksum": "sha1:8b9a757897986d44543d337d71970defef85711a"
         },
         "metadata.json": {
-            "size": 324,
-            "checksum": "sha1:86274efcb7890a1a21abd26e996d74690d604a3e"
+            "size": 360,
+            "checksum": "sha1:181216ec38c98b86f968315f6900feb58544bdcc"
         },
         "policies/AdminCanReadAndWrite.cedar": {
             "size": 342,
@@ -22,9 +22,9 @@
             "size": 2062,
             "checksum": "sha1:1044043b495d30b92b16382d7e0a16bd8836ccf8"
         },
-        "trusted-issuers/Jans.json": {
-            "size": 589,
-            "checksum": "sha1:9f0e045fe21c55613a9b7fb39fefbe746f049c3f"
+        "trusted-issuers.json": {
+            "size": 673,
+            "checksum": "sha1:87097bf604ef16b73c1cb7757f7652af1fddd194"
         }
     }
 }

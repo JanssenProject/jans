@@ -9,13 +9,11 @@
 
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
-use super::super::errors::{
-    CedarParseErrorDetail, CustomIssuerParseError, PolicyStoreError, TrustedIssuerValidateError,
-    ValidationError,
-};
+use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
+use super::super::formats::ReadStoreError;
 use super::super::formats::v1::trusted_issuer::IssuerParser;
-use super::super::formats::{ParseStoreError, ReadStoreError};
-use super::super::manager::ConversionError;
+use super::super::migration::MigrationError;
+use super::super::migration::v1_to_v2::V1ToV2Error;
 use super::super::policy_parser;
 use super::super::test_utils::read_v0_files;
 use super::super::vfs_adapter::{DirEntry, MemoryVfs, PhysicalVfs, VfsFileSystem};
@@ -793,7 +791,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("jans.json"),
         r#"{
             "id": "jans_server",
-            "name": "Jans Authorization Server",
+            "name": "Jans",
             "description": "Primary Jans OpenID Connect Provider",
             "configuration_endpoint": "https://jans.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -814,7 +812,7 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
         issuers_dir.join("google.json"),
         r#"{
             "id": "google_oauth",
-            "name": "Google OAuth",
+            "name": "Google",
             "description": "Google OAuth 2.0 Provider",
             "configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -861,14 +859,24 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     assert!(ids.contains(&"google_oauth".to_string()));
 
     // Build the runtime store and check the issuer map
-    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
-        .expect("store with two issuers should parse")
-        .store;
-    let issuer_map = store
-        .trusted_issuers
-        .as_ref()
-        .expect("trusted issuers should be present");
-    assert_eq!(issuer_map.len(), 2, "Map should have 2 issuers");
+    let store = read_from_vfs(
+        &store_vfs,
+        dir.to_str().expect("temp dir should be UTF-8"),
+        false,
+        None,
+    )
+    .expect("store with two issuers should parse")
+    .store;
+    // Google's only token is `trusted: false`, so nothing of it is migrated.
+    let issuer_map = store.token_types.jwt_issuers();
+    assert_eq!(
+        issuer_map
+            .keys()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>(),
+        vec!["Jans"],
+        "only the issuer with trusted tokens should remain"
+    );
 }
 
 #[test]
@@ -910,16 +918,24 @@ fn test_load_custom_issuers_end_to_end() {
     let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("conversion should succeed")
         .store;
-    let acme = store
-        .custom_issuers
-        .get("acme")
-        .expect("acme custom issuer should be present");
-    let token = acme
-        .tokens_mappings
+    assert_acme_custom_token(&store);
+}
+
+/// The `acme` custom issuer's `Acme::CustomToken` reached the runtime store.
+fn assert_acme_custom_token(store: &crate::common::policy_store::PolicyStoreWithID) {
+    let token = store
+        .token_types
         .get("Acme::CustomToken")
         .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required);
-    assert!(token.required_claims.contains("sub"));
+    assert_eq!(
+        token.issuer().to_string(),
+        "acme",
+        "issuer should be the file id"
+    );
+    assert!(
+        matches!(token.kind(), crate::common::policy_store::TokenTypeKind::Custom { metadata, .. } if metadata.required_claims.contains("sub")),
+        "required_claims should be converted"
+    );
 }
 
 const ACME_JSON: &str = r#"{
@@ -985,28 +1001,20 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
     let store = read_from_vfs(&archive_vfs, ".", false, None)
         .expect("reading the archive should succeed")
         .store;
-    let acme = store
-        .custom_issuers
-        .get("acme")
-        .expect("acme custom issuer should be present after convert");
-    let token = acme
-        .tokens_mappings
-        .get("Acme::CustomToken")
-        .expect("acme should declare the Acme::CustomToken type");
-    assert!(token.required);
-    assert!(token.required_claims.contains("sub"));
+    assert_acme_custom_token(&store);
 
     let store2 = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())
         .expect("read_policy_store_archive_bytes should succeed")
         .store;
     assert!(
-        store2.custom_issuers.contains_key("acme"),
+        store2.token_types.get("Acme::CustomToken").is_some(),
         "acme issuer must survive round-trip through archive_bytes loader"
     );
 }
 
+/// Two files declaring one entity type cannot be merged into one entry.
 #[test]
-fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
+fn test_load_custom_issuers_archive_vfs_duplicate_entity_type_errors() {
     let archive_bytes = make_archive_with_custom_issuer(&[
         (
             "custom-issuers/a.json",
@@ -1014,16 +1022,27 @@ fn test_load_custom_issuers_archive_vfs_duplicate_id_errors() {
         ),
         (
             "custom-issuers/b.json",
-            r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
+            r#"{ "id": "other", "tokens_mappings": { "A::T": {} } }"#,
         ),
     ]);
 
     let err = read_policy_store_archive_bytes(archive_bytes, false, ArchiveLimits::default())
-        .expect_err("duplicate custom issuer ID should fail conversion");
+        .expect_err("an entity type declared in two files should fail migration");
     assert!(
-        matches!(&err, ReadStoreError::Parse(ParseStoreError::Conversion(ConversionError::CustomIssuerValidation(errors)))
-            if matches!(&errors[..], [CustomIssuerParseError::DuplicateId { id, .. }] if id == "dup")),
-        "expected one DuplicateId for id 'dup', got: {err:?}"
+        matches!(
+            &err,
+            ReadStoreError::Migration(MigrationError::V1ToV2(
+                V1ToV2Error::DuplicateEntityType { entity_type, file_a, file_b }
+            ))
+                if entity_type == "A::T"
+                    && file_a == "custom-issuers/a.json"
+                    && file_b == "custom-issuers/b.json"
+        ),
+        "expected DuplicateEntityType naming both files, got: {err:?}"
+    );
+    assert!(
+        err.to_string().starts_with("spec version 1 to 2: "),
+        "the message should name the migration step that failed, got: {err}"
     );
 }
 
@@ -1043,8 +1062,9 @@ fn test_load_custom_issuers_absent_yields_empty() {
     );
 }
 
+/// v2 has no issuer id: files sharing one are one issuer with every token type.
 #[test]
-fn test_load_custom_issuers_duplicate_id_errors() {
+fn test_load_custom_issuers_shared_id_merges() {
     let temp_dir = TempDir::new().unwrap();
     let dir = temp_dir.path();
     create_test_policy_store(dir).expect("Failed to create test policy store");
@@ -1053,23 +1073,30 @@ fn test_load_custom_issuers_duplicate_id_errors() {
     fs::create_dir(&ci_dir).unwrap();
     fs::write(
         ci_dir.join("a.json"),
-        r#"{ "id": "dup", "tokens_mappings": { "A::T": {} } }"#,
+        r#"{ "id": "dup", "tokens_mappings": { "A::Alpha": {} } }"#,
     )
     .unwrap();
     fs::write(
         ci_dir.join("b.json"),
-        r#"{ "id": "dup", "tokens_mappings": { "B::T": {} } }"#,
+        r#"{ "id": "dup", "tokens_mappings": { "B::Beta": {} } }"#,
     )
     .unwrap();
 
     let store_vfs = PhysicalVfs::new();
-    let err = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
-        .expect_err("duplicate custom issuer id should fail conversion");
-    assert!(
-        matches!(&err, ReadStoreError::Parse(ParseStoreError::Conversion(ConversionError::CustomIssuerValidation(errors)))
-            if matches!(&errors[..], [CustomIssuerParseError::DuplicateId { id, .. }] if id == "dup")),
-        "expected one DuplicateId for id 'dup', got: {err:?}"
-    );
+    let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
+        .expect("custom issuers sharing an id should load")
+        .store;
+    for entity_type in ["A::Alpha", "B::Beta"] {
+        let token = store
+            .token_types
+            .get(entity_type)
+            .expect("both token types should be kept");
+        assert_eq!(
+            token.issuer().to_string(),
+            "dup",
+            "{entity_type} issuer mismatch"
+        );
+    }
 }
 
 /// The raw `metadata.json` the loader read, as JSON.
@@ -1143,7 +1170,7 @@ fn test_parse_issuer_with_token_metadata() {
 }
 
 #[test]
-fn test_detect_duplicate_issuer_ids() {
+fn test_issuers_sharing_v1_id_both_load() {
     // Create in-memory filesystem
     let vfs = MemoryVfs::new();
 
@@ -1185,12 +1212,12 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    // Create trusted-issuers directory with duplicate IDs
+    // v2 has no issuer id: two files sharing one are two issuers
     vfs.create_file(
         "trusted-issuers/file1.json",
         r#"{
             "id": "issuer1",
-            "name": "Issuer One",
+            "name": "One",
             "description": "First instance",
             "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -1207,7 +1234,7 @@ action "read" appliesTo {
         "trusted-issuers/file2.json",
         r#"{
             "id": "issuer1",
-            "name": "Issuer One Duplicate",
+            "name": "OneCopy",
             "description": "Duplicate instance",
             "configuration_endpoint": "https://issuer1.com/.well-known/openid-configuration",
             "token_metadata": {
@@ -1220,23 +1247,14 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    // Duplicates are rejected when the store is converted
-    let err =
-        read_from_vfs(&vfs, "/", false, None).expect_err("Should detect duplicate issuer IDs");
+    let store = read_from_vfs(&vfs, "/", false, None)
+        .expect("issuers sharing a v1 id should load")
+        .store;
+    let issuers = store.token_types.jwt_issuers();
     assert!(
-        matches!(
-            &err,
-            ReadStoreError::Parse(ParseStoreError::Conversion(
-                ConversionError::TrustedIssuerValidation(errors)
-            ))
-                if matches!(&errors[..], [TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }]
-                    // Directory order is not guaranteed, so either file may be seen first.
-                    if id == "issuer1" && matches!(
-                        (first_file.as_str(), second_file.as_str()),
-                        ("file1.json", "file2.json") | ("file2.json", "file1.json")
-                    ))
-        ),
-        "expected one DuplicateId naming issuer1 and both files, got: {err:?}"
+        issuers.contains_key("One") && issuers.contains_key("OneCopy"),
+        "both issuers should be kept, got: {:?}",
+        issuers.keys().collect::<Vec<_>>()
     );
 }
 
@@ -1327,7 +1345,7 @@ fn test_complete_policy_store_with_issuers() {
         issuers_dir.join("issuer.json"),
         r#"{
             "id": "main_issuer",
-            "name": "Main Issuer",
+            "name": "Main",
             "description": "Primary authentication provider",
             "configuration_endpoint": "https://auth.test/.well-known/openid-configuration",
             "token_metadata": {
@@ -1401,12 +1419,16 @@ fn test_complete_policy_store_with_issuers() {
     let store = read_from_vfs(&store_vfs, dir.to_str().unwrap(), false, None)
         .expect("complete store should parse")
         .store;
-    let issuer_map = store
-        .trusted_issuers
-        .as_ref()
-        .expect("trusted issuers should be present");
-    assert_eq!(issuer_map.len(), 1);
-    assert!(issuer_map.contains_key("main_issuer"));
+    let issuer_map = store.token_types.jwt_issuers();
+    assert_eq!(
+        issuer_map.len(),
+        1,
+        "only the issuer with tokens should load"
+    );
+    assert!(
+        issuer_map.contains_key("Main"),
+        "the issuer should be named Main"
+    );
 }
 
 #[test]

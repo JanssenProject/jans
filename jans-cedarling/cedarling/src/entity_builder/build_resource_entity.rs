@@ -51,12 +51,13 @@ mod test {
     use super::super::test::*;
     use super::super::*;
     use crate::CedarEntityMapping;
+    use crate::common::policy_store::TokenTypes;
     use serde_json::json;
 
     #[test]
     fn can_build_entity() {
         let builder = EntityBuilder::new(
-            TrustedIssuerIndex::new(&HashMap::new(), None),
+            &TokenTypes::default(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),
         )
@@ -101,7 +102,7 @@ mod test {
     #[test]
     fn can_build_entity_with_optional_attr() {
         let builder = EntityBuilder::new(
-            TrustedIssuerIndex::new(&HashMap::new(), None),
+            &TokenTypes::default(),
             Some(&CEDARLING_VALIDATOR_SCHEMA),
             DefaultEntities::default(),
         )

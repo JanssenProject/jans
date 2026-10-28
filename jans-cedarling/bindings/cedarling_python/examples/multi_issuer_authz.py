@@ -7,13 +7,14 @@
 
 Use ``authorize_multi_issuer`` when the caller presents JWT tokens.
 Each token is wrapped in a ``TokenInput`` that maps it to the Cedar
-entity type declared in the policy store's ``token_metadata``.
+entity type declared in the policy store's ``trusted-issuers.json``.
 
 Policy store
     ``example_files/policy-store-multi-issuer/``
 
     Declares a single trusted issuer **JansTestIssuer** with three token
-    types -- ``access_token``, ``id_token``, and ``userinfo_token``.
+    types -- ``Jans::Access_Token``, ``Jans::Id_Token``, and
+    ``Jans::Userinfo_Token``.
     Two Cedar policies check token tags:
 
     * One permits ``Update`` when the access token's ``org_id`` tag
@@ -100,8 +101,8 @@ def main():
     })
 
     # -- 3. Wrap each JWT in a TokenInput -------------------------------------
-    # The ``mapping`` string must match an ``entity_type_name`` declared
-    # in the policy store's trusted_issuers -> token_metadata section.
+    # The ``mapping`` string must match an entity type declared as a key
+    # in the policy store's trusted-issuers.json.
     tokens = [
         TokenInput(mapping="Jans::Access_Token", payload=ACCESS_TOKEN),
         TokenInput(mapping="Jans::Id_Token", payload=ID_TOKEN),

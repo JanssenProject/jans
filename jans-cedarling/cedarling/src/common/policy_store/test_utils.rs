@@ -521,7 +521,7 @@ pub(super) fn read_v0_files(
     vfs: &dyn VfsFileSystem,
     dir: &str,
     strict: bool,
-) -> Result<formats::Files, PolicyStoreError> {
+) -> Result<formats::V0Files, PolicyStoreError> {
     formats::read_v0_files(&StoreFs::open(vfs, dir)?, strict)
 }
 

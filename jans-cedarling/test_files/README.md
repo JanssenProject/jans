@@ -27,7 +27,6 @@ YAML remains supported for test suites. These fixtures are used across unit and 
 1. `policy-store_schema_err_base64.yaml`: contains invalid base64 schema.
 1. `policy-store_schema_err_cedar_mistake.yaml`: contains broken cedar-policy schema (should be error on compilation).
 1. `policy-store_schema_err.yaml`: contains broken json cedar-policy schema (should be error on reading json value).
-1. `policy-store_with_trusted_issuers_ok.yaml`: list of trusted issuers for multi-issuer tests.
 
 
 ## TRACE key fixtures

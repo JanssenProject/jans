@@ -353,9 +353,9 @@ func (c *Cedarling) DrainMetrics() (MetricsSnapshot, error) {
 	return snapshot, nil
 }
 
-// IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given id finished loading successfully.
-func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerID string) bool {
-	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerID)
+// IsTrustedIssuerLoadedByName returns true if the trusted issuer with the given name finished loading successfully.
+func (c *Cedarling) IsTrustedIssuerLoadedByName(issuerName string) bool {
+	return internal.CallIsTrustedIssuerLoadedByName(c.instance_id, issuerName)
 }
 
 // IsTrustedIssuerLoadedByIss returns true if the trusted issuer for the given JWT iss claim finished loading successfully.
