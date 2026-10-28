@@ -901,6 +901,8 @@
       
         
       
+        
+      
     
     
     
@@ -1096,6 +1098,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-app-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native app readiness
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#advertised-algorithms" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1260,6 +1273,33 @@
     
   
   Passkey Telemetry
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../native-app-readiness/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Native App Readiness
 
     
   </span>
@@ -2065,6 +2105,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#native-app-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Native app readiness
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#advertised-algorithms" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2257,6 +2308,8 @@
       
         
           
+        
+      
         
       
         
@@ -2786,6 +2839,35 @@ checked against.</p>
 ceremony. When an origin is rejected, the server log says which RPs were considered and that configured native
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.</p>
+<p>To check that the <code>assetlinks.json</code> and <code>apple-app-site-association</code> files an RP has deployed match these
+entries, see <a href="../native-app-readiness/">Native App Readiness</a>.</p>
+<h3 id="native-app-readiness">Native app readiness<a class="headerlink" href="#native-app-readiness" title="Permanent link">#</a></h3>
+<p>The <code>nativeReadiness*</code> properties control a check that compares the <code>assetlinks.json</code> and
+<code>apple-app-site-association</code> files an RP has deployed with the <code>androidApps</code> and <code>iosApps</code> recorded under
+<code>rp</code> (see above). Everything is off by default, so an upgrade changes nothing until an administrator turns it
+on.</p>
+<ul>
+<li><code>nativeReadinessEnabled</code> is the master switch. While it is <code>false</code> the endpoint does no work.</li>
+<li><code>nativeReadinessAllowExternalFetch</code> is a second, separate opt-in. The server only contacts an RP's
+  <code>/.well-known</code> files when both flags are <code>true</code>; with only <code>nativeReadinessEnabled</code> set it reports what is
+  configured and does not fetch.</li>
+<li><code>nativeReadinessMaxResponseBytes</code> (default 128 KiB) and <code>nativeReadinessTimeoutMs</code> (default 3 seconds) bound
+  each fetch. The server also applies a fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value
+  cannot make a fetch unbounded. A value of zero or less falls back to the default. The time limit covers the
+  HTTP fetch only; the name lookup happens before it starts and is bounded only by the server's DNS resolver.</li>
+<li><code>nativeReadinessCacheTtlSeconds</code> is how long a result is reused before the files are fetched again. It is
+  never shorter than 60 seconds.</li>
+</ul>
+<p>The check is run with <code>POST /jans-fido2/restv1/rp/{rpConfigId}/readiness</code>, where <code>rpConfigId</code> is the RP <code>id</code>
+exactly as configured, URL-encoded. The body is empty or <code>{"recheck": true}</code>, which skips the cached result.
+The endpoint cannot be pointed at any other host: only the stored RP ID is ever fetched, and it must be a
+public host name. Like the other diagnostic endpoints, it relies on the infrastructure or the Config API
+plugin for authentication.</p>
+<p>The response lists, for <code>android</code> and <code>ios</code>, each check with a <code>status</code> of <code>pass</code>, <code>warn</code> or <code>fail</code> and a short
+<code>reason</code>, together with <code>checkedAt</code>, <code>fromCache</code> and <code>nextRecheckAllowedAt</code>. It never contains the content of
+the fetched files. A request that would exceed a rate limit gets HTTP 429 with a <code>Retry-After</code> header and
+causes no fetch. The limits apply per server node: one fetch per RP per minute, 20 files per minute in total,
+and 3 checks at a time. Each executed check is written to the server log as a <code>native-readiness-audit</code> line.</p>
 <h3 id="advertised-algorithms">Advertised algorithms<a class="headerlink" href="#advertised-algorithms" title="Permanent link">#</a></h3>
 <p>The algorithms offered to the authenticator in <code>pubKeyCredParams</code> are not taken from <code>enabledFidoAlgorithms</code>
 directly. An algorithm is advertised only when this server can complete a registration with it end-to-end:
@@ -2875,7 +2957,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    October 28, 2026
   </span>
 
     
