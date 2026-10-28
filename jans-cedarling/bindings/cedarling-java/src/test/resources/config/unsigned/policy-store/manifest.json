@@ -3,8 +3,8 @@
   "generated_date": "2026-03-13T02:28:22.283762+00:00",
   "files": {
     "metadata.json": {
-      "size": 333,
-      "checksum": "sha1:775ee637a9578c56e46f1a5c6e8a29987720bc03"
+      "size": 369,
+      "checksum": "sha1:64721504b56d0a99084e3f5fd6bc0aa387d0241f"
     },
     "policies/allow_teacher.cedar": {
       "size": 149,

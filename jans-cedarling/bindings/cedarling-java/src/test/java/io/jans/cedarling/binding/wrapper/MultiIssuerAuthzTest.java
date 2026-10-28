@@ -165,8 +165,8 @@ public class MultiIssuerAuthzTest {
 
     @Test
     public void testTrustedIssuerLoading() {
-        assertFalse(adapter.isTrustedIssuerLoadedByName("Jans"),
-                "Issuer 'Jans' should not be loaded by name");
+        assertTrue(adapter.isTrustedIssuerLoadedByName("Jans"),
+                "Issuer 'Jans' should be loaded by its name");
 
         assertTrue(adapter.isTrustedIssuerLoadedByIss("https://op-provider.gluu.org"),
                 "Issuer should be loaded by ISS");

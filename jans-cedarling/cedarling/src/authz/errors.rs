@@ -28,9 +28,6 @@ pub enum MultiIssuerValidationError {
     #[error("Invalid JSON in context field")]
     InvalidContextJson,
 
-    #[error("Missing issuer claim in JWT")]
-    MissingIssuer,
-
     #[error("JWT claims are not a JSON object: {0}")]
     InvalidClaims(&'static str),
 

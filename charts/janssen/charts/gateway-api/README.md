@@ -34,7 +34,7 @@ Kubernetes: `>=v1.23.0-0`
 | additionalConfig.istio | object | `{}` | Configuration for Istio. |
 | additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
 | additionalConfig.nginx | object | `{"enableAuditGrpcRewriteSnippets":false}` | Configuration for NGINX Fabric. |
-| additionalConfig.nginx.enableAuditGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup |
+| additionalConfig.nginx.enableAuditGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to forward Lock gRPC requests (`/io.jans.lock.audit.AuditService`, `/io.jans.lock.trace.TraceService`, `/io.jans.lock.trace.TraceAdminService`) to the same paths under `/jans-auth`. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup |
 | additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
 | fullnameOverride | string | `""` |  |
 | gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","enabled":true,"gatewayNamespace":"","httpPort":80,"httpSectionName":"http","httpsPort":443,"httpsSectionName":"https","infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
@@ -66,7 +66,7 @@ Kubernetes: `>=v1.23.0-0`
 | routes.fido2WebauthnEnabled | bool | `false` | Enable endpoint /.well-known/webauthn |
 | routes.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
-| routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled) |
+| routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService (if enabled, global.auth-server.lockEnabled must be enabled) |
 | routes.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled) |
 | routes.oauthServerConfigEnabled | bool | `true` | Enable endpoint /.well-known/oauth-authorization-server |
 | routes.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |

@@ -220,13 +220,14 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: .cedar template files
 ├── entities/               # Optional: .json entity files
-└── trusted-issuers/        # Optional: .json issuer configurations
+└── trusted-issuers.json    # Optional: accepted token types and their issuers
 ```
 
 **metadata.json structure:**
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
@@ -349,7 +350,7 @@ Note: The `CedarlingAdapter` wrapper performs additional validation and may thro
 `CedarlingAdapter` exposes trusted issuer loading status methods:
 
 ```java
-boolean loadedByName = adapter.isTrustedIssuerLoadedByName("issuer_id");
+boolean loadedByName = adapter.isTrustedIssuerLoadedByName("Acme");
 boolean loadedByIss = adapter.isTrustedIssuerLoadedByIss("https://issuer.example.org");
 long totalIssuers = adapter.totalIssuers();
 long loadedCount = adapter.loadedTrustedIssuersCount();
@@ -357,4 +358,4 @@ List<String> loadedIds = adapter.loadedTrustedIssuerIds();
 List<String> failedIds = adapter.failedTrustedIssuerIds();
 ```
 
-These methods are useful when your policy store includes `trusted-issuers/` definitions.
+These methods are useful when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.

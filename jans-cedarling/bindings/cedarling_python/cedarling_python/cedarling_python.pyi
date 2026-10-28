@@ -523,12 +523,12 @@ class Cedarling:
         """
         ...
 
-    def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
+    def is_trusted_issuer_loaded_by_name(self, issuer_name: str) -> bool:
         """
-        Check whether a trusted issuer was loaded by issuer identifier.
+        Check whether a trusted issuer was loaded by name.
 
         Args:
-            issuer_id: The trusted issuer identifier to check.
+            issuer_name: The issuer name to check, the `issuer` of its token types.
 
         Returns:
             True if the trusted issuer is loaded, otherwise False.

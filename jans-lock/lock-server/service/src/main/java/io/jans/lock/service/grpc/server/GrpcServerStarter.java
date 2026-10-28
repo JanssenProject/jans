@@ -18,8 +18,8 @@ import io.grpc.ServerBuilder;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.GrpcServerMode;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
-import io.jans.lock.service.grpc.audit.GrpcAuditServiceProvider;
 import io.jans.lock.service.grpc.security.GrpcAuthorizationInterceptor;
+import io.jans.lock.service.grpc.util.GrpcLimits;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -41,7 +41,7 @@ public class GrpcServerStarter {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private GrpcAuditServiceProvider grpcAuditServiceProvider;
+    private GrpcServiceRegistry grpcServiceRegistry;
 
     @Inject
     private GrpcAuthorizationInterceptor authorizationInterceptor;
@@ -74,6 +74,8 @@ public class GrpcServerStarter {
 			return;
 		}
 
+    	int maxInboundMessageSize = GrpcLimits.maxInboundMessageSize(appConfiguration.getTraceConfiguration());
+
     	if (GrpcServerMode.TLS_SERVER == grpcConfiguration.getServerMode()) {
             // Use Netty-based server with TLS/ALPN
             try {
@@ -84,8 +86,9 @@ public class GrpcServerStarter {
                 io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder nettyBuilder =
                         io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder.forPort(grpcConfiguration.getGrpcPort())
                                 .sslContext(sslContext)
-                                .addService(grpcAuditServiceProvider.getService())  // Get service from provider
+                                .maxInboundMessageSize(maxInboundMessageSize)
                                 .intercept(authorizationInterceptor);  // Add authorization interceptor
+                grpcServiceRegistry.getServices().forEach(nettyBuilder::addService);
 
                 grpcServer = nettyBuilder.build().start();
 
@@ -95,11 +98,11 @@ public class GrpcServerStarter {
                 throw new IOException("Failed to start Netty-based gRPC server with TLS", e);
             }
         } else {
-            grpcServer = ServerBuilder.forPort(grpcConfiguration.getGrpcPort())
-                    .addService(grpcAuditServiceProvider.getService())  // Get service from provider
-                    .intercept(authorizationInterceptor)  // Add authorization interceptor
-                    .build()
-                    .start();
+            ServerBuilder<?> serverBuilder = ServerBuilder.forPort(grpcConfiguration.getGrpcPort())
+                    .maxInboundMessageSize(maxInboundMessageSize)
+                    .intercept(authorizationInterceptor);  // Add authorization interceptor
+            grpcServiceRegistry.getServices().forEach(serverBuilder::addService);
+            grpcServer = serverBuilder.build().start();
 
             log.info("gRPC server started on port {} with authorization enabled", grpcConfiguration.getGrpcPort());
         }

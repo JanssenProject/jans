@@ -11,6 +11,8 @@ spec:
     - context: http.server.location
       value: |
         rewrite ^/io.jans.lock.audit.AuditService([^?]*)? /jans-auth/io.jans.lock.audit.AuditService$1?$args? break;
+        rewrite ^/io.jans.lock.trace.TraceService([^?]*)? /jans-auth/io.jans.lock.trace.TraceService$1?$args? break;
+        rewrite ^/io.jans.lock.trace.TraceAdminService([^?]*)? /jans-auth/io.jans.lock.trace.TraceAdminService$1?$args? break;
 {{- end }}
 
 {{- end }}

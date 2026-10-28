@@ -67,19 +67,19 @@ pub enum DropReason {
     #[error("JWT validation failed")]
     JwtValidationFailed,
 
-    /// A token with the same issuer and token type was already accepted.
-    #[error("duplicate issuer and token-type combination")]
+    /// An earlier token with the same mapping was already accepted, so this one
+    /// was dropped without being validated or processed.
+    #[error("a token with the same mapping was already accepted")]
     DuplicateToken,
 
-    /// Two trusted issuers map to the same entity type and both passed the
-    /// `(iss, mapping)` check. Last wins: this is the earlier token, dropped
-    /// because a later input with the same mapping replaced it.
+    /// No longer emitted: a mapping names a single issuer, so a second token for
+    /// it is a [`DuplicateToken`](Self::DuplicateToken). Kept so bindings that
+    /// match on it keep compiling.
     #[error("replaced by a later token with the same mapping")]
     DuplicateMapping,
 
     /// The mapping routes to a custom issuer but no
-    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) is registered, and
-    /// the mapping is not marked required.
+    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) is registered.
     #[error("no custom token processor registered for this mapping")]
     NoProcessorRegistered,
 

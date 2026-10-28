@@ -239,7 +239,7 @@ impl MockServer {
     /// Generates a [`TrustedIssuer`] for this instance of the [`MockServer`].
     pub(crate) fn trusted_issuer(&self) -> TrustedIssuer {
         let mut issuer = TrustedIssuer::default();
-        issuer.set_oidc_endpoint(
+        issuer.set_configuration_endpoint(
             Url::parse(&(self.server.url() + MOCK_OIDC_ENDPOINT)).expect("should be a valid url"),
         );
         issuer
@@ -546,7 +546,7 @@ impl MockServer {
 /// This is useful for testing error handling in issuer loading.
 pub(crate) fn create_failing_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
     let mut issuer = TrustedIssuer::default();
-    issuer.set_oidc_endpoint(
+    issuer.set_configuration_endpoint(
         Url::parse(&format!(
             "invalid://{issuer_id}/.well-known/openid-configuration"
         ))
@@ -560,7 +560,7 @@ pub(crate) fn create_failing_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
 pub(crate) fn create_unreachable_trusted_issuer(issuer_id: &str) -> TrustedIssuer {
     let mut issuer = TrustedIssuer::default();
     // Use a localhost port that's unlikely to be in use
-    issuer.set_oidc_endpoint(
+    issuer.set_configuration_endpoint(
         Url::parse(&format!(
             "http://localhost:65535/{issuer_id}/.well-known/openid-configuration"
         ))
