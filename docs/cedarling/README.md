@@ -111,9 +111,11 @@ The following diagram is a high-level picture of the Cedarling components:
   `context.data`).
 * **Cedar Engine** is a recent release of the Rust Cedar Engine, thanks to Amazon. It
   returns the decision and diagnostics.
-* **Logs & Metrics** records decision and system logs. In enterprise deployments, the
-  optional **Lock Server** provides the Policy Store and receives logs and telemetry for
-  central storage.
+* **Observability** records decision and system logs and metrics. With
+  [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
+  record of each decision as evidence. In enterprise deployments, the optional
+  **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence
+  for central storage, and can also provide the Policy Store.
 
 ## Proof-based authorization: Token-Based Access Control (TBAC)
 

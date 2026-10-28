@@ -67,7 +67,7 @@ NODES = {
                 "title": "Entity & Context Builder",
                 "desc": ["principals, resource,", "context.tokens, context.data"]},
     "logs": {"group": "core", "box": (380, 620, 230, 76),
-             "title": "Logs & Metrics", "desc": ["decision and system logs"]},
+             "title": "Observability", "desc": ["logs, telemetry, evidence"]},
     "cedar": {"group": "core", "box": (720, 620, 250, 76), "emphasis": True,
               "title": "Cedar Engine", "desc": ["Allow / Deny, diagnostics"]},
 
@@ -75,8 +75,9 @@ NODES = {
                "title": "Policy store source", "desc": ["local file or URI"]},
     "issuers": {"group": "external", "box": (1100, 290, 230, 96),
                 "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "status list"]},
-    "lock": {"group": "external", "box": (1100, 602, 230, 112), "optional": True,
-             "title": "Lock Server", "desc": ["optional", "policy store, logs,", "health, telemetry"]},
+    "lock": {"group": "external", "box": (1100, 588, 230, 140), "optional": True,
+             "title": "Lock Server", "role": "Evidence Collector",
+             "desc": ["optional", "policy store, logs,", "health, telemetry"]},
 }
 
 # Each edge is a polyline; the last point carries the arrowhead. Edges listed
@@ -99,8 +100,8 @@ EDGES = [
     {"points": [(845, 566), (845, 620)], "label": "entities, context", "at": (845, 593)},
     {"points": [(720, 658), (610, 658)], "label": "decision", "at": (665, 636)},
     {"points": [(290, 658), (380, 658)]},
-    {"points": [(495, 696), (495, 752), (1215, 752), (1215, 714)],
-     "label": "logs, telemetry", "at": (860, 752), "optional": True},
+    {"points": [(495, 696), (495, 752), (1215, 752), (1215, 728)],
+     "label": "logs, telemetry, evidence", "at": (860, 752), "optional": True},
     {"points": [(1330, 658), (1378, 658), (1378, 62), (900, 62), (900, 140)],
      "label": "policy store", "at": (1150, 62), "optional": True},
     {"points": [(60, 668), (22, 668), (22, 50), (560, 50), (560, 140)],
@@ -152,16 +153,23 @@ def render_node(node):
         f'stroke="{style["accent"]}" stroke-width="{stroke_width}"{dash} filter="url(#shadow)"/>'
     ]
 
+    lines = []
+    if "role" in node:
+        lines.append((node["role"], "role", style["accent"]))
+    for i, line in enumerate(node["desc"]):
+        if node.get("optional") and i == 0:
+            lines.append((line, "desc tag", style["accent"]))
+        else:
+            lines.append((line, "desc", DESC_COLOR))
+
     title_height, line_height = 26, 21
-    block = title_height + line_height * len(node["desc"])
+    block = title_height + line_height * len(lines)
     top = y + (h - block) / 2
     cx = x + w / 2
     parts.append(
         f'<text x="{cx}" y="{top + 20}" class="title" fill="#ffffff">{escape(node["title"])}</text>'
     )
-    for i, line in enumerate(node["desc"]):
-        css = "desc tag" if node.get("optional") and i == 0 else "desc"
-        color = style["accent"] if css == "desc tag" else DESC_COLOR
+    for i, (line, css, color) in enumerate(lines):
         parts.append(
             f'<text x="{cx}" y="{top + title_height + 16 + i * line_height}" class="{css}" '
             f'fill="{color}">{escape(line)}</text>'
@@ -220,6 +228,7 @@ def render_svg():
         ".group { font-size: 15px; font-weight: 700; letter-spacing: 0.14em; text-anchor: start; }"
         ".title { font-size: 20px; font-weight: 700; }"
         ".desc { font-size: 15.5px; }"
+        ".role { font-size: 17px; font-weight: 700; }"
         ".tag { font-size: 13px; font-weight: 700; letter-spacing: 0.12em;"
         " text-transform: uppercase; }"
         ".edge { font-size: 13.5px; font-weight: 600; }"
