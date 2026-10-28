@@ -311,7 +311,7 @@ public class UserResource extends BaseResource {
             if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
                 throwBadRequestException("USER_UPDATE_ERROR", "User DN does not match user inum");
             }
-            validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST);
+            validateUserPermission(storedUser.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
 
             // checking mandatory attributes
             List<String> excludeAttributes = List.of(USER_PWD);
@@ -393,8 +393,13 @@ public class UserResource extends BaseResource {
             logger.debug(USER_PLACEHOLDER, existingUser);
 
             // validate user permission
-            String candidateUserInum = existingUser.getAttribute("inum");
-            validateUserPermission(candidateUserInum, ApiConstants.WRITE_REQUEST);
+            String patchUserInum = existingUser.getAttribute("inum");
+            User storedUser = userMgmtSrv.getUserBasedOnInum(patchUserInum);
+            checkResourceNotNull(storedUser, USER);
+            if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(existingUser.getDn())) {
+                throwBadRequestException("UPDATE_USER_PATCH_ERROR", "User DN does not match user inum");
+            }
+            validateUserPermission(storedUser.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(existingUser);

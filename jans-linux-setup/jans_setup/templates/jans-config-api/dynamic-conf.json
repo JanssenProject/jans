@@ -6,7 +6,7 @@
   "roleAttributeName": "jansAdminUIRole",
   "adminRoleNames": ["admin", "api-admin"] ,
   "userPermissionValidationEnabled": true,
-  "validateUserInumInIntrospectionFlag": false,
+  "validateUserInumInIntrospectionFlag": true,
   "fetchUserDataInIntrospectionFlag": true,
   "userRolePermissionExcludedClients": [],
   "disableAuditLogger": false,
