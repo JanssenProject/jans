@@ -132,13 +132,17 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public void init(User user, AuthorizationGrantType authorizationGrantType, Client client, Date authenticationTime) {
         super.init(user, authorizationGrantType, client, authenticationTime);
-        if (isEphemeralSubjectType(client)) {
+        if (isEphemeralSubjectType(client, user)) {
             setEphemeralSub(SubjectIdentifierGenerator.generateEphemeralSubjectIdentifier());
         }
     }
 
-    private static boolean isEphemeralSubjectType(Client client) {
-        return client != null && SubjectType.EPHEMERAL.equals(client.getSubjectType());
+    /**
+     * Ephemeral sub applies only to grants with an end-user. Grants without user (e.g. client_credentials)
+     * keep the client_id fallback sub.
+     */
+    public static boolean isEphemeralSubjectType(Client client, User user) {
+        return client != null && user != null && SubjectType.EPHEMERAL.equals(client.getSubjectType());
     }
 
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
@@ -610,9 +614,10 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     public String getSub() {
-        if (isEphemeralSubjectType(getClient())) {
+        if (isEphemeralSubjectType(getClient(), getUser())) {
             if (StringUtils.isBlank(getEphemeralSub())) {
-                setEphemeralSub(SubjectIdentifierGenerator.generateEphemeralSubjectIdentifier());
+                log.warn("Ephemeral sub is missing for grant of client: {}", getClientId());
+                return "";
             }
             return getEphemeralSub();
         }

@@ -882,20 +882,20 @@ impl Cedarling {
         self.instance.policy_store_id()
     }
 
-    /// Check whether a trusted issuer was loaded by issuer identifier.
+    /// Check whether a trusted issuer was loaded by name.
     ///
     /// # Arguments
     ///
-    /// * `issuer_id` - Trusted issuer identifier to check.
+    /// * `issuer_name` - The issuer name, the `issuer` of its token types.
     ///
     /// # Example
     ///
     /// ```javascript
-    /// const ok = cedarling.isTrustedIssuerLoadedByName("issuer_id");
+    /// const ok = cedarling.isTrustedIssuerLoadedByName("Acme");
     /// ```
     #[wasm_bindgen(js_name = isTrustedIssuerLoadedByName)]
-    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     /// Check whether a trusted issuer was loaded by `iss` claim.

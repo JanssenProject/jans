@@ -44,6 +44,7 @@
 							<outputFileName>lock-server</outputFileName>
 							<outputPath>${project.parent.basedir}/..</outputPath>
 							<prettyPrint>true</prettyPrint>
+							<sortOutput>true</sortOutput>
 							<resourcePackages>
 								<package>io.jans.lock.service.ws.rs</package>
 							</resourcePackages>
@@ -343,4 +344,25 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<!-- TRACE ingest benchmark against a live database, see TraceIngestBenchmark; not part of the default build -->
+		<profile>
+			<id>benchmark</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<includes>
+								<include>**/*Benchmark.java</include>
+							</includes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

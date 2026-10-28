@@ -1,0 +1,168 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://jans.io/cedarling/policy-store/v2/trusted-issuers.schema.json",
+    "title": "Cedarling trusted-issuers.json (policy store format v2)",
+    "description": "Map of Cedar entity type -> token type entry. Not expressible in JSON Schema and checked at load: duplicate keys, one `issuer` = one kind / one `iss` / one key source, same `iss` with different `jwks` across issuers, unique `context.tokens` keys (case-insensitive issuer prefix), none of them `total_token_count`.",
+    "type": "object",
+    "propertyNames": {
+        "$ref": "#/$defs/entityTypeName"
+    },
+    "additionalProperties": {
+        "$ref": "#/$defs/entry"
+    },
+    "$defs": {
+        "identifier": {
+            "description": "Single Cedar identifier.",
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "entityTypeName": {
+            "description": "Cedar entity type, equal to request `TokenInput.mapping`. Last segment is the type part of the `context.tokens` key. Final validity is checked by cedar_policy::EntityTypeName (reserved words etc.).",
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*(::[A-Za-z_][A-Za-z0-9_]*)*$"
+        },
+        "issuer": {
+            "$ref": "#/$defs/identifier",
+            "not": {
+                "enum": [
+                    "true",
+                    "false",
+                    "if",
+                    "then",
+                    "else",
+                    "in",
+                    "is",
+                    "like",
+                    "has",
+                    "__cedar"
+                ]
+            },
+            "description": "Issuer identity, not a Cedar reserved word. Policy-visible: namespace of `{issuer}::TrustedIssuer` and, lowercased, prefix of the `context.tokens` key."
+        },
+        "requiredClaims": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1
+            },
+            "uniqueItems": true,
+            "default": []
+        },
+        "entry": {
+            "type": "object",
+            "required": [
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "enum": [
+                        "jwt",
+                        "custom"
+                    ]
+                }
+            },
+            "oneOf": [
+                {
+                    "$ref": "#/$defs/jwtEntry"
+                },
+                {
+                    "$ref": "#/$defs/customEntry"
+                }
+            ]
+        },
+        "jwtEntry": {
+            "type": "object",
+            "required": [
+                "type",
+                "issuer",
+                "configuration_endpoints"
+            ],
+            "properties": {
+                "type": {
+                    "const": "jwt"
+                },
+                "issuer": {
+                    "$ref": "#/$defs/issuer"
+                },
+                "configuration_endpoints": {
+                    "$ref": "#/$defs/keySource"
+                },
+                "token_id": {
+                    "description": "Claim used as the token id.",
+                    "type": "string",
+                    "minLength": 1,
+                    "default": "jti"
+                },
+                "required_claims": {
+                    "$ref": "#/$defs/requiredClaims",
+                    "description": "Presence + RFC 7519 value validation."
+                }
+            },
+            "additionalProperties": false
+        },
+        "customEntry": {
+            "type": "object",
+            "required": [
+                "type",
+                "issuer"
+            ],
+            "properties": {
+                "type": {
+                    "const": "custom"
+                },
+                "issuer": {
+                    "$ref": "#/$defs/issuer"
+                },
+                "required_claims": {
+                    "$ref": "#/$defs/requiredClaims",
+                    "description": "Presence in processor output."
+                }
+            },
+            "additionalProperties": false
+        },
+        "keySource": {
+            "description": "Exactly one form, so an issuer's keys have a single origin.",
+            "oneOf": [
+                {
+                    "title": "Discovery",
+                    "description": "Expected `iss` = this URL minus `/.well-known/openid-configuration`; keys from discovered `jwks_uri`.",
+                    "type": "object",
+                    "required": [
+                        "configuration"
+                    ],
+                    "properties": {
+                        "configuration": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https?://[^?#]+/\\.well-known/openid-configuration$"
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                {
+                    "title": "Static",
+                    "description": "No discovery; keys from `jwks`, expected `iss` given explicitly.",
+                    "type": "object",
+                    "required": [
+                        "jwks",
+                        "iss"
+                    ],
+                    "properties": {
+                        "jwks": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https?://"
+                        },
+                        "iss": {
+                            "type": "string",
+                            "format": "uri",
+                            "pattern": "^https?://[^?#]+$",
+                            "description": "An issuer identifier: no query or fragment."
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        }
+    }
+}

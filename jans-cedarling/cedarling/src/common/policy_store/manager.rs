@@ -21,7 +21,7 @@ use super::formats::StoreContent;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
 use super::schema_parser::ParsedSchema;
-use super::{CustomIssuerMetadata, PoliciesContainer, PolicyStore, TrustedIssuer};
+use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
@@ -51,17 +51,29 @@ pub enum ConversionError {
         source: Box<super::errors::PolicyStoreError>,
     },
 
-    /// Trusted issuers conflict across files
-    #[error("Failed to convert trusted issuers: {}", join_errors(.0))]
-    TrustedIssuerValidation(Vec<super::errors::TrustedIssuerValidateError>),
-
     /// A custom issuer file could not be parsed
     #[error(transparent)]
     CustomIssuerParse(#[from] super::errors::CustomIssuerParseError),
 
-    /// Custom issuers conflict across files
-    #[error("Failed to convert custom issuers: {}", join_errors(.0))]
-    CustomIssuerValidation(Vec<super::errors::CustomIssuerParseError>),
+    /// `trusted-issuers.json` could not be parsed
+    #[error("Failed to parse '{file}': {source}")]
+    TrustedIssuersFile {
+        file: String,
+        #[source]
+        source: serde_json::Error,
+    },
+
+    /// Token types conflict across issuers
+    #[error("Invalid token types: {0}")]
+    TokenTypes(#[from] super::TokenTypesError),
+
+    /// An issuer name is not a valid issuer identity
+    #[error("Invalid issuer: {0}")]
+    InvalidIssuerName(#[from] super::InvalidIssuerName),
+
+    /// A token type is not a valid Cedar entity type
+    #[error("Invalid token type: {0}")]
+    InvalidEntityType(#[from] super::InvalidEntityType),
 
     /// Entity conversion failed
     #[error("Failed to convert entities: {0}")]
@@ -70,15 +82,6 @@ pub enum ConversionError {
     /// Policy set creation failed
     #[error("Failed to create policy set: {0}")]
     PolicySetCreation(String),
-}
-
-/// Renders several errors as one line, so an aggregate variant stays readable.
-fn join_errors<E: std::fmt::Display>(errors: &[E]) -> String {
-    errors
-        .iter()
-        .map(std::string::ToString::to_string)
-        .collect::<Vec<_>>()
-        .join("; ")
 }
 
 /// Policy Store Manager converts loaded stores into the runtime [`PolicyStore`].
@@ -93,8 +96,7 @@ impl PolicyStoreManager {
     pub(crate) fn build(
         content: &StoreContent,
         version: String,
-        trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
-        custom_issuers: HashMap<String, CustomIssuerMetadata>,
+        token_types: TokenTypes,
     ) -> Result<PolicyStore, ConversionError> {
         let cedar_schema = content
             .schema
@@ -119,8 +121,7 @@ impl PolicyStoreManager {
             schema: cedar_schema,
             schema_source_exists: content.schema_source_exists,
             policies: policies_container,
-            trusted_issuers,
-            custom_issuers,
+            token_types,
             default_entities,
         })
     }
@@ -511,7 +512,8 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         let store =
             result.expect("a schemaless store should build; strictness is checked when reading");
         assert!(
@@ -544,7 +546,8 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         let store = result.expect("a store with a schema should build");
         assert!(
             store.schema.is_some(),
@@ -576,13 +579,17 @@ mod tests {
             entities: vec![],
         };
 
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), None, HashMap::new());
+        let result =
+            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
         assert_eq!(store.version, Some("1.0.0".to_string()));
         assert!(!store.policies.get_set().is_empty());
-        assert!(store.trusted_issuers.is_none());
+        assert!(
+            store.token_types.jwt_issuers().is_empty(),
+            "a store without issuers should declare none"
+        );
         assert_eq!(store.default_entities.entities().len(), 0);
     }
 
@@ -615,17 +622,18 @@ mod tests {
             }],
         };
 
-        let issuers = HashMap::from([("main".to_string(), TrustedIssuer::default())]);
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), Some(issuers), HashMap::new());
+        let token_types =
+            TokenTypes::build([crate::common::policy_store::TestJwtIssuer::default()], [])
+                .expect("the default issuer should be valid");
+        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), token_types);
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
-        assert!(store.trusted_issuers.is_some());
         assert!(store.default_entities.entities().len() > 0);
-
-        let issuers = store.trusted_issuers.unwrap();
-        assert!(issuers.contains_key("main"));
+        assert!(
+            store.token_types.jwt_issuers().contains_key("Jans"),
+            "the Jans issuer should be loaded"
+        );
 
         assert_eq!(store.default_entities.entities().len(), 1);
     }

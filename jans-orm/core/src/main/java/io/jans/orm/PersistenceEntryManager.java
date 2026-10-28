@@ -118,6 +118,20 @@ public interface PersistenceEntryManager extends EntityManager {
     <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, SearchScope scope, String[] ldapReturnAttributes,
                             BatchOperation<T> batchOperation, int start, int count, int chunkSize);
 
+    /**
+     * Sorted search which returns at most count entries starting from start without calculating total
+     * entries count. Prefer it over findPagedEntries when total count is not needed.
+     * When sortBy is specified it replaces the entity default sort (@DataEntry sortBy) where the backend
+     * supports it, so the database can read rows in index order. Backends which can't skip the count
+     * fall back to findPagedEntries.
+     */
+    @SuppressWarnings("java:S107")
+    default <T> List<T> findEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
+                                    SortOrder sortOrder, int start, int count, int chunkSize) {
+        return findPagedEntries(primaryKey, entryClass, filter, ldapReturnAttributes, sortBy, sortOrder, start, count, chunkSize)
+                .getEntries();
+    }
+
     // TODO: Combine sortBy and SortOrder into Sort
     <T> PagedResult<T> findPagedEntries(String primaryKey, Class<T> entryClass, Filter filter, String[] ldapReturnAttributes, String sortBy,
                                         SortOrder sortOrder, int start, int count, int chunkSize);

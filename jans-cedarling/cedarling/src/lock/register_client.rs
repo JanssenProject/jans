@@ -5,9 +5,8 @@
 
 //! This module is responsible for Cedarling's Dynamic Client Registration (DCR) at startup.
 
-use std::collections::HashMap;
-
 use super::{init_http_client, lock_config::Url};
+use crate::http::HttpClient;
 use crate::{HttpClientConfig, app_types::PdpID, http::InitializeHttpClientError};
 use serde::Deserialize;
 use serde_json::json;
@@ -15,6 +14,18 @@ use thiserror::Error;
 
 pub(super) const DCR_SCOPE: &str = "cedarling";
 pub(super) const ACCESS_TKN_SCOPE: &str = "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly";
+/// Lock's TRACE ingestion endpoints require this scope, not `log.write`.
+const TRACE_WRITE_SCOPE: &str = "https://jans.io/oauth/lock/trace.write";
+
+/// Scopes of the Lock access token; `trace.write` only when TRACE is enabled, so
+/// a client without TRACE asks for nothing new.
+pub(super) fn access_token_scope(trace: bool) -> String {
+    if trace {
+        format!("{ACCESS_TKN_SCOPE} {TRACE_WRITE_SCOPE}")
+    } else {
+        ACCESS_TKN_SCOPE.to_string()
+    }
+}
 
 pub(super) async fn register_client(
     pdp_id: PdpID,
@@ -22,6 +33,7 @@ pub(super) async fn register_client(
     ssa_jwt: Option<&String>,
     accept_invalid_certs: bool,
     http_conf: HttpClientConfig,
+    scope: String,
 ) -> Result<ClientCredentials, ClientRegistrationError> {
     let client = init_http_client(None, accept_invalid_certs, http_conf)?;
 
@@ -58,37 +70,68 @@ pub(super) async fn register_client(
         .await
         .map_err(ClientRegistrationError::RegisterLockClient)?;
 
-    // Get access token
-    let form_data = serde_json::from_value::<HashMap<String, String>>(json!({
-        "grant_type": "client_credentials",
-        "scope": ACCESS_TKN_SCOPE,
-    }))
-    // this should never fail since this is a hard-coded valid JSON
-    .expect("serialize form data");
+    let source = TokenSource {
+        token_endpoint: oidc.token_endpoint,
+        client_id,
+        client_secret,
+        scope,
+    };
+    let access_token = request_access_token(&client, &source).await?;
 
-    let AccessToken { access_token } = client
+    Ok(ClientCredentials {
+        access_token,
+        source,
+    })
+}
+
+/// Gets an access token with the client credentials grant. Used at registration
+/// and again whenever a token must be reissued, so there is one way to get it.
+pub(super) async fn request_access_token(
+    http: &HttpClient,
+    source: &TokenSource,
+) -> Result<String, ClientRegistrationError> {
+    let form_data = [
+        ("grant_type", "client_credentials"),
+        ("scope", source.scope.as_str()),
+    ];
+    let AccessToken { access_token } = http
         .post_json(|client| {
             client
-                .post(&oidc.token_endpoint)
-                .basic_auth(&client_id, Some(&client_secret))
+                .post(&source.token_endpoint)
+                .basic_auth(&source.client_id, Some(&source.client_secret))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .form(&form_data)
         })
         .await
         .map_err(ClientRegistrationError::GetAccessToken)?;
-
-    Ok(ClientCredentials {
-        client_id,
-        client_secret,
-        access_token,
-    })
+    Ok(access_token)
 }
 
 #[derive(Debug, PartialEq, Clone)]
 pub(super) struct ClientCredentials {
-    pub client_id: String,
-    pub client_secret: String,
     pub access_token: String,
+    /// What it takes to get the next token for the same client.
+    pub source: TokenSource,
+}
+
+/// The registered client and the token endpoint, kept so a token can be reissued.
+#[derive(PartialEq, Clone)]
+pub(super) struct TokenSource {
+    pub(super) token_endpoint: String,
+    pub(super) client_id: String,
+    pub(super) client_secret: String,
+    pub(super) scope: String,
+}
+
+impl std::fmt::Debug for TokenSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TokenSource")
+            .field("token_endpoint", &self.token_endpoint)
+            .field("client_id", &self.client_id)
+            .field("client_secret", &"[REDACTED]")
+            .field("scope", &self.scope)
+            .finish()
+    }
 }
 
 #[derive(Debug, Error)]
@@ -148,6 +191,7 @@ mod tests {
             Some(&ssa_jwt.to_string()),
             false,
             crate::http::HttpClientConfig::default(),
+            access_token_scope(false),
         )
         .await;
 
@@ -177,6 +221,7 @@ mod tests {
             None,
             false,
             crate::http::HttpClientConfig::default(),
+            access_token_scope(false),
         )
         .await;
 
@@ -268,5 +313,20 @@ mod tests {
             )
             .expect(1)
             .create()
+    }
+
+    #[test]
+    fn access_token_scope_adds_trace_write_only_with_trace() {
+        let trace_write = "https://jans.io/oauth/lock/trace.write";
+        assert_eq!(
+            access_token_scope(false),
+            ACCESS_TKN_SCOPE,
+            "without TRACE the token request asks for the same scopes as before"
+        );
+        assert_eq!(
+            access_token_scope(true),
+            format!("{ACCESS_TKN_SCOPE} {trace_write}"),
+            "with TRACE the token request also asks for trace.write"
+        );
     }
 }

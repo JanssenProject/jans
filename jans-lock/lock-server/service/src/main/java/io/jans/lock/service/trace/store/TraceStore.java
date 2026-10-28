@@ -23,6 +23,7 @@ import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.ReceiptHead;
+import io.jans.lock.service.trace.model.ReceiptSettlement;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.TokenRef;
@@ -126,10 +127,20 @@ public interface TraceStore {
 	void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException;
 
 	/**
-	 * @return {@code true} if a matching receipt was found and updated, {@code false} otherwise
-	 * @throws TraceStorageException on a persistence failure
+	 * Moves a receipt out of {@code PENDING} by compare-and-swap (design §9): reads the row, checks its
+	 * state and writes {@code target} only while the row is still {@code PENDING}. {@code COMMITTED}
+	 * and {@code VOID} are terminal; a lost compare-and-swap is re-read and re-evaluated, so a
+	 * terminal state is never overwritten.
+	 *
+	 * @param target {@code COMMITTED} or {@code VOID}
+	 * @return {@link ReceiptSettlement#SETTLED}, {@link ReceiptSettlement#ALREADY_SETTLED} (the same
+	 *         state is already stored), {@link ReceiptSettlement#CONFLICT} (the other terminal state
+	 *         is stored) or {@link ReceiptSettlement#NOT_FOUND}
+	 * @throws IllegalArgumentException if {@code target} is {@code PENDING}
+	 * @throws TraceStorageException    on a persistence failure, including exhausted compare-and-swap
+	 *                                   retries
 	 */
-	boolean updateReceiptState(String domainId, long receiptSequence, TraceReceiptState state)
+	ReceiptSettlement settleReceipt(String domainId, long receiptSequence, TraceReceiptState target)
 			throws TraceStorageException;
 
 	/**

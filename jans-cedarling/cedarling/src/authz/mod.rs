@@ -12,7 +12,8 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::{PolicyStoreWithID, TrustedIssuer};
+use crate::common::policy_store::token_types::EntityTypeName;
+use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
     BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
@@ -22,6 +23,9 @@ use crate::log::interface::LogWriter;
 use crate::log::{
     AuthorizationLogInfo, AuthorizeInfo, BaseLogEntry, Decision, DecisionLogEntry, Diagnostics,
     DiagnosticsSummary, LogEntry, LogLevel, LogTokensInfo, Logger, PushedDataInfo, gen_uuid7,
+};
+use crate::trace::{
+    DecisionFacts, DraftError, Outcome, TokenRef, TraceRecordStatus, TraceRecorder, token_facts,
 };
 use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
@@ -33,6 +37,7 @@ use request::{
 };
 use serde_json::json;
 use smol_str::SmolStr;
+use std::cell::OnceCell;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use std::sync::Arc;
@@ -59,21 +64,13 @@ pub(crate) struct AuthzConfig {
     pub policy_store: PolicyStoreWithID,
     pub jwt_service: Arc<jwt::JwtService>,
     pub entity_builder: Arc<EntityBuilder>,
-    /// Index of configured custom (non-JWT) issuers. Rebuilt on every policy-store
-    /// swap so the *index* is never stale, and consulted to route tokens to a
-    /// registered [`CustomTokenProcessor`](crate::CustomTokenProcessor).
-    ///
-    /// Note this does not extend to already-cached processing *results*: the
-    /// `JwtService` (and its `TokenCache`) is reused across swaps when
-    /// `trusted_issuers` is unchanged, so cached custom tokens can outlive a
-    /// tightening `custom_issuers` change until `CEDARLING_TOKEN_CACHE_MAX_TTL`
-    /// lapses.
-    pub custom_issuer_index: Arc<jwt::CustomIssuerIndex>,
     pub authorization: AuthorizationConfig,
     /// Data store for pushed data that gets injected into context
     pub data_store: Arc<DataStore>,
     /// Shared metrics collector for telemetry
     pub metrics: Arc<MetricsCollector>,
+    /// Builds the TRACE record of each decision; `None` when TRACE is disabled.
+    pub trace: Option<TraceRecorder>,
 }
 
 /// Authorization Service
@@ -167,8 +164,8 @@ impl Authz {
         }
     }
 
-    pub(crate) fn trusted_issuers(&self) -> Option<&HashMap<String, TrustedIssuer>> {
-        self.config.policy_store.trusted_issuers.as_ref()
+    pub(crate) fn token_types(&self) -> &TokenTypes {
+        &self.config.policy_store.token_types
     }
 
     /// Returns the ID of the currently loaded policy store, if it carries one.
@@ -179,6 +176,12 @@ impl Authz {
         } else {
             Some(id.clone())
         }
+    }
+
+    /// The TRACE recorder, handed to the `Authz` a refresh builds so records keep
+    /// going to the same emitter.
+    pub(crate) fn trace_recorder(&self) -> Option<TraceRecorder> {
+        self.config.trace.clone()
     }
 
     /// Clone the [`Arc`] wrapping the current [`jwt::JwtService`] for reuse across a refresh.
@@ -354,6 +357,15 @@ impl Authz {
 
         let multi_diagnostics = std::slice::from_ref(&authz_info.diagnostics);
 
+        let trace_record_status = self.record_trace(
+            request_id,
+            self.trace_context(&request.options).as_ref(),
+            &request.action,
+            &resource_uid,
+            result.decision,
+            || token_facts(&validated_tokens, &request.tokens).map(Arc::from),
+        );
+
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.log_decision(
@@ -372,6 +384,7 @@ impl Authz {
                 pushed_data: pushed_data_info,
                 batch_id: None,
                 dropped_tokens: &result.dropped_tokens,
+                trace_record_status,
             },
         );
 
@@ -468,19 +481,28 @@ impl Authz {
                 .decision_log_default_jwt_id
                 .as_str(),
         );
+        // Shared by the items below: the token references are built for the first
+        // item whose record needs them, and the rest reuse them.
+        let trace_tokens = OnceCell::new();
+        let trace_token_facts = || {
+            trace_tokens
+                .get_or_init(|| token_facts(&validated_tokens, &request.tokens).map(Arc::from))
+                .clone()
+        };
+        let trace_context = self.trace_context(&request.options);
 
         let mut results = Vec::with_capacity(request.items.len());
         for (item_index, item) in request.items.iter().enumerate() {
             let item_start = Utc::now();
             let item_request_id = gen_uuid7();
 
-            let (response, resource_uid_str) = match self.try_batch_item_multi_issuer(
+            let (response, resource_uid) = match self.try_batch_item_multi_issuer(
                 item,
                 &setup_entities,
                 &pushed_data,
                 schema_ref,
             ) {
-                Ok((resp, uid)) => (resp, uid.to_string()),
+                Ok(decided) => decided,
                 Err(e) => {
                     let item_err = classify_batch_item_error(&e, item_index);
                     self.config.metrics.record_error(&e);
@@ -511,11 +533,20 @@ impl Authz {
 
             let diagnostics_slice = std::slice::from_ref(&diagnostics);
 
+            let trace_record_status = self.record_trace(
+                item_request_id,
+                trace_context.as_ref(),
+                &item.action,
+                &resource_uid,
+                decision,
+                trace_token_facts,
+            );
+
             self.log_decision(
                 item_request_id,
                 &DecisionLogMetadata {
                     action: item.action.clone(),
-                    resource: resource_uid_str,
+                    resource: resource_uid.to_string(),
                     decision,
                     tokens_logging_info: tokens_logging_info.clone(),
                     decision_time: decision_time_micro_sec,
@@ -524,6 +555,7 @@ impl Authz {
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
                     dropped_tokens: &dropped_tokens,
+                    trace_record_status,
                 },
             );
 
@@ -731,6 +763,15 @@ impl Authz {
 
         let logged_principals = principal_uid.as_slice();
 
+        let trace_record_status = self.record_trace(
+            request_id,
+            self.trace_context(&request.options).as_ref(),
+            &request.action,
+            &resource_uid,
+            result.decision,
+            || Ok(Arc::from([])),
+        );
+
         // Decision log
         // we log decision log before debug log, to avoid cloning diagnostic info
         self.log_decision(
@@ -746,6 +787,7 @@ impl Authz {
                 pushed_data: pushed_data_info,
                 batch_id: None,
                 dropped_tokens: &[],
+                trace_record_status,
             },
         );
 
@@ -825,13 +867,14 @@ impl Authz {
 
         let schema = &self.config.policy_store.schema;
         let schema_ref = schema.as_ref().map(|s| &s.schema);
+        let trace_context = self.trace_context(&request.options);
 
         let mut results = Vec::with_capacity(request.items.len());
         for (item_index, item) in request.items.iter().enumerate() {
             let item_start = Utc::now();
             let item_request_id = gen_uuid7();
 
-            let (response, resource_uid_str) = match self.try_batch_item_unsigned(
+            let (response, resource_uid) = match self.try_batch_item_unsigned(
                 item,
                 principal.as_ref(),
                 principal_uid.as_ref(),
@@ -839,10 +882,7 @@ impl Authz {
                 &pushed_data,
                 schema_ref,
             ) {
-                Ok((resp, uid)) => {
-                    let uid_str = uid.to_string();
-                    (resp, uid_str)
-                },
+                Ok(decided) => decided,
                 Err(e) => {
                     let item_err = classify_batch_item_error(&e, item_index);
                     self.config.metrics.record_error(&e);
@@ -873,11 +913,20 @@ impl Authz {
             let logged_principals: Vec<EntityUid> = principal_uid.iter().cloned().collect();
             let diagnostics_slice = std::slice::from_ref(&diagnostics);
 
+            let trace_record_status = self.record_trace(
+                item_request_id,
+                trace_context.as_ref(),
+                &item.action,
+                &resource_uid,
+                decision,
+                || Ok(Arc::from([])),
+            );
+
             self.log_decision(
                 item_request_id,
                 &DecisionLogMetadata {
                     action: item.action.clone(),
-                    resource: resource_uid_str,
+                    resource: resource_uid.to_string(),
                     decision,
                     tokens_logging_info: LogTokensInfo::empty(),
                     decision_time: decision_time_micro_sec,
@@ -886,6 +935,7 @@ impl Authz {
                     pushed_data: pushed_data_info.clone(),
                     batch_id: Some(batch_id),
                     dropped_tokens: &[],
+                    trace_record_status,
                 },
             );
 
@@ -1012,7 +1062,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await
@@ -1041,7 +1091,11 @@ impl Authz {
         // this map for both single and batch paths) never logs the same
         // mapping under both `tokens` and `dropped_tokens`.
         let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
-        validated_tokens.retain(|name, _| !entity_build_drops.iter().any(|d| d.mapping == *name));
+        validated_tokens.retain(|name, _| {
+            !entity_build_drops
+                .iter()
+                .any(|d| d.mapping == name.as_str())
+        });
 
         // Order is not guaranteed: entity-build drops append after validation
         // drops; callers correlate entries by `index`.
@@ -1176,6 +1230,37 @@ impl Authz {
         self.config.log_service.log_any(log_entry);
     }
 
+    /// The host's TRACE context, shared by the records of one request; `None`
+    /// when TRACE is disabled or the host passed no context.
+    fn trace_context(&self, options: &AuthorizeOptions) -> Option<Arc<TraceContext>> {
+        self.config.trace.as_ref()?;
+        options.trace.clone().map(Arc::new)
+    }
+
+    /// Hands the TRACE record of one decision to the emitter; `None` when TRACE is
+    /// disabled. `tokens` runs only when the record is built.
+    fn record_trace(
+        &self,
+        request_id: Uuid,
+        trace_context: Option<&Arc<TraceContext>>,
+        action: &str,
+        resource: &EntityUid,
+        allowed: bool,
+        tokens: impl FnOnce() -> Result<Arc<[TokenRef]>, DraftError>,
+    ) -> Option<TraceRecordStatus> {
+        let trace = self.config.trace.as_ref()?;
+        Some(
+            trace.record(request_id, trace_context, &self.config.policy_store, || {
+                Ok(DecisionFacts {
+                    action: action.to_string(),
+                    resource_type: resource.type_name().to_string(),
+                    outcome: Outcome::from_allowed(allowed),
+                    tokens: tokens()?,
+                })
+            }),
+        )
+    }
+
     /// Logs a decision log entry.
     fn log_decision(&self, request_id: Uuid, metadata: &DecisionLogMetadata) {
         let entry = BaseLogEntry::new_decision(request_id).with_fn(|base| DecisionLogEntry {
@@ -1193,6 +1278,7 @@ impl Authz {
             pushed_data: metadata.pushed_data.clone(),
             batch_id: metadata.batch_id,
             dropped_tokens: metadata.dropped_tokens.to_vec(),
+            trace_record_status: metadata.trace_record_status,
         });
         self.config.log_service.log_fn(entry);
     }
@@ -1263,7 +1349,7 @@ impl Authz {
             .validate_multi_issuer_tokens(
                 tokens,
                 custom_processor,
-                &self.config.custom_issuer_index,
+                &self.config.policy_store.token_types,
                 custom_timeout,
             )
             .await?;
@@ -1271,11 +1357,8 @@ impl Authz {
         let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
             .tokens
             .keys()
-            .map(|mapping| {
-                cedar_policy::EntityTypeName::from_str(mapping)
-                    .map_err(|e| AuthorizeError::IdentifierParsing(e.into()))
-            })
-            .collect::<Result<_, _>>()?;
+            .map(|entity_type| entity_type.cedar().clone())
+            .collect();
 
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;
@@ -1352,10 +1435,10 @@ fn parse_action_uids(actions: &[String]) -> Result<HashSet<EntityUid>, Authorize
 }
 
 impl TrustedIssuerLoadingInfo for Authz {
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
         self.config
             .jwt_service
-            .is_trusted_issuer_loaded_by_name(issuer_id)
+            .is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
@@ -1409,6 +1492,8 @@ struct DecisionLogMetadata<'a> {
     /// Tokens dropped from a multi-issuer decision. Empty (and omitted from the
     /// logged entry) for single-issuer and unsigned paths.
     dropped_tokens: &'a [DroppedToken],
+    /// `None` when TRACE is disabled.
+    trace_record_status: Option<TraceRecordStatus>,
 }
 
 /// Helper struct to hold named parameters for [`Authz::log_debug`] method.
@@ -1446,7 +1531,7 @@ struct UnsignedSetup {
 /// that [`LogTokensInfo`] can be produced from the same snapshot the entities
 /// were built from.
 struct MultiIssuerSetup {
-    validated_tokens: HashMap<String, crate::jwt::ValidatedToken>,
+    validated_tokens: HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
     entities: MultiIssuerSetupEntities,
     /// Tokens dropped across validation and entity building. Order is not
     /// guaranteed; use each entry's `index` to correlate with the request
@@ -1458,7 +1543,7 @@ struct MultiIssuerSetup {
 #[derive(Debug)]
 pub(super) struct AuthorizeEntitiesData {
     pub issuers: HashSet<Entity>,
-    pub tokens: HashMap<String, Entity>,
+    pub tokens: HashMap<ContextKey, Entity>,
     pub resource: Entity,
     pub default_entities: DefaultEntities,
 }
@@ -1511,38 +1596,31 @@ mod bundle_hash_tests {
     use super::*;
     use crate::authz::metrics::{MetricsCollector, MetricsMode};
     use crate::common::policy_store::archive_handler::ArchiveLimits;
-    use crate::common::policy_store::test_utils::fixtures;
+    use crate::common::policy_store::test_utils::{PolicyStoreTestBuilder, fixtures};
     use crate::context_data_api::{DataStore, DataStoreConfig};
     use crate::http::{HttpClient, HttpClientConfig};
     use crate::init::authz_builder::build_authz;
     use crate::init::policy_store::parse_cjar_bytes;
     use crate::init::policy_store_refresh::AuthzRebuilder;
     use crate::log::TEST_LOGGER;
+    use crate::trace::TraceRecorder;
+    use crate::trace::test_utils::CjarStore;
     use crate::{AuthorizationConfig, JwtConfig};
 
-    async fn parsed_store(version: &str) -> (PolicyStoreWithID, jans_trace_core::Digest) {
-        let bytes = fixtures::minimal_valid()
-            .with_version(version)
-            .build_archive()
-            .expect("test archive builds");
-        let hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
+    /// `builder`'s archive parsed the way bootstrap parses it.
+    pub(super) async fn parsed_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
+        let bytes = builder.build_archive().expect("test archive builds");
+        let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
         let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
             .await
             .expect("test archive parses")
             .store;
-        (store, hash)
+        CjarStore { store, bundle_hash }
     }
 
-    /// A refreshed store carries its own `bundle_hash`, while an `Authz`
-    /// snapshot taken before the swap keeps the hash of the store it decided with.
-    #[tokio::test]
-    async fn refresh_with_new_archive_changes_bundle_hash() {
-        let (first, first_hash) = parsed_store("1.0.0").await;
-        let (second, second_hash) = parsed_store("2.0.0").await;
-        assert_ne!(first_hash, second_hash, "the two archives should differ");
-
-        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
-        let rebuilder = AuthzRebuilder {
+    /// What the refresh worker rebuilds `Authz` with, around `log` and `metrics`.
+    pub(super) fn rebuilder(log: Logger, metrics: Arc<MetricsCollector>) -> AuthzRebuilder {
+        AuthzRebuilder {
             jwt_config: JwtConfig::new_without_validation(),
             authorization_config: AuthorizationConfig::default(),
             http_client: HttpClient::new(HttpClientConfig {
@@ -1552,15 +1630,23 @@ mod bundle_hash_tests {
                 max_response_size_bytes: None,
             })
             .expect("http client should be constructed"),
-            log: TEST_LOGGER.clone(),
+            log,
             data_store: Arc::new(
                 DataStore::new(DataStoreConfig::default(), metrics.clone())
                     .expect("data store should be created"),
             ),
             metrics,
-        };
-        let bootstrap = build_authz(
-            first,
+        }
+    }
+
+    /// The `Authz` bootstrap builds from `store`, with the same services `rebuilder` holds.
+    pub(super) async fn bootstrap(
+        rebuilder: &AuthzRebuilder,
+        store: PolicyStoreWithID,
+        trace: Option<TraceRecorder>,
+    ) -> Authz {
+        build_authz(
+            store,
             &rebuilder.jwt_config,
             &rebuilder.authorization_config,
             rebuilder.http_client.clone(),
@@ -1568,9 +1654,31 @@ mod bundle_hash_tests {
             rebuilder.data_store.clone(),
             rebuilder.metrics.clone(),
             None,
+            trace,
         )
         .await
-        .expect("bootstrap Authz should build");
+        .expect("bootstrap Authz should build")
+    }
+
+    /// A refreshed store carries its own `bundle_hash`, while an `Authz`
+    /// snapshot taken before the swap keeps the hash of the store it decided with.
+    #[tokio::test]
+    async fn refresh_with_new_archive_changes_bundle_hash() {
+        let CjarStore {
+            store: first,
+            bundle_hash: first_hash,
+        } = parsed_store(&fixtures::minimal_valid()).await;
+        let CjarStore {
+            store: second,
+            bundle_hash: second_hash,
+        } = parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
+        assert_ne!(first_hash, second_hash, "the two archives should differ");
+
+        let rebuilder = rebuilder(
+            TEST_LOGGER.clone(),
+            Arc::new(MetricsCollector::new(MetricsMode::Disabled)),
+        );
+        let bootstrap = bootstrap(&rebuilder, first, None).await;
         let swap = arc_swap::ArcSwap::from_pointee(bootstrap);
 
         let snapshot = swap.load_full();
@@ -1589,6 +1697,622 @@ mod bundle_hash_tests {
             snapshot.config.policy_store.bundle_hash(),
             Some(first_hash),
             "a snapshot held across the refresh keeps the old bundle_hash"
+        );
+    }
+}
+
+#[cfg(test)]
+mod trace_record_tests {
+    use std::sync::Arc;
+
+    use tokio::sync::mpsc;
+
+    use super::bundle_hash_tests::{bootstrap, parsed_store, rebuilder};
+    use super::*;
+    use crate::app_types::PdpID;
+    use crate::authz::metrics::{MetricsCollector, MetricsMode};
+    use crate::authz::request::{BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest};
+    use crate::common::policy_store::test_utils::fixtures;
+    use crate::log::{LogStrategy, TEST_LOGGER};
+    use crate::trace::test_utils::{CjarStore, dolphin_token, multi_issuer_store};
+    use crate::trace::{Outcome, TraceRecorder};
+    use crate::{
+        CustomTokenError, CustomTokenProcessor, LogConfig, LogStorage, LogTypeConfig,
+        MemoryLogConfig, ProcessedTokenClaims, TokenInput,
+    };
+
+    fn with_trace() -> AuthorizeOptions {
+        AuthorizeOptions::with_trace(TraceContext::new(
+            "exec-1".to_string(),
+            "https://gateway.example.com".to_string(),
+            "workload-1".to_string(),
+        ))
+    }
+
+    fn entity(entity_type: &str, id: &str) -> EntityData {
+        serde_json::from_value::<EntityData>(json!({
+            "cedar_entity_mapping": {"entity_type": entity_type, "id": id},
+        }))
+        .expect("test entity data")
+    }
+
+    fn request(options: AuthorizeOptions) -> RequestUnsigned {
+        RequestUnsigned {
+            principal: Some(entity("TestApp::User", "u1")),
+            action: "TestApp::Action::\"read\"".to_string(),
+            resource: entity("TestApp::Resource", "r1"),
+            context: json!({}),
+            options,
+        }
+    }
+
+    fn read_item(resource_id: &str) -> BatchItem {
+        BatchItem {
+            resource: entity("TestApp::Resource", resource_id),
+            action: "TestApp::Action::\"read\"".to_string(),
+            context: json!({}),
+        }
+    }
+
+    fn unsigned_batch(options: AuthorizeOptions) -> BatchAuthorizeUnsignedRequest {
+        BatchAuthorizeUnsignedRequest::new(
+            Some(entity("TestApp::User", "u1")),
+            vec![read_item("r1"), read_item("r2"), read_item("r3")],
+        )
+        .with_options(options)
+    }
+
+    fn dolphin_item(action: &str, resource_id: &str) -> BatchItem {
+        BatchItem {
+            resource: entity("Dolphin::Resource", resource_id),
+            action: action.to_string(),
+            context: json!({}),
+        }
+    }
+
+    fn drain<T>(rx: &mut mpsc::Receiver<T>) -> Vec<T> {
+        std::iter::from_fn(|| rx.try_recv().ok()).collect()
+    }
+
+    fn memory_log() -> Logger {
+        Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ))
+    }
+
+    #[tokio::test]
+    async fn valid_unsigned_decision_is_emitted() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
+        let (tx, mut rx) = mpsc::channel(1);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            Some(recorder),
+        )
+        .await;
+
+        let result = authz
+            .authorize_unsigned(&request(with_trace()))
+            .expect("the decision should be made");
+
+        let draft = rx
+            .try_recv()
+            .expect("the decision should reach the emitter");
+        assert_eq!(
+            draft.record_id.to_string(),
+            result.request_id,
+            "record_id is the request_id of the decision"
+        );
+        assert_eq!(
+            draft.decision.action, "TestApp::Action::\"read\"",
+            "action as requested"
+        );
+        assert_eq!(
+            draft.decision.resource_type, "TestApp::Resource",
+            "resource type of the resource uid"
+        );
+        assert_eq!(draft.decision.outcome, Outcome::Allow, "allow-all policy");
+        assert!(
+            draft.decision.tokens.is_empty(),
+            "an unsigned decision uses no tokens"
+        );
+        assert_eq!(
+            metrics
+                .snapshot_and_reset()
+                .operational_stats
+                .get("trace.emitted"),
+            Some(&1),
+            "the emitted record should be counted"
+        );
+    }
+
+    #[tokio::test]
+    async fn untraceable_store_is_warned_once_when_authz_is_built() {
+        let log = memory_log();
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let recorder = TraceRecorder::new(None, log.clone(), metrics.clone());
+        let rebuilder = rebuilder(log.clone(), metrics);
+        let store = parsed_store(&fixtures::minimal_valid().with_version(""))
+            .await
+            .store;
+        let is_store_warning = |entry: &serde_json::Value| {
+            entry["level"] == "WARN"
+                && entry["msg"]
+                    .as_str()
+                    .is_some_and(|message| message.contains("trace.policy"))
+        };
+
+        let authz = bootstrap(&rebuilder, store, Some(recorder)).await;
+        assert_eq!(
+            log.pop_logs()
+                .iter()
+                .filter(|entry| is_store_warning(entry))
+                .count(),
+            1,
+            "building an Authz on a store that cannot back a record should warn once"
+        );
+
+        for _ in 0..2 {
+            authz
+                .authorize_unsigned(&request(with_trace()))
+                .expect("the decision should be made");
+            let logs = log.pop_logs();
+            let status = logs
+                .iter()
+                .find(|entry| entry["log_kind"] == "Decision")
+                .and_then(|entry| entry["trace_record_status"].as_str());
+            assert_eq!(
+                status,
+                Some("not_emitted_invalid_field"),
+                "the store cannot back a record"
+            );
+            assert!(
+                !logs.iter().any(is_store_warning),
+                "a decision should not repeat the warning given when the Authz was built"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn decision_log_carries_status_only_with_trace() {
+        for (trace, expected) in [(true, Some("not_emitted_no_endpoint")), (false, None)] {
+            let log = memory_log();
+            let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+            let recorder = trace.then(|| TraceRecorder::new(None, log.clone(), metrics.clone()));
+            let rebuilder = rebuilder(log.clone(), metrics);
+            let authz = bootstrap(
+                &rebuilder,
+                parsed_store(&fixtures::minimal_valid()).await.store,
+                recorder,
+            )
+            .await;
+            log.pop_logs();
+
+            authz
+                .authorize_unsigned(&request(with_trace()))
+                .expect("the decision should be made");
+
+            let decision_log = log
+                .pop_logs()
+                .into_iter()
+                .find(|entry| entry["log_kind"] == "Decision")
+                .expect("the decision should be logged");
+            assert_eq!(
+                decision_log
+                    .get("trace_record_status")
+                    .and_then(serde_json::Value::as_str),
+                expected,
+                "trace_record_status with TRACE enabled: {trace}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn trace_disabled_adds_no_metric_keys() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Local));
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics.clone());
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            None,
+        )
+        .await;
+
+        authz
+            .authorize_unsigned(&request(with_trace()))
+            .expect("the decision should be made");
+
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("authz.requests_total"),
+            Some(&1),
+            "the decision itself should be counted"
+        );
+        let trace_keys: Vec<_> = stats
+            .keys()
+            .filter(|key| key.starts_with("trace."))
+            .collect();
+        assert!(
+            trace_keys.is_empty(),
+            "TRACE disabled should add no trace.* keys, got {trace_keys:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn unsigned_batch_of_three_sends_three_drafts_in_order() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            Some(recorder),
+        )
+        .await;
+
+        let response = authz
+            .authorize_unsigned_batch(&unsigned_batch(with_trace()))
+            .expect("the batch should be decided");
+
+        let drafts = drain(&mut rx);
+        let record_ids: Vec<String> = drafts
+            .iter()
+            .map(|draft| draft.record_id.to_string())
+            .collect();
+        let request_ids: Vec<String> = response
+            .results
+            .iter()
+            .map(|result| {
+                result
+                    .as_ref()
+                    .expect("every item should be decided")
+                    .request_id
+                    .clone()
+            })
+            .collect();
+        assert_eq!(
+            record_ids, request_ids,
+            "one record per item, in item order, each with the item's request_id"
+        );
+        let unique: HashSet<&String> = record_ids.iter().collect();
+        assert_eq!(unique.len(), 3, "every item has its own record_id");
+    }
+
+    #[tokio::test]
+    async fn valid_multi_issuer_decision_is_emitted() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(1);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = AuthorizeMultiIssuerRequest::new(
+            vec![dolphin_token()],
+            entity("Dolphin::Resource", "d1"),
+            "Dolphin::Action::\"Read\"".to_string(),
+        )
+        .with_options(with_trace());
+
+        let result = authz
+            .authorize_multi_issuer(&request, None)
+            .await
+            .expect("the decision should be made");
+
+        let draft = rx
+            .try_recv()
+            .expect("the decision should reach the emitter");
+        assert_eq!(
+            draft.record_id.to_string(),
+            result.request_id,
+            "record_id is the request_id of the decision"
+        );
+        assert_eq!(
+            draft.decision.resource_type, "Dolphin::Resource",
+            "resource type of the resource uid"
+        );
+        let tokens: Vec<_> = draft
+            .decision
+            .tokens
+            .iter()
+            .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
+            .collect();
+        assert_eq!(
+            tokens,
+            [(
+                "https://idp.dolphin.sea".to_string(),
+                "Dolphin::Access_Token"
+            )],
+            "the record references the token the decision used"
+        );
+    }
+
+    /// Accepts any payload as a `Sonar::Api_Key`, with no claims.
+    struct SonarProcessor;
+
+    #[cfg_attr(
+        not(any(target_arch = "wasm32", target_arch = "wasm64")),
+        async_trait::async_trait
+    )]
+    #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait::async_trait(?Send))]
+    impl CustomTokenProcessor for SonarProcessor {
+        async fn process(
+            &self,
+            _mapping: &str,
+            payload: &str,
+        ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+            Ok(ProcessedTokenClaims::new(HashMap::new(), payload))
+        }
+    }
+
+    /// The issuer id in a custom token's reference is the one validation gives the
+    /// token, not one the test chooses.
+    #[tokio::test]
+    async fn custom_token_is_recorded_by_its_issuer_urn() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(1);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = AuthorizeMultiIssuerRequest::new(
+            vec![
+                dolphin_token(),
+                TokenInput::new("Sonar::Api_Key".to_string(), "sonar-key-1".to_string()),
+            ],
+            entity("Dolphin::Resource", "d1"),
+            "Dolphin::Action::\"Read\"".to_string(),
+        )
+        .with_options(with_trace());
+        let processor: Arc<dyn CustomTokenProcessor> = Arc::new(SonarProcessor);
+
+        authz
+            .authorize_multi_issuer(&request, Some(&processor))
+            .await
+            .expect("the decision should be made");
+
+        let draft = rx
+            .try_recv()
+            .expect("the decision should reach the emitter");
+        let tokens: Vec<_> = draft
+            .decision
+            .tokens
+            .iter()
+            .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
+            .collect();
+        assert_eq!(
+            tokens,
+            [
+                (
+                    "https://idp.dolphin.sea".to_string(),
+                    "Dolphin::Access_Token"
+                ),
+                (
+                    "urn:jans:cedarling:custom-issuer:sonar".to_string(),
+                    "Sonar::Api_Key"
+                ),
+            ],
+            "the custom token is named by its issuer name lowercased, the JWT by its iss"
+        );
+    }
+
+    #[tokio::test]
+    async fn unsigned_batch_records_share_the_trace_context() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            Some(recorder),
+        )
+        .await;
+
+        authz
+            .authorize_unsigned_batch(&unsigned_batch(with_trace()))
+            .expect("the batch should be decided");
+
+        let drafts = drain(&mut rx);
+        assert_eq!(drafts.len(), 3, "every item should have a record");
+        assert!(
+            drafts
+                .iter()
+                .all(|draft| Arc::ptr_eq(&draft.trace, &drafts[0].trace)),
+            "records of one batch should share its trace context instead of copying it"
+        );
+    }
+
+    #[tokio::test]
+    async fn multi_issuer_batch_records_share_the_trace_context_and_tokens() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = BatchAuthorizeMultiIssuerRequest::new(
+            vec![dolphin_token()],
+            vec![
+                dolphin_item("Dolphin::Action::\"Read\"", "d1"),
+                dolphin_item("Dolphin::Action::\"Read\"", "d2"),
+            ],
+        )
+        .with_options(with_trace());
+
+        authz
+            .authorize_multi_issuer_batch(&request, None)
+            .await
+            .expect("the batch should be decided");
+
+        let drafts = drain(&mut rx);
+        assert_eq!(drafts.len(), 2, "every item should have a record");
+        assert!(
+            Arc::ptr_eq(&drafts[0].trace, &drafts[1].trace),
+            "records of one batch should share its trace context instead of copying it"
+        );
+        assert!(
+            Arc::ptr_eq(&drafts[0].decision.tokens, &drafts[1].decision.tokens),
+            "records of one batch should share its token references instead of copying them"
+        );
+    }
+
+    #[tokio::test]
+    async fn multi_issuer_batch_item_error_sends_no_draft() {
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&multi_issuer_store()).await.store,
+            Some(recorder),
+        )
+        .await;
+        let request = BatchAuthorizeMultiIssuerRequest::new(
+            vec![dolphin_token()],
+            vec![
+                dolphin_item("Dolphin::Action::\"Read\"", "d1"),
+                dolphin_item("not an action", "d2"),
+                dolphin_item("Dolphin::Action::\"Read\"", "d3"),
+            ],
+        )
+        .with_options(with_trace());
+
+        let response = authz
+            .authorize_multi_issuer_batch(&request, None)
+            .await
+            .expect("the batch should be decided");
+
+        assert!(
+            matches!(response.results[1], Err(BatchItemError::ActionParse { .. })),
+            "the middle item should fail on its action, got {:?}",
+            response.results[1]
+        );
+        let drafts = drain(&mut rx);
+        let record_ids: Vec<String> = drafts
+            .iter()
+            .map(|draft| draft.record_id.to_string())
+            .collect();
+        let decided: Vec<String> = [&response.results[0], &response.results[2]]
+            .into_iter()
+            .map(|result| {
+                result
+                    .as_ref()
+                    .expect("the item should be decided")
+                    .request_id
+                    .clone()
+            })
+            .collect();
+        assert_eq!(
+            record_ids, decided,
+            "only the decided items have records, in item order"
+        );
+        for draft in &drafts {
+            let tokens: Vec<_> = draft
+                .decision
+                .tokens
+                .iter()
+                .map(|token| (token.issuer.to_string(), token.token_type.as_str()))
+                .collect();
+            assert_eq!(
+                tokens,
+                [(
+                    "https://idp.dolphin.sea".to_string(),
+                    "Dolphin::Access_Token"
+                )],
+                "every record references the batch token"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn batch_without_context_sends_nothing() {
+        let log = memory_log();
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(4);
+        let recorder = TraceRecorder::new(Some(tx), log.clone(), metrics.clone());
+        let rebuilder = rebuilder(log.clone(), metrics);
+        let authz = bootstrap(
+            &rebuilder,
+            parsed_store(&fixtures::minimal_valid()).await.store,
+            Some(recorder),
+        )
+        .await;
+        log.pop_logs();
+
+        authz
+            .authorize_unsigned_batch(&unsigned_batch(AuthorizeOptions::default()))
+            .expect("the batch should be decided");
+
+        assert!(
+            drain(&mut rx).is_empty(),
+            "a batch without a TRACE context has no records"
+        );
+        let statuses: Vec<_> = log
+            .pop_logs()
+            .into_iter()
+            .filter(|entry| entry["log_kind"] == "Decision" && entry.get("decision").is_some())
+            .map(|entry| entry["trace_record_status"].clone())
+            .collect();
+        assert_eq!(
+            statuses,
+            vec![json!("not_emitted_missing_context"); 3],
+            "every item's decision log carries its own status"
+        );
+    }
+
+    #[tokio::test]
+    async fn refreshed_authz_keeps_recorder() {
+        let CjarStore { store: first, .. } = parsed_store(&fixtures::minimal_valid()).await;
+        let CjarStore {
+            store: second,
+            bundle_hash: second_hash,
+        } = parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
+        let metrics = Arc::new(MetricsCollector::new(MetricsMode::Disabled));
+        let (tx, mut rx) = mpsc::channel(1);
+        let recorder = TraceRecorder::new(Some(tx), TEST_LOGGER.clone(), metrics.clone());
+        let rebuilder = rebuilder(TEST_LOGGER.clone(), metrics);
+        let bootstrap = bootstrap(&rebuilder, first, Some(recorder)).await;
+
+        let refreshed = rebuilder
+            .rebuild(second, &bootstrap)
+            .await
+            .expect("refreshed Authz should build");
+        drop(bootstrap);
+        refreshed
+            .authorize_unsigned(&request(with_trace()))
+            .expect("the decision should be made");
+
+        let draft = rx
+            .try_recv()
+            .expect("the refreshed Authz should send into the bootstrap channel");
+        assert_eq!(
+            draft.policy.bundle_hash, second_hash,
+            "the record should carry the bundle_hash of the refreshed store"
         );
     }
 }
@@ -1681,7 +2405,7 @@ mod tests {
     fn default_takes_precedence_over_token_on_uid_collision() {
         let mut tokens = HashMap::new();
         tokens.insert(
-            "tok1".to_string(),
+            ContextKey::for_test("tok1"),
             to_entity(json!({"uid": {"type": "Jans::access_token", "id": "tok1"}, "attrs": {"scope": "evil"}, "parents": []})),
         );
         let data = AuthorizeEntitiesData {

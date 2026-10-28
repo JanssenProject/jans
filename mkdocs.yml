@@ -127,7 +127,6 @@ nav:
       - Customization:
         - janssen-server/developer/customization/README.md
         - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
-        - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
     - Implementation Design:
       - Implementation Design: contribute/implementation-design/README.md
       - Agama:
@@ -612,6 +611,11 @@ nav:
     - Java: cedarling/tutorials/java.md
     - Kotlin: cedarling/tutorials/kotlin.md
     - Swift: cedarling/tutorials/swift.md
+  - Patterns:
+    - Policy Annotations: cedarling/patterns/annotation-patterns.md
+    - Multi-Step Flows: cedarling/patterns/annotation-workflow.md
+    - Step-Up and Evidence: cedarling/patterns/annotation-challenge.md
+    - Client-Side Denials: cedarling/patterns/annotation-client-authority.md
   - Reference:
     - Authorization: cedarling/reference/cedarling-authz.md
     - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md

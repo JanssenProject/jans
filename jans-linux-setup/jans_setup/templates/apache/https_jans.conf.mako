@@ -129,10 +129,11 @@
     %>
     % endif
 
-    <Location /io.jans.lock.audit.AuditService/>
+    % for lock_grpc_service in ('io.jans.lock.audit.AuditService', 'io.jans.lock.trace.TraceService', 'io.jans.lock.trace.TraceAdminService'):
+    <Location /${lock_grpc_service}/>
         # Main proxy configuration
-        ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix}/io.jans.lock.audit.AuditService/ upgrade=h2c
-        ProxyPassReverse http://localhost:${lock_host_port}/${lock_host_suffix}/io.jans.lock.audit.AuditService/
+        ProxyPass http://localhost:${lock_host_port}/${lock_host_suffix}/${lock_grpc_service}/ upgrade=h2c
+        ProxyPassReverse http://localhost:${lock_host_port}/${lock_host_suffix}/${lock_grpc_service}/
 
         # Required headers for gRPC
         RequestHeader set Content-Type "application/grpc"
@@ -150,6 +151,7 @@
         # Allow HTTP/2 methods
         Require method GET POST
     </Location>
+    % endfor
 
     % endif
 

@@ -14,8 +14,10 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::authz::DroppedToken;
 use crate::common::policy_store::PoliciesContainer;
+use crate::common::policy_store::token_types::EntityTypeName;
 use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
+use crate::trace::TraceRecordStatus;
 use cedar_policy::EntityUid;
 use rand::Rng;
 use rand::{SeedableRng, rngs::StdRng};
@@ -362,6 +364,10 @@ pub(crate) struct DecisionLogEntry {
     /// logs are unchanged.
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub dropped_tokens: Vec<DroppedToken>,
+    /// What happened to the TRACE record of this decision. Absent when TRACE is
+    /// disabled.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub trace_record_status: Option<TraceRecordStatus>,
 }
 
 /// Telemetry log entry following the 3-map model.
@@ -638,14 +644,14 @@ pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::
 
 impl LogTokensInfo {
     pub(crate) fn new(
-        tokens: &HashMap<String, crate::jwt::ValidatedToken>,
+        tokens: &HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
         decision_log_jwt_id: &str,
     ) -> Self {
         let tokens_logging_info = tokens
             .iter()
             .map(|(tkn_name, entry)| {
                 (
-                    tkn_name.clone(),
+                    tkn_name.to_string(),
                     entry.token.logging_info(decision_log_jwt_id),
                 )
             })

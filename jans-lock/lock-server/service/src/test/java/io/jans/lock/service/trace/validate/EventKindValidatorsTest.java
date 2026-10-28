@@ -779,6 +779,132 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testRuntimeEffect_missingEffectStatus_throwsMissing() throws IOException {
+		ObjectNode root = loadFixture("runtime_effect_valid.json");
+		remove(root, "trace", "event", "effect_status");
+
+		assertRejected(root, "missing:trace.event.effect_status");
+	}
+
+	@Test
+	void testRuntimeEffect_unknownEffectStatus_throwsInvalid() throws IOException {
+		for (String status : new String[] { "done", "CONFIRMED", "Planned", " confirmed" }) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			set(root, TextNode.valueOf(status), "trace", "event", "effect_status");
+
+			assertRejected(root, "invalid:trace.event.effect_status");
+		}
+	}
+
+	@Test
+	void testRuntimeEffect_emptyOrNonStringEffectStatus_throws() throws IOException {
+		ObjectNode empty = loadFixture("runtime_effect_valid.json");
+		set(empty, TextNode.valueOf(""), "trace", "event", "effect_status");
+		assertRejected(empty, "empty:trace.event.effect_status");
+
+		ObjectNode number = loadFixture("runtime_effect_valid.json");
+		((ObjectNode) at(number, "trace", "event")).put("effect_status", 1);
+		assertRejected(number, "type:trace.event.effect_status");
+
+		ObjectNode object = loadFixture("runtime_effect_valid.json");
+		((ObjectNode) at(object, "trace", "event")).set("effect_status", MAPPER.createObjectNode());
+		assertRejected(object, "type:trace.event.effect_status");
+	}
+
+	@Test
+	void testRuntimeEffect_everyStatusWithOutcomeAndDigest_accepted() throws IOException {
+		for (String status : new String[] { "planned", "dispatched", "confirmed", "failed", "reverted" }) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			set(root, TextNode.valueOf(status), "trace", "event", "effect_status");
+
+			registry.validate(parseAndCommonValidate(root));
+		}
+	}
+
+	@Test
+	void testRuntimeEffect_nonPlannedWithoutOutcome_throwsMissing() throws IOException {
+		for (String status : new String[] { "dispatched", "confirmed", "failed", "reverted" }) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			set(root, TextNode.valueOf(status), "trace", "event", "effect_status");
+			remove(root, "trace", "event", "outcome");
+
+			assertRejected(root, "missing:trace.event.outcome");
+		}
+	}
+
+	@Test
+	void testRuntimeEffect_nonPlannedWithEmptyOutcome_throwsEmpty() throws IOException {
+		ObjectNode root = loadFixture("runtime_effect_valid.json");
+		set(root, TextNode.valueOf("dispatched"), "trace", "event", "effect_status");
+		set(root, TextNode.valueOf(""), "trace", "event", "outcome");
+
+		assertRejected(root, "empty:trace.event.outcome");
+	}
+
+	@Test
+	void testRuntimeEffect_plannedWithoutOutcome_accepted() throws IOException {
+		ObjectNode root = loadFixture("runtime_effect_valid.json");
+		set(root, TextNode.valueOf("planned"), "trace", "event", "effect_status");
+		remove(root, "trace", "event", "outcome");
+
+		registry.validate(parseAndCommonValidate(root));
+	}
+
+	@Test
+	void testRuntimeEffect_plannedWithBadOutcome_throws() throws IOException {
+		ObjectNode empty = loadFixture("runtime_effect_valid.json");
+		set(empty, TextNode.valueOf("planned"), "trace", "event", "effect_status");
+		set(empty, TextNode.valueOf(""), "trace", "event", "outcome");
+		assertRejected(empty, "empty:trace.event.outcome");
+
+		ObjectNode notString = loadFixture("runtime_effect_valid.json");
+		set(notString, TextNode.valueOf("planned"), "trace", "event", "effect_status");
+		((ObjectNode) at(notString, "trace", "event")).put("outcome", 7);
+		assertRejected(notString, "type:trace.event.outcome");
+	}
+
+	@Test
+	void testRuntimeEffect_confirmedWithoutResultDigest_throwsMissing() throws IOException {
+		ObjectNode root = loadFixture("runtime_effect_valid.json");
+		remove(root, "trace", "event", "result_digest");
+
+		assertRejected(root, "missing:trace.event.result_digest");
+	}
+
+	@Test
+	void testRuntimeEffect_confirmedWithMalformedResultDigest_throws() throws IOException {
+		String[] malformed = { "md5:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf7",
+				"sha256:84FD9BAC333AD79154348296204FA7F8C537A96E08983E5F73B3F5ACA8E8EDF7",
+				"sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf",
+				"sha256:84fd9bac333ad79154348296204fa7f8c537a96e08983e5f73b3f5aca8e8edf70" };
+		for (String digest : malformed) {
+			ObjectNode root = loadFixture("runtime_effect_valid.json");
+			set(root, TextNode.valueOf(digest), "trace", "event", "result_digest");
+
+			assertRejected(root, "invalid:trace.event.result_digest");
+		}
+
+		ObjectNode notString = loadFixture("runtime_effect_valid.json");
+		((ObjectNode) at(notString, "trace", "event")).put("result_digest", 5);
+		assertRejected(notString, "type:trace.event.result_digest");
+	}
+
+	@Test
+	void testRuntimeEffect_nonConfirmedResultDigest_optionalButValidatedWhenPresent() throws IOException {
+		for (String status : new String[] { "planned", "dispatched", "failed", "reverted" }) {
+			ObjectNode without = loadFixture("runtime_effect_valid.json");
+			set(without, TextNode.valueOf(status), "trace", "event", "effect_status");
+			remove(without, "trace", "event", "result_digest");
+			registry.validate(parseAndCommonValidate(without));
+
+			ObjectNode malformed = loadFixture("runtime_effect_valid.json");
+			set(malformed, TextNode.valueOf(status), "trace", "event", "effect_status");
+			set(malformed, TextNode.valueOf("not-a-digest"), "trace", "event", "result_digest");
+			assertRejected(malformed, "invalid:trace.event.result_digest");
+		}
+	}
+
+	@Test
 	void testRuntimeEffect_withoutProducedEffectParent_acceptedWithWarning() throws IOException {
 		ObjectNode root = loadFixture("runtime_effect_valid.json");
 		remove(root, "parent_record_ids");
@@ -863,6 +989,47 @@ class EventKindValidatorsTest extends BaseLockServiceTest {
 		ParsedAssertion assertion = parseAndCommonValidate(root);
 
 		registry.validate(assertion);
+	}
+
+	@Test
+	void testTokens_issuerCustomUrn_accepted() throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		remove(root, "trace", "event", "tokens", "0", "jti");
+		set(root, TextNode.valueOf("abcdefghijklmnopqrst"), "trace", "event", "tokens", "0", "fingerprint");
+		set(root, TextNode.valueOf("urn:jans:cedarling:custom-issuer:billing-api"), "trace", "event", "tokens", "0",
+				"issuer");
+
+		ParsedAssertion assertion = parseAndCommonValidate(root);
+		CorrelationInputs result = registry.validate(assertion);
+
+		assertEquals("urn:jans:cedarling:custom-issuer:billing-api", result.getTokenRefs().get(0).getIssuer());
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({ "urn:jans:cedarling:custom-issuer:billing:v2", "urn:jans:cedarling:custom-issuer:a%20b",
+			"urn:jans:cedarling:custom-issuer:svc_1.prod-eu@example" })
+	void testTokens_issuerCustomUrnNameChars_accepted(String issuer) throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf(issuer), "trace", "event", "tokens", "0", "issuer");
+
+		registry.validate(parseAndCommonValidate(root));
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@CsvSource({ "urn:jans:cedarling:custom-issuer:","URN:jans:cedarling:custom-issuer:billing-api",
+			"urn:jans:cedarling:other:billing-api", "urn:example:billing-api",
+			"urn:jans:cedarling:custom-issuer:a#b", "urn:jans:cedarling:custom-issuer:a?+b",
+			"urn:jans:cedarling:custom-issuer:a?=b", "urn:jans:cedarling:custom-issuer:?+b",
+			"urn:jans:cedarling:custom-issuer:a/b", "urn:jans:cedarling:custom-issuer:a%zz",
+			"urn:jans:cedarling:custom-issuer:a b" })
+	void testTokens_issuerInvalidUrn_throwsInvalidAssertion(String issuer) throws IOException {
+		ObjectNode root = loadFixture("authorization_decision_valid.json");
+		set(root, TextNode.valueOf(issuer), "trace", "event", "tokens", "0", "issuer");
+
+		TraceValidationException ex = validateAndCapture(root);
+
+		assertEquals(TraceValidationException.ERROR_INVALID_ASSERTION, ex.getErrorId());
+		assertEquals("invalid:trace.event.tokens[0].issuer", ex.getReason());
 	}
 
 	@Test
