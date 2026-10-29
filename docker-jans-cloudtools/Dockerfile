@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.20@sha256:b052d402e9146bca23524922cdbe9a11849cd2e6af0d2661eaa10400a124c19d
+FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:7b0cd77df19f413034a437f081ac4c3db892e6ce3d3cde56c76d5c51cf7b071a
 
 # ===============
 # Alpine packages
@@ -146,11 +146,6 @@ COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 RUN ln -sf /usr/lib/jvm/jre /opt/java
-
-# a workaround to block compromised emudhra certs while waiting updates from jvm distro
-COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
-RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
-    && rm -f /tmp/emudhra_blocked.certs
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000

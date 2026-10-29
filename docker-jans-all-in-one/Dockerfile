@@ -47,7 +47,7 @@ FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.20@sha256:1aa69057bcd3eafa77738ec58ba8b969fd621212e3f280d3774e64409bf6333d
+FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:a16eb904aa472d560ff3fb6a77de0efc3482be938210d2caef0bd1f89c10d356
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -245,11 +245,6 @@ RUN cp /app/templates/nginx/*-upstream.conf /etc/nginx/jans-aio/ \
     && cp /app/templates/nginx/*-location.conf /etc/nginx/jans-aio
 
 RUN touch /run/nginx/nginx.pid
-
-# a workaround to block compromised emudhra certs while waiting updates from jvm distro
-COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
-RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
-    && rm -f /tmp/emudhra_blocked.certs
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -u 1000 jans \

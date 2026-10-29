@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.20@sha256:1aa69057bcd3eafa77738ec58ba8b969fd621212e3f280d3774e64409bf6333d
+FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:a16eb904aa472d560ff3fb6a77de0efc3482be938210d2caef0bd1f89c10d356
 
 # ===============
 # Alpine packages
@@ -296,11 +296,6 @@ RUN chmod +x /app/scripts/entrypoint.sh
 RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
 
 RUN ln -sf /usr/lib/jvm/jdk /opt/java
-
-# a workaround to block compromised emudhra certs while waiting updates from jvm distro
-COPY contrib/emudhra_blocked.certs /tmp/emudhra_blocked.certs
-RUN cat /tmp/emudhra_blocked.certs >> /opt/java/lib/security/blocked.certs \
-    && rm -f /tmp/emudhra_blocked.certs
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
