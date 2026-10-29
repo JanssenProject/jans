@@ -62,6 +62,7 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
+import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.servlet.http.HttpServletRequest;
@@ -100,6 +101,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	private ApplicationAuditLogger applicationAuditLogger;
 
 	@Mock
+	private TraceRetrievalService retrievalService;
+
+	@Mock
 	private HttpServletRequest httpServletRequest;
 
 	private TraceConfiguration traceConfiguration;
@@ -119,6 +123,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		setField(impl, "submitterIdentityService", submitterIdentityService);
 		setField(impl, "evidenceDomainResolver", evidenceDomainResolver);
 		setField(impl, "ingestionService", ingestionService);
+		setField(impl, "retrievalService", retrievalService);
 		setField(impl, "applicationAuditLogger", applicationAuditLogger);
 
 		traceConfiguration = new TraceConfiguration();
@@ -555,6 +560,52 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(applicationAuditLogger).log(any(), eq(false));
 	}
 
+	// -- gRPC calls --------------------------------------------------------------------------------
+
+	private void bindServletRequest(HttpServletRequest request) throws ReflectiveOperationException {
+		java.lang.reflect.Field field = io.jans.lock.service.ws.rs.base.BaseResource.class.getDeclaredField("httpRequest");
+		field.setAccessible(true);
+		field.set(impl, request);
+	}
+
+	@Test
+	void testGetRecord_GrpcCall_IgnoresServletRequestAndAuditsContextIp() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(retrievalService.findRecord(DOMAIN, "record-1", null)).thenReturn(storedRecord(false));
+
+		io.grpc.Context.current().withValue(io.jans.lock.util.ServerUtil.CLIENT_IP_CONTEXT_KEY, "10.1.2.3")
+				.run(() -> impl.getRecord("record-1", null));
+
+		verify(submitterIdentityService).resolve(null);
+		org.mockito.Mockito.verifyNoInteractions(httpServletRequest);
+		org.mockito.ArgumentCaptor<io.jans.core.cedarling.model.AuditLogEntry> entry = org.mockito.ArgumentCaptor
+				.forClass(io.jans.core.cedarling.model.AuditLogEntry.class);
+		verify(applicationAuditLogger).log(entry.capture(), eq(true));
+		assertEquals("10.1.2.3", entry.getValue().getIp());
+	}
+
+	@Test
+	void testSubmitRecord_GrpcCall_ResolvesIdentityWithoutServletRequest() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(ingestionService.ingest(any(), org.mockito.ArgumentMatchers.eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		io.grpc.Context.current().withValue(io.jans.lock.util.ServerUtil.CLIENT_IP_CONTEXT_KEY, "10.1.2.3")
+				.run(() -> impl.submitRecord(body(), null, null));
+
+		verify(submitterIdentityService).resolve(null);
+	}
+
+	@Test
+	void testGetRecord_RestCall_ResolvesIdentityFromServletRequest() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(retrievalService.findRecord(DOMAIN, "record-1", null)).thenReturn(storedRecord(false));
+
+		impl.getRecord("record-1", null);
+
+		verify(submitterIdentityService).resolve(httpServletRequest);
+	}
+
 	// -- annotation fixture check ------------------------
 
 	@Test
@@ -570,7 +621,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport");
+		assertEquals("SubmitRecord", protectedApi.grpcMethodName());
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());
@@ -592,7 +643,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport");
+		assertEquals("SubmitBulkRecords", protectedApi.grpcMethodName());
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());

@@ -140,11 +140,11 @@ jobs:
     - name: Install dylint
       run: |
         export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
-        cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
+        cargo binstall cargo-dylint --version 6.3.0 --locked --no-confirm
+        cargo binstall dylint-link --version 6.3.0 --locked --no-confirm
         if ! which dylint-link > /dev/null 2>&1; then
           echo "dylint-link not found via binstall, falling back to cargo install"
-          cargo install dylint-link --version 5.0.0 --locked
+          cargo install dylint-link --version 6.3.0 --locked
         fi
         echo "dylint-link location: $(which dylint-link)"
     - name: Run Tests

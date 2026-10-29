@@ -96,7 +96,7 @@ Kubernetes: `>=v1.23.0-0`
 | auth-server.ingress.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | auth-server.ingress.firebaseMessagingLabels | object | `{}` | Firebase Messaging ingress resource labels. key app is taken |
 | auth-server.ingress.lockAdditionalAnnotations | object | `{}` | Lock ingress resource additional annotations. |
-| auth-server.ingress.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService |
+| auth-server.ingress.lockAuditEnabled | bool | `false` | Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService |
 | auth-server.ingress.lockConfigAdditionalAnnotations | object | `{}` | Lock config ingress resource additional annotations. |
 | auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration |
 | auth-server.ingress.lockConfigLabels | object | `{}` | Lock config ingress resource labels. key app is taken |
@@ -335,7 +335,7 @@ Kubernetes: `>=v1.23.0-0`
 | gateway-api.routes.fido2WebauthnEnabled | bool | `false` | Enable endpoint /.well-known/webauthn |
 | gateway-api.routes.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | gateway-api.routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
-| gateway-api.routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, auth-server.lockEnabled must be enabled) |
+| gateway-api.routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService (if enabled, auth-server.lockEnabled must be enabled) |
 | gateway-api.routes.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration (if enabled, auth-server.lockEnabled must be enabled) |
 | gateway-api.routes.oauthServerConfigEnabled | bool | `true` | Enable endpoint /.well-known/oauth-authorization-server |
 | gateway-api.routes.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |

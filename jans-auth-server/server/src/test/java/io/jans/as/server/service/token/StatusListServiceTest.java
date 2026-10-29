@@ -9,6 +9,9 @@ import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.DiscoveryService;
 import io.jans.as.server.service.cluster.StatusIndexPoolService;
+import io.jans.model.token.StatusIndexPool;
+import io.jans.model.tokenstatus.StatusList;
+import io.jans.model.tokenstatus.TokenStatus;
 import jakarta.ws.rs.WebApplicationException;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
@@ -17,6 +20,9 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
@@ -145,5 +151,35 @@ public class StatusListServiceTest {
         JSONObject statusClaim = claims.getClaimAsJSON("status");
         assertNotNull(statusClaim);
         assertEquals(statusClaim.getJSONObject("status_list").getInt("idx"), 0);
+    }
+
+    @Test
+    public void join_shouldCoverEveryAllocatedIndex() throws IOException {
+        StatusIndexPool unused = pool(0, 0, 99, null);
+        StatusList revoked = new StatusList(2);
+        revoked.set(105, TokenStatus.INVALID.getValue());
+        StatusIndexPool used = pool(1, 100, 199, revoked.getLst());
+
+        StatusList joined = StatusList.fromEncoded(
+                StatusListService.join(List.of(unused, used), 2, log).getLst(), 2);
+
+        assertEquals(joined.getSize(), 200);
+        assertEquals(joined.get(5), TokenStatus.VALID.getValue());
+        assertEquals(joined.get(105), TokenStatus.INVALID.getValue());
+        assertEquals(joined.get(199), TokenStatus.VALID.getValue());
+    }
+
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void join_whenPoolDataIsCorrupt_shouldFail() {
+        StatusListService.join(List.of(pool(0, 0, 99, "not-a-status-list")), 2, log);
+    }
+
+    private static StatusIndexPool pool(int id, int startIndex, int endIndex, String data) {
+        StatusIndexPool pool = new StatusIndexPool();
+        pool.setId(id);
+        pool.setStartIndex(startIndex);
+        pool.setEndIndex(endIndex);
+        pool.setData(data);
+        return pool;
     }
 }
