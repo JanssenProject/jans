@@ -1,0 +1,14 @@
+# Doxygen configuration for the Cedarling C API reference.
+# Run from this directory; automation/docs/generate-c-docs.sh sets the variables below.
+PROJECT_NAME           = "Cedarling C API"
+INPUT                  = "$(CEDARLING_C_HEADER)" mainpage.md examples.dox
+USE_MDFILE_AS_MAINPAGE = mainpage.md
+EXAMPLE_PATH           = ../examples
+EXAMPLE_PATTERNS       = *.c
+OUTPUT_DIRECTORY       = "$(CEDARLING_C_DOCS_OUT)"
+HTML_OUTPUT            = html
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+FULL_PATH_NAMES        = NO
+GENERATE_LATEX         = NO
+QUIET                  = YES
