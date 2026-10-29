@@ -49,7 +49,7 @@ DIAGRAM = {
     "edges": [
         {"points": [(1180, 150), (1180, 62), (200, 62), (200, 150)],
          "label": "token with status claim", "at": (690, 62), "color": "violet"},
-        {"points": [(200, 240), (200, 290)], "arrow": False, "style": "dotted"},
+        {"points": [(200, 240), (200, 290)]},
         {"points": [(340, 390), (385, 390), (385, 195), (430, 195)]},
         {"points": [(1020, 195), (930, 195)], "color": "violet"},
         {"points": [(720, 195), (680, 195)]},
