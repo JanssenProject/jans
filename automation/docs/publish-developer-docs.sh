@@ -55,11 +55,15 @@ write_landing_page() {
     if [ -f cedarling-js/index.html ]; then
         entries+=("cedarling-js/index.html|Cedarling JavaScript/TypeScript")
     fi
+    if [ -f cedarling-java/index.html ]; then
+        entries+=("cedarling-java/index.html|Cedarling Java/Kotlin")
+    fi
     local page
     while IFS= read -r page; do
         entries+=("${page#./}|${page#./}")
     done < <(find . -mindepth 2 -name index.html \
         -not -path "./cedarling/*" -not -path "./cedarling-c/*" -not -path "./cedarling-js/*" \
+        -not -path "./cedarling-java/*" \
         -not -path "./.git/*" | sort)
 
     {
