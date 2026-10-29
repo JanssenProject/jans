@@ -5,12 +5,12 @@ The numbered badges match the numbered list under the diagram in the docs.
 
 DIAGRAM = {
     "output": "docs/assets/cedarling/cedarling-zero-trust-topology.png",
-    "size": (1400, 700),
+    "size": (1400, 720),
     "groups": [
         {"color": "teal", "label": "MOBILE DEVICE", "x": 300, "y": 40, "w": 380, "h": 370},
         {"color": "violet", "label": "IDENTITY PROVIDER", "x": 900, "y": 40, "w": 460, "h": 370},
-        {"color": "blue", "label": "API GATEWAY", "x": 270, "y": 470, "w": 400, "h": 200},
-        {"color": "blue", "label": "BACKEND APPLICATION", "x": 730, "y": 470, "w": 400,
+        {"color": "blue", "label": "API GATEWAY", "x": 270, "y": 490, "w": 400, "h": 200},
+        {"color": "blue", "label": "BACKEND APPLICATION", "x": 730, "y": 490, "w": 400,
          "h": 200},
     ],
     "nodes": {
@@ -19,7 +19,7 @@ DIAGRAM = {
 
         "app": {"color": "teal", "box": (320, 90, 340, 130),
                 "title": "App", "desc": ["ships with a Software", "Statement Assertion (SSA)"]},
-        "device_pdp": {"color": "teal", "box": (320, 290, 340, 90), "emphasis": True,
+        "device_pdp": {"color": "teal", "box": (320, 290, 250, 90), "emphasis": True,
                        "badge": 2, "title": "Cedarling", "desc": ["gates UI and API calls"]},
 
         "register": {"color": "violet", "box": (920, 90, 200, 90),
@@ -29,10 +29,10 @@ DIAGRAM = {
         "token": {"color": "violet", "box": (920, 290, 200, 90),
                   "title": "/token", "desc": ["issues access", "token"]},
 
-        "gateway_pdp": {"color": "blue", "box": (290, 525, 360, 110), "emphasis": True,
+        "gateway_pdp": {"color": "blue", "box": (290, 545, 360, 110), "emphasis": True,
                         "badge": 3, "title": "Cedarling",
                         "desc": ["checks scopes and", "revocation before forwarding"]},
-        "backend_pdp": {"color": "blue", "box": (750, 525, 360, 110), "emphasis": True,
+        "backend_pdp": {"color": "blue", "box": (750, 545, 360, 110), "emphasis": True,
                         "badge": 4, "title": "Cedarling",
                         "desc": ["re-checks the request,", "trusts no upstream layer"]},
     },
@@ -45,10 +45,10 @@ DIAGRAM = {
          "color": "violet"},
         {"points": [(1140, 135), (1120, 135)], "arrow": False, "color": "violet"},
         {"points": [(920, 335), (790, 335), (790, 200), (660, 200)],
-         "label": "access token", "at": (790, 260), "color": "violet"},
-        {"points": [(490, 220), (490, 290)], "label": "authorize", "at": (490, 255)},
-        {"points": [(490, 410), (490, 470)],
-         "label": "API call with access token", "at": (490, 440)},
-        {"points": [(670, 580), (730, 580)]},
+         "label": "get access token", "at": (790, 260), "color": "violet", "both": True},
+        {"points": [(445, 220), (445, 290)], "label": "authorize", "at": (445, 255)},
+        {"points": [(620, 220), (620, 410), (620, 490)],
+         "label": "API call with access token", "at": (620, 450)},
+        {"points": [(670, 600), (730, 600)]},
     ],
 }
