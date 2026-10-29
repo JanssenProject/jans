@@ -63,9 +63,11 @@ public class UserResource extends BaseResource {
     private static final String USER_PWD = "userPassword";
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
+    private static final String UPDATE_USER_PATCH_ERROR = "UPDATE_USER_PATCH_ERROR";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
     private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s User")
             .append(" does not have super admin permission to fetch/modify user{%s}");
+    private static final String MISMATCH_ERROR_MSG = "{%s} User DN does not match user inum{%s}";
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -236,6 +238,8 @@ public class UserResource extends BaseResource {
             // get User object
             User user = setUserAttributes(customUser);
 
+            validateUserPermission(user.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
+
             validateUserData(user, false, removeNonLDAPAttributes, null);
             logger.info("Service call to create user:{}", user);
 
@@ -309,7 +313,8 @@ public class UserResource extends BaseResource {
             User storedUser = userMgmtSrv.getUserBasedOnInum(candidateUserInum);
             checkResourceNotNull(storedUser, USER);
             if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
-                throwBadRequestException("USER_UPDATE_ERROR", "User DN does not match user inum");
+                throwBadRequestException("USER_UPDATE_ERROR",
+                        String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), user.getDn()));
             }
             validateUserPermission(storedUser.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
 
@@ -399,7 +404,8 @@ public class UserResource extends BaseResource {
                 User storedUser = userMgmtSrv.getUserBasedOnInum(patchUserInum);
                 checkResourceNotNull(storedUser, USER);
                 if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(existingUser.getDn())) {
-                    throwBadRequestException("UPDATE_USER_PATCH_ERROR", "User DN does not match user inum");
+                    throwBadRequestException(UPDATE_USER_PATCH_ERROR,
+                            String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), existingUser.getDn()));
                 }
             }
 
@@ -421,7 +427,7 @@ public class UserResource extends BaseResource {
             customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
             logger.info("patched customUser:{}", customUser);
         } catch (Exception ex) {
-            handleException(ex, "UPDATE_USER_PATCH_ERROR");
+            handleException(ex, UPDATE_USER_PATCH_ERROR);
         }
 
         return Response.ok(customUser).build();
@@ -451,9 +457,28 @@ public class UserResource extends BaseResource {
         if (logger.isInfoEnabled()) {
             logger.info("User to be deleted - inum:{} ", escapeLog(inum));
         }
-        User user = userMgmtSrv.getUserBasedOnInum(inum);
-        checkResourceNotNull(user, USER);
-        userMgmtSrv.removeUser(user);
+        try {
+            User user = userMgmtSrv.getUserBasedOnInum(inum);
+            checkResourceNotNull(user, USER);
+
+            // validate user permission
+            String deleteUserInum = user.getAttribute("inum");
+            if (StringUtils.isNotBlank(deleteUserInum)) {
+                User storedUser = userMgmtSrv.getUserBasedOnInum(deleteUserInum);
+                checkResourceNotNull(storedUser, USER);
+                if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
+                    throwBadRequestException("UPDATE_USER_DELETE_ERROR",
+                            String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), user.getDn()));
+                }
+            }
+
+            validateUserPermission(inum, ApiConstants.DELETE_REQUEST);
+
+            userMgmtSrv.removeUser(user);
+            logger.info("deleted User:{}", inum);
+        } catch (Exception ex) {
+            handleException(ex, "UPDATE_USER_DELETE_ERROR");
+        }
         return Response.noContent().build();
     }
 
@@ -790,7 +815,8 @@ public class UserResource extends BaseResource {
         }
 
         if (StringUtils.isNotBlank(userInum) && !isAdmin) {
-            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), escapeLog(loggedInUserInum), escapeLog(userInum));
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), escapeLog(loggedInUserInum),
+                    escapeLog(userInum));
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));

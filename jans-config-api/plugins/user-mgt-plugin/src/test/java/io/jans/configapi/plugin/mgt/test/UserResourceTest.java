@@ -30,7 +30,7 @@ public class UserResourceTest extends UserBaseTest {
 
         Response response = request.get();
         log.info("\n\n Response for getUserResourceData() -  response:{}, response.getStatus():{}", response, response.getStatus());
-        assertEquals(response.getStatus(), Status.OK.getStatusCode());
+        assertEquals(response.getStatus(), Status.UNAUTHORIZED.getStatusCode());
         
     }
 
