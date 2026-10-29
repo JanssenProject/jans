@@ -183,7 +183,7 @@ A type mismatch on a **required** attribute causes an error. A type mismatch on 
 
 Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft.
 
-This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
+This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property. An issuer with a static JWKS, or without a `status_list_endpoint`, has no Status List, so its tokens that carry a `status` claim are rejected.
 
 > ℹ️ **Use Case**
 >
@@ -199,7 +199,7 @@ Cedarling applies **fail-closed** semantics: if a background refresh fails (netw
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so with the JWKS and the Status List that it fetches from each trusted issuer, using the endpoints in the issuer's OpenID configuration. A token that fails any check is dropped and logged.
+JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling validates the JWT's signature, its claims (such as `exp`), and its status (revoked or not). It fetches the JWKS and the Status List through each trusted issuer's OpenID configuration. A token that fails any check is dropped and logged.
 
 ![Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List](../../assets/cedarling/cedarling-jwt-validation.png)
 
