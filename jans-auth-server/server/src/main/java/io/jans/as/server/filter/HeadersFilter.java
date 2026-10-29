@@ -62,7 +62,9 @@ public class HeadersFilter implements Filter {
         }
 
         final String requestURI = httpRequest.getRequestURI();
-        final boolean hasAny = appConfiguration.getApplySecurityHeadersIfUriContainsAny().stream().anyMatch(requestURI::contains);
+        final boolean hasAny = appConfiguration.getApplySecurityHeadersIfUriContainsAny().stream()
+                .filter(uriPart -> uriPart != null && !uriPart.trim().isEmpty())
+                .anyMatch(requestURI::contains);
         if (hasAny) {
             httpResponse.addHeader(CONTENT_SECURITY_POLICY_HEADER, CONTENT_SECURITY_POLICY_VALUE);
             httpResponse.addHeader(X_CONTENT_TYPE_OPTIONS_HEADER, X_CONTENT_TYPE_OPTIONS_VALUE);

@@ -8,6 +8,7 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -83,6 +84,34 @@ public class HeadersFilterTest {
         HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
 
         verify(response, never()).addHeader(anyString(), anyString());
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_withEmptyAndNullUriListEntries_shouldIgnoreThem() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setApplySecurityHeadersIfUriContainsAny(Arrays.asList("", " ", null));
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response, never()).addHeader(anyString(), anyString());
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_withValidEntryAmongEmptyAndNull_shouldAddSecurityHeaders() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setApplySecurityHeadersIfUriContainsAny(Arrays.asList("", null, "/restv1/token"));
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response).addHeader("X-Content-Type-Options", "nosniff");
     }
 
     @Test
