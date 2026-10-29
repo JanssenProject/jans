@@ -27,6 +27,7 @@ public class UserResourceTest extends UserBaseTest {
         Builder request = getResteasyService().getClientBuilder(issuer + userUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        request.header("User-inum","123");
 
         Response response = request.get();
         log.info("\n\n Response for getUserResourceData() -  response:{}, response.getStatus():{}", response, response.getStatus());

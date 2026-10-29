@@ -67,7 +67,7 @@ public class UserResource extends BaseResource {
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
     private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s User")
             .append(" does not have super admin permission to fetch/modify user{%s}");
-    private static final String MISMATCH_ERROR_MSG = "{%s} User DN does not match user inum{%s}";
+    private static final String MISMATCH_ERROR_MSG = "User DN does not match user inum";
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -313,8 +313,11 @@ public class UserResource extends BaseResource {
             User storedUser = userMgmtSrv.getUserBasedOnInum(candidateUserInum);
             checkResourceNotNull(storedUser, USER);
             if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
-                throwBadRequestException("USER_UPDATE_ERROR",
-                        String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), user.getDn()));
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Update User DN mismatch - inum:{}, storedDn:{}, requestDn:{}",
+                            escapeLog(candidateUserInum), escapeLog(storedUser.getDn()), escapeLog(user.getDn()));
+                }
+                throwBadRequestException("USER_UPDATE_ERROR", MISMATCH_ERROR_MSG);
             }
             validateUserPermission(storedUser.getAttribute("inum"), ApiConstants.WRITE_REQUEST);
 
@@ -404,8 +407,11 @@ public class UserResource extends BaseResource {
                 User storedUser = userMgmtSrv.getUserBasedOnInum(patchUserInum);
                 checkResourceNotNull(storedUser, USER);
                 if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(existingUser.getDn())) {
-                    throwBadRequestException(UPDATE_USER_PATCH_ERROR,
-                            String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), existingUser.getDn()));
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Patch User DN mismatch - inum:{}, storedDn:{}, requestDn:{}",
+                                escapeLog(storedUser), escapeLog(storedUser.getDn()), escapeLog(existingUser.getDn()));
+                    }
+                    throwBadRequestException(UPDATE_USER_PATCH_ERROR, MISMATCH_ERROR_MSG);
                 }
             }
 
@@ -467,15 +473,21 @@ public class UserResource extends BaseResource {
                 User storedUser = userMgmtSrv.getUserBasedOnInum(deleteUserInum);
                 checkResourceNotNull(storedUser, USER);
                 if (StringUtils.isNotBlank(storedUser.getDn()) && !storedUser.getDn().equals(user.getDn())) {
-                    throwBadRequestException("UPDATE_USER_DELETE_ERROR",
-                            String.format(MISMATCH_ERROR_MSG, storedUser.getDn(), user.getDn()));
+                    if (logger.isWarnEnabled()) {
+                        logger.warn("Delete User DN mismatch - inum:{}, storedDn:{}, requestDn:{}",
+                                escapeLog(storedUser), escapeLog(storedUser.getDn()), escapeLog(user.getDn()));
+                    }
+                    throwBadRequestException("UPDATE_USER_DELETE_ERROR", MISMATCH_ERROR_MSG);
                 }
             }
 
             validateUserPermission(inum, ApiConstants.DELETE_REQUEST);
 
             userMgmtSrv.removeUser(user);
-            logger.info("deleted User:{}", inum);
+            if (logger.isInfoEnabled()) {
+                logger.info("deleted User:{}", escapeLog(inum));
+            }
+
         } catch (Exception ex) {
             handleException(ex, "UPDATE_USER_DELETE_ERROR");
         }
@@ -762,14 +774,13 @@ public class UserResource extends BaseResource {
         if (logger.isInfoEnabled()) {
             logger.info(" UserResource - Header loggedInUserInum:{}", escapeLog(loggedInUserInum));
         }
-        if (StringUtils.isBlank(loggedInUserInum)) {
-            logger.info("Logged in User details missing");
-        }
 
+        // For user mgt endpoint Header attribute `User-inum` is mandatory
         if (StringUtils.isBlank(loggedInUserInum)) {
-            return;
+            throw new WebApplicationException("`User-inum` is missing",
+                    Response.status(Response.Status.BAD_REQUEST).build());
         }
-
+        
         // Return if logged-in user is updating own profile
         if (StringUtils.isNotBlank(loggedInUserInum) && loggedInUserInum.equals(userInum)) {
             return;
@@ -786,14 +797,9 @@ public class UserResource extends BaseResource {
             logger.info("validateUserPermission - loggedInUserInum {}, userInum:{}, httpRequestMethod:{}",
                     escapeLog(loggedInUserInum), escapeLog(userInum), httpRequestMethod);
         }
+
         if (StringUtils.isBlank(userInum)) {
             return;
-        }
-
-        // For user mgt endpoint Header attribute `User-inum` is mandatory
-        if (StringUtils.isBlank(loggedInUserInum)) {
-            throw new WebApplicationException("`User-inum` is missing",
-                    Response.status(Response.Status.BAD_REQUEST).build());
         }
 
         // Get logged in User details
