@@ -33,10 +33,10 @@ The Cedarling can be:
 In addition to being a library, the Cedarling is an embeddable Policy Decision Point (PDP),
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
-Janssen Lock Server, the evidence collector, to centralize collection of decision logs, which are
-a record of allowed or denied access to a capability, and, with TRACE enabled, of signed evidence
-of those decisions. Lock Server can enable enterprises to perform threat detection and stream the
-logs to a SIEM or ITDR.
+Janssen Lock Server, the evidence collector, to centralize decision logs (records of allowed or
+denied access to a capability) and, when [TRACE](./reference/cedarling-properties.md#trace-properties)
+is enabled, signed evidence of each decision whose request carries a TRACE context. Lock Server
+can enable enterprises to perform threat detection and stream the logs to a SIEM or ITDR.
 
 The Cedarling supports JWT validation and claims mapping. Validation includes checking the
 signature against a list of trusted issuers, validating the contents of the token (e.g.
