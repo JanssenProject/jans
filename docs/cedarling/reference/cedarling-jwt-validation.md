@@ -199,9 +199,9 @@ Cedarling applies **fail-closed** semantics: if a background refresh fails (netw
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so with the JWKS and the Status List that it fetches from each trusted issuer, using the endpoints in the issuer's OpenID configuration. A token that fails any check is dropped and logged.
 
-![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
+![Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List](../../assets/cedarling/cedarling-jwt-validation.png)
 
 ## Local JWKS
 
