@@ -23,14 +23,15 @@ Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
 ![Diagram showing Cedarling authorization flow: tokens and a resource become entities that a policy evaluates](../../assets/cedarling/cedarling-authz.png)
 
-The tokens, the Action, the Resource, and the Context are sent in the authz request. The Cedarling
-validates each token and turns it into a Cedar entity under `context.tokens`, named after its
-trusted issuer and token type (for example `context.tokens.bar_access_token`). The Resource
+The tokens, the Action, and the Resource are sent in the authz request, along with an optional
+Context. The Cedarling validates each token and turns it into a Cedar entity under
+`context.tokens`, named after its trusted issuer and token type (for example
+`context.tokens.bar_access_token`). The Resource
 becomes a Cedar entity too. Policies then compare token claims with resource attributes: in the
 diagram, the access token lists the customers the caller supports, and the policy allows the
 request because the ticket belongs to one of them. When the application has already authenticated
-the caller, it can pass an asserted principal instead of tokens, see
-[Unsigned Authorization](#unsigned-authorization-authorize_unsigned).
+the caller, it can pass an asserted principal instead of tokens (see
+[Unsigned Authorization](#unsigned-authorization-authorize_unsigned)).
 
 Policies can express RBAC conditions, ABAC conditions, or both. For example, a policy may allow
 Admins to access a "private" Resource from the private network during business hours. "Admins" is
