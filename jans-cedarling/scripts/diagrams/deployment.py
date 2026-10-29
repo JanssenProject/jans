@@ -34,7 +34,7 @@ DIAGRAM = {
         "sidecar": {"color": "amber", "box": (820, 340, 255, 70), "emphasis": True,
                     "title": "Cedarling Sidecar", "desc": ["AuthZEN API, any language"]},
         "gateways": {"color": "amber", "box": (1085, 340, 255, 70), "emphasis": True,
-                     "title": "Gateway plugins", "desc": ["KrakenD, OPA"]},
+                     "title": "Plugins", "desc": ["KrakenD gateway, OPA"]},
 
         "lock": {"color": "violet", "box": (500, 480, 400, 120),
                  "title": "Lock Server", "role": "Evidence Collector",
@@ -51,10 +51,10 @@ DIAGRAM = {
         {"points": [(1186, 205), (1186, 230)]},
         {"points": [(1292, 205), (1292, 230)]},
         {"points": [(210, 350), (210, 540), (500, 540)],
-         "color": "violet", "style": "dashed", "both": True},
+         "label": "logs, telemetry", "at": (355, 540), "color": "violet", "style": "dashed", "both": True},
         {"points": [(590, 350), (590, 480)],
-         "color": "violet", "style": "dashed", "both": True},
+         "label": "logs, telemetry, evidence", "at": (590, 415), "color": "violet", "style": "dashed", "both": True},
         {"points": [(1080, 430), (1080, 540), (900, 540)],
-         "color": "violet", "style": "dashed", "both": True},
+         "label": "logs, telemetry, evidence", "at": (1080, 485), "color": "violet", "style": "dashed", "both": True},
     ],
 }
