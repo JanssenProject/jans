@@ -1466,6 +1466,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applysecurityheadersifuricontainsany" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        applySecurityHeadersIfUriContainsAny
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applyxframeoptionsheaderifuricontainsany" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -4198,6 +4209,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         sectorIdentifierCacheLifetimeInMinutes
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#securityheadersenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        securityHeadersEnabled
       </span>
     </span>
   </a>
@@ -6027,6 +6049,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#applysecurityheadersifuricontainsany" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        applySecurityHeadersIfUriContainsAny
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#applyxframeoptionsheaderifuricontainsany" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -8766,6 +8799,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#securityheadersenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        securityHeadersEnabled
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#servicedocumentation" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -9891,6 +9935,11 @@
 <td>allowStartupOnJwksUriFetchFailure</td>
 <td>Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.</td>
 <td><a href="#allowstartuponjwksurifetchfailure">Details</a></td>
+</tr>
+<tr>
+<td>applySecurityHeadersIfUriContainsAny</td>
+<td>Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.</td>
+<td><a href="#applysecurityheadersifuricontainsany">Details</a></td>
 </tr>
 <tr>
 <td>applyXFrameOptionsHeaderIfUriContainsAny</td>
@@ -11138,6 +11187,11 @@
 <td><a href="#sectoridentifiercachelifetimeinminutes">Details</a></td>
 </tr>
 <tr>
+<td>securityHeadersEnabled</td>
+<td>Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny</td>
+<td><a href="#securityheadersenabled">Details</a></td>
+</tr>
+<tr>
 <td>serviceDocumentation</td>
 <td>URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider</td>
 <td><a href="#servicedocumentation">Details</a></td>
@@ -11720,6 +11774,18 @@
 </li>
 <li>
 <p>Default value: false</p>
+</li>
+</ul>
+<h2 id="applysecurityheadersifuricontainsany">applySecurityHeadersIfUriContainsAny<a class="headerlink" href="#applysecurityheadersifuricontainsany" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: /restv1/token, /restv1/userinfo, /restv1/introspection, /restv1/jwks, /restv1/register, /restv1/revoke</p>
 </li>
 </ul>
 <h2 id="applyxframeoptionsheaderifuricontainsany">applyXFrameOptionsHeaderIfUriContainsAny<a class="headerlink" href="#applyxframeoptionsheaderifuricontainsany" title="Permanent link">#</a></h2>
@@ -14710,6 +14776,18 @@
 <p>Default value: 1440</p>
 </li>
 </ul>
+<h2 id="securityheadersenabled">securityHeadersEnabled<a class="headerlink" href="#securityheadersenabled" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: true</p>
+</li>
+</ul>
 <h2 id="servicedocumentation">serviceDocumentation<a class="headerlink" href="#servicedocumentation" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -15618,7 +15696,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 23, 2026
+    October 29, 2026
   </span>
 
     
