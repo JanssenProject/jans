@@ -58,6 +58,8 @@ CORNER_RADIUS = 10
 TITLE_HEIGHT = 26
 LINE_HEIGHT = 21
 CODE_LINE_HEIGHT = 20
+# The arrow marker is 7 stroke widths long on a 2px line.
+ARROW_LENGTH = 14
 
 
 def rounded_path(points):
@@ -141,6 +143,28 @@ def render_node(node):
     return "".join(parts)
 
 
+def label_position(edge, width):
+    """Keep a label on the last segment clear of the arrowhead.
+
+    A label centered on a short last segment ends right where the arrowhead
+    starts, so it is centered between the segment start and the arrowhead base
+    instead.
+    """
+    lx, ly = edge["at"]
+    if not edge.get("arrow", True) or len(edge["points"]) < 2:
+        return lx, ly
+    (sx, sy), (ex, ey) = edge["points"][-2], edge["points"][-1]
+    if sx == ex == lx and min(sy, ey) <= ly <= max(sy, ey):
+        direction = 1 if ey > sy else -1
+        base = ey - direction * ARROW_LENGTH
+        return lx, (sy + base) / 2
+    if sy == ey == ly and min(sx, ex) <= lx <= max(sx, ex):
+        direction = 1 if ex > sx else -1
+        base = ex - direction * ARROW_LENGTH
+        return (sx + base) / 2, ly
+    return lx, ly
+
+
 def render_edge(edge):
     color_name = edge.get("color", "teal")
     color = COLORS[color_name]["edge"]
@@ -166,8 +190,8 @@ def render_edge(edge):
         jx, jy = edge["points"][0]
         parts.append(f'<circle cx="{jx}" cy="{jy}" r="4.5" fill="{color}"/>')
     if "label" in edge:
-        lx, ly = edge["at"]
         width = 9 + len(edge["label"]) * 7.6
+        lx, ly = label_position(edge, width)
         parts.append(
             f'<rect x="{lx - width / 2}" y="{ly - 12}" width="{width}" height="24" rx="12" '
             f'fill="{BACKGROUND}" stroke="{color}" stroke-opacity="0.35"/>'
