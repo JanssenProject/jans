@@ -45,9 +45,11 @@ basic_example.c for complete values.
 
 ## Memory ownership
 
-Anything the library returns belongs to the caller and must be released with
-the matching function: `cedarling_free_string`, `cedarling_free_result`,
-`cedarling_free_instance_result` or `cedarling_free_string_array`.
+Strings and results allocated by the library belong to the caller and must be
+released with the matching function: `cedarling_free_string`,
+`cedarling_free_result`, `cedarling_free_instance_result` or
+`cedarling_free_string_array`. The exception is `cedarling_version()`, which
+returns a static string that must not be freed.
 
 ## Errors
 

@@ -41,7 +41,7 @@ cd "$CLONE_DIR"
 write_landing_page() {
     local entries=()
     if [ -f cedarling/index.html ]; then
-        entries+=("cedarling/index.html|Cedarling Rust and WASM")
+        entries+=("cedarling/index.html|Cedarling Rust, WASM and UniFFI")
     fi
     if [ -f cedarling-python/index.html ]; then
         entries+=("cedarling-python/index.html|Cedarling Python")

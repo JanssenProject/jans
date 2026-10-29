@@ -22,7 +22,6 @@ cat > "$DOC_DIR"/index.html <<'HTML'
 <head>
   <meta charset="utf-8">
   <title>Cedarling API documentation</title>
-  <meta http-equiv="refresh" content="0; url=cedarling/index.html">
 </head>
 <body>
   <p>Cedarling API documentation:</p>

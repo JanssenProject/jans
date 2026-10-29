@@ -33,8 +33,8 @@ def test_authorize_errors_package_qualified_import():
     import cedarling_python.authorize_errors as module
     from cedarling_python.authorize_errors import AuthorizeError
 
-    assert module is authorize_errors
-    assert AuthorizeError is authorize_errors.AuthorizeError
+    assert module is authorize_errors, "package-qualified import returned a different module"
+    assert AuthorizeError is authorize_errors.AuthorizeError, "AuthorizeError is not the native class"
 
 
 def test_authorize_unsigned_ok():
