@@ -15,7 +15,7 @@ DIAGRAM = {
                   "title": "Token (JWT)",
                   "code": ["iss: https://idp.bar.com",
                            "sub: foo@bar.com",
-                           "exp: 1730203200",
+                           "exp: 4102444800",
                            "status:",
                            "  status_list:",
                            "*    idx: 265",
