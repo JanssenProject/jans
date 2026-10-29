@@ -22,7 +22,7 @@ DIAGRAM = {
         "psm": {"color": "blue", "box": (380, 140, 590, 76),
                 "title": "Policy Store Manager", "desc": ["load, verify signature, refresh"]},
         "jwt": {"color": "blue", "box": (720, 300, 250, 76),
-                "title": "JWT Service", "desc": ["signature, claims, status list"]},
+                "title": "JWT Service", "desc": ["signature, claims, Status List"]},
         "cds": {"color": "blue", "box": (380, 470, 230, 96),
                 "title": "Context Data Store", "desc": ["pushed data with TTL"]},
         "builder": {"color": "blue", "box": (720, 470, 250, 96),
@@ -36,10 +36,10 @@ DIAGRAM = {
         "source": {"color": "violet", "box": (1100, 140, 230, 76),
                    "title": "Policy store source", "desc": ["local file or URI"]},
         "issuers": {"color": "violet", "box": (1100, 290, 230, 96),
-                    "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "status list"]},
-        "lock": {"color": "violet", "box": (1100, 602, 230, 112),
+                    "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "Status List"]},
+        "lock": {"color": "violet", "box": (1100, 584, 230, 130),
                  "title": "Lock Server", "role": "Evidence Collector",
-                 "desc": ["policy store, logs,", "health, telemetry"]},
+                 "desc": ["policy store, logs,", "health, telemetry,", "evidence"]},
     },
     # Edges listed later are drawn on top; the halo on the issuers edge cuts a
     # gap into the policies line it crosses.
