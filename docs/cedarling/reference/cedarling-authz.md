@@ -10,9 +10,11 @@ tags:
 # Authorization Using Cedarling
 
 The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the
-Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
-or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
-a Jans Lock Server OAuth protected endpoint.
+Trusted IDPs. The Cedarling loads its Policy Store during initialization from a local directory or
+Cedar Archive (`.cjar`), from inline YAML, or as a `.cjar` fetched via HTTPS (see
+[Policy Store Formats](./cedarling-policy-store.md#policy-store-formats)). In enterprise
+deployments, the Cedarling can retrieve its Policy Store from a Jans Lock Server OAuth protected
+endpoint.
 
 Developers need to define Cedar Schema that makes sense for their application. For example, a
 developer writing a customer support application might define an "Issue" Resource and Actions like
