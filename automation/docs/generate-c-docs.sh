@@ -8,27 +8,23 @@ WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
 
 echo "Generating the C header for the cedarling_c crate"
-cargo check --manifest-path "$CEDARLING_DIR"/Cargo.toml -p cedarling_c
+cargo build --release --manifest-path "$CEDARLING_DIR"/Cargo.toml -p cedarling_c
 
 if [ ! -f "$HEADER" ]; then
     echo "ERROR: cbindgen produced no header at $HEADER." >&2
     exit 1
 fi
 
-cat > "$WORK_DIR"/Doxyfile <<DOXYFILE
-PROJECT_NAME           = "Cedarling C API"
-INPUT                  = "$HEADER" "$BINDING_DIR/README.md"
-USE_MDFILE_AS_MAINPAGE = "$BINDING_DIR/README.md"
-OUTPUT_DIRECTORY       = "$WORK_DIR/out"
-OPTIMIZE_OUTPUT_FOR_C  = YES
-EXTRACT_ALL            = YES
-FULL_PATH_NAMES        = NO
-GENERATE_LATEX         = NO
-QUIET                  = YES
-DOXYFILE
+if ! doxygen --version >/dev/null 2>&1; then
+    echo "ERROR: doxygen is not installed or cannot run." >&2
+    exit 1
+fi
 
-echo "Generating C docs with doxygen"
-doxygen "$WORK_DIR"/Doxyfile
+# Doxygen rendering changes between versions, so record which one built the docs.
+echo "Generating C docs with doxygen $(doxygen --version | head -1)"
+mkdir -p "$WORK_DIR"/out
+(cd "$BINDING_DIR"/docs &&
+    CEDARLING_C_HEADER="$HEADER" CEDARLING_C_DOCS_OUT="$WORK_DIR"/out doxygen Doxyfile)
 
 if [ ! -f "$WORK_DIR"/out/html/index.html ]; then
     echo "ERROR: doxygen produced no output for cedarling_c." >&2
