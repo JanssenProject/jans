@@ -153,7 +153,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             // If no scope required
             if (resourceScopes == null || resourceScopes.isEmpty()) {
                 logger.info(" If no resource scopes required return original accessToken");
-                return accessToken;
+                return AUTHENTICATION_SCHEME + accessToken;
             }
 
             // find missing scopes
@@ -174,7 +174,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                             + ", token scopes: " + tokenScopes, Response.status(Response.Status.UNAUTHORIZED).build());
                 }
 
-                return accessToken;
+                return AUTHENTICATION_SCHEME + accessToken;
             }
 
             // If only authSpecificScope missing then proceed with token creation else throw
@@ -191,7 +191,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             if (missingScopes == null || missingScopes.isEmpty()) {
                 logger.info(" No missing scopes and hence returning original accessToken");
 
-                return accessToken;
+                return AUTHENTICATION_SCHEME + accessToken;
             }
 
             logger.info("Generating new token with authSpecificScope");
