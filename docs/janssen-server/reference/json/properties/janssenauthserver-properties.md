@@ -29,6 +29,7 @@ tags:
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
 | allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
+| applySecurityHeadersIfUriContainsAny | Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true. | [Details](#applysecurityheadersifuricontainsany) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -278,6 +279,7 @@ tags:
 | saveTokensInCache | Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincache) |
 | saveTokensInCacheAndDontSaveInPersistence | Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincacheanddontsaveinpersistence) |
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
+| securityHeadersEnabled | Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny | [Details](#securityheadersenabled) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
 | sessionAuthnTimeCheckDuringPromptLoginThresholdMs | Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms. | [Details](#sessionauthntimecheckduringpromptloginthresholdms) |
 | sessionIdCookieLifetime | The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidcookielifetime) |
@@ -520,6 +522,15 @@ tags:
 - Required: No
 
 - Default value: false
+
+
+## applySecurityHeadersIfUriContainsAny
+
+- Description: Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.
+
+- Required: No
+
+- Default value: /restv1/token, /restv1/userinfo, /restv1/introspection, /restv1/jwks, /restv1/register, /restv1/revoke
 
 
 ## applyXFrameOptionsHeaderIfUriContainsAny
@@ -2761,6 +2772,15 @@ tags:
 - Required: No
 
 - Default value: 1440
+
+
+## securityHeadersEnabled
+
+- Description: Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny
+
+- Required: No
+
+- Default value: true
 
 
 ## serviceDocumentation
