@@ -135,6 +135,7 @@ Select the deployment method that best fits your environment and requirements.
 === "Kubernetes"
 
     ```bash
+    # Helm chart: janssen/janssen
     wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     

@@ -15,6 +15,7 @@ For local deployments, minimum resources are:
 Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
 ```bash
+# Helm chart: janssen/janssen
 sudo su -
 wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
