@@ -10,7 +10,8 @@ Usage (from the repository root):
     python3 jans-cedarling/scripts/diagrams/render.py              # all diagrams
     python3 jans-cedarling/scripts/diagrams/render.py components   # one diagram
 
-Set CHROME to the browser binary if it is not on PATH.
+Set CHROME to the browser binary if it is not on PATH. Install pngquant to
+compress the PNGs; without it they are written uncompressed.
 
 A diagram module defines DIAGRAM with these keys:
     output  PNG path relative to the repository root
@@ -39,6 +40,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", 
 DIAGRAMS = ["components", "jwt_validation", "authz", "deployment", "topology"]
 
 CHROME_TIMEOUT_SECONDS = 60
+PNGQUANT_TIMEOUT_SECONDS = 60
 
 FONT = "'Ubuntu Sans', Inter, 'Segoe UI', 'DejaVu Sans', sans-serif"
 MONO_FONT = "'Ubuntu Mono', 'DejaVu Sans Mono', Menlo, Consolas, monospace"
@@ -279,6 +281,26 @@ def screenshot(svg, size, output, scale, chrome):
         return result.returncode
 
 
+def quantize(output, pngquant):
+    """Reduce the PNG to a 256-color palette.
+
+    The diagrams use a few flat colors plus antialiasing, so a palette keeps
+    them visually unchanged at well under half the size, and PNG still shows
+    on every device.
+    """
+    command = [pngquant, "256", "--speed", "1", "--strip", "--force",
+               "--output", output, "--", output]
+    try:
+        result = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                                text=True, errors="replace", timeout=PNGQUANT_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        print(f"pngquant did not finish within {PNGQUANT_TIMEOUT_SECONDS}s", file=sys.stderr)
+        return 1
+    if result.returncode != 0:
+        print(result.stderr, file=sys.stderr)
+    return result.returncode
+
+
 def main():
     parser = argparse.ArgumentParser(description="Render the Cedarling diagrams used in the docs.")
     parser.add_argument("names", nargs="*", help=f"diagrams to render: {', '.join(DIAGRAMS)} "
@@ -294,6 +316,10 @@ def main():
     if chrome is None:
         print("Chrome or Chromium not found; set CHROME to the browser binary", file=sys.stderr)
         return 1
+    pngquant = shutil.which("pngquant")
+    if pngquant is None:
+        print("pngquant not found; PNGs are written uncompressed (about 2.5x larger)",
+              file=sys.stderr)
 
     for name in args.names or DIAGRAMS:
         diagram = importlib.import_module(name).DIAGRAM
@@ -303,6 +329,8 @@ def main():
                 f.write(svg)
         output = os.path.join(REPO_ROOT, diagram["output"])
         code = screenshot(svg, diagram["size"], output, args.scale, chrome)
+        if code == 0 and pngquant:
+            code = quantize(output, pngquant)
         if code != 0:
             return code
         print(f"{name}: {diagram['output']}")
