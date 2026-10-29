@@ -457,7 +457,8 @@ class TraceAdminRestWebServiceImplTest extends BaseLockServiceTest {
 
 			assertEquals(1, protectedApi.scopes().length);
 			assertEquals(ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS, protectedApi.scopes()[0]);
-			assertEquals("", protectedApi.grpcMethodName(), "TRACE admin has no gRPC transport");
+			assertEquals(Character.toUpperCase(method.getName().charAt(0)) + method.getName().substring(1),
+					protectedApi.grpcMethodName(), "gRPC method name of " + method.getName());
 
 			assertEquals("Jans::Action::\"" + spec[0] + "\"", cedarlingApi.action());
 			assertEquals("Jans::HTTP_Request", cedarlingApi.resource());

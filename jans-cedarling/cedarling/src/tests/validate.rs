@@ -243,9 +243,11 @@ async fn test_validate_reports_outdated_spec_version_as_warning() {
 async fn test_validate_current_spec_version_has_no_warnings() {
     let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&archive_source(Some(1)), &http_client_config)
-        .await
-        .expect("infra layer ok");
+    let current = crate::common::policy_store::formats::CURRENT_FORMAT_VERSION;
+    let report =
+        Cedarling::validate_policy_store(&archive_source(Some(current)), &http_client_config)
+            .await
+            .expect("infra layer ok");
 
     assert!(
         report.is_ok(),
@@ -276,6 +278,41 @@ async fn test_validate_unsupported_spec_version_fails_metadata() {
                 if errors.iter().any(|e| e.message.contains("policy_store_spec_version 99"))
         ),
         "the metadata level should fail naming the unsupported version: {report:?}"
+    );
+}
+
+/// A store that cannot be migrated is a store problem, reported at the parse
+/// level rather than as an infrastructure error.
+#[tokio::test]
+async fn test_validate_migration_error_fails_parse() {
+    let builder = crate::common::policy_store::test_utils::fixtures::minimal_valid()
+        .with_spec_version(1)
+        .with_trusted_issuer(
+            "acme",
+            r#"{
+                "name": "Acme Corp",
+                "description": "",
+                "configuration_endpoint": "https://idp.acme.test/.well-known/openid-configuration"
+            }"#,
+        );
+    let config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::ArchiveBytes(
+            builder.build_archive().expect("should build archive"),
+        ),
+        ..Default::default()
+    };
+
+    let report =
+        Cedarling::validate_policy_store(&config, &crate::http::HttpClientConfig::default())
+            .await
+            .expect("a migration error is not an infrastructure error");
+    assert!(
+        matches!(
+            &report.parse,
+            LevelResult::Failed { errors }
+                if errors.iter().any(|e| e.message.contains("Failed to migrate the policy store"))
+        ),
+        "the parse level should fail with the migration error: {report:?}"
     );
 }
 

@@ -19,6 +19,9 @@ public class Constants {
     public static final String TRUST = "/trust";
     public static final String ATTESTATION_CONFIG = "/attestation/config";
     public static final String MDS_HEALTH = "/mds/health";
+    public static final String RP = "/rp";
+    public static final String RP_CONFIG_ID_READINESS = "/{rpConfigId}/readiness";
+    public static final String REQUESTED_BY_HEADER = "X-Jans-Requested-By";
 
     public static final String USERNAME_PATH = "/{username}";
     public static final String UUID_PATH  = "/{uuid}";

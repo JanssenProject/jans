@@ -8,11 +8,8 @@
 //! This module provides functionality to parse and validate trusted issuer configuration files,
 //! ensuring they conform to the required schema with proper token metadata and required fields.
 
-use crate::common::policy_store::errors::{
-    PolicyStoreError, TrustedIssuerErrorType, TrustedIssuerValidateError,
-};
+use crate::common::policy_store::errors::{PolicyStoreError, TrustedIssuerErrorType};
 use crate::common::policy_store::formats::file_id::id_from_filename;
-use crate::common::policy_store::{TokenEntityMetadata, TrustedIssuer};
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 use std::collections::{HashMap, HashSet};
@@ -39,17 +36,6 @@ fn default_token_id() -> String {
     "jti".to_string()
 }
 
-impl From<TokenMetadataDoc> for TokenEntityMetadata {
-    fn from(doc: TokenMetadataDoc) -> Self {
-        TokenEntityMetadata::builder()
-            .trusted(doc.trusted)
-            .entity_type_name(doc.entity_type_name)
-            .token_id(doc.token_id)
-            .required_claims(doc.required_claims)
-            .build()
-    }
-}
-
 /// One trusted issuer file body.
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct TrustedIssuerDoc {
@@ -59,24 +45,11 @@ pub(crate) struct TrustedIssuerDoc {
     pub(crate) token_metadata: HashMap<String, TokenMetadataDoc>,
 }
 
-impl From<TrustedIssuerDoc> for TrustedIssuer {
-    fn from(doc: TrustedIssuerDoc) -> Self {
-        TrustedIssuer::new(
-            doc.name,
-            doc.description,
-            doc.oidc_endpoint,
-            doc.token_metadata
-                .into_iter()
-                .map(|(key, token)| (key, token.into()))
-                .collect(),
-        )
-    }
-}
-
 /// A parsed trusted issuer configuration with metadata.
 #[derive(Debug, Clone)]
 pub(crate) struct ParsedIssuer {
-    /// The issuer name (used as key/id)
+    /// The issuer id; v2 identifies issuers by name, so it is not migrated.
+    #[cfg_attr(not(test), expect(dead_code, reason = "v2 has no issuer id"))]
     pub(crate) id: String,
     /// The trusted issuer configuration
     pub(crate) issuer: TrustedIssuerDoc,
@@ -241,71 +214,11 @@ impl IssuerParser {
 
         Ok(token_metadata)
     }
-
-    /// Validate a collection of parsed issuers for conflicts and completeness.
-    pub(crate) fn validate_issuers(
-        issuers: &[ParsedIssuer],
-    ) -> Result<(), Vec<TrustedIssuerValidateError>> {
-        let mut errors = Vec::new();
-        let mut seen_ids: HashMap<String, String> = HashMap::with_capacity(issuers.len());
-
-        for parsed in issuers {
-            // Check for duplicate issuer IDs (only insert if not duplicate)
-            if let Some(existing_file) = seen_ids.get(&parsed.id) {
-                errors.push(TrustedIssuerValidateError::DuplicateId {
-                    id: parsed.id.clone(),
-                    first_file: existing_file.clone(),
-                    second_file: parsed.filename.clone(),
-                });
-                // Don't insert the duplicate - keep the first occurrence
-            } else {
-                seen_ids.insert(parsed.id.clone(), parsed.filename.clone());
-            }
-
-            // Token metadata is optional for JWKS-only configurations
-            // It's only required when token_metadata entries specify entity_type_name or required_claims
-            // for signed-token/trusted-issuer validation. Since we can't determine this requirement
-            // when token_metadata is empty, we allow empty token_metadata to support JWKS-only use cases.
-            // Validation of required fields within token_metadata entries is handled in parse_token_metadata.
-        }
-
-        if errors.is_empty() {
-            Ok(())
-        } else {
-            Err(errors)
-        }
-    }
-
-    /// Create a consolidated map of all issuers.
-    pub(crate) fn create_issuer_map(issuers: Vec<ParsedIssuer>) -> HashMap<String, TrustedIssuer> {
-        let mut issuer_map = HashMap::with_capacity(issuers.len());
-
-        for parsed in issuers {
-            // Check for duplicates (shouldn't happen if validate_issuers was called)
-            // Note: This is a defensive check - duplicates should be caught earlier
-            if let std::collections::hash_map::Entry::Vacant(e) =
-                issuer_map.entry(parsed.id.clone())
-            {
-                e.insert(parsed.issuer.into());
-            }
-        }
-
-        issuer_map
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn token_doc(entity_type_name: &str) -> TokenMetadataDoc {
-        TokenMetadataDoc {
-            trusted: true,
-            entity_type_name: entity_type_name.to_string(),
-            token_id: "jti".to_string(),
-            required_claims: HashSet::new(),
-        }
-    }
 
     /// Minimal `token_metadata` entries fall back to the v0 defaults, and
     /// unknown keys such as `user_id` / `role_mapping` are ignored.
@@ -359,27 +272,6 @@ mod tests {
         )
         .expect("YAML token metadata with unknown keys should parse");
         assert_eq!(parsed, expected, "unknown YAML keys should be ignored");
-    }
-
-    #[test]
-    fn token_metadata_doc_converts_to_runtime() {
-        let doc = TokenMetadataDoc {
-            trusted: false,
-            entity_type_name: "Jans::Id_token".into(),
-            token_id: "sid".into(),
-            required_claims: HashSet::from(["iss".to_string()]),
-        };
-
-        assert_eq!(
-            TokenEntityMetadata::from(doc),
-            TokenEntityMetadata::builder()
-                .trusted(false)
-                .entity_type_name("Jans::Id_token".into())
-                .token_id("sid".into())
-                .required_claims(HashSet::from(["iss".to_string()]))
-                .build(),
-            "every TokenMetadataDoc field should map onto the runtime type"
-        );
     }
 
     #[test]
@@ -589,165 +481,6 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_validate_issuers_no_duplicates() {
-        let issuers = vec![
-            ParsedIssuer {
-                id: "issuer1".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 1".to_string(),
-                    description: "First".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer1.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "access_token".to_string(),
-                        token_doc("Jans::Access_token"),
-                    )]),
-                },
-                filename: "file1.json".to_string(),
-            },
-            ParsedIssuer {
-                id: "issuer2".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 2".to_string(),
-                    description: "Second".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer2.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "id_token".to_string(),
-                        token_doc("Jans::Id_token"),
-                    )]),
-                },
-                filename: "file2.json".to_string(),
-            },
-        ];
-
-        IssuerParser::validate_issuers(&issuers)
-            .expect("distinct issuer ids should pass validation");
-    }
-
-    #[test]
-    fn test_validate_issuers_duplicate_ids() {
-        let issuers = vec![
-            ParsedIssuer {
-                id: "issuer1".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 1".to_string(),
-                    description: "First".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer1.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "access_token".to_string(),
-                        token_doc("Jans::Access_token"),
-                    )]),
-                },
-                filename: "file1.json".to_string(),
-            },
-            ParsedIssuer {
-                id: "issuer1".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 1 Duplicate".to_string(),
-                    description: "Duplicate".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer1.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "id_token".to_string(),
-                        token_doc("Jans::Id_token"),
-                    )]),
-                },
-                filename: "file2.json".to_string(),
-            },
-        ];
-
-        let result = IssuerParser::validate_issuers(&issuers);
-        let errors = result.expect_err("Should detect duplicate issuer IDs");
-
-        assert_eq!(errors.len(), 1, "Expected exactly one duplicate error");
-        assert!(
-            matches!(&errors[0], TrustedIssuerValidateError::DuplicateId { id, first_file, second_file }
-                if id == "issuer1" && first_file == "file1.json" && second_file == "file2.json"),
-            "expected DuplicateId naming the id and both files, got: {:?}",
-            errors[0]
-        );
-    }
-
-    #[test]
-    fn test_validate_issuers_no_token_metadata() {
-        let issuers = vec![ParsedIssuer {
-            id: "issuer1".to_string(),
-            issuer: TrustedIssuerDoc {
-                name: "Issuer 1".to_string(),
-                description: "No tokens".to_string(),
-                oidc_endpoint: Url::parse("https://issuer1.com/.well-known/openid-configuration")
-                    .expect("test oidc endpoint should be a valid url"),
-                token_metadata: HashMap::new(),
-            },
-            filename: "file1.json".to_string(),
-        }];
-
-        // Empty token_metadata is allowed for JWKS-only configurations
-        let result = IssuerParser::validate_issuers(&issuers);
-        result.expect("Should accept issuer with empty token_metadata for JWKS-only use case");
-    }
-
-    #[test]
-    fn test_create_issuer_map() {
-        let issuers = vec![
-            ParsedIssuer {
-                id: "issuer1".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 1".to_string(),
-                    description: "First".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer1.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "access_token".to_string(),
-                        token_doc("Jans::Access_token"),
-                    )]),
-                },
-                filename: "file1.json".to_string(),
-            },
-            ParsedIssuer {
-                id: "issuer2".to_string(),
-                issuer: TrustedIssuerDoc {
-                    name: "Issuer 2".to_string(),
-                    description: "Second".to_string(),
-                    oidc_endpoint: Url::parse(
-                        "https://issuer2.com/.well-known/openid-configuration",
-                    )
-                    .expect("test oidc endpoint should be a valid url"),
-                    token_metadata: HashMap::from([(
-                        "id_token".to_string(),
-                        token_doc("Jans::Id_token"),
-                    )]),
-                },
-                filename: "file2.json".to_string(),
-            },
-        ];
-
-        let map = IssuerParser::create_issuer_map(issuers);
-
-        assert_eq!(map.len(), 2, "both issuers should reach the map");
-        assert!(
-            map.contains_key("issuer1"),
-            "issuer1 should be keyed by its id"
-        );
-        assert!(
-            map.contains_key("issuer2"),
-            "issuer2 should be keyed by its id"
-        );
-    }
-    /// A file named only `.json` leaves nothing to derive an id from.
     #[test]
     fn parse_rejects_id_derived_from_bare_extension() {
         let content = r#"{

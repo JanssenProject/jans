@@ -160,11 +160,9 @@ impl TokenCache {
 
         // Extract issuer for indexing; custom-token entries additionally carry a
         // marker index so `clear_custom_tokens` can flush them without touching JWTs.
-        let mut index_keys: Vec<String> = token
-            .extract_normalized_issuer()
-            .map(|iss| vec![IndexKey::Iss(iss).index_value()])
-            .unwrap_or_default();
-        if matches!(kind, TokenKind::AuthorizeCustom(_)) {
+        let mut index_keys =
+            vec![IndexKey::Iss(token.normalized_issuer().into_owned()).index_value()];
+        if matches!(kind, TokenKind::AuthorizeCustom { .. }) {
             index_keys.push(IndexKey::Custom.index_value());
         }
 
@@ -318,6 +316,8 @@ impl IndexKey {
 mod tests {
     use super::*;
     use crate::authz::metrics::MetricsMode;
+    use crate::common::policy_store::TrustedIssuer;
+    use crate::jwt::TokenIssuer;
     use crate::jwt::token::TokenClaims;
     use serde_json::{Value, json};
     use std::collections::HashMap;
@@ -332,8 +332,12 @@ mod tests {
         )
     }
 
+    fn test_issuer() -> TokenIssuer {
+        TokenIssuer::Jwt(Arc::new(TrustedIssuer::default()))
+    }
+
     fn token(claims: HashMap<String, Value>) -> Arc<Token> {
-        Arc::new(Token::new("test", TokenClaims::from(claims), None))
+        Arc::new(Token::new(TokenClaims::from(claims), test_issuer()))
     }
 
     fn token_with_exp(now: DateTime<Utc>, duration_secs: i64) -> Arc<Token> {
@@ -350,7 +354,10 @@ mod tests {
         let token = token_with_exp(now, 3600);
 
         let jwt_kind = TokenKind::AuthorizeMultiIssuer("Acme::Access_Token".into());
-        let custom_kind = TokenKind::AuthorizeCustom("Acme::ApiKey".into());
+        let custom_kind = TokenKind::AuthorizeCustom {
+            mapping: "Acme::ApiKey".into(),
+            generation: 1,
+        };
 
         cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
         cache.save(&custom_kind, "custom-payload", token, now);
@@ -428,7 +435,7 @@ mod tests {
     fn explicit_expiration_used_when_no_exp_claim() {
         let now = Utc::now();
         let cache = token_cache(0);
-        let token = Arc::new(Token::new("access_token", TokenClaims::default(), None));
+        let token = Arc::new(Token::new(TokenClaims::default(), test_issuer()));
 
         assert_eq!(
             cache.cache_duration(TokenCache::effective_exp(

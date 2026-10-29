@@ -461,7 +461,7 @@
                                     "type": "boolean"
                                 },
                                 "lockAuditEnabled": {
-                                    "description": "Enable endpoint /io.jans.lock.audit.AuditService",
+                                    "description": "Enable endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService",
                                     "type": "boolean"
                                 },
                                 "authzenConfigEnabled": {

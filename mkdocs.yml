@@ -245,6 +245,7 @@ nav:
       - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
+      - Native App Readiness: janssen-server/fido/native-app-readiness.md
       - Passkey Interception Script: script-catalog/person_authentication/passkey/README.md
     - SAML:
       - Shibboleth IDP:
@@ -611,6 +612,11 @@ nav:
     - Java: cedarling/tutorials/java.md
     - Kotlin: cedarling/tutorials/kotlin.md
     - Swift: cedarling/tutorials/swift.md
+  - Patterns:
+    - Policy Annotations: cedarling/patterns/annotation-patterns.md
+    - Multi-Step Flows: cedarling/patterns/annotation-workflow.md
+    - Step-Up and Evidence: cedarling/patterns/annotation-challenge.md
+    - Client-Side Denials: cedarling/patterns/annotation-client-authority.md
   - Reference:
     - Authorization: cedarling/reference/cedarling-authz.md
     - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md

@@ -14,6 +14,7 @@ use crate::common::policy_store::formats::{
 };
 use crate::common::policy_store::legacy_store::LegacyAgamaPolicyStore;
 use crate::common::policy_store::loader;
+use crate::common::policy_store::migration::MigrationError;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
@@ -49,6 +50,9 @@ pub enum PolicyStoreLoadError {
     /// Failed to parse the policy store from file.
     #[error("Failed to convert loaded policy store: {0}")]
     Conversion(#[from] ConversionError),
+    /// The store could not be migrated to the current spec version.
+    #[error("Failed to migrate the policy store: {0}")]
+    Migration(MigrationError),
     /// Failed to load policy store from archive.
     #[error("Failed to load policy store from archive: {0}")]
     Archive(String),
@@ -82,28 +86,35 @@ fn extract_first_policy_store(
         .policy_stores
         .iter()
         .take(1)
-        .map(|(k, v)| {
-            let store: PolicyStore = v.to_owned().into();
+        .map(
+            |(k, v)| -> Result<PolicyStoreWithID, PolicyStoreLoadError> {
+                let store = PolicyStore::try_from(v.to_owned()).map_err(ConversionError::from)?;
 
-            let metadata = crate::common::policy_store::metadata::PolicyStoreMetadata {
-                cedar_version: agama_policy_store
-                    .cedar_version
-                    .strip_prefix('v')
-                    .unwrap_or(&agama_policy_store.cedar_version)
-                    .to_string(),
-                policy_store: crate::common::policy_store::metadata::PolicyStoreInfo {
-                    id: k.clone(),
-                    name: k.clone(),
-                    version: v.version.clone().unwrap_or_default(),
-                    description: None,
-                    created_date: None,
-                    updated_date: None,
-                },
-            };
+                let metadata = crate::common::policy_store::metadata::PolicyStoreMetadata {
+                    cedar_version: agama_policy_store
+                        .cedar_version
+                        .strip_prefix('v')
+                        .unwrap_or(&agama_policy_store.cedar_version)
+                        .to_string(),
+                    policy_store: crate::common::policy_store::metadata::PolicyStoreInfo {
+                        id: k.clone(),
+                        name: k.clone(),
+                        version: v.version.clone().unwrap_or_default(),
+                        description: None,
+                        created_date: None,
+                        updated_date: None,
+                    },
+                };
 
-            PolicyStoreWithID::without_archive(k.to_owned(), store, Some(metadata))
-        })
-        .next();
+                Ok(PolicyStoreWithID::without_archive(
+                    k.to_owned(),
+                    store,
+                    Some(metadata),
+                ))
+            },
+        )
+        .next()
+        .transpose()?;
 
     match policy_store_option {
         Some(policy_store) => {
@@ -530,6 +541,7 @@ fn map_read_err(e: ReadStoreError, is_archive: bool) -> PolicyStoreLoadError {
         ReadStoreError::Parse(ParseStoreError::Conversion(e)) => {
             PolicyStoreLoadError::Conversion(e)
         },
+        ReadStoreError::Migration(e) => PolicyStoreLoadError::Migration(e),
         ReadStoreError::Read(PolicyStoreError::CedarParsing { file, detail }) => {
             PolicyStoreLoadError::InvalidStore(format!("Cedar parse error in {file}: {detail}"))
         },

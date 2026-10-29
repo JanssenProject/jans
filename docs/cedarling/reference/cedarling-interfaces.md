@@ -488,7 +488,7 @@ This interface is particularly useful when `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE
 
 ### Methods
 
-- `is_trusted_issuer_loaded_by_name(issuer_id)` — Returns `true` if the trusted issuer with the given policy store key is loaded.
+- `is_trusted_issuer_loaded_by_name(issuer_name)` — Returns `true` if the trusted issuer with the given name, the `issuer` of its token types, is loaded.
 
 - `is_trusted_issuer_loaded_by_iss(iss_claim)` — Returns `true` if the trusted issuer with the given `iss` claim value is loaded.
 

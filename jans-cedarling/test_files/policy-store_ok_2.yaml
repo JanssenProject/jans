@@ -13,7 +13,6 @@ policy_stores:
     trusted_issuers:
       Jans123123:
         name: "Jans"
-        description: "A Test IDP"
         openid_configuration_endpoint: "https://account.gluu.org/.well-known/openid-configuration"
         token_metadata:
           access_token:
