@@ -53,7 +53,7 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 |---|---|---|
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
 | **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
-| **Principal source** | Derived from JWT token claims | Supplied directly by the application |
+| **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
 | **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
