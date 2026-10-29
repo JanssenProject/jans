@@ -43,8 +43,8 @@ write_landing_page() {
     if [ -f cedarling/index.html ]; then
         entries+=("cedarling/index.html|Cedarling Rust and WASM")
     fi
-    if [ -f cedarling-python/cedarling_python.html ]; then
-        entries+=("cedarling-python/cedarling_python.html|Cedarling Python")
+    if [ -f cedarling-python/index.html ]; then
+        entries+=("cedarling-python/index.html|Cedarling Python")
     fi
     if [ -f cedarling-c/index.html ]; then
         entries+=("cedarling-c/index.html|Cedarling C")
@@ -63,7 +63,7 @@ write_landing_page() {
         entries+=("${page#./}|${page#./}")
     done < <(find . -mindepth 2 -name index.html \
         -not -path "./cedarling/*" -not -path "./cedarling-c/*" -not -path "./cedarling-js/*" \
-        -not -path "./cedarling-java/*" \
+        -not -path "./cedarling-java/*" -not -path "./cedarling-python/*" \
         -not -path "./.git/*" | sort)
 
     {
