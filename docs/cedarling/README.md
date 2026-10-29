@@ -94,15 +94,29 @@ in-memory cache. See the Cedarling [log](./reference/cedarling-logs.md) document
 
 The following diagram is a high-level picture of the Cedarling components:
 
-![](../assets/cedarling/lock-cedarling-rust-core-components.jpg)
+![Cedarling components](../assets/cedarling/cedarling-components.png)
 
-* **Cedar Engine** a recent release of the Rust Cedar Engine, thanks to Amazon.
-* **SparKV** is an in-memory key-value store that supports automatic expiration of data.
-* **Interfaces** perform actions described above
-* **JWT Engine** is used to validate JWT signatures, JWT content (e.g., `exp`), and to 
-  check if the JWT token is revoked (using the Status List JWT) 
-* **Lock Engine** is used for enterprise deployments to load the Policy Store from a 
-  trusted source and send logs for central storage. 
+* **Interfaces** provide initialization, authorization, pushing context data, and
+  reading logs, metrics, and policy annotations. See the
+  [interfaces reference](./reference/cedarling-interfaces.md).
+* **Policy Store Manager** loads the Policy Store from a local file, a URI, or the Lock
+  Server, verifies its signature, and refreshes it. It provides the schema, the
+  policies, and the list of trusted issuers.
+* **JWT Service** validates token signatures and claims (e.g., `exp`) using the trusted
+  issuers' OpenID configuration and JWKS, and checks whether a token is revoked using the
+  Status List JWT.
+* **Context Data Store** keeps data pushed through the Data API, with optional TTL.
+* **Entity & Context Builder** turns validated tokens or an asserted principal, the
+  resource, and pushed data into Cedar entities and context (`context.tokens`,
+  `context.data`).
+* **Cedar Engine** is a recent release of the Rust Cedar Engine, thanks to Amazon. It
+  returns the decision and diagnostics.
+* **Observability** records decision and system logs and metrics. With
+  [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
+  record, as evidence, of each decision whose request carries a
+  [TRACE context](./reference/cedarling-authz.md#authorize-options-and-trace-context). In enterprise deployments, the optional
+  **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence
+  for central storage, and can also provide the Policy Store.
 
 ## Proof-based authorization: Token-Based Access Control (TBAC)
 
