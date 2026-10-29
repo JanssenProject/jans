@@ -761,9 +761,14 @@ public class UserResource extends BaseResource {
             logger.info("validateUserPermission - loggedInUserInum {}, userInum:{}, httpRequestMethod:{}",
                     escapeLog(loggedInUserInum), escapeLog(userInum), httpRequestMethod);
         }
-
-        if (StringUtils.isBlank(loggedInUserInum) && StringUtils.isBlank(userInum)) {
+        if (StringUtils.isBlank(userInum)) {
             return;
+        }
+
+        // For user mgt endpoint Header attribute `User-inum` is mandatory
+        if (StringUtils.isBlank(loggedInUserInum)) {
+            throw new WebApplicationException("`User-inum` is missing",
+                    Response.status(Response.Status.BAD_REQUEST).build());
         }
 
         // Get logged in User details
@@ -785,9 +790,7 @@ public class UserResource extends BaseResource {
         }
 
         if (StringUtils.isNotBlank(userInum) && !isAdmin) {
-            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(),
-                    (loggedInUserInum != null) ? loggedInUserInum : "", userInum);
-            logger.error("validateUserPermission - errMsg:{}", errMsg);
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), escapeLog(loggedInUserInum));
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
