@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.filters;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 public class UserResourceFilter extends BaseFilter {
 
     protected static final String USER_INUM = "inum";
+    protected static final String PATH = "/configuser";
 
     @Inject
     Logger log;
