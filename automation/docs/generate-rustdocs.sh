@@ -28,7 +28,7 @@ cat > "$DOC_DIR"/index.html <<'HTML'
   <p>Cedarling API documentation:</p>
   <ul>
     <li><a href="cedarling/index.html">Rust (<code>cedarling</code>)</a></li>
-    <li><a href="cedarling_wasm/index.html">JavaScript/WASM (<code>cedarling_wasm</code>)</a></li>
+    <li><a href="cedarling_wasm/index.html">WASM bindings, Rust side (<code>cedarling_wasm</code>)</a></li>
     <li><a href="cedarling_uniffi/index.html">Kotlin/Swift via UniFFI (<code>cedarling_uniffi</code>)</a></li>
   </ul>
 </body>
