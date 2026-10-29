@@ -158,7 +158,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "/restv1/token",
             "/restv1/userinfo",
             "/restv1/introspection",
-            "/restv1/introspection",
+            "/restv1/jwks",
             "/restv1/register",
             "/restv1/revoke",
         ]),
