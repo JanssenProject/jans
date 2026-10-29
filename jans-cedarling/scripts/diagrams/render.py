@@ -16,7 +16,8 @@ A diagram module defines DIAGRAM with these keys:
     output  PNG path relative to the repository root
     size    (width, height) of the canvas
     groups  dashed boxes: color, label, x, y, w, h
-    nodes   boxes: color, box (x, y, w, h), title, and optionally role,
+    nodes   boxes: color, box (x, y, w, h), or (x, y, w) for a code card that
+            fits its code, title, and optionally role,
             desc (centered lines), code (left-aligned monospace lines; a line
             starting with "*" is highlighted), badge (number), emphasis
     edges   polylines: points (the last one carries the arrowhead), and
@@ -58,6 +59,7 @@ CORNER_RADIUS = 10
 TITLE_HEIGHT = 26
 LINE_HEIGHT = 21
 CODE_LINE_HEIGHT = 20
+CARD_PADDING = 14
 # The arrow marker is 7 stroke widths long on a 2px line.
 ARROW_LENGTH = 14
 
@@ -95,7 +97,17 @@ def render_group(group):
 
 def render_node(node):
     style = COLORS[node["color"]]
-    x, y, w, h = node["box"]
+    x, y, w, *rest = node["box"]
+    lines = []
+    if "role" in node:
+        lines.append((node["role"], "role", style["accent"]))
+    lines += [(line, "desc", DESC_COLOR) for line in node.get("desc", [])]
+    code = node.get("code", [])
+    block = TITLE_HEIGHT + LINE_HEIGHT * len(lines)
+    # A box given without a height fits its code, so code cards never end in
+    # empty space.
+    h = rest[0] if rest else CARD_PADDING + block + 22 + CODE_LINE_HEIGHT * (len(code) - 1) + 20
+
     stroke_width = 2.5 if node.get("emphasis") else 1.6
     fill = EMPHASIS_FILL if node.get("emphasis") else style["node"]
     parts = [
@@ -103,16 +115,9 @@ def render_node(node):
         f'stroke="{style["accent"]}" stroke-width="{stroke_width}" filter="url(#shadow)"/>'
     ]
 
-    lines = []
-    if "role" in node:
-        lines.append((node["role"], "role", style["accent"]))
-    lines += [(line, "desc", DESC_COLOR) for line in node.get("desc", [])]
-    code = node.get("code", [])
-
     # Text-only boxes center their text; boxes with code start at the top so
     # the code reads like a document.
-    block = TITLE_HEIGHT + LINE_HEIGHT * len(lines)
-    top = y + 14 if code else y + (h - block) / 2
+    top = y + CARD_PADDING if code else y + (h - block) / 2
     cx = x + w / 2
     parts.append(
         f'<text x="{cx}" y="{top + 20}" class="title" fill="{TITLE_COLOR}">'
