@@ -90,8 +90,10 @@ the OpenID Connect discovery document at `/.well-known/openid-configuration`:
 }
 ```
 
-Clients that read this metadata entry know they MUST validate the `iss` parameter in every
-authorization response they receive from this server.
+For non-JARM authorization responses, the client must validate the `iss`
+authorization response parameter against the expected issuer. For JARM
+responses, the client must validate the `iss` claim in the JWT authorization
+response instead.
 
 ## Relationship to JARM
 
@@ -136,7 +138,9 @@ for the full property description.
 When a client receives an authorization response from a server that has advertised
 `authorization_response_iss_parameter_supported: true`, it MUST:
 
-1. Extract the `iss` parameter from the redirect response.
+1. For non-JARM authorization responses, extract the `iss` parameter from the
+   redirect response. For JARM responses, extract the `iss` claim from the
+   validated JWT authorization response.
 2. Compare its value to the expected issuer identifier using simple string comparison
    (as defined in [RFC 3986 §6.2.1](https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.1)).
 3. Reject the response if `iss` is absent or does not match the expected value.

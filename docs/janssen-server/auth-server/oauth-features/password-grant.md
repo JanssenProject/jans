@@ -24,8 +24,13 @@ in practice. [OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-
 
 ## Configuration
 
-A client can use the password grant if it is enabled in the configuration. An administrator can use
-[TUI](../../config-guide/config-tools/jans-tui/README.md) to enable password grant for a client.
+A client can use the password grant only when it is enabled both for the authorization server and
+for that client. Add `password` to the authorization server's
+[grantTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#granttypessupported)
+property (in TUI, navigate to **Auth Server -> Properties -> grantTypesSupported**), and add
+`password` to the client's grant types using
+[TUI](../../config-guide/config-tools/jans-tui/README.md). Otherwise, the token endpoint rejects
+the request. See the [token endpoint documentation](../endpoints/token.md#token-endpoint) for details.
 
 ![](../../../assets/image-tui-client-registration-basic.png)
 

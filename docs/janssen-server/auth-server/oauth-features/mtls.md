@@ -669,11 +669,18 @@ Once we have obtained the `access_token` in `jwt(json web token)` format, we wil
 
 ### 4. Call `introspection` endpoint
 
+The client certificate authenticates the TLS connection, but the introspection
+endpoint also requires an authorization credential by default. Use the access
+token as a Bearer credential as well as the token being introspected:
+if [`introspectionAccessTokenMustHaveIntrospectionScope`](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveintrospectionscope)
+is enabled, make sure the access token includes the `introspection` scope.
+
 Run below command:
 
 ```bash
 curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --location 'https://<YOUR_DOMAIN>/jans-auth/restv1/introspection' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Authorization: Bearer <ACCESS_TOKEN>' \
 --data-urlencode 'token=<ACCESS_TOKEN>' \
 --data-urlencode 'response_as_jwt=false'
 ```

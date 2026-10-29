@@ -35,8 +35,9 @@ server-level `requirePkce` property. A client can also require PKCE through its
 client attributes. Setting the server-level property to `false` does not disable
 PKCE for clients that individually require it.
 
-Only the `S256` code challenge method is accepted. Requests using `plain`,
-an unsupported method, or a `code_challenge` without an explicit
+For requests processed through the authorization endpoint, only the `S256`
+code challenge method is accepted. Requests using `plain`, an unsupported
+method, or a `code_challenge` without an explicit
 `code_challenge_method=S256` are rejected. See the
 [authorization-server configuration](../../config-guide/auth-server-config/jans-authorization-server-config.md)
 and the [`requirePkce` property reference](../../reference/json/properties/janssenauthserver-properties.md#requirepkce).

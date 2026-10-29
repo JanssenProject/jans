@@ -119,7 +119,7 @@ Typical parameters are the same as standard authorization requests, with added J
 - `state`
 - `response_mode=query.jwt|fragment.jwt|form_post.jwt|jwt`
 - `code_challenge` (for Authorization Code Flow with PKCE)
-- `code_challenge_method` (`S256` is recommended)
+- `code_challenge_method` (must be `S256`)
 
 For new integrations using the Authorization Code Flow, use PKCE with
 `code_challenge_method=S256`. JARM protects the authorization response,

@@ -620,7 +620,7 @@ tags:
 
 - Required: No
 
-- Default value: 600 seconds
+- Default value:  60 seconds (standard installation)
 
 
 ## authorizationEncryptionAlgValuesSupported
