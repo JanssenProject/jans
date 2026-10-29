@@ -1901,14 +1901,18 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        performanceMetrics:
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        metricsData:
           type: object
           additionalProperties:
             type: object
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationAttempts:
+        period:
+          type: string
+        fallbackEvents:
           type: integer
           format: int64
         authenticationSuccesses:
@@ -1917,38 +1921,34 @@ components:
         authenticationFailures:
           type: integer
           format: int64
-        authenticationSuccessRate:
+        registrationSuccessRate:
           type: number
           format: double
-        registrationAttempts:
-          type: integer
-          format: int64
-        registrationFailures:
+        authenticationAttempts:
           type: integer
           format: int64
         registrationSuccesses:
           type: integer
           format: int64
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationFailures:
+          type: integer
+          format: int64
         registrationAvgDuration:
           type: number
           format: double
+        registrationAttempts:
+          type: integer
+          format: int64
         authenticationAvgDuration:
           type: number
           format: double
-        metricsData:
+        performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        fallbackEvents:
-          type: integer
-          format: int64
-        period:
-          type: string
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         errorCounts:
           type: object
           additionalProperties:

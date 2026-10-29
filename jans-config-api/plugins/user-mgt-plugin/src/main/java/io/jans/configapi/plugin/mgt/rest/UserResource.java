@@ -790,7 +790,7 @@ public class UserResource extends BaseResource {
         }
 
         if (StringUtils.isNotBlank(userInum) && !isAdmin) {
-            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), escapeLog(loggedInUserInum));
+            String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(), escapeLog(loggedInUserInum), escapeLog(userInum));
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));
