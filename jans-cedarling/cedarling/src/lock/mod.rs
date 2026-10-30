@@ -146,6 +146,15 @@ mod proto {
     tonic::include_proto!("io.jans.lock.audit");
 }
 
+/// Client for Lock's `TraceService`. TRACE is native only, like the sink using it.
+#[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+mod trace_proto {
+    // These lints are disabled because they are triggered by the generated code
+    #![allow(unreachable_pub)]
+    #![allow(clippy::pedantic)]
+    tonic::include_proto!("io.jans.lock.trace");
+}
+
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
