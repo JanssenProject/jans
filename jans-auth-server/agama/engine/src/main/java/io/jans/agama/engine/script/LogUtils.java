@@ -102,6 +102,8 @@ public class LogUtils {
             case TRACE:
                 LOG.trace(result);
                 break;
+            default:
+                break;
         }
         
     }
@@ -114,6 +116,7 @@ public class LogUtils {
             case INFO: return !LOG.isInfoEnabled();
             case WARN: return !LOG.isWarnEnabled();
             case ERROR: return !LOG.isErrorEnabled();
+            default: break;
         }
         return false;
         
