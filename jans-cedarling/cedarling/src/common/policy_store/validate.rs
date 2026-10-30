@@ -8,8 +8,7 @@
 use serde::Serialize;
 use strsim::levenshtein;
 
-use super::formats::v2::TRUSTED_ISSUERS_FILE;
-use super::formats::v2::trusted_issuers::UnknownField;
+use super::formats::UnknownField;
 
 /// Farther names are more likely vendor extensions than typos.
 const MAX_SUGGESTION_DISTANCE: usize = 2;
@@ -97,20 +96,21 @@ pub struct Diagnostic {
 impl From<UnknownField> for Diagnostic {
     fn from(unknown: UnknownField) -> Self {
         let UnknownField {
-            entity_type,
-            field,
+            file,
+            path,
             known_fields,
         } = unknown;
+        let field = path.rsplit('.').next().unwrap_or(&path);
         let suggestion = known_fields
             .iter()
-            .min_by_key(|known| levenshtein(known, &field))
-            .filter(|known| levenshtein(known, &field) <= MAX_SUGGESTION_DISTANCE);
+            .min_by_key(|known| levenshtein(known, field))
+            .filter(|known| levenshtein(known, field) <= MAX_SUGGESTION_DISTANCE);
         let hint = suggestion.map_or(String::new(), |known| format!("; did you mean `{known}`?"));
         Diagnostic {
-            file: TRUSTED_ISSUERS_FILE.to_string(),
+            file: file.to_string(),
             line: None,
             column: None,
-            message: format!("entry '{entity_type}': unknown field `{field}` is ignored{hint}"),
+            message: format!("unknown field `{path}` is ignored{hint}"),
         }
     }
 }
@@ -135,8 +135,8 @@ mod tests {
 
     fn message(field: &str) -> String {
         Diagnostic::from(UnknownField {
-            entity_type: "Acme::Access_token".to_string(),
-            field: field.to_string(),
+            file: "store.json",
+            path: format!("Acme::Access_token.{field}"),
             known_fields: &["issuer", "required_claims"],
         })
         .message
@@ -146,7 +146,7 @@ mod tests {
     fn suggests_near_known_field() {
         assert_eq!(
             message("required_claim"),
-            "entry 'Acme::Access_token': unknown field `required_claim` is ignored; did you mean \
+            "unknown field `Acme::Access_token.required_claim` is ignored; did you mean \
              `required_claims`?",
             "a typo should get a suggestion"
         );
@@ -156,7 +156,7 @@ mod tests {
     fn does_not_suggest_for_distant_field() {
         assert_eq!(
             message("x_vendor_feature"),
-            "entry 'Acme::Access_token': unknown field `x_vendor_feature` is ignored",
+            "unknown field `Acme::Access_token.x_vendor_feature` is ignored",
             "a vendor extension should not get a suggestion"
         );
     }

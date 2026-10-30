@@ -24,6 +24,7 @@ grpc = [
 
 [dependencies]
 serde = { workspace = true }
+serde_ignored = "0.1"
 strsim = { version = "0.11.1", optional = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde-saphyr = "1.3.0"

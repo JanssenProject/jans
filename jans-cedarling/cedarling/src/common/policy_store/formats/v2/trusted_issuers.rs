@@ -8,14 +8,17 @@
 //! The file is one JSON object keyed by Cedar entity type; each entry fully
 //! describes one token type, including its issuer and kind.
 
-use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::collections::HashSet;
 use std::fmt;
 use std::str::FromStr;
 
 use serde::Deserialize;
-use serde::de::{self, Deserializer, IgnoredAny, MapAccess, Visitor};
+use serde::de::{self, DeserializeOwned, Deserializer, MapAccess, Visitor};
+use serde_json::value::RawValue;
 use url::Url;
 
+use super::TRUSTED_ISSUERS_FILE;
+use crate::common::policy_store::formats::{UnknownField, struct_fields};
 use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 use crate::common::policy_store::{
     CustomTokenMetadata, KeySource, TokenEntityMetadata, TokenTypes, TokenTypesError,
@@ -27,6 +30,7 @@ use crate::common::policy_store::{
 #[derive(Debug, Clone, Default, PartialEq)]
 pub(crate) struct TrustedIssuersDoc {
     pub(crate) entries: Vec<TrustedIssuerEntry>,
+    pub(crate) unknown_fields: Vec<UnknownField>,
 }
 
 /// One key of the file and its entry.
@@ -36,46 +40,26 @@ pub(crate) struct TrustedIssuerEntry {
     pub(crate) config: TokenTypeConfig,
 }
 
-/// Fields of an entry that the specification does not define. Only the names
-/// are kept: extensions by other PDPs mean nothing here.
-#[derive(Debug, Clone, Default, PartialEq)]
-pub(crate) struct UnknownFields(BTreeSet<String>);
-
-impl<'de> Deserialize<'de> for UnknownFields {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        let fields = BTreeMap::<String, IgnoredAny>::deserialize(deserializer)?;
-        Ok(Self(fields.into_keys().collect()))
-    }
-}
-
-const JWT_FIELDS: &[&str] = &[
-    "type",
-    "issuer",
-    "configuration_endpoints",
-    "token_id",
-    "required_claims",
-];
-const CUSTOM_FIELDS: &[&str] = &["type", "issuer", "required_claims"];
-
-/// Valid only on `jwt` entries. Rejected on `custom` ones rather than treated
-/// as extensions, so a wrong `type` cannot silently drop a key source.
-const JWT_ONLY_FIELDS: &[&str] = &["configuration_endpoints", "token_id"];
-
-/// An ignored entry field, for validation tools to report.
-#[cfg_attr(not(feature = "tools"), allow(dead_code))]
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct UnknownField {
-    pub(crate) entity_type: String,
-    pub(crate) field: String,
-    pub(crate) known_fields: &'static [&'static str],
-}
-
 /// One token type; `type` selects which fields are allowed.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum TokenTypeConfig {
     Jwt(Box<JwtTokenConfig>),
     Custom(CustomTokenConfig),
+}
+
+/// The tag of an entry. Read apart from the entry: `serde_ignored` cannot see
+/// through an internally tagged enum, which buffers its content.
+#[derive(Deserialize)]
+struct EntryTag {
+    #[serde(rename = "type")]
+    kind: EntryKind,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum EntryKind {
+    Jwt,
+    Custom,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -87,8 +71,6 @@ pub(crate) struct JwtTokenConfig {
     pub(crate) token_id: String,
     #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
-    #[serde(flatten)]
-    pub(crate) unknown: UnknownFields,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
@@ -97,8 +79,6 @@ pub(crate) struct CustomTokenConfig {
     pub(crate) issuer: IssuerName,
     #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
-    #[serde(flatten)]
-    pub(crate) unknown: UnknownFields,
 }
 
 // Frozen v2 default; independent of the runtime `DEFAULT_TKN_ID`.
@@ -239,30 +219,88 @@ impl<'de> Visitor<'de> for TrustedIssuersVisitor {
     fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
         let mut seen = HashSet::new();
         let mut entries = Vec::new();
+        let mut unknown_fields = Vec::new();
         while let Some(key) = map.next_key::<String>()? {
             if !seen.insert(key.clone()) {
                 return Err(de::Error::custom(format!("duplicate entity type '{key}'")));
             }
             let entity_type = EntityTypeName::from_str(&key).map_err(de::Error::custom)?;
-            let config = map
-                .next_value::<TokenTypeConfig>()
+            // Raw text, not `Value`: a `Value` would hide duplicate fields.
+            let raw = map.next_value::<Box<RawValue>>()?;
+            let config = parse_entry(&key, raw.get(), &mut unknown_fields)
                 .map_err(|e| de::Error::custom(format!("invalid entry '{key}': {e}")))?;
-            if let TokenTypeConfig::Custom(custom) = &config
-                && let Some(field) = JWT_ONLY_FIELDS
-                    .iter()
-                    .find(|field| custom.unknown.0.contains(**field))
-            {
-                return Err(de::Error::custom(format!(
-                    "invalid entry '{key}': `{field}` is only allowed on a `jwt` entry"
-                )));
-            }
             entries.push(TrustedIssuerEntry {
                 entity_type,
                 config,
             });
         }
-        Ok(TrustedIssuersDoc { entries })
+        Ok(TrustedIssuersDoc {
+            entries,
+            unknown_fields,
+        })
     }
+}
+
+/// Parses one entry and records the fields it ignored.
+fn parse_entry(
+    key: &str,
+    json: &str,
+    unknown_fields: &mut Vec<UnknownField>,
+) -> Result<TokenTypeConfig, serde_json::Error> {
+    let EntryTag { kind } = serde_json::from_str(json)?;
+    let (config, known_fields, ignored) = match kind {
+        EntryKind::Jwt => {
+            let Tracked { value, ignored } = parse_tracked::<JwtTokenConfig>(json)?;
+            (
+                TokenTypeConfig::Jwt(Box::new(value)),
+                struct_fields::<JwtTokenConfig>(),
+                ignored,
+            )
+        },
+        EntryKind::Custom => {
+            let Tracked { value, ignored } = parse_tracked::<CustomTokenConfig>(json)?;
+            // A wrong `type` must not silently drop a key source.
+            if let Some(field) = ignored
+                .iter()
+                .find(|path| struct_fields::<JwtTokenConfig>().contains(&path.as_str()))
+            {
+                return Err(de::Error::custom(format!(
+                    "`{field}` is only allowed on a `jwt` entry"
+                )));
+            }
+            (
+                TokenTypeConfig::Custom(value),
+                struct_fields::<CustomTokenConfig>(),
+                ignored,
+            )
+        },
+    };
+    unknown_fields.extend(ignored.into_iter().map(|path| UnknownField {
+        file: TRUSTED_ISSUERS_FILE,
+        path: format!("{key}.{path}"),
+        known_fields,
+    }));
+    Ok(config)
+}
+
+/// A deserialized value and the paths of the fields it did not read.
+struct Tracked<T> {
+    value: T,
+    ignored: Vec<String>,
+}
+
+/// Deserializes `T`, returning the paths of fields it did not read. `type` is
+/// left out: the tag is read separately.
+fn parse_tracked<T: DeserializeOwned>(json: &str) -> Result<Tracked<T>, serde_json::Error> {
+    let mut ignored = Vec::new();
+    let mut deserializer = serde_json::Deserializer::from_str(json);
+    let value = serde_ignored::deserialize(&mut deserializer, |path| {
+        let path = path.to_string();
+        if path != "type" {
+            ignored.push(path);
+        }
+    })?;
+    Ok(Tracked { value, ignored })
 }
 
 /// Parses `trusted-issuers.json` content.
@@ -271,24 +309,6 @@ pub(crate) fn parse(json: &str) -> Result<TrustedIssuersDoc, serde_json::Error> 
 }
 
 impl TrustedIssuersDoc {
-    /// Lists the fields ignored while parsing, in file order of their entries.
-    pub(crate) fn unknown_fields(&self) -> Vec<UnknownField> {
-        self.entries
-            .iter()
-            .flat_map(|entry| {
-                let (unknown, known_fields) = match &entry.config {
-                    TokenTypeConfig::Jwt(jwt) => (&jwt.unknown, JWT_FIELDS),
-                    TokenTypeConfig::Custom(custom) => (&custom.unknown, CUSTOM_FIELDS),
-                };
-                unknown.0.iter().map(move |field| UnknownField {
-                    entity_type: entry.entity_type.to_string(),
-                    field: field.clone(),
-                    known_fields,
-                })
-            })
-            .collect()
-    }
-
     /// Validates the entries as a whole and converts them into runtime types.
     pub(crate) fn into_runtime(self) -> Result<TokenTypes, TokenTypesError> {
         let mut builder = TokenTypesBuilder::default();
@@ -396,15 +416,51 @@ mod tests {
                 .expect("the plain entry should convert"),
             "unknown fields must not change the runtime token types"
         );
-        let fields: Vec<_> = doc
-            .unknown_fields()
-            .into_iter()
-            .map(|unknown| unknown.field)
+        let paths: Vec<_> = doc
+            .unknown_fields
+            .iter()
+            .map(|unknown| unknown.path.as_str())
             .collect();
         assert_eq!(
-            fields,
-            ["required_claim", "x_vendor"],
-            "`type` and known fields must not be listed"
+            paths,
+            [
+                "Acme::Access_token.x_vendor",
+                "Acme::Access_token.required_claim"
+            ],
+            "unknown fields should be listed in file order, without `type` or known fields"
+        );
+        assert_eq!(
+            doc.unknown_fields[0].file, TRUSTED_ISSUERS_FILE,
+            "the format should name the file it read"
+        );
+    }
+
+    #[test]
+    fn struct_fields_match_the_derived_structs() {
+        assert_eq!(
+            struct_fields::<JwtTokenConfig>(),
+            [
+                "issuer",
+                "configuration_endpoints",
+                "token_id",
+                "required_claims"
+            ],
+            "jwt field names should come from the derive"
+        );
+        assert_eq!(
+            struct_fields::<CustomTokenConfig>(),
+            ["issuer", "required_claims"],
+            "custom field names should come from the derive"
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_entry_field() {
+        let err = parse(r#"{ "Acme::T": { "type": "custom", "issuer": "A", "issuer": "B" } }"#)
+            .expect_err("a repeated field must be rejected");
+        assert!(
+            err.to_string().contains("duplicate field `issuer`"),
+            "expected the duplicate field error, got: {err}"
         );
     }
 
