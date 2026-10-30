@@ -587,6 +587,33 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn lock_without_trace_service_is_a_missing_route() {
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("a local port is free");
+        let addr = listener.local_addr().expect("the listener has an address");
+        // No services: tonic answers every call as Lock without `TraceService` does.
+        tokio::spawn(async move {
+            Server::builder()
+                .add_routes(tonic::service::Routes::default())
+                .serve_with_incoming(TcpListenerStream::new(listener))
+                .await
+                .expect("the old Lock serves");
+        });
+        let endpoint = format!("http://{addr}/").parse().expect("valid URL");
+
+        let err = sink(&endpoint, None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a Lock without TraceService should refuse the request");
+        assert_eq!(
+            err.refusal(),
+            Some(RequestRefusal::NoGrpcRoute),
+            "the refusal should point at the missing route, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
     async fn description_that_is_not_a_lock_error_has_no_error_id() {
         let lock = mock_lock(|_| Err(Status::permission_denied("Authorization error"))).await;
 

@@ -113,6 +113,13 @@ impl RejectedStatus {
             Self::Grpc(code) => code == tonic::Code::ResourceExhausted,
         }
     }
+
+    /// No `TraceService` behind the address: Lock answers `UNIMPLEMENTED`, and a
+    /// proxy's `404` reaches tonic as `UNIMPLEMENTED` too.
+    #[cfg(feature = "grpc")]
+    fn is_missing_route(self) -> bool {
+        self == Self::Grpc(tonic::Code::Unimplemented)
+    }
 }
 
 impl fmt::Display for RejectedStatus {
@@ -136,6 +143,10 @@ pub(crate) enum RequestRefusal {
     /// `invalid_request` without a reason: Lock hides it unless its
     /// `errorReasonEnabled` is on, the default being off.
     Unexplained,
+    /// No TRACE gRPC route: a Lock Server older than its TRACE gRPC services,
+    /// or a proxy without the `io.jans.lock.trace.TraceService` route.
+    #[cfg(feature = "grpc")]
+    NoGrpcRoute,
 }
 
 impl PostBulkError {
@@ -151,6 +162,10 @@ impl PostBulkError {
         };
         if status.is_message_too_large() {
             return Some(RequestRefusal::BodyTooLarge);
+        }
+        #[cfg(feature = "grpc")]
+        if status.is_missing_route() {
+            return Some(RequestRefusal::NoGrpcRoute);
         }
         if !status.is_bad_request() || error.as_deref() != Some("invalid_request") {
             return None;

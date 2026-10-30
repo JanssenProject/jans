@@ -192,6 +192,7 @@ When Lock Server does not take a request (it is lost after its retries, refused 
 | `UNAUTHENTICATED` | `401` | the token is renewed and the request sent once more, as for `401` |
 | `INVALID_ARGUMENT` | `400` | final; `invalid_request` with a bulk limit reason names the setting to lower, as for `400` |
 | `RESOURCE_EXHAUSTED` | none | final; gRPC refuses a message over `maxBulkRequestBytes` plus 64 KiB before Lock Server reads it, and the `ERROR` names `CEDARLING_TRACE_BULK_MAX_BYTES` |
+| `UNIMPLEMENTED` | none | final; Lock Server or its proxy has no `io.jans.lock.trace.TraceService` route (an older Lock Server, or a proxy whose `404` gRPC reports as `UNIMPLEMENTED`), and the `ERROR` says to update them or set `CEDARLING_TRACE_TRANSPORT` to `rest` |
 | `PERMISSION_DENIED`, `NOT_FOUND`, `ALREADY_EXISTS`, `FAILED_PRECONDITION`, any other | `403`, `404`, `409`, other `4xx` | final |
 
 When Lock Server publishes no `trace_bulk_endpoint` and `CEDARLING_TRACE_ENDPOINT` is not set, or the endpoint is plain `http` to a non-loopback host, Cedarling starts, logs a `WARN` once and reports `not_emitted_no_endpoint` for every decision.
