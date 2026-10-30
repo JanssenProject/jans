@@ -183,7 +183,7 @@ A type mismatch on a **required** attribute causes an error. A type mismatch on 
 
 Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft.
 
-This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
+This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property. An issuer with a static JWKS, or without a `status_list_endpoint`, has no Status List, so its tokens that carry a `status` claim are rejected.
 
 > ℹ️ **Use Case**
 >
@@ -199,9 +199,9 @@ Cedarling applies **fail-closed** semantics: if a background refresh fails (netw
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling validates the JWT's signature, its claims (such as `exp`), and its status (revoked or not). It fetches the JWKS and, if the issuer publishes a `status_list_endpoint`, the Status List through the issuer's OpenID configuration; static issuers use their configured JWKS. A token that fails any check is dropped and logged.
 
-![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
+![Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List](../../assets/cedarling/cedarling-jwt-validation.png)
 
 ## Local JWKS
 
