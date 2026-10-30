@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.nimbusds.oauth2.sdk.http.HTTPRequest.Method.*;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 class WebResponse {
     

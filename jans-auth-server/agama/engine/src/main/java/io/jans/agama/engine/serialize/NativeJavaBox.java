@@ -2,7 +2,6 @@ package io.jans.agama.engine.serialize;
 
 import io.jans.agama.engine.service.ActionService;
 import io.jans.agama.engine.service.ManagedBeanService;
-import io.jans.agama.model.serialize.Type;
 import io.jans.util.Pair;
 import io.jans.service.cdi.util.CdiUtil;
 
