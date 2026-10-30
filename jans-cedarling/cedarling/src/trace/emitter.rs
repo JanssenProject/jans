@@ -1045,7 +1045,7 @@ mod tests {
     use crate::bootstrap_config::TraceConfig;
     use crate::common::app_types::PdpID;
     use crate::common::policy_store::test_utils::fixtures;
-    use crate::lock::{BulkItemResult, BulkSink, PostBulkError};
+    use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RejectedStatus};
     use crate::log::{LogStrategy, TEST_LOGGER, gen_uuid7};
     use crate::trace::record::{
         DecisionFacts, IssuerRef, Outcome, PolicyFacts, RecordDraft, TokenRef,
@@ -1135,12 +1135,12 @@ mod tests {
                     retry_after: Some(Duration::from_secs(seconds)),
                 }),
                 Reply::Rejected => Err(PostBulkError::Rejected {
-                    status: 403,
+                    status: RejectedStatus::Http(reqwest::StatusCode::FORBIDDEN),
                     error: Some("access_denied".to_string()),
                     reason: None,
                 }),
                 Reply::InvalidRequest(reason) => Err(PostBulkError::Rejected {
-                    status: 400,
+                    status: RejectedStatus::Http(reqwest::StatusCode::BAD_REQUEST),
                     error: Some("invalid_request".to_string()),
                     reason: reason.map(str::to_string),
                 }),

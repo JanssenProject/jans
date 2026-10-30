@@ -64,16 +64,38 @@ pub(crate) enum PostBulkError {
     },
     /// Lock refused the whole request; the same bytes get the same answer.
     #[error(
-        "Lock Server rejected the TRACE bulk request with HTTP {status} (error: {}, reason: {})",
+        "Lock Server rejected the TRACE bulk request with {status} (error: {}, reason: {})",
         error.as_deref().unwrap_or("none"),
         reason.as_deref().unwrap_or("none")
     )]
     Rejected {
-        status: u16,
+        status: RejectedStatus,
         /// Error id from the Lock error catalog.
         error: Option<String>,
         reason: Option<String>,
     },
+}
+
+/// The status a whole bulk request was refused with, in the terms of the
+/// transport that carried it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RejectedStatus {
+    Http(StatusCode),
+}
+
+impl RejectedStatus {
+    /// Lock's answer to a request it could not accept as sent (`invalid_request`).
+    fn is_bad_request(self) -> bool {
+        matches!(self, Self::Http(StatusCode::BAD_REQUEST))
+    }
+}
+
+impl fmt::Display for RejectedStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Http(status) => write!(f, "HTTP {}", status.as_u16()),
+        }
+    }
 }
 
 /// Why Lock refused a whole bulk request Cedarling built, when the fix is in
@@ -93,14 +115,14 @@ impl PostBulkError {
     /// `None` for a refusal whose error and reason already say what is wrong.
     pub(crate) fn refusal(&self) -> Option<RequestRefusal> {
         let Self::Rejected {
-            status: 400,
+            status,
             error: Some(error),
             reason,
         } = self
         else {
             return None;
         };
-        if error != "invalid_request" {
+        if !status.is_bad_request() || error != "invalid_request" {
             return None;
         }
         match reason.as_deref() {
@@ -213,7 +235,7 @@ impl TraceSink {
         }
         let error = serde_json::from_slice::<ErrorBody>(&bytes).ok();
         Err(PostBulkError::Rejected {
-            status: status.as_u16(),
+            status: RejectedStatus::Http(status),
             error: error.as_ref().map(|body| body.error.clone()),
             reason: error.and_then(|body| body.reason),
         })
@@ -248,7 +270,7 @@ fn retry_after(headers: &HeaderMap, now: DateTime<Utc>) -> Option<Duration> {
 
 fn unauthorized() -> PostBulkError {
     PostBulkError::Rejected {
-        status: StatusCode::UNAUTHORIZED.as_u16(),
+        status: RejectedStatus::Http(StatusCode::UNAUTHORIZED),
         error: None,
         reason: None,
     }
@@ -257,7 +279,7 @@ fn unauthorized() -> PostBulkError {
 fn parse_results(bytes: &[u8]) -> Result<Vec<BulkItemResult>, PostBulkError> {
     let response: BulkResponse =
         serde_json::from_slice(bytes).map_err(|err| PostBulkError::Rejected {
-            status: StatusCode::MULTI_STATUS.as_u16(),
+            status: RejectedStatus::Http(StatusCode::MULTI_STATUS),
             error: None,
             reason: Some(format!("unreadable bulk response: {err}")),
         })?;
@@ -498,7 +520,13 @@ mod tests {
             .await
             .expect_err("an unreadable 207 body should be an error");
         assert!(
-            matches!(err, PostBulkError::Rejected { status: 207, .. }),
+            matches!(
+                err,
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::MULTI_STATUS),
+                    ..
+                }
+            ),
             "expected Rejected {{ status: 207 }}, got {err:?}"
         );
     }
@@ -623,7 +651,11 @@ mod tests {
         assert!(
             matches!(
                 err,
-                PostBulkError::Rejected { status: 400, ref error, ref reason }
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::BAD_REQUEST),
+                    ref error,
+                    ref reason,
+                }
                     if error.as_deref() == Some("invalid_request")
                         && reason.as_deref() == Some("bulk_body_too_large")
             ),
@@ -663,7 +695,13 @@ mod tests {
             .expect_err("a 401 after reissue should be an error");
 
         assert!(
-            matches!(err, PostBulkError::Rejected { status: 401, .. }),
+            matches!(
+                err,
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::UNAUTHORIZED),
+                    ..
+                }
+            ),
             "expected Rejected {{ status: 401 }}, got {err:?}"
         );
         old.assert_async().await;
@@ -683,7 +721,13 @@ mod tests {
             .expect_err("a pre-issued token cannot be reissued");
 
         assert!(
-            matches!(err, PostBulkError::Rejected { status: 401, .. }),
+            matches!(
+                err,
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::UNAUTHORIZED),
+                    ..
+                }
+            ),
             "expected Rejected {{ status: 401 }}, got {err:?}"
         );
         token.assert_async().await;
@@ -774,9 +818,9 @@ mod tests {
         );
     }
 
-    fn refused(status: u16, error: Option<&str>, reason: Option<&str>) -> PostBulkError {
+    fn refused(status: StatusCode, error: Option<&str>, reason: Option<&str>) -> PostBulkError {
         PostBulkError::Rejected {
-            status,
+            status: RejectedStatus::Http(status),
             error: error.map(str::to_string),
             reason: reason.map(str::to_string),
         }
@@ -786,37 +830,47 @@ mod tests {
     fn refusal_tells_limits_and_a_hidden_reason_from_the_rest() {
         let invalid = Some("invalid_request");
         assert_eq!(
-            refused(400, invalid, Some("max_bulk_records_exceeded")).refusal(),
+            refused(
+                StatusCode::BAD_REQUEST,
+                invalid,
+                Some("max_bulk_records_exceeded")
+            )
+            .refusal(),
             Some(RequestRefusal::TooManyRecords),
             "too many records"
         );
         assert_eq!(
-            refused(400, invalid, Some("bulk_body_too_large")).refusal(),
+            refused(
+                StatusCode::BAD_REQUEST,
+                invalid,
+                Some("bulk_body_too_large")
+            )
+            .refusal(),
             Some(RequestRefusal::BodyTooLarge),
             "a body too large"
         );
         assert_eq!(
-            refused(400, invalid, None).refusal(),
+            refused(StatusCode::BAD_REQUEST, invalid, None).refusal(),
             Some(RequestRefusal::Unexplained),
             "invalid_request without a reason"
         );
         assert_eq!(
-            refused(400, invalid, Some("trace_disabled")).refusal(),
+            refused(StatusCode::BAD_REQUEST, invalid, Some("trace_disabled")).refusal(),
             None,
             "a reason that explains itself"
         );
         assert_eq!(
-            refused(400, Some("invalid_signature"), None).refusal(),
+            refused(StatusCode::BAD_REQUEST, Some("invalid_signature"), None).refusal(),
             None,
             "another error id"
         );
         assert_eq!(
-            refused(403, invalid, None).refusal(),
+            refused(StatusCode::FORBIDDEN, invalid, None).refusal(),
             None,
             "another status"
         );
         assert_eq!(
-            refused(400, None, None).refusal(),
+            refused(StatusCode::BAD_REQUEST, None, None).refusal(),
             None,
             "a body that is not a Lock error"
         );
@@ -824,6 +878,17 @@ mod tests {
             retryable("Lock is down".to_string()).refusal(),
             None,
             "a retryable failure"
+        );
+    }
+
+    #[test]
+    fn rejection_message_names_the_http_status() {
+        let message = refused(StatusCode::FORBIDDEN, Some("access_denied"), None).to_string();
+        assert_eq!(
+            message,
+            "Lock Server rejected the TRACE bulk request with HTTP 403 (error: access_denied, \
+             reason: none)",
+            "the logged rejection should name the transport and its status"
         );
     }
 
@@ -840,7 +905,11 @@ mod tests {
         assert!(
             matches!(
                 err,
-                PostBulkError::Rejected { status: 400, ref error, reason: None }
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::BAD_REQUEST),
+                    ref error,
+                    reason: None,
+                }
                     if error.as_deref() == Some("invalid_request")
             ),
             "expected Rejected {{ 400, invalid_request, no reason }}, got {err:?}"

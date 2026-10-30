@@ -176,6 +176,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+pub(crate) use trace_sink::RejectedStatus;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
