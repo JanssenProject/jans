@@ -120,15 +120,19 @@ fn git_rerun_if_changed() {
     }
 }
 
-/// Compiles the audit protobuf definition into Rust code via `tonic-build`.
+/// Compiles the audit and TRACE protobuf definitions into Rust code via `tonic-build`.
 #[cfg(feature = "grpc")]
 fn compile_protos() {
     let audit_proto = "src/lock/proto/audit.proto";
+    let trace_proto = "src/lock/proto/trace.proto";
 
     println!("cargo:rerun-if-changed={audit_proto}");
+    println!("cargo:rerun-if-changed={trace_proto}");
 
     tonic_prost_build::configure()
         .build_transport(false)
-        .compile_protos(&[audit_proto], &["src/lock/proto/"])
+        // Lock verifies signatures over these exact bytes; `Bytes` shares them, not copies.
+        .bytes(".io.jans.lock.trace.SubmitBulkRecordsRequest.records")
+        .compile_protos(&[audit_proto, trace_proto], &["src/lock/proto/"])
         .expect("Failed to compile protos");
 }

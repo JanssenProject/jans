@@ -630,6 +630,11 @@ impl Emitter {
                  needs at least {}, so a lower Lock Server limit must be raised",
                 TraceConfig::MIN_BULK_MAX_BYTES
             ),
+            #[cfg(feature = "grpc")]
+            RequestRefusal::NoGrpcRoute => "Lock Server or its proxy has no \
+                 io.jans.lock.trace.TraceService route: update Lock Server and its proxy routes, \
+                 or set CEDARLING_TRACE_TRANSPORT to rest"
+                .to_string(),
             RequestRefusal::Unexplained => format!(
                 "Lock Server gives the reason only with errorReasonEnabled; it refuses a request \
                  Cedarling builds this way when TRACE is disabled in Lock Server \
@@ -647,7 +652,10 @@ impl Emitter {
         loop {
             let (err, retry_after) = match self.sink.post_bulk(body).await {
                 Ok(results) => return Sent::Results(results),
-                Err(err @ PostBulkError::Rejected { .. }) => {
+                Err(
+                    err @ (PostBulkError::Rejected { .. }
+                    | PostBulkError::UnreadableResponse { .. }),
+                ) => {
                     let fix = err
                         .refusal()
                         .map(|refusal| format!("; {}", self.refusal_fix(refusal)))
@@ -1045,7 +1053,7 @@ mod tests {
     use crate::bootstrap_config::TraceConfig;
     use crate::common::app_types::PdpID;
     use crate::common::policy_store::test_utils::fixtures;
-    use crate::lock::{BulkItemResult, BulkSink, PostBulkError};
+    use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RejectedStatus};
     use crate::log::{LogStrategy, TEST_LOGGER, gen_uuid7};
     use crate::trace::record::{
         DecisionFacts, IssuerRef, Outcome, PolicyFacts, RecordDraft, TokenRef,
@@ -1071,6 +1079,9 @@ mod tests {
         PerRecord(Vec<Option<&'static str>>),
         /// The whole request refused with `400 invalid_request` and this reason.
         InvalidRequest(Option<&'static str>),
+        /// No `TraceService` behind the gRPC address.
+        #[cfg(feature = "grpc")]
+        Unimplemented,
     }
 
     /// Answers each request with the next scripted reply, then accepts all.
@@ -1135,12 +1146,18 @@ mod tests {
                     retry_after: Some(Duration::from_secs(seconds)),
                 }),
                 Reply::Rejected => Err(PostBulkError::Rejected {
-                    status: 403,
+                    status: RejectedStatus::Http(reqwest::StatusCode::FORBIDDEN),
                     error: Some("access_denied".to_string()),
                     reason: None,
                 }),
+                #[cfg(feature = "grpc")]
+                Reply::Unimplemented => Err(PostBulkError::Rejected {
+                    status: RejectedStatus::Grpc(tonic::Code::Unimplemented),
+                    error: None,
+                    reason: None,
+                }),
                 Reply::InvalidRequest(reason) => Err(PostBulkError::Rejected {
-                    status: 400,
+                    status: RejectedStatus::Http(reqwest::StatusCode::BAD_REQUEST),
                     error: Some("invalid_request".to_string()),
                     reason: reason.map(str::to_string),
                 }),
@@ -2292,6 +2309,16 @@ mod tests {
             disabled.contains("trace_disabled") && !disabled.contains("CEDARLING_TRACE_BULK"),
             "a refusal whose reason explains it gets no advice: {disabled}"
         );
+
+        #[cfg(feature = "grpc")]
+        {
+            let no_route = refusal_error(Reply::Unimplemented).await;
+            assert!(
+                no_route.contains("io.jans.lock.trace.TraceService route")
+                    && no_route.contains("CEDARLING_TRACE_TRANSPORT to rest"),
+                "a missing gRPC route says what to update or how to fall back: {no_route}"
+            );
+        }
     }
 
     #[tokio::test(start_paused = true)]

@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use url::Url;
 
-use super::{BootstrapConfigLoadingError, BootstrapConfigRaw, PolicyStoreSource};
+use super::{BootstrapConfigLoadingError, BootstrapConfigRaw, LockTransport, PolicyStoreSource};
 use crate::trace::{ProducerId, TraceSigningKid};
 
 /// TRACE producer settings. Exists only when `CEDARLING_TRACE` is enabled, so a
@@ -26,6 +26,9 @@ pub struct TraceConfig {
     pub signing_kid: Option<TraceSigningKid>,
     /// Where TRACE bulk requests go (`CEDARLING_TRACE_ENDPOINT`).
     pub endpoint: TraceEndpoint,
+    /// How TRACE bulk requests go (`CEDARLING_TRACE_TRANSPORT`). gRPC uses only
+    /// the origin of [`Self::endpoint`].
+    pub transport: LockTransport,
     /// Maximum records per bulk request (`CEDARLING_TRACE_BULK_MAX_RECORDS`).
     pub bulk_max_records: NonZeroUsize,
     /// Maximum bytes per bulk request (`CEDARLING_TRACE_BULK_MAX_BYTES`).
@@ -189,6 +192,7 @@ fn build_enabled_trace_config(
         signing_key,
         signing_kid,
         endpoint,
+        transport: raw.trace_transport,
         bulk_max_records: non_zero(
             raw.trace_bulk_max_records,
             "CEDARLING_TRACE_BULK_MAX_RECORDS",
@@ -296,11 +300,43 @@ mod tests {
                 signing_key: TraceSigningKey::File(KEY_PATH.into()),
                 signing_kid: None,
                 endpoint: TraceEndpoint::Discovered,
+                transport: LockTransport::Rest,
                 bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
                 bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
             },
             "defaults: producer id from application name, kid from thumbprint, \
-             discovered endpoint, Lock bulk limits"
+             discovered endpoint over REST, Lock bulk limits"
+        );
+    }
+
+    #[test]
+    fn trace_transport_is_independent_of_lock_transport() {
+        let config = trace_config(&[("CEDARLING_TRACE_TRANSPORT", Some(json!("rest")))]);
+        assert_eq!(config.transport, LockTransport::Rest, "explicit rest");
+
+        #[cfg(feature = "grpc")]
+        {
+            let config = trace_config(&[("CEDARLING_TRACE_TRANSPORT", Some(json!("grpc")))]);
+            assert_eq!(config.transport, LockTransport::Grpc, "explicit grpc");
+
+            let config = trace_config(&[("CEDARLING_LOCK_TRANSPORT", Some(json!("grpc")))]);
+            assert_eq!(
+                config.transport,
+                LockTransport::Rest,
+                "audit over gRPC must not move TRACE off REST"
+            );
+        }
+    }
+
+    #[test]
+    fn unknown_trace_transport_is_refused() {
+        let mut map = trace_raw();
+        map.insert("CEDARLING_TRACE_TRANSPORT".to_string(), json!("soap"));
+        let err = serde_json::from_value::<BootstrapConfigRaw>(Value::Object(map))
+            .expect_err("an unknown transport should not deserialize");
+        assert!(
+            err.to_string().contains("soap"),
+            "the error should name the value, got {err}"
         );
     }
 

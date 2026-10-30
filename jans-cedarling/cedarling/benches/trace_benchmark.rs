@@ -179,6 +179,7 @@ fn trace_config() -> TraceConfig {
         ),
         signing_kid: None,
         endpoint: TraceEndpoint::Discovered,
+        transport: cedarling::LockTransport::Rest,
         bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
         bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
     }

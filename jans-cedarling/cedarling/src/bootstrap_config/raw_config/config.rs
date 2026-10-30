@@ -622,6 +622,15 @@ pub struct BootstrapConfigRaw {
     )]
     pub trace_endpoint: Option<String>,
 
+    /// Transport for TRACE bulk requests ("rest" or "grpc"). Separate from
+    /// `CEDARLING_LOCK_TRANSPORT`, so audit over gRPC does not move TRACE with it.
+    #[serde(
+        rename = "CEDARLING_TRACE_TRANSPORT",
+        deserialize_with = "deserialize_or_parse_string_as_json",
+        default
+    )]
+    pub trace_transport: LockTransport,
+
     /// Maximum number of records in one TRACE bulk request. Default: 100, as in Lock.
     #[serde(
         rename = "CEDARLING_TRACE_BULK_MAX_RECORDS",
