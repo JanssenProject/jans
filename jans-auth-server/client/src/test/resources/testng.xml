@@ -26,6 +26,11 @@
             <class name="io.jans.as.client.json.JsonApplierTest"/>
         </classes>
     </test>
+    <test name="ClientUtil HTTP client TLS test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.util.ClientUtilHttpClientTlsTest"/>
+        </classes>
+    </test>
     <test name="WaitForPageSwitchSettled Client test" enabled="true">
         <classes>
             <class name="io.jans.as.client.page.WaitForPageSwitchSettledTest"/>
