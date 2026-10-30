@@ -3,7 +3,7 @@
   "configOauthEnabled": ${configOauthEnabled},
   "protectionMode": "oauth",
   "disableLoggerTimer": false,
-  "userRolePermissionValidationEnabled": true,
+  "userRolePermissionValidationEnabled": false,
   "validateUserInumInIntrospectionFlag": true,
   "fetchUserRoleInIntrospectionFlag": true,
   "userRolePermissionExcludedClients": [],
