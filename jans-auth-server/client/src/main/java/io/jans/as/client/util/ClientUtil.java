@@ -16,7 +16,7 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -127,21 +127,25 @@ public class ClientUtil {
     public static CloseableHttpClient createHttpClient(String tlsVersion, String[] ciphers) {
         try {
             SSLContext sslContext = SSLContexts.createDefault();
+            // Enforce hostname verification. NoopHostnameVerifier previously disabled it, allowing
+            // a server certificate issued for a different host to be accepted.
             SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(sslContext,
-                    new String[]{tlsVersion}, ciphers, NoopHostnameVerifier.INSTANCE);
+                    new String[]{tlsVersion}, ciphers, new DefaultHostnameVerifier());
 
             Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("https", sslConnectionFactory)
                     .register("http", new PlainConnectionSocketFactory())
                     .build();
 
-            try (PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry)) {
-                return HttpClients.custom()
-                        .setSSLContext(sslContext)
-                        .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                        .setConnectionManager(cm)
-                        .build();
-            }
+            // The connection manager must outlive this method: closing it here shut down the
+            // pool before the returned client could be used. Its lifecycle is owned by the
+            // returned CloseableHttpClient.
+            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
+            return HttpClients.custom()
+                    .setSSLContext(sslContext)
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                    .setConnectionManager(cm)
+                    .build();
         } catch (Exception e) {
             log.error("Error creating HttpClient with a custom TLS version and custom ciphers", e);
             return null;
