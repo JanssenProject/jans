@@ -16,7 +16,6 @@ import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -130,7 +129,7 @@ public class ClientUtil {
             // Enforce hostname verification. NoopHostnameVerifier previously disabled it, allowing
             // a server certificate issued for a different host to be accepted.
             SSLConnectionSocketFactory sslConnectionFactory = new SSLConnectionSocketFactory(sslContext,
-                    new String[]{tlsVersion}, ciphers, new DefaultHostnameVerifier());
+                    new String[]{tlsVersion}, ciphers, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
             Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
                     .register("https", sslConnectionFactory)

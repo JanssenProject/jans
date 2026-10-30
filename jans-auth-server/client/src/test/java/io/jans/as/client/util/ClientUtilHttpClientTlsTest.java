@@ -1,7 +1,7 @@
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
- * Copyright (c) 2024, Janssen Project
+ * Copyright (c) 2026, Janssen Project
  */
 
 package io.jans.as.client.util;
@@ -73,6 +73,11 @@ public class ClientUtilHttpClientTlsTest {
 
     @BeforeClass
     public void setUp() throws Exception {
+        // Capture the JVM's pre-test truststore settings first, so @AfterClass can restore them
+        // even if certificate generation, server startup or truststore creation fails below.
+        originalTrustStore = System.getProperty("javax.net.ssl.trustStore");
+        originalTrustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+        originalTrustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
         long now = System.currentTimeMillis();
         Date notBefore = new Date(now - 60000);
         Date notAfter = new Date(now + 365L * 24 * 3600 * 1000);
@@ -113,9 +118,6 @@ public class ClientUtilHttpClientTlsTest {
             trustStore.store(out, "changeit".toCharArray());
         }
 
-        originalTrustStore = System.getProperty("javax.net.ssl.trustStore");
-        originalTrustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
-        originalTrustStoreType = System.getProperty("javax.net.ssl.trustStoreType");
         System.setProperty("javax.net.ssl.trustStore", trustStoreFile.toAbsolutePath().toString());
         System.setProperty("javax.net.ssl.trustStorePassword", "changeit");
         System.setProperty("javax.net.ssl.trustStoreType", "PKCS12");
