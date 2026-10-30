@@ -647,7 +647,10 @@ impl Emitter {
         loop {
             let (err, retry_after) = match self.sink.post_bulk(body).await {
                 Ok(results) => return Sent::Results(results),
-                Err(err @ PostBulkError::Rejected { .. }) => {
+                Err(
+                    err @ (PostBulkError::Rejected { .. }
+                    | PostBulkError::UnreadableResponse { .. }),
+                ) => {
                     let fix = err
                         .refusal()
                         .map(|refusal| format!("; {}", self.refusal_fix(refusal)))

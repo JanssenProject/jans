@@ -78,6 +78,10 @@ pub(crate) enum PostBulkError {
         error: Option<String>,
         reason: Option<String>,
     },
+    /// Lock answered that it processed the request, but the per-record results
+    /// cannot be read. Lock may have kept the records, so they are not sent again.
+    #[error("Lock Server's answer to the TRACE bulk request cannot be read: {reason}")]
+    UnreadableResponse { reason: String },
 }
 
 /// The status a whole bulk request was refused with, in the terms of the
@@ -351,10 +355,8 @@ fn retry_after(headers: &HeaderMap, now: DateTime<Utc>) -> Option<Duration> {
 
 fn parse_results(bytes: &[u8]) -> Result<Vec<BulkItemResult>, PostBulkError> {
     let response: BulkResponse =
-        serde_json::from_slice(bytes).map_err(|err| PostBulkError::Rejected {
-            status: RejectedStatus::Http(StatusCode::MULTI_STATUS),
-            error: None,
-            reason: Some(format!("unreadable bulk response: {err}")),
+        serde_json::from_slice(bytes).map_err(|err| PostBulkError::UnreadableResponse {
+            reason: format!("HTTP 207 body: {err}"),
         })?;
     Ok(response
         .results
@@ -589,7 +591,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn multi_status_with_bad_body_is_rejected() {
+    async fn multi_status_with_bad_body_is_unreadable() {
         let mut server = Server::new_async().await;
         let _bulk = bulk(&mut server, "old-token", 207, "not json");
 
@@ -600,12 +602,10 @@ mod tests {
         assert!(
             matches!(
                 err,
-                PostBulkError::Rejected {
-                    status: RejectedStatus::Http(StatusCode::MULTI_STATUS),
-                    ..
-                }
+                PostBulkError::UnreadableResponse { ref reason }
+                    if reason.starts_with("HTTP 207 body")
             ),
-            "expected Rejected {{ status: 207 }}, got {err:?}"
+            "expected UnreadableResponse for the 207 body, got {err:?}"
         );
     }
 

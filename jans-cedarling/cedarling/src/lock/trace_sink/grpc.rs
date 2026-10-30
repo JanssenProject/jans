@@ -141,13 +141,8 @@ fn results(acceptance: BulkAcceptance) -> Result<Vec<BulkItemResult>, PostBulkEr
 }
 
 fn item(entry: BulkResultEntry) -> Result<BulkItemResult, PostBulkError> {
-    let index = usize::try_from(entry.index).map_err(|_| PostBulkError::Rejected {
-        status: RejectedStatus::Grpc(Code::Ok),
-        error: None,
-        reason: Some(format!(
-            "unreadable bulk response: record index {}",
-            entry.index
-        )),
+    let index = usize::try_from(entry.index).map_err(|_| PostBulkError::UnreadableResponse {
+        reason: format!("record index {} in BulkAcceptance", entry.index),
     })?;
     // Lock sends `""` for what it leaves out, a hidden reason included.
     let TraceError { error, reason, .. } = entry.error.unwrap_or_default();
@@ -624,11 +619,8 @@ mod tests {
         assert!(
             matches!(
                 err,
-                PostBulkError::Rejected {
-                    status: RejectedStatus::Grpc(Code::Ok),
-                    error: None,
-                    reason: Some(ref reason),
-                } if reason.contains("record index -1")
+                PostBulkError::UnreadableResponse { ref reason }
+                    if reason.contains("record index -1")
             ),
             "expected an unreadable response naming the index, got {err:?}"
         );
