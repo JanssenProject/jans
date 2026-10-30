@@ -370,6 +370,9 @@
         <loc>https://docs.jans.io/nightly/janssen-server/fido/passkey-telemetry/</loc>
       </url>
       <url>
+        <loc>https://docs.jans.io/nightly/janssen-server/fido/native-app-readiness/</loc>
+      </url>
+      <url>
         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/passkey/</loc>
       </url>
       <url>
@@ -1220,6 +1223,18 @@
       </url>
       <url>
         <loc>https://docs.jans.io/nightly/cedarling/tutorials/swift/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/nightly/cedarling/patterns/annotation-patterns/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/nightly/cedarling/patterns/annotation-workflow/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/nightly/cedarling/patterns/annotation-challenge/</loc>
+      </url>
+      <url>
+        <loc>https://docs.jans.io/nightly/cedarling/patterns/annotation-client-authority/</loc>
       </url>
       <url>
         <loc>https://docs.jans.io/nightly/cedarling/reference/cedarling-authz/</loc>

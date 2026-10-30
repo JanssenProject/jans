@@ -143,7 +143,8 @@ Select the deployment method that best fits your environment and requirements.
 === "Kubernetes"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+    # Helm chart: janssen/janssen
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     
     [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/README.md)
@@ -153,7 +154,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
     ```
     
     [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
@@ -163,7 +164,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+    curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
     sudo python3 install.py
     ```
     
@@ -601,7 +602,7 @@ configuration JSON response, which you can find at `.well-known/openid-configura
 in your specific deployment. Typically, it is
 `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
 registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
@@ -3866,7 +3867,7 @@ If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP stat
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 ```
@@ -4645,7 +4646,7 @@ https://janssen.server.host/jans-auth/restv1/authorize
 ```
 
 More information about request and response of the authorization endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Authorization).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
 
 
 ## Configuration Properties
@@ -5967,7 +5968,7 @@ https://janssen.server.host/jans-auth/restv1/clientinfo
 
 Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Client_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -6181,7 +6182,7 @@ Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-c
 Gluu Server documentation to understand how end session endpoint works in Janssen Server.
 
 More information about request and response of the end session endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -6259,7 +6260,7 @@ https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
 More information about request and response of the global token revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Usage
 
@@ -6581,7 +6582,7 @@ can be found by checking the `introspection_endpoint` claim of the OpenID Connec
  "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
 More information about request and response of the Introspection endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
 
@@ -6853,7 +6854,7 @@ methods used are same as the ones used for client authentication at [token endpo
 
 More information about request and response of the PAR endpoint can be found in
 the OpenAPI specification of
-[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/0.0.0-nightly/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
+[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7005,7 +7006,7 @@ https://janssen.server.host/jans-auth/restv1/ssa
 
 More information about request and response of the revocation endpoint can be found in
 the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/SSA).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7552,7 +7553,7 @@ https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 
 
@@ -7659,7 +7660,7 @@ sample response. Actual response can greatly vary in its contents based on reque
 ```
 
 More information about request and response of the token endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
@@ -7797,7 +7798,7 @@ User Info response should contain: `sub`, `jti` and `client_id` claims.
 
 Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -14384,7 +14385,7 @@ Command will be similar to the one below:
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-[Restart](https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
 
 ```
 jans-auth.service
@@ -16078,7 +16079,7 @@ Operation ID: patch-config-jwks
 
 To use this operation, specify the id of the key that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `use` from `enc` to `sig`.
 
@@ -17372,7 +17373,7 @@ Operation ID: patch-oauth-uma-resources-by-id
 
 To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `name` from `uma resource` to `UMA`.
 
@@ -18140,7 +18141,7 @@ Another example is to delete session with **sid=c190667e-a186-421d-8679-420e8261
 curl -k -X DELETE "https://example.jans.io/jans-config-api/api/v1/jans-auth-server/session/sid/c190667e-a186-421d-8679-420e82615a38" -H "Authorization: Bearer 5abf61a6-b86f-49d7-8134-77168303d0f9"
 ```
 
-Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml).
+Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml).
 
 # SSA Configuration
 
@@ -18757,7 +18758,7 @@ are published in the [Swagger document](./../../reference/openapi.md), see endpo
 [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) provides a central place to manage and configure jans modules.
 It helps in configuring auth-server, users, fido2 and scim modules.
 
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
 ![Config-API-Architecture](../../../../assets/config-api-architecture.png)
 
@@ -20145,7 +20146,7 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 # Config-api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/nightly/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server).
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server).
 
 ## Jans Config API Plugins
 Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
@@ -20668,7 +20669,7 @@ Janssen Config API endpoints are OAuth protected. It supports basic token as wel
 
 ### Invoking API using curl
 
-Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
 #### Prerequisites
 
@@ -20679,7 +20680,7 @@ You will need:
 
 #### Steps
 
- * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
+ * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
  endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
@@ -29130,6 +29131,22 @@ There are two AS configuration properties related to `X-Frame-Options`:
 By default AS attaches `X-Frame-Options` header to all responses where request uri contains `.htm`.
 It means for all AS pages.
 
+## Configure Security Headers
+
+`HeadersFilter` also attaches defense-in-depth headers to API responses:
+
+- `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` - blocks execution of injected markup and clickjacking.
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: no-referrer` - keeps URL secrets from leaking.
+
+Configuration properties:
+
+- `securityHeadersEnabled` - boolean, default `true`. Set to `false` to disable the headers.
+- `applySecurityHeadersIfUriContainsAny` - array of strings. If the request uri contains any string from this array, AS attaches the headers to the response.
+  Default value: `/restv1/token`, `/restv1/userinfo`, `/restv1/introspection`, `/restv1/jwks`, `/restv1/register`, `/restv1/revoke`.
+
+Do not add endpoints that RPs must frame (for example `check_session_iframe`) or normal HTML pages to this list.
+
 # FIDO & Passkeys Administration Guide
 
 Janssen’s FIDO2 server enables relying parties (RPs) to register and authenticate users via hardware security keys, platform authenticators (e.g., Apple Touch ID, Windows Hello), and synced passkeys.
@@ -29155,7 +29172,7 @@ For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 
 Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md).
 
 ### FIDO Metric API 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests
@@ -30023,7 +30040,7 @@ An entry under `rp` may also list the Android and iOS apps that share its RP ID,
 | `androidApps[].packageName` | Android application package name |
 | `androidApps[].sha256CertFingerprints` | SHA-256 fingerprints of the app signing certificate, colon-separated hex |
 | `androidApps[].distribution` | `play-store` or `self-signed`: which signing certificate the fingerprints belong to |
-| `iosApps[].teamId` | Apple Developer Team ID |
+| `iosApps[].teamId` | Apple Developer Team ID, or the app's App ID prefix when that differs (older apps) |
 | `iosApps[].bundleId` | Application bundle identifier |
 
 This is the single place an RP's native apps are recorded. It is what the `assetlinks.json` and
@@ -30035,6 +30052,70 @@ checked against.
 ceremony. When an origin is rejected, the server log says which RPs were considered and that configured native
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.
+
+To check that the `assetlinks.json` and `apple-app-site-association` files an RP has deployed match these
+entries, see [Native App Readiness](native-app-readiness.md).
+
+#### Exporting the association files
+
+The server generates both files from these fields, for you to deploy on the RP-ID host. They are the same
+files the readiness check compares a deployed copy against.
+
+| Request | File |
+| --- | --- |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/assetlinks.json` | Android `assetlinks.json`, one statement per `androidApps` entry |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/apple-app-site-association` | Apple file, one `TeamID.BundleID` per complete `iosApps` entry |
+
+`{rpConfigId}` is the RP `id` as configured, URL-encoded. The answer is a JSON download, `404` when the RP is
+not configured or has no app of that platform. Nothing is served from Jans: both Apple and Android fetch
+`https://<rp-id>/.well-known/...` without following redirects, so deploy each file on the RP-ID host itself.
+Apple's file is named `apple-app-site-association`, with no `.json` extension.
+
+**Merge the exported entries into any file that is already there; do not replace it.** The exports describe
+only the passkey (`webcredentials` and `get_login_creds`) entries. A host that already serves these files may
+also use them for universal links or Android App Links, such as `applinks` in the Apple file or other
+statements in `assetlinks.json`, and overwriting the file removes those. Add the exported statements to the
+Android array, and the exported app IDs to `webcredentials.apps`, and leave everything else as it is.
+
+**Check that `teamId` is the app's App ID prefix.** Apple expects `<App ID prefix>.<bundle ID>` in
+`webcredentials.apps`. For most apps the prefix is the Team ID, but for older apps it can be a different value.
+Use the prefix shown for the app's App ID under Identifiers in your Apple Developer account (it is also the
+part before the bundle ID in the app's `application-identifier` entitlement), and record that value as `teamId`.
+
+After deploying, run the native app readiness check for the same RP
+(`POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, which needs `nativeReadinessEnabled` and
+`nativeReadinessAllowExternalFetch`) to confirm the deployed files match the configured apps. A mismatched
+fingerprint or Team ID is the most common deployment failure, and the check reports it.
+
+### Native app readiness
+
+The `nativeReadiness*` properties control a check that compares the `assetlinks.json` and
+`apple-app-site-association` files an RP has deployed with the `androidApps` and `iosApps` recorded under
+`rp` (see above). Everything is off by default, so an upgrade changes nothing until an administrator turns it
+on.
+
+- `nativeReadinessEnabled` is the master switch. While it is `false` the endpoint does no work.
+- `nativeReadinessAllowExternalFetch` is a second, separate opt-in. The server only contacts an RP's
+  `/.well-known` files when both flags are `true`; with only `nativeReadinessEnabled` set it reports what is
+  configured and does not fetch.
+- `nativeReadinessMaxResponseBytes` (default 128 KiB) and `nativeReadinessTimeoutMs` (default 3 seconds) bound
+  each fetch. The server also applies a fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value
+  cannot make a fetch unbounded. A value of zero or less falls back to the default. The time limit covers the
+  HTTP fetch only; the name lookup happens before it starts and is bounded only by the server's DNS resolver.
+- `nativeReadinessCacheTtlSeconds` is how long a result is reused before the files are fetched again. It is
+  never shorter than 60 seconds.
+
+The check is run with `POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, where `rpConfigId` is the RP `id`
+exactly as configured, URL-encoded. The body is empty or `{"recheck": true}`, which skips the cached result.
+The endpoint cannot be pointed at any other host: only the stored RP ID is ever fetched, and it must be a
+public host name. Like the other diagnostic endpoints, it relies on the infrastructure or the Config API
+plugin for authentication.
+
+The response lists, for `android` and `ios`, each check with a `status` of `pass`, `warn` or `fail` and a short
+`reason`, together with `checkedAt`, `fromCache` and `nextRecheckAllowedAt`. It never contains the content of
+the fetched files. A request that would exceed a rate limit gets HTTP 429 with a `Retry-After` header and
+causes no fetch. The limits apply per server node: one fetch per RP per minute, 20 files per minute in total,
+and 3 checks at a time. Each executed check is written to the server log as a `native-readiness-audit` line.
 
 ### Advertised algorithms
 
@@ -30189,6 +30270,218 @@ Store this content in a file, say `/tmp/config_values.json`.
 ### Location of logs in FIDO2 server:
 
 Logs can be found at `/opt/jans/jetty/jans-fido2/logs`
+
+# Native App Readiness
+
+Passkeys in an Android or iOS app only work when the relying party's domain vouches for the app. The domain
+does that by serving two files under `/.well-known/`:
+
+- `assetlinks.json` for Android
+- `apple-app-site-association` for iOS
+
+When one of them is missing, unreachable or out of date, the app fails with a generic error and nothing says
+why. The readiness check compares the files an RP has actually deployed with the `androidApps` and `iosApps`
+recorded for it under `rp` (see [Native applications of a relying
+party](fido2-server-properties-config.md#native-applications-of-a-relying-party)) and reports what is wrong.
+
+The check is read-only. It never changes configuration and never changes how a ceremony is decided.
+
+## Enabling the check
+
+`nativeReadinessEnabled` must be `true` to run the check at all. `nativeReadinessAllowExternalFetch` is needed
+only for checking the files an RP has deployed; leave it `false` to get the configuration-only report. Both are
+`false` by default, so an upgrade changes nothing until an administrator turns them on.
+
+| Property | Effect |
+| :--- | :--- |
+| `nativeReadinessEnabled` | Master switch. While `false` the endpoint does no work and answers `{"enabled": false}`. |
+| `nativeReadinessAllowExternalFetch` | Second, separate opt-in for contacting the RP's `/.well-known` files. With only `nativeReadinessEnabled` set, the check reports what is configured and does not fetch. |
+
+The size, time and cache properties (`nativeReadinessMaxResponseBytes`, `nativeReadinessTimeoutMs`,
+`nativeReadinessCacheTtlSeconds`) are described in [Native app
+readiness](fido2-server-properties-config.md#native-app-readiness).
+
+## Running a check
+
+=== "FIDO2 server"
+
+    ```
+    POST /jans-fido2/restv1/rp/{rpConfigId}/readiness
+    ```
+
+    The FIDO2 server does not authenticate this call itself. Like the other diagnostic endpoints it relies on
+    the infrastructure in front of it, so prefer the Config API route.
+
+=== "Config API (fido2 plugin)"
+
+    ```
+    POST /fido2/rp/{rpConfigId}/readiness
+    ```
+
+    Served under the Config API base path. Requires the `https://jans.io/oauth/config/fido2.write` scope, or
+    `https://jans.io/oauth/config/fido2.admin` or `https://jans.io/oauth/config/write-all`. A read scope is
+    not enough, because the call makes the FIDO2 server contact an external host.
+
+    The caller's `Authorization` header is forwarded to the FIDO2 server. The Config API identifies the caller
+    by introspecting that token (the user's `inum`, else the user name, else the client id) and passes it on as
+    the requester for the [audit](#audit). A value sent by the caller in a header is never used.
+
+`rpConfigId` is the RP `id` exactly as configured, URL-encoded. The body is empty, or:
+
+```json
+{ "recheck": true }
+```
+
+Any other field is ignored. In particular, no URL, host, port or path can be supplied.
+
+| Response | Meaning |
+| :--- | :--- |
+| `200` | The result below. |
+| `400` | The body is not a JSON object. |
+| `404` | No relying party is configured with that id. Nothing was fetched. |
+| `429` | A [rate limit](#caching-and-rate-limits) refused the check. The `Retry-After` header gives the wait in seconds. Nothing was fetched. |
+| `500` | The Config API route only: the FIDO2 server could not be reached or answered something else. |
+
+### Result
+
+```json
+{
+  "enabled": true,
+  "externalFetch": true,
+  "platforms": {
+    "android": [
+      { "check": "reachability.status", "status": "pass", "reason": "HTTP 200" },
+      { "check": "content.android.fingerprint", "status": "fail",
+        "reason": "fingerprint AB:CD:... for package com.example.app not listed" }
+    ],
+    "ios": [
+      { "check": "content.ios.app", "status": "pass", "reason": "app T9A667JL6T.com.example.app listed in webcredentials.apps" },
+      { "check": "content.ios.cdn", "status": "warn", "reason": "iOS reads this file through app-site-association.cdn-apple.com, which caches aggressively; a correct file may not take effect immediately" }
+    ]
+  },
+  "checkedAt": "2026-10-21T09:30:00Z",
+  "fromCache": false,
+  "nextRecheckAllowedAt": "2026-10-21T09:31:00Z"
+}
+```
+
+Each check has a `status` and a short `reason`:
+
+| `status` | Meaning |
+| :--- | :--- |
+| `pass` | The check holds. |
+| `warn` | Worth a look, but the file can still work. |
+| `fail` | The platform will reject the file, or the file does not match the configuration. |
+
+The `reason` names only configured values (a package name, a fingerprint, `TeamID.BundleID`), HTTP status
+codes and counts. **The result never contains the content of a fetched file**, a redirect target, a resolved
+address or a parser error message.
+
+A platform with no configured apps is not fetched. Its list holds one `pass` saying so.
+
+## Checks
+
+### Reachability
+
+Run once per file, for every platform that has apps configured.
+
+| Check | `pass` | `warn` | `fail` |
+| :--- | :--- | :--- | :--- |
+| `reachability.status` | HTTP 200 | | Any other status (the code is stated), a redirect, or no response: the name does not resolve, resolves to an address that is not allowed, the TLS connection failed, or the host could not be reached. |
+| `reachability.redirect` | | | Present only for a 3xx answer. Says whether the redirect goes to a path on the same host, to `www.` plus the same name, or to a different host. Neither Android nor iOS follows redirects. |
+| `reachability.host` | Present for any non-redirect answer, naming the RP ID host that answered. | | |
+| `reachability.content-type` | `application/json` (parameters such as `charset` are ignored). Present for HTTP 200 only. | A different type, for `apple-app-site-association` only. | No `Content-Type` header, or a different type for `assetlinks.json`. |
+| `reachability.limits` | The response is within the size limit. | | The response is larger than the limit, or nothing arrived in time. |
+
+### Content
+
+Run only when the file answered HTTP 200 and was not cut off at the size limit.
+
+| Check | `pass` | `warn` | `fail` |
+| :--- | :--- | :--- | :--- |
+| `content.parse` | | | The body is empty, is not valid JSON, is too deeply nested, or is not the expected shape (a JSON array for `assetlinks.json`, an object for `apple-app-site-association`). Nothing else is reported for that file. |
+| `content.android.package` | A statement lists the configured package. | | The package is not listed. |
+| `content.android.fingerprint` | Every configured fingerprint is listed. Comparison ignores case and colons. | The file lists fingerprints for the package that are not configured. The count is stated. | A configured fingerprint is missing, or an app has no fingerprint configured. |
+| `content.android.relation` | A statement for the package that lists each configured fingerprint carries `delegate_permission/common.get_login_creds`. | | No such statement does. The relation on a different statement than the one holding the fingerprints is not enough. |
+| `content.ios.app` | `webcredentials.apps` contains `TeamID.BundleID` (case-insensitive). | | It does not, or an app is configured without a team ID or bundle ID. |
+| `content.drift` | The file matches what Jans would generate from the configuration. | The deployed file differs, for example after a signing key rotation. Counts of missing and unexpected entries are stated. Order, whitespace and unrelated extra content are ignored. | Never. |
+| `content.ios.cdn` | | Always, for the Apple file, whether the other checks pass or fail. | Never. |
+
+`content.drift` and `content.ios.cdn` are advice, not verdicts, and never fail a check on their own.
+
+When nothing is fetched, the check reports `config.android` and `config.ios` instead (a `pass` when apps are
+configured, a `warn` when none are), `fetch.skipped` when external fetching is off, and `config.rp-id` as a
+`fail` when the configured RP ID is not a public host name that can be checked.
+
+### Apple CDN caching
+
+iOS does not read `apple-app-site-association` from your server when the app is installed. It reads a copy held by
+Apple's CDN, `app-site-association.cdn-apple.com`, which caches aggressively. The check cannot see that copy
+and does not contact the CDN, so a correct file can still take a while to take effect after you deploy it. This
+is why `content.ios.cdn` is always a `warn`.
+
+### CMS-signed `apple-app-site-association`
+
+An `apple-app-site-association` file can be served CMS-signed, which is not JSON. The check reads the file as
+JSON only, so a signed file is reported as `content.parse` `fail` and its contents are not checked. This is a
+limitation of the check, not necessarily a fault of the file: if you serve a signed file, treat that `fail` as
+expected and verify the file another way.
+
+## What the server will and will not contact
+
+Fetching is the risky part of this feature, so it is deliberately narrow:
+
+- **Only the configured RP ID is contacted.** The caller selects a configured entry; it cannot supply a host,
+  URL, port or path. An id that is not configured gets `404` and no outbound request.
+- **The RP ID must be a public host name.** An IP address, `localhost`, a name with a port and similar values
+  are refused before any lookup.
+- **HTTPS on port 443 only**, at the two fixed paths `/.well-known/assetlinks.json` and
+  `/.well-known/apple-app-site-association`.
+- **Redirects are never followed.** A 3xx answer is reported and nothing more.
+- **Blocked address ranges.** After the name is resolved, the connection is made only to an address the
+  server has checked. Loopback, private, link-local (which includes the `169.254.169.254` cloud metadata
+  address), unique-local IPv6, carrier-grade NAT, multicast, documentation, benchmarking, unspecified and
+  reserved ranges are refused, and so are IPv6 forms that wrap one of those IPv4 addresses.
+- **Bounded.** The response size is capped at 256 KiB and the HTTP fetch at 10 seconds, whatever the properties
+  say. The name lookup happens before that deadline starts and is bounded only by the server's DNS resolver, so
+  a slow lookup can make a whole check take longer.
+- **Nothing sent.** No cookies, credentials, proxy or server tokens. Only `Accept` and `User-Agent` are set.
+
+## Caching and rate limits
+
+A result is kept in memory, per server node, for `nativeReadinessCacheTtlSeconds` and never for less than 60
+seconds. A request served from the cache has `"fromCache": true` and makes no outbound request.
+
+The cache is keyed by the RP id only, so changing an RP's `androidApps` or `iosApps` does not invalidate it. After
+changing them, send `{"recheck": true}` to see a result for the new configuration.
+
+Sending `{"recheck": true}` (the "Recheck now" action) skips the cache, but not the rate limits. The limits are
+per server node, so in a cluster the installation-wide ceiling is the number of nodes times these values:
+
+| Limit | Value |
+| :--- | :--- |
+| Fetches per relying party | 1 per 60 seconds |
+| Files fetched, all relying parties together | 20 per 60 seconds |
+| Checks running at the same time | 3 |
+
+A request that would exceed one of them gets `429` with a `Retry-After` header and causes no fetch.
+`nextRecheckAllowedAt` in the result says when the same relying party can be fetched again.
+
+## Audit
+
+Each executed check writes one line to the FIDO2 server log, starting with `native-readiness-audit`:
+
+| Field | Value |
+| :--- | :--- |
+| `rpId` | The relying party id. |
+| `check` | The check id, or `cache.hit` when a cached result was served. |
+| `requestedBy` | Who asked: the caller the Config API identified from the token, sent in `X-Jans-Requested-By`, or whatever a direct call put in that header. `unknown` when absent. |
+| `timestamp` | When the check ran, in UTC. |
+| `result` | `pass`, `warn` or `fail`. |
+| `resolvedIpClass` | A coarse label for the address that was reached, never the address itself: `public`, `blocked`, `unresolved`, `unknown`, or `none` when nothing was fetched. |
+
+`requestedBy` is informational. The FIDO2 server does not authenticate callers, so a request that reaches it
+directly can set any value.
 
 # Passkey Telemetry & Metrics
 
@@ -30543,7 +30836,7 @@ The telemetry API is a set of read-only `GET` endpoints grouped as raw entries,
 aggregations, analytics, and utility (`config`, `health`). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:
 
-- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)**
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
 | Group | Endpoints |
 |---|---|
@@ -31364,7 +31657,7 @@ System should meet the following requirements:
 To deploy the AIO Janssen Server, first download the installation script and make it executable:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh 
 chmod u+x start_janssen_aio_demo.sh
 ```
 
@@ -31421,7 +31714,7 @@ Janssen Server can be configured using the Text-based User Interface (TUI).
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
     ```bash
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
     ```
 
 2. To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers. 
@@ -31574,7 +31867,7 @@ For production environments, use a managed database service:
 Deploy PostgreSQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
 
@@ -31601,7 +31894,7 @@ config:
 Deploy MySQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
 
@@ -32086,8 +32379,9 @@ For local deployments, minimum resources are:
 Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 
 ```bash
+# Helm chart: janssen/janssen
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
@@ -32205,14 +32499,14 @@ Open a kubectl shell from the top right navigation menu `>_` and run:
 === "MySQL"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
     kubectl apply -f mysql.yaml # adjust values as preferred
     ```
 
 === "PostgreSQL"
 
     ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
     kubectl apply -f pgsql.yaml # adjust values as preferred
     ```
 
@@ -32622,7 +32916,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.debian13_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -32639,17 +32933,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-debian13-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-debian13-0.0.0-nightly.bundle \
+          --bundle jans-debian13-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.debian13_amd64.deb
+          jans_replace-janssen-version-stable.debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32661,19 +32955,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.debian13_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.debian13_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.debian13_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.debian13_amd64.deb: OK
+    jans_replace-janssen-version-stable.debian13_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install ./jans_0.0.0-nightly.debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script
@@ -32783,7 +33077,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~debian13_amd64) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```
 
@@ -32807,7 +33101,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 1. Download the installer
 ```
-curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
 ```
 
 1. Execute Installer
@@ -32873,7 +33167,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -32884,17 +33178,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el9-0.0.0-nightly.bundle \
+          --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          ~/jans-0.0.0-nightly.el9.x86_64.rpm
+          ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32906,19 +33200,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-   echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el9.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 ```
 
 ### RHEL 10
@@ -32934,7 +33228,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -32945,17 +33239,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el10-0.0.0-nightly.bundle \
+          --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-         ~/jans-0.0.0-nightly.el10.x86_64.rpm
+         ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -32967,19 +33261,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el10.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -33135,7 +33429,7 @@ sudo SUSEConnect -p PackageHub/15.5/x86_64
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse16.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -33146,17 +33440,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-suse16-0.0.0-nightly.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-suse16-0.0.0-nightly.bundle \
+          --bundle jans-suse16-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-0.0.0-nightly.suse16.x86_64.rpm
+          jans-replace-janssen-version-stable.suse16.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33168,19 +33462,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.suse16.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo zypper install ~/jans-0.0.0-nightly.suse16.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
 
 !!! note "Expected zypper prompt during install"
@@ -33328,7 +33622,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33345,17 +33639,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu24-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33367,19 +33661,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
@@ -33388,7 +33682,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33405,17 +33699,17 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu22-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33427,19 +33721,19 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or,
@@ -33561,7 +33855,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 ```
 
@@ -33732,7 +34026,7 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 helm list -n <namespace>
 ```
 
-Keep note of the chart version. For example: `0.0.0-nightly`
+Keep note of the chart version. For example: `replace-janssen-version`
 
 ### Manual Restore
 
@@ -33754,7 +34048,7 @@ kubectl create -f secret-backup.yaml
 4.  Insall jans using the override or user supplied values with the same chart version:
 
 ```bash
-helm install <release-name> janssen/janssen -f values.yaml --version=<0.0.0-nightly> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
@@ -33802,7 +34096,7 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -33854,7 +34148,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key
           containers:
             - name: load-web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be different in Helm
@@ -33941,7 +34235,7 @@ Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+                  image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
                   resources:
                     requests:
                       memory: "300Mi"
@@ -33992,7 +34286,7 @@ Changing FQDN in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: change-fqdn
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -35300,7 +35594,7 @@ kubectl scale --replicas=3 deployment/auth-server -n <namespace>
 
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
 
-    `wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz`
+    `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
 
     Now we have `jans-cli-tui-linux-ubuntu-X86-64.pyz` downloaded.
 
@@ -35329,7 +35623,7 @@ This guide shows how to upgrade a Janssen helm deployment.
 
 4.  Apply your upgrade:
 
-    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=0.0.0-nightly`
+    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=replace-janssen-version`
 
 # Janssen Lock Guide
 
@@ -37182,13 +37476,13 @@ In cloud-native architecture, the load testing is executed via k8s pods.
 
 ### Authorization Code Flow jmeter load test
 
-For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
+For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
 
 See [Authorization code flow recipe](../recipes/benchmark.md#authorization-code-flow) for details.
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter load test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
 
 See [ROPC flow recipe](../recipes/benchmark.md#resource-owner-password-credentials-ropc-flow) for details.
 
@@ -38165,7 +38459,7 @@ credentials on one page.
 
 You can build a page like Google on your own website. You need to be able to
 list, add, and remove 2FA credentials for a given user's account. But another
-good option is the [Jans Casa](https://docs.jans.io/nightly/casa) web application.
+good option is the [Jans Casa](https://docs.jans.io/vreplace-janssen-version/casa) web application.
 
 The holy grail of security policies since the introduction of RSA OTP tokens,
 stepped-up authentication is when the subject is presented with an additional
@@ -38627,13 +38921,13 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 
 3. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
 
-4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `0.0.0-nightly_dev` which are the bleeding edge images for release `0.0.0-nightly`. Stable images such as `0.0.0-nightly-1` should be used.
+4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
    
    ```yaml
    config:
       image:
         repository: ghcr.io/janssenproject/jans/configurator
-        tag: 0.0.0-nightly_dev 
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -38677,17 +38971,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/auth-server
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/config-api
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/persistence-loader
-       tag: 0.0.0-nightly_dev 
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -38721,7 +39015,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     mkdir -p add_users && cd add_users
     ```
 
-2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
 
@@ -38815,7 +39109,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -38907,7 +39201,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -38995,7 +39289,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
@@ -45228,6 +45522,7 @@ If you’d like to contribute to this document, get started with the [Contributi
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
 | allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
+| applySecurityHeadersIfUriContainsAny | Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true. | [Details](#applysecurityheadersifuricontainsany) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -45477,6 +45772,7 @@ If you’d like to contribute to this document, get started with the [Contributi
 | saveTokensInCache | Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincache) |
 | saveTokensInCacheAndDontSaveInPersistence | Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincacheanddontsaveinpersistence) |
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
+| securityHeadersEnabled | Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny | [Details](#securityheadersenabled) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
 | sessionAuthnTimeCheckDuringPromptLoginThresholdMs | Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms. | [Details](#sessionauthntimecheckduringpromptloginthresholdms) |
 | sessionIdCookieLifetime | The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidcookielifetime) |
@@ -45719,6 +46015,15 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 
 - Default value: false
+
+
+## applySecurityHeadersIfUriContainsAny
+
+- Description: Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.
+
+- Required: No
+
+- Default value: /restv1/token, /restv1/userinfo, /restv1/introspection, /restv1/jwks, /restv1/register, /restv1/revoke
 
 
 ## applyXFrameOptionsHeaderIfUriContainsAny
@@ -47962,6 +48267,15 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Default value: 1440
 
 
+## securityHeadersEnabled
+
+- Description: Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny
+
+- Required: No
+
+- Default value: true
+
+
 ## serviceDocumentation
 
 - Description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
@@ -49376,22 +49690,22 @@ This Reference guide helps you learn about the components and architecture of Ja
 # Image references
 | Image                                                                                                                          |
 |--------------------------------------------------------------------------------------------------------------------------------|
-| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-all-in-one/README.md)       |
-| [jans-auth-server](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-auth-server/README.md)     |
-| [jans-casa](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-casa/README.md)                   |
-| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-cloudtools/README.md)       |
-| [jans-config-api](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-config-api/README.md)       |
-| [jans-configurator](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-configurator/README.md)   |
-| [jans-fido2](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-fido2/README.md)                 |
-| [jans-persistence](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-persistence/README.md)     |
-| [jans-saml](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-saml/README.md)                   |
-| [jans-scim](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-scim/README.md)                   |
+| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-all-in-one/README.md)       |
+| [jans-auth-server](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-auth-server/README.md)     |
+| [jans-casa](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-casa/README.md)                   |
+| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-cloudtools/README.md)       |
+| [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)       |
+| [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md)   |
+| [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)                 |
+| [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)     |
+| [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                   |
+| [jans-scim](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-scim/README.md)                   |
 
 # Helm Chart references
 | Helm Chart                                                                                                                   |
 |------------------------------------------------------------------------------------------------------------------------------|
-| [All In One Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen-all-in-one/README.md) |
-| [Microservices Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen/README.md)         |
+| [All In One Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen-all-in-one/README.md) |
+| [Microservices Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen/README.md)         |
 
 
 ## Architectural diagram of Janssen
@@ -50145,12 +50459,12 @@ Follow the links below to access respective documentation.
 
 | Service          | REST API                                                                                                                                                                              |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml)                         |
-| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml)          |
+| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml)                         |
+| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)          |
 | Jans Core        | NA                                                                                                                                                                                    |
-| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)                      |
-| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
-| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-lock/lock-server.yaml) |
+| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)                      |
+| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
+| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-lock/lock-server.yaml) |
 
 ## Javadocs
 
@@ -53724,11 +54038,11 @@ This guide shows how to upgrade a Janssen VM deployment.
     Custom scripts are considered external configuration and are not updated automatically during an upgrade.
     Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
-Let's assume we are upgrading Jans VM installation from `current version` to `nightly`
+Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
 1. Keep the old VM installation running.
 
-2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `nightly`.
+2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `vreplace-janssen-version`.
 
     You can install with a test client. For example:
 
@@ -53736,11 +54050,11 @@ Let's assume we are upgrading Jans VM installation from `current version` to `ni
 
     This `client-id` and `client-pw` will then be used to import Terraform configurations
 
-3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `nightly` to:
+3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `vreplace-janssen-version` to:
     - import all the global configurations from the new installation using `terraform import`
     - define all the custom IDP configurations and apply them using `terraform apply`
 
-4. At this point there should be two versions up, `old version` and `nightly`.
+4. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
 
 5. Traffic should be switched gradually from the old setup to the new setup.
    Once confidence is gained, drain the old VM.
@@ -55398,7 +55712,7 @@ Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/nightly/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/vreplace-janssen-version/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
@@ -55485,7 +55799,7 @@ The _casa_ project allows to onboard new types of second factors (authentication
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
@@ -55612,7 +55926,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 
@@ -55705,15 +56019,15 @@ Acquaintance with the following technologies is recommended:
 ### Sample plugins
 
 The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](
-https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
-Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
+Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens  
@@ -55753,7 +56067,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../janssen-server/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 
@@ -55844,7 +56158,7 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
@@ -55852,7 +56166,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
@@ -55947,7 +56261,7 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/strong-authn-settings-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Log in to Casa using an administrator account
 
@@ -55971,7 +56285,7 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
 
 # Accounts Linking Plugin
 
@@ -56009,9 +56323,9 @@ Most of work is demanded on setting up project _c_, where configuration of ident
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
-1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/nightly/agama-inbound-0.0.0-nightly.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
@@ -56023,7 +56337,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     zip -r inbound.zip *
     ```
 
-1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-agama-0.0.0-nightly-project.zip`
+1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`. 
 
@@ -56351,7 +56665,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
     This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  
 
-    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
+    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
     - The server name
     - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
@@ -56360,7 +56674,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
 === "Apache 2.4 with TLS 1.2"
 
-    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
     In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
 
@@ -56389,7 +56703,7 @@ Offering users the login page and the account onboarding regarded above is up to
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-agama-0.0.0-nightly-project.zip`
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 
@@ -56429,7 +56743,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
 
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 
@@ -56441,7 +56755,7 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://github.com/JanssenProject/jans/releases/download/nightly/jans-scim-model-0.0.0-nightly.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
 
@@ -56595,7 +56909,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -56621,7 +56935,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/custom-branding-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -56654,7 +56968,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Plugin
 
-1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-0.0.0-nightly-jar-with-dependencies.jar) file
+1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
 
 1. Login to Casa using an administrative account
 
@@ -56670,7 +56984,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-agama-0.0.0-nightly-project.zip)
+1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 
@@ -56917,15 +57231,29 @@ in-memory cache. See the Cedarling [log](./reference/cedarling-logs.md) document
 
 The following diagram is a high-level picture of the Cedarling components:
 
-![](../assets/cedarling/lock-cedarling-rust-core-components.jpg)
+![Cedarling components](../assets/cedarling/cedarling-components.png)
 
-* **Cedar Engine** a recent release of the Rust Cedar Engine, thanks to Amazon.
-* **SparKV** is an in-memory key-value store that supports automatic expiration of data.
-* **Interfaces** perform actions described above
-* **JWT Engine** is used to validate JWT signatures, JWT content (e.g., `exp`), and to 
-  check if the JWT token is revoked (using the Status List JWT) 
-* **Lock Engine** is used for enterprise deployments to load the Policy Store from a 
-  trusted source and send logs for central storage. 
+* **Interfaces** provide initialization, authorization, pushing context data, and
+  reading logs, metrics, and policy annotations. See the
+  [interfaces reference](./reference/cedarling-interfaces.md).
+* **Policy Store Manager** loads the Policy Store from a local file, a URI, or the Lock
+  Server, verifies its signature, and refreshes it. It provides the schema, the
+  policies, and the list of trusted issuers.
+* **JWT Service** validates token signatures and claims (e.g., `exp`) using the trusted
+  issuers' OpenID configuration and JWKS, and checks whether a token is revoked using the
+  Status List JWT.
+* **Context Data Store** keeps data pushed through the Data API, with optional TTL.
+* **Entity & Context Builder** turns validated tokens or an asserted principal, the
+  resource, and pushed data into Cedar entities and context (`context.tokens`,
+  `context.data`).
+* **Cedar Engine** is a recent release of the Rust Cedar Engine, thanks to Amazon. It
+  returns the decision and diagnostics.
+* **Observability** records decision and system logs and metrics. With
+  [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
+  record, as evidence, of each decision whose request carries a
+  [TRACE context](./reference/cedarling-authz.md#authorize-options-and-trace-context). In enterprise deployments, the optional
+  **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence
+  for central storage, and can also provide the Policy Store.
 
 ## Proof-based authorization: Token-Based Access Control (TBAC)
 
@@ -58626,7 +58954,7 @@ with the `student` entity type in the schema:
 }
 ```
 
-For this, follow the steps found [here](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
@@ -59630,6 +59958,1511 @@ See the [JWT-based Terraform authorization guide](./terraform-authz-jwt.md) for 
 ### Auditing decisions
 
 Cedarling emits structured logs for every authorization decision. Set `CEDARLING_LOG_LEVEL` to `INFO` or `DEBUG` to capture the principal, action, resource, decision, and matching policy IDs in your log pipeline.
+
+# Pattern: Step-Up and Evidence
+
+!!! note "Illustrative example"
+
+    Acme, ReportBot, and every `@checks` value below are invented for this page. Cedarling attaches
+    no meaning to them; they work only because the example application reads them. The scenario is
+    simplified to show the mechanism, not to be copied as a security design. See
+    [Policy Annotation Patterns](./annotation-patterns.md) for the ground rules.
+
+## The Scenario
+
+Acme runs an internal assistant, `ReportBot`, that employees use to answer questions over company
+documents. It reads the same document store the employees can read, on their behalf.
+
+Dana, who works in the Northeast financial-services team, asks ReportBot a broad question, and to
+answer it the assistant reaches for `Acme::Document::"strategy-fy27"`, a company-level strategy
+document classified `highly_confidential`, normally read only by the strategy and finance teams.
+
+Nothing here is obviously an attack. There are three plausible explanations:
+
+- Dana genuinely needs the document and nobody told the access system.
+- The assistant went too far and turned a broad question into a search Dana never meant to run.
+- Dana's credentials are being used by somebody else.
+
+A binary answer has to pick one. Denying blocks legitimate work and teaches people to work around
+the tool. Allowing means an agent reads strategy documents at machine speed, and the security team
+finds out from a log review next week.
+
+## Where the Challenge Is Decided
+
+The better answer is to ask: confirm with Dana that the access was intended, get the data owner to
+confirm the need, or require a security key. [Beyond
+Zero](https://queue.acm.org/detail.cfm?id=3819083) calls this a *challenge*, friction applied in the
+moment and in proportion to the risk.
+
+Choosing that challenge is not the policy's job. Which challenge to put in front of an accessor is
+an organization-level decision that spans applications, and it is usually made by a reasoning engine
+or an identity orchestration service. It weighs signals no single policy sees: the device, the
+session's history, what the same account did in other applications an hour ago. A policy that named
+its own challenge would be making that decision with a fraction of the information.
+
+What the policy can do is say precisely what is missing. Its `@checks` label names the condition
+that denied the request, and its `unless` clause names the evidence that would satisfy it. The
+reasoning engine takes the label as one input among many and decides what to do: run a challenge,
+refuse, or raise an alert.
+
+Once a challenge is issued, the interaction becomes stateful. The accessor goes off to complete it,
+the challenge service records the result, and the next request arrives with richer context. The
+challenge itself carries no claims; it is the opportunity to collect them. The policy sees only the
+outcome, as evidence in the context, and evaluates the request again.
+
+## Modeling the Agent
+
+The policies below are written against the identity model, so the identity model comes first.
+
+The agent is a principal in its own right, not a flag on the human. `ReportBot` has its own entity
+type, its own ID, and its own attributes, so policies tell "an agent did this" from "a human did
+this" by the principal type, which the engine enforces, rather than by reading a string out of the
+context that nothing prevents the caller from setting.
+
+The agent also has to stay attributable to the human who operates it. Lose that link and the agent
+has access that no person is responsible for. An attribute of type `User` cannot express that link,
+because [only the principal and the resource are
+entities](./annotation-patterns.md#only-the-principal-and-the-resource-are-entities). So the agent
+carries its operator as an identifier, together with copies of the operator attributes the policies
+need, filled in by the server when it builds the request:
+
+- `operator_id` keeps the request attributable to a person, and it is what the challenge service
+  uses to reach the operator
+- `operator_assignments` and `operator_risk_tier` are copies of the operator's own attributes, so
+  rules about the human's scope and risk can be evaluated on an agent request
+
+Make them required in the schema. A required attribute the server forgot to fill in fails the
+request, while an optional one that is missing would make every policy reading it error, drop out of
+the decision, and stop protecting anything.
+
+## The Flow
+
+```mermaid
+sequenceDiagram
+    participant Dana
+    participant App
+    participant Cedarling
+    participant Engine as Reasoning engine
+    participant Service as Challenge service
+
+    Dana->>App: prompt
+    App->>Cedarling: 1. authorize<br/>principal: Agent::"reportbot-7f3"<br/>attestations: []
+    Cedarling-->>App: Deny<br/>forbid_agent_read_sensitive_unconfirmed<br/>forbid_offscope_sensitive_read_by_agent
+    App->>Cedarling: 2. annotation_values(reason, "checks")
+    Cedarling-->>App: agent.human_intent_unconfirmed<br/>document.outside_operator_assignments
+    App->>Engine: 3. checks + signals
+    Engine-->>App: run two challenges
+    App->>Service: 4. run challenges
+    Service->>Dana: ReportBot wants to open strategy-fy27. Did you ask for this?
+    Dana-->>Service: confirm
+    Note over Service: the data owner approves too
+    Service-->>App: results, stored server-side, bound to this request
+    App->>Cedarling: 5. authorize again<br/>attestations: [human_intent_confirmed, data_owner_approved]
+    Cedarling-->>App: Allow
+    App-->>Dana: answer
+```
+
+Step 5 is the important one. The evidence goes back in as context, and the same policies are
+evaluated again. No policy is bypassed and no verdict is overridden. The request became a different,
+better-evidenced request.
+
+## Schema
+
+Both principal types apply to the action, and the collected evidence is part of the context so the
+policies can test it.
+
+```cedarschema
+namespace Acme {
+    entity User = {
+        "assignments": Set<String>,
+        "risk_tier": String,
+    };
+
+    entity Agent = {
+        "operator_id": String,
+        "operator_assignments": Set<String>,
+        "operator_risk_tier": String,
+        "model": String,
+    };
+
+    entity Document = {
+        "sensitivity": String,
+        "subject": String,
+        "owner_team": String,
+    };
+
+    action "Read" appliesTo {
+        principal: [User, Agent],
+        resource: [Document],
+        context: {
+            "attestations": Set<String>,
+        }
+    };
+}
+```
+
+## Policies
+
+One broad `permit`, with the risk conditions layered on top as labeled `forbid` policies:
+
+```cedar
+@id("permit_read_documents")
+permit (
+    principal,
+    action == Acme::Action::"Read",
+    resource is Acme::Document
+);
+```
+
+An agent reading a highly confidential document needs evidence that the human intended it. This
+condition is about the *nature of the accessor*, so it exists only for `Agent`:
+
+```cedar
+@id("forbid_agent_read_sensitive_unconfirmed")
+@checks("agent.human_intent_unconfirmed")
+@detail("An agent is reading a highly confidential document with no confirmation from its operator.")
+forbid (
+    principal is Acme::Agent,
+    action == Acme::Action::"Read",
+    resource is Acme::Document
+)
+when { resource.sensitivity == "highly_confidential" }
+unless {
+    context.attestations.contains("human_intent_confirmed")
+};
+```
+
+Reading a highly confidential document outside the human's work assignments needs the data owner's
+approval on record. This one is about the *human's scope of work*, and it applies whether the human
+reads the document directly or an agent reads it for them. So it exists twice, once per principal
+type, differing only in where the assignments come from:
+
+```cedar
+@id("forbid_offscope_sensitive_read_by_agent")
+@checks("document.outside_operator_assignments")
+@detail("The document's subject is not among the operator's assignments and no owner approval is recorded.")
+forbid (
+    principal is Acme::Agent,
+    action == Acme::Action::"Read",
+    resource is Acme::Document
+)
+when {
+    resource.sensitivity == "highly_confidential" &&
+    !principal.operator_assignments.contains(resource.subject)
+}
+unless {
+    context.attestations.contains("data_owner_approved")
+};
+```
+
+```cedar
+@id("forbid_offscope_sensitive_read_by_user")
+@checks("document.outside_operator_assignments")
+@detail("The document's subject is not among the user's assignments and no owner approval is recorded.")
+forbid (
+    principal is Acme::User,
+    action == Acme::Action::"Read",
+    resource is Acme::Document
+)
+when {
+    resource.sensitivity == "highly_confidential" &&
+    !principal.assignments.contains(resource.subject)
+}
+unless {
+    context.attestations.contains("data_owner_approved")
+};
+```
+
+Evaluated against Dana's request, the agent principal matches both agent policies:
+
+```text
+DENY   reason: forbid_agent_read_sensitive_unconfirmed
+               forbid_offscope_sensitive_read_by_agent
+```
+
+Had Dana opened the document directly, only the scope rule would have fired:
+
+```text
+DENY   reason: forbid_offscope_sensitive_read_by_user
+```
+
+And once both pieces of evidence are recorded in the context, the same policy set allows the
+request:
+
+```text
+ALLOW  reason: permit_read_documents
+```
+
+### Notes on the Shape of This
+
+Each condition is its own policy. Cedar rejects a duplicate annotation key on one policy, so
+`@checks` appears once per policy. Independent risk conditions stay independent policies, they are
+reviewed separately, and the ones that matched are the ones reported in `reason()`.
+
+Each `forbid` names the evidence that clears it, in its `unless` clause. A `forbid` with no `unless`
+is a hard block: no amount of evidence changes the answer. The `unless` clause is the policy's real
+statement of what would make the request acceptable, and it is enforced by the engine on the second
+call rather than trusted to the application.
+
+The policy names evidence, not a procedure. `data_owner_approved` says what has to be true. Whether
+the challenge service collects it with an in-app approval, a ticket, or a call is not the policy's
+concern, and the reasoning engine may decide not to try at all.
+
+One rule, two principal types, two policies. They share one `@checks` value, so the reasoning
+engine sees the same condition whichever principal type fired it, while each keeps its own `@id`
+for the decision log.
+
+## Application Code
+
+```rust
+use std::collections::BTreeSet;
+
+// Server-issued records only, already filtered to this action and resource and to
+// records that have not expired. Never the raw client context.
+let mut attestations: BTreeSet<String> = evidence.valid_for(&document, Action::Read);
+
+// A set: two policies reporting the same condition are one condition.
+let checks = |result: &AuthorizeResult| -> BTreeSet<String> {
+    cedarling
+        .annotation_values(result.response.diagnostics().reason(), "checks")
+        .into_iter()
+        .collect()
+};
+
+// Evidence collected earlier is already in this request, so a read that needs no
+// challenge is allowed here and never reaches the reasoning engine.
+let first = cedarling
+    .authorize_unsigned(read_request(&agent, &document, &attestations))
+    .await?;
+if first.decision {
+    return Ok(serve(first));
+}
+
+// No labels: no policy named missing evidence, so there is nothing to collect.
+let found = checks(&first);
+if found.is_empty() {
+    return Err(deny(&found));
+}
+
+audit.record(&cedarling.annotations_by_policy(first.response.diagnostics().reason()));
+
+// The reasoning engine decides what, if anything, to ask for. It sees the conditions
+// the policies found plus signals from outside this request.
+let plan = reasoning_engine
+    .decide(&agent, &document, &found, session.signals())
+    .await?;
+
+let challenges = match plan {
+    Plan::Challenge(challenges) => challenges,
+    Plan::Refuse | Plan::Contain => return Err(deny(&found)),
+};
+
+for challenge in challenges {
+    // Results are attested by the challenge service and stored server-side,
+    // bound to this resource and action, with the expiry the service set.
+    let attestation = challenge_service.run(challenge, &agent, &document).await?;
+    attestations.insert(evidence.record(attestation, &document, Action::Read)?);
+}
+
+// One more evaluation with the new evidence, and its answer is final.
+let second = cedarling
+    .authorize_unsigned(read_request(&agent, &document, &attestations))
+    .await?;
+if second.decision {
+    Ok(serve(second))
+} else {
+    Err(deny(&checks(&second)))
+}
+```
+
+There are three ways out before any challenge runs. The request is allowed on the first call,
+because the evidence it needs was collected earlier or it never needed any. No policy labeled the
+denial, so there is nothing to ask for. Or the reasoning engine refuses. The reasoning engine cannot
+turn a `Deny` into an `Allow`; it can only collect evidence that the policies then evaluate.
+
+Nothing in this code trusts the caller. The set fed into `context.attestations` is rebuilt from
+server-side records that are scoped to this resource and action and dropped once they expire, which
+is what makes the policy's `unless` clause mean anything.
+
+There is exactly one evaluation after the evidence is collected. A second denial goes back to the
+caller, not to the reasoning engine, because asking again until the answer is `Allow` turns a policy
+mistake into an endless series of prompts.
+
+## Requirements for the Evidence
+
+The pattern is only as strong as the integrity of `context.attestations`, so treat these as part of
+the implementation rather than as advice. They bind whoever runs the challenges: the reasoning
+engine, the challenge service, and the application that assembles the context.
+
+- Never accept evidence from the client. An attestation has to be produced by the challenge service
+  and held in server-side session state, or in a signed, audience-bound token. If a browser or an
+  agent can put `"human_intent_confirmed"` into the context, the policy enforces nothing.
+- Expire it. Cedar has no concept of elapsed time here, so the challenge service sets a lifetime on
+  every attestation and the application drops expired ones before building the context. An
+  attestation with no expiry is one that a long-lived session keeps using forever.
+- Bind it to the request. Evidence collected for one document should not silently authorize a bulk
+  export of a thousand others. Scope the stored attestation to the action and resource it was
+  collected for, or to a short window, whichever your risk model justifies.
+- Collect it from someone who can refuse. An attestation an agent produces on its own is not
+  evidence, and neither is one the requester produces about their own request.
+  `human_intent_confirmed` has to come from the operator named by `operator_id`, never from the
+  agent; `data_owner_approved` has to come from the team in `resource.owner_team`, never from the
+  operator, or the operator approves their own off-scope read. Record who answered, and reject an
+  answer from the wrong party.
+- Log the failures. A challenge that is repeatedly abandoned is a signal in itself, and it belongs
+  in the same stream as the decision logs, where the reasoning engine can see it next time.
+
+Because those records live on the server, a browser evaluating these same policies is working from a
+copy it cannot refresh, so its denials are provisional. See
+[Advisory denials in a client-side PDP](./annotation-client-authority.md).
+
+## Variation: Risk Carried by the Operator
+
+Risk attaches to the human, but the request arrives from the agent. The copied
+`operator_risk_tier` keeps the two connected, so an elevated-risk operator cannot skip the checks
+by sending an assistant:
+
+```cedar
+@id("forbid_agent_read_for_elevated_risk_operator")
+@checks("operator.elevated_risk")
+@detail("The agent's operator is flagged elevated-risk and no security key verification is recorded.")
+forbid (
+    principal is Acme::Agent,
+    action == Acme::Action::"Read",
+    resource is Acme::Document
+)
+when {
+    principal.operator_risk_tier == "elevated" &&
+    resource.sensitivity == "highly_confidential"
+}
+unless {
+    context.attestations.contains("security_key_verified")
+};
+```
+
+## Variation: Containment
+
+Some conditions should not be cleared in the moment. After several failed challenges, or when an
+investigation has already flagged the account, the right answer is a durable block that a person has
+to lift.
+
+That is the same mechanism with the `unless` clause removed:
+
+```cedar
+@id("forbid_contained_operator")
+@checks("operator.contained")
+@detail("The agent's operator is under containment by security operations.")
+forbid (
+    principal is Acme::Agent,
+    action,
+    resource
+)
+when { principal.operator_risk_tier == "contained" };
+```
+
+The human's own sessions need the twin, or containment stops an assistant and lets the operator
+carry on by hand:
+
+```cedar
+@id("forbid_contained_user")
+@checks("operator.contained")
+@detail("The user is under containment by security operations.")
+forbid (
+    principal is Acme::User,
+    action,
+    resource
+)
+when { principal.risk_tier == "contained" };
+```
+
+No evidence clears these policies, so the reasoning engine has nothing to collect. It reads
+`operator.contained` and knows not to offer a challenge; lifting the block means changing the risk
+tier, which happens outside the request.
+
+Containment depends on an attribute being present, and it is the one policy here that must never
+stop applying unnoticed. Keep `risk_tier` and `operator_risk_tier` required in the schema. Cedarling
+validates the principal against the schema when it builds it, so a principal without the attribute
+fails the request instead of slipping past the containment policy. Without a schema there is nothing
+to check: the policy errors at evaluation, drops out of the decision, and the denial it should have
+produced never happens.
+
+Containment here is keyed on the human. Blocking one badly behaving agent while its operator keeps
+working would need a risk attribute of the agent's own and a third policy.
+
+## What This Buys You
+
+The policies state what each risky condition is and what evidence would make it acceptable, and the
+engine enforces that on every call. The decision about how to collect the evidence stays where the
+signals are: with the reasoning engine and the challenge service. Security engineers add a
+condition, retire one, or tighten what counts as sufficient evidence by editing policies, and each
+change is a diff you can review, test against recorded requests, and find later in the decision log.
+
+# Pattern: Advisory Denials in a Client-Side PDP
+
+!!! note "Illustrative example"
+
+    Acme Reports, the `@server_input` key, and every `@checks` value below are invented for this
+    page. Cedarling attaches no meaning to them; they work only because the example application
+    reads them. See [Policy Annotation Patterns](./annotation-patterns.md) for the ground rules.
+
+## The Scenario
+
+Acme's reporting dashboard is a browser application with Cedarling embedded through the WASM
+package. It authorizes locally before it calls the API, which is what makes the interface feel
+immediate: buttons that would fail are disabled, and a click that cannot succeed is answered without
+a round trip.
+
+The API runs Cedarling too, over the same policy store, and re-evaluates every request. That is not
+duplicate work: the browser copy exists for the interface, and the server copy protects the data.
+
+Now two different denials arrive at the same button.
+
+The user is a viewer, and viewers do not generate reports. The browser knows the user's role, the
+role is not going to change between the click and the request, and the server would say exactly the
+same thing. Rendering "you do not have access" locally is correct and costs nothing.
+
+The workspace has used up its monthly quota. The browser is comparing against a counter it
+fetched when the page loaded, and the real figure lives in the metering service. That number may
+have moved in either direction: the month may have rolled over, an administrator may have raised the
+plan, or another tab may have consumed the remainder. A local denial here is a guess.
+
+Both are `Deny`. Only one of them is worth showing.
+
+## The Policy Describes Its Inputs
+
+The browser cannot tell the two denials apart from the decision alone. The policy can help, without
+telling the browser what to do, by stating a fact about itself: which of its inputs only the server
+holds fresh.
+
+```cedar
+@server_input("reports_used")
+```
+
+That is a description, not an instruction. It is true whoever evaluates the policy. The browser
+draws its own conclusion from it: a denial that rests on server-held input is not one it can
+confirm. The server draws none, because for the server the input is fresh.
+
+## Why This Is Safe
+
+A client-side PDP can be wrong in only one direction that matters. It cannot grant anything, because
+the server evaluates the same request again and grants nothing on the browser's say-so. What it can
+do is refuse something the server would have allowed, which is a correctness problem in the
+interface rather than a security problem.
+
+The pattern relies on this one-way risk. Sending the request anyway, after a local denial, gives
+away nothing: the authoritative answer is still the server's.
+
+The reverse must never exist. Nothing lets a client skip the request after a local `Allow`, and
+nothing lets it disregard a denial from the server. Those would move the decision to the least
+trustworthy participant.
+
+This safety is not free. It holds only while the following five conditions hold, and each one has
+to be kept that way:
+
+- Every guarded call is authorized again on the server, from inputs the server resolved itself. A
+  single endpoint that trusts the browser's decision, or that rebuilds the request from what the
+  browser sent, ends the guarantee for that endpoint.
+- The client renders denials and never shapes data. Masking and row limits are applied by whoever
+  builds the response, which is the server. A browser that masks columns it received in the clear
+  only changes how data it already has is displayed.
+- Everything the browser evaluates is treated as public. The embedded PDP holds the policy store and
+  the entity attributes it reasons over, so thresholds, tier names, contract quotas, and risk tiers
+  are readable by anyone who opens the developer tools. Ship only what you are willing to show, and
+  keep policies whose contents are themselves sensitive on the server.
+- The action's effect is a server call. An action the browser can carry out alone, revealing a field
+  already on the page or exporting rows it already downloaded, has no second check behind it, and
+  there the local PDP is the only PDP. Do not guard those this way.
+- The endpoint is safe to call when the answer is no. Every provisional denial becomes a request
+  that the server is expected to refuse, so refusals must not start metered work, increment
+  counters, or leave half an effect behind, and the endpoint needs capacity for traffic the client
+  used to absorb.
+
+## Which Policies Carry It
+
+The ones whose conditions rest on facts the browser cannot hold fresh, which in practice means facts
+the server owns:
+
+- counters and quotas, like `context.reports_used`
+- approval records, like `context.approvals`
+- collected evidence, like `context.attestations`
+- validated incident or session state, like `context.incident_id`
+- risk attributes a backend investigation updates, like `principal.risk_tier`
+
+Those examples are the inputs from the other pages in this section, which is not a coincidence.
+Every one of them describes something the server established and the client carries a copy of.
+
+A denial that rests on the principal's role, the resource's type, or anything else the browser
+received with its tokens is in the opposite position. It is as good locally as it is remotely, and
+its policy carries no `@server_input`.
+
+## Schema
+
+```cedarschema
+namespace Acme {
+    entity User = {
+        "role": String,
+    };
+
+    entity Workspace;
+
+    action "GenerateReport" appliesTo {
+        principal: [User],
+        resource: [Workspace],
+        context: {
+            "reports_used": Long,
+        }
+    };
+
+    action "ExportRows" appliesTo {
+        principal: [User],
+        resource: [Workspace],
+        context: {}
+    };
+}
+```
+
+## Policies
+
+The same four policies run in the browser and on the server. Only one of them reads server-held
+input.
+
+```cedar
+@id("permit_generate_report")
+permit (
+    principal,
+    action == Acme::Action::"GenerateReport",
+    resource
+);
+```
+
+```cedar
+@id("permit_export_rows")
+permit (
+    principal,
+    action == Acme::Action::"ExportRows",
+    resource
+)
+when { principal.role == "admin" };
+```
+
+```cedar
+@id("forbid_generate_report_wrong_role")
+@checks("report.role_not_permitted")
+@detail("Only analysts and admins generate reports.")
+forbid (
+    principal,
+    action == Acme::Action::"GenerateReport",
+    resource
+)
+unless {
+    ["analyst", "admin"].contains(principal.role)
+};
+```
+
+```cedar
+@id("forbid_generate_report_quota_exhausted")
+@checks("quota.reports.exhausted")
+@detail("The workspace has used every report its plan includes this month.")
+@server_input("reports_used")
+forbid (
+    principal,
+    action == Acme::Action::"GenerateReport",
+    resource
+)
+when { context.reports_used >= 1000 };
+```
+
+`@server_input` names the field, not just the fact, so that a reviewer can check it against the
+condition: removing `reports_used` from the policy should remove the label too, and adding a
+server-held field to an unlabeled policy should add one.
+
+## The Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Browser
+    participant API
+    participant Metering
+
+    User->>Browser: click
+    Note over Browser: local authorize_unsigned<br/>reports_used from page load<br/>Deny: forbid_generate_report_quota_exhausted<br/>every denial reads server input
+    Browser-->>User: pending
+    Browser->>API: POST /reports
+    API->>Metering: read counter
+    Metering-->>API: fresh counter
+    Note over API: authorize_unsigned (authoritative)
+    API-->>Browser: 201, or 403
+    Browser-->>User: result
+```
+
+The pending state is an accurate report of what the browser knows, which at that point is nothing.
+
+## Browser Code
+
+None of this belongs in a click handler. Whether a local denial may be rendered is the same question
+for every guarded action in the application, so the answer lives in two pieces that every action
+shares: a function that reads the decision, and a wrapper that runs the call.
+
+The first one is pure. Given a decision, it says what the browser is entitled to do with it:
+
+```javascript
+// The only place the UI interprets an authorization decision.
+function localOutcome(result) {
+  if (result.decision) {
+    return { proceed: true };
+  }
+
+  const diagnostics = result.response.diagnostics;
+
+  // A policy that errored was dropped from the decision. In a browser the usual
+  // cause is an input this side failed to load, and the server evaluates the same
+  // policies over inputs it owns, so this denial is not ours to render.
+  if (diagnostics.errors.length > 0) {
+    report(diagnostics.errors);
+    return { proceed: true, pending: true };
+  }
+
+  const denials = Object.values(cedarling.annotationsByPolicy(diagnostics.reason));
+
+  // A denial resting only on what the browser itself knows, or nothing matched at all.
+  const local = denials.find((a) => !a.server_input);
+
+  if (local || denials.length === 0) {
+    return { proceed: false, messageId: messageFor(local?.checks) };
+  }
+
+  // Every denial reads input the server owns, so none of them is ours to render.
+  return { proceed: true, pending: true };
+}
+```
+
+`messageFor` is the application's own table from `@checks` values to message identifiers, with a
+generic fallback for values it does not know.
+
+Both an `Allow` and a fully provisional `Deny` return `proceed: true`. From the browser's side they
+are the same situation: it has nothing worth saying, and the server decides. The only difference is
+that one of them warns the interface to expect a wait.
+
+A render-time check calls `authorizeOnly` and stops there. Disabling a button is the interface
+acting on a denial before any click, so it may only act on a denial the browser is entitled to make:
+`proceed: false` renders as disabled, everything else renders as enabled and resolves when clicked.
+
+### Bind the Action to the Call It Guards
+
+The wrapper still needs a request to authorize and a call to make, and if a caller supplies those
+separately they are free to drift. The browser can authorize `Acme::Action::"GenerateReport"` and
+then post to an endpoint that exports raw rows, and nothing complains: the local check was real, it
+just answered a question nobody asked.
+
+Declare the pair once, in a table the whole application shares:
+
+```javascript
+// Built once, from the tokens the session already holds.
+const principal = {
+  cedar_entity_mapping: { entity_type: "Acme::User", id: user.id },
+  role: user.role,
+};
+
+// The stale counter this whole pattern is about: a snapshot taken at page load.
+const usage = usageSnapshot();
+
+const guardedActions = {
+  generateReport: {
+    action: 'Acme::Action::"GenerateReport"',
+    resource: (workspace) => ({
+      cedar_entity_mapping: { entity_type: "Acme::Workspace", id: workspace.id },
+    }),
+    context: (workspace) => ({ reports_used: usage.cached(workspace.id) }),
+    call: (workspace) => api.post("/reports", { workspace: workspace.id }),
+  },
+
+  exportRows: {
+    action: 'Acme::Action::"ExportRows"',
+    resource: (workspace) => ({
+      cedar_entity_mapping: { entity_type: "Acme::Workspace", id: workspace.id },
+    }),
+    context: () => ({}),
+    call: (workspace) => api.post("/exports", { workspace: workspace.id }),
+  },
+};
+
+// `target` is what the action operates on, the workspace here. Named `target`
+// rather than `subject`, which in authorization usually means the principal.
+async function authorizeOnly(name, target) {
+  const { action, resource, context } = guardedActions[name];
+
+  const result = await cedarling.authorizeUnsigned(
+    JSON.stringify({
+      principal,
+      action,
+      resource: resource(target),
+      context: context(target),
+    }),
+  );
+
+  return localOutcome(result);
+}
+
+async function guarded(name, target) {
+  const outcome = await authorizeOnly(name, target);
+
+  if (!outcome.proceed) {
+    return { status: "denied", messageId: outcome.messageId };
+  }
+
+  if (outcome.pending) {
+    ui.showPending();
+  }
+
+  const response = await guardedActions[name].call(target);
+
+  return response.ok
+    ? { status: "ok", body: response.body }
+    : { status: "denied", messageId: response.messageId };  // the server's message
+}
+```
+
+A handler is then one line, names one thing, and knows nothing about annotations or policy IDs:
+
+```javascript
+const outcome = await guarded("generateReport", workspace);
+```
+
+Two warnings keep this from becoming worse than what it replaces.
+
+The mapping is a declaration, not a naming convention. Cedar actions describe what the user is
+doing, so they stay business-shaped: `Acme::Action::"GenerateReport"`, never
+`Acme::Action::"POST /reports"`. Naming actions after routes brings transport details into the
+policy vocabulary, and every URL change becomes a policy change.
+
+The relationship is not always one to one. A batch endpoint performs several actions, and a BFF or
+GraphQL resolver may serve one action through several calls. The rule that survives those cases is
+narrower than "one action per endpoint": every call site declares which action it is guarded by, in
+one place, next to the call.
+
+The server keeps its own version of this table, and derives the action from its routing rather than
+from anything the client sends.
+
+The four cases the browser has to tell apart:
+
+```text
+analyst, counter says 10     ALLOW  permit_generate_report
+analyst, counter says 1000   DENY   forbid_generate_report_quota_exhausted
+                                    reads server input, so ask the server
+viewer,  counter says 10     DENY   forbid_generate_report_wrong_role
+                                    local facts only, so render it
+viewer,  counter says 1000   DENY   forbid_generate_report_wrong_role
+                                    forbid_generate_report_quota_exhausted
+                                    one denial on local facts, so render it
+```
+
+The direction of that test matters. One denial resting on local facts is enough to render a
+refusal, because it holds regardless of what the server thinks about the others: the viewer without
+the right role stays refused even if the quota turns out to be fine. Only when *every* matched
+policy reads server input does the browser have nothing worth saying.
+
+An empty `reason()` belongs on the same side as a local denial, as long as it means what it looks
+like. Nothing matched, and a round trip will not change that. The exception is the case the
+overview describes under [Only the determining policies are
+reported](./annotation-patterns.md#only-the-determining-policies-are-reported): a policy that
+errored is dropped from the decision and shows up in `errors()` instead. In a browser that error is
+usually the client's own doing, a counter that failed to load or an attribute the session never
+received, and the server would evaluate the same policies without trouble. So a non-empty `errors()`
+is the most provisional case there is, which is why `localOutcome` checks it before anything else.
+
+## Server Code
+
+```rust
+// The API builds the context from what it owns, not from what the client sent.
+let request = report_request(&user, &workspace, metering.reports_used(&workspace)?);
+let result = cedarling.authorize_unsigned(request).await?;
+
+// A policy that errored was skipped, so an Allow here can hide a forbid that never ran.
+if result.response.diagnostics().errors().next().is_some() {
+    return Err(evaluation_failed(&result));
+}
+
+if !result.decision {
+    let checks = cedarling.annotation_values(result.response.diagnostics().reason(), "checks");
+    return Err(forbidden(message_for(&checks)));
+}
+
+generate_report(&workspace)
+```
+
+The server never reads `@server_input`. Its inputs are the fresh ones, so the label has nothing to
+tell it, and treating it as a reason to relax a denial would make the policy optional. Record that
+in a comment where the server's enforcement point reads annotations; the shared policy store makes
+it easy to assume both sides act on every key.
+
+## Rules That Keep This Safe
+
+**Read the decision in one place.** The rule for when a local denial may be rendered is a property
+of the application, not of the action, so it belongs in a single wrapper that every guarded call
+goes through.
+
+**Keep the action and the call declared together.** A local check that authorizes one action while
+the handler performs another is worse than no check, because it looks like enforcement.
+
+**Pending is not an optimistic yes.** The interface must not enable downstream state, start an
+upload, or show a success animation while the request is in flight. It knows nothing yet.
+
+**The final message comes from the server.** After the round trip, show what the server's decision
+carried. The local policy that fired may not even be the one that denies at the other end.
+
+**Do not label everything.** Each provisional denial is a round trip the client-side PDP was
+supposed to save. If most policies read server input, the embedded PDP is a latency cost with no
+benefit, and calling the server unconditionally would be simpler and clearer.
+
+**Treat annotations as published.** The browser holds the policies and reads their annotations, so
+anything in a key or a `@detail` is readable by the people the policy constrains. Keep internal
+identifiers, ticket numbers, and detection logic out of policies the client loads.
+
+## When to Decide per Action Instead
+
+Labeling policies is not the only option. An application can decide per action that a local denial
+is never rendered, which needs no annotations at all.
+
+That is the better choice when every denial for an action has the same source. Labeling
+policies is worth it when one action mixes both kinds, which is the case here: the same button
+can be refused for a role the browser knows and for a quota it does not.
+
+## What This Buys You
+
+The interface stops guessing about which failures it is allowed to render. Each policy states which
+of its inputs live on the server, next to the condition that reads them, and the same policy store
+answers both the browser and the API. A new policy that depends on server-owned data arrives with
+its own label, and the front end handles it without a release.
+
+# Policy Annotation Patterns
+
+A Cedar policy answers one question: is this action on this resource allowed, yes or no. That
+answer alone is often not enough to build a product. When a request is denied, the application
+wants to know *which* rule refused it, so it can explain the refusal, offer a way forward, or hand
+the case to something that can. When a request is allowed, it may want to know *on what basis*,
+because an allow under a break-glass rule is not the same event as an allow under a standing grant.
+
+Cedar annotations (`@key("value")`) let the policy author label each policy with what it checks,
+and Cedarling hands those labels back with the decision. The policy says what it found. The
+application, or a reasoning engine behind it, decides what to do about it.
+
+This section collects patterns for doing that. Each page describes a scenario, the policies, and
+the application code that reads the annotations.
+
+The code samples assume you know how an authorization request carries its principal, resource, and
+context. If that is new, read [Authorization](../reference/cedarling-authz.md) and
+[Entities](../reference/cedarling-entities.md) first; nothing here changes how a request is built.
+
+!!! note "These are illustrative examples, not a specification"
+
+    Cedarling gives annotations no built-in meaning. `@checks`, `@detail`, `@server_input`, and
+    every other key on these pages were chosen for the documentation: they are not reserved, not
+    validated, and nothing in Cedarling reacts to them. An annotation only does something because
+    *your* application reads that key.
+
+    The one exception is `@id`, which Cedarling uses as the policy ID.
+
+    The same goes for the scenarios themselves. The companies, entities, schemas, and flows exist
+    to show what the mechanism makes possible. They are deliberately simplified, and they are
+    neither reference architectures nor security advice for your system. Design your own
+    vocabulary and your own policies around your own risk model.
+
+The pages build on each other, so read them in this order if the mechanism is new to you.
+
+| Pattern | Problem it solves |
+|---|---|
+| [Multi-step flows and escalation](./annotation-workflow.md) | Onboarding prerequisites, approvals, and break-glass access |
+| [Step-up and evidence](./annotation-challenge.md) | A denial that names what is missing, so a challenge service can collect it |
+| [Advisory denials in a client-side PDP](./annotation-client-authority.md) | Telling a browser which of its own denials rest on data it cannot see |
+
+## Annotations Inform, the Application Decides
+
+Every pattern here uses annotations in one way: to describe the policy. A policy says what condition
+it tests, and nothing about what should happen next.
+
+```cedar
+@checks("quota.reports.exhausted")
+```
+
+That label is all the application needs. Its own table maps `quota.reports.exhausted` to a
+translated message, an upgrade offer for a self-serve customer, a call to the account manager for an
+enterprise one, and a reset date from the billing system. None of that belongs in the policy, for
+three reasons:
+
+- The right reaction depends on context the policy does not have: the customer's contract, the
+  channel the request came from, other signals collected across applications.
+- Remedies change at product speed. Message copy, upgrade offers, and escalation contacts would turn
+  every product change into a policy release.
+- A policy that instructs the application is a policy whose meaning depends on the application
+  following it. A policy that describes itself stays true whoever reads it.
+
+This matters most for step-up. Deciding which challenge to put in front of an accessor (a security
+key touch, a confirmation from a human, an approval from a data owner) is an organization-level
+decision, usually made by a reasoning engine or an identity orchestration service that weighs
+signals no single policy sees. The policy contributes one input to that decision: the condition it
+found. See [Step-up and evidence](./annotation-challenge.md).
+
+### The Vocabulary Used on These Pages
+
+| Key | Carries | Read by |
+|---|---|---|
+| `@checks` | the condition the policy tests, as a stable identifier: `onboarding.bank_account_missing`, `quota.reports.exhausted` | application code |
+| `@detail` | one sentence for the developer explaining the condition: "The workspace has used its full monthly report quota." | logs and debugging tools, never end users |
+| `@server_input` | the context field the policy reads that only the server holds fresh | a client-side PDP |
+
+A `@checks` value names a state, not an action. `onboarding.bank_account_missing` stays accurate
+whatever the application does about it; `onboarding.redirect_to_bank_form` would be a remedy
+dressed up as a fact. Use dotted, lowercase identifiers, keep them stable once published, and treat
+them like an API: renaming one breaks every application table that maps it.
+
+`@detail` is for people debugging the system, which is why it can be plain English and does not need
+a translation catalog. Text that end users read comes from the application's own catalog, keyed by
+the `@checks` value.
+
+## The Mental Model
+
+```mermaid
+flowchart LR
+    request["request"] --> pdp["Cedarling (PDP)"]
+    pdp --> decision["decision: Allow / Deny"]
+    pdp --> reason["reason(): determining policy IDs"]
+    reason --> lookup["annotations_by_policy / annotation_values"]
+    lookup --> app["application (PEP) or reasoning engine decides what to do"]
+```
+
+Three properties follow from this, and every pattern in this section respects them.
+
+The decision stays binary. An annotation never changes `Allow` into `Deny` or the reverse. A label
+travels alongside a decision. It is never a third decision.
+
+The policy describes and the application acts. `@checks("document.outside_operator_assignments")`
+says what the policy found. Whether that leads to a request for owner approval, a refusal, or a
+security alert is decided elsewhere.
+
+Annotations are static. The value is a literal string fixed at authoring time. It cannot
+include context, entity attributes, or the current counter value. Anything dynamic is resolved
+by the application after it reads the label.
+
+## Labels on an Allow
+
+Labels usually turn up on denials, but a `permit` carries them just as well. On an `Allow`,
+`reason()` holds the satisfied `permit` policies, so the application can read their labels after a
+successful authorization. That covers "allowed, and here is something worth knowing":
+
+- an entitlement that expires soon
+- access through a temporary exception rather than a standing grant, like the break-glass rule on
+  the [workflow page](./annotation-workflow.md#part-3-break-glass-access)
+
+A `permit` written only to carry a label still grants access. It changes no decision only while a
+broader `permit` already allows the same requests; if someone later narrows that grant, the labeled
+policy becomes the one that allows them. Keep its conditions no wider than the grant it sits beside.
+
+## Mechanics You Need to Know
+
+These constraints shape how the patterns are written, so read them before designing an annotation
+vocabulary.
+
+### Only the Determining Policies Are Reported
+
+`result.response.diagnostics().reason()` contains the policies that determined the outcome, and
+those are the only policies whose annotations you can resolve. Cedar reaches a decision in three
+ways, and each one reports something different:
+
+| Outcome | How it happened | `reason()` contains | Annotations you can read |
+|---|---|---|---|
+| `Allow` | at least one `permit` matched, no `forbid` did | the satisfied `permit` policies | the annotations on those `permit` policies |
+| `Deny` | a `forbid` matched, whether or not a `permit` also did | the satisfied `forbid` policies | the annotations on those `forbid` policies |
+| `Deny` | nothing matched at all, the default deny | nothing, `reason()` is empty | none |
+
+The two `Deny` rows are different situations, not conflicting statements about one. In the first, a
+policy author wrote a rule that actively blocked the request, and that rule can describe itself. In
+the second, no rule blocked anything and no rule allowed anything either: Cedar denies by default,
+and a default has no policy behind it to carry an annotation.
+
+`permit` annotations also never survive a `Deny`. When a `forbid` overrides a matching `permit`,
+only the `forbid` appears in `reason()`, so a label on the `permit` is not available to explain the
+denial.
+
+A fourth case looks just like the third. A policy whose expression errors at evaluation time, on
+integer overflow or on an attribute the entity does not carry, is dropped from the decision and
+reported in `diagnostics().errors()` instead of `reason()`. If that policy was the only `permit`,
+the result is a `Deny` with an empty `reason()`, which looks the same as "nothing matched" to code
+that reads only `reason()`. Log `errors()` alongside the decision, or a broken policy looks like an
+ordinary default deny for as long as nobody checks.
+
+The same rule works in the other direction, and there it is a security problem. If the policy that
+errored was a `forbid`, the matching `permit` still stands and the result is an `Allow`, granted
+while the condition that should have blocked it never ran. An enforcement point that acts on the
+decision has to check `errors()` first and refuse, or retry, when it is not empty.
+
+A fifth case fills `reason()` with policies that did not fire at all. `authorize_unsigned` with no
+principal runs Cedar's partial evaluation, and when some policies remain undecided, Cedarling
+returns a `Deny` whose `reason()` holds the IDs of those undecided policies. Those policies were
+neither satisfied nor rejected: the request lacked what they needed to decide. Their labels describe
+rules that might have applied, so treat a principal-less denial as "undetermined" rather than as the
+reason for a refusal.
+
+The default-deny row is the one people most often get wrong. If you want a label for a request that
+simply matches no `permit`, an annotated `forbid` has to exist and match, as
+`forbid_generate_report_quota_exhausted` does on the
+[client-side page](./annotation-client-authority.md). Otherwise, the application needs its own
+fallback for "denied, nothing more to say". Do not add a catch-all `forbid` just to hang an
+annotation on it: in Cedar `forbid` always wins, so a broad catch-all silently overrides every
+`permit` you have.
+
+### One Key per Policy, Several Values Means Several Policies
+
+Cedar rejects a duplicate annotation key on the same policy (`duplicate annotation: @checks`), so a
+single policy carries at most one `@checks`. Two independent conditions are two policies, each
+labeled, and both have to be satisfied for both to appear in `reason()`.
+
+This works in your favor. Independent conditions stay independent policies, and
+`annotation_values(reason, "checks")` collects every label that actually fired, duplicates
+preserved.
+
+```rust
+// Two forbid policies matched, each describing a different missing piece of evidence.
+let found =
+    cedarling.annotation_values(result.response.diagnostics().reason(), "checks");
+// ["agent.human_intent_unconfirmed", "document.outside_operator_assignments"]
+```
+
+Use `annotations_map` only when you know the same key is not used by several matching policies,
+since it keeps one arbitrary value per key. `annotations_by_policy` is the loss-free view, and it is
+the one you want for audit logging because it records which policy reported what.
+
+### `reason()` Has No Order
+
+`reason()` is a set of policy IDs, so the policies come back in no particular order, and the lookup
+methods report values in whatever order they receive the IDs. Two consequences:
+
+- Never pair two `annotation_values` results by position. The first value of one list does not
+  necessarily come from the same policy as the first value of the other.
+- If several annotations on one policy only mean something together, such as `@checks` and
+  `@detail`, read them with `annotations_by_policy`, which keeps each policy's set intact.
+
+Anything that has to be presented in a specific order is ordered by the application. The
+[workflow page](./annotation-workflow.md) does that for onboarding steps: the policies report which
+steps are missing, and the application's own step list decides the order.
+
+### `@id` Is Reserved
+
+Cedarling uses the `@id("...")` annotation as the policy ID. Keep it as the identifier and do not
+overload it with other meaning.
+
+It is not stripped from the results. `annotations_map` returns an `id` key, and every group from
+`annotations_by_policy` carries one, because all three methods read a policy's annotations without
+filtering. Forwarding "all annotations" to a browser or a log therefore ships your policy IDs too.
+
+`@checks` is not a second `@id`. Several policies may report the same condition, for instance one
+written for a human principal and one for an agent, and they share one `@checks` value so the
+application handles them the same way. The `@id` still tells them apart in the decision log.
+
+### The Lookup Is Independent of the Authorization Method
+
+Every pattern here is written against `authorize_unsigned`, but nothing in the mechanism depends on
+it. `authorize_multi_issuer` reports the determining policies the same way, and the same three
+lookup methods resolve their annotations. Only the principal and context construction differ.
+
+### Only the Principal and the Resource Are Entities
+
+`authorize_unsigned` builds two entities, the principal and the resource, and evaluates the request
+against those two alone. An attribute whose type is another entity, such as an agent's
+`operated_by: User`, cannot be built: Cedarling rejects the request because the referenced entity
+was never supplied. Put what the policies need on the principal or the resource directly, as the
+[step-up page](./annotation-challenge.md#modeling-the-agent) does for an agent's operator, and keep
+nested records to primitive types and sets.
+
+### Resolve Annotations Promptly
+
+Annotation lookup resolves IDs against the *current* policy store. A concurrent policy-store
+refresh may swap the store between the authorization call and the lookup, in which case IDs that
+no longer resolve are silently dropped. Resolve immediately after `authorize*()`, in the same
+request handler.
+
+## Anti-Patterns
+
+Do not instruct the application. `@upsell("plan_business")`, `@notify("account_manager")`,
+`@redirect("/kyc/documents")`, and `@user_message("Please upgrade")` all decide, inside the policy,
+something the application is better placed to decide. Label the condition and map it to a reaction
+in code.
+
+Do not put secrets or personal data in annotations. Annotations travel with the policy store and
+land in decision logs. They are policy metadata, readable by anyone who can read the policy.
+
+Do not let an annotation override the decision. An enforcement point that lets a `Deny` proceed
+because the policy carried some label is not enforcing anything. If you need a policy that observes
+without blocking, express that in the policy logic instead of ignoring its verdict.
+
+Do not encode structure in one annotation. A JSON document in a string is hard to review and easy to
+break. One condition per policy, one identifier per condition.
+
+Do not invent keys per policy. An annotation vocabulary is an interface between policy authors and
+application developers, so keep a short, documented list of keys and of the `@checks` values in use,
+and treat adding one as an API change. A value that no code maps is a silent no-op, so test the
+application's table against the policy store: every `@checks` value in use has an entry, and every
+entry is still used.
+
+Do not assume an annotation will be there. Policies change independently of the application, so
+every lookup needs a sane default for "no label", and an unknown `@checks` value needs a defined
+fallback, usually the generic handling for a plain denial.
+
+## API Reference
+
+The three lookup methods are documented in the
+[Interfaces reference](../reference/cedarling-interfaces.md#annotation-lookup). Rust and Python use
+the snake_case names below; the JavaScript binding exports them as `annotationsMap`,
+`annotationValues`, and `annotationsByPolicy`.
+
+- `annotations_map(policy_ids)` returns a merged map that keeps one value per duplicate key
+- `annotation_values(policy_ids, key)` returns all values of one key, duplicates preserved
+- `annotations_by_policy(policy_ids)` returns them grouped by policy ID, loss-free
+
+# Pattern: Multi-Step Flows and Escalation
+
+!!! note "Illustrative example"
+
+    Acme Payments and every `@checks` value below are invented for this page. Cedarling attaches
+    no meaning to them; they work only because the example application reads them. See
+    [Policy Annotation Patterns](./annotation-patterns.md) for the ground rules.
+
+## The Scenario
+
+Acme Payments registers new merchants in stages. A new merchant can log in immediately, but before
+they can accept a card payment they have to submit business details, connect a bank account, and
+pass an identity check. Later, once they are trading, a large withdrawal needs approval from a
+second person, and support staff occasionally need to open a merchant's records during an incident.
+
+Each of these is the same shape: the policy knows exactly which condition holds the request back,
+or on which basis it was let through. Written the usual way, that knowledge is duplicated: the
+onboarding wizard re-implements the prerequisite checks to know what to show, and the withdrawal
+handler re-implements the approval threshold to know when to ask. Over time both copies stop
+matching the policies that actually decide.
+
+Labels remove the duplicate. Each policy reports the condition it found, and the application maps
+that condition to a screen, an approver, or an audit procedure. The rules live in the policies; the
+reactions live in the application; nothing is written twice.
+
+## Schema
+
+```cedarschema
+namespace Acme {
+    entity User = {
+        "completed_steps": Set<String>,
+        "role": String,
+    };
+
+    entity Merchant;
+
+    action "AcceptPayments" appliesTo {
+        principal: [User],
+        resource: [Merchant],
+        context: {}
+    };
+
+    action "Withdraw" appliesTo {
+        principal: [User],
+        resource: [Merchant],
+        context: {
+            "amount_cents": Long,
+            "approvals": Set<String>,
+        }
+    };
+
+    action "ViewMerchantRecords" appliesTo {
+        principal: [User],
+        resource: [Merchant],
+        context: {
+            "incident_id": String,
+        }
+    };
+}
+```
+
+## Part 1: Prerequisites as Policies
+
+Onboarding has three prerequisites, and the merchant cannot accept payments until all of them are
+done. Give each one its own `forbid` policy that reports which prerequisite is missing:
+
+```cedar
+@id("permit_accept_payments")
+permit (
+    principal,
+    action == Acme::Action::"AcceptPayments",
+    resource
+);
+```
+
+```cedar
+@id("forbid_accept_payments_without_business_details")
+@checks("onboarding.business_details_missing")
+@detail("The merchant has not submitted business details.")
+forbid (
+    principal,
+    action == Acme::Action::"AcceptPayments",
+    resource
+)
+unless {
+    principal.completed_steps.contains("business_details")
+};
+```
+
+```cedar
+@id("forbid_accept_payments_without_bank_account")
+@checks("onboarding.bank_account_missing")
+@detail("The merchant has not connected a bank account.")
+forbid (
+    principal,
+    action == Acme::Action::"AcceptPayments",
+    resource
+)
+unless {
+    principal.completed_steps.contains("bank_account")
+};
+```
+
+```cedar
+@id("forbid_accept_payments_without_identity_check")
+@checks("onboarding.identity_check_missing")
+@detail("The merchant has not passed the identity check.")
+forbid (
+    principal,
+    action == Acme::Action::"AcceptPayments",
+    resource
+)
+unless {
+    principal.completed_steps.contains("identity_check")
+};
+```
+
+A merchant who has submitted business details but nothing else gets both remaining conditions back
+in one call:
+
+```text
+DENY   reason: forbid_accept_payments_without_bank_account
+               forbid_accept_payments_without_identity_check
+```
+
+Nothing in the policies orders the prerequisites, and nothing should: they are independent, and a
+merchant can clear them in any order. The order in which they are *presented*, the route to each
+form, and the copy on each screen are interface decisions, so they live in the application's step
+list, keyed by the condition each policy reports:
+
+```rust
+/// The wizard, in display order. Each step names the condition that keeps it open.
+const ONBOARDING_STEPS: &[Step] = &[
+    Step { checks: "onboarding.business_details_missing", route: "onboarding.business_details" },
+    Step { checks: "onboarding.bank_account_missing", route: "onboarding.bank_account" },
+    Step { checks: "onboarding.identity_check_missing", route: "onboarding.identity_check" },
+];
+
+let found: BTreeSet<String> = cedarling
+    .annotation_values(result.response.diagnostics().reason(), "checks")
+    .into_iter()
+    .collect();
+
+let remaining: Vec<&Step> = ONBOARDING_STEPS
+    .iter()
+    .filter(|step| found.contains(step.checks))
+    .collect();
+
+// A denying condition the wizard cannot show is a bug to surface, not one to skip:
+// otherwise the merchant completes every step on screen and is refused again.
+let unknown: Vec<&String> = found
+    .iter()
+    .filter(|c| {
+        c.starts_with("onboarding.") && !ONBOARDING_STEPS.iter().any(|s| s.checks == c.as_str())
+    })
+    .collect();
+if !unknown.is_empty() {
+    return Err(Error::UnmappedCheck(unknown.into_iter().cloned().collect()));
+}
+```
+
+The application now has a checklist rather than a single error. It can show the whole remaining
+path, send the merchant to the first open step, and render the rest as upcoming.
+
+The step list is the one place where the application repeats something from the policy store: the
+set of condition identifiers. Adding a fourth prerequisite therefore means a new policy *and* a new
+entry in the list. The `unknown` check above is what catches a mismatch. A policy that is added
+first fails clearly in testing instead of leaving merchants stuck in front of a wizard that thinks
+they are done.
+
+The same policies answer for every entry point. An API call, the dashboard, and a mobile client all
+get the same remaining conditions, because they come from the decision rather than from each
+client's copy of the flow.
+
+## Part 2: Escalation and Approval
+
+A large withdrawal is not simply blocked. It needs someone else to agree.
+
+Withdrawals need their own `permit`, or clearing the approval would leave the request matching
+nothing at all and Cedar would deny it by default, with nothing to explain why:
+
+```cedar
+@id("permit_withdraw")
+permit (
+    principal,
+    action == Acme::Action::"Withdraw",
+    resource
+);
+```
+
+```cedar
+@id("forbid_large_withdrawal_without_approval")
+@checks("withdrawal.large_without_finance_approval")
+@detail("Withdrawals above $10,000 need a recorded finance-lead approval.")
+forbid (
+    principal,
+    action == Acme::Action::"Withdraw",
+    resource
+)
+when { context.amount_cents > 1000000 }
+unless { context.approvals.contains("finance_lead") };
+```
+
+The policy states the rule: above the threshold, a finance-lead approval has to be on record. Who
+the finance leads are this week, how long they have to answer, and how the request reaches them are
+operational facts, and they change with staffing and process rather than with policy. The
+application maps the condition to its approval workflow:
+
+```rust
+let found = cedarling.annotation_values(result.response.diagnostics().reason(), "checks");
+
+// Every condition that asked for an approval, not just the first one.
+for check in &found {
+    match check.as_str() {
+        "withdrawal.large_without_finance_approval" => {
+            approvals.request(ApprovalKind::FinanceLead, &withdrawal)?;
+        },
+        "withdrawal.new_destination_unverified" => {
+            approvals.request(ApprovalKind::Treasury, &withdrawal)?;
+        },
+        other => return Err(Error::UnmappedCheck(vec![other.to_string()])),
+    }
+}
+```
+
+Several independent conditions can hold at once. If a second `forbid` covered a newly added
+destination account, a withdrawal that is both large and newly routed would match both policies, and
+the loop above requests both approvals in one pass. Reading one arbitrary value with
+`annotations_map` would request one, and the retry would be refused again by a condition nobody
+mentioned: not an over-authorization, but a flow that gets stuck, and nobody notices until a user
+runs into it.
+
+Once the approval is recorded, the request is re-evaluated with `approvals` in the context, and the
+same policy set allows it. The approval record has to be produced server-side. A client that can put
+`"finance_lead"` into `context.approvals` has approved its own withdrawal.
+
+A server-side record is necessary and not enough on its own. `context.approvals` is a set of role
+names, so by itself it says that *somebody* with that role approved *something*. Three properties
+have to come from the record behind it, and none of them are visible in the policy:
+
+- who approved. The record has to name the approver, and the application has to refuse an approval
+  whose approver is the principal making the request.
+- what they approved. Tie the record to one withdrawal: its id, its amount, its destination. Store
+  it against the session instead and the first approval covers every withdrawal after it.
+- when. Expire it.
+
+Cedar has no string concatenation, so the policy cannot check `"finance_lead:<withdrawal-id>"`
+itself. The application resolves the approval records for *this* withdrawal and passes only the
+roles whose stored approval matches its id, amount, and destination. The set then means "approved,
+for this request", and `contains("finance_lead")` is a claim the policy can trust.
+
+## Part 3: Break-Glass Access
+
+Support staff sometimes need to open a merchant's records during an incident. Always denying it
+means incidents take longer. Allowing it without a record means an unwatched path into customer
+data.
+
+The middle option is a narrow `permit` that labels the basis it grants on:
+
+```cedar
+@id("permit_support_break_glass")
+@checks("support.break_glass_during_incident")
+@detail("On-call support opening merchant records under an open incident.")
+permit (
+    principal,
+    action == Acme::Action::"ViewMerchantRecords",
+    resource
+)
+when {
+    principal.role == "support_oncall" &&
+    context.incident_id != ""
+};
+```
+
+The label arrives on the success path. It tells the application that this `Allow` came through the
+break-glass rule rather than a standing grant, and the application's own break-glass procedure
+takes over: collect a justification, expire the grant after the period the security team set,
+record a second reviewer, notify the merchant. Those duties belong to the application because the
+application is the one carrying them out. An allow whose follow-up is skipped is worse than a deny,
+because it leaves a trail that looks accountable while nothing was enforced, so make the procedure
+fail closed: if it cannot run, do not serve the records.
+
+The policy does not gate on all of that. `context.incident_id` is a precondition: no incident, no
+permit. The justification is not. If it has to be a real gate, record it server-side, put
+`justification_id` in the context, and add it to the `when` clause. Otherwise be clear that it is an
+audit duty, not a check.
+
+The time limit needs the same care. `permit_support_break_glass` carries no time term, so
+re-authorizing the same request returns the same `Allow` for as long as the incident stays open. The
+application has to drop the grant when its period ends, *and* the server has to re-resolve the
+incident on every request and refuse one that has been closed. Neither covers the other.
+
+`context.incident_id` has to be built server-side from a validated incident record, exactly like the
+approvals above. The policy only checks that the value is non-empty, so if a client can put a string
+there, every support account holds a permanent break-glass key. Resolve the incident before
+authorizing, reject the request when it is unknown, already closed, or about a different merchant,
+and pass in what the server resolved rather than what the caller sent. The policy leaves `resource`
+open, so that last check is the only thing that keeps an incident on one merchant from opening the
+records of every other.
+
+Keep break-glass a separate, narrow policy rather than a relaxation of the normal one. It is the
+policy an auditor will ask about first, and it is far easier to answer when it stands alone with a
+single `@id` and its own conditions.
+
+## Reading the Labels in One Place
+
+Once several flows share the convention, the application can dispatch on the condition in one
+place:
+
+```javascript
+const reason = result.response.diagnostics.reason;
+
+if (!result.decision) {
+  const found = new Set(cedarling.annotationValues(reason, "checks"));
+
+  // The wizard owns the order; the policies only say which steps are open.
+  const steps = ONBOARDING_STEPS.filter((step) => found.has(step.checks));
+  if (steps.length > 0) {
+    return showChecklist(steps);
+  }
+
+  const approvals = [...found].filter((c) => APPROVAL_KINDS[c]);
+  if (approvals.length > 0) {
+    return requestApprovals(approvals.map((c) => APPROVAL_KINDS[c]));
+  }
+
+  return denyPlain("access.denied.generic");
+}
+```
+
+`annotation_values` is the right call here, because each policy carries a single label and the
+labels are independent. Reach for `annotations_by_policy` when you need the `@detail` that belongs
+to each label, for instance in a debugging view.
+
+The order of these branches is a product decision. One request carries one action, so onboarding
+steps and withdrawal approvals never arrive together, but two approval conditions for one withdrawal
+can, and the application decides how to present them.
+
+## What This Buys You
+
+The prerequisite checks, the approval threshold, and the break-glass conditions are each written
+once, in a policy that says what it checks. The wizard, the approval workflow, and the break-glass
+procedure react to those conditions without re-implementing them, and lowering the approval
+threshold to $5,000 is a one-line policy diff that ships without touching the application.
 
 # Authorization Using The Cedarling
 
@@ -60897,7 +62730,7 @@ After an authorization call, the policies that determined the decision are repor
 
 Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
 
-See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples, and [Policy Annotation Patterns](../patterns/annotation-patterns.md) for worked scenarios: labeling what each policy checks, multi-step flows, step-up evidence, and the design constraints behind them.
 
 # Cedarling Entity Mappings
 
@@ -70326,7 +72159,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer
@@ -74288,7 +76121,7 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 
 ## Configuration Prerequisites
 - A Janssen Authorization Server installation
-- [Client Registration script](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
+- [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath 
 
@@ -74903,9 +76736,9 @@ To access information in your Agama consent flow related to the user attempting 
 
 |Method|Description|Reference class|
 |-|-|-|
-|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
-|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
-|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
+|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
+|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
+|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
 |`getSessionAttributes`|A map containing the parameters of the OAuth authentication request issued||
 
 Java example code:
@@ -76385,7 +78218,7 @@ The ParType interception script also adds the following method(s):
 
 # Persistence Script
 
-By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
+By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
 
 1. Load initialization data from DB or initialize services after the creation of Entry Manager. 
 2. Release resources, terminate services etc. after the destruction of Entry Manager.
@@ -76472,7 +78305,7 @@ The custom script has the following properties:
 |`apple_client_id`		|Name of Service ID on developer.apple.com. 	| `com.company.name`|
 |`apple_jwks`		| Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -76488,7 +78321,7 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `apple-auth-default.json` with the following contents
@@ -76517,7 +78350,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
 ```mermaid
@@ -76544,7 +78377,7 @@ Jans AS->>RP: 10. write Jans session cookie
 ```
 
 ## Administrator prerequisites
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).   
 
 ## User prerequisites
@@ -76658,7 +78491,7 @@ Now Duo is an available authentication mechanism for your Janssen Server. This m
     To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`.
 
 ## Make Duo the Default Authentication Mechanism
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 1. Create a file say `duo-auth-default.json` with the following contents
@@ -76716,8 +78549,8 @@ An out-of-the-box feature, the Google Authentication script is a `PersonAuthenti
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup#readme))    
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
+- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup#readme))    
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
 - A [Google account](https://accounts.google.com/).     
 - Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
@@ -76766,7 +78599,7 @@ The custom script has the following properties:
 |-----------------------|-------------------------------|---------------|
 |`google_creds_file`		|Details of the client created on https://console.cloud.google.com/apis/credentials. See [this](https://github.com/maduvena/jans-docs/wiki/Google-Authentication-Script/_edit#download-google-client-json-file) step.		| `/etc/certs/google_client_secret.json`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Google Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -76782,7 +78615,7 @@ Now Google is an available authentication mechanism for your Janssen Server. Thi
 
 ### Make Sign-in with Google Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `google-auth-default.json` with the following contents
@@ -78389,7 +80222,7 @@ SMS to the person's mobile number.
 
 Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/twilio2FA.py)
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -78412,7 +80245,7 @@ The module has a few properties:
 5) qr_options - Specify width and height of QR image. It's optional property.
     Example: qr_options: { width: 400, height: 400 }
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -78745,13 +80578,13 @@ can be used in place of the password of the users for authentication.
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
 This document explains how to use the Janssen Auth Server's built-in
-[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
+[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
 
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
-- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
+- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
@@ -78791,7 +80624,7 @@ Now FIDO2 is an available authentication mechanism for your Janssen Server. This
     Find `"acr_values_supported":` and you should see `"fido2"`.
 
 ## Enable FIDO2 Script as default authentication script:
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable FIDO2 authentication:
 1. Create a file say `fido2-auth-default.json` with the following contents
 ```
@@ -78821,9 +80654,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 ## FIDO2 login page
 Below is an illustration of the Janssen Server's default FIDO2 login page:
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image_fido2.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png)
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/nightly/admin/developer/customization/customize-web-pages/).
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
 
 ## Using FIDO2 tokens
 
@@ -78840,7 +80673,7 @@ All subsequent FIDO2 authentications for that user account will require the enro
 ### FIDO2 credential management
 A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image-fido2-ldap-structure.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image-fido2-ldap-structure.png)
 Diagram source in mermaid.live
 ```
 graph TD
@@ -79672,7 +81505,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `sg-auth-default.json` with the following contents
@@ -79696,9 +81529,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/developer/customization/customize-web-pages.md).
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md).
 
 ### Self-service
 To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, [Gluu Casa](https://casa.gluu.org).
@@ -79776,7 +81609,7 @@ By default, users will get the default authentication mechanism as specified abo
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
+2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
 Now `twilio_sms` is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request `twilio_sms` authentication for users.
 
@@ -79787,7 +81620,7 @@ Now `twilio_sms` is an available authentication mechanism for your Janssen Serve
 
 ## Enable `twilio_sms` Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable `twilio_sms` authentication:
 1. Create a file say `twilio_sms` -auth-default.json` with the following contents
 ```
@@ -80004,7 +81837,7 @@ Resource Owner Password Credentials script allows modifying the behavior of Reso
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).
 
 ## Interface
-The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
+The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
 
 ### Inherited Methods
 | Method header | Method description |
@@ -80021,10 +81854,10 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 ### Objects
 | Object name | Object description |
 |:-----|:------|
-|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
-|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
-| `context` | [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
+|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
+| `context` | [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
 
 ## Use case: Basic ROPC authentication script
 
@@ -81637,13 +83470,13 @@ Above command contains references to the release number at two places. `v1.1.4` 
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 
-To avoid this manual, error-prone approach the Janssen Project uses a release marker, `0.0.0-nightly` instead
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead
 of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version)
 so that it stays up-to-date release after release.
 
 ```bash
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 !!! Warning

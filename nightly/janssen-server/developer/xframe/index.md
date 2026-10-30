@@ -24,3 +24,19 @@ There are two AS configuration properties related to `X-Frame-Options`:
 
 By default AS attaches `X-Frame-Options` header to all responses where request uri contains `.htm`.
 It means for all AS pages.
+
+## Configure Security Headers
+
+`HeadersFilter` also attaches defense-in-depth headers to API responses:
+
+- `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'` - blocks execution of injected markup and clickjacking.
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: no-referrer` - keeps URL secrets from leaking.
+
+Configuration properties:
+
+- `securityHeadersEnabled` - boolean, default `true`. Set to `false` to disable the headers.
+- `applySecurityHeadersIfUriContainsAny` - array of strings. If the request uri contains any string from this array, AS attaches the headers to the response.
+  Default value: `/restv1/token`, `/restv1/userinfo`, `/restv1/introspection`, `/restv1/jwks`, `/restv1/register`, `/restv1/revoke`.
+
+Do not add endpoints that RPs must frame (for example `check_session_iframe`) or normal HTML pages to this list.

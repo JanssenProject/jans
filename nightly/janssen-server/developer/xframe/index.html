@@ -374,6 +374,8 @@
       
         
       
+        
+      
     
     
     
@@ -952,6 +954,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Configure X-Frame-Options Header
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-security-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Configure Security Headers
       </span>
     </span>
   </a>
@@ -1674,6 +1687,8 @@
       
         
       
+        
+      
     
     
     
@@ -1752,6 +1767,17 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         Configure X-Frame-Options Header
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-security-headers" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Configure Security Headers
       </span>
     </span>
   </a>
@@ -1950,6 +1976,20 @@ by ensuring that their content is not embedded into other sites.</p>
 </ul>
 <p>By default AS attaches <code>X-Frame-Options</code> header to all responses where request uri contains <code>.htm</code>.
 It means for all AS pages.</p>
+<h2 id="configure-security-headers">Configure Security Headers<a class="headerlink" href="#configure-security-headers" title="Permanent link">#</a></h2>
+<p><code>HeadersFilter</code> also attaches defense-in-depth headers to API responses:</p>
+<ul>
+<li><code>Content-Security-Policy: default-src 'none'; frame-ancestors 'none'</code> - blocks execution of injected markup and clickjacking.</li>
+<li><code>X-Content-Type-Options: nosniff</code></li>
+<li><code>Referrer-Policy: no-referrer</code> - keeps URL secrets from leaking.</li>
+</ul>
+<p>Configuration properties:</p>
+<ul>
+<li><code>securityHeadersEnabled</code> - boolean, default <code>true</code>. Set to <code>false</code> to disable the headers.</li>
+<li><code>applySecurityHeadersIfUriContainsAny</code> - array of strings. If the request uri contains any string from this array, AS attaches the headers to the response.
+  Default value: <code>/restv1/token</code>, <code>/restv1/userinfo</code>, <code>/restv1/introspection</code>, <code>/restv1/jwks</code>, <code>/restv1/register</code>, <code>/restv1/revoke</code>.</li>
+</ul>
+<p>Do not add endpoints that RPs must frame (for example <code>check_session_iframe</code>) or normal HTML pages to this list.</p>
 
 
   <nav class="md-tags" >
@@ -2006,7 +2046,7 @@ It means for all AS pages.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 16, 2025
+    October 29, 2026
   </span>
 
     

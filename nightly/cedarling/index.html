@@ -372,6 +372,8 @@
       
         
       
+        
+      
     
     
     
@@ -617,6 +619,8 @@
       
         
       
+        
+      
     
     
     
@@ -779,6 +783,67 @@
     
   
   Tutorials
+
+    
+  </span>
+  
+  
+
+      
+        <span class="md-nav__icon md-icon"></span>
+      
+    </a>
+  
+
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+    
+    
+      
+        
+        
+      
+    
+    <li class="md-nav__item md-nav__item--pruned md-nav__item--nested">
+      
+        
+  
+  
+  
+    <a href="./patterns/annotation-patterns/" class="md-nav__link">
+      
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  Patterns
 
     
   </span>
@@ -1275,15 +1340,29 @@ will fetch the most recent issuer public keys and metadata.</p>
 in-memory cache. See the Cedarling <a href="./reference/cedarling-logs/">log</a> documentation for more information.</p>
 <h3 id="cedarling-components">Cedarling Components<a class="headerlink" href="#cedarling-components" title="Permanent link">#</a></h3>
 <p>The following diagram is a high-level picture of the Cedarling components:</p>
-<p><img alt="" src="../assets/cedarling/lock-cedarling-rust-core-components.jpg" /></p>
+<p><img alt="Cedarling components" src="../assets/cedarling/cedarling-components.png" /></p>
 <ul>
-<li><strong>Cedar Engine</strong> a recent release of the Rust Cedar Engine, thanks to Amazon.</li>
-<li><strong>SparKV</strong> is an in-memory key-value store that supports automatic expiration of data.</li>
-<li><strong>Interfaces</strong> perform actions described above</li>
-<li><strong>JWT Engine</strong> is used to validate JWT signatures, JWT content (e.g., <code>exp</code>), and to 
-  check if the JWT token is revoked (using the Status List JWT) </li>
-<li><strong>Lock Engine</strong> is used for enterprise deployments to load the Policy Store from a 
-  trusted source and send logs for central storage. </li>
+<li><strong>Interfaces</strong> provide initialization, authorization, pushing context data, and
+  reading logs, metrics, and policy annotations. See the
+  <a href="./reference/cedarling-interfaces/">interfaces reference</a>.</li>
+<li><strong>Policy Store Manager</strong> loads the Policy Store from a local file, a URI, or the Lock
+  Server, verifies its signature, and refreshes it. It provides the schema, the
+  policies, and the list of trusted issuers.</li>
+<li><strong>JWT Service</strong> validates token signatures and claims (e.g., <code>exp</code>) using the trusted
+  issuers' OpenID configuration and JWKS, and checks whether a token is revoked using the
+  Status List JWT.</li>
+<li><strong>Context Data Store</strong> keeps data pushed through the Data API, with optional TTL.</li>
+<li><strong>Entity &amp; Context Builder</strong> turns validated tokens or an asserted principal, the
+  resource, and pushed data into Cedar entities and context (<code>context.tokens</code>,
+  <code>context.data</code>).</li>
+<li><strong>Cedar Engine</strong> is a recent release of the Rust Cedar Engine, thanks to Amazon. It
+  returns the decision and diagnostics.</li>
+<li><strong>Observability</strong> records decision and system logs and metrics. With
+  <a href="./reference/cedarling-properties/#trace-properties">TRACE</a> enabled, it also signs a
+  record, as evidence, of each decision whose request carries a
+  <a href="./reference/cedarling-authz/#authorize-options-and-trace-context">TRACE context</a>. In enterprise deployments, the optional
+  <strong>Lock Server</strong> is the evidence collector: it receives logs, telemetry, and evidence
+  for central storage, and can also provide the Policy Store.</li>
 </ul>
 <h2 id="proof-based-authorization-token-based-access-control-tbac">Proof-based authorization: Token-Based Access Control (TBAC)<a class="headerlink" href="#proof-based-authorization-token-based-access-control-tbac" title="Permanent link">#</a></h2>
 <p>TBAC helps developers implement security based on JWTs from trusted issuers like identity
@@ -1448,7 +1527,7 @@ It’s a presence.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    June 16, 2026
+    October 29, 2026
   </span>
 
     
