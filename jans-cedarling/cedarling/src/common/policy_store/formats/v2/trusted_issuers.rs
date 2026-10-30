@@ -675,6 +675,14 @@ mod tests {
                 endpoints(json!({ "jwks": "file:///etc/passwd", "iss": "https://a" })),
             ),
             (
+                "empty host",
+                endpoints(json!({ "jwks": "https://", "iss": "https://a" })),
+            ),
+            (
+                "space in host",
+                endpoints(json!({ "jwks": "https://a b/k", "iss": "https://a" })),
+            ),
+            (
                 "iss with query",
                 endpoints(json!({ "jwks": "https://a/k", "iss": "https://a?x=1" })),
             ),
@@ -693,5 +701,104 @@ mod tests {
                 "the parser should reject {label}"
             );
         }
+    }
+
+    /// Cedar rejects a reserved word as any `::` segment, so the schema must too.
+    #[test]
+    fn schema_and_parser_reject_reserved_entity_type_keys() {
+        let validator = schema_validator();
+        for key in ["if", "true", "__cedar", "Acme::if::Token", "Acme::__cedar"] {
+            let store = json!({ key: { "type": "custom", "issuer": "Acme" } });
+            assert!(
+                !validator.is_valid(&store),
+                "the schema should reject entity type '{key}'"
+            );
+            assert!(
+                parse(&store.to_string()).is_err(),
+                "the parser should reject entity type '{key}'"
+            );
+        }
+        for key in ["ifx", "Acme::Bif", "___cedar"] {
+            let store = json!({ key: { "type": "custom", "issuer": "Acme" } });
+            assert!(
+                validator.is_valid(&store),
+                "the schema should accept entity type '{key}'"
+            );
+            parse(&store.to_string())
+                .unwrap_or_else(|e| panic!("the parser should accept entity type '{key}': {e}"));
+        }
+    }
+
+    /// The schema mirrors the runtime fetch guard: https anywhere, http only on loopback.
+    #[test]
+    fn schema_requires_https_or_loopback_http_for_fetched_urls() {
+        let validator = schema_validator();
+        let jwt = |endpoints: serde_json::Value| {
+            json!({
+                "Acme::Access_token": {
+                    "type": "jwt",
+                    "issuer": "Acme",
+                    "configuration_endpoints": endpoints
+                }
+            })
+        };
+        for (label, endpoints) in [
+            (
+                "remote http discovery",
+                json!({ "configuration": "http://idp.remote/.well-known/openid-configuration" }),
+            ),
+            (
+                "remote http jwks",
+                json!({ "jwks": "http://idp.remote/keys", "iss": "https://idp.remote" }),
+            ),
+        ] {
+            assert!(
+                !validator.is_valid(&jwt(endpoints)),
+                "the schema should reject {label}"
+            );
+        }
+        for (label, endpoints) in [
+            (
+                "https discovery",
+                json!({ "configuration": "https://idp.remote/.well-known/openid-configuration" }),
+            ),
+            (
+                "loopback http discovery",
+                json!({ "configuration": "http://localhost:8080/.well-known/openid-configuration" }),
+            ),
+            (
+                "loopback http jwks",
+                json!({ "jwks": "http://127.0.0.1:8080/keys", "iss": "http://[::1]:8080" }),
+            ),
+            (
+                "remote http iss is compared, not fetched",
+                json!({ "jwks": "https://idp.remote/keys", "iss": "http://idp.remote" }),
+            ),
+        ] {
+            assert!(
+                validator.is_valid(&jwt(endpoints)),
+                "the schema should accept {label}"
+            );
+        }
+    }
+
+    /// The schema publishes the canonical lowercase scheme; `url::Url` also takes uppercase.
+    #[test]
+    fn schema_uses_canonical_lowercase_scheme() {
+        let validator = schema_validator();
+        let store = json!({
+            "Acme::Access_token": {
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": {
+                    "configuration": "HTTPS://idp.acme.com/.well-known/openid-configuration"
+                }
+            }
+        });
+        assert!(
+            !validator.is_valid(&store),
+            "the schema should require the canonical lowercase scheme"
+        );
+        parse(&store.to_string()).expect("the parser should still accept an uppercase scheme");
     }
 }
