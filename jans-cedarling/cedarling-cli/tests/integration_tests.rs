@@ -100,7 +100,9 @@ fn test_validate_strict_fails_on_unknown_fields() {
     cmd.assert()
         .failure()
         .code(1)
-        .stdout(predicates::str::contains("2 unknown field(s) with --strict"));
+        .stdout(predicates::str::contains(
+            "2 unknown field(s) with --strict",
+        ));
 }
 
 #[test]
