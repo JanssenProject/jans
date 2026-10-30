@@ -19,7 +19,7 @@ use std::str::FromStr;
 use super::Upgrade;
 use crate::common::policy_store::formats::v2::trusted_issuers::{
     CustomTokenConfig, JwtTokenConfig, KeySourceDoc, TokenTypeConfig, TrustedIssuerEntry,
-    TrustedIssuersDoc,
+    TrustedIssuersDoc, UnknownFields,
 };
 use crate::common::policy_store::formats::{v1, v2};
 use crate::common::policy_store::token_types::{
@@ -213,6 +213,7 @@ fn migrate_trusted_issuer(
             },
             token_id: token.token_id,
             required_claims: token.required_claims,
+            unknown: UnknownFields::default(),
         }));
         entries.insert(&file, &token.entity_type_name, config)?;
     }
@@ -254,6 +255,7 @@ fn migrate_custom_issuer(
         let config = TokenTypeConfig::Custom(CustomTokenConfig {
             issuer: issuer.clone(),
             required_claims: token.required_claims,
+            unknown: UnknownFields::default(),
         });
         entries.insert(&file, &entity_type, config)?;
     }
@@ -411,6 +413,7 @@ mod tests {
                 },
                 token_id: "sid".to_string(),
                 required_claims: HashSet::from(["iss".to_string()]),
+                unknown: UnknownFields::default(),
             })),
             "a JWT token keeps its issuer name, endpoint, token_id and required_claims"
         );
@@ -419,6 +422,7 @@ mod tests {
             &TokenTypeConfig::Custom(CustomTokenConfig {
                 issuer: IssuerName::from_str("ac_me").expect("valid name"),
                 required_claims: HashSet::from(["sub".to_string()]),
+                unknown: UnknownFields::default(),
             }),
             "a custom issuer is named by its sanitized id, the v1 key prefix"
         );

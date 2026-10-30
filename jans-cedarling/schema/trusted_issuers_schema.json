@@ -52,6 +52,7 @@
             "default": []
         },
         "entry": {
+            "description": "Fields not defined here are ignored, so PDPs can add their own; `keySource` stays closed. Fields of the other `type` are errors.",
             "type": "object",
             "required": [
                 "type"
@@ -100,8 +101,7 @@
                     "$ref": "#/$defs/requiredClaims",
                     "description": "Presence + RFC 7519 value validation."
                 }
-            },
-            "additionalProperties": false
+            }
         },
         "customEntry": {
             "type": "object",
@@ -119,9 +119,10 @@
                 "required_claims": {
                     "$ref": "#/$defs/requiredClaims",
                     "description": "Presence in processor output."
-                }
-            },
-            "additionalProperties": false
+                },
+                "configuration_endpoints": false,
+                "token_id": false
+            }
         },
         "keySource": {
             "description": "Exactly one form, so an issuer's keys have a single origin. Fetched URLs must be https, or http on a loopback host (`localhost`, `127.0.0.1`, `::1`), as the runtime refuses any other scheme; `iss` is compared, not fetched. Full URL syntax is checked at load.",

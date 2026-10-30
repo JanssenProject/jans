@@ -32,7 +32,7 @@ const LAYOUT: Layout = Layout {
 };
 
 /// Every token type of the store; a store without it accepts no tokens.
-const TRUSTED_ISSUERS_FILE: &str = "trusted-issuers.json";
+pub(crate) const TRUSTED_ISSUERS_FILE: &str = "trusted-issuers.json";
 
 /// Where earlier versions kept issuers. Ignored, but reported, since one left
 /// behind by a manual migration is likely a mistake.

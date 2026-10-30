@@ -348,6 +348,10 @@ pub(crate) struct FormatReport {
     pub(crate) spec_version: Option<u32>,
     /// Non-fatal findings, for the caller to log.
     pub(crate) warnings: Vec<PolicyStoreWarning>,
+    /// Ignored fields of `trusted-issuers.json`. Never logged at runtime; only
+    /// validation tools report them.
+    #[cfg_attr(not(feature = "tools"), allow(dead_code))]
+    pub(crate) unknown_fields: Vec<v2::trusted_issuers::UnknownField>,
 }
 
 /// A parsed store and what its format reported. Only `store` reaches the runtime.
@@ -374,6 +378,7 @@ pub(super) fn read_policy_store(
     let strict = strict_schema_validation;
 
     let mut warnings = warnings_for(selected.declared);
+    let mut unknown_fields = Vec::new();
     let doc = match selected.format {
         FormatVersion::V0 => v0::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
         FormatVersion::V1 => v1::read(fs, metadata_json, strict)?.into_current(&mut warnings)?,
@@ -381,6 +386,7 @@ pub(super) fn read_policy_store(
             let mut v2_warnings = Vec::new();
             let doc = v2::read(fs, metadata_json, strict, &mut v2_warnings)?;
             warnings.extend(v2_warnings.into_iter().map(PolicyStoreWarning::from));
+            unknown_fields = doc.trusted_issuers.unknown_fields();
             doc.into_current(&mut warnings)?
         },
     };
@@ -399,6 +405,7 @@ pub(super) fn read_policy_store(
         format: FormatReport {
             spec_version: Some(selected.spec_version),
             warnings,
+            unknown_fields,
         },
     })
 }

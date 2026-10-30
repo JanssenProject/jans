@@ -789,6 +789,7 @@ dependencies = [
  "sigstore-verifier",
  "smol_str",
  "stats_alloc",
+ "strsim",
  "strum",
  "tempfile",
  "test_utils",

@@ -8,12 +8,12 @@
 //! The file is one JSON object keyed by Cedar entity type; each entry fully
 //! describes one token type, including its issuer and kind.
 
-use std::collections::HashSet;
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::fmt;
 use std::str::FromStr;
 
 use serde::Deserialize;
-use serde::de::{self, Deserializer, MapAccess, Visitor};
+use serde::de::{self, Deserializer, IgnoredAny, MapAccess, Visitor};
 use url::Url;
 
 use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
@@ -36,6 +36,40 @@ pub(crate) struct TrustedIssuerEntry {
     pub(crate) config: TokenTypeConfig,
 }
 
+/// Fields of an entry that the specification does not define. Only the names
+/// are kept: extensions by other PDPs mean nothing here.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub(crate) struct UnknownFields(BTreeSet<String>);
+
+impl<'de> Deserialize<'de> for UnknownFields {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let fields = BTreeMap::<String, IgnoredAny>::deserialize(deserializer)?;
+        Ok(Self(fields.into_keys().collect()))
+    }
+}
+
+const JWT_FIELDS: &[&str] = &[
+    "type",
+    "issuer",
+    "configuration_endpoints",
+    "token_id",
+    "required_claims",
+];
+const CUSTOM_FIELDS: &[&str] = &["type", "issuer", "required_claims"];
+
+/// Valid only on `jwt` entries. Rejected on `custom` ones rather than treated
+/// as extensions, so a wrong `type` cannot silently drop a key source.
+const JWT_ONLY_FIELDS: &[&str] = &["configuration_endpoints", "token_id"];
+
+/// An ignored entry field, for validation tools to report.
+#[cfg_attr(not(feature = "tools"), allow(dead_code))]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct UnknownField {
+    pub(crate) entity_type: String,
+    pub(crate) field: String,
+    pub(crate) known_fields: &'static [&'static str],
+}
+
 /// One token type; `type` selects which fields are allowed.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -45,7 +79,6 @@ pub(crate) enum TokenTypeConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct JwtTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
@@ -54,15 +87,18 @@ pub(crate) struct JwtTokenConfig {
     pub(crate) token_id: String,
     #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
+    #[serde(flatten)]
+    pub(crate) unknown: UnknownFields,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct CustomTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
     #[serde(default, deserialize_with = "de_required_claims")]
     pub(crate) required_claims: HashSet<String>,
+    #[serde(flatten)]
+    pub(crate) unknown: UnknownFields,
 }
 
 // Frozen v2 default; independent of the runtime `DEFAULT_TKN_ID`.
@@ -114,7 +150,8 @@ pub(crate) enum KeySourceDoc {
 }
 
 /// Hand-written so a store author sees the actual problem rather than
-/// serde's "did not match any variant".
+/// serde's "did not match any variant". Unlike the entry, this object stays
+/// closed: it decides where an issuer's keys come from.
 impl<'de> Deserialize<'de> for KeySourceDoc {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         deserializer.deserialize_map(KeySourceVisitor)
@@ -210,6 +247,15 @@ impl<'de> Visitor<'de> for TrustedIssuersVisitor {
             let config = map
                 .next_value::<TokenTypeConfig>()
                 .map_err(|e| de::Error::custom(format!("invalid entry '{key}': {e}")))?;
+            if let TokenTypeConfig::Custom(custom) = &config
+                && let Some(field) = JWT_ONLY_FIELDS
+                    .iter()
+                    .find(|field| custom.unknown.0.contains(**field))
+            {
+                return Err(de::Error::custom(format!(
+                    "invalid entry '{key}': `{field}` is only allowed on a `jwt` entry"
+                )));
+            }
             entries.push(TrustedIssuerEntry {
                 entity_type,
                 config,
@@ -225,6 +271,24 @@ pub(crate) fn parse(json: &str) -> Result<TrustedIssuersDoc, serde_json::Error> 
 }
 
 impl TrustedIssuersDoc {
+    /// Lists the fields ignored while parsing, in file order of their entries.
+    pub(crate) fn unknown_fields(&self) -> Vec<UnknownField> {
+        self.entries
+            .iter()
+            .flat_map(|entry| {
+                let (unknown, known_fields) = match &entry.config {
+                    TokenTypeConfig::Jwt(jwt) => (&jwt.unknown, JWT_FIELDS),
+                    TokenTypeConfig::Custom(custom) => (&custom.unknown, CUSTOM_FIELDS),
+                };
+                unknown.0.iter().map(move |field| UnknownField {
+                    entity_type: entry.entity_type.to_string(),
+                    field: field.clone(),
+                    known_fields,
+                })
+            })
+            .collect()
+    }
+
     /// Validates the entries as a whole and converts them into runtime types.
     pub(crate) fn into_runtime(self) -> Result<TokenTypes, TokenTypesError> {
         let mut builder = TokenTypesBuilder::default();
@@ -307,6 +371,41 @@ mod tests {
     /// Parses one entry under `Acme::Access_token`.
     fn parse_entry(entry: &serde_json::Value) -> Result<TrustedIssuersDoc, serde_json::Error> {
         parse(&json!({ "Acme::Access_token": entry }).to_string())
+    }
+
+    #[test]
+    fn ignores_and_lists_unknown_fields() {
+        let plain = json!({
+            "type": "jwt",
+            "issuer": "Acme",
+            "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
+        });
+        let mut extended = plain.clone();
+        extended["x_vendor"] = json!({ "nested": [1, 2] });
+        extended["required_claim"] = json!(["sub"]);
+
+        let doc = parse_entry(&extended).expect("unknown fields must not fail parsing");
+        let plain_doc = parse_entry(&plain).expect("the plain entry should parse");
+
+        assert_eq!(
+            doc.clone()
+                .into_runtime()
+                .expect("the extended entry should convert"),
+            plain_doc
+                .into_runtime()
+                .expect("the plain entry should convert"),
+            "unknown fields must not change the runtime token types"
+        );
+        let fields: Vec<_> = doc
+            .unknown_fields()
+            .into_iter()
+            .map(|unknown| unknown.field)
+            .collect();
+        assert_eq!(
+            fields,
+            ["required_claim", "x_vendor"],
+            "`type` and known fields must not be listed"
+        );
     }
 
     #[track_caller]
@@ -400,7 +499,7 @@ mod tests {
                 "issuer": "Acme",
                 "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
             }),
-            "unknown field `configuration_endpoints`",
+            "`configuration_endpoints` is only allowed on a `jwt` entry",
         );
     }
 
@@ -639,7 +738,6 @@ mod tests {
                 "repeated claim",
                 jwt(json!({ "required_claims": ["sub", "sub"] })),
             ),
-            ("unknown field", jwt(json!({ "trusted": true }))),
             ("reserved issuer", jwt(json!({ "issuer": "if" }))),
             ("issuer with ::", jwt(json!({ "issuer": "Acme::Corp" }))),
             (
@@ -647,6 +745,14 @@ mod tests {
                 json!({ "type": "jwt", "issuer": "Acme" }),
             ),
             ("unknown type", json!({ "type": "saml", "issuer": "Acme" })),
+            (
+                "custom with token_id",
+                json!({ "type": "custom", "issuer": "Acme", "token_id": "jti" }),
+            ),
+            (
+                "unknown key source field",
+                endpoints(json!({ "jwks": "https://a/k", "iss": "https://a", "extra": 1 })),
+            ),
             (
                 "custom with key source",
                 json!({
