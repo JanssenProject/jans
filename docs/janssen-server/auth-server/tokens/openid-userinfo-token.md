@@ -11,8 +11,24 @@ tags:
 ## `Userinfo` JWT
 
 An OpenID Connect client, after obtaining an access token, can present it
-at the Userinfo endpoint to obtain the Userinfo JWT token. The Userinfo response
-is is described in [OpenID Core 5.4.3](https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponseValidation), and directs the developer to:
+at the UserInfo endpoint to obtain a UserInfo response. The response is
+returned as JSON by default, or as a JWT when signing or encryption is configured.
+
+Clients should send the access token to the UserInfo endpoint using the
+HTTP `Authorization` header with the `Bearer` authentication scheme.
+
+For example:
+
+```http
+GET /jans-auth/restv1/userinfo HTTP/1.1
+Host: <jans-host>
+Authorization: Bearer <access_token>
+```
+
+As part of Janssen's OAuth 2.1-aligned security changes, the UserInfo
+endpoint no longer accepts access tokens through URL query parameters.
+
+The Userinfo response is described in [OpenID Core 5.4.3](https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponseValidation), and directs the developer to:
 
 * Verify that the OP that responded was the intended OP through a TLS server certificate check
 
@@ -44,9 +60,9 @@ Below is an example of the Userinfo claims for the default Jans Admin user:
 
 Domains can limit the claims released to a client from the Userinfo endpoint
 by associating only the OpenID scopes required by that client. You can also
-define new scopes, and associate any user claims with them. Note, clients still
-must request the scopes they need for an access token. For example, a client
-may be authorize
+define new scopes, and associate any user claims with them. Clients must request the scopes needed to access the corresponding claims.
+The UserInfo response contains claims authorized for the client based on
+the granted scopes and applicable authorization policies.
 
 ## Requesting individual claims
 

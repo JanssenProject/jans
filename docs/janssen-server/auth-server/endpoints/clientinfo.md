@@ -30,6 +30,9 @@ Since clientinfo endpoint is an OAuth2 protected resource, a valid access token 
 access the endpoint. More information about request and response of the clientinfo endpoint can be found in
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
+Send this access token in the HTTP `Authorization: Bearer` header and do not send as a URL query
+parameter.
+
 ## Disabling The Endpoint Using Feature Flag
 
 `/clientinfo` endpoint can be enabled or disable using [clientinfo feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#clientinfo).
