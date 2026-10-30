@@ -63,6 +63,47 @@ fn test_validate_fail() {
 }
 
 #[test]
+fn test_validate_reports_unknown_fields() {
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
+    cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+        .arg("--policy-store")
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/v2_store_unknown_field"
+        ))
+        .arg("validate");
+
+    cmd.assert()
+        .success()
+        .stdout(predicates::str::contains(
+            "trusted-issuers.json: unknown field `Acme::Access_token.required_claim` is ignored; \
+             did you mean `required_claims`?",
+        ))
+        .stdout(predicates::str::contains(
+            "unknown field `Acme::Access_token.x_vendor` is ignored\n",
+        ))
+        .stdout(predicates::str::contains("validation passed"));
+}
+
+#[test]
+fn test_validate_strict_fails_on_unknown_fields() {
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
+    cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+        .arg("--policy-store")
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/v2_store_unknown_field"
+        ))
+        .arg("validate")
+        .arg("--strict");
+
+    cmd.assert()
+        .failure()
+        .code(1)
+        .stdout(predicates::str::contains("2 unknown field(s) with --strict"));
+}
+
+#[test]
 fn test_validate_missing_source() {
     let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")

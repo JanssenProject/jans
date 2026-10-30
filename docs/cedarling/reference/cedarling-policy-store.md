@@ -262,9 +262,12 @@ The file's JSON Schema is [`trusted_issuers_schema.json`](https://github.com/Jan
 | `token_id` | jwt | no, default `jti` | Claim used as the token entity id; must not be empty. |
 | `required_claims` | all | no, default `[]` | Claim names, none empty and none repeated. JWT: the claims must be present, and registered claims ([RFC 7519 §4.1](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1)) such as `exp` or `nbf` are validated. Custom: the claims must be present in the processor output. |
 
-Unknown fields are rejected, so a misspelled field, or a JWT-only field such as
-`configuration_endpoints` on a `custom` entry, fails the load with a message
-naming it.
+Unknown fields are ignored, so other PDPs can add their own. Cedarling does not
+log them: `cedarling-cli validate` reports each one with a suggestion for a likely
+typo, and `--strict` fails on them. Run it with `--strict` in CI, as a misspelled
+`required_claims` would otherwise leave the claims unchecked. Unknown fields inside
+`configuration_endpoints` and JWT-only fields such as `configuration_endpoints` on
+a `custom` entry still fail the load with a message naming them.
 
 These rules are checked when the store loads, and a violation fails the load:
 
@@ -540,10 +543,10 @@ urgent, but every load logs the warnings below.
 ### Unknown fields
 
 Unknown keys in `metadata.json` are ignored in every version. In version 2,
-unknown keys in `trusted-issuers.json` entries are rejected with an error naming
-them. In versions 0 and 1, unknown keys in trusted-issuer files are ignored, so a
-misspelled optional key is silently dropped, and unknown keys in custom-issuer
-files are rejected. Migration carries over every field the newer version has a
+unknown keys in `trusted-issuers.json` entries are ignored and reported by
+`cedarling-cli validate`, except inside `configuration_endpoints`, where they are
+rejected. In versions 0 and 1, unknown keys in trusted-issuer and custom-issuer
+files are ignored, so a misspelled optional key is silently dropped. Migration carries over every field the newer version has a
 place for and reports what it cannot carry over.
 
 ### Warnings
