@@ -3,8 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Where TRACE records go and the token they go with. TRACE always uses REST:
-//! Lock has no TRACE endpoint over gRPC.
+//! Where TRACE records go and the token they go with. Bulk requests go over REST
+//! (`POST /audit/trace/bulk`) or, with `CEDARLING_TRACE_TRANSPORT=grpc`, over
+//! gRPC (`TraceService/SubmitBulkRecords`), which runs the same Lock pipeline.
 
 use std::fmt;
 use std::time::Duration;
@@ -22,6 +23,9 @@ use super::register_client::{TokenSource, request_access_token};
 use crate::TraceEndpoint;
 use crate::http::HttpClient;
 use crate::http_utils::MAX_EXPONENTIAL_DELAY;
+
+#[cfg(feature = "grpc")]
+pub(super) mod grpc;
 
 /// Acceptance flags that point at a problem on the producer's side. Coverage
 /// gaps and lateness are expected after a loss or a retry, so they are not kept.
@@ -81,12 +85,29 @@ pub(crate) enum PostBulkError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum RejectedStatus {
     Http(StatusCode),
+    /// Lock sends the gRPC status matching the HTTP status of the REST answer.
+    #[cfg(feature = "grpc")]
+    Grpc(tonic::Code),
 }
 
 impl RejectedStatus {
     /// Lock's answer to a request it could not accept as sent (`invalid_request`).
     fn is_bad_request(self) -> bool {
-        matches!(self, Self::Http(StatusCode::BAD_REQUEST))
+        match self {
+            Self::Http(status) => status == StatusCode::BAD_REQUEST,
+            #[cfg(feature = "grpc")]
+            Self::Grpc(code) => code == tonic::Code::InvalidArgument,
+        }
+    }
+
+    /// gRPC refuses a message over Lock's transport limit (`maxBulkRequestBytes`
+    /// plus 64 KiB) before Lock reads it, so no Lock error comes with it.
+    fn is_message_too_large(self) -> bool {
+        match self {
+            Self::Http(_) => false,
+            #[cfg(feature = "grpc")]
+            Self::Grpc(code) => code == tonic::Code::ResourceExhausted,
+        }
     }
 }
 
@@ -94,6 +115,8 @@ impl fmt::Display for RejectedStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Http(status) => write!(f, "HTTP {}", status.as_u16()),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(code) => write!(f, "gRPC {code:?}"),
         }
     }
 }
@@ -116,13 +139,16 @@ impl PostBulkError {
     pub(crate) fn refusal(&self) -> Option<RequestRefusal> {
         let Self::Rejected {
             status,
-            error: Some(error),
+            error,
             reason,
         } = self
         else {
             return None;
         };
-        if !status.is_bad_request() || error != "invalid_request" {
+        if status.is_message_too_large() {
+            return Some(RequestRefusal::BodyTooLarge);
+        }
+        if !status.is_bad_request() || error.as_deref() != Some("invalid_request") {
             return None;
         }
         match reason.as_deref() {
@@ -138,12 +164,18 @@ impl PostBulkError {
 pub(super) enum TraceChannel {
     /// `POST` of the body to the TRACE bulk endpoint.
     Rest(url::Url),
+    /// `TraceService/SubmitBulkRecords` on the origin of the TRACE endpoint,
+    /// where the Lock proxy routes it, as for the audit gRPC transport.
+    #[cfg(feature = "grpc")]
+    Grpc(grpc::GrpcTraceClient),
 }
 
 impl fmt::Debug for TraceChannel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Rest(endpoint) => f.debug_tuple("Rest").field(&endpoint.as_str()).finish(),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(client) => f.debug_tuple("Grpc").field(client).finish(),
         }
     }
 }
@@ -153,6 +185,8 @@ impl TraceChannel {
     fn unauthorized(&self) -> PostBulkError {
         let status = match self {
             Self::Rest(_) => RejectedStatus::Http(StatusCode::UNAUTHORIZED),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(_) => RejectedStatus::Grpc(tonic::Code::Unauthenticated),
         };
         PostBulkError::Rejected {
             status,
@@ -184,7 +218,7 @@ impl fmt::Debug for TraceSink {
     }
 }
 
-/// Answer to one attempt, before a `401` is handled.
+/// Answer to one attempt, before a `401` (gRPC `UNAUTHENTICATED`) is handled.
 enum Attempt {
     Results(Vec<BulkItemResult>),
     Unauthorized,
@@ -241,6 +275,8 @@ impl TraceSink {
         let token = self.token.read().await.0.clone();
         match &self.channel {
             TraceChannel::Rest(endpoint) => self.post_rest(endpoint, token, body).await,
+            #[cfg(feature = "grpc")]
+            TraceChannel::Grpc(client) => client.submit(&token, body).await,
         }
     }
 

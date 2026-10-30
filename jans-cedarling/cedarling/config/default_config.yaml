@@ -41,6 +41,9 @@ CEDARLING_TRACE: "disabled"
 # "discovered" (or a blank value) takes trace_bulk_endpoint from the Lock Server well-known
 # configuration. Must be https, or http only to a loopback host: the Lock token goes with it.
 # CEDARLING_TRACE_ENDPOINT: "discovered"
+# "rest" or "grpc" (requires the grpc feature); independent of CEDARLING_LOCK_TRANSPORT.
+# gRPC calls TraceService/SubmitBulkRecords on the scheme, host and port of the endpoint.
+# CEDARLING_TRACE_TRANSPORT: "rest"
 # CEDARLING_TRACE_BULK_MAX_RECORDS: 100
 # At least 262146: one record of the Lock Server default maxRequestBytes plus brackets.
 # CEDARLING_TRACE_BULK_MAX_BYTES: 4194304
