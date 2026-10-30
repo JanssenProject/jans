@@ -104,6 +104,19 @@ fn test_validate_strict_fails_on_unknown_fields() {
 }
 
 #[test]
+fn test_validate_accepts_relative_directory() {
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
+    cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+        .arg("--policy-store")
+        .arg("./tests/v2_store_unknown_field/")
+        .arg("validate");
+
+    cmd.assert()
+        .success()
+        .stdout(predicates::str::contains("validation passed"));
+}
+
+#[test]
 fn test_validate_missing_source() {
     let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
     cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
