@@ -29,12 +29,32 @@ pub(super) mod grpc;
 
 /// Acceptance flags that point at a problem on the producer's side. Coverage
 /// gaps and lateness are expected after a loss or a retry, so they are not kept.
-const PROBLEM_FLAGS: [&str; 4] = [
-    "chain_link_failure_flag",
-    "equivocation_flag",
-    "policy_mismatch_flag",
-    "reserved_member_flag",
-];
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ProblemFlag {
+    ChainLinkFailure,
+    Equivocation,
+    PolicyMismatch,
+    ReservedMember,
+}
+
+impl ProblemFlag {
+    const ALL: [Self; 4] = [
+        Self::ChainLinkFailure,
+        Self::Equivocation,
+        Self::PolicyMismatch,
+        Self::ReservedMember,
+    ];
+
+    /// The member of Lock's REST answer, which is also the name logged.
+    fn name(self) -> &'static str {
+        match self {
+            Self::ChainLinkFailure => "chain_link_failure_flag",
+            Self::Equivocation => "equivocation_flag",
+            Self::PolicyMismatch => "policy_mismatch_flag",
+            Self::ReservedMember => "reserved_member_flag",
+        }
+    }
+}
 
 /// Sends one bulk body to Lock. A trait so the emitter is tested without HTTP.
 #[async_trait]
@@ -51,7 +71,7 @@ pub(crate) struct BulkItemResult {
     /// Error id from the Lock error catalog when the record was rejected.
     pub(crate) error: Option<String>,
     pub(crate) reason: Option<String>,
-    /// Names of the [`PROBLEM_FLAGS`] Lock set on an accepted record.
+    /// Names of the [`ProblemFlag`]s Lock set on an accepted record.
     pub(crate) flags: Vec<&'static str>,
 }
 
@@ -412,8 +432,9 @@ fn non_empty<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<String
 
 impl From<RawItem> for BulkItemResult {
     fn from(item: RawItem) -> Self {
-        let flags = PROBLEM_FLAGS
+        let flags = ProblemFlag::ALL
             .into_iter()
+            .map(ProblemFlag::name)
             .filter(|flag| item.members.get(*flag) == Some(&serde_json::Value::Bool(true)))
             .collect();
         let (error, reason) = match item.error {

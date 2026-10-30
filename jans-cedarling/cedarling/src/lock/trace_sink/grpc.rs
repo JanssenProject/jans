@@ -15,7 +15,7 @@ use tonic::metadata::MetadataValue;
 use tonic::transport::{Channel, ClientTlsConfig};
 use tonic::{Code, Request, Status};
 
-use super::{Attempt, BulkItemResult, ErrorBody, PROBLEM_FLAGS, PostBulkError, RejectedStatus};
+use super::{Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus};
 use crate::HttpClientConfig;
 use crate::lock::trace_proto::trace_service_client::TraceServiceClient;
 use crate::lock::trace_proto::{
@@ -155,19 +155,23 @@ fn item(entry: BulkResultEntry) -> Result<BulkItemResult, PostBulkError> {
     })
 }
 
-/// The [`PROBLEM_FLAGS`] Lock set, in that order.
+/// Names of the [`ProblemFlag`]s Lock set.
 fn problem_flags(flags: &TraceFlags) -> Vec<&'static str> {
-    let set = [
-        flags.chain_link_failure_flag,
-        flags.equivocation_flag,
-        flags.policy_mismatch_flag,
-        flags.reserved_member_flag,
-    ];
-    PROBLEM_FLAGS
+    ProblemFlag::ALL
         .into_iter()
-        .zip(set)
-        .filter_map(|(name, set)| set.then_some(name))
+        .filter(|flag| is_set(*flag, flags))
+        .map(ProblemFlag::name)
         .collect()
+}
+
+/// Matching on the flag ties each one to its own field of `TraceFlags`.
+fn is_set(flag: ProblemFlag, flags: &TraceFlags) -> bool {
+    match flag {
+        ProblemFlag::ChainLinkFailure => flags.chain_link_failure_flag,
+        ProblemFlag::Equivocation => flags.equivocation_flag,
+        ProblemFlag::PolicyMismatch => flags.policy_mismatch_flag,
+        ProblemFlag::ReservedMember => flags.reserved_member_flag,
+    }
 }
 
 #[cfg(test)]
