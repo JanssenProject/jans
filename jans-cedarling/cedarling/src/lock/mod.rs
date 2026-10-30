@@ -697,7 +697,7 @@ fn create_trace_sink(
         },
     };
     Ok(Some(Arc::new(TraceSink {
-        endpoint,
+        channel: trace_sink::TraceChannel::Rest(endpoint),
         http: init_http_client(None, accept_invalid_certs, http_conf)?,
         token: tokio::sync::RwLock::new(LockAccessToken(access_token.to_string())),
         source,
@@ -1285,9 +1285,10 @@ mod test {
             .trace_sink()
             .expect("a discovered trace_bulk_endpoint should give a TRACE sink");
         assert!(
-            sink.endpoint.path().ends_with("/audit/trace/bulk"),
-            "the sink should post to the discovered bulk endpoint, got {}",
-            sink.endpoint
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(endpoint)
+                if endpoint.path().ends_with("/audit/trace/bulk")),
+            "the sink should post to the discovered bulk endpoint, got {:?}",
+            sink.channel
         );
         assert!(
             sink.source.is_some(),
@@ -1393,9 +1394,10 @@ mod test {
         let sink = service
             .trace_sink()
             .expect("an explicit endpoint should give a TRACE sink");
-        assert_eq!(
-            sink.endpoint, url,
-            "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint"
+        assert!(
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(endpoint) if *endpoint == url),
+            "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint, got {:?}",
+            sink.channel
         );
     }
 

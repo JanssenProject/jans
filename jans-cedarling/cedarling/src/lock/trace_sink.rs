@@ -134,10 +134,39 @@ impl PostBulkError {
     }
 }
 
-/// The Lock TRACE bulk endpoint and the client that posts to it. Holds its own
-/// copy of the token, so a `401` can swap in a reissued one.
+/// How bulk requests reach Lock.
+pub(super) enum TraceChannel {
+    /// `POST` of the body to the TRACE bulk endpoint.
+    Rest(url::Url),
+}
+
+impl fmt::Debug for TraceChannel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Rest(endpoint) => f.debug_tuple("Rest").field(&endpoint.as_str()).finish(),
+        }
+    }
+}
+
+impl TraceChannel {
+    /// A token Lock refused again after it was reissued, or that cannot be reissued.
+    fn unauthorized(&self) -> PostBulkError {
+        let status = match self {
+            Self::Rest(_) => RejectedStatus::Http(StatusCode::UNAUTHORIZED),
+        };
+        PostBulkError::Rejected {
+            status,
+            error: None,
+            reason: None,
+        }
+    }
+}
+
+/// The Lock TRACE endpoint and the client that sends to it. Holds its own copy
+/// of the token, so a `401` can swap in a reissued one.
 pub(crate) struct TraceSink {
-    pub(super) endpoint: url::Url,
+    pub(super) channel: TraceChannel,
+    /// Posts REST bulk requests and reissues the token, whatever the channel.
     pub(super) http: HttpClient,
     /// Shared by every bulk request until Lock answers `401`; then replaced by
     /// the reissued token, which the following requests use in turn.
@@ -149,7 +178,7 @@ pub(crate) struct TraceSink {
 impl fmt::Debug for TraceSink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TraceSink")
-            .field("endpoint", &self.endpoint.as_str())
+            .field("channel", &self.channel)
             .field("source", &self.source)
             .finish_non_exhaustive()
     }
@@ -174,7 +203,7 @@ impl BulkSink for TraceSink {
             return Ok(results);
         }
         let Some(source) = &self.source else {
-            return Err(unauthorized());
+            return Err(self.channel.unauthorized());
         };
         // Stored for the following calls, so they do not hit `401` again.
         let token = request_access_token(&self.http, source)
@@ -186,7 +215,7 @@ impl BulkSink for TraceSink {
         *self.token.write().await = LockAccessToken(token);
         match self.post_once(body).await? {
             Attempt::Results(results) => Ok(results),
-            Attempt::Unauthorized => Err(unauthorized()),
+            Attempt::Unauthorized => Err(self.channel.unauthorized()),
         }
     }
 }
@@ -194,10 +223,15 @@ impl BulkSink for TraceSink {
 impl TraceSink {
     /// The bulk request carrying `body`. `Bytes` clones share the buffer, so a
     /// retry or a resend after `401` does not copy the batch.
-    fn bulk_request(&self, token: String, body: &Bytes) -> reqwest::RequestBuilder {
+    fn bulk_request(
+        &self,
+        endpoint: &url::Url,
+        token: String,
+        body: &Bytes,
+    ) -> reqwest::RequestBuilder {
         self.http
             .raw_client
-            .post(self.endpoint.clone())
+            .post(endpoint.clone())
             .bearer_auth(token)
             .header(CONTENT_TYPE, "application/json")
             .body(body.clone())
@@ -205,8 +239,19 @@ impl TraceSink {
 
     async fn post_once(&self, body: &Bytes) -> Result<Attempt, PostBulkError> {
         let token = self.token.read().await.0.clone();
+        match &self.channel {
+            TraceChannel::Rest(endpoint) => self.post_rest(endpoint, token, body).await,
+        }
+    }
+
+    async fn post_rest(
+        &self,
+        endpoint: &url::Url,
+        token: String,
+        body: &Bytes,
+    ) -> Result<Attempt, PostBulkError> {
         let response = self
-            .bulk_request(token, body)
+            .bulk_request(endpoint, token, body)
             .send()
             .await
             .map_err(|err| retryable(err.to_string()))?;
@@ -266,14 +311,6 @@ fn retry_after(headers: &HeaderMap, now: DateTime<Utc>) -> Option<Duration> {
             .ok()?,
     };
     Some(delay.min(MAX_EXPONENTIAL_DELAY))
-}
-
-fn unauthorized() -> PostBulkError {
-    PostBulkError::Rejected {
-        status: RejectedStatus::Http(StatusCode::UNAUTHORIZED),
-        error: None,
-        reason: None,
-    }
 }
 
 fn parse_results(bytes: &[u8]) -> Result<Vec<BulkItemResult>, PostBulkError> {
@@ -413,13 +450,17 @@ mod tests {
 
     fn sink(server: &ServerGuard, source: Option<TokenSource>) -> TraceSink {
         TraceSink {
-            endpoint: format!("{}{BULK_PATH}", server.url())
-                .parse()
-                .expect("valid URL"),
+            channel: TraceChannel::Rest(endpoint(server)),
             http: HttpClient::new(HttpClientConfig::default()).expect("HTTP client"),
             token: RwLock::new(LockAccessToken("old-token".to_string())),
             source,
         }
+    }
+
+    fn endpoint(server: &ServerGuard) -> url::Url {
+        format!("{}{BULK_PATH}", server.url())
+            .parse()
+            .expect("valid URL")
     }
 
     fn source(server: &ServerGuard) -> TokenSource {
@@ -453,11 +494,12 @@ mod tests {
     async fn every_attempt_sends_the_body_without_copying_it() {
         let server = Server::new_async().await;
         let sink = sink(&server, None);
+        let endpoint = endpoint(&server);
         let body = bulk_body();
 
         for attempt in ["first", "repeated"] {
             let request = sink
-                .bulk_request("token".to_string(), &body)
+                .bulk_request(&endpoint, "token".to_string(), &body)
                 .build()
                 .expect("the bulk request builds");
             let sent = request
@@ -620,7 +662,7 @@ mod tests {
     async fn unreachable_endpoint_is_retryable() {
         let server = Server::new_async().await;
         let mut sink = sink(&server, None);
-        sink.endpoint = "http://127.0.0.1:1/bulk".parse().expect("valid URL");
+        sink.channel = TraceChannel::Rest("http://127.0.0.1:1/bulk".parse().expect("valid URL"));
 
         let err = sink
             .post_bulk(&bulk_body())
