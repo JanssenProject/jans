@@ -734,6 +734,27 @@ mod tests {
         jsonschema::draft202012::new(&schema).expect("the schema should compile")
     }
 
+    #[test]
+    fn schema_and_parser_accept_unknown_entry_fields() {
+        let validator = schema_validator();
+        for entry in [
+            json!({
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" },
+                "x_vendor": { "enabled": true }
+            }),
+            json!({ "type": "custom", "issuer": "Acme", "x_vendor": 1 }),
+        ] {
+            let store = json!({ "Acme::Access_token": entry });
+            assert!(
+                validator.is_valid(&store),
+                "the schema should accept an unknown field: {store}"
+            );
+            parse(&store.to_string()).expect("the parser should accept an unknown field");
+        }
+    }
+
     /// The example and every v2 fixture in the repository pass the schema and load.
     #[test]
     fn schema_and_parser_accept_the_fixtures() {
