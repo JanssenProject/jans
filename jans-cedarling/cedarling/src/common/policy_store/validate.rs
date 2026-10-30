@@ -6,6 +6,12 @@
 #![cfg(feature = "tools")]
 
 use serde::Serialize;
+use strsim::levenshtein;
+
+use super::formats::UnknownField;
+
+/// Farther names are more likely vendor extensions than typos.
+const MAX_SUGGESTION_DISTANCE: usize = 2;
 
 /// Result of validating a policy store, one field per level.
 #[derive(Debug, Clone, Serialize)]
@@ -19,6 +25,9 @@ pub struct ValidationReport {
     /// Non-fatal findings, such as an outdated `policy_store_spec_version`.
     /// They do not affect [`is_ok`](Self::is_ok).
     pub warnings: Vec<Diagnostic>,
+    /// Fields of `trusted-issuers.json` that were ignored: vendor extensions
+    /// or typos. They do not affect [`is_ok`](Self::is_ok).
+    pub unknown_fields: Vec<Diagnostic>,
 }
 
 impl ValidationReport {
@@ -84,6 +93,28 @@ pub struct Diagnostic {
     pub message: String,
 }
 
+impl From<UnknownField> for Diagnostic {
+    fn from(unknown: UnknownField) -> Self {
+        let UnknownField {
+            file,
+            path,
+            known_fields,
+        } = unknown;
+        let field = path.rsplit('.').next().unwrap_or(&path);
+        let suggestion = known_fields
+            .iter()
+            .min_by_key(|known| levenshtein(known, field))
+            .filter(|known| levenshtein(known, field) <= MAX_SUGGESTION_DISTANCE);
+        let hint = suggestion.map_or(String::new(), |known| format!("; did you mean `{known}`?"));
+        Diagnostic {
+            file: file.to_string(),
+            line: None,
+            column: None,
+            message: format!("unknown field `{path}` is ignored{hint}"),
+        }
+    }
+}
+
 /// Errors that occur due to infrastructure failures (network, IO) during validation.
 #[derive(Debug, thiserror::Error)]
 pub enum ValidateInfraError {
@@ -96,4 +127,37 @@ pub enum ValidateInfraError {
     /// Failed to build the HTTP client.
     #[error("failed to build HTTP client: {0}")]
     HttpClientBuild(#[from] crate::http::InitializeHttpClientError),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn message(field: &str) -> String {
+        Diagnostic::from(UnknownField {
+            file: "store.json",
+            path: format!("Acme::Access_token.{field}"),
+            known_fields: &["issuer", "required_claims"],
+        })
+        .message
+    }
+
+    #[test]
+    fn suggests_near_known_field() {
+        assert_eq!(
+            message("required_claim"),
+            "unknown field `Acme::Access_token.required_claim` is ignored; did you mean \
+             `required_claims`?",
+            "a typo should get a suggestion"
+        );
+    }
+
+    #[test]
+    fn does_not_suggest_for_distant_field() {
+        assert_eq!(
+            message("x_vendor_feature"),
+            "unknown field `Acme::Access_token.x_vendor_feature` is ignored",
+            "a vendor extension should not get a suggestion"
+        );
+    }
 }

@@ -926,6 +926,7 @@ mod tests {
         FormatReport {
             spec_version: Some(spec_version),
             warnings: warnings.to_vec(),
+            unknown_fields: Vec::new(),
         }
     }
 
