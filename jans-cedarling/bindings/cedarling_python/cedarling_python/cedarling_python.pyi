@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2024, Gluu, Inc.
 
-from typing import Optional, List, final, Dict, Any
+from typing import Optional, List, final, Dict, Any, ClassVar
 from datetime import timedelta
 from enum import Enum
 
@@ -709,6 +709,8 @@ class DropReason:
     kind: str
     detail: Optional[str]
     message: str
+    # `eq` without `hash` in Rust makes instances unhashable at runtime.
+    __hash__: ClassVar[None] = ...  # type: ignore[assignment]
     def __repr__(self) -> str: ...
 
 @final
@@ -835,6 +837,7 @@ class DataEntry:
     expires_at: Optional[str]
     access_count: int
 
+    @property
     def value(self) -> Any:
         """
         Get the value stored in this entry.

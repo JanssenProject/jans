@@ -312,7 +312,7 @@ adapter.getLogsByTag("System");
 
 ## Defined API
 
-Defined APIs are listed in the [Cedarling Java API documentation](https://janssenproject.github.io/developer-docs/jans-cedarling/bindings/cedarling-java/io/jans/cedarling/binding/wrapper/CedarlingAdapter.html).
+Defined APIs are listed in the [Cedarling Java API documentation](https://janssenproject.github.io/developer-docs/cedarling-java/cedarling-java/io.jans.cedarling.binding.wrapper/-cedarling-adapter/index.html).
 
 ## See Also
 
