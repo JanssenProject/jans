@@ -1939,7 +1939,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 0.0.0-nightly
-    created: '2026-10-29T02:16:35.573770615Z'
+    created: '2026-10-30T02:30:25.552779413Z'
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1994,7 +1994,7 @@ entries:
       repository: ''
       version: 0.0.0-nightly
     description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
-    digest: b512d778f398a63bf2667aedc361882b98398e1616063838e262dbdffe9dd63f
+    digest: 454245d239b1a48870a5e1f94166b28102e151f67f499489877c5eddd2a4788f
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.23.0-0'
@@ -2647,9 +2647,9 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 0.0.0-nightly
-    created: '2026-10-29T02:16:35.578133642Z'
+    created: '2026-10-30T02:30:25.556116237Z'
     description: Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
-    digest: af6a202ae97fb0420be39155df6ab8110aadcce545b23ecedd8d9e55c44d9078
+    digest: 6b92f13b185e32b6abb90896af486e60e4249dcf9fd4aeeeb79ce40c0510ae72
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.23.0-0'
@@ -2664,4 +2664,4 @@ entries:
     urls:
     - https://github.com/JanssenProject/jans/releases/download/nightly/janssen-all-in-one-0.0.0-nightly.tgz
     version: 0.0.0-nightly
-generated: '2026-10-29T02:16:35.532468343Z'
+generated: '2026-10-30T02:30:25.537841192Z'
