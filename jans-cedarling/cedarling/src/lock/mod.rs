@@ -1251,13 +1251,6 @@ mod test {
 
     /// Lock configuration with the direct access token, so no IDP is needed.
     #[cfg(not(target_arch = "wasm32"))]
-    fn rest(endpoint: &TraceEndpoint) -> TraceRoute<'_> {
-        TraceRoute {
-            endpoint,
-            transport: LockTransport::Rest,
-        }
-    }
-
     fn direct_token_config(config_uri: url::Url) -> LockServiceConfig {
         LockServiceConfig {
             config_uri,
@@ -1267,6 +1260,15 @@ mod test {
             telemetry_interval: None,
             transport: LockTransport::Rest,
             ..Default::default()
+        }
+    }
+
+    /// TRACE over REST to `endpoint`, as it is by default.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn rest(endpoint: &TraceEndpoint) -> TraceRoute<'_> {
+        TraceRoute {
+            endpoint,
+            transport: LockTransport::Rest,
         }
     }
 
