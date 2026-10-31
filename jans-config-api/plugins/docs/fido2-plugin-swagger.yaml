@@ -1901,11 +1901,36 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        deviceTypes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
+        errorCounts:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int64
         performanceMetrics:
           type: object
           additionalProperties:
             type: object
+        period:
+          type: string
+        metricsData:
+          type: object
+          additionalProperties:
+            type: object
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
         registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
           type: integer
           format: int64
         authenticationSuccesses:
@@ -1914,18 +1939,12 @@ components:
         authenticationFailures:
           type: integer
           format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        registrationSuccesses:
+        fallbackEvents:
           type: integer
           format: int64
         registrationSuccessRate:
           type: number
           format: double
-        registrationAttempts:
-          type: integer
-          format: int64
         authenticationSuccessRate:
           type: number
           format: double
@@ -1935,25 +1954,6 @@ components:
         authenticationAvgDuration:
           type: number
           format: double
-        fallbackEvents:
-          type: integer
-          format: int64
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
-        period:
-          type: string
-        metricsData:
-          type: object
-          additionalProperties:
-            type: object
-        errorCounts:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:
