@@ -28,8 +28,8 @@ DIAGRAM = {
         "builder": {"color": "blue", "box": (720, 470, 250, 96),
                     "title": "Entity & Context Builder",
                     "desc": ["principals, resource,", "context.tokens, context.data"]},
-        "logs": {"color": "blue", "box": (380, 620, 230, 76),
-                 "title": "Observability", "desc": ["logs, telemetry, evidence"]},
+        "logs": {"color": "blue", "box": (380, 620, 230, 96),
+                 "title": "Observability", "desc": ["logs, telemetry,", "TRACE evidence"]},
         "cedar": {"color": "blue", "box": (720, 620, 250, 76), "emphasis": True,
                   "title": "Cedar Engine", "desc": ["Allow / Deny, diagnostics"]},
 
@@ -39,7 +39,7 @@ DIAGRAM = {
                     "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "Status List"]},
         "lock": {"color": "violet", "box": (1100, 584, 230, 130),
                  "title": "Lock Server", "role": "Evidence Collector",
-                 "desc": ["policy store, logs,", "health, telemetry,", "evidence"]},
+                 "desc": ["policy store, logs,", "health, telemetry,", "TRACE evidence"]},
     },
     # Edges listed later are drawn on top; the halo on the issuers edge cuts a
     # gap into the policies line it crosses.
@@ -61,8 +61,8 @@ DIAGRAM = {
         {"points": [(845, 566), (845, 620)], "label": "entities, context", "at": (845, 593)},
         {"points": [(720, 658), (610, 658)], "label": "decision", "at": (665, 636)},
         {"points": [(380, 658), (290, 658)]},
-        {"points": [(495, 696), (495, 752), (1215, 752), (1215, 714)],
-         "label": "logs, telemetry, evidence", "at": (860, 752),
+        {"points": [(495, 716), (495, 752), (1215, 752), (1215, 714)],
+         "label": "logs, telemetry, TRACE evidence", "at": (860, 752),
          "color": "violet", "style": "dashed"},
         {"points": [(1330, 658), (1378, 658), (1378, 62), (900, 62), (900, 140)],
          "label": "policy store", "at": (1150, 62), "color": "violet", "style": "dashed"},

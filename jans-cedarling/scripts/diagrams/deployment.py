@@ -38,7 +38,7 @@ DIAGRAM = {
 
         "lock": {"color": "violet", "box": (500, 480, 400, 120),
                  "title": "Lock Server", "role": "Evidence Collector",
-                 "desc": ["policy store, logs, telemetry, evidence"]},
+                 "desc": ["policy store, logs, telemetry, TRACE evidence"]},
     },
     "edges": [
         {"points": [(210, 180), (210, 230)]},
@@ -53,8 +53,8 @@ DIAGRAM = {
         {"points": [(210, 350), (210, 540), (500, 540)],
          "label": "logs, telemetry", "at": (355, 540), "color": "violet", "style": "dashed", "both": True},
         {"points": [(590, 350), (590, 480)],
-         "label": "logs, telemetry, evidence", "at": (590, 415), "color": "violet", "style": "dashed", "both": True},
+         "label": "logs, telemetry, TRACE evidence", "at": (590, 415), "color": "violet", "style": "dashed", "both": True},
         {"points": [(1080, 430), (1080, 540), (900, 540)],
-         "label": "logs, telemetry, evidence", "at": (1080, 485), "color": "violet", "style": "dashed", "both": True},
+         "label": "logs, telemetry, TRACE evidence", "at": (1080, 485), "color": "violet", "style": "dashed", "both": True},
     ],
 }
