@@ -39,7 +39,7 @@ DIAGRAM = {
                     "title": "Trusted issuers", "desc": ["OpenID config, JWKS,", "Status List"]},
         "lock": {"color": "violet", "box": (1100, 584, 230, 130),
                  "title": "Lock Server", "role": "Evidence Collector",
-                 "desc": ["policy store, logs,", "health, telemetry,", "TRACE evidence"]},
+                 "desc": ["policy store, logs,", "telemetry, TRACE evidence"]},
     },
     # Edges listed later are drawn on top; the halo on the issuers edge cuts a
     # gap into the policies line it crosses.
@@ -59,7 +59,7 @@ DIAGRAM = {
         {"points": [(290, 518), (380, 518)]},
         {"points": [(610, 518), (720, 518)], "label": "context.data", "at": (665, 496)},
         {"points": [(845, 566), (845, 620)], "label": "entities, context", "at": (845, 593)},
-        {"points": [(720, 658), (610, 658)], "label": "decision", "at": (665, 636)},
+        {"points": [(720, 658), (610, 658)]},
         {"points": [(380, 658), (290, 658)]},
         {"points": [(495, 716), (495, 752), (1215, 752), (1215, 714)],
          "label": "logs, telemetry, TRACE evidence", "at": (860, 752),
