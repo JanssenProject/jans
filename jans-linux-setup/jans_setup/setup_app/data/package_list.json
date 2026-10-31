@@ -2,7 +2,7 @@
   "red 9": {
     "aliases": ["rocky 9"],
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server python3-typing-extensions",
     "python": {
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
@@ -13,7 +13,7 @@
   "red 10": {
     "aliases": ["rocky 10"],
     "optional": "",
-    "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
+    "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server python3-typing-extensions",
     "python": {
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
@@ -23,7 +23,7 @@
   },
   "centos 9": {
     "optional": "",
-    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
+    "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server python3-typing-extensions",
     "python": {
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
@@ -33,12 +33,13 @@
   },
   "centos 10": {
     "optional": "",
-    "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
+    "mandatory": "openssl httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server python3-typing-extensions",
     "python": {
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
       "certifi": "python-certifi",
-      "psycopg2": "python-psycopg2"
+      "psycopg2": "python-psycopg2",
+      "typing_extensions": "python-typing-extensions"
     }
   },
   "suse 16": {
