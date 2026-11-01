@@ -75,4 +75,7 @@ public class Constants {
 
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     public static final String X_FRAME_OPTIONS_HEADER = "X-Frame-Options";
+    public static final String CONTENT_SECURITY_POLICY_HEADER = "Content-Security-Policy";
+    public static final String X_CONTENT_TYPE_OPTIONS_HEADER = "X-Content-Type-Options";
+    public static final String REFERRER_POLICY_HEADER = "Referrer-Policy";
 }

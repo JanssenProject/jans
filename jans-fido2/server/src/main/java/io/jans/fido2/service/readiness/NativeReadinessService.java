@@ -247,7 +247,7 @@ public class NativeReadinessService {
                 + (ExpectedAssociationFileBuilder.iosApps(party).isEmpty() ? 0 : 1);
     }
 
-    private static RequestedParty find(Fido2Configuration config, String id) {
+    static RequestedParty find(Fido2Configuration config, String id) {
         if (id == null || config.getRequestedParties() == null) {
             return null;
         }

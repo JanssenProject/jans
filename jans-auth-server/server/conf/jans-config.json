@@ -57,6 +57,15 @@
         "mail",
         "uid"
     ],
+    "securityHeadersEnabled": true,
+    "applySecurityHeadersIfUriContainsAny": [
+        "/restv1/token",
+        "/restv1/userinfo",
+        "/restv1/introspection",
+        "/restv1/jwks",
+        "/restv1/register",
+        "/restv1/revoke"
+    ],
     "responseTypesSupported":[
         ["code"],
         ["code", "id_token"],
