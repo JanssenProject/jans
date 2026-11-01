@@ -1,5 +1,6 @@
 package io.jans.configapi.plugin.mgt.filters;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.filter.BaseFilter;
 import io.jans.configapi.core.util.ProtectionScopeType;
@@ -31,6 +32,7 @@ import org.slf4j.Logger;
 public class UserResourceFilter extends BaseFilter {
 
     protected static final String USER_INUM = "inum";
+    protected static final String PATH = "/configuser";
 
     @Inject
     Logger log;
@@ -61,6 +63,15 @@ public class UserResourceFilter extends BaseFilter {
     public void filter(ContainerRequestContext requestContext) {
         try {
             log.info("======================== Inside UserResourceFilter filter... ========================");
+            if (log.isInfoEnabled()) {
+                log.info(" Inside UserResourceFilter filter - info.getPath():{}, PATH:{}, method:{}",
+                        escapeLog(info.getPath()), PATH, escapeLog(requestContext.getMethod()));
+            }
+
+            if (info.getPath() == null || !info.getPath().contains(PATH)) {
+                log.info(" Exiting as not User Management Endpoint!");
+                return;
+            }
 
             // Verify current UserRolePermission
             validateUserRolePermission(requestContext, resourceInfo, httpHeaders);
@@ -158,6 +169,7 @@ public class UserResourceFilter extends BaseFilter {
     }
 
     private void validateDataInIntrospectionResponse(IntrospectionResponse introspectionResponse, String userInum) {
+        log.info(" Verify DataInIntrospectionResponse");
 
         // validate `User-inum` in Introspection response
         if (!authUtil.isValidateUserInumInIntrospectionFlag()) {
