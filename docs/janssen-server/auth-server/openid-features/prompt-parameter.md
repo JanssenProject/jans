@@ -7,7 +7,7 @@ tags:
   - prompt
 ---
 
-# Prompt CREATE
+# Prompt parameter
 
 `prompt=create` value indicates to the AS that the client desires that the user be shown
  the account creation page rather than the login flow.
@@ -49,19 +49,27 @@ redirect a user to the /authorize endpoint of Janssen authentication API.
 For example:
 
 ```
-GET https://YOUR_DOMAIN//authorize?
-response_type={response_type}&
-client_id={client_id}&
-scope={scope}&
-state={state}&
-ui_locales=&
-claims_locales=&
-acr_values=&
-redirect_uri={redirect_uri}&
-prompt=none
-
-Basic credential user
+GET https://<jans-host>/jans-auth/restv1/authorize?
+    response_type=code&
+    client_id=<CLIENT_ID>&
+    scope=openid&
+    state=<STATE>&
+    redirect_uri=<URL_ENCODED_REDIRECT_URI>&
+    prompt=none&
+    code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&
+    code_challenge_method=S256
 ```
+
+For the Authorization Code Flow, clients should use PKCE with the `S256`
+code challenge method. The client generates a `code_verifier`, includes
+the derived `code_challenge` in the authorization request, and sends
+the original `code_verifier` when exchanging the authorization code
+at the token endpoint.
+
+The `prompt=none` parameter requests authentication without user
+interaction. If authentication or consent requires user interaction,
+the authorization server returns an appropriate error, such as
+`login_required` or `consent_required`.
 
 The **prompt=none** parameter causes Janssen to immediately send a result to the specified
 **redirect_uri** (callback URL) using the specified **response_mode** with one of two possible
@@ -107,7 +115,7 @@ end
 ```
 ![Example 1](../../../assets/prompt_none_1.png)
 
-Example 2: **Prompt None (Without credentials in Header)**
+Example 2: **Prompt None (With credentials in Header)**
 ```
 title Prompt None (With credentials in Header)
 
