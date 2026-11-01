@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -15905,6 +15905,12 @@ components:
           enum:
           - SAMEORIGIN
           - DENY
+        securityHeadersEnabled:
+          type: boolean
+        applySecurityHeadersIfUriContainsAny:
+          type: array
+          items:
+            type: string
         responseTypesSupported:
           uniqueItems: true
           type: array
@@ -18737,9 +18743,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
