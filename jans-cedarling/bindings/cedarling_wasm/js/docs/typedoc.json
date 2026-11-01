@@ -1,0 +1,12 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Cedarling JavaScript/TypeScript API",
+  "entryPoints": [
+    "../.build/docs/types/index.d.ts",
+    "../.build/docs/types/edge.d.ts",
+    "../.build/docs/types/manual.d.ts"
+  ],
+  "tsconfig": "./tsconfig.typedoc.json",
+  "readme": "../README.md",
+  "excludeInternal": true
+}

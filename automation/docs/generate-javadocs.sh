@@ -30,8 +30,17 @@ for module in $JVM_PROJECTS
     wget -q "$RELEASE_URL/cedarling_uniffi-kotlin-${UNIFFI_VERSION}.zip" -O "$ZIP_PATH"
     unzip -q "$ZIP_PATH" -d "$KOTLIN_DIR"
     rm -f "$ZIP_PATH"
-    mvn -q -s "$SETTINGS" -f "$module_pom" dokka:javadoc
-    doc_subpaths=("target/dokkaJavadoc")
+    mvn -q -s "$SETTINGS" -f "$module_pom" dokka:dokka
+    # Published under a clean slug, unlike the other modules' module-path layout.
+    java_docs="$BASE_DIR"/target/dokka/html
+    if [ ! -f "$java_docs"/index.html ]; then
+      echo "ERROR: Dokka produced no HTML for '$module'." >&2
+      exit 1
+    fi
+    echo "Copying Dokka HTML from $java_docs to $OUTPUT_DIRECTORY/cedarling-java"
+    mkdir -p "$OUTPUT_DIRECTORY"/cedarling-java
+    cp -r "$java_docs"/. "$OUTPUT_DIRECTORY"/cedarling-java/
+    continue
    else
     # FIPS variants depend on their sibling's jar, which javadoc:javadoc never builds.
     fips_excludes=()

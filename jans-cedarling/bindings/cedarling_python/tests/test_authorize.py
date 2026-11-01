@@ -28,6 +28,15 @@ def test_authorize_errors_exist():
     assert issubclass(authorize_errors.AuthorizeError, Exception)
 
 
+def test_authorize_errors_package_qualified_import():
+    """`import cedarling_python.authorize_errors` returns the real module, not the stub."""
+    import cedarling_python.authorize_errors as module
+    from cedarling_python.authorize_errors import AuthorizeError
+
+    assert module is authorize_errors, "package-qualified import returned a different module"
+    assert AuthorizeError is authorize_errors.AuthorizeError, "AuthorizeError is not the native class"
+
+
 def test_authorize_unsigned_ok():
     """Test authorize_unsigned with a minimal single-principal request."""
     instance = Cedarling(load_bootstrap_config(POLICY_STORE_LOCATION))

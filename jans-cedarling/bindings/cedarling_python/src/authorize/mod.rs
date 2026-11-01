@@ -61,5 +61,10 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     errors::authorize_errors_module(&submodule)?;
     m.add_submodule(&submodule)?;
 
+    // As for data_errors_ctx: without this, `import cedarling_python.authorize_errors`
+    // loads the empty authorize_errors.py stub and shadows the real module.
+    let modules = m.py().import("sys")?.getattr("modules")?;
+    modules.set_item("cedarling_python.authorize_errors", submodule.as_borrowed())?;
+
     Ok(())
 }
