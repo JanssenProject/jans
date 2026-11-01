@@ -60,9 +60,16 @@ Sample Authorization Request
 ```
 POST /jans-auth/restv1/authorize HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
+Content-Type: application/x-www-form-urlencoded
 
-response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+profile+address+email+phone+user_name&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
+response_type=code&client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&scope=openid+profile+address+email+phone+user_name&redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D&code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&code_challenge_method=S256
 ```
+
+For the Authorization Code flow, clients should use PKCE with the `S256`
+code challenge method. The client generates a `code_verifier`, derives
+the `code_challenge` using SHA-256 and Base64URL encoding, and includes
+the challenge in the authorization request. The original `code_verifier`
+is sent during the subsequent token request.
 
 Request is rejected if request's `authorization_details` has types which does not have corresponding `AuthzDetailType` custom script.
 
@@ -98,7 +105,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  "grant_types" : [ "authorization_code", "implicit" ],
+  "grant_types" : [ "authorization_code" ],
   "subject_type" : "public",
   "application_type" : "web",
   "authorization_details_types" : [ "demo_authz_detail" ],
@@ -148,8 +155,7 @@ X-Xss-Protection: 1; mode=block
     "id_token_signed_response_alg": "RS256",
     "access_token_as_jwt": false,
     "grant_types": [
-        "authorization_code",
-        "implicit"
+        "authorization_code"
     ],
     "subject_type": "public",
     "authorization_details_types": ["demo_authz_detail"],

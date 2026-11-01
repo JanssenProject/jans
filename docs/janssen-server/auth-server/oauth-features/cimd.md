@@ -153,6 +153,8 @@ GET /authorize
   &redirect_uri=https%3A%2F%2Fapp.example.com%2Fcallback
   &scope=openid
   &state=abc123
+  &code_challenge=<BASE64URL_SHA256_OF_CODE_VERIFIER>
+  &code_challenge_method=S256
 ```
 
 No prior registration is required. The server resolves the metadata on the first request.

@@ -60,12 +60,19 @@ for details.
 
 ## Obtaining an ID Token
 
-The client may obtain an ID Token in the authorization response, from the
-token endpoint, or both. Note, if you intend to use the Code Flow, and you
-don't intend to validate the `c_hash` or `s_hash` values in the ID Token
-returned from the authorization endpoint, don't check `id_token` in the
-response_type for the authorization endpoint, as it will waste compute and
-storage generating a token you don't need.
+In the OpenID Connect Authorization Code Flow, the client obtains an ID Token
+from the token endpoint after exchanging the authorization code. Clients
+should use PKCE with the `S256` code challenge method to protect the
+authorization code.
+
+OpenID Connect also defines Implicit and Hybrid Flows, which can return
+an ID Token in the authorization response. These flows are supported for
+legacy compatibility but are not recommended for new OAuth 2.1-aligned
+integrations.
+
+For new integrations, use the Authorization Code Flow with PKCE and request
+`response_type=code` rather than requesting an ID Token directly in the
+authorization response.
 
 ## Validating an ID Token
 

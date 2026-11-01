@@ -27,6 +27,13 @@ The client can register a list of URIs as a value for redirect URI parameter. Re
   matches with the regex provided by the client. Great care should be exercised when using regex to ensure that it
   accurately matches with the intended patterns only. This feature can be turned on or off via
   [feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md)
+
+    For new integrations, register exact redirect URIs whenever possible.
+    Avoid broad regular expressions or wildcard-style matching because
+    they can allow authorization responses to be redirected to unintended
+    destinations. Use redirect URI regular expressions only when required
+    for compatibility, and restrict them to explicitly trusted destinations.
+
 - When using client type as `web`, the redirect URI generally takes the form of `<schema>://<host-name>:<port>/<path>`.
   It must use `https` schema. The exception to **schema rule** is made when  
   `localhost` or loopback ip `127.0.0.1` is used as the hostname. 
@@ -114,17 +121,30 @@ tokens. The table below shows grant types and flows that should be used for vari
 | Client Type                                                                                     | Recommended Grant Type                         | Flow                         |
 |-------------------------------------------------------------------------------------------------|------------------------------------------------|------------------------------|
 | Backend App (Example: batch processes) that need to access its own resources                    | `client_credentials`                           | Client Credentials           |
-| Server backend of a web-application needs access token                                          | `authorization_code`                           | Authorization Code           |
-| Web-application that needs user information via id_token on browser and access token on backend | `authorization_code`                           | Hybrid Flow                  |
+| Server backend of a web-application needs access token                                          | `authorization_code`                           | Authorization Code with PKCE |
+| Web application requiring an ID token and an access token                                       | `authorization_code`                           | OpenID Connect Authorization Code with PKCE |
 | Browser based single page applications or Mobile applications                                   | `authorization_code`                           | Authorization Code with PKCE |
-| Browser based single page applications or Mobile applications that only intend to get id_token  | -                                              | Implicit Flow with Form Post |
+| Browser-based or mobile application requiring only an ID token                                  | `authorization_code`                           | OpenID Connect Authorization Code with PKCE |
 | Input constrained devices (Example: TV)                                                         | `urn:ietf:params:oauth:grant-type:device_code` | Device Flow                  |
-| Highly trusted applications where redirect based flows are not feasible to implement            | `password`                                     | Resource Owner Password Flow |
+| Existing legacy integrations only                                                               | `password` (legacy; not recommended)            | Resource Owner Password Flow |
+
+For new applications, use the Authorization Code Flow with PKCE
+(`code_challenge_method=S256`) when user authorization is required.
+This recommendation applies to both public and confidential clients.
+
+Janssen Server may continue to support the Implicit Flow, Hybrid Flow,
+and Resource Owner Password Credentials Grant for compatibility with
+existing applications. However, these flows are not recommended for
+new integrations. Existing clients should migrate to the Authorization
+Code Flow with PKCE where applicable.
 
 !!! Note
 
-    Certain grant types should not be used together. For example, implicit flow with hybrid flow. Or using authorization
-    code flow with hybrid flow. This allows a downgrade attack from more secure flow to less secure flow.
+    Configure only the grant types and response types required by the
+    client. Avoid enabling legacy implicit or hybrid response types
+    alongside Authorization Code Flow unless needed for an existing
+    integration. Restricting unnecessary response types reduces the
+    risk of authorization flow downgrade attacks.
 
 
 ## Pre-authorization
@@ -146,15 +166,28 @@ Janssen Server's well-known [configuration endpoint](../endpoints/configuration.
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-Claim `response_types_supported` lists all the supported grant types in the response.
+Claim `response_types_supported` lists all the supported response types in the response.
 
 When registering client using dynamic client registration, if the `response_type` parameter is not specified, it'll
 default to `code`.
 
 ### Response Type Recommendations
 
-- Avoid using response type `token`. This response type is 
-[deprecated](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#section-10.1) by OAuth 2.1. 
+- For new integrations, use `response_type=code` with PKCE
+  (`code_challenge_method=S256`).
+- Avoid `response_type=token` and any combination containing it, such as
+  `id_token token` or `code token`. OAuth 2.1 removes the Implicit Grant.
+- Avoid `response_type=id_token` and hybrid types such as `code id_token`
+  for new integrations. These are OpenID Connect response types and are not
+  removed by OAuth 2.1, but they return tokens through the browser. Use
+  `response_type=code` with PKCE to get the ID Token from the token endpoint.
+- By default, Janssen Server rejects authorization requests whose
+  `response_type` contains `token` or `id_token`, because they require the
+  `implicit` grant type, which is not in the default `grantTypesSupported`.
+  To support existing applications, add `implicit` to `grantTypesSupported`
+  and to the client's grant types. Alternatively, set
+  `allowIdTokenWithoutImplicitGrantType` to `true` to allow `id_token`
+  without the `implicit` grant.
 - Grant types allowed for a client determines which response types are permitted in authorization requests. 
 Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
 authorization requests containing response types not permitted for respective client.
