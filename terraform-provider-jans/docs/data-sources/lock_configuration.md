@@ -42,6 +42,7 @@ Data source for retrieving the Jans Lock plugin configuration.
 - `stat_enabled` (Boolean) Whether statistics collection is enabled.
 - `stat_timer_interval_in_seconds` (Number) Interval of the statistics timer in seconds.
 - `token_channels` (List of String) Message channels the Lock server listens on for tokens.
+- `trace_configuration` (List of Object) Trace and evidence pipeline configuration of the Lock server. (see [below for nested schema](#nestedatt--trace_configuration))
 
 <a id="nestedatt--cedarling_configuration"></a>
 ### Nested Schema for `cedarling_configuration`
@@ -76,3 +77,40 @@ Read-Only:
 - `tls_cert_chain_file_path` (String)
 - `tls_private_key_file_path` (String)
 - `use_tls` (Boolean)
+
+
+<a id="nestedatt--trace_configuration"></a>
+### Nested Schema for `trace_configuration`
+
+Read-Only:
+
+- `chain_registration_mode` (String)
+- `client_domain_bindings` (List of Object) (see [below for nested schema](#nestedobjatt--trace_configuration--client_domain_bindings))
+- `correlation_retry_limit` (Number)
+- `crypto_provider` (String)
+- `default_allowed_producer_ids` (List of String)
+- `default_evidence_domain_id` (String)
+- `enabled` (Boolean)
+- `lateness_threshold_seconds` (Number)
+- `max_array_length` (Number)
+- `max_bulk_records` (Number)
+- `max_bulk_request_bytes` (Number)
+- `max_future_skew_seconds` (Number)
+- `max_json_depth` (Number)
+- `max_object_members` (Number)
+- `max_request_bytes` (Number)
+- `max_string_length` (Number)
+- `pending_receipt_timeout_seconds` (Number)
+- `policy_mismatch_grace_seconds` (Number)
+- `policy_release_retention_days` (Number)
+- `receipt_allocation_retry_limit` (Number)
+- `receipt_repair_interval_seconds` (Number)
+
+<a id="nestedobjatt--trace_configuration--client_domain_bindings"></a>
+### Nested Schema for `trace_configuration.client_domain_bindings`
+
+Read-Only:
+
+- `allowed_producer_ids` (List of String)
+- `client_id` (String)
+- `evidence_domain_id` (String)
