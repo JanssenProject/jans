@@ -10,9 +10,11 @@ tags:
 # Authorization Using Cedarling
 
 The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the
-Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
-or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
-a Jans Lock Server OAuth protected endpoint.
+Trusted IDPs. The Cedarling loads its Policy Store during initialization from a local directory or
+Cedar Archive (`.cjar`), from inline YAML, or as a `.cjar` fetched via HTTPS (see
+[Policy Store Formats](./cedarling-policy-store.md#policy-store-formats)). In enterprise
+deployments, the Cedarling can retrieve its Policy Store from a Jans Lock Server OAuth protected
+endpoint.
 
 Developers need to define Cedar Schema that makes sense for their application. For example, a
 developer writing a customer support application might define an "Issue" Resource and Actions like
@@ -21,23 +23,21 @@ grain access controls needed to implement the business rules of their applicatio
 to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy
 Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
+![Diagram showing Cedarling authorization flow: tokens and a resource become entities that a policy evaluates](../../assets/cedarling/cedarling-authz.png)
 
-The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
-User, Workload, and Role entities based on token claims.
+The tokens, the Action, and the Resource are sent in the authz request, along with an optional
+Context. The Cedarling validates each token and turns it into a Cedar entity under
+`context.tokens`, named after its trusted issuer and token type (for example
+`context.tokens.bar_access_token`). The Resource
+becomes a Cedar entity too. Policies then compare token claims with resource attributes: in the
+diagram, the access token lists the customers the caller supports, and the policy allows the
+request because the ticket belongs to one of them. When the application has already authenticated
+the caller, it can pass an asserted principal instead of tokens (see
+[Unsigned Authorization](#unsigned-authorization-authorize_unsigned)).
 
-The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
-of saying "User can perform action", we can say "Role can perform action"--a convenient way to
-implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
-domain may use the `role` user claim of the OpenID Userinfo token; another domain may use the
-`memberOf` claim in the OIDC id_token.
-
-Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC
-conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a
-"private" Resource from the private network, during business hours. In this case "Admins" is the role,
-but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
-"slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
+Policies can express RBAC conditions, ABAC conditions, or both. For example, a policy may allow
+Admins to access a "private" Resource from the private network during business hours. "Admins" is
+the role, read from a token claim such as `role` or `memberOf`, and the other conditions are ABAC.
 
 The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
 Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
@@ -54,8 +54,8 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | | `authorize_multi_issuer` | `authorize_unsigned` |
 |---|---|---|
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
-| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
-| **Principal source** | Derived from JWT token claims | Supplied directly by the application |
+| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are checked when present and required when listed in `required_claims` | No — accepts raw entity data as-is |
+| **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
 | **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |

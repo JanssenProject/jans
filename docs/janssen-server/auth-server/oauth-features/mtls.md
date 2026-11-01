@@ -10,6 +10,13 @@ tags:
 
 # mTLS (Mutual Transport Layer Security)
 
+For OAuth, mutual-TLS client authentication and certificate-bound access tokens
+are defined by [RFC 8705](https://datatracker.ietf.org/doc/html/rfc8705), an
+OAuth 2.0 specification. This describes the standard mTLS follows; it does not
+mean Janssen supports only OAuth 2.0. Janssen also applies OAuth 2.1-aligned
+security defaults, including requiring PKCE `S256` for Authorization Code by
+default. These defaults do not replace or remove RFC 8705 mTLS support.
+
 ## What Is mTLS?
 
 **mTLS** is a process that establishes an encrypted [TLS](https://wikipedia.org/wiki/Transport_Layer_Security)
@@ -57,6 +64,20 @@ In practice, mTLS can identify and authorize the following:
 - If MTLS Authentication is used then `access_token` automatically saves certificate `S256` hash of certificates which
   can be validated by RP. If `access_token` is JWT then `x5t#S256` claim is added to payload of the token. Otherwise,
   token can be introspected.
+
+The PKI trust-chain validation for `tls_client_auth` is performed by the TLS-terminating
+proxy (for example Apache), while Jans checks the forwarded certificate subject against
+`tls_client_auth_subject_dn`. For `self_signed_tls_client_auth`, Jans matches the
+certificate public key against a key in the client's registered JWKS. Protect the
+forwarded-certificate headers: the proxy must remove client-supplied copies and set its
+own value only after authenticating the TLS client.
+
+When Jans creates a certificate-bound access token, the current token-creation path
+calculates `x5t#S256` from the `X-ClientCert` request header. Although client
+authentication can parse Envoy/Istio and Traefik forwarded-certificate headers too,
+the token-binding path reads `X-ClientCert` directly. Ensure the TLS-terminating
+proxy supplies the authenticated client certificate in that header for certificate
+binding, including by mapping another trusted proxy header to `X-ClientCert` if needed.
 
 ```
 {
@@ -535,75 +556,32 @@ curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --locatio
     "authorization_code"
   ],
   "response_types": [
-    "code",
-    "token",
-    "id_token"
+    "code"
   ],
   "redirect_uris": [
-    https://<YOUR_DOMAIN>/jans-auth-rp/home.htm
+    "https://<YOUR_DOMAIN>/jans-auth-rp/home.htm"
   ]
 }'
 ```
 
-Response:
+The registration response contains server-generated client details. The following
+shows the relevant values for this example; other fields depend on server policy:
 
 ```json
 {
-  "allow_spontaneous_scopes": false,
-  "jwks": {
-    "keys": [
-      {
-        "kty": "RSA",
-        "e": "AQAB",
-        "use": "sig",
-        "kid": "your-kid",
-        "alg": "RS256",
-        "n": "5elNNA2wYlUpEK2JxOqIgFe3JmHBs63M7wvKM_cbzXjMpLXn7UqAbIN7drDgLIvsIwSo9DAuWvFV3mLqApFYlL1qQCEveULbh6LorqPUzl2UjHwDDFlM1Hj6JpJ_GbacX5-YnRgXC7k_p4ZIf0GOkQxIo0WVNhulku3z84Ko8Efk5BeV7ImFyXWLoO-ru8h3Yvq2h1LRVYX02LZlG6Mv8dqCJsWHIbnmaB16TSe_HCA3qEA4k9La2fl4R7fPlq1u89LN3kz2M0cm1M8aTTquLHP0tv5EpeqX1pG4VjwurssevguRM9QqrGkPktAw_uzIKfO7s5_j3AD3teYdVQFryQ"
-      }
-    ]
-  },
-  "application_type": "web",
-  "rpt_as_jwt": false,
-  "registration_client_uri": "https://<YOUR_DOMAIN>/jans-auth/restv1/register?client_id=d16994c2-313c-4440-9713-25290fbb89a9",
-  "tls_client_auth_subject_dn": "",
-  "run_introspection_script_before_jwt_creation": false,
-  "registration_access_token": "93a52334-bf79-4414-bc9a-983b6921597c",
   "client_id": "d16994c2-313c-4440-9713-25290fbb89a9",
   "token_endpoint_auth_method": "self_signed_tls_client_auth",
-  "scope": "email openid profile",
-  "client_secret": "e1c9e9df-e542-4225-adb4-d0590f85d97d",
-  "client_id_issued_at": 1698114939,
-  "backchannel_logout_uri": "",
-  "backchannel_logout_session_required": false,
-  "client_name": "Test Client mTLS",
-  "par_lifetime": 600,
-  "spontaneous_scopes": [],
-  "id_token_signed_response_alg": "RS256",
-  "access_token_as_jwt": true,
-  "grant_types": [
-    "implicit",
-    "refresh_token",
-    "authorization_code"
-  ],
-  "subject_type": "pairwise",
-  "additional_token_endpoint_auth_methods": [],
-  "keep_client_authorization_after_expiration": false,
-  "require_par": false,
-  "redirect_uris": [
-    "https://<YOUR_DOMAIN>/jans-auth-rp/home.htm"
-  ],
-  "redirect_uris_regex": "",
-  "additional_audience": [],
-  "frontchannel_logout_session_required": false,
-  "client_secret_expires_at": 1698201339,
-  "access_token_signing_alg": "RS256",
-  "response_types": [
-    "code",
-    "id_token",
-    "token"
-  ]
+  "grant_types": ["authorization_code"],
+  "response_types": ["code"]
 }
 ```
+
+The returned grant and response types depend on the server's registration policy.
+For this Authorization Code example, verify that the registered client allows
+`authorization_code` and has `code` as its response type. Do not rely on legacy
+Implicit-flow values appearing in a response. The server may also return a
+`client_secret` field for compatibility; it is not used by
+`self_signed_tls_client_auth`.
 
 > **NOTE:** To obtain the `jwks` field data, follow the next step.
 
@@ -634,20 +612,24 @@ Enter pass phrase for PKCS12 import pass phrase:
 
 ### 2. Call `authorize` endpoint
 
-From your browser of choice call the following url:
+Generate a PKCE verifier and its `S256` challenge for this authorization
+request. Use the same verifier in the token request below. Replace the
+placeholders in the URL with the generated challenge and your client details:
 
 ```
-https://<YOUR_DOMAIN>/jans-auth/restv1/authorize?response_type=code&client_id=d16994c2-313c-4440-9713-25290fbb89a9&scope=openid+profil+email&redirect_uri=https://<YOUR_DOMAIN>/jans-auth-rp/home.htm&state=f9bb35cb-3485-4ae4-aa8e-63e9a97b6e5d&nonce=4a2f07cb-521b-465c-8b06-0c17711a96a7
+https://<YOUR_DOMAIN>/jans-auth/restv1/authorize?response_type=code&client_id=d16994c2-313c-4440-9713-25290fbb89a9&scope=openid+profile+email&redirect_uri=https%3A%2F%2F<YOUR_DOMAIN>%2Fjans-auth-rp%2Fhome.htm&state=f9bb35cb-3485-4ae4-aa8e-63e9a97b6e5d&nonce=4a2f07cb-521b-465c-8b06-0c17711a96a7&code_challenge=<BASE64URL_SHA256_OF_CODE_VERIFIER>&code_challenge_method=S256
 ```
 
 URL parameters:
 
 - `response_type=code`
 - `client_id=d16994c2-313c-4440-9713-25290fbb89a9`
-- `scope=openid+profil+email`
+- `scope=openid+profile+email`
 - `redirect_uri=https://<YOUR_DOMAIN>/jans-auth-rp/home.htm`
 - `state=f9bb35cb-3485-4ae4-aa8e-63e9a97b6e5d`
 - `nonce=4a2f07cb-521b-465c-8b06-0c17711a96a7`
+- `code_challenge=<BASE64URL_SHA256_OF_CODE_VERIFIER>`
+- `code_challenge_method=S256`
 
 The field we need to obtain is the `code`.
 
@@ -663,25 +645,35 @@ curl --insecure --cert-type P12 --cert example-cli.p12:<YOUR_PASSWORD> --locatio
 --data-urlencode 'grant_type=authorization_code' \
 --data-urlencode 'redirect_uri=https://<YOUR_DOMAIN>/jans-auth-rp/home.htm' \
 --data-urlencode 'client_id=d16994c2-313c-4440-9713-25290fbb89a9' \
---data-urlencode 'client_secret=<YOUR_CLIENT_SECRET>' \
---data-urlencode 'code=<YOUR_CODE>'
+--data-urlencode 'code=<YOUR_CODE>' \
+--data-urlencode 'code_verifier=<THE_PKCE_VERIFIER_USED_TO_CREATE_THE_CHALLENGE>'
 ```
+
+Because this client uses `self_signed_tls_client_auth`, authenticate it with the
+client certificate rather than a client secret. Its certificate public key must
+match a public key in the registered JWKS.
 
 Response:
 
 ```json
 {
-  "access_token": "eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJNSGdqa2hnTktmZWF4ZUVEY0wycEt5c1EwVUQ4RDk1QUd5NFBGXzI2cmlnIiwiY29kZSI6ImE0NWE5ODI5LTFkMDQtNGQxNS05NjllLWRiMjk3Mzk4ZTdjMyIsImlzcyI6Imh0dHBzOi8vbWlsdG9uLWNoLWhhcmR5LW1pdGUuZ2x1dS5pbmZvIiwidG9rZW5fdHlwZSI6IkJlYXJlciIsImNsaWVudF9pZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImF1ZCI6IjVkODM1NDA3LTFlZjMtNDQxZC04YWU2LTZiYmRkNTcyNzZjYyIsImFjciI6ImJhc2ljIiwieDV0I1MyNTYiOiJPeHRJQXRBMEMwTkwteTR2UmZLeDd6TExFZXhfWG1DelduUWJ4ejZUem5ZIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSIsImVtYWlsIl0sImF1dGhfdGltZSI6MTY5ODE5NDczNiwiZXhwIjoxNjk4Mjc4MDQzLCJpYXQiOjE2OTgxOTY4MzIsInVzZXJuYW1lIjoiRGVmYXVsdCBBZG1pbiBVc2VyIn0.JpK7JYy6Avui3LNbxTKBYJW9fqjEIqijCXPw9fvqEO1kqO7AUozOEof00hPKzJo1Dh7VgGpY89MiAduDUoU3QCemtFsNSd1DCyExl2s3w5OF2mUm6nMzjaS377ZQQ39DAq91OGFFq_ISt4JIhWRf7_xUEvlLRAttTqxE5qp1ZYvgAYu07jbVJX8WqJvxYz3rZ3J-4kq2FLREunRf5KxYaHO-oKzrmhRVPTc_cj1vqwSfu8vRjLmx4P-eN7SgVNa0XmZ8WClLnmchucGBH6rYq3bXZWsOKixwLhno_2vPe1MmbK3XnNNBu_fm_bL2N5kgAwr9b-upoBJc08IyCje1vA",
-  "refresh_token": "1e58e2c9-4175-4b3f-8170-65544b1a7c48",
-  "id_token": "eyJraWQiOiJjb25uZWN0X2NmNjBiZWZmLTU1MzUtNDllNS04MWQ5LTM5ZDM4ZmNlMWNhMF9zaWdfcnMyNTYiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoib1NoVDE4YUdRVHdtNXBjT255dkNMUSIsInN1YiI6Ik1IZ2praGdOS2ZlYXhlRURjTDJwS3lzUTBVRDhEOTVBR3k0UEZfMjZyaWciLCJhbXIiOlsiMTAiXSwiaXNzIjoiaHR0cHM6Ly9taWx0b24tY2gtaGFyZHktbWl0ZS5nbHV1LmluZm8iLCJub25jZSI6ImMxNGQ2Y2RlLWQ5NTYtNDM4Zi04Mzk5LTQ3MzdkNWZlOTkyOSIsInNpZCI6IjI2ZTM4YTJmLTEzZTktNGY4Yi05MzdjLTQ3M2ViMjdlNzFkNiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiNWQ4MzU0MDctMWVmMy00NDFkLThhZTYtNmJiZGQ1NzI3NmNjIiwicmFuZG9tIjoiMjVhZDViMmUtMGNkMi00Mjg3LTg1M2ItZWY3NWRhZjMzNWMwIiwiYWNyIjoiYmFzaWMiLCJjX2hhc2giOiJwM2ZJVHlGT09fd0tRZW9QT1VkWWF3IiwiYXV0aF90aW1lIjoxNjk4MTk0NzM2LCJleHAiOjE2OTgyMDA0MzIsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwiaWF0IjoxNjk4MTk2ODMyfQ.GMXkiFGcCy6dXI8gPPuCLd977Gs_rkG1w3FrNx_HlSnmcDUSsEQHvPxpA99Y3L8Z82uLHYCbP5Vga6iCEOmBBHnu9jEsmYgp-TSrB31HV-5g7-o4ZWJG05SdL9KgSP3PyDXRqcE0VFxBJ-uJSyvI-htQ4GUXMIhqVhbJJynPNosXtZvvDVIw1NBThupmqx58cozf5tIdnwaeiuN_Ce2XQrjZBiachI6KWFa-Mstrsdw1E6Ny_4bP-1UmeNgScd6pmIUemGsfclxIAgO0lACqgbGh7wo0PljbhEkGU_i9kP--0KJHkBkUxflULW3aAqdYtG9hEr_JEIddHVxXbi1c_w",
+  "access_token": "<JWT_ACCESS_TOKEN>",
+  "refresh_token": "<REFRESH_TOKEN>",
+  "id_token": "<ID_TOKEN>",
   "token_type": "Bearer",
-  "expires_in": 81210
+  "expires_in": 3600
 }
 ```
 
 Once we have obtained the `access_token` in `jwt(json web token)` format, we will do the last step.
 
 ### 4. Call `introspection` endpoint
+
+The client certificate authenticates the TLS connection, but the introspection
+endpoint also requires an authorization credential by default. Use the access
+token as a Bearer credential as well as the token being introspected:
+if [`introspectionAccessTokenMustHaveIntrospectionScope`](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveintrospectionscope)
+is enabled, make sure the access token includes the `introspection` scope.
 
 Run below command:
 
@@ -702,7 +694,7 @@ Response:
   "active": true,
   "token_type": "Bearer",
   "client_id": "d16994c2-313c-4440-9713-25290fbb89a9",
-  "aud": "5d835407-1ef3-441d-8ae6-6bbdd57276cc",
+  "aud": "<TOKEN_AUDIENCE>",
   "acr": "basic",
   "nbf": null,
   "scope": "openid profile email",
