@@ -12,8 +12,8 @@ tags:
 The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, and
 self-contained solution for policy-based authorization, designed for both client-side and
 server-side enforcement. This makes it particularly well-suited for latency-sensitive
-environments like databases, browser-based applications, mobile apps, API gateways, and
-embedded devices. At less than 2M in size, it's small enough to load into your browser or
+environments like browser-based applications, mobile apps, API gateways, and embedded
+devices. At less than 2M in size, it's small enough to load into your browser or
 mobile application. When embedded, the Cedarling avoids slow cloud policy decisions,
 enabling sub-millisecond performance. The Cedarling never fetches data to make a
 decision as this is a performance killer and would make the PDP unreliable. Much of the
@@ -28,14 +28,15 @@ The Cedarling can be:
 * Deployed as a sidecar
 * Deployed as a centralized cloud PDP service
 
-![](../assets/cedarling/cedarling-readme-01.jpg)
+![Where Cedarling runs: browsers, mobile apps, and backends, connected to Lock Server](../assets/cedarling/cedarling-deployment.png)
 
 In addition to being a library, the Cedarling is an embeddable Policy Decision Point (PDP),
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
-Janssen Lock Server to centralize collection of decision logs, which are a record of allowed or denied
-access to a capability. Lock Server can enable enterprises to perform threat detection and
-stream the logs to a SIEM or ITDR.
+Janssen Lock Server, the evidence collector, to centralize decision logs (records of allowed or
+denied access to a capability) and, when [TRACE](./reference/cedarling-properties.md#trace-properties)
+is enabled, signed evidence of each decision whose request carries a TRACE context. Lock Server
+can enable enterprises to perform threat detection and stream the logs to a SIEM or ITDR.
 
 The Cedarling supports JWT validation and claims mapping. Validation includes checking the
 signature against a list of trusted issuers, validating the contents of the token (e.g.
@@ -134,7 +135,7 @@ Or you could say more simply, *"Does this bundle of tokens authorize this capabi
 Zero Trust is a modern security model that assumes no implicit trust. Every request must be
 explicitly authorized based on policies, identity, and context. The Cedarling enables
 end-to-end Zero Trust enforcement by embedding fine-grained authorization across the
-entire security stack, from client devices to backend services and databases.
+entire security stack, from client devices to backend services.
 
 ### End-to-End Authorization Enforcement
 
@@ -142,7 +143,7 @@ The Cedarling can be deployed **at every layer** to ensure that access decisions
 consistently enforced. The diagram below illustrates how the Cedarling operates in a
 hypothetical mobile application architecture:
 
-![](../assets/cedarling/lock-cedarling-mobile-generic.jpg)
+![Zero Trust topology with Cedarling at the IDP, mobile app, API gateway, and backend](../assets/cedarling/cedarling-zero-trust-topology.png)
 
 1. **Identity Provider (IDP) Enforcement**  
     - The IDP can use the Cedarling to determine if a mobile application should be allowed
@@ -168,12 +169,6 @@ hypothetical mobile application architecture:
     - Example: Even if a request passes through an API gateway, the backend can recheck
       authorization policies to prevent privilege escalation.
 
-5. **Database-Level Policy Enforcement**  
-    - The Cedarling can be embedded within databases to filter data at query time,
-      ensuring only authorized records are returned.  
-    - Example: A multi-tenant SaaS application may enforce row-level security, so a user
-      can only access their own organization's data.
-
 ### Why Zero Trust Needs Cedarlings
 
 Traditional access control models assume network perimeters are secure, leading to
@@ -182,8 +177,8 @@ excessive trust in internal components. The Cedarling aligns with Zero Trust by:
 - Eliminating implicit trust; each authorization decision is enforced based on real-time 
   policies.
 - Improving re-usability of policies across applications to enable multi-layer security
-- Ensuring consistent policies from client devices to backend services and databases, 
-  enforcing the same security rules everywhere.
+- Ensuring consistent policies from client devices to backend services, enforcing the
+  same security rules everywhere.
 
 ### Cedarling and Threat Detection
 
@@ -201,8 +196,8 @@ Management) system to detect:
 By embedding the Cedarling across multiple layers of the application stack, organizations
 can enforce Zero Trust security, reduce unauthorized access, and gain visibility into
 access patterns. Whether it's protecting frontend applications, securing API gateways, or
-enforcing access policies at the database level, the Cedarling ensures every request is
-explicitly authorized everywhere.
+rechecking requests in backend services, the Cedarling ensures every request is explicitly
+authorized everywhere.
 
 !!! tip "Why is it "The Cedarling""
 
