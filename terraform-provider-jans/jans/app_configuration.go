@@ -483,6 +483,10 @@ type AppConfiguration struct {
 	SpiffeBundleReadTimeoutMs                                 int                                   `schema:"spiffe_bundle_read_timeout_ms" json:"spiffeBundleReadTimeoutMs"`
 	SpiffeTrustDomains                                        []SpiffeTrustDomainConfiguration      `schema:"spiffe_trust_domains" json:"spiffeTrustDomains"`
 	IdJagTrustedIdpIssuers                                    []TrustedIssuerConfig                 `schema:"id_jag_trusted_idp_issuers" json:"idJagTrustedIdpIssuers"`
+	SecurityHeadersEnabled                                    bool                                  `schema:"security_headers_enabled" json:"securityHeadersEnabled"`
+	ApplySecurityHeadersIfUriContainsAny                      []string                              `schema:"apply_security_headers_if_uri_contains_any" json:"applySecurityHeadersIfUriContainsAny"`
+	StrictTokenRedirectUriValidation                          bool                                  `schema:"strict_token_redirect_uri_validation" json:"strictTokenRedirectUriValidation"`
+	AllowStartupOnJwksUriFetchFailure                         bool                                  `schema:"allow_startup_on_jwks_uri_fetch_failure" json:"allowStartupOnJwksUriFetchFailure"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

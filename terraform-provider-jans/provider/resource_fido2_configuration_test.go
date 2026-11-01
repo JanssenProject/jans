@@ -50,6 +50,11 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
                         LockAuditClientId:               "lock-audit-client",
                         LockAuditClientPassword:         "lock-audit-secret",
                         LockAuditFlushInterval:          60,
+                        NativeReadinessEnabled:          true,
+                        NativeReadinessAllowExternalFetch: true,
+                        NativeReadinessMaxResponseBytes: 1048576,
+                        NativeReadinessTimeoutMs:        5000,
+                        NativeReadinessCacheTtlSeconds:  300,
                 },
         }
 
@@ -66,8 +71,8 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 
         // Note: Empty strings and default boolean values don't generate patches
         // Expected patches: non-empty strings, non-default bools, ints, and arrays
-        if len(patches) != 22 {
-                t.Errorf("Got %d patches, expected 22", len(patches))
+        if len(patches) != 27 {
+                t.Errorf("Got %d patches, expected 27", len(patches))
         }
 
         if err := fromSchemaResource(data, &newCfg); err != nil {

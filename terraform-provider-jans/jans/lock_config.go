@@ -14,6 +14,40 @@ type GrpcConfiguration struct {
 	TlsPrivateKeyFilePath string `schema:"tls_private_key_file_path" json:"tlsPrivateKeyFilePath"`
 }
 
+// TraceConfiguration holds the Lock server trace and evidence pipeline settings.
+// The update is a full replace (PUT), so scalars are serialized without omitempty.
+type TraceConfiguration struct {
+	Enabled                      bool                       `schema:"enabled" json:"enabled"`
+	DefaultEvidenceDomainId      string                     `schema:"default_evidence_domain_id" json:"defaultEvidenceDomainId"`
+	DefaultAllowedProducerIds    []string                   `schema:"default_allowed_producer_ids" json:"defaultAllowedProducerIds"`
+	ClientDomainBindings         []TraceClientDomainBinding `schema:"client_domain_bindings" json:"clientDomainBindings"`
+	LatenessThresholdSeconds     int                        `schema:"lateness_threshold_seconds" json:"latenessThresholdSeconds"`
+	PolicyMismatchGraceSeconds   int                        `schema:"policy_mismatch_grace_seconds" json:"policyMismatchGraceSeconds"`
+	PolicyReleaseRetentionDays   int                        `schema:"policy_release_retention_days" json:"policyReleaseRetentionDays"`
+	MaxFutureSkewSeconds         int                        `schema:"max_future_skew_seconds" json:"maxFutureSkewSeconds"`
+	MaxRequestBytes              int                        `schema:"max_request_bytes" json:"maxRequestBytes"`
+	MaxJsonDepth                 int                        `schema:"max_json_depth" json:"maxJsonDepth"`
+	MaxStringLength              int                        `schema:"max_string_length" json:"maxStringLength"`
+	MaxArrayLength               int                        `schema:"max_array_length" json:"maxArrayLength"`
+	MaxObjectMembers             int                        `schema:"max_object_members" json:"maxObjectMembers"`
+	ReceiptAllocationRetryLimit  int                        `schema:"receipt_allocation_retry_limit" json:"receiptAllocationRetryLimit"`
+	CorrelationRetryLimit        int                        `schema:"correlation_retry_limit" json:"correlationRetryLimit"`
+	ReceiptRepairIntervalSeconds int                        `schema:"receipt_repair_interval_seconds" json:"receiptRepairIntervalSeconds"`
+	PendingReceiptTimeoutSeconds int                        `schema:"pending_receipt_timeout_seconds" json:"pendingReceiptTimeoutSeconds"`
+	MaxBulkRecords               int                        `schema:"max_bulk_records" json:"maxBulkRecords"`
+	MaxBulkRequestBytes          int                        `schema:"max_bulk_request_bytes" json:"maxBulkRequestBytes"`
+	ChainRegistrationMode        string                     `schema:"chain_registration_mode" json:"chainRegistrationMode"`
+	CryptoProvider               string                     `schema:"crypto_provider" json:"cryptoProvider"`
+}
+
+// TraceClientDomainBinding binds a Lock client to an evidence domain and the
+// producer ids it may act on behalf of.
+type TraceClientDomainBinding struct {
+	ClientId           string   `schema:"client_id" json:"clientId"`
+	EvidenceDomainId   string   `schema:"evidence_domain_id" json:"evidenceDomainId"`
+	AllowedProducerIds []string `schema:"allowed_producer_ids" json:"allowedProducerIds"`
+}
+
 // LockConfiguration is the application configuration of the Jans Lock plugin.
 // CedarlingConfiguration and PolicySource are shared with the config-api app
 // configuration, since the Lock spec defines them identically.
@@ -42,6 +76,7 @@ type LockConfiguration struct {
 	MessageConsumerType                string                 `schema:"message_consumer_type" json:"messageConsumerType"`
 	ErrorReasonEnabled                 bool                   `schema:"error_reason_enabled" json:"errorReasonEnabled"`
 	CleanServiceBatchChunkSize         int                    `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize"`
+	TraceConfiguration                 TraceConfiguration     `schema:"trace_configuration" json:"traceConfiguration,omitempty"`
 }
 
 // GetLockConfiguration returns the current Lock plugin configuration.

@@ -2638,6 +2638,29 @@ func resourceAppConfiguration() *schema.Resource {
 				Description: "List of trusted IDP issuers for the ID Assertion Grant (JAG).",
 				Elem:        resourceTrustedSsaIssuers(),
 			},
+			"security_headers_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether security headers are added to responses.",
+			},
+			"apply_security_headers_if_uri_contains_any": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of URI fragments; security headers are applied when the request URI contains any of them.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"strict_token_redirect_uri_validation": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether strict redirect URI validation is enforced at the token endpoint.",
+			},
+			"allow_startup_on_jwks_uri_fetch_failure": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether the server may start when the JWKS URI fetch fails.",
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,

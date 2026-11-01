@@ -47,6 +47,11 @@ type Fido2Configuration struct {
         LockAuditClientId               string             `schema:"lock_audit_client_id" json:"lockAuditClientId"`
         LockAuditClientPassword         string             `schema:"lock_audit_client_password" json:"lockAuditClientPassword"`
         LockAuditFlushInterval          int                `schema:"lock_audit_flush_interval" json:"lockAuditFlushInterval"`
+        NativeReadinessEnabled          bool               `schema:"native_readiness_enabled" json:"nativeReadinessEnabled"`
+        NativeReadinessAllowExternalFetch bool             `schema:"native_readiness_allow_external_fetch" json:"nativeReadinessAllowExternalFetch"`
+        NativeReadinessMaxResponseBytes int                `schema:"native_readiness_max_response_bytes" json:"nativeReadinessMaxResponseBytes"`
+        NativeReadinessTimeoutMs        int                `schema:"native_readiness_timeout_ms" json:"nativeReadinessTimeoutMs"`
+        NativeReadinessCacheTtlSeconds  int                `schema:"native_readiness_cache_ttl_seconds" json:"nativeReadinessCacheTtlSeconds"`
 }
 
 // JansFido2DynConfiguration defines the Fido2 dynamic configuration

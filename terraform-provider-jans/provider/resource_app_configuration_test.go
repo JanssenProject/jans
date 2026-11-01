@@ -51,6 +51,10 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			{"code", "id_token"},
 		},
 		CookieSameSite:                             "strict",
+		SecurityHeadersEnabled:                     true,
+		ApplySecurityHeadersIfUriContainsAny:       []string{"/jans-auth", "/.well-known"},
+		StrictTokenRedirectUriValidation:           true,
+		AllowStartupOnJwksUriFetchFailure:          true,
 		DisableExternalLoggerConfiguration:         true,
 		IdJagLifetime:                              3600,
 		IdJagIssueRefreshToken:                     true,
@@ -83,8 +87,8 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 16 {
-		t.Errorf("Got %d patches, expected 16", len(patches))
+	if len(patches) != 20 {
+		t.Errorf("Got %d patches, expected 20", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {
