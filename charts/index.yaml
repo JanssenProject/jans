@@ -2008,6 +2008,85 @@ entries:
     urls:
     - https://github.com/JanssenProject/jans/releases/download/v1.1.3/janssen-1.1.3.tgz
     version: 1.1.3
+  - annotations:
+      artifacthub.io/containsSecurityUpdates: 'true'
+      artifacthub.io/images: "- name: auth-server\n  image: ghcr.io/janssenproject/jans/auth-server:0.0.0-nightly\n- name: auth-server-key-rotation\n  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly\n- name: configuration-manager\n  image: ghcr.io/janssenproject/jans/configurator:0.0.0-nightly\n- name:  config-api\n  image: ghcr.io/janssenproject/jans/config-api:0.0.0-nightly\n- name: fido2\n  image: ghcr.io/janssenproject/jans/fido2:0.0.0-nightly\n- name: persistence\n  image: ghcr.io/janssenproject/jans/persistence-loader:0.0.0-nightly\n- name: casa\n  image: ghcr.io/janssenproject/jans/casa:0.0.0-nightly\n- name: scim\n  image: ghcr.io/janssenproject/jans/scim:0.0.0-nightly\n- name: cleanup\n  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly\n- name: shibboleth-idp\n  image: ghcr.io/janssenproject/jans/shibboleth:5.1.6_dev\n"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: 'true'
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management Microservices
+      catalog.cattle.io/release-name: janssen
+    apiVersion: v2
+    appVersion: 0.0.0-nightly
+    created: '2026-11-02T17:27:59.70122692Z'
+    dependencies:
+    - condition: global.casa.enabled
+      name: casa
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.config.enabled
+      name: config
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.config-api.enabled
+      name: config-api
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.auth-server.enabled
+      name: auth-server
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.fido2.enabled
+      name: fido2
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.scim.enabled
+      name: scim
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.nginx-ingress.enabled
+      name: nginx-ingress
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.auth-server-key-rotation.enabled
+      name: auth-server-key-rotation
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.persistence.enabled
+      name: persistence
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.istio.ingress
+      name: cn-istio-ingress
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.cleanup.enabled
+      name: cleanup
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.shibboleth-idp.enabled
+      name: shibboleth-idp
+      repository: ''
+      version: 0.0.0-nightly
+    - condition: global.gateway-api.enabled
+      name: gateway-api
+      repository: ''
+      version: 0.0.0-nightly
+    description: Janssen Access and Identity Management Microservices Chart. This chart deploys each janssen microservice as a separate deployment.
+    digest: 23607f19894de5593d41ee0774a0aca5adc0615ad51a1c3f6823d290c5acd6fa
+    home: https://jans.io
+    icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.23.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/tree/main/charts/janssen
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/nightly/janssen-0.0.0-nightly.tgz
+    version: 0.0.0-nightly
   janssen-all-in-one:
   - annotations:
       artifacthub.io/containsSecurityUpdates: 'true'
@@ -2664,4 +2743,31 @@ entries:
     urls:
     - https://github.com/JanssenProject/jans/releases/download/v1.1.3/janssen-all-in-one-1.1.3.tgz
     version: 1.1.3
-generated: '2026-11-02T10:50:36.123251+03:00'
+  - annotations:
+      artifacthub.io/containsSecurityUpdates: 'true'
+      artifacthub.io/images: "- name: all-in-one\n  image: ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly\n"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/prerelease: 'true'
+      catalog.cattle.io/certified: partner
+      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management All-in-One
+      catalog.cattle.io/release-name: janssen-all-in-one
+    apiVersion: v2
+    appVersion: 0.0.0-nightly
+    created: '2026-11-02T17:27:59.741344897Z'
+    description: Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
+    digest: a1b89fbbbf689cfa6cb2a49b0c2554f7288e72664ae7c1da3c1c6b195336bbea
+    home: https://jans.io
+    icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+    kubeVersion: '>=v1.23.0-0'
+    maintainers:
+    - email: support@jans.io
+      name: moabu
+    name: janssen-all-in-one
+    sources:
+    - https://jans.io
+    - https://github.com/JanssenProject/jans/tree/main/charts/janssen
+    - https://github.com/JanssenProject/jans/tree/main/charts/janssen-all-in-one
+    urls:
+    - https://github.com/JanssenProject/jans/releases/download/nightly/janssen-all-in-one-0.0.0-nightly.tgz
+    version: 0.0.0-nightly
+generated: '2026-11-02T17:27:59.687584973Z'
