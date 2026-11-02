@@ -1,0 +1,6 @@
+Flow com.acme.basic.salutation
+    Basepath ""
+
+data = RRF "prompt.ftlh"
+RRF "salutation.ftlh" data
+Finish true
