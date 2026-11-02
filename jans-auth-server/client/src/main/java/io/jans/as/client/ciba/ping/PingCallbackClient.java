@@ -9,6 +9,7 @@ package io.jans.as.client.ciba.ping;
 import io.jans.as.client.BaseClient;
 import io.jans.as.client.util.ClientUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.json.JSONObject;
@@ -27,6 +28,8 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
 
     private final boolean fapiCompatibility;
 
+    private CloseableHttpClient mtlsHttpClient;
+
     public PingCallbackClient(String url, boolean fapiCompatibility) {
         super(url);
         this.fapiCompatibility = fapiCompatibility;
@@ -42,7 +45,11 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
             setExecutor(getApacheHttpClient4ExecutorForMTLS());
         }
         initClient();
-        return _exec();
+        try {
+            return _exec();
+        } finally {
+            closeHttpClient();
+        }
     }
 
     private PingCallbackResponse _exec() {
@@ -78,7 +85,25 @@ public class PingCallbackClient extends BaseClient<PingCallbackRequest, PingCall
     private ApacheHttpClient43Engine getApacheHttpClient4ExecutorForMTLS() {
         // Ciphers accepted by FAPI-CIBA specs and OpenJDK.
         String[] ciphers = new String[]{"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256", "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"};
-        return new ApacheHttpClient43Engine(ClientUtil.createHttpClient("TLSv1.2", ciphers));
+        this.mtlsHttpClient = ClientUtil.createHttpClient("TLSv1.2", ciphers);
+        return new ApacheHttpClient43Engine(this.mtlsHttpClient);
+    }
+
+    /**
+     * Closes the mTLS {@link CloseableHttpClient} created for this request. The engine built
+     * around it does not own it (it is constructed with closeHttpClient=false), so it must be
+     * closed here to release its connection pool.
+     */
+    private void closeHttpClient() {
+        if (this.mtlsHttpClient != null) {
+            try {
+                this.mtlsHttpClient.close();
+            } catch (Exception e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                this.mtlsHttpClient = null;
+            }
+        }
     }
 
 }
