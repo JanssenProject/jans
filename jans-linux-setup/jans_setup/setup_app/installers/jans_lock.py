@@ -170,14 +170,14 @@ class JansLockInstaller(JettyInstaller):
         if not self.installed():
             return
 
-        lock_test_client_prefix = '2202.'
+        lock_trace_test_client_prefix = '2202.'
         lock_audit_test_client_prefix = '2203.'
         check_result = self.check_clients([
-            ('lock_test_client_id', lock_test_client_prefix),
+            ('lock_trace_test_client_id', lock_trace_test_client_prefix),
             ('lock_audit_test_client_id', lock_audit_test_client_prefix),
             ])
 
-        if check_result.get(lock_test_client_prefix) == 1:
+        if check_result.get(lock_trace_test_client_prefix) == 1:
             warning = "Test data for Jans Lock was allready loaded."
             self.logIt(warning)
             if Config.installed_instance:
@@ -200,9 +200,9 @@ class JansLockInstaller(JettyInstaller):
 
         dynamic_conf = json.loads(result['jansConfDyn'])
         bindings = dynamic_conf.setdefault('traceConfiguration', {}).setdefault('clientDomainBindings', [])
-        if any(binding.get('clientId') == Config.lock_test_client_id for binding in bindings):
+        if any(binding.get('clientId') == Config.lock_trace_test_client_id for binding in bindings):
             return
 
-        bindings.append({'clientId': Config.lock_test_client_id, 'evidenceDomainId': 'default', 'allowedProducerIds': ['*']})
+        bindings.append({'clientId': Config.lock_trace_test_client_id, 'evidenceDomainId': 'default', 'allowedProducerIds': ['*']})
         self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_conf, indent=2), dn)
         self.dbUtils.set_configuration('jansRevision', str(int(result.get("jansRevision") or 0) + 1), dn)
