@@ -66,12 +66,8 @@ ahash = { version = "0.8.12", default-features = false, features = [
 ] }
 vfs = "0.13.0"
 # aes-crypto is intentionally excluded from zip default features.
-# zip's aes-crypto pulls in constant_time_eq@^0.4 (MSRV = 1.95.0), which is
-# incompatible with the nightly-2025-09-18 toolchain used by the dylint CI job.
 # cedarling only reads/writes zip archives with Deflated compression;
 # AES-encrypted zip support is not required.
-# If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
-# update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
 zip = { version = "9.0.5", default-features = false, features = [
     "bzip2",
     "deflate64",
