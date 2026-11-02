@@ -2638,6 +2638,29 @@ func resourceAppConfiguration() *schema.Resource {
 				Description: "List of trusted IDP issuers for the ID Assertion Grant (JAG).",
 				Elem:        resourceTrustedSsaIssuers(),
 			},
+			"security_headers_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether security headers are added to responses.",
+			},
+			"apply_security_headers_if_uri_contains_any": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of URI fragments; security headers are applied when the request URI contains any of them.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"strict_token_redirect_uri_validation": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether strict redirect URI validation is enforced at the token endpoint.",
+			},
+			"allow_startup_on_jwks_uri_fetch_failure": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether the server may start when the JWKS URI fetch fails.",
+			},
 		},
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -2665,6 +2688,28 @@ func resourceAppConfigurationRead(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
+// appConfigFalseBoolPatches returns replace patches for the boolean app-config
+// fields that are explicitly set to false in configuration. patchFromResourceData
+// relies on GetOk, which treats false as unset, so these would otherwise never be
+// sent on an update; GetRawConfig distinguishes a configured false from an unset one.
+func appConfigFalseBoolPatches(rawConfig cty.Value, get func(string) any) []jans.PatchRequest {
+	boolFields := map[string]string{
+		"security_headers_enabled":                "/securityHeadersEnabled",
+		"strict_token_redirect_uri_validation":    "/strictTokenRedirectUriValidation",
+		"allow_startup_on_jwks_uri_fetch_failure": "/allowStartupOnJwksUriFetchFailure",
+	}
+	var patches []jans.PatchRequest
+	for key, path := range boolFields {
+		if attrConfigState(rawConfig, key) != configSet {
+			continue
+		}
+		if v, ok := get(key).(bool); ok && !v {
+			patches = append(patches, jans.PatchRequest{Op: "replace", Path: path, Value: false})
+		}
+	}
+	return patches
+}
+
 func resourceAppConfigurationUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	c := meta.(*jans.Client)
@@ -2674,6 +2719,9 @@ func resourceAppConfigurationUpdate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
+	// patchFromResourceData (GetOk) drops explicitly-configured false bools; re-add them.
+	patches = append(patches, appConfigFalseBoolPatches(d.GetRawConfig(), d.Get)...)
 
 	if _, err := c.PatchAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
