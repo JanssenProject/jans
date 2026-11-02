@@ -125,8 +125,7 @@ public class UserSessionIdService {
             return true;
         }
 
-        Map<String, String> sessionAttributes = entity.getSessionAttributes();
-        String sessionUser = sessionAttributes == null ? null : sessionAttributes.get(AUTHENTICATED_USER);
+        String sessionUser = entity.getSessionAttributes().get(AUTHENTICATED_USER);
         if (StringHelper.isNotEmpty(sessionUser)) {
             String userName = registrationEntry.getRegistrationData() == null ? null
                     : registrationEntry.getRegistrationData().getUsername();
