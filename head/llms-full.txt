@@ -78225,6 +78225,8 @@ It is also possible to run introspection script during `access_token` creation a
 
 If `run_introspection_script_before_jwt_creation` set to true and `access_token_as_jwt` set to true then introspection script will be run before JWT (`access_token`) is created and all JSON values will be transfered to JWT. Also `context` inside script has additional method which allows to cancel transfering of claims if needed `context.setTranferIntrospectionPropertiesIntoJwtClaims(false)`
 
+`context.getTokenAttribute(key)` returns a value that an UpdateToken script stored with `context.putTokenAttribute(key, value)` when the introspected access token was created. It returns `null` if the value is absent. Values are stored for access tokens only. It always returns `null` only when the script runs before JWT creation (`run_introspection_script_before_jwt_creation` is `true`), because the token is not stored yet and no introspected token grant is set. When the script runs from a call to the introspection endpoint, the introspected grant is set and the stored attributes are returned.
+
 ## Common Use Cases
 
 ## Script Type: Python
@@ -83306,6 +83308,18 @@ An UpdateTokenType script is great for adding scopes or removing scopes to/from 
     def modifyAccessToken(self, accessToken, context):
               context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("openid", "mynewscope"))
 ```
+#### Persist custom data with an access token
+
+`context.putTokenAttribute(key, value)` stores a string with the access token entity (`attr` field of `io.jans.model.token.TokenEntity`). The value survives until the token expires. Read it later with `context.getTokenAttribute(key)` or, in an Introspection script, with `context.getTokenAttribute(key)` of `ExternalIntrospectionContext`.
+
+Do not store large or sensitive payloads. Prefer a short identifier such as a user `inum`.
+
+```
+    def modifyAccessToken(self, accessToken, context):
+        context.putTokenAttribute("user_inum", userInum)
+        return True
+```
+
 #### Perform business check before returning AT
 
 Pseudocode and example - Issue Access token only if account balance is greater than 0

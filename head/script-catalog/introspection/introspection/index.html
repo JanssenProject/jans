@@ -874,6 +874,7 @@ def modifyResponse(self, responseAsJsonObject, context):
 
 <p>It is also possible to run introspection script during <code>access_token</code> creation as JWT. It can be controlled by <code>run_introspection_script_before_jwt_creation</code> client property which is set to false by default.</p>
 <p>If <code>run_introspection_script_before_jwt_creation</code> set to true and <code>access_token_as_jwt</code> set to true then introspection script will be run before JWT (<code>access_token</code>) is created and all JSON values will be transfered to JWT. Also <code>context</code> inside script has additional method which allows to cancel transfering of claims if needed <code>context.setTranferIntrospectionPropertiesIntoJwtClaims(false)</code></p>
+<p><code>context.getTokenAttribute(key)</code> returns a value that an UpdateToken script stored with <code>context.putTokenAttribute(key, value)</code> when the introspected access token was created. It returns <code>null</code> if the value is absent. Values are stored for access tokens only. It always returns <code>null</code> only when the script runs before JWT creation (<code>run_introspection_script_before_jwt_creation</code> is <code>true</code>), because the token is not stored yet and no introspected token grant is set. When the script runs from a call to the introspection endpoint, the introspected grant is set and the stored attributes are returned.</p>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">#</a></h2>
 <h2 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h2>
 <h3 id="retrieve-grant-session-and-user-details-from-access-token">Retrieve Grant, Session and User Details from Access Token<a class="headerlink" href="#retrieve-grant-session-and-user-details-from-access-token" title="Permanent link">#</a></h3>
@@ -1111,7 +1112,7 @@ def modifyResponse(self, responseAsJsonObject, context):
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 29, 2025
+    November 02, 2026
   </span>
 
     

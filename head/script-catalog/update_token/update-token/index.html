@@ -2494,6 +2494,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#persist-custom-data-with-an-access-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Persist custom data with an access token
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#perform-business-check-before-returning-at" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3389,6 +3400,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#persist-custom-data-with-an-access-token" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Persist custom data with an access token
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#perform-business-check-before-returning-at" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3903,6 +3925,13 @@ To Associate an Update Token script to a client (RP), execute the command below 
 <div class="highlight"><pre><span></span><code>    def modifyAccessToken(self, accessToken, context):
               context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet(&quot;openid&quot;, &quot;mynewscope&quot;))
 </code></pre></div>
+<h4 id="persist-custom-data-with-an-access-token">Persist custom data with an access token<a class="headerlink" href="#persist-custom-data-with-an-access-token" title="Permanent link">#</a></h4>
+<p><code>context.putTokenAttribute(key, value)</code> stores a string with the access token entity (<code>attr</code> field of <code>io.jans.model.token.TokenEntity</code>). The value survives until the token expires. Read it later with <code>context.getTokenAttribute(key)</code> or, in an Introspection script, with <code>context.getTokenAttribute(key)</code> of <code>ExternalIntrospectionContext</code>.</p>
+<p>Do not store large or sensitive payloads. Prefer a short identifier such as a user <code>inum</code>.</p>
+<div class="highlight"><pre><span></span><code>    def modifyAccessToken(self, accessToken, context):
+        context.putTokenAttribute(&quot;user_inum&quot;, userInum)
+        return True
+</code></pre></div>
 <h4 id="perform-business-check-before-returning-at">Perform business check before returning AT<a class="headerlink" href="#perform-business-check-before-returning-at" title="Permanent link">#</a></h4>
 <p>Pseudocode and example - Issue Access token only if account balance is greater than 0</p>
 <div class="highlight"><pre><span></span><code>    # Returns boolean, true - indicates that script applied changes
@@ -4081,7 +4110,7 @@ Access token lifetime from script has highest priority (it wins from client's ac
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    February 04, 2026
+    November 02, 2026
   </span>
 
     
