@@ -12,11 +12,11 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::token_types::EntityTypeName;
 use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
-    BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
+    BuiltEntities, EntityBuilder, MultiIssuerSetup, MultiIssuerSetupEntities,
+    UnsignedPrincipalBuild,
 };
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -233,9 +233,9 @@ impl Authz {
         let schema = &self.config.policy_store.schema;
 
         let MultiIssuerSetup {
-            validated_tokens,
             entities: setup_entities,
-            dropped_tokens,
+            used_tokens,
+            dropped: dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -348,7 +348,7 @@ impl Authz {
         );
 
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens,
+            &used_tokens,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
@@ -363,7 +363,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || token_facts(&validated_tokens, &request.tokens).map(Arc::from),
+            || token_facts(&used_tokens, &request.tokens).map(Arc::from),
         );
 
         // Decision log
@@ -461,9 +461,9 @@ impl Authz {
         })?;
 
         let MultiIssuerSetup {
-            validated_tokens,
             entities: setup_entities,
-            dropped_tokens,
+            used_tokens,
+            dropped: dropped_tokens,
         } = self
             .multi_issuer_setup(&request.tokens, custom_processor)
             .await?;
@@ -475,7 +475,7 @@ impl Authz {
         let schema_ref = schema.as_ref().map(|s| &s.schema);
 
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens,
+            &used_tokens,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
@@ -486,7 +486,7 @@ impl Authz {
         let trace_tokens = OnceCell::new();
         let trace_token_facts = || {
             trace_tokens
-                .get_or_init(|| token_facts(&validated_tokens, &request.tokens).map(Arc::from))
+                .get_or_init(|| token_facts(&used_tokens, &request.tokens).map(Arc::from))
                 .clone()
         };
         let trace_context = self.trace_context(&request.options);
@@ -1055,56 +1055,50 @@ impl Authz {
         tokens: &[crate::TokenInput],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
-        let custom_timeout = self.custom_token_timeout();
-        let validated = self
-            .config
-            .jwt_service
-            .validate_multi_issuer_tokens(
-                tokens,
-                custom_processor,
-                &self.config.policy_store.token_types,
-                custom_timeout,
-            )
-            .await
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+        let record_validation_error = |e: &MultiIssuerValidationError| {
+            self.config.metrics.record_error(e);
+            self.config.metrics.record_authz_error();
+        };
 
-        let mut setup_entities = self
-            .config
-            .entity_builder
-            .build_multi_issuer_setup_entities(&validated.tokens, self.config.log_service.as_ref())
-            .map_err(|e| {
-                self.config.metrics.record_error(&e);
-                self.config.metrics.record_authz_error();
-                AuthorizeError::MultiIssuerEntity(e)
-            })?;
+        if tokens.is_empty() {
+            let err = MultiIssuerValidationError::EmptyTokenArray;
+            record_validation_error(&err);
+            return Err(err.into());
+        }
 
-        let crate::jwt::ValidatedMultiIssuerTokens {
-            tokens: mut validated_tokens,
-            dropped: mut dropped_tokens,
-        } = validated;
+        let log_service = self.config.log_service.as_ref();
+        let mut validator = self.config.jwt_service.multi_issuer_validator(
+            custom_processor,
+            &self.config.policy_store.token_types,
+            self.custom_token_timeout(),
+        );
+        let mut setup = self.config.entity_builder.multi_issuer_setup_builder();
 
-        // A token that failed entity building must not also be reported as
-        // used: drop it from the validated map so `LogTokensInfo` (built from
-        // this map for both single and batch paths) never logs the same
-        // mapping under both `tokens` and `dropped_tokens`.
-        let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
-        validated_tokens.retain(|name, _| {
-            !entity_build_drops
-                .iter()
-                .any(|d| d.mapping == name.as_str())
-        });
+        // Validate and build each token in input order, so every input is
+        // recorded as used or dropped at the point its outcome is known.
+        for (index, input) in tokens.iter().enumerate() {
+            match validator
+                .validate(index, input)
+                .await
+                .inspect_err(record_validation_error)?
+            {
+                jwt::TokenValidation::Accepted(validated) => {
+                    setup.add_validated(validated, log_service);
+                },
+                jwt::TokenValidation::Dropped(reason) => {
+                    setup.record_drop(&input.mapping, index, reason);
+                },
+            }
+        }
 
-        // Order is not guaranteed: entity-build drops append after validation
-        // drops; callers correlate entries by `index`.
-        dropped_tokens.extend(entity_build_drops);
+        validator
+            .ensure_any_validated()
+            .inspect_err(record_validation_error)?;
 
-        Ok(MultiIssuerSetup {
-            validated_tokens,
-            entities: setup_entities,
-            dropped_tokens,
+        setup.finish(log_service).map_err(|e| {
+            self.config.metrics.record_error(&e);
+            self.config.metrics.record_authz_error();
+            AuthorizeError::MultiIssuerEntity(e)
         })
     }
 
@@ -1342,23 +1336,24 @@ impl Authz {
         resources: &[crate::EntityData],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
-        let custom_timeout = self.custom_token_timeout();
-        let validated_tokens = self
-            .config
-            .jwt_service
-            .validate_multi_issuer_tokens(
-                tokens,
-                custom_processor,
-                &self.config.policy_store.token_types,
-                custom_timeout,
-            )
-            .await?;
+        if tokens.is_empty() {
+            return Err(MultiIssuerValidationError::EmptyTokenArray.into());
+        }
 
-        let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
-            .tokens
-            .keys()
-            .map(|entity_type| entity_type.cedar().clone())
-            .collect();
+        let mut validator = self.config.jwt_service.multi_issuer_validator(
+            custom_processor,
+            &self.config.policy_store.token_types,
+            self.custom_token_timeout(),
+        );
+        let mut principal_types: HashSet<cedar_policy::EntityTypeName> = HashSet::new();
+        for (index, input) in tokens.iter().enumerate() {
+            if let jwt::TokenValidation::Accepted(validated) =
+                validator.validate(index, input).await?
+            {
+                principal_types.insert(validated.token_type.entity_type().cedar().clone());
+            }
+        }
+        validator.ensure_any_validated()?;
 
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;
@@ -1522,21 +1517,6 @@ struct ExecuteAuthorizeParameters<'a> {
 struct UnsignedSetup {
     principal: Option<Entity>,
     built_entities: BuiltEntities,
-}
-
-/// Resource-independent setup shared across all items in a multi-issuer batch.
-///
-/// Built once via [`Authz::multi_issuer_setup`] and combined with a per-item
-/// resource entity + context by the caller. `validated_tokens` is retained so
-/// that [`LogTokensInfo`] can be produced from the same snapshot the entities
-/// were built from.
-struct MultiIssuerSetup {
-    validated_tokens: HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
-    entities: MultiIssuerSetupEntities,
-    /// Tokens dropped across validation and entity building. Order is not
-    /// guaranteed; use each entry's `index` to correlate with the request
-    /// `tokens` array. Shared by every item in a batch.
-    dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Structure to hold entites created from tokens

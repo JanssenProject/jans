@@ -6,7 +6,6 @@
 //! Builds the TRACE record of each decision on the authorize path and hands it
 //! to the emitter without waiting, so TRACE never delays or changes a decision.
 
-use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
@@ -22,7 +21,6 @@ use crate::authz::TraceContext;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::request::TokenInput;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::common::policy_store::token_types::EntityTypeName;
 use crate::jwt::{TokenIssuer, ValidatedToken};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
@@ -267,10 +265,10 @@ fn signed_at() -> u64 {
 /// its custom issuer in the policy store, whatever the host's processor put in
 /// `iss`, so the record does not depend on host code.
 pub(crate) fn token_facts(
-    validated: &HashMap<EntityTypeName, ValidatedToken>,
+    validated: &[ValidatedToken],
     inputs: &[TokenInput],
 ) -> Result<Vec<TokenRef>, DraftError> {
-    let mut ordered: Vec<&ValidatedToken> = validated.values().collect();
+    let mut ordered: Vec<&ValidatedToken> = validated.iter().collect();
     ordered.sort_by_key(|validated| validated.index);
 
     let mut refs = Vec::with_capacity(ordered.len());
@@ -391,13 +389,8 @@ mod tests {
 
     /// Validated tokens keyed by their entity type, as multi-issuer validation
     /// returns them.
-    fn by_entity_type(
-        tokens: impl IntoIterator<Item = ValidatedToken>,
-    ) -> HashMap<EntityTypeName, ValidatedToken> {
-        tokens
-            .into_iter()
-            .map(|validated| (validated.token_type.entity_type().clone(), validated))
-            .collect()
+    fn used_tokens(tokens: impl IntoIterator<Item = ValidatedToken>) -> Vec<ValidatedToken> {
+        tokens.into_iter().collect()
     }
 
     /// A JWT of the default `Jans` issuer, validated as the token type `mapping`.
@@ -734,7 +727,7 @@ mod tests {
                 input("Jans::Access_Token", "header.payload.sig"),
                 input("Acme::DolphinToken", raw),
             ];
-            let tokens = by_entity_type([
+            let tokens = used_tokens([
                 jwt(
                     "Jans::Access_Token",
                     json!({"iss": ISSUER, "jti": "jti-1"}),
@@ -786,7 +779,7 @@ mod tests {
     #[test]
     fn custom_token_keeps_its_jti() {
         let inputs = [input("Acme::DolphinToken", "dolphin-opaque")];
-        let tokens = by_entity_type([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
+        let tokens = used_tokens([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -798,7 +791,7 @@ mod tests {
     #[test]
     fn jwt_without_lock_issuer_is_invalid_field() {
         let inputs = [input("Jans::Access_Token", "header.payload.sig")];
-        let tokens = by_entity_type([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
+        let tokens = used_tokens([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
         let log = memory_log();
         let tokens =
             token_facts(&tokens, &inputs).expect("a JWT stays in the list even without an issuer");
@@ -825,7 +818,7 @@ mod tests {
     fn token_without_jti_uses_fingerprint() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = by_entity_type([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
+        let tokens = used_tokens([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -846,7 +839,7 @@ mod tests {
             input("B::T", "raw-b"),
             input("C::T", "raw-c"),
         ];
-        let tokens = by_entity_type([
+        let tokens = used_tokens([
             jwt("C::T", json!({"iss": ISSUER, "jti": "c"}), 2),
             jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
             jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
@@ -864,7 +857,7 @@ mod tests {
     fn raw_token_in_jti_is_invalid_field() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = by_entity_type([jwt(
+        let tokens = used_tokens([jwt(
             "Jans::Access_Token",
             json!({"iss": ISSUER, "jti": raw}),
             0,

@@ -14,7 +14,6 @@ use super::LogLevel;
 use super::interface::{Indexed, Loggable};
 use crate::authz::DroppedToken;
 use crate::common::policy_store::PoliciesContainer;
-use crate::common::policy_store::token_types::EntityTypeName;
 use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use crate::trace::TraceRecordStatus;
@@ -643,15 +642,14 @@ impl Loggable for BaseLogEntry {
 pub(crate) struct LogTokensInfo(pub HashMap<String, HashMap<String, serde_json::Value>>);
 
 impl LogTokensInfo {
-    pub(crate) fn new(
-        tokens: &HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
-        decision_log_jwt_id: &str,
-    ) -> Self {
+    /// Build the decision-log view of the tokens used in a decision, keyed by
+    /// entity type.
+    pub(crate) fn new(tokens: &[crate::jwt::ValidatedToken], decision_log_jwt_id: &str) -> Self {
         let tokens_logging_info = tokens
             .iter()
-            .map(|(tkn_name, entry)| {
+            .map(|entry| {
                 (
-                    tkn_name.to_string(),
+                    entry.token_type.entity_type().to_string(),
                     entry.token.logging_info(decision_log_jwt_id),
                 )
             })

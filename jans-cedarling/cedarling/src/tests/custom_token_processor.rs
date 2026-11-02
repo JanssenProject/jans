@@ -597,3 +597,139 @@ async fn custom_mapping_shadowing_jwt_type_fails_init() {
         "expected the shadowed type in the init error; display={display} debug={debug}"
     );
 }
+
+/// Two custom issuers: `Custom::ApiKey` builds normally, while the
+/// schema requires a `department` attribute on `Custom::Broken` that no
+/// processor emits, so that token validates but fails entity building.
+const ENTITY_BUILD_FAILURE_STORE_RAW: &str = r#"
+cedar_version: v4.0.0
+policy_stores:
+  entity_build_failure_store:
+    cedar_version: v4.0.0
+    name: EntityBuildFailure
+    description: one custom token validates but cannot become an entity
+    trusted_issuers: {}
+    custom_issuers:
+      CustomKeys:
+        tokens_mappings:
+          "Custom::ApiKey": {}
+      BrokenKeys:
+        tokens_mappings:
+          "Custom::Broken": {}
+    policies:
+      allow_admin_api_key:
+        description: Allow reads when the API key carries the admin scope
+        creation_date: "2026-01-01T00:00:00.000000"
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal,
+                action == Custom::Action::"Read",
+                resource == Custom::Resource::"Doc"
+            ) when {
+                context has tokens.customkeys_apikey &&
+                context.tokens.customkeys_apikey.hasTag("scope") &&
+                context.tokens.customkeys_apikey.getTag("scope").contains("admin")
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Custom {
+          entity Any;
+          entity Resource = {"name": String};
+          entity ApiKey = {
+            token_type?: String,
+            jti?: String,
+            iss?: String,
+            exp?: Long,
+            validated_at?: Long,
+          } tags Set<String>;
+          entity Broken = {
+            department: String,
+            token_type?: String,
+            jti?: String,
+            iss?: String,
+            exp?: Long,
+            validated_at?: Long,
+          } tags Set<String>;
+          action "Read" appliesTo {
+            principal: [Any],
+            resource: [Resource],
+            context: Context
+          };
+        }
+        type Context = {
+          tokens: {
+            customkeys_apikey?: Custom::ApiKey,
+            brokenkeys_broken?: Custom::Broken,
+            total_token_count: Long
+          }
+        };
+    default_entities: {}
+"#;
+
+/// A token that validates but fails entity building is reported only as
+/// dropped, never as used, and drops from both stages are in input order.
+#[tokio::test]
+async fn entity_build_failure_is_dropped_and_not_logged_as_used() {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(ENTITY_BUILD_FAILURE_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
+
+    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+        vec![
+            TokenInput::new("Custom::Broken".to_string(), "secret-admin-key".to_string()),
+            TokenInput::new("Unknown::Token".to_string(), "not-a-jwt".to_string()),
+            TokenInput::new("Custom::ApiKey".to_string(), "secret-admin-key".to_string()),
+        ],
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": { "entity_type": "Custom::Resource", "id": "Doc" },
+                "name": "A protected document"
+            })
+            .to_string(),
+        )
+        .expect("resource entity should build"),
+        "Custom::Action::\"Read\"".to_string(),
+        None,
+    );
+
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("the buildable token should authorize the request");
+
+    assert!(result.decision, "the admin API key should be ALLOW");
+    assert_eq!(
+        result.dropped_tokens,
+        vec![
+            crate::DroppedToken::new("Custom::Broken", 0, crate::DropReason::EntityBuildFailed),
+            crate::DroppedToken::new("Unknown::Token", 1, crate::DropReason::JwtValidationFailed),
+        ],
+        "entity-build and validation drops must be reported in input order"
+    );
+
+    let logs = crate::log::interface::LogStorage::pop_logs(&cedarling);
+    let decision_log = logs
+        .iter()
+        .find(|log| log.get("dropped_tokens").is_some())
+        .expect("a decision-log entry must carry dropped_tokens");
+    let logged_tokens = decision_log
+        .get("tokens")
+        .and_then(|tokens| tokens.as_object())
+        .expect("the decision log must carry the used tokens");
+    assert!(
+        logged_tokens.contains_key("Custom::ApiKey"),
+        "the used token must be logged under tokens, got {logged_tokens:?}"
+    );
+    assert!(
+        !logged_tokens.contains_key("Custom::Broken"),
+        "a dropped token must not also be logged as used, got {logged_tokens:?}"
+    );
+}
