@@ -172,10 +172,10 @@ skip() { SKIP=$((SKIP + 1)); echo "⚠️  skipped: $1"; }
 # The token is checked against the RFC 6750 b64token grammar before it reaches a curl config.
 get_token() {
   local id="$1" secret="$2" scope="$3" token
-  token="$(printf 'user = "%s:%s"\n' "$id" "$secret" \
+  token=$(printf 'user = "%s:%s"\n' "$id" "$secret" \
     | curl "${CURL_BASE[@]}" -K - "$TOKEN_URL" \
         -d "grant_type=client_credentials" -d "scope=${scope}" \
-    | jq -r '.access_token // empty')"
+    | jq -r '.access_token // empty')
   if [[ -n "$token" && ! "$token" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; then
     echo "❌ access_token is not a valid bearer token, ignoring it" >&2
     return 0

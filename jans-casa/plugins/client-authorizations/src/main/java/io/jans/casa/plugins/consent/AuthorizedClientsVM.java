@@ -50,9 +50,13 @@ public class AuthorizedClientsVM {
     }
 
     public String safeUri(String uri) {
+        if (uri == null) {
+            return null;
+        }
+        String trimmed = uri.trim();
         try {
-            String scheme = Optional.ofNullable(uri).map(u -> URI.create(u.trim()).getScheme()).orElse(null);
-            return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme) ? uri.trim() : null;
+            String scheme = URI.create(trimmed).getScheme();
+            return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme) ? trimmed : null;
         } catch (IllegalArgumentException e) {
             return null;
         }

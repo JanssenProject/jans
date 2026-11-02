@@ -167,14 +167,13 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
         }
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-        boolean signatureVerified = cryptoProvider.verifySignature(
+        return cryptoProvider.verifySignature(
                 jwt.getSigningInput(),
                 jwt.getEncodedSignature(),
                 jwt.getHeader().getKeyId(),
                 JwtUtil.getJSONWebKeys(jwksUri),
                 sharedKey,
                 jwt.getHeader().getSignatureAlgorithm());
-        return signatureVerified;
     }
 
     private void parseJson(String entity) {

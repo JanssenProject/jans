@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import stat
 import sys
 import json
 import zipfile
@@ -197,7 +198,9 @@ if not 'projectName' in project_metadata:
     project_dir_fd = os.open(agama_path, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0))
     try:
         tmp_name = '.project.json.{}.tmp'.format(os.getpid())
-        tmp_fd = os.open(tmp_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644, dir_fd=project_dir_fd)
+        tmp_fd = os.open(tmp_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600, dir_fd=project_dir_fd)
+        if project_metadata_fn.exists():
+            os.fchmod(tmp_fd, stat.S_IMODE(project_metadata_fn.stat().st_mode))
         with os.fdopen(tmp_fd, 'w') as w:
             w.write(json.dumps(project_metadata_new, indent=2))
         os.replace(tmp_name, 'project.json', src_dir_fd=project_dir_fd, dst_dir_fd=project_dir_fd)

@@ -63,14 +63,14 @@ fn spawn_writer_thread(
             }
 
             // Nothing to flush: block instead of polling with an expired deadline.
-            let received = if buffer.is_empty() {
+            let next_message = if buffer.is_empty() {
                 receiver
                     .recv()
                     .map_err(|_| mpsc::RecvTimeoutError::Disconnected)
             } else {
                 receiver.recv_timeout(next_flush_deadline.saturating_duration_since(now))
             };
-            match received {
+            match next_message {
                 Ok(LogMessage::Log(serializer)) => {
                     if buffer.is_empty() {
                         next_flush_deadline = Instant::now() + flush_timeout;

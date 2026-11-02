@@ -183,7 +183,7 @@ public class IdJagServiceTest {
             idJagService.validateSubjectToken("saml-blob-here", "urn:ietf:params:oauth:token-type:saml2", executionContext);
             fail("Expected WebApplicationException for unvalidated SAML2 token");
         } catch (WebApplicationException e) {
-            assertEquals(400, e.getResponse().getStatus());
+            assertEquals(e.getResponse().getStatus(), 400);
         }
     }
 

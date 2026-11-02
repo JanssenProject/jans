@@ -394,9 +394,9 @@ is_bearer_token() { [[ "$1" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; }
 
 get_token() { # CLIENT_ID CLIENT_SECRET SCOPE: credentials go to curl through stdin, not the process list
   local token
-  token="$(printf 'user = "%s:%s"\n' "$1" "$2" \
+  token=$(printf 'user = "%s:%s"\n' "$1" "$2" \
     | curl -sS $CURL_TLS -K - "${HOST}/jans-auth/restv1/token" -d "grant_type=client_credentials" -d "scope=$3" \
-    | jq -r '.access_token // empty')"
+    | jq -r '.access_token // empty')
   if [[ -n "$token" ]] && ! is_bearer_token "$token"; then
     echo "❌ access_token is not a valid bearer token, ignoring it" >&2
     return 0

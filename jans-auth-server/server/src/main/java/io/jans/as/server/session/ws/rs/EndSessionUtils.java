@@ -9,7 +9,6 @@ package io.jans.as.server.session.ws.rs;
 import io.jans.as.model.util.Util;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Form;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;

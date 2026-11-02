@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -61,7 +62,7 @@ public class RateLimitService {
 
     private static final int MIN_BUCKET_RETENTION_IN_SECONDS = 120;
 
-    private volatile Cache<String, Bucket> buckets = newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS);
+    private final AtomicReference<Cache<String, Bucket>> buckets = new AtomicReference<>(newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS));
     private RateLimitConfig rateLimitConfiguration;
 
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
@@ -87,7 +88,7 @@ public class RateLimitService {
 
         RateLimitContext rateLimitContext = new RateLimitContext(httpRequest, rateLimitConfiguration.isRateLoggingEnabled());
         final List<Pair<String, RateLimitRule>> keyWithRules = buildKeyPerRule(rateLimitContext, matchedRules);
-        final Cache<String, Bucket> currentBuckets = buckets;
+        final Cache<String, Bucket> currentBuckets = buckets.get();
 
         for (Pair<String, RateLimitRule> keyWithRule : keyWithRules) {
             RateLimitRule rule = keyWithRule.getSecond();
@@ -348,7 +349,7 @@ public class RateLimitService {
     public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         try {
             rateLimitConfiguration = appConfiguration.getRateLimitConfiguration();
-            buckets = newBucketCache(maxPeriodInSeconds(rateLimitConfiguration));
+            buckets.set(newBucketCache(maxPeriodInSeconds(rateLimitConfiguration)));
 
             if (rateLimitConfiguration == null) {
                 log.info("Rate limiting is not configured.");

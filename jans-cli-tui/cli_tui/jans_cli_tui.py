@@ -1101,9 +1101,9 @@ class JansCliApp(Application):
                     with os.fdopen(tmp_fd, 'w') as w:
                         w.write(text_area.text)
                     os.replace(tmp_path, path)
-                except BaseException:
-                    os.unlink(tmp_path)
-                    raise
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
                 self.pbar_text = _("File {} was saved".format(text_area.text))
                 self.show_message(_("Info"), _("File {} was successfully saved").format(path),
                                   tobefocused=params.get('tobefocused') or self.center_container)

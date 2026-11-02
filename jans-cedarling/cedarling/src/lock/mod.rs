@@ -233,6 +233,25 @@ fn drop_insecure_audit_endpoints(endpoints: &mut AuditEndpoints, logger: Option<
     }
 }
 
+/// Get lock config from the config uri endpoint, keeping only audit endpoints
+/// the access token may be sent to.
+async fn fetch_lock_config(
+    bootstrap_conf: &LockServiceConfig,
+    http_client: &HttpClient,
+    logger: Option<&LoggerWeak>,
+) -> Result<LockConfig, InitLockServiceError> {
+    let config_uri = &bootstrap_conf.config_uri;
+    // Discovery decides where the access token goes, so it must not be spoofable.
+    if !is_secure_transport(config_uri) {
+        return Err(InitLockServiceError::InsecureConfigUri(
+            config_uri.origin().ascii_serialization(),
+        ));
+    }
+    let mut lock_config = LockConfig::get(config_uri, http_client).await?;
+    drop_insecure_audit_endpoints(&mut lock_config.audit_endpoints, logger);
+    Ok(lock_config)
+}
+
 fn is_loopback_host(url: &url::Url) -> bool {
     match url.host() {
         Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
@@ -315,16 +334,7 @@ impl LockService {
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
 
-        // Discovery decides where the access token goes, so it must not be spoofable.
-        if !is_secure_transport(&bootstrap_conf.config_uri) {
-            return Err(InitLockServiceError::InsecureConfigUri(
-                bootstrap_conf.config_uri.origin().ascii_serialization(),
-            ));
-        }
-
-        // Get lock config from the config uri endpoint first
-        let mut lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
-        drop_insecure_audit_endpoints(&mut lock_config.audit_endpoints, logger.as_ref());
+        let lock_config = fetch_lock_config(bootstrap_conf, &http_client, logger.as_ref()).await?;
 
         let token = Self::acquire_access_token(
             pdp_id,

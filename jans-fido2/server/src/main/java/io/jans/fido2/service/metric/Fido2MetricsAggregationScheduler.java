@@ -560,8 +560,8 @@ public class Fido2MetricsAggregationScheduler {
      */
     private boolean isAggregationTypeEnabled(String aggregationType) {
         try {
-            String key = "fido2.metrics.aggregation." + aggregationType.toLowerCase() + ".enabled";
-            return Boolean.parseBoolean(getConfigString(key, "true"));
+            String propertyName = "fido2.metrics.aggregation." + aggregationType.toLowerCase() + ".enabled";
+            return Boolean.parseBoolean(getConfigString(propertyName, "true"));
         } catch (Exception e) {
             log.warn("Failed to check if {} aggregation is enabled, defaulting to true: {}", aggregationType, e.getMessage());
             return true;

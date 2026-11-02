@@ -509,10 +509,8 @@ public class AuthzRequestService {
         Client client = authzRequest.getClient();
 
         // explicitly set acrs via getDefaultAcrValues()
-        if (StringUtils.isBlank(authzRequest.getAcrValues())) {
-            if (!ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
-            }
+        if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+            authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
         }
 
         final int minimumAcrLevel = client.getAttributes().getMinimumAcrLevel();
