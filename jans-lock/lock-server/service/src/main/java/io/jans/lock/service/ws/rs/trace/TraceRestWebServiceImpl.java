@@ -225,7 +225,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE record, recordId: {}", escapeLog(recordId));
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving TRACE record, recordId: {}", escapeLog(recordId));
+			}
 			checkEnabled();
 			requireMaxLength(recordId, MAX_RECORD_ID_LENGTH, FIELD_RECORD_ID);
 
@@ -249,8 +251,10 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
-					escapeLog(policyStoreId), escapeLog(policyStoreVersion), escapeLog(bundleHash));
+			if (log.isDebugEnabled()) {
+				log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
+						escapeLog(policyStoreId), escapeLog(policyStoreVersion), escapeLog(bundleHash));
+			}
 			checkEnabled();
 			checlStart(start);
 			requireCountInRange(count);
@@ -306,7 +310,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE execution, traceExecutionId: {}", escapeLog(traceExecutionId));
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving TRACE execution, traceExecutionId: {}", escapeLog(traceExecutionId));
+			}
 			checkEnabled();
 			checlStart(start);
 			requireMaxLength(traceExecutionId, MAX_EXECUTION_ID_LENGTH, "trace_execution_id");

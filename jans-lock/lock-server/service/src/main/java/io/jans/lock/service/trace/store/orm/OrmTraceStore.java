@@ -141,10 +141,6 @@ public class OrmTraceStore implements TraceStore {
 		return "ou=policyReleases," + baseDn();
 	}
 
-	private String policyReleaseDn(String policyStoreId, String bundleHash) {
-		return TraceKeys.policyReleaseDn(baseDn(), traceKeys.policyReleaseKey(policyStoreId, bundleHash));
-	}
-
 	// -- duplicate-safe insert -------------------------------------------
 
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)

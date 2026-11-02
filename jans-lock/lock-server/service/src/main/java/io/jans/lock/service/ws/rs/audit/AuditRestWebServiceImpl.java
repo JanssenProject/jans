@@ -93,7 +93,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	 */
 	@Override
 	public Response processHealthRequest(HealthEntry healthEntry, HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Health request - healthEntry: {}", escapeLog(healthEntry));
+		if (log.isInfoEnabled()) {
+			log.info("Processing Health request - healthEntry: {}", escapeLog(healthEntry));
+		}
 
 		if (healthEntry == null) {
 			throwBadRequestException("Health entry is required");
@@ -160,7 +162,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	 */
 	@Override
 	public Response processLogRequest(LogEntry logEntry, HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Log request - logEntry: {}", escapeLog(logEntry));
+		if (log.isInfoEnabled()) {
+			log.info("Processing Log request - logEntry: {}", escapeLog(logEntry));
+		}
 
 		if (logEntry == null) {
 			throwBadRequestException("Log entry is required");
@@ -224,7 +228,9 @@ public class AuditRestWebServiceImpl extends BaseResource implements AuditRestWe
 	 */
 	@Override
 	public Response processTelemetryRequest(TelemetryEntry telemetryEntry, HttpServletRequest request, SecurityContext sec) {
-		log.info("Processing Telemetry request - telemetryEntry: {}", escapeLog(telemetryEntry));
+		if (log.isInfoEnabled()) {
+			log.info("Processing Telemetry request - telemetryEntry: {}", escapeLog(telemetryEntry));
+		}
 
 		if (telemetryEntry == null) {
 			throwBadRequestException("Telemetry entry is required");

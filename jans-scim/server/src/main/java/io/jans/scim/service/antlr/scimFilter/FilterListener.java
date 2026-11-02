@@ -146,8 +146,10 @@ public class FilterListener extends ScimFilterBaseListener {
     public Filter getFilter() {
         if (StringUtils.isEmpty(error)) {
             Filter f = filter.poll();
-            log.info("LDAP filter expression computed was {}",
-                    Optional.ofNullable(f).map(Filter::toString).map(str -> str.replaceAll("[\\r\\n\\t]", "_")).orElse(null));
+            if (log.isInfoEnabled()) {
+                log.info("LDAP filter expression computed was {}",
+                        Optional.ofNullable(f).map(Filter::toString).map(str -> str.replaceAll("[\\r\\n\\t]", "_")).orElse(null));
+            }
             return f;
         }
         return null;

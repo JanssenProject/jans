@@ -118,11 +118,14 @@ public class ExternalConstraintsService {
         int parens = 0;
         int brackets = 0;
         boolean inString = false;
+        boolean escaped = false;
         for (int i = 0; i < filter.length(); i++) {
             char c = filter.charAt(i);
             if (inString) {
-                if (c == '\\') {
-                    i++;
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '\\') {
+                    escaped = true;
                 } else if (c == '"') {
                     inString = false;
                 }
