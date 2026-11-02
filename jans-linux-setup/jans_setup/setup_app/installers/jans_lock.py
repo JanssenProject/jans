@@ -171,7 +171,11 @@ class JansLockInstaller(JettyInstaller):
             return
 
         lock_test_client_prefix = '2202.'
-        check_result = self.check_clients([('lock_test_client_id', lock_test_client_prefix)])
+        lock_audit_test_client_prefix = '2203.'
+        check_result = self.check_clients([
+            ('lock_test_client_id', lock_test_client_prefix),
+            ('lock_audit_test_client_id', lock_audit_test_client_prefix),
+            ])
 
         if check_result.get(lock_test_client_prefix) == 1:
             warning = "Test data for Jans Lock was allready loaded."
