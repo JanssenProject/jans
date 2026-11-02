@@ -50,7 +50,7 @@ It is also possible to run introspection script during `access_token` creation a
 
 If `run_introspection_script_before_jwt_creation` set to true and `access_token_as_jwt` set to true then introspection script will be run before JWT (`access_token`) is created and all JSON values will be transfered to JWT. Also `context` inside script has additional method which allows to cancel transfering of claims if needed `context.setTranferIntrospectionPropertiesIntoJwtClaims(false)`
 
-`context.getTokenAttribute(key)` returns a value that an UpdateToken script stored with `context.putTokenAttribute(key, value)` when the introspected access token was created. It returns `null` if the value is absent. Values are stored for access tokens only.
+`context.getTokenAttribute(key)` returns a value that an UpdateToken script stored with `context.putTokenAttribute(key, value)` when the introspected access token was created. It returns `null` if the value is absent. Values are stored for access tokens only. When `run_introspection_script_before_jwt_creation` is `true`, the script runs before the token is stored and no introspected token grant is set, so the call always returns `null`.
 
 ## Common Use Cases
 
