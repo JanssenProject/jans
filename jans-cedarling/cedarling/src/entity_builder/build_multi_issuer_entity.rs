@@ -529,14 +529,20 @@ mod tests {
         }
     }
 
+    /// A test token paired with the token type mapping it is validated as.
+    struct SetupToken {
+        mapping: String,
+        token: Token,
+    }
+
     /// Feed validated test tokens through the setup builder; each token's
     /// request index is its position in `tokens`.
     fn build_setup(
         builder: &TestBuilder,
-        tokens: Vec<(String, Token)>,
+        tokens: Vec<SetupToken>,
     ) -> Result<MultiIssuerSetup, MultiIssuerEntityError> {
         let mut setup = builder.multi_issuer_setup_builder();
-        for (index, (mapping, token)) in tokens.into_iter().enumerate() {
+        for (index, SetupToken { mapping, token }) in tokens.into_iter().enumerate() {
             let validated = ValidatedToken {
                 token: Arc::new(token),
                 index,
@@ -865,12 +871,18 @@ mod tests {
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.push(("Jans::Access_Token".to_string(), token_one));
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_two = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
-        tokens.push(("Jans::Access_Token2".to_string(), token_two));
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token2".to_string(),
+            token: token_two,
+        });
 
         let result = build_setup(&builder, tokens);
         assert!(result.is_ok());
@@ -901,21 +913,30 @@ mod tests {
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.push(("Jans::Access_Token".to_string(), token_one));
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Token from Dolphin issuer
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_two =
             create_test_token("https://idp.dolphin.sea/auth", "token2", claims2, &builder);
-        tokens.push(("Acme::DolphinToken".to_string(), token_two));
+        tokens.push(SetupToken {
+            mapping: "Acme::DolphinToken".to_string(),
+            token: token_two,
+        });
 
         // Token from same issuer but different type
         let mut claims3 = HashMap::new();
         claims3.insert("sub".to_string(), json!("user3"));
         let token_three =
             create_test_token("https://idp.acme.com/auth", "token3", claims3, &builder);
-        tokens.push(("Jans::Id_Token".to_string(), token_three));
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_three,
+        });
 
         let result = build_setup(&builder, tokens);
         assert!(result.is_ok());
@@ -1101,21 +1122,30 @@ mod tests {
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.push(("Jans::Access_Token".to_string(), token_one));
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Invalid token (missing jti, so it has no entity id)
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
         let token_two = Token::new(token_claims2, acme_issuer(&builder));
-        tokens.push(("Jans::Id_Token".to_string(), token_two));
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_two,
+        });
 
         // Another valid token
         let mut claims3 = HashMap::new();
         claims3.insert("sub".to_string(), json!("user3"));
         let token_three =
             create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
-        tokens.push(("Acme::DolphinToken".to_string(), token_three));
+        tokens.push(SetupToken {
+            mapping: "Acme::DolphinToken".to_string(),
+            token: token_three,
+        });
 
         let result = build_setup(&builder, tokens);
         assert!(result.is_ok());
@@ -1219,14 +1249,20 @@ mod tests {
         claims1.insert("sub".to_string(), json!("user1"));
         let token_claims1 = TokenClaims::from(claims1);
         let token_one = Token::new(token_claims1, acme_issuer(&builder));
-        tokens.push(("Jans::Access_Token".to_string(), token_one));
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Invalid token 2 (missing jti)
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
         let token_two = Token::new(token_claims2, acme_issuer(&builder));
-        tokens.push(("Jans::Id_Token".to_string(), token_two));
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_two,
+        });
 
         let result = build_setup(&builder, tokens);
 
