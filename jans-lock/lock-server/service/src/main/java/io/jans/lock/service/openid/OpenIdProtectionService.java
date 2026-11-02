@@ -135,7 +135,7 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 }
 
                 Response introspectionFailure = processIntrospectionResponse(iresp, scopes);
-                if (introspectionFailure != null) {
+                if (introspectionFailure != null || iresp == null) {
                     return AuthorizationOutcome.denied(introspectionFailure);
                 }
 
