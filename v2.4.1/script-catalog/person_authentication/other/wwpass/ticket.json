@@ -1,0 +1,9 @@
+#!/bin/bash
+if [[ "$QUERY_STRING" =~ ^p=.* ]]
+then
+    auth_type="p"
+fi
+
+echo "Content-type: application/json"
+echo ""
+curl "https://spfe.wwpass.com/get.json?auth_type=$auth_type" --cert /opt/wwpass_gluu/gluu_client.crt --key /opt/wwpass_gluu/gluu_client.key --cacert /opt/wwpass_gluu/wwpass.ca.crt -s

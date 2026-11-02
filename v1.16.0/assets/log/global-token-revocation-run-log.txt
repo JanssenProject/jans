@@ -1,0 +1,29 @@
+-------------------------------------------------------
+REQUEST:
+-------------------------------------------------------
+POST /jans-auth/restv1/global-token-revocation HTTP/1.1
+Host: jenkins-build.jans.io
+Content-Type: application/json
+Accept: application/json
+Authorization: Basic OTIyMzY1NmEtYjk1Ni00MWM3LTg1NmMtYWZkZGJmZjE4Y2Y5OmM5YWFhN2VkLTFlOGMtNDJkMi05OTY2LTgwYzY4ODI0MGE1ZQ==
+
+{
+  "sub_id": {
+    "format": "uid",
+    "id": "breakfast"
+  }
+}
+
+-------------------------------------------------------
+RESPONSE:
+-------------------------------------------------------
+HTTP/1.1 204
+Connection: Keep-Alive
+Date: Wed, 28 May 2025 08:59:54 GMT
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Keep-Alive: timeout=5, max=100
+Server: Apache/2.4.52 (Ubuntu)
+Set-Cookie: X-Correlation-Id=1af9dfdc-b0bf-4c9b-8e30-46eb6a560168; Secure; HttpOnly;HttpOnly
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Xss-Protection: 1; mode=block

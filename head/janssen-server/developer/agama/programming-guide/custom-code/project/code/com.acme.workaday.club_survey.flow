@@ -1,0 +1,40 @@
+Flow com.acme.workaday.club_survey
+    Basepath ""
+    Timeout 180 seconds
+    Configs conf
+
+pages = conf.pages
+When conf.showIntro is true
+    RRF "intro.ftlh"
+
+ah = Call com.acme.agama.survey.AnswersHandler#new pages.length
+index = 0
+
+Repeat 100 times max
+
+    id = pages[index].id
+    ans = Call ah getAnswer id
+    When ans is null
+        ans = { id: id, choice: [], text: "" }
+        
+    fl = Call ah isFirstLast index
+    pageData = { answer: ans, template: pages[index].template, first: fl.key, last: fl.value }
+    
+    Log "Displaying question '%'" id 
+    obj = RRF "survey.ftlh" pageData    
+       
+    Call ah storeAnswer id obj.option obj.text
+    Quit When obj.end is ""
+
+    When obj.prev is ""
+        index = Call java.lang.Math#decrementExact index
+    
+    When obj.next is ""
+        index = Call java.lang.Math#incrementExact index
+    
+Call ah close
+Log "Answers were" ah
+
+RRF "outro.ftlh"
+
+Finish true

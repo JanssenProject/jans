@@ -1,0 +1,26 @@
+// If finished successfully, the returned value of this flow has the form:
+// { success: true, data: { userId: "...", givenName: "...",  phone: "..." } }
+Flow com.acme.workaday.userValidation
+    Basepath ""
+
+people = { jsmith:    { givenName: "Josh",  phone: "+1 123 456 8900" },
+           abrown:    { givenName: "Alice", phone: "+44 001 234 5689" },
+           jthompson: { givenName: "Jane",  phone: "+56 681 234 5900" },
+           mskinner:  { givenName: "Maja",  phone: "+1 341 256 8900" } } 
+
+pageData = { showError: false }
+iterations = Repeat 3 times max
+    data = RRF "username.ftlh" pageData
+    userId = data.username
+    userData = people.$userId
+
+    Quit When userData is not null
+    pageData.showError = true
+
+When iterations is 3
+    Finish false
+
+Log "Login attempt for" userId
+userData.userId = userId
+data = { success: true, data: userData }
+Finish data

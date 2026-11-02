@@ -1,0 +1,14 @@
+Flow com.acme.workaday.userauthn
+    Basepath ""
+
+obj = Trigger com.acme.workaday.userValidation
+When obj.success is false
+    Finish false
+
+userData = obj.data
+obj = Trigger com.acme.workaday.smsChallenge userData.givenName userData.phone
+
+When obj.success is false
+    Finish obj
+
+Finish userData.userId

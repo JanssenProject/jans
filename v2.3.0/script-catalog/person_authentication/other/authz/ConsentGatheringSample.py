@@ -1,0 +1,87 @@
+# Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+# Copyright (c) 2020, Janssen Project
+#
+# Author: Yuriy Movchan
+#
+
+from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.security import Identity
+from io.jans.model.custom.script.type.authz import ConsentGatheringType
+from io.jans.util import StringHelper
+
+import java
+import random
+
+class ConsentGathering(ConsentGatheringType):
+
+    def __init__(self, currentTimeMillis):
+        self.currentTimeMillis = currentTimeMillis
+
+    def init(self, customScript, configurationAttributes):
+        print "Consent-Gathering. Initializing ..."
+        print "Consent-Gathering. Initialized successfully"
+
+        return True
+
+    def destroy(self, configurationAttributes):
+        print "Consent-Gathering. Destroying ..."
+        print "Consent-Gathering. Destroyed successfully"
+
+        return True
+
+    def getAuthenticationMethodClaims(self, requestParameters):
+        return None
+
+    def getApiVersion(self):
+        return 11
+
+    # Main consent-gather method. Must return True (if gathering performed successfully) or False (if fail).
+    # All user entered values can be access via Map<String, String> context.getPageAttributes()
+    def authorize(self, step, context): # context is reference of io.jans.as.server.service.external.context.ConsentGatheringContext
+        print "Consent-Gathering. Authorizing..."
+
+        if step == 1:
+            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allowButton != None) and (len(allowButton) > 0):
+                print "Consent-Gathering. Authorization success for step 1"
+                return True
+
+            print "Consent-Gathering. Authorization declined for step 1"
+        elif step == 2:
+            allowButton = context.getRequestParameters().get("authorizeForm:allowButton")
+            if (allowButton != None) and (len(allowButton) > 0):
+                print "Consent-Gathering. Authorization success for step 2"
+                return True
+
+            print "Consent-Gathering. Authorization declined for step 2"
+
+        return False
+
+    def getNextStep(self, step, context):
+        return -1
+
+    def prepareForStep(self, step, context):
+        if not context.isAuthenticated():
+            print "User is not authenticated. Aborting authorization flow ..."
+            return False
+
+        if step == 2:
+            pageAttributes = context.getPageAttributes()
+            
+            # Generate random consent gathering request
+            consentRequest = "Requested transaction #%s approval for the amount of sum $ %s.00" % ( random.randint(100000, 1000000), random.randint(1, 100) )
+            pageAttributes.put("consent_request", consentRequest)
+            return True
+
+        return True
+
+    def getStepsCount(self, context):
+        return 2
+
+    def getPageForStep(self, step, context):
+        if step == 1:
+            return "/authz/authorize.xhtml"
+        elif step == 2:
+            return "/authz/transaction.xhtml"
+
+        return ""
