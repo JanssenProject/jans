@@ -199,31 +199,37 @@ public class AdminUISessionService {
                         token, CommonUtils.toUrlEncodedString(body),
                         ContentType.APPLICATION_FORM_URLENCODED,
                         "Bearer ");
-        String jsonString = null;
-        if (httpServiceResponse.getHttpResponse() != null
-                && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+        try {
+            String jsonString = null;
+            if (httpServiceResponse != null && httpServiceResponse.getHttpResponse() != null
+                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-            logger.debug(
-                    "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                    httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                    httpServiceResponse.getHttpResponse().getEntity());
-            if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
-                ObjectMapper mapper = new ObjectMapper();
+                logger.debug(
+                        "httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                        httpServiceResponse.getHttpResponse().getEntity());
+                if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                    ObjectMapper mapper = new ObjectMapper();
 
-                HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                if (httpEntity != null) {
-                    jsonString = httpService.getContent(httpEntity);
+                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                    if (httpEntity != null) {
+                        jsonString = httpService.getContent(httpEntity);
 
-                    HashMap<String, Object> payloadMap = mapper.readValue(jsonString, HashMap.class);
-                    if (payloadMap.containsKey("active")) {
-                        return (boolean) payloadMap.get("active");
+                        HashMap<String, Object> payloadMap = mapper.readValue(jsonString, HashMap.class);
+                        if (payloadMap.containsKey("active")) {
+                            return (boolean) payloadMap.get("active");
+                        }
+                        return false;
                     }
-                    return false;
+                    logger.error("Error in introspection of token to access Config API endpoints. Response is null.");
                 }
-                logger.error("Error in introspection of token to access Config API endpoints. Response is null.");
+            }
+            return false;
+        } finally {
+            if (httpServiceResponse != null) {
+                httpServiceResponse.closeConnection();
             }
         }
-        return false;
     }
 
     /**
@@ -293,34 +299,41 @@ public class AdminUISessionService {
             body.put("redirect_uri", tokenRequest.getRedirectUri());
             body.put("client_id", tokenRequest.getAuthUsername());
 
-            HttpServiceResponse httpServiceResponse = httpService
-                    .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), CommonUtils.toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
-                            "Basic ");
-            String jsonString = null;
-            if (httpServiceResponse.getHttpResponse() != null
-                    && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
+            HttpServiceResponse httpServiceResponse = null;
+            try {
+                httpServiceResponse = httpService
+                        .executePost(tokenEndpoint, tokenRequest.getEncodedCredentials(), CommonUtils.toUrlEncodedString(body), ContentType.APPLICATION_FORM_URLENCODED,
+                                "Basic ");
+                String jsonString = null;
+                if (httpServiceResponse != null && httpServiceResponse.getHttpResponse() != null
+                        && httpServiceResponse.getHttpResponse().getStatusLine() != null) {
 
-                logger.debug(
-                        " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
-                        httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
-                        httpServiceResponse.getHttpResponse().getEntity());
-                if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
-                    ObjectMapper mapper = new ObjectMapper();
+                    logger.debug(
+                            " FINAL  httpServiceResponse.getHttpResponse():{}, httpServiceResponse.getHttpResponse().getStatusLine():{}, httpServiceResponse.getHttpResponse().getEntity():{}",
+                            httpServiceResponse.getHttpResponse(), httpServiceResponse.getHttpResponse().getStatusLine(),
+                            httpServiceResponse.getHttpResponse().getEntity());
+                    if (httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode() == 200) {
+                        ObjectMapper mapper = new ObjectMapper();
 
-                    HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
-                    if (httpEntity != null) {
-                        jsonString = httpService.getContent(httpEntity);
+                        HttpEntity httpEntity = httpServiceResponse.getHttpResponse().getEntity();
+                        if (httpEntity != null) {
+                            jsonString = httpService.getContent(httpEntity);
 
-                        HashMap<String, Object> tokenMap = mapper.readValue(jsonString, HashMap.class);
-                        tokenMap.remove("token_type");
-                        return tokenMap;
+                            HashMap<String, Object> tokenMap = mapper.readValue(jsonString, HashMap.class);
+                            tokenMap.remove("token_type");
+                            return tokenMap;
+                        }
+                        logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response entity is null.");
                     }
-                    logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response entity is null.");
-                }
 
+                }
+                logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response is null.");
+                throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), TOKEN_GENERATION_ERROR + "Response is null.");
+            } finally {
+                if (httpServiceResponse != null) {
+                    httpServiceResponse.closeConnection();
+                }
             }
-            logger.error(TOKEN_GENERATION_ERROR + ": {}", "Response is null.");
-            throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), TOKEN_GENERATION_ERROR + "Response is null.");
         } catch (Exception e) {
             logger.error(TOKEN_GENERATION_ERROR, e);
             throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage());
