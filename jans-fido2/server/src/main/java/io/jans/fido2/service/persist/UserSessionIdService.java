@@ -117,8 +117,8 @@ public class UserSessionIdService {
 
         String sessionUserDn = entity.getUserDn();
         if (StringHelper.isNotEmpty(sessionUserDn)) {
-            String expectedPrefix = "inum=" + StringHelper.toLowerCase(userInum) + ",";
-            if (StringHelper.isEmpty(userInum) || !StringHelper.toLowerCase(sessionUserDn).startsWith(expectedPrefix)) {
+            if (StringHelper.isEmpty(userInum)
+                    || !StringHelper.toLowerCase(sessionUserDn).startsWith("inum=" + userInum.toLowerCase() + ",")) {
                 log.warn("Session '{}' belongs to another user, it will not be updated", entity.getId());
                 return false;
             }

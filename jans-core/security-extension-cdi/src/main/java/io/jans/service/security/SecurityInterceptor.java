@@ -49,7 +49,7 @@ public class SecurityInterceptor implements Serializable {
         }
 
         // SecurityChecking restrictions
-        Secure[] constraints = (is == null) ? new Secure[0] : is.value();
+        Secure[] constraints = is.value();
 
         // Getting the parameter values
         Map<String, Object> secureVars = computeParameterValues(ctx);

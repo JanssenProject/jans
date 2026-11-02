@@ -53,6 +53,9 @@ public class LdapConfigurationService {
 
     public void save(List<GluuLdapConfiguration> ldapConfigurations) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
+        if (configuration == null) {
+            throw new IllegalStateException("Jans configuration entry not found");
+        }
         List<IDPAuthConf> idpAuthn = new ArrayList<>();
         if (configuration.getIdpAuthn() != null) {
             configuration.getIdpAuthn().stream().filter(c -> !isLdapAuthConf(c)).forEach(idpAuthn::add);

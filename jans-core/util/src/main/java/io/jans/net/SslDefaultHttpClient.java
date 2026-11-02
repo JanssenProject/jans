@@ -126,7 +126,7 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
         KeyStore keyStore = getKeyStore(this.keyStoreType, this.keyStorePath, this.keyStorePassword);
 
         KeyManagerFactory kmFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmFactory.init(keyStore, this.keyStorePassword.toCharArray());
+        kmFactory.init(keyStore, this.keyStorePassword == null ? null : this.keyStorePassword.toCharArray());
 
         return kmFactory.getKeyManagers();
     }

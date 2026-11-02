@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,7 +26,7 @@ public class RsResource implements Serializable {
     @JsonProperty(value = "exp")
     private Integer exp;
 
-    private volatile Map<String, Condition> httpMethodToCondition = null;
+    private final AtomicReference<Map<String, Condition>> httpMethodToCondition = new AtomicReference<>();
 
     public String getPath() {
         return path;
@@ -41,7 +42,7 @@ public class RsResource implements Serializable {
 
     public void setConditions(List<Condition> conditions) {
         this.conditions = conditions;
-        this.httpMethodToCondition = null;
+        this.httpMethodToCondition.set(null);
     }
 
     public List<String> scopes(String httpMethod) {
@@ -89,10 +90,10 @@ public class RsResource implements Serializable {
     }
 
     public Map<String, Condition> getConditionMap() {
-        Map<String, Condition> map = httpMethodToCondition;
+        Map<String, Condition> map = httpMethodToCondition.get();
         if (map == null) {
             map = buildMap();
-            httpMethodToCondition = map;
+            httpMethodToCondition.set(map);
         }
         return map;
     }
