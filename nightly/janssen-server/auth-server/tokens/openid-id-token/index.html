@@ -2434,12 +2434,17 @@ claim of the resulting <code>id_token</code>. See
 <a href="../../../developer/agama/jans-agama-engine/#authentication-and-finish">Authentication and <code>Finish</code></a>
 for details.</p>
 <h2 id="obtaining-an-id-token">Obtaining an ID Token<a class="headerlink" href="#obtaining-an-id-token" title="Permanent link">#</a></h2>
-<p>The client may obtain an ID Token in the authorization response, from the
-token endpoint, or both. Note, if you intend to use the Code Flow, and you
-don't intend to validate the <code>c_hash</code> or <code>s_hash</code> values in the ID Token
-returned from the authorization endpoint, don't check <code>id_token</code> in the
-response_type for the authorization endpoint, as it will waste compute and
-storage generating a token you don't need.</p>
+<p>In the OpenID Connect Authorization Code Flow, the client obtains an ID Token
+from the token endpoint after exchanging the authorization code. Clients
+should use PKCE with the <code>S256</code> code challenge method to protect the
+authorization code.</p>
+<p>OpenID Connect also defines Implicit and Hybrid Flows, which can return
+an ID Token in the authorization response. These flows are supported for
+legacy compatibility but are not recommended for new OAuth 2.1-aligned
+integrations.</p>
+<p>For new integrations, use the Authorization Code Flow with PKCE and request
+<code>response_type=code</code> rather than requesting an ID Token directly in the
+authorization response.</p>
 <h2 id="validating-an-id-token">Validating an ID Token<a class="headerlink" href="#validating-an-id-token" title="Permanent link">#</a></h2>
 <p>At a minimum, client developers should always validate the following:</p>
 <ul>
@@ -2525,7 +2530,7 @@ assertion is much longer.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 25, 2026
+    November 01, 2026
   </span>
 
     

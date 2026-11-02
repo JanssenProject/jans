@@ -30,7 +30,7 @@
     
     
       
-        <title>OAuth 2.0 Authorization Code Grant - Janssen Documentation</title>
+        <title>Authorization Code Grant - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth-20-authorization-code-grant" class="md-skip">
+        <a href="#authorization-code-grant" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OAuth 2.0 Authorization Code Grant
+              Authorization Code Grant
             
           </span>
         </div>
@@ -2344,30 +2344,31 @@
   
 
 
-<h1 id="oauth-20-authorization-code-grant">OAuth 2.0 Authorization Code Grant<a class="headerlink" href="#oauth-20-authorization-code-grant" title="Permanent link">#</a></h1>
-<p>The <a href="https://tools.ietf.org/html/rfc6749#section-1.3.1">Authorization Code grant type</a> is used by confidential and public clients to exchange an authorization code for an access token.
-After the user returns to the client via the redirect URL, the application will get the authorization code from the URL and use it to request an access token.</p>
+<h1 id="authorization-code-grant">Authorization Code Grant<a class="headerlink" href="#authorization-code-grant" title="Permanent link">#</a></h1>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1">Authorization Code Grant</a> enables public and confidential clients to obtain access tokens through an authorization code issued by the Janssen Authentication Server.</p>
+<p>The client initiates an authorization request and redirects the user to Janssen for authentication and, when required, consent. After successful authorization, Janssen redirects the user back to the client's registered redirect URI with an authorization code. The client then exchanges this code at the token endpoint to obtain an access token and, when applicable, additional tokens.</p>
+<p>Janssen requires Proof Key for Code Exchange (PKCE) by default for the Authorization Code Grant, using the <code>S256</code> code challenge method. PKCE binds the authorization request to the token request and helps protect against authorization code interception. Legacy configurations may allow PKCE enforcement to be disabled, but PKCE should remain enabled for OAuth 2.1-aligned applications.</p>
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
 <pre class="mermaid"><code>
 sequenceDiagram
-    title Authorization code flow
-    autonumber 1
+    title Authorization Code Flow with PKCE
+    autonumber
 
-    participant User as Resource owner User 
+    participant User as Resource owner User
     participant Client
     participant Jans as Jans AS
     participant RS as Resource Server
 
-    activate User
-    Client-&gt;&gt;Jans: Authorization Request
-    activate Client 
+    Client-&gt;&gt;Client: Generate code_verifier and code_challenge (S256)
+    Client-&gt;&gt;Jans: Authorization Request (code_challenge, code_challenge_method=S256)
+    activate Client
     activate Jans
     User-&gt;&gt;Jans: User login and consent
     Jans--&gt;&gt;Client: Authorization code response
     deactivate Client
     deactivate Jans
 
-    Client-&gt;&gt;Jans: Exchange code for Access Token
+    Client-&gt;&gt;Jans: Exchange code for Access Token (code_verifier)
     activate Client
     activate Jans
     Jans--&gt;&gt;Client: Access Token with optional Refresh Token
@@ -2390,28 +2391,34 @@ sequenceDiagram
     deactivate Client
     deactivate RS
 
-    Client-&gt;&gt;Jans: Refresh Token
-    activate Client
-    activate Jans
-    Jans--&gt;&gt;Client: Access Token with optional Refresh Token
-    deactivate Client
-    deactivate Jans
-    deactivate User
+    opt Refresh Token available
+        Client-&gt;&gt;Jans: Refresh Token Request
+        activate Client
+        activate Jans
+        Jans--&gt;&gt;Client: Access Token with optional Refresh Token
+        deactivate Client
+        deactivate Jans
+    end
 </code></pre>
 <h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java</p>
+<p>Refer to the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java">Authorization Code Flow integration test</a></p>
 </li>
 <li>
 <p>On a browser access 
-<code>https://my.jans.server/jans-auth/restv1/authorize?redirect_uri=https://my-redirect-app:8080&amp;client_id=Put_client_id_here&amp;scope=username+openid&amp;response_type=code</code>
-Based on the default authentication method set (acr), the user will be presented with credentials for login. The OpenID Provider (Gluu Server) verifies the user’s identity and authenticates the user.
-In the back channel the following steps take place :</p>
+<code>https://my.jans.server/jans-auth/restv1/authorize?redirect_uri=https%3A%2F%2Fmy-redirect-app%3A8080&amp;client_id=Put_client_id_here&amp;scope=openid%20profile&amp;response_type=code&amp;code_challenge=GENERATED_CODE_CHALLENGE&amp;code_challenge_method=S256&amp;state=RANDOM_STATE_VALUE</code> </p>
+<p>Based on the configured authentication method (<code>acr</code>), the Janssen Authentication Server prompts the user to authenticate and obtains consent when required.</p>
 </li>
-<li>The OpenID Provider (Gluu Server) sends the user back to the application with an authorization code.</li>
-<li>The application sends the code to the Token Endpoint to receive an Access Token and ID Token in the response.</li>
-<li>The application uses the ID Token to authorize the user. At this point the application/RP can access the UserInfo endpoint for claims.</li>
+<li>
+<p>After successful authentication, the following steps take place:</p>
+<ul>
+<li>Janssen redirects the user back to the application's registered redirect URI with an authorization code.</li>
+<li>The application sends the authorization code and the original PKCE <code>code_verifier</code> to the Janssen token endpoint.</li>
+<li>Janssen validates the authorization code and PKCE verifier, then issues an access token and, for an OpenID Connect request containing the <code>openid</code> scope, an ID token. A refresh token may also be issued when applicable.</li>
+<li>The application validates the ID token to obtain authentication information about the user and uses the access token to access protected resources or retrieve user claims from the UserInfo endpoint.</li>
+</ul>
+</li>
 </ol>
 
 
@@ -2483,7 +2490,7 @@ In the back channel the following steps take place :</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 01, 2026
   </span>
 
     

@@ -9,7 +9,7 @@ Learn more about each part of the validation process:
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
 - [Schema and Claims Compatibility](#schema-and-claims-compatibility): How Cedar schema must match JWT payload structure.
-- [JWT Status Validation](#jwt-status-validation): Checks if a token has been explicitly revoked.
+- [JWT Status Validation](#jwt-status-validation): Checks if a token has been revoked or suspended.
 - [Local JWKS](#local-jwks): Using local key stores for testing.
 
 **Key Configuration Properties:**
@@ -64,8 +64,6 @@ You **MUST** declare its token type in `trusted-issuers.json`, with a discovery 
 }
 ```
 
-Only token types declared this way are validated. All other tokens are dropped.
-
 ### Validation Requirements
 
 In summary, for a token to be validated by Cedarling, two conditions must be met:
@@ -107,7 +105,7 @@ You can specify required claims in a token type's entry. If `exp` or `nbf` are i
 }
 ```
 
-The above configuration means that any `Jans::Access_token` must contain both the `exp` and `client_id` claims, or it will be dropped. Registered claims like `exp` and `nbf` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards (e.g., checking that the token is not expired).
+The above configuration means that any `Jans::Access_token` must contain both the `exp` and `client_id` claims, or it will be dropped.
 
 ## Schema and Claims Compatibility
 
@@ -167,13 +165,11 @@ Cedar schema types must match the JWT claim value types:
 | Record (`{ field: Type }`) | JSON object |
 | Entity reference | Resolved from built entities |
 
-A type mismatch on a **required** attribute causes an error. A type mismatch on an **optional** attribute causes the attribute to be silently skipped.
-
 ## JWT Status Validation
 
 Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft.
 
-This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
+This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property. An issuer with a static JWKS, or without a `status_list_endpoint`, has no Status List, so its tokens that carry a `status` claim are rejected.
 
 > ℹ️ **Use Case**
 >
@@ -183,15 +179,26 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 
 By design, the refresh interval for the Status List JWT is driven by the `ttl` claim **inside the Status List JWT itself**, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every `ttl` seconds.
 
-The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` (default `300` seconds) caps that interval: the effective refresh interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`, so the issuer can always request a *more frequent* refresh, but never a less frequent one. When the issuer omits the `ttl` claim, the max value is used directly so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds are clamped up to `5` seconds.
+The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps that interval, so the issuer can request a more frequent refresh, but never a less frequent one:
+
+- The effective interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`.
+- Without a `ttl` claim, the max value is used, so the cache cannot go stale forever.
+- `0` or an unset variable means the default, `300` seconds.
+- Non-zero values below `5` seconds are raised to `5` seconds.
 
 Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+JWTs (JSON Web Tokens) contain authorization information that the Cedarling uses to construct token entities in the `authorize_multi_issuer` flow. The Cedarling runs these checks on each JWT:
 
-![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
+- **Claims**, such as `exp`: always checked.
+- **Signature**: checked against the issuer's JWKS when `CEDARLING_JWT_SIG_VALIDATION` is enabled. When it is disabled, the JWT is decoded without verification.
+- **Status**: checked against the issuer's Status List when `CEDARLING_JWT_STATUS_VALIDATION` is enabled and the issuer publishes a `status_list_endpoint`. The `Invalid` and `Suspended` statuses fail validation.
+
+A token that fails any check is dropped. Cedarling logs the failure when the configured logger is enabled.
+
+![Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List](../../assets/cedarling/cedarling-jwt-validation.png)
 
 ## Local JWKS
 

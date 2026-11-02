@@ -30,7 +30,7 @@
     
     
       
-        <title>OAuth 2.0 Device Authorization Grant - Janssen Documentation</title>
+        <title>Device Authorization Grant - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth-20-device-authorization-grant" class="md-skip">
+        <a href="#device-authorization-grant" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OAuth 2.0 Device Authorization Grant
+              Device Authorization Grant
             
           </span>
         </div>
@@ -2678,37 +2678,43 @@
   
 
 
-<h1 id="oauth-20-device-authorization-grant">OAuth 2.0 Device Authorization Grant<a class="headerlink" href="#oauth-20-device-authorization-grant" title="Permanent link">#</a></h1>
-<p>This OAuth 2.0 protocol extension enables OAuth clients to request user authorization from applications on devices (e.g. smart TVs, media consoles, printers) that  are <strong>input-constrained</strong> or <strong>browser-less</strong> . The authorization flow defined by this <a href="https://tools.ietf.org/html/rfc8628">RFC 8628</a>, sometimes referred to as the "device flow", instructs the user to review the authorization request on a secondary device, such as a smartphone or a personal computer, which has the requisite input and browser capabilities to complete the user interaction.</p>
+<h1 id="device-authorization-grant">Device Authorization Grant<a class="headerlink" href="#device-authorization-grant" title="Permanent link">#</a></h1>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc8628">OAuth 2.0 Device Authorization Grant (RFC 8628)</a> enables applications running on input-constrained or browserless devices, such as smart TVs, media consoles, and printers, to obtain user authorization.</p>
+<p>In this flow, the device requests authorization from the Janssen Authentication Server and displays a verification URL and user code. The user opens the verification URL on another device, such as a smartphone or computer, to authenticate and approve the request. Meanwhile, the requesting device polls the Janssen token endpoint until authorization is completed or the request expires.</p>
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
-<p><img alt="" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device_auth_flow.png" /></p>
-<p>Paste the following source text of the sequence diagram on <a href="https://sequencediagram.org/">sequencediagram.org</a>
-<div class="highlight"><pre><span></span><code>title Oauth2.0 Device Authorization flow
+<pre class="mermaid"><code>
+sequenceDiagram
+    title OAuth 2.0 Device Authorization Flow
+    autonumber
 
-participant User
-participant Browser on Computer / Smartphone
-participant Device App
-participant Jans AS
-participant Third Party App
+    participant User
+    participant Browser as User's Browser
+    participant Device as Device App
+    participant Jans as Jans AS
+    participant ThirdParty as Third Party App
 
-User-&gt;Device App:Opens an app on device
-Device App-&gt;Jans AS:Sends authorization request \n&quot;jans-server.com/jans-auth/restv1/device_authorization&quot;
-Jans AS-&gt;Device App:Response - \nuser_code, device_code, verification_url, interval, expiration
-Device App -&gt;User: Instructs the user to access Verification URL \nand enter user_code
-note over Device App:Device App will keep polling AS for Access Token \nuntil device authorization is completed
-loop till Device App recieves Access Token:
-Device App-&gt;Jans AS:request Access Token
-Jans AS-&gt;Device App:Response - \naccess_denied \nOR expired_token \nOR authorization_pending \nOR Access token
-end 
-User-&gt;Browser on Computer / Smartphone:Opens a browser \nand access verification URL
-Browser on Computer / Smartphone-&gt;Jans AS:send user_code to verification URL
-Browser on Computer / Smartphone &lt;-Jans AS:Login and authorization prompt
-Browser on Computer / Smartphone-&gt;Jans AS:Authentication and consent
-Jans AS-&gt;Jans AS: Mark device as Authorized
-note over Jans AS:Subsequent polling by the Device App \nwill return an Access Token as indicated \nby the loop above
-Device App-&gt;Third Party App:Invoke API with Access Token
-Third Party App-&gt;Device App: return Response
-</code></pre></div></p>
+    User-&gt;&gt;Device: Opens an app on device
+    Device-&gt;&gt;Jans: Device authorization request
+    Jans--&gt;&gt;Device: user_code, device_code, verification_uri, interval, expires_in
+    Device--&gt;&gt;User: Display verification URI and user_code
+
+    Note over Device,Jans: Device polls the token endpoint at the required interval
+
+    Device-&gt;&gt;Jans: Token request with device_code
+    Jans--&gt;&gt;Device: authorization_pending
+
+    User-&gt;&gt;Browser: Opens verification URI
+    Browser-&gt;&gt;Jans: Submits user_code
+    Jans--&gt;&gt;Browser: Login and authorization prompt
+    Browser-&gt;&gt;Jans: Authentication and consent
+    Jans-&gt;&gt;Jans: Mark device as authorized
+
+    Device-&gt;&gt;Jans: Poll token endpoint with device_code
+    Jans--&gt;&gt;Device: Access token
+
+    Device-&gt;&gt;ThirdParty: Invoke API with access token
+    ThirdParty--&gt;&gt;Device: API response
+</code></pre>
 <h2 id="user-experience">User Experience<a class="headerlink" href="#user-experience" title="Permanent link">#</a></h2>
 <ol>
 <li>First, the user requests authorization from the device:</li>
@@ -2828,7 +2834,7 @@ Server: Jetty(9.4.19.v20190610)
 <p>The user will need to put <code>user_code</code> value in the browser and after that, he will be redirected to the common authorization flow, it requires login whether there is no session between the user-agent and the Jans server and grant the permissions based on the device request.</p>
 <h2 id="poll-token">Poll Token<a class="headerlink" href="#poll-token" title="Permanent link">#</a></h2>
 <p>Since the user will be using a separate device to navigate to the <code>verification_url</code> and grant or deny access, the requesting device is not automatically notified when the user responds to the access request. For that reason, the requesting device needs to poll the Jans Server to determine when the user has responded to the request.</p>
-<p>The requesting device should continue sending polling requests until it receives a response indicating that the user has responded to the access request or until the <code>device_code</code> expires. The parameter <code>interval</code> returned in step 2 specifies the amount of time, in seconds, to wait between requests.</p>
+<p>The requesting device continues polling the token endpoint while authorization is pending, until it receives a successful token response, a terminal error, or the <code>device_code</code> expires. The <code>interval</code> parameter returned by the device authorization endpoint specifies the minimum number of seconds between polling requests. If the server returns a <code>slow_down</code> error, the device must increase the polling interval by at least five seconds.</p>
 <p>The URL of the endpoint to poll is <code>/jans-auth/restv1/token</code>. The polling request contains the following parameters:</p>
 <h4 id="parameters_1">Parameters<a class="headerlink" href="#parameters_1" title="Permanent link">#</a></h4>
 <table>
@@ -2865,8 +2871,8 @@ grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Adevice_code&amp;device_cod
 <h3 id="token-response">Token Response<a class="headerlink" href="#token-response" title="Permanent link">#</a></h3>
 <p>The Jans authorization server responds to each polling request with one of the following responses:</p>
 <p><strong>Access granted</strong></p>
-<p>If the user granted access to the device (by clicking <code>Allow</code> on the consent screen), then the response contains an access token and a refresh token. The tokens enable the device to access to the resource server on the user's behalf.</p>
-<p>In this case, the server responds with all tokens required and allowed to be issued depending on the configuration in the server.</p>
+<p>If the user grants access to the device, the Janssen Authentication Server returns an access token. A refresh token and an ID token may also be issued, depending on the requested scopes and server configuration.</p>
+<p>The device can use the access token to access protected resources on the user's behalf.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 200
 Content-Length: 858
@@ -2922,7 +2928,7 @@ Server: Jetty(9.4.19.v20190610)
 <p><strong>Other errors</strong>
 This token endpoint can return any error code already defined, for example whether client can't be authenticated or the grant type sent is invalid. Some of them could be: <code>invalid_client</code>, <code>invalid_grant</code>, <code>invalid_request</code> and others.</p>
 <h3 id="customizing-device-grant-page">Customizing Device Grant page<a class="headerlink" href="#customizing-device-grant-page" title="Permanent link">#</a></h3>
-<p>More about customising <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml">this page</a>  to include your organization's stylesheets, images and content in this <a href="https://jans.io/docs/developer/customization/customize-web-pages.md">article</a></p>
+<p>To customize the Device Authorization page with your organization's stylesheets, images, and content, refer to the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/device_authorization.xhtml">Device Authorization page source</a> and the <a href="../../../developer/customization/customize-web-pages/">Customize Web Pages guide</a>.</p>
 
 
   <nav class="md-tags" >
@@ -2993,7 +2999,7 @@ This token endpoint can return any error code already defined, for example wheth
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 15, 2025
+    November 01, 2026
   </span>
 
     

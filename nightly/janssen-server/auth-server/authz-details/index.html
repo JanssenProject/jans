@@ -2231,9 +2231,15 @@ It means that for example above administrator must define two <code>AuthzDetailT
 <p>Sample Authorization Request
 <div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorize HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
+Content-Type: application/x-www-form-urlencoded
 
-response_type=code&amp;client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&amp;scope=openid+profile+address+email+phone+user_name&amp;redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&amp;state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&amp;nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D
+response_type=code&amp;client_id=7a29bf35-96ec-4bbd-a05c-15e1ff9f07cc&amp;scope=openid+profile+address+email+phone+user_name&amp;redirect_uri=https%3A%2F%2Fyuriyz-relaxed-jawfish.gluu.info%2Fjans-auth-rp%2Fhome.htm&amp;state=6cdc7701-178c-4653-adac-5c1e9c6c4aba&amp;nonce=b9a1ecc4-548e-475c-8b29-f019417e1aef&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;authorization_details=%5B%0A++%7B%0A++++%22type%22%3A+%22demo_authz_detail%22%2C%0A++++%22actions%22%3A+%5B%0A++++++%22list_accounts%22%2C%0A++++++%22read_balances%22%0A++++%5D%2C%0A++++%22locations%22%3A+%5B%0A++++++%22https%3A%2F%2Fexample.com%2Faccounts%22%0A++++%5D%2C%0A++++%22ui_representation%22%3A+%22Read+balances+and+list+accounts+at+https%3A%2F%2Fexample.com%2Faccounts%22%0A++%7D%0A%5D&amp;code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&amp;code_challenge_method=S256
 </code></pre></div></p>
+<p>For the Authorization Code flow, clients should use PKCE with the <code>S256</code>
+code challenge method. The client generates a <code>code_verifier</code>, derives
+the <code>code_challenge</code> using SHA-256 and Base64URL encoding, and includes
+the challenge in the authorization request. The original <code>code_verifier</code>
+is sent during the subsequent token request.</p>
 <p>Request is rejected if request's <code>authorization_details</code> has types which does not have corresponding <code>AuthzDetailType</code> custom script.</p>
 <p>Check more details about <a href="../../../script-catalog/authz_detail/AuthzDetail.java"><code>AuthzDetailType</code> custom scripts</a></p>
 <h3 id="as-metadata-discovery">AS Metadata (Discovery)<a class="headerlink" href="#as-metadata-discovery" title="Permanent link">#</a></h3>
@@ -2258,7 +2264,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-  &quot;grant_types&quot; : [ &quot;authorization_code&quot;, &quot;implicit&quot; ],
+  &quot;grant_types&quot; : [ &quot;authorization_code&quot; ],
   &quot;subject_type&quot; : &quot;public&quot;,
   &quot;application_type&quot; : &quot;web&quot;,
   &quot;authorization_details_types&quot; : [ &quot;demo_authz_detail&quot; ],
@@ -2308,8 +2314,7 @@ X-Xss-Protection: 1; mode=block
     &quot;id_token_signed_response_alg&quot;: &quot;RS256&quot;,
     &quot;access_token_as_jwt&quot;: false,
     &quot;grant_types&quot;: [
-        &quot;authorization_code&quot;,
-        &quot;implicit&quot;
+        &quot;authorization_code&quot;
     ],
     &quot;subject_type&quot;: &quot;public&quot;,
     &quot;authorization_details_types&quot;: [&quot;demo_authz_detail&quot;],
@@ -2386,7 +2391,7 @@ X-Xss-Protection: 1; mode=block
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 04, 2025
+    November 01, 2026
   </span>
 
     

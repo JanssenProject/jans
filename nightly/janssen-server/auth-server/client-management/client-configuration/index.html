@@ -2614,15 +2614,24 @@ framework</a> and
 <ul>
 <li>Redirect URI should be an <strong>absolute URI</strong>. For instance, URI should not have wildcard characters. As recommended
   <a href="https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2">here</a></li>
-<li><strong>Redirect Regex</strong>: Janssen Server enables clients to allow redirect URIs that conform to a regular expression(regex)
+<li>
+<p><strong>Redirect Regex</strong>: Janssen Server enables clients to allow redirect URIs that conform to a regular expression(regex)
   pattern. While validating redirect URIs received in an incoming request, the Janssen Server first looks at the list
   of statically registered URI as part of <code>Redirect URIs</code> and then checks if any of the redirect URI from the request
   matches with the regex provided by the client. Great care should be exercised when using regex to ensure that it
   accurately matches with the intended patterns only. This feature can be turned on or off via
-  <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/">feature flag</a></li>
-<li>When using client type as <code>web</code>, the redirect URI generally takes the form of <code>&lt;schema&gt;://&lt;host-name&gt;:&lt;port&gt;/&lt;path&gt;</code>.
+  <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/">feature flag</a></p>
+<p>For new integrations, register exact redirect URIs whenever possible.
+Avoid broad regular expressions or wildcard-style matching because
+they can allow authorization responses to be redirected to unintended
+destinations. Use redirect URI regular expressions only when required
+for compatibility, and restrict them to explicitly trusted destinations.</p>
+</li>
+<li>
+<p>When using client type as <code>web</code>, the redirect URI generally takes the form of <code>&lt;schema&gt;://&lt;host-name&gt;:&lt;port&gt;/&lt;path&gt;</code>.
   It must use <code>https</code> schema. The exception to <strong>schema rule</strong> is made when<br />
-<code>localhost</code> or loopback ip <code>127.0.0.1</code> is used as the hostname. </li>
+<code>localhost</code> or loopback ip <code>127.0.0.1</code> is used as the hostname. </p>
+</li>
 <li>Prefer to use the loopback IP instead of <code>localhost</code> as hostname to facilitate <strong>local testing</strong> as
   recommended in <a href="https://www.rfc-editor.org/rfc/rfc8252#section-8.3">OAuth 2.0 native app specification section 8.3</a></li>
 <li>Janssen Server supports all <a href="https://datatracker.ietf.org/doc/html/rfc8252#section-7">methods of redirection</a> used by
@@ -2705,12 +2714,12 @@ tokens. The table below shows grant types and flows that should be used for vari
 <tr>
 <td>Server backend of a web-application needs access token</td>
 <td><code>authorization_code</code></td>
-<td>Authorization Code</td>
+<td>Authorization Code with PKCE</td>
 </tr>
 <tr>
-<td>Web-application that needs user information via id_token on browser and access token on backend</td>
+<td>Web application requiring an ID token and an access token</td>
 <td><code>authorization_code</code></td>
-<td>Hybrid Flow</td>
+<td>OpenID Connect Authorization Code with PKCE</td>
 </tr>
 <tr>
 <td>Browser based single page applications or Mobile applications</td>
@@ -2718,9 +2727,9 @@ tokens. The table below shows grant types and flows that should be used for vari
 <td>Authorization Code with PKCE</td>
 </tr>
 <tr>
-<td>Browser based single page applications or Mobile applications that only intend to get id_token</td>
-<td>-</td>
-<td>Implicit Flow with Form Post</td>
+<td>Browser-based or mobile application requiring only an ID token</td>
+<td><code>authorization_code</code></td>
+<td>OpenID Connect Authorization Code with PKCE</td>
 </tr>
 <tr>
 <td>Input constrained devices (Example: TV)</td>
@@ -2728,16 +2737,27 @@ tokens. The table below shows grant types and flows that should be used for vari
 <td>Device Flow</td>
 </tr>
 <tr>
-<td>Highly trusted applications where redirect based flows are not feasible to implement</td>
-<td><code>password</code></td>
+<td>Existing legacy integrations only</td>
+<td><code>password</code> (legacy; not recommended)</td>
 <td>Resource Owner Password Flow</td>
 </tr>
 </tbody>
 </table>
+<p>For new applications, use the Authorization Code Flow with PKCE
+(<code>code_challenge_method=S256</code>) when user authorization is required.
+This recommendation applies to both public and confidential clients.</p>
+<p>Janssen Server may continue to support the Implicit Flow, Hybrid Flow,
+and Resource Owner Password Credentials Grant for compatibility with
+existing applications. However, these flows are not recommended for
+new integrations. Existing clients should migrate to the Authorization
+Code Flow with PKCE where applicable.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Certain grant types should not be used together. For example, implicit flow with hybrid flow. Or using authorization
-code flow with hybrid flow. This allows a downgrade attack from more secure flow to less secure flow.</p>
+<p>Configure only the grant types and response types required by the
+client. Avoid enabling legacy implicit or hybrid response types
+alongside Authorization Code Flow unless needed for an existing
+integration. Restricting unnecessary response types reduces the
+risk of authorization flow downgrade attacks.</p>
 </div>
 <h2 id="pre-authorization">Pre-authorization<a class="headerlink" href="#pre-authorization" title="Permanent link">#</a></h2>
 <p>If the OAuth authorization prompt should not be displayed to end users, set this field to True. This is useful for SSO
@@ -2751,13 +2771,26 @@ defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types ca
 Janssen Server's well-known <a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
-<p>Claim <code>response_types_supported</code> lists all the supported grant types in the response.</p>
+<p>Claim <code>response_types_supported</code> lists all the supported response types in the response.</p>
 <p>When registering client using dynamic client registration, if the <code>response_type</code> parameter is not specified, it'll
 default to <code>code</code>.</p>
 <h3 id="response-type-recommendations">Response Type Recommendations<a class="headerlink" href="#response-type-recommendations" title="Permanent link">#</a></h3>
 <ul>
-<li>Avoid using response type <code>token</code>. This response type is 
-<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#section-10.1">deprecated</a> by OAuth 2.1. </li>
+<li>For new integrations, use <code>response_type=code</code> with PKCE
+  (<code>code_challenge_method=S256</code>).</li>
+<li>Avoid <code>response_type=token</code> and any combination containing it, such as
+  <code>id_token token</code> or <code>code token</code>. OAuth 2.1 removes the Implicit Grant.</li>
+<li>Avoid <code>response_type=id_token</code> and hybrid types such as <code>code id_token</code>
+  for new integrations. These are OpenID Connect response types and are not
+  removed by OAuth 2.1, but they return tokens through the browser. Use
+  <code>response_type=code</code> with PKCE to get the ID Token from the token endpoint.</li>
+<li>By default, Janssen Server rejects authorization requests whose
+  <code>response_type</code> contains <code>token</code> or <code>id_token</code>, because they require the
+  <code>implicit</code> grant type, which is not in the default <code>grantTypesSupported</code>.
+  To support existing applications, add <code>implicit</code> to <code>grantTypesSupported</code>
+  and to the client's grant types. Alternatively, set
+  <code>allowIdTokenWithoutImplicitGrantType</code> to <code>true</code> to allow <code>id_token</code>
+  without the <code>implicit</code> grant.</li>
 <li>Grant types allowed for a client determines which response types are permitted in authorization requests. 
 Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
 authorization requests containing response types not permitted for respective client.</li>
@@ -2820,7 +2853,7 @@ which expected value in seconds.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    March 06, 2026
+    November 01, 2026
   </span>
 
     

@@ -30,7 +30,7 @@
     
     
       
-        <title>OAuth 2.0 client credentials Grant - Janssen Documentation</title>
+        <title>Client credentials Grant - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth-20-client-credentials-grant" class="md-skip">
+        <a href="#client-credentials-grant" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OAuth 2.0 client credentials Grant
+              Client credentials Grant
             
           </span>
         </div>
@@ -2344,34 +2344,48 @@
   
 
 
-<h1 id="oauth-20-client-credentials-grant">OAuth 2.0 client credentials Grant<a class="headerlink" href="#oauth-20-client-credentials-grant" title="Permanent link">#</a></h1>
+<h1 id="client-credentials-grant">Client credentials Grant<a class="headerlink" href="#client-credentials-grant" title="Permanent link">#</a></h1>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.4">Client Credentials Grant</a> allows a confidential client to obtain an access token from the Janssen Authentication Server using its own credentials, without involving an end-user.</p>
+<p>This grant is commonly used for machine-to-machine (M2M) communication, where an application or service needs to access protected resources on its own behalf. The client authenticates directly with the Janssen token endpoint and receives an access token based on its authorized scopes.</p>
 <h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
 <pre class="mermaid"><code>
 sequenceDiagram
-    title Client credentials flow
-    autonumber 1
+    title Client Credentials Flow
+    autonumber
 
     participant Client as Resource owner Client
-    participant JansAS as Jans AS
+    participant Jans as Jans AS
 
-    activate Client
-    Client-&gt;&gt;JansAS:Client Authentication
-    activate JansAS
-    JansAS--&gt;&gt;Client:Access Token
-    deactivate JansAS
+    Client-&gt;&gt;Jans: Token Request (grant_type=client_credentials, client authentication)
+    activate Jans
+    Jans--&gt;&gt;Client: Access Token
+    deactivate Jans
 </code></pre>
 <h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/ClientCredentialsGrantHttpTest.java</p>
+<p>Refer to the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/ClientCredentialsGrantHttpTest.java">Client Credentials Grant integration test</a></p>
 </li>
 <li>
-<p>CURL Command:
-<div class="highlight"><pre><span></span><code>curl -k -u &quot;put_client_id:put_client_secret&quot; https://jans-ui.jans.io/jans-auth/restv1/token \ 
-      -d  &quot;grant_type=client_credentials&amp;scope=put_scope_name_here&quot; 
-</code></pre></div></p>
+<p>Send a token request to the Janssen Authentication Server using the Client Credentials Grant.
+   For a client registered with <code>client_secret_basic</code>, send the credentials in the HTTP Basic
+   <code>Authorization</code> header:</p>
 </li>
 </ol>
+<div class="highlight"><pre><span></span><code><span class="w">   </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://my.jans.server/jans-auth/restv1/token&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-u<span class="w"> </span><span class="s2">&quot;YOUR_CLIENT_ID:YOUR_CLIENT_SECRET&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;scope=YOUR_SCOPE&quot;</span>
+</code></pre></div>
+<p>For a client registered with <code>client_secret_post</code>, send the credentials in the request body
+   instead. The client must have <code>client_secret_post</code> as its <code>token_endpoint_auth_method</code> or in
+   its <code>additional_token_endpoint_auth_methods</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="w">   </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s2">&quot;https://my.jans.server/jans-auth/restv1/token&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>-d<span class="w"> </span><span class="s2">&quot;grant_type=client_credentials&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;client_id=YOUR_CLIENT_ID&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;client_secret=YOUR_CLIENT_SECRET&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">     </span>--data-urlencode<span class="w"> </span><span class="s2">&quot;scope=YOUR_SCOPE&quot;</span>
+</code></pre></div>
 
 
   <nav class="md-tags" >
@@ -2442,7 +2456,7 @@ sequenceDiagram
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 01, 2026
   </span>
 
     

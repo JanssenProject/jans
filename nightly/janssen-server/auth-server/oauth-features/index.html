@@ -30,7 +30,7 @@
     
     
       
-        <title>OpenID Connect Provider (OP) - Janssen Documentation</title>
+        <title>OAuth 2.1 and OAuth 2.0 - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#openid-connect-provider-op" class="md-skip">
+        <a href="#oauth-21-and-oauth-20" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OpenID Connect Provider (OP)
+              OAuth 2.1 and OAuth 2.0
             
           </span>
         </div>
@@ -1881,6 +1881,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#enabling-legacy-oauth-20-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Enabling Legacy OAuth 2.0 Features
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#have-questions-in-the-meantime" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2075,9 +2086,19 @@
   
 
 
-<h1 id="openid-connect-provider-op">OpenID Connect Provider (OP)<a class="headerlink" href="#openid-connect-provider-op" title="Permanent link">#</a></h1>
-<p>The <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server">Janssen Authentication Server</a> has core OAuth 2.0 support as well as many other related specs:</p>
+<h1 id="oauth-21-and-oauth-20">OAuth 2.1 and OAuth 2.0<a class="headerlink" href="#oauth-21-and-oauth-20" title="Permanent link">#</a></h1>
+<p>The <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server">Janssen Authentication Server</a> follows OAuth 2.1 by default, along with related specifications and extensions. Out of the box:</p>
 <ul>
+<li>The Authorization Code Grant requires Proof Key for Code Exchange (PKCE) with the <code>S256</code> challenge method. The <code>plain</code> method is not accepted.</li>
+<li>The Implicit Grant and the Resource Owner Password Credentials (ROPC) Grant are not in the default supported grant types.</li>
+<li>The UserInfo endpoint does not accept access tokens in the URL query.</li>
+<li>Public clients receive a new refresh token on every refresh.</li>
+<li>Authorization responses include the <code>iss</code> parameter.</li>
+</ul>
+<p>For backward compatibility, Janssen still supports OAuth 2.0 features that OAuth 2.1 removes or discourages. See <a href="#enabling-legacy-oauth-20-features">Enabling Legacy OAuth 2.0 Features</a>.</p>
+<p>The Janssen Authentication Server supports the following OAuth specifications and related extensions:</p>
+<ul>
+<li>The OAuth 2.1 Authorization Framework <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/">(spec draft)</a></li>
 <li>The OAuth 2.0 Authorization Framework <a href="https://datatracker.ietf.org/doc/html/rfc6749">(spec)</a></li>
 <li>The OAuth 2.0 Authorization Framework: Bearer Token Usage <a href="https://datatracker.ietf.org/doc/html/rfc6750">(spec)</a></li>
 <li>JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens <a href="https://datatracker.ietf.org/doc/html/rfc9068">(spec)</a></li>
@@ -2087,11 +2108,11 @@
 <li>OAuth 2.0 Token Revocation <a href="https://datatracker.ietf.org/doc/html/rfc7009">(spec)</a></li>
 <li>Proof Key for Code Exchange by OAuth Public Clients (PKCE) <a href="https://datatracker.ietf.org/doc/html/rfc7636">(spec)</a></li>
 <li>OAuth 2.0 for Native Apps <a href="https://datatracker.ietf.org/doc/html/rfc8252">(spec)</a></li>
-<li>OAuth 2.0 Token Exchange <a href="https://datatracker.ietf.org/doc/html/rfc8252">(spec)</a></li>
+<li>OAuth 2.0 Token Exchange <a href="https://datatracker.ietf.org/doc/html/rfc8693">(spec)</a></li>
 <li>OAuth 2.0 Authorization Server Metadata <a href="https://datatracker.ietf.org/doc/html/rfc8414">(spec)</a></li>
 <li>OAuth 2.0 Dynamic Client Registration Protocol <a href="https://datatracker.ietf.org/doc/html/rfc7591">(spec)</a></li>
 <li>OAuth 2.0 Pushed Authorization Requests <a href="https://datatracker.ietf.org/doc/html/rfc9126">(spec)</a></li>
-<li>OAuth 2.0 Demonstrating Proof-of-Possession at the Application Layer (DPoP) <a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-dpop">(spec)</a></li>
+<li>OAuth 2.0 Demonstrating Proof-of-Possession (DPoP) <a href="https://datatracker.ietf.org/doc/html/rfc9449">(spec)</a></li>
 <li>OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens <a href="https://datatracker.ietf.org/doc/html/rfc8705">(spec)</a></li>
 <li>Assertion Framework for OAuth 2.0 Client Authentication and Authorization Grants <a href="https://www.rfc-editor.org/rfc/rfc7521.html">(spec)</a></li>
 <li>JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) <a href="https://openid.net/specs/oauth-v2-jarm.html">(spec)</a></li>
@@ -2106,8 +2127,11 @@
 <li>OpenID Connect Ephemeral Subject Identifier 1.0 <a href="https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html">(spec)</a> <a href="../openid-features/subject-identifiers/#ephemeral-subject-identifiers">(doc)</a></li>
 </ul>
 <h2 id="protocol-overview">Protocol Overview<a class="headerlink" href="#protocol-overview" title="Permanent link">#</a></h2>
-<p>OAuth 2.0 is the industry-standard protocol for authorization. OAuth 2.0 focuses on client developer simplicity providing specific authorization flows for different applications (e.g. web applications, desktop applications, mobile phones, and other devices).</p>
-<p>It's handy to know some OAuth 2.0 terminology:</p>
+<p>OAuth 2.0 is the industry-standard framework for authorization. OAuth 2.1 builds on
+OAuth 2.0 with updated security recommendations and safer defaults for authorization
+flows across different types of applications.</p>
+<p>For new applications, use the Authorization Code Grant with PKCE. OAuth 2.0 grants removed by OAuth 2.1 do remain available in Janssen when explicitly enabled.</p>
+<p>OAuth defines the following four primary roles:</p>
 <ul>
 <li>
 <p><strong>resource owner</strong> - An entity capable of granting access to a protected resource.
@@ -2127,6 +2151,53 @@
 <p><strong>authorization server</strong> - The server issuing access tokens to the client after successfully
                              authenticating the resource owner and obtaining authorization.</p>
 </li>
+</ul>
+<h2 id="enabling-legacy-oauth-20-features">Enabling Legacy OAuth 2.0 Features<a class="headerlink" href="#enabling-legacy-oauth-20-features" title="Permanent link">#</a></h2>
+<p>Janssen supports OAuth 2.0 features that OAuth 2.1 removes or discourages, so that existing
+applications keep working. Each feature has its own setting; there is no single switch.
+These options are not recommended for new integrations.</p>
+<table>
+<thead>
+<tr>
+<th>Legacy feature</th>
+<th>Setting</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./implicit-grant/">Implicit Grant</a> (<code>response_type=token</code>)</td>
+<td>Add <code>implicit</code> to <a href="../../reference/json/properties/janssenauthserver-properties/#granttypessupported"><code>grantTypesSupported</code></a> and to the client's grant types</td>
+</tr>
+<tr>
+<td>OpenID Connect <code>id_token</code> and hybrid response types, such as <code>code id_token</code></td>
+<td>Same as the Implicit Grant, or set <a href="../../reference/json/properties/janssenauthserver-properties/#allowidtokenwithoutimplicitgranttype"><code>allowIdTokenWithoutImplicitGrantType</code></a> to <code>true</code> to allow <code>id_token</code> without the <code>implicit</code> grant</td>
+</tr>
+<tr>
+<td><a href="./password-grant/">Password Grant</a> (Resource Owner Password Credentials)</td>
+<td>Add <code>password</code> to <a href="../../reference/json/properties/janssenauthserver-properties/#granttypessupported"><code>grantTypesSupported</code></a> and to the client's grant types</td>
+</tr>
+<tr>
+<td>Authorization Code without PKCE</td>
+<td>Set <a href="../../reference/json/properties/janssenauthserver-properties/#requirepkce"><code>requirePkce</code></a> to <code>false</code>. PKCE is still required for clients that have <code>requirePkce</code> enabled in their own attributes</td>
+</tr>
+<tr>
+<td>Authorization responses without the <code>iss</code> parameter</td>
+<td>Set <a href="../../reference/json/properties/janssenauthserver-properties/#authorizationresponseissparametersupported"><code>authorizationResponseIssParameterSupported</code></a> to <code>false</code>. See <a href="./authorization-server-issuer-identification/">Issuer Identification</a></td>
+</tr>
+</tbody>
+</table>
+<p>Server properties are set using
+<a href="../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> via
+<code>Auth Server</code>-&gt;<code>Properties</code>. A client's grant types are set via
+<code>Auth Server</code>-&gt;<code>Clients</code>-&gt;select the client-&gt;<code>Basic</code>-&gt;<code>Grant</code>.</p>
+<p>For clients registered using dynamic client registration, the requested grant types must also be in
+<a href="../../reference/json/properties/janssenauthserver-properties/#granttypessupportedbydynamicregistration"><code>grantTypesSupportedByDynamicRegistration</code></a>.
+The default value already includes <code>implicit</code> and <code>password</code>.</p>
+<p>The following OAuth 2.0 behaviors cannot be re-enabled:</p>
+<ul>
+<li>The PKCE <code>plain</code> code challenge method. Only <code>S256</code> is accepted.</li>
+<li>Keeping the same refresh token for public clients. A public client always receives a new
+  refresh token on refresh, even when <code>skipRefreshTokenDuringRefreshing</code> is <code>true</code>.</li>
 </ul>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
 <p>You can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://chat.gluu.org/join/wnsm743ho6byd57r4he2yihn/">community chat on Zulip</a>. Any questions you have will help determine what information our documentation should cover.</p>
@@ -2188,7 +2259,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 23, 2026
+    November 01, 2026
   </span>
 
     

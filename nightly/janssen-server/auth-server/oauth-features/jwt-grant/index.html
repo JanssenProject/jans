@@ -30,7 +30,7 @@
     
     
       
-        <title>OAuth 2.0 JWT Grant - Janssen Documentation</title>
+        <title>JWT Bearer Grant - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth-20-jwt-grant" class="md-skip">
+        <a href="#jwt-bearer-grant" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OAuth 2.0 JWT Grant
+              JWT Bearer Grant
             
           </span>
         </div>
@@ -993,6 +993,23 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  JWT Grant
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="././" class="md-nav__link md-nav__link--active">
         
   
@@ -1008,6 +1025,39 @@
   
 
       </a>
+      
+        
+
+
+  
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Assertion Validation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -2046,6 +2096,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#assertion-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Assertion Validation
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2253,17 +2322,19 @@
   
 
 
-<h1 id="oauth-20-jwt-grant">OAuth 2.0 JWT Grant<a class="headerlink" href="#oauth-20-jwt-grant" title="Permanent link">#</a></h1>
-<p>The <a href="https://datatracker.ietf.org/doc/html/rfc7523">JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants spec</a>.</p>
-<p>JWT Grant is identified by <code>grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</code> at Token Endpoint.</p>
-<p>AS requires client authentication during JWT Grant usage.</p>
-<p><strong>Assertion validation</strong>
-1. Client's <code>jwks</code> or <code>jwks_uri</code> is used to get keys for <code>assertion</code> signature validation
-2. <code>aud</code> claim of <code>assertion</code> must contain AS <code>issuer</code> or otherwise any <code>aud</code> claim value must starts from AS <code>issuer</code> (for example if Token Endpoint address is set in <code>aud</code> claim value)
-3. <code>iss</code> must not be blank. If AS <code>trustedSsaIssuers</code> configuration property is set then AS will validate <code>iss</code> value against <code>trustedSsaIssuers</code> configuration property.
-4. AS validates <code>exp</code> on expiration
-5. AS validates <code>nbf</code> if it's present
-6. <code>sub</code> value must be not empty and not blank </p>
+<h1 id="jwt-bearer-grant">JWT Bearer Grant<a class="headerlink" href="#jwt-bearer-grant" title="Permanent link">#</a></h1>
+<p>The <a href="https://datatracker.ietf.org/doc/html/rfc7523">JSON Web Token (JWT) Profile for OAuth 2.0 Client Authentication and Authorization Grants (RFC 7523)</a> defines how JWT assertions can be used to request access tokens from an authorization server.</p>
+<p>The Janssen Authentication Server supports the JWT Bearer Grant using <code>grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer</code> at the token endpoint. The client submits a signed JWT assertion, which Janssen validates before issuing an access token.</p>
+<p>Janssen requires client authentication when using the JWT Bearer Grant.</p>
+<h2 id="assertion-validation">Assertion Validation<a class="headerlink" href="#assertion-validation" title="Permanent link">#</a></h2>
+<ol>
+<li>Janssen validates the JWT assertion's signature using the public keys obtained from the client's configured <code>jwks</code> or <code>jwks_uri</code>.</li>
+<li><code>aud</code> claim of <code>assertion</code> must contain AS <code>issuer</code> or otherwise any <code>aud</code> claim value must starts from AS <code>issuer</code> (for example if Token Endpoint address is set in <code>aud</code> claim value)</li>
+<li><code>iss</code> must not be blank. If AS <code>trustedSsaIssuers</code> configuration property is set then AS will validate <code>iss</code> value against <code>trustedSsaIssuers</code> configuration property.</li>
+<li><code>exp</code> is required; an assertion without <code>exp</code> or with an expired <code>exp</code> is rejected</li>
+<li>AS validates <code>nbf</code> if it's present</li>
+<li><code>sub</code> value must be not empty and not blank </li>
+</ol>
 <p><strong>Sample of decoded assertion payload</strong></p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="s2">&quot;https://jwt-idp.example.com&quot;</span><span class="p">,</span>
@@ -2285,6 +2356,7 @@ It means that User Info Endpoint can't be called with access token obtains with 
 <div class="highlight"><pre><span></span><code>POST /token HTTP/1.1
 Host: authz.example.net
 Content-Type: application/x-www-form-urlencoded
+Authorization: Basic &lt;base64 encoded&gt;
 
 grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer
 &amp;assertion=eyJhbGciOiJFUzI1NiIsImtpZCI6IjE2In0.
@@ -2378,7 +2450,7 @@ Pragma: no-cache
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 15, 2025
+    November 01, 2026
   </span>
 
     

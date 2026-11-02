@@ -2413,8 +2413,18 @@
 <h1 id="openid-userinfo-token">OpenID Userinfo Token<a class="headerlink" href="#openid-userinfo-token" title="Permanent link">#</a></h1>
 <h2 id="userinfo-jwt"><code>Userinfo</code> JWT<a class="headerlink" href="#userinfo-jwt" title="Permanent link">#</a></h2>
 <p>An OpenID Connect client, after obtaining an access token, can present it
-at the Userinfo endpoint to obtain the Userinfo JWT token. The Userinfo response
-is is described in <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponseValidation">OpenID Core 5.4.3</a>, and directs the developer to:</p>
+at the UserInfo endpoint to obtain a UserInfo response. The response is
+returned as JSON by default, or as a JWT when signing or encryption is configured.</p>
+<p>Clients should send the access token to the UserInfo endpoint using the
+HTTP <code>Authorization</code> header with the <code>Bearer</code> authentication scheme.</p>
+<p>For example:</p>
+<div class="highlight"><pre><span></span><code><span class="nf">GET</span> <span class="nn">/jans-auth/restv1/userinfo</span> <span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span>
+<span class="na">Host</span><span class="o">:</span> <span class="l">&lt;jans-host&gt;</span>
+<span class="na">Authorization</span><span class="o">:</span> <span class="l">Bearer &lt;access_token&gt;</span>
+</code></pre></div>
+<p>As part of Janssen's OAuth 2.1-aligned security changes, the UserInfo
+endpoint no longer accepts access tokens through URL query parameters.</p>
+<p>The Userinfo response is described in <a href="https://openid.net/specs/openid-connect-core-1_0.html#UserInfoResponseValidation">OpenID Core 5.4.3</a>, and directs the developer to:</p>
 <ul>
 <li>
 <p>Verify that the OP that responded was the intended OP through a TLS server certificate check</p>
@@ -2445,9 +2455,9 @@ during Registration.</p>
 <h2 id="selective-disclosure">Selective disclosure<a class="headerlink" href="#selective-disclosure" title="Permanent link">#</a></h2>
 <p>Domains can limit the claims released to a client from the Userinfo endpoint
 by associating only the OpenID scopes required by that client. You can also
-define new scopes, and associate any user claims with them. Note, clients still
-must request the scopes they need for an access token. For example, a client
-may be authorize</p>
+define new scopes, and associate any user claims with them. Clients must request the scopes needed to access the corresponding claims.
+The UserInfo response contains claims authorized for the client based on
+the granted scopes and applicable authorization policies.</p>
 <h2 id="requesting-individual-claims">Requesting individual claims<a class="headerlink" href="#requesting-individual-claims" title="Permanent link">#</a></h2>
 <p>If you want to use the <code>claims</code> parameter, you will have to first enable this feature in the Auth Server properties: set <code>claimsParameterSupported=True</code>.
 This is not a recommended configuration, because the claims parameter bypasses
@@ -2518,7 +2528,7 @@ the claim in the database.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 29, 2025
+    November 01, 2026
   </span>
 
     

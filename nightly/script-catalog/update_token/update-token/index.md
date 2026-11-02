@@ -172,6 +172,18 @@ An UpdateTokenType script is great for adding scopes or removing scopes to/from 
     def modifyAccessToken(self, accessToken, context):
               context.overwriteAccessTokenScopes(accessToken, Sets.newHashSet("openid", "mynewscope"))
 ```
+#### Persist custom data with an access token
+
+`context.putTokenAttribute(key, value)` stores a string with the access token entity (`attr` field of `io.jans.model.token.TokenEntity`). The value survives until the token expires. Read it later with `context.getTokenAttribute(key)` or, in an Introspection script, with `context.getTokenAttribute(key)` of `ExternalIntrospectionContext`.
+
+Do not store large or sensitive payloads. Prefer a short identifier such as a user `inum`.
+
+```
+    def modifyAccessToken(self, accessToken, context):
+        context.putTokenAttribute("user_inum", userInum)
+        return True
+```
+
 #### Perform business check before returning AT
 
 Pseudocode and example - Issue Access token only if account balance is greater than 0

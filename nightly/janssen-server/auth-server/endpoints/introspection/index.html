@@ -1295,15 +1295,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#sample-get-request" class="md-nav__link">
+  <a href="#sample-post-request-recommended" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Sample GET Request
+        Sample POST Request (recommended)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Sample GET Request">
+    <nav class="md-nav" aria-label="Sample POST Request (recommended)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1334,15 +1334,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-post-request" class="md-nav__link">
+  <a href="#sample-get-request" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Sample POST Request
+        Sample GET Request
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Sample POST Request">
+    <nav class="md-nav" aria-label="Sample GET Request">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2421,15 +2421,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#sample-get-request" class="md-nav__link">
+  <a href="#sample-post-request-recommended" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Sample GET Request
+        Sample POST Request (recommended)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Sample GET Request">
+    <nav class="md-nav" aria-label="Sample POST Request (recommended)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2460,15 +2460,15 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-post-request" class="md-nav__link">
+  <a href="#sample-get-request" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Sample POST Request
+        Sample GET Request
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Sample POST Request">
+    <nav class="md-nav" aria-label="Sample GET Request">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2850,45 +2850,29 @@ introspection</a> specifications.</p>
 can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://janssen.server.host/.well-known/openid-configuration</code></p>
 <p>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `</p>
 <p>More information about request and response of the Introspection endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
 <p><strong>Request parameters</strong></p>
 <ul>
 <li><code>token</code> - REQUIRED.  The string value of the token.  For access tokens, this is the "access_token" value returned from the token endpoint</li>
 <li><code>token_type_hint</code> - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. </li>
 <li><code>response_as_jwt</code> - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).</li>
 </ul>
-<h2 id="sample-get-request">Sample GET Request<a class="headerlink" href="#sample-get-request" title="Permanent link">#</a></h2>
+<p>The <code>token</code> parameter is the token being inspected, and it is distinct from the credential
+used to authenticate the caller to the introspection endpoint. Authenticate the request
+using the configured client authentication method or an <code>Authorization: Bearer</code> header
+where supported.</p>
+<h2 id="sample-post-request-recommended">Sample POST Request (recommended)<a class="headerlink" href="#sample-post-request-recommended" title="Permanent link">#</a></h2>
+<p>Send the token being inspected in the form-encoded request body. This keeps
+it out of URLs, which servers, proxies and browsers can log.</p>
 <h3 id="request">Request<a class="headerlink" href="#request" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span><span class="s1">&#39;GET&#39;</span><span class="w">   </span><span class="s1">&#39;https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&amp;response_as_jwt=false&#39;</span><span class="w">   </span>-H<span class="w"> </span><span class="s1">&#39;accept: application/json&#39;</span><span class="w"> </span>-H<span class="w">   </span><span class="s2">&quot;Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5&quot;</span>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="s1">&#39;https://janssen.server.host/jans-auth/restv1/introspection&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Accept: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Authorization: Bearer &lt;CALLER_ACCESS_TOKEN&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;token=&lt;TOKEN_TO_INSPECT&gt;&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--data-urlencode<span class="w"> </span><span class="s1">&#39;response_as_jwt=false&#39;</span>
 </code></pre></div>
 <h3 id="response">Response<a class="headerlink" href="#response" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/config/scripts.write&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;acr_values&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668705523</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668705223</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
-<span class="p">}</span>
-</code></pre></div>
-<h2 id="sample-post-request">Sample POST Request<a class="headerlink" href="#sample-post-request" title="Permanent link">#</a></h2>
-<h3 id="request_1">Request<a class="headerlink" href="#request_1" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span><span class="s1">&#39;POST&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="s1">&#39;https://janssen.server.host/jans-auth/restv1/introspection&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;accept: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/x-www-form-urlencoded&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;token=eyJra....3ZkB-Ajwg&#39;</span><span class="w">  </span>
-<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer eyJra...BpKo7g&quot;</span>
-</code></pre></div>
-<h3 id="response_1">Response<a class="headerlink" href="#response_1" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host&quot;</span><span class="p">,</span>
@@ -2902,6 +2886,30 @@ the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://r
 <span class="w">    </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668941216</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668781885</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="sample-get-request">Sample GET Request<a class="headerlink" href="#sample-get-request" title="Permanent link">#</a></h2>
+<p>GET is supported for compatibility. It places the inspected token in the URL
+query, where it can appear in server, proxy and browser logs. Prefer POST.</p>
+<h3 id="request_1">Request<a class="headerlink" href="#request_1" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span><span class="s1">&#39;GET&#39;</span><span class="w">   </span><span class="s1">&#39;https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&amp;response_as_jwt=false&#39;</span><span class="w">   </span>-H<span class="w"> </span><span class="s1">&#39;accept: application/json&#39;</span><span class="w"> </span>-H<span class="w">   </span><span class="s2">&quot;Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5&quot;</span>
+</code></pre></div>
+<h3 id="response_1">Response<a class="headerlink" href="#response_1" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://janssen.server.host&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;token_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Bearer&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1800.df1bb233-10b8-40ed-bbb9-07da50892a35&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/config/scripts.write&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;acr_values&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;cnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668705523</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1668705223</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;username&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span>
 <span class="p">}</span>
@@ -3067,7 +3075,7 @@ navigate to</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    February 04, 2026
+    November 01, 2026
   </span>
 
     

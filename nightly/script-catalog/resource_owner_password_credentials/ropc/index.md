@@ -1,10 +1,17 @@
 # Resource Owner Password Credential
+
+!!! warning "Legacy OAuth grant"
+    This catalog page documents scripts for the Resource Owner Password Credentials
+    grant, which is not in the default supported grant types and is not recommended for
+    new integrations. Use only for an existing deployment that explicitly enables the
+    legacy flow.
+
 Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant ([RFC 6749](https://www.rfc-editor.org/rfc/rfc6749#section-4.3)).
 
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).
 
 ## Interface
-The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
+The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
 
 ### Inherited Methods
 | Method header | Method description |
@@ -21,10 +28,10 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 ### Objects
 | Object name | Object description |
 |:-----|:------|
-|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
-|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
-| `context` | [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
+|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
+| `context` | [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
 
 ## Use case: Basic ROPC authentication script
 

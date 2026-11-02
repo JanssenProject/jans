@@ -1987,7 +1987,7 @@
 <li><a href="#jwt-signature-validation">Signature Validation</a>: Verifies the token's origin using trusted issuer keys.</li>
 <li><a href="#jwt-content-validation">Content Validation</a>: Ensures required claims like <code>exp</code> or <code>client_id</code> are present.</li>
 <li><a href="#schema-and-claims-compatibility">Schema and Claims Compatibility</a>: How Cedar schema must match JWT payload structure.</li>
-<li><a href="#jwt-status-validation">JWT Status Validation</a>: Checks if a token has been explicitly revoked.</li>
+<li><a href="#jwt-status-validation">JWT Status Validation</a>: Checks if a token has been revoked or suspended.</li>
 <li><a href="#local-jwks">Local JWKS</a>: Using local key stores for testing.</li>
 </ul>
 <p><strong>Key Configuration Properties:</strong></p>
@@ -2029,7 +2029,6 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Only token types declared this way are validated. All other tokens are dropped.</p>
 <h3 id="validation-requirements">Validation Requirements<a class="headerlink" href="#validation-requirements" title="Permanent link">#</a></h3>
 <p>In summary, for a token to be validated by Cedarling, two conditions must be met:</p>
 <ol>
@@ -2062,7 +2061,7 @@
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>The above configuration means that any <code>Jans::Access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be dropped. Registered claims like <code>exp</code> and <code>nbf</code> will also be validated according to <a href="https://datatracker.ietf.org/doc/html/rfc7519#section-4.1">RFC 7519</a> standards (e.g., checking that the token is not expired).</p>
+<p>The above configuration means that any <code>Jans::Access_token</code> must contain both the <code>exp</code> and <code>client_id</code> claims, or it will be dropped.</p>
 <h2 id="schema-and-claims-compatibility">Schema and Claims Compatibility<a class="headerlink" href="#schema-and-claims-compatibility" title="Permanent link">#</a></h2>
 <p>When building token entities, Cedarling maps JWT claims to Cedar entity attributes based on the Cedar schema. The schema must be compatible with the JWT payload structure, otherwise entity creation will fail.</p>
 <h3 id="behavior-rules">Behavior Rules<a class="headerlink" href="#behavior-rules" title="Permanent link">#</a></h3>
@@ -2159,21 +2158,32 @@ namespace Acme {
 </tr>
 </tbody>
 </table>
-<p>A type mismatch on a <strong>required</strong> attribute causes an error. A type mismatch on an <strong>optional</strong> attribute causes the attribute to be silently skipped.</p>
 <h2 id="jwt-status-validation">JWT Status Validation<a class="headerlink" href="#jwt-status-validation" title="Permanent link">#</a></h2>
 <p>Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a> draft.</p>
-<p>This feature is toggled with the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property.</p>
+<p>This feature is toggled with the <code>CEDARLING_JWT_STATUS_VALIDATION</code> property. An issuer with a static JWKS, or without a <code>status_list_endpoint</code>, has no Status List, so its tokens that carry a <code>status</code> claim are rejected.</p>
 <blockquote>
 <p>ℹ️ <strong>Use Case</strong></p>
 <p>Enforcing token revocation can help mitigate account takeover risks by allowing for near-instant invalidation of compromised tokens.</p>
 </blockquote>
 <h3 id="status-list-refresh-cadence">Status List Refresh Cadence<a class="headerlink" href="#status-list-refresh-cadence" title="Permanent link">#</a></h3>
 <p>By design, the refresh interval for the Status List JWT is driven by the <code>ttl</code> claim <strong>inside the Status List JWT itself</strong>, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every <code>ttl</code> seconds.</p>
-<p>The bootstrap property <code>CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX</code> (default <code>300</code> seconds) caps that interval: the effective refresh interval is <code>min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)</code>, so the issuer can always request a <em>more frequent</em> refresh, but never a less frequent one. When the issuer omits the <code>ttl</code> claim, the max value is used directly so the cache cannot silently go stale forever. A value of <code>0</code> or an unset variable resolves to the built-in default. Non-zero values below <code>5</code> seconds are clamped up to <code>5</code> seconds.</p>
+<p>The bootstrap property <code>CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX</code> caps that interval, so the issuer can request a more frequent refresh, but never a less frequent one:</p>
+<ul>
+<li>The effective interval is <code>min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)</code>.</li>
+<li>Without a <code>ttl</code> claim, the max value is used, so the cache cannot go stale forever.</li>
+<li><code>0</code> or an unset variable means the default, <code>300</code> seconds.</li>
+<li>Non-zero values below <code>5</code> seconds are raised to <code>5</code> seconds.</li>
+</ul>
 <p>Cedarling applies <strong>fail-closed</strong> semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.</p>
 <h2 id="jwt-validation-flow-diagram">JWT Validation Flow Diagram<a class="headerlink" href="#jwt-validation-flow-diagram" title="Permanent link">#</a></h2>
-<p>JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the <code>authorize_multi_issuer</code> flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.</p>
-<p><img alt="Cedarling JWT validation flow diagram showing token verification process" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
+<p>JWTs (JSON Web Tokens) contain authorization information that the Cedarling uses to construct token entities in the <code>authorize_multi_issuer</code> flow. The Cedarling runs these checks on each JWT:</p>
+<ul>
+<li><strong>Claims</strong>, such as <code>exp</code>: always checked.</li>
+<li><strong>Signature</strong>: checked against the issuer's JWKS when <code>CEDARLING_JWT_SIG_VALIDATION</code> is enabled. When it is disabled, the JWT is decoded without verification.</li>
+<li><strong>Status</strong>: checked against the issuer's Status List when <code>CEDARLING_JWT_STATUS_VALIDATION</code> is enabled and the issuer publishes a <code>status_list_endpoint</code>. The <code>Invalid</code> and <code>Suspended</code> statuses fail validation.</li>
+</ul>
+<p>A token that fails any check is dropped. Cedarling logs the failure when the configured logger is enabled.</p>
+<p><img alt="Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List" src="../../../assets/cedarling/cedarling-jwt-validation.png" /></p>
 <h2 id="local-jwks">Local JWKS<a class="headerlink" href="#local-jwks" title="Permanent link">#</a></h2>
 <p>A local JWKS can be used by setting the <code>CEDARLING_LOCAL_JWKS</code> bootstrap property to a path to a local JSON file. When providing a local Json Web Key Store (JWKS), the file must follow the following schema:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
@@ -2256,7 +2266,7 @@ namespace Acme {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 01, 2026
   </span>
 
     

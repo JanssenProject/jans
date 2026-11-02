@@ -2641,8 +2641,8 @@
 
 <h1 id="authorization-server-issuer-identification-rfc-9207">Authorization Server Issuer Identification (RFC 9207)<a class="headerlink" href="#authorization-server-issuer-identification-rfc-9207" title="Permanent link">#</a></h1>
 <p>Janssen Server supports OAuth 2.0 Authorization Server Issuer Identification as defined in
-<a href="https://datatracker.ietf.org/doc/html/rfc9207">RFC 9207</a>. When enabled, the authorization
-server includes its own issuer identifier (<code>iss</code>) in every authorization response — both
+<a href="https://datatracker.ietf.org/doc/html/rfc9207">RFC 9207</a>. By default, the authorization
+server includes its own issuer identifier (<code>iss</code>) in authorization responses — both
 successful responses and redirect-based error responses — so that clients can detect and
 reject mix-up attacks.</p>
 <h2 id="the-mix-up-attack">The Mix-Up Attack<a class="headerlink" href="#the-mix-up-attack" title="Permanent link">#</a></h2>
@@ -2655,9 +2655,10 @@ causing the client to submit a code or token issued by the attacker's server.</p
 directly into every redirect response. The client compares this value against the issuer it
 expected, and rejects the response if they do not match.</p>
 <h2 id="how-it-works">How It Works<a class="headerlink" href="#how-it-works" title="Permanent link">#</a></h2>
-<p>When <code>authorizationResponseIssParameterSupported</code> is set to <code>true</code> in Janssen Server
-configuration, the <code>iss</code> parameter is appended to every authorization redirect sent back to
-the client's <code>redirect_uri</code>.</p>
+<p>When <code>authorizationResponseIssParameterSupported</code> is <code>true</code> in Janssen Server
+configuration, the <code>iss</code> parameter is appended to every non-JARM authorization redirect sent
+back to the client's <code>redirect_uri</code>, except for JARM responses, where the issuer is included
+in the JWT authorization response. This is the default.</p>
 <h3 id="successful-authorization-response">Successful Authorization Response<a class="headerlink" href="#successful-authorization-response" title="Permanent link">#</a></h3>
 <p>A standard authorization code response with issuer identification looks like:</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 302 Found
@@ -2682,11 +2683,11 @@ Location: https://client.example.com/cb?
     participant AS as Authorization Server
 
     Client-&gt;&gt;UA: Redirect to /authorize
-    UA-&gt;&gt;AS: GET /authorize?response_type=code&amp;client_id=...&amp;state=xyz
+    UA-&gt;&gt;AS: GET /authorize?response_type=code&amp;client_id=...&amp;state=xyz&amp;code_challenge=...&amp;code_challenge_method=S256
     AS-&gt;&gt;UA: 302 redirect_uri?code=...&amp;state=xyz&amp;iss=https://server.example.com
     UA-&gt;&gt;Client: code + state + iss
     Client-&gt;&gt;Client: Verify iss == expected issuer
-    Client-&gt;&gt;AS: POST /token (code exchange)
+    Client-&gt;&gt;AS: POST /token (code + code_verifier)
     AS-&gt;&gt;Client: access_token</code></pre>
 <h3 id="discovery-metadata">Discovery Metadata<a class="headerlink" href="#discovery-metadata" title="Permanent link">#</a></h3>
 <p>When issuer identification is enabled, the Janssen Server advertises this capability in
@@ -2697,8 +2698,10 @@ the OpenID Connect discovery document at <code>/.well-known/openid-configuration
 <span class="w">  </span><span class="err">...</span>
 <span class="p">}</span>
 </code></pre></div>
-<p>Clients that read this metadata entry know they MUST validate the <code>iss</code> parameter in every
-authorization response they receive from this server.</p>
+<p>For non-JARM authorization responses, the client must validate the <code>iss</code>
+authorization response parameter against the expected issuer. For JARM
+responses, the client must validate the <code>iss</code> claim in the JWT authorization
+response instead.</p>
 <h2 id="relationship-to-jarm">Relationship to JARM<a class="headerlink" href="#relationship-to-jarm" title="Permanent link">#</a></h2>
 <p>When <a href="https://openid.net/specs/oauth-v2-jarm.html">JWT Secured Authorization Response Mode (JARM)</a>
 is used, the authorization response is wrapped in a signed JWT that already contains an
@@ -2708,8 +2711,8 @@ protective purpose as the plain <code>iss</code> query parameter.</p>
 negotiated response mode is one of <code>query.jwt</code>, <code>fragment.jwt</code>, <code>form_post.jwt</code>, or <code>jwt</code>.
 The issuer is already secured inside the JWT.</p>
 <h2 id="configuring-janssen-server">Configuring Janssen Server<a class="headerlink" href="#configuring-janssen-server" title="Permanent link">#</a></h2>
-<p>Issuer identification is <strong>opt-in</strong> and disabled by default so that existing deployments
-are unaffected. To enable it, set the following property:</p>
+<p>Issuer identification is enabled by default. To disable it for compatibility with clients
+that cannot process the parameter, set the following property:</p>
 <table>
 <thead>
 <tr>
@@ -2723,19 +2726,20 @@ are unaffected. To enable it, set the following property:</p>
 <tr>
 <td><code>authorizationResponseIssParameterSupported</code></td>
 <td>Boolean</td>
-<td><code>false</code></td>
-<td>When <code>true</code>, the <code>iss</code> parameter is added to all authorization redirect responses per RFC 9207.</td>
+<td><code>true</code></td>
+<td>When <code>true</code>, the <code>iss</code> parameter is added to authorization redirect responses per RFC 9207.</td>
 </tr>
 </tbody>
 </table>
 <h3 id="using-the-tui">Using the TUI<a class="headerlink" href="#using-the-tui" title="Permanent link">#</a></h3>
 <p>Navigate to <strong>Auth Server → Configuration → Properties</strong> and set
-<code>authorizationResponseIssParameterSupported</code> to <code>true</code>.</p>
+<code>authorizationResponseIssParameterSupported</code> to <code>false</code> only when compatibility requires
+disabling issuer identification.</p>
 <h3 id="using-the-config-api">Using the Config API<a class="headerlink" href="#using-the-config-api" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-X<span class="w"> </span>PATCH<span class="w"> </span>https://&lt;jans-host&gt;/jans-config-api/api/v1/jans-auth-server/config<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer &lt;access_token&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json-patch+json&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;:&quot;replace&quot;,&quot;path&quot;:&quot;/authorizationResponseIssParameterSupported&quot;,&quot;value&quot;:true}]&#39;</span>
+<span class="w">  </span>-d<span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;:&quot;replace&quot;,&quot;path&quot;:&quot;/authorizationResponseIssParameterSupported&quot;,&quot;value&quot;:false}]&#39;</span>
 </code></pre></div>
 <p>See the <a href="../../../../janssen-server/reference/json/properties/janssenauthserver-properties/#authorizationresponseissparametersupported">configuration reference</a>
 for the full property description.</p>
@@ -2743,7 +2747,9 @@ for the full property description.</p>
 <p>When a client receives an authorization response from a server that has advertised
 <code>authorization_response_iss_parameter_supported: true</code>, it MUST:</p>
 <ol>
-<li>Extract the <code>iss</code> parameter from the redirect response.</li>
+<li>For non-JARM authorization responses, extract the <code>iss</code> parameter from the
+   redirect response. For JARM responses, extract the <code>iss</code> claim from the
+   validated JWT authorization response.</li>
 <li>Compare its value to the expected issuer identifier using simple string comparison
    (as defined in <a href="https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.1">RFC 3986 §6.2.1</a>).</li>
 <li>Reject the response if <code>iss</code> is absent or does not match the expected value.</li>
@@ -2834,7 +2840,7 @@ Any questions you have will help determine what information our documentation sh
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    July 03, 2026
+    November 01, 2026
   </span>
 
     

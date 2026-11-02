@@ -30,7 +30,7 @@
     
     
       
-        <title>Prompt CREATE - Janssen Documentation</title>
+        <title>Prompt parameter - Janssen Documentation</title>
       
     
     
@@ -94,7 +94,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#prompt-create" class="md-skip">
+        <a href="#prompt-parameter" class="md-skip">
           Skip to content
         </a>
       
@@ -145,7 +145,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Prompt CREATE
+              Prompt parameter
             
           </span>
         </div>
@@ -2231,7 +2231,7 @@
   
 
 
-<h1 id="prompt-create">Prompt CREATE<a class="headerlink" href="#prompt-create" title="Permanent link">#</a></h1>
+<h1 id="prompt-parameter">Prompt parameter<a class="headerlink" href="#prompt-parameter" title="Permanent link">#</a></h1>
 <p><code>prompt=create</code> value indicates to the AS that the client desires that the user be shown
  the account creation page rather than the login flow.</p>
 <p>It is enabled by default. However <code>prompt=create</code> can be entirely disabled if set
@@ -2259,19 +2259,25 @@ To initiate a silent authentication request, add the <strong>prompt=none</strong
 redirect a user to the /authorize endpoint of Janssen authentication API.
 (The individual parameters on the authentication request will vary depending on the specific needs of your app.)</p>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code>GET https://YOUR_DOMAIN//authorize?
-response_type={response_type}&amp;
-client_id={client_id}&amp;
-scope={scope}&amp;
-state={state}&amp;
-ui_locales=&amp;
-claims_locales=&amp;
-acr_values=&amp;
-redirect_uri={redirect_uri}&amp;
-prompt=none
-
-Basic credential user
+<div class="highlight"><pre><span></span><code>GET https://&lt;jans-host&gt;/jans-auth/restv1/authorize?
+    response_type=code&amp;
+    client_id=&lt;CLIENT_ID&gt;&amp;
+    scope=openid&amp;
+    state=&lt;STATE&gt;&amp;
+    redirect_uri=&lt;URL_ENCODED_REDIRECT_URI&gt;&amp;
+    prompt=none&amp;
+    code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM&amp;
+    code_challenge_method=S256
 </code></pre></div>
+<p>For the Authorization Code Flow, clients should use PKCE with the <code>S256</code>
+code challenge method. The client generates a <code>code_verifier</code>, includes
+the derived <code>code_challenge</code> in the authorization request, and sends
+the original <code>code_verifier</code> when exchanging the authorization code
+at the token endpoint.</p>
+<p>The <code>prompt=none</code> parameter requests authentication without user
+interaction. If authentication or consent requires user interaction,
+the authorization server returns an appropriate error, such as
+<code>login_required</code> or <code>consent_required</code>.</p>
 <p>The <strong>prompt=none</strong> parameter causes Janssen to immediately send a result to the specified
 <strong>redirect_uri</strong> (callback URL) using the specified <strong>response_mode</strong> with one of two possible
 responses: success or error.</p>
@@ -2310,7 +2316,7 @@ AuthenticationFilterService-&gt;Browser: WebApplicationException (LOGIN_REQUIRED
 end
 </code></pre></div>
 <img alt="Example 1" src="../../../../assets/prompt_none_1.png" /></p>
-<p>Example 2: <strong>Prompt None (Without credentials in Header)</strong>
+<p>Example 2: <strong>Prompt None (With credentials in Header)</strong>
 <div class="highlight"><pre><span></span><code>title Prompt None (With credentials in Header)
 
 participant Browser
@@ -2456,7 +2462,7 @@ Janssen-&gt;Browser: /redirect_uri?with_param=...
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    May 11, 2026
+    November 01, 2026
   </span>
 
     

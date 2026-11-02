@@ -254,7 +254,7 @@ Command will be similar to the one below:
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-[Restart](https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
 
 ```
 jans-auth.service
