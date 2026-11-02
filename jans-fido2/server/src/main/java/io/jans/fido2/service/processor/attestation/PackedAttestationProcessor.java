@@ -113,8 +113,8 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
 
         // if attestation mode is enabled in the global config
 
-        if (!AttestationMode.DISABLED.getValue()
-                .equalsIgnoreCase(rpPolicyService.resolveAttestationMode(registration.getRpId())))
+        String attestationMode = rpPolicyService.resolveAttestationMode(registration.getRpId());
+        if (!AttestationMode.DISABLED.getValue().equalsIgnoreCase(attestationMode))
         {
         	if (attStmt.hasNonNull("x5c")) {
 
@@ -143,6 +143,11 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
             } else {
                 PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
                 authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+                // Self attestation only proves key possession, not trusted authenticator provenance
+                if (AttestationMode.ENFORCED.getValue().equalsIgnoreCase(attestationMode)) {
+                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR,
+                            "Self attestation is not allowed in enforced attestation mode");
+                }
             }
         }
         else

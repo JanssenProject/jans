@@ -51,7 +51,7 @@ public class SqConnectionProviderPool {
 			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
 			Properties clonedProperties = (Properties) props.clone();
-			if (clonedProperties.getProperty("auth.userName") != null) {
+			if (clonedProperties.getProperty("auth.userPassword") != null) {
 				clonedProperties.setProperty("auth.userPassword", "REDACTED");
 			}
 

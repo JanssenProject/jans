@@ -328,13 +328,13 @@ public class AssetResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response uploadAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
-            log.info("Create Asset details assetForm:{}", assetForm);
+            log.info("Create Asset details assetForm:{}", escapeLog(assetForm));
         }
 
         // validation
         checkResourceNotNull(assetForm, ASSET_DATA_FORM);
         Document asset = assetForm.getDocument();
-        log.info(" Create asset:{} ", asset);
+        log.info(" Create asset:{} ", escapeLog(asset));
         checkResourceNotNull(asset, ASSET_DATA);
         checkNotNull(asset.getFileName(), "fileName");
         validateDocument(asset);
@@ -343,7 +343,11 @@ public class AssetResource extends ConfigBaseResource {
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
+            asset.setDn(assets.get(0).getDn());
             asset.setBaseDn(assets.get(0).getBaseDn());
+        } else {
+            asset.setInum(null);
+            asset.setDn(null);
         }
 
         InputStream assetStream = assetForm.getAssetFile();
@@ -394,14 +398,14 @@ public class AssetResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAsset(@MultipartForm AssetForm assetForm) throws Exception {
         if (log.isInfoEnabled()) {
-            log.info("Update Asset details assetForm:{}", assetForm);
+            log.info("Update Asset details assetForm:{}", escapeLog(assetForm));
         }
 
         // validation
         checkResourceNotNull(assetForm, ASSET_DATA_FORM);
         Document asset = assetForm.getDocument();
         final String inum = asset.getInum();
-        log.debug(" Create asset:{} ", asset);
+        log.debug(" Create asset:{} ", escapeLog(asset));
         checkResourceNotNull(asset, ASSET_DATA);
         checkResourceNotNull(inum, ASSET_INUM);
         checkNotNull(asset.getFileName(), "fileName");
@@ -417,13 +421,13 @@ public class AssetResource extends ConfigBaseResource {
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
         log.info(
                 "Check if asset with inum different then:{} but with same name exist - asset.getDisplayName():{}, assets:{}",
-                inum, asset.getFileName(), assets);
+                escapeLog(inum), escapeLog(asset.getFileName()), assets);
         if (assets != null && !assets.isEmpty()) {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
                     .collect(Collectors.toList());
-            logger.info("Other asset with same name:{} are list:{}", asset.getFileName(), list);
+            logger.info("Other asset with same name:{} are list:{}", escapeLog(asset.getFileName()), list);
             if (list != null && !list.isEmpty()) {
-                log.error("Another asset with same name:{}", asset.getFileName());
+                log.error("Another asset with same name:{}", escapeLog(asset.getFileName()));
                 throwBadRequestException(ASSET_NAME_CONFLICT,
                         String.format(ASSET_NAME_CONFLICT_MSG, asset.getFileName()));
             }

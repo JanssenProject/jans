@@ -13,6 +13,7 @@ import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import io.jans.util.properties.FileConfiguration;
 import io.jans.util.security.PropertiesDecrypter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 @ApplicationScoped
@@ -34,35 +36,38 @@ public class ConnectionStatus {
     ConfigurationFactory configurationFactory;
 
     public boolean isUp(GluuLdapConfiguration ldapConfiguration) {
-        logger.info(" LDAP Connection Status parameters - ldapConfiguration:{}, ldapConfiguration.getBindDN():{}, ldapConfiguration.getBindPassword()):{}, ldapConfiguration.isUseSSL():{} ",
-                ldapConfiguration, ldapConfiguration.getBindDN(), ldapConfiguration.getBindPassword(),
+        return isUp(ldapConfiguration, false);
+    }
+
+    /**
+     * @param decryptBindPassword decrypt the bind password with the installation key; only allowed for a stored
+     *                            configuration whose connection settings are unchanged
+     */
+    public boolean isUp(GluuLdapConfiguration ldapConfiguration, boolean decryptBindPassword) {
+        logger.info(" LDAP Connection Status parameters - configId:{}, bindDN:{}, useSSL:{}",
+                escapeLog(ldapConfiguration.getConfigId()), escapeLog(ldapConfiguration.getBindDN()),
                 ldapConfiguration.isUseSSL());
 
-        Properties properties = System.getProperties();
-        properties.setProperty("bindDN", ldapConfiguration.getBindDN());
-        properties.setProperty("bindPassword", ldapConfiguration.getBindPassword());
+        Properties properties = new Properties();
+        properties.setProperty("bindDN", StringUtils.defaultString(ldapConfiguration.getBindDN()));
+        properties.setProperty("bindPassword", StringUtils.defaultString(ldapConfiguration.getBindPassword()));
         properties.setProperty("servers", buildServersString(getServers(ldapConfiguration)));
         properties.setProperty("useSSL", Boolean.toString(ldapConfiguration.isUseSSL()));
-        Properties ldapDecryptedProperties = PropertiesDecrypter.decryptProperties(properties,
-                configurationFactory.getCryptoConfigurationSalt());
+        Properties ldapProperties = decryptBindPassword
+                ? PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt())
+                : properties;
 
-        logger.trace("Attempting to create LDAP connection with properties: {}", ldapDecryptedProperties);
-
-        LdapConnectionProvider connectionProvider = new LdapConnectionProvider(
-                PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt()));
-
-        logger.trace("connectionProvider: {}", connectionProvider);
-        connectionProvider.create(ldapDecryptedProperties);
-
-        logger.info("Connection status connectionProvider.isConnected(): {}", connectionProvider.isConnected());
-
-        if (connectionProvider.isConnected()) {
-            logger.trace("Connect to LDAP");
-            connectionProvider.closeConnectionPool();
-            return true;
+        LdapConnectionProvider connectionProvider = new LdapConnectionProvider(ldapProperties);
+        try {
+            connectionProvider.create();
+            boolean isConnected = connectionProvider.isConnected();
+            logger.info("Connection status connectionProvider.isConnected(): {}", isConnected);
+            return isConnected;
+        } finally {
+            if (connectionProvider.getConnectionPool() != null) {
+                connectionProvider.closeConnectionPool();
+            }
         }
-
-        return false;
     }
 
     @NotNull

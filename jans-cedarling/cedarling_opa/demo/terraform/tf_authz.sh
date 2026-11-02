@@ -22,8 +22,9 @@
 #   ./tf_authz.sh -chdir=environments/prod apply
 #   ./tf_authz.sh destroy -auto-approve
 #
-# For commands other than plan / apply / destroy, the auth check is skipped and
-# terraform is called directly (e.g. terraform init, terraform fmt, etc.).
+# init, fmt, validate, version, output, show, providers and graph skip the auth
+# check and call terraform directly; any other sub-command is rejected.
+# `-destroy` on plan / apply is authorized as Destroy.
 #
 # OPA endpoint:
 #   The script queries /v1/data/infra/terraform (the full package) rather than
@@ -44,10 +45,14 @@ TERRAFORM_BIN="${TERRAFORM_BIN:-terraform}"
 # Also capture -chdir= so we know where to look for the .terraform/ cache.
 TF_SUBCOMMAND=""
 CHDIR_ARG=""
+DESTROY_FLAG=""
 for arg in "$@"; do
     case "${arg}" in
         -chdir=*)
             CHDIR_ARG="${arg}"
+            ;;
+        -destroy|-destroy=true)
+            DESTROY_FLAG="yes"
             ;;
         -*)
             ;;
@@ -66,11 +71,21 @@ case "${TF_SUBCOMMAND}" in
     plan)    CEDAR_ACTION="Plan" ;;
     apply)   CEDAR_ACTION="Apply" ;;
     destroy) CEDAR_ACTION="Destroy" ;;
-    *)
-        # No authorization check needed for init, fmt, validate, output, etc.
+    init|fmt|validate|version|output|show|providers|graph)
+        # Read-only or local-only commands: no authorization check.
         exec "${TERRAFORM_BIN}" "$@"
         ;;
+    *)
+        echo "tf_authz: ERROR — 'terraform ${TF_SUBCOMMAND}' is not supported by this wrapper." >&2
+        echo "          Gated: plan, apply, destroy. Ungated: init, fmt, validate, version," >&2
+        echo "          output, show, providers, graph." >&2
+        exit 1
+        ;;
 esac
+# `plan -destroy` / `apply -destroy` destroy infrastructure, so they need Destroy.
+if [[ -n "${DESTROY_FLAG}" ]]; then
+    CEDAR_ACTION="Destroy"
+fi
 
 # ─── Verify dependencies ─────────────────────────────────────────────────────
 for cmd in curl jq; do

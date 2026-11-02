@@ -25,7 +25,7 @@ public class RsResource implements Serializable {
     @JsonProperty(value = "exp")
     private Integer exp;
 
-    private Map<String, Condition> httpMethodToCondition = null;
+    private volatile Map<String, Condition> httpMethodToCondition = null;
 
     public String getPath() {
         return path;
@@ -41,6 +41,7 @@ public class RsResource implements Serializable {
 
     public void setConditions(List<Condition> conditions) {
         this.conditions = conditions;
+        this.httpMethodToCondition = null;
     }
 
     public List<String> scopes(String httpMethod) {
@@ -88,23 +89,26 @@ public class RsResource implements Serializable {
     }
 
     public Map<String, Condition> getConditionMap() {
-        if (httpMethodToCondition == null) {
-            initMap();
+        Map<String, Condition> map = httpMethodToCondition;
+        if (map == null) {
+            map = buildMap();
+            httpMethodToCondition = map;
         }
-        return httpMethodToCondition;
+        return map;
     }
 
-    private void initMap() {
-        httpMethodToCondition = Maps.newHashMap();
+    private Map<String, Condition> buildMap() {
+        Map<String, Condition> map = Maps.newHashMap();
         if (conditions != null) {
             for (Condition condition : conditions) {
                 if (condition.getHttpMethods() != null) {
                     for (String httpMethod : condition.getHttpMethods()) {
-                        httpMethodToCondition.put(httpMethod, condition);
+                        map.put(httpMethod, condition);
                     }
                 }
             }
         }
+        return map;
     }
 
     @Override

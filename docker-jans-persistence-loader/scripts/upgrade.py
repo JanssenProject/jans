@@ -1,4 +1,5 @@
 import contextlib
+import itertools
 import json
 import logging.config
 import os
@@ -413,11 +414,7 @@ class Upgrade:
         except TypeError:
             conf = entry.attrs["jansConfDyn"]
 
-        should_update = False
-
-        if conf != role_mapping:
-            conf = role_mapping
-            should_update = True
+        conf, should_update = _merge_role_mapping(conf, role_mapping)
 
         # licenseSpringCredentials must be removed in favor of SCAN license credentials
         if "licenseSpringCredentials" in conf:
@@ -553,7 +550,8 @@ class Upgrade:
         with contextlib.suppress(TypeError):
             message_conf = json.loads(message_conf)
 
-        entry.attrs["jansMessageConf"], should_update = _transform_message_config(message_conf)
+        entry.attrs["jansMessageConf"], message_conf_updated = _transform_message_config(message_conf)
+        should_update = should_update or message_conf_updated
 
         # set document store
         doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
@@ -571,6 +569,58 @@ class Upgrade:
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+
+def _merge_role_mapping(conf, defaults):
+    """Add new default roles/permissions without restoring ones removed by admins."""
+    should_update = False
+
+    for key in ("roles", "permissions", "rolePermissionMapping"):
+        if not isinstance(conf.get(key), list):
+            conf[key] = []
+            should_update = True
+
+    known_roles = {role.get("role") for role in conf["roles"]}
+    for role in defaults.get("roles", []):
+        if role.get("role") not in known_roles:
+            conf["roles"].append(role)
+            should_update = True
+
+    # permissions unknown to the stored config are new in this release, hence never revoked
+    known_perms = {perm.get("permission") for perm in conf["permissions"]}
+    known_perms.update(itertools.chain.from_iterable(
+        mapping.get("permissions") or [] for mapping in conf["rolePermissionMapping"]
+    ))
+
+    new_perms = set()
+    for perm in defaults.get("permissions", []):
+        if perm.get("permission") not in known_perms:
+            conf["permissions"].append(perm)
+            new_perms.add(perm.get("permission"))
+            should_update = True
+
+    new_perms.update(
+        perm
+        for mapping in defaults.get("rolePermissionMapping", [])
+        for perm in mapping.get("permissions") or []
+        if perm not in known_perms
+    )
+
+    mappings = {mapping.get("role"): mapping for mapping in conf["rolePermissionMapping"]}
+    for default_mapping in defaults.get("rolePermissionMapping", []):
+        mapping = mappings.get(default_mapping.get("role"))
+
+        if mapping is None:
+            conf["rolePermissionMapping"].append(default_mapping)
+            should_update = True
+            continue
+
+        mapping.setdefault("permissions", [])
+        for perm in default_mapping.get("permissions", []):
+            if perm in new_perms and perm not in mapping["permissions"]:
+                mapping["permissions"].append(perm)
+                should_update = True
+    return conf, should_update
 
 
 def _transform_message_config(conf):
@@ -607,7 +657,9 @@ def _transform_message_config(conf):
             "messageWaitMillis": msg_wait_millis,
             "messageSleepThreadTime": msg_sleep_thread,
         },
+        # keep existing TLS/auth settings; only the server address is env-driven
         "redisConfiguration": {
+            **(conf.get("redisConfiguration") or {}),
             "servers": os.environ.get("CN_REDIS_URL", "localhost:6379"),
         },
     }

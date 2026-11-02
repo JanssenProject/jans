@@ -41,8 +41,10 @@ public class Answer {
     }
     
     public String toString() {
-        return "{ id: " + Objects.toString(id) + ", choice: " + Objects.toString(choice) +
+        // answers are user-supplied and this output ends up in logs
+        String s = "{ id: " + Objects.toString(id) + ", choice: " + Objects.toString(choice) +
                ", text: " + Objects.toString(text) + "}";
+        return s.replaceAll("[\\r\\n]", "_");
     }
 
 }

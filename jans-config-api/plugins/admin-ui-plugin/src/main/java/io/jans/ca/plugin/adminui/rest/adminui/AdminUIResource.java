@@ -578,7 +578,7 @@ public class AdminUIResource {
             "Admin UI - Role-Permissions Mapping"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
                     @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) }) 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
@@ -588,7 +588,7 @@ public class AdminUIResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     public Response getAllAdminUIRolePermissionsMapping() {
         try {
             log.info("Get all Admin-UI role-permissions mapping.");
@@ -619,7 +619,7 @@ public class AdminUIResource {
     @Operation(summary = "Add role-permissions mapping", description = "Add role-permissions mapping", operationId = "add-role-permissions-mapping", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
                     @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
@@ -630,7 +630,7 @@ public class AdminUIResource {
     @POST
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     public Response addPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Adding role-permissions to Admin-UI.");
@@ -661,7 +661,7 @@ public class AdminUIResource {
     @Operation(summary = "Map permissions to role", description = "Map permissions to role", operationId = "map-permissions-to-role", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
                     @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
@@ -672,7 +672,7 @@ public class AdminUIResource {
     @PUT
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     public Response mapPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Mapping permissions to Admin-UI role.");
@@ -705,7 +705,7 @@ public class AdminUIResource {
             "Admin UI - Role-Permissions Mapping"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
                     @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
@@ -715,7 +715,7 @@ public class AdminUIResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     public Response getAdminUIRolePermissionsMapping(@Parameter(description = "Admin UI Role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get Admin-UI role-permissions mapping by role-name.");
@@ -746,7 +746,7 @@ public class AdminUIResource {
     @Operation(summary = "Remove role-permissions mapping by role-name", description = "Remove role-permissions mapping by role-name", operationId = "remove-role-permissions-permission", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
                     @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_DELETE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
                     @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
@@ -756,7 +756,7 @@ public class AdminUIResource {
     @DELETE
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_DELETE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_DELETE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_DELETE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_DELETE})
     public Response removePermissionsFromRole(@Parameter(description = "role") @PathParam(ROLE_CONST) @NotNull String role) {
         try {
             log.info("Removing permissions to Admin-UI role.");

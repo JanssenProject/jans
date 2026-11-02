@@ -177,7 +177,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
-            config_jans_auth_test_properties
+            config_jans_auth_test_properties,
+            mode=0o600
             )
 
         ignoredirs = [

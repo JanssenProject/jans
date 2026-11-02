@@ -156,7 +156,7 @@ use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::{LogWriter, LoggerWeak};
 use crate::{HttpClientConfig, LockServiceConfig, LockTransport, TraceEndpoint};
-use lock_config::LockConfig;
+use lock_config::{AuditEndpoints, LockConfig};
 use log_entry::LockLogEntry;
 use log_worker::AuditWorker;
 use register_client::{ClientRegistrationError, TokenSource, access_token_scope, register_client};
@@ -199,12 +199,38 @@ impl std::fmt::Debug for LockAccessToken {
 
 fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -> Option<String> {
     let url = url::Url::parse(uri).ok()?;
-    let secure = match url.scheme() {
+    (is_secure_transport(&url) && origin.is_tuple() && url.origin() == *origin)
+        .then(|| token.0.clone())
+}
+
+/// `https`, or `http` only to a loopback host: anything the Lock access token
+/// is sent to, or that decides where it is sent.
+fn is_secure_transport(url: &url::Url) -> bool {
+    match url.scheme() {
         "https" => true,
-        "http" => is_loopback_host(&url),
+        "http" => is_loopback_host(url),
         _ => false,
-    };
-    (secure && origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+    }
+}
+
+/// Drops discovered audit endpoints the Lock access token must not be sent to.
+fn drop_insecure_audit_endpoints(endpoints: &mut AuditEndpoints, logger: Option<&LoggerWeak>) {
+    for (name, endpoint) in [
+        ("log_endpoint", &mut endpoints.log),
+        ("health_endpoint", &mut endpoints.health),
+        ("telemetry_endpoint", &mut endpoints.telemetry),
+    ] {
+        if endpoint
+            .as_ref()
+            .is_some_and(|url| !is_secure_transport(&url.0))
+        {
+            *endpoint = None;
+            logger.cloned().log_any(LockLogEntry::warn(format!(
+                "ignoring the discovered Lock {name}: it must use https, or http only to a \
+                 loopback host, because the Lock access token is sent to it"
+            )));
+        }
+    }
 }
 
 fn is_loopback_host(url: &url::Url) -> bool {
@@ -289,8 +315,16 @@ impl LockService {
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
 
+        // Discovery decides where the access token goes, so it must not be spoofable.
+        if !is_secure_transport(&bootstrap_conf.config_uri) {
+            return Err(InitLockServiceError::InsecureConfigUri(
+                bootstrap_conf.config_uri.origin().ascii_serialization(),
+            ));
+        }
+
         // Get lock config from the config uri endpoint first
-        let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
+        let mut lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
+        drop_insecure_audit_endpoints(&mut lock_config.audit_endpoints, logger.as_ref());
 
         let token = Self::acquire_access_token(
             pdp_id,
@@ -653,6 +687,8 @@ pub enum InitLockServiceError {
     TransportError(#[from] transport::TransportError),
     #[error("failed to parse access token: {0}")]
     InvalidAccessToken(String),
+    #[error("the Lock config URI on '{0}' must use https, or http only to a loopback host")]
+    InsecureConfigUri(String),
 }
 
 /// The TRACE sink; `None` when TRACE is off, or with a warning when there is no

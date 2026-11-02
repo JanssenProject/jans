@@ -13,6 +13,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.persistence.model.ClientAttributes;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.register.ws.rs.RegisterService;
@@ -338,6 +339,9 @@ public class ClientIdMetadataService {
             attrs.setCimdExpiresAt(System.currentTimeMillis() + (ttlSeconds * 1000L));
             client.setAttributes(attrs);
 
+            // CIMD documents are not verified as software statements, so hooks must never see an unverified one
+            stripSoftwareStatement(registerRequest);
+
             // Execute external DCR script (allows server operators to customize/reject CIMD clients).
             // httpRequest is null since this is not an HTTP registration request.
             final boolean scriptResult = externalDynamicClientRegistrationService
@@ -612,6 +616,16 @@ public class ClientIdMetadataService {
     }
 
     // ==================== Parsing ====================
+
+    private void stripSoftwareStatement(RegisterRequest registerRequest) {
+        if (StringUtils.isNotBlank(registerRequest.getSoftwareStatement())) {
+            log.debug("Ignoring unverified software_statement in client metadata document.");
+        }
+        registerRequest.setSoftwareStatement(null);
+        if (registerRequest.getJsonObject() != null) {
+            registerRequest.getJsonObject().remove(RegisterRequestParam.SOFTWARE_STATEMENT.toString());
+        }
+    }
 
     /**
      * Parse the CIMD metadata JSON into a RegisterRequest using RFC 7591 field mapping.

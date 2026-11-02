@@ -148,7 +148,8 @@ fn add_exp_claim(
         TokenIssuer::Jwt(_) => None,
     };
 
-    if let Some(exp) = claim_exp.or(meta_exp) {
+    // An explicit processor expiration wins over the claim, matching validation
+    if let Some(exp) = meta_exp.or(claim_exp) {
         attrs.insert(EXP_CLAIM.to_string(), RestrictedExpression::new_long(exp));
     } else if required.unwrap_or(false) {
         // exp is required but missing in token
@@ -342,7 +343,7 @@ impl EntityBuilder {
                     "validated_at" => Some(&validated_at_val),
                     "jti" => claims.get("jti").or(Some(&jti_val)),
                     "iss" => claims.get("iss").or(iss_val.as_ref()),
-                    "exp" => claims.get("exp").or(exp_val.as_ref()),
+                    "exp" => exp_val.as_ref().or(claims.get("exp")),
                     other => claims.get(other),
                 },
                 built_entities,

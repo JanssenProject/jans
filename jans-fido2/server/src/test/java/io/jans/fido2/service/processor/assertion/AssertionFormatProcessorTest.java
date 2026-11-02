@@ -117,7 +117,8 @@ class AssertionFormatProcessorTest {
 
         //TODO: this check doesnt make sense right, everthing is null
         //verify(log).info(contains("User verification option"), eq(UserVerification.discouraged));
-        verifyNoInteractions(dataMapperService, coseService, hexUtilService, authenticatorDataVerifier);
+        verify(authenticatorDataVerifier).verifyAssertionSignature(any(), any(), any(), any(), anyInt());
+        verifyNoInteractions(hexUtilService);
         //verifyNoMoreInteractions(log);
     }
 

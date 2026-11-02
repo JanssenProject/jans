@@ -278,10 +278,16 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@Parameter(description = "Resource description ID") @PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        logger.debug("Patch for  id:{} , pathString:{}", id, pathString);
+        logger.debug("Patch for  id:{} , pathString:{}", escapeLog(id), escapeLog(pathString));
         UmaResource existingResource = findOrThrow(id);
+        final String dn = existingResource.getDn();
+        final String existingId = existingResource.getId();
+        final String existingInum = existingResource.getInum();
 
         existingResource = Jackson.applyPatch(pathString, existingResource);
+        existingResource.setDn(dn);
+        existingResource.setId(existingId);
+        existingResource.setInum(existingInum);
         umaResourceService.updateResource(existingResource);
         return Response.ok(existingResource).build();
     }

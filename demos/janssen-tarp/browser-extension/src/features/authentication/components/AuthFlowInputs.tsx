@@ -10,6 +10,7 @@ import { MultiSelectDropdown } from '../../../shared/components/multiSelect/Mult
 import { Dropdown } from '../../../shared/components/Dropdown';
 import { LabelWithTooltip } from '../../../shared/components/Common';
 import { awaitRedirectInIncognitoPopup } from '../../../shared/components/IncognitoPopupFlow';
+import { assertSecureUrl } from '../../../shared/urlSecurity';
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 type Option = { name: string; label?: string; create?: boolean };
@@ -88,6 +89,10 @@ export default function AuthFlowInputs({
     try {
       setLoading(true);
       setErrorMessage('');
+
+      assertSecureUrl(client?.authorizationEndpoint, 'Authorization endpoint');
+      assertSecureUrl(client?.tokenEndpoint, 'Token endpoint');
+      assertSecureUrl(client?.userinfoEndpoint, 'Userinfo endpoint');
 
       const redirectBase =
         Array.isArray(client?.redirectUris) && client.redirectUris[0]

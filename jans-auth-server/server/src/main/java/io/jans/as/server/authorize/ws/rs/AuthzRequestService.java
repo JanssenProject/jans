@@ -186,6 +186,7 @@ public class AuthzRequestService {
         authzRequest.setAmrValues(par.getAttributes().getAmrValuesStr());
         authzRequest.setCodeChallenge(par.getAttributes().getCodeChallenge());
         authzRequest.setCodeChallengeMethod(par.getAttributes().getCodeChallengeMethod());
+        authzRequest.setMaxAge(par.getAttributes().getMaxAge());
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
 
@@ -434,7 +435,12 @@ public class AuthzRequestService {
             if (jwr != null) {
                 String tempRedirectUri = jwr.getClaims().getClaimAsString("redirect_uri");
                 if (StringUtils.isNotBlank(tempRedirectUri)) {
-                    redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+                    final String decodedRedirectUri = URLDecoder.decode(tempRedirectUri, "UTF-8");
+                    if (StringUtils.isNotBlank(redirectionUriService.validateRedirectionUri(client, decodedRedirectUri))) {
+                        redirectUriResponse.getRedirectUri().setBaseRedirectUri(decodedRedirectUri);
+                    } else {
+                        log.debug("Ignoring redirect_uri from request object which is not registered for client {}", client.getClientId());
+                    }
                 }
             }
             String clientId = client.getClientId();
@@ -507,11 +513,11 @@ public class AuthzRequestService {
             if (!ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
                 authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
             }
-            return;
         }
 
+        final int minimumAcrLevel = client.getAttributes().getMinimumAcrLevel();
         final int currentMinAcrLevel = getCurrentMinAcrLevel(authzRequest);
-        if (currentMinAcrLevel >= client.getAttributes().getMinimumAcrLevel()) {
+        if (currentMinAcrLevel >= minimumAcrLevel) {
             return; // do nothing -> current level is enough
         }
 
@@ -524,18 +530,23 @@ public class AuthzRequestService {
         }
 
         final Map<String, Integer> acrToLevelMap = getAcrToLevelMap();
-        if (client.getAttributes().getMinimumAcrPriorityList().isEmpty()) { // no priority list -> pick up next higher then minimum
+        if (client.getAttributes().getMinimumAcrPriorityList().isEmpty()) { // no priority list -> pick up lowest level satisfying minimum
+            Map.Entry<String, Integer> selected = null;
             for (Map.Entry<String, Integer> entry : acrToLevelMap.entrySet()) {
-                if (currentMinAcrLevel < entry.getValue()) {
-                    authzRequest.setAcrValues(entry.getKey());
-                    return;
+                if (entry.getValue() != null && entry.getValue() >= minimumAcrLevel
+                        && (selected == null || entry.getValue() < selected.getValue())) {
+                    selected = entry;
                 }
+            }
+            if (selected != null) {
+                authzRequest.setAcrValues(selected.getKey());
+                return;
             }
         }
 
         for (String acr : client.getAttributes().getMinimumAcrPriorityList()) {
             final Integer acrLevel = acrToLevelMap.get(acr);
-            if (acrLevel != null && acrLevel >= currentMinAcrLevel) {
+            if (acrLevel != null && acrLevel >= minimumAcrLevel) {
                 authzRequest.setAcrValues(acr);
                 return;
             }

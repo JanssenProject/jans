@@ -6,6 +6,8 @@
 
 package io.jans.lock.service.ws.rs.trace;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -223,7 +225,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE record, recordId: {}", recordId);
+			log.debug("Retrieving TRACE record, recordId: {}", escapeLog(recordId));
 			checkEnabled();
 			requireMaxLength(recordId, MAX_RECORD_ID_LENGTH, FIELD_RECORD_ID);
 
@@ -248,7 +250,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		Response response = null;
 		try {
 			log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
-					policyStoreId, policyStoreVersion, bundleHash);
+					escapeLog(policyStoreId), escapeLog(policyStoreVersion), escapeLog(bundleHash));
 			checkEnabled();
 			checlStart(start);
 			requireCountInRange(count);
@@ -304,7 +306,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE execution, traceExecutionId: {}", traceExecutionId);
+			log.debug("Retrieving TRACE execution, traceExecutionId: {}", escapeLog(traceExecutionId));
 			checkEnabled();
 			checlStart(start);
 			requireMaxLength(traceExecutionId, MAX_EXECUTION_ID_LENGTH, "trace_execution_id");

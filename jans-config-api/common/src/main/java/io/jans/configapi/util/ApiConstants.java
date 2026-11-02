@@ -165,6 +165,8 @@ public class ApiConstants {
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
     public static final String PROTECTION_TYPE_UMA = "uma";
     public static final String ISSUER = "issuer";
+    public static final String AUTHENTICATED_SUBJECT_ATTRIBUTE = "jans.configapi.authenticatedSubject";
+    public static final String AUTHENTICATED_CLIENT_ATTRIBUTE = "jans.configapi.authenticatedClient";
 
     // Connection pool properties
     public static final int CONNECTION_POOL_MAX_TOTAL = 200;

@@ -1,8 +1,8 @@
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
 fqdn: demoexample.jans.io
-# -- Admin password to log in to the UI.
-adminPassword: Test1234#
+# -- Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret.
+adminPassword: ""
 # -- City. Used for certificate creation.
 city: Austin
 # -- Country code. Used for certificate creation.
@@ -106,7 +106,7 @@ configmap:
   # -- Base URL of Vault.
   cnVaultAddr: http://localhost:8200
   # -- Verify connection to Vault.
-  cnVaultVerify: false
+  cnVaultVerify: true
   # -- Path to file contains Vault AppRole role ID.
   cnVaultRoleIdFile: /etc/certs/vault_role_id
   # -- Path to file contains Vault AppRole secret ID.

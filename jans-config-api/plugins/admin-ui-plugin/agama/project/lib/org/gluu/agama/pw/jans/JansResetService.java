@@ -71,7 +71,7 @@ public class JansResetService extends ResetService{
 
         User user = getUser(MAIL, email);
         boolean local = user != null;
-        LogUtils.log("There is % local account for %", local ? "a" : "no", email);
+        LogUtils.log("There is % local account for %", local ? "a" : "no", sanitizeForLog(email));
     
         if (local) {            
             String uid = getSingleValuedAttr(user, UID);
@@ -134,8 +134,8 @@ public class JansResetService extends ResetService{
     public String sendEmail(String to) {
         String userLang = null;
         User user = getUser(MAIL, to);
-        LogUtils.log("User is: %", user.getUserId());
         if (user != null) {
+            LogUtils.log("User is: %", user.getUserId());
             userLang = getSingleValuedAttr(user, LANG);
             if (userLang == null || userLang.isBlank()) {
                 userLang = getSingleValuedAttr(user, LOCALE);
@@ -169,8 +169,13 @@ public class JansResetService extends ResetService{
         }
 
         LogUtils.log("E-mail delivery failed, check jans-auth logs");
-        return null;
+        // A null code could match an absent passcode in the flow, so delivery failure must stop recovery.
+        throw new IllegalStateException("Verification code delivery failed");
     } 
+
+    private static String sanitizeForLog(String value) {
+        return value == null ? null : value.replaceAll("[\\r\\n]", "_");
+    }
 
     private SmtpConfiguration getSmtpConfiguration() {
         ConfigurationService configurationService = CdiUtil.bean(ConfigurationService.class);

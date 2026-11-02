@@ -431,8 +431,7 @@ public class SchemaService {
         for (final String superiorClass : superiorClasses) {
             final ObjectClassDefinition objectClassDefinition = objectClassDefinitions.get(StringHelper.toLowerCase(superiorClass));
             if (objectClassDefinition != null) {
-                resultObjectClassDefinitions.add(objectClassDefinition);
-                if (recursive) {
+                if (resultObjectClassDefinitions.add(objectClassDefinition) && recursive) {
                     getSuperiorClasses(objectClassDefinitions, objectClassDefinition, resultObjectClassDefinitions);
                 }
             }
@@ -445,8 +444,7 @@ public class SchemaService {
             final ObjectClassDefinition objectClassDefinition, final Set<ObjectClassDefinition> resultObjectClassDefinitions) {
         for (final String superiorClass : objectClassDefinition.getSuperiorClasses()) {
             final ObjectClassDefinition superiorObjectClassDefinition = objectClassDefinitions.get(StringHelper.toLowerCase(superiorClass));
-            if (superiorObjectClassDefinition != null) {
-                resultObjectClassDefinitions.add(superiorObjectClassDefinition);
+            if ((superiorObjectClassDefinition != null) && resultObjectClassDefinitions.add(superiorObjectClassDefinition)) {
                 getSuperiorClasses(objectClassDefinitions, superiorObjectClassDefinition, resultObjectClassDefinitions);
             }
         }

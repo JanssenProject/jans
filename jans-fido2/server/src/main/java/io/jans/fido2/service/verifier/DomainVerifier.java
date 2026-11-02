@@ -20,6 +20,12 @@ package io.jans.fido2.service.verifier;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.conf.RequestedParty;
+import io.jans.util.StringHelper;
 
 import io.jans.fido2.model.error.CommonErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -42,6 +48,9 @@ public class DomainVerifier {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     public boolean verifyDomain(String domain, JsonNode clientDataNode) {
     	String clientDataOrigin = commonVerifiers.verifyThatFieldString(clientDataNode, "origin");
@@ -76,9 +85,33 @@ public class DomainVerifier {
             if (!effectiveDomain.endsWith("." + domain)) {
                 throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_DOMAIN, "Domains don't match");
             }
+            // The RP ID suffix rule only scopes the credential; the serving origin must itself be allowed
+            if (!isAllowedSubdomainOrigin(domain, effectiveDomain)) {
+                throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_DOMAIN, "Origin is not allowed");
+            }
         }
 
         return true;
+    }
+
+    private boolean isAllowedSubdomainOrigin(String domain, String effectiveDomain) {
+        Fido2Configuration fido2Configuration = appConfiguration == null ? null : appConfiguration.getFido2Configuration();
+        List<RequestedParty> requestedParties = fido2Configuration == null ? null : fido2Configuration.getRequestedParties();
+        if (requestedParties == null || requestedParties.isEmpty()) {
+            return true;
+        }
+
+        for (RequestedParty requestedParty : requestedParties) {
+            List<String> origins = requestedParty == null ? null : requestedParty.getOrigins();
+            if (origins == null || origins.stream().noneMatch(o -> StringHelper.equalsIgnoreCase(o, domain))) {
+                continue;
+            }
+            if (origins.stream().anyMatch(o -> StringHelper.equalsIgnoreCase(o, effectiveDomain))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

@@ -122,11 +122,17 @@ jobs:
         egress-policy: audit
     - name: Resolve tag
       id: tag
+      env:
+        INPUT_TAG: ${{ inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          TAG_NAME="${{ inputs.target_tag }}"
+          TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
+        fi
+        if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "Invalid release tag" >&2; exit 1
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
     - name: Delete the deploy target's package versions (so a re-release overwrites)
@@ -237,11 +243,17 @@ jobs:
 
     - name: Resolve tag and version
       id: ver
+      env:
+        INPUT_TAG: ${{ inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          TAG_NAME="${{ inputs.target_tag }}"
+          TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "${{ github.event.ref }}" | cut -d '/' -f 3)
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
+        fi
+        if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "Invalid release tag" >&2; exit 1
         fi
         echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
         if [[ "${TAG_NAME}" == "nightly" ]]; then
@@ -439,12 +451,19 @@ jobs:
         egress-policy: audit
     - name: Resolve release tag
       id: tag
+      env:
+        INPUT_TAG: ${{ inputs.target_tag }}
+        EVENT_REF: ${{ github.event.ref }}
       run: |
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-          echo "tag=${{ inputs.target_tag }}" >> "$GITHUB_OUTPUT"
+          TAG_NAME="$INPUT_TAG"
         else
-          echo "tag=$(echo '${{ github.event.ref }}' | cut -d '/' -f 3)" >> "$GITHUB_OUTPUT"
+          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
         fi
+        if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "Invalid release tag" >&2; exit 1
+        fi
+        echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
     - name: Download digest artifact
       uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
       with:

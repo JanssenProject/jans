@@ -211,10 +211,40 @@ public abstract class BaseAuthFilterService {
         for (IndexedParameter indexedParameter : authenticationFilterWithParameters.getIndexedVariables()) {
             String attributeValue = normalizedAttributeValues.get(indexedParameter.getParamName());
             if (attributeValue != null) {
-                filter = filter.replace(indexedParameter.getParamIndex(), attributeValue);
+                filter = filter.replace(indexedParameter.getParamIndex(), escapeFilterValue(attributeValue));
             }
         }
         return filter;
+    }
+
+    /**
+     * RFC 4515 assertion value escaping, so request values can't change the configured filter structure.
+     */
+    public static String escapeFilterValue(String value) {
+        StringBuilder sb = new StringBuilder(value.length());
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            switch (c) {
+                case '\\':
+                    sb.append("\\5c");
+                    break;
+                case '*':
+                    sb.append("\\2a");
+                    break;
+                case '(':
+                    sb.append("\\28");
+                    break;
+                case ')':
+                    sb.append("\\29");
+                    break;
+                case '\0':
+                    sb.append("\\00");
+                    break;
+                default:
+                    sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
     public <T> String loadEntryDN(PersistenceEntryManager manager, Class<T> entryClass, AuthenticationFilterWithParameters authenticationFilterWithParameters, Map<String, String> normalizedAttributeValues) throws SearchException {

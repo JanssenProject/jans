@@ -9,6 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Optional;
@@ -19,6 +23,8 @@ import java.util.Optional;
  * @author jgomer
  */
 public final class WebUtils {
+
+    private static final int IMAGE_FETCH_TIMEOUT_MS = 5000;
 
     private static Logger LOG = LoggerFactory.getLogger(WebUtils.class);
 
@@ -131,7 +137,28 @@ public final class WebUtils {
 
         String val = null;
         try {
-            val = ImageIO.read(new URL(url)) == null ? null : url;
+            URL u = new URL(url);
+            if (!"https".equalsIgnoreCase(u.getProtocol()) && !"http".equalsIgnoreCase(u.getProtocol())) {
+                LOG.warn("Unsupported scheme in image url '{}'", url);
+                return null;
+            }
+            for (InetAddress addr : InetAddress.getAllByName(u.getHost())) {
+                if (isInternalAddress(addr)) {
+                    LOG.warn("Image url '{}' points to a non-public address", url);
+                    return null;
+                }
+            }
+
+            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+            //Redirects could lead to non-public destinations
+            conn.setInstanceFollowRedirects(false);
+            conn.setConnectTimeout(IMAGE_FETCH_TIMEOUT_MS);
+            conn.setReadTimeout(IMAGE_FETCH_TIMEOUT_MS);
+            try (InputStream is = conn.getInputStream()) {
+                val = ImageIO.read(is) == null ? null : url;
+            } finally {
+                conn.disconnect();
+            }
         } catch (Exception e) {
             LOG.warn("Error validating image url '{}'", url);
             //LOG.error(e.getMessage(), e);
@@ -140,6 +167,12 @@ public final class WebUtils {
 
     }
     
+    private static boolean isInternalAddress(InetAddress addr) {
+        return addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()
+                || addr.isAnyLocalAddress() || addr.isMulticastAddress()
+                || (addr instanceof Inet6Address && (addr.getAddress()[0] & 0xfe) == 0xfc);
+    }
+
     public static String getFullRequestURL() {
         HttpServletRequest req = getServletRequest();
         String query = req.getQueryString();

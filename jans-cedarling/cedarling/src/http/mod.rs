@@ -36,6 +36,7 @@ pub(crate) struct HttpClient {
     #[allow(unused)]
     max_retries: u32,
     max_response_size_bytes: Option<u64>,
+    conf: HttpClientConfig,
 }
 
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
@@ -98,6 +99,44 @@ impl Default for HttpClientConfig {
 #[error(transparent)]
 pub struct InitializeHttpClientError(#[from] reqwest::Error);
 
+#[cfg(not(target_arch = "wasm32"))]
+const MAX_REDIRECTS: usize = 10;
+
+#[cfg(not(target_arch = "wasm32"))]
+fn is_secure_url(url: &url::Url) -> bool {
+    match url.scheme() {
+        "https" => true,
+        "http" => match url.host() {
+            Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+            Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
+            Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
+            None => false,
+        },
+        _ => false,
+    }
+}
+
+/// Follows redirects like reqwest's default policy, but refuses to leave
+/// https (or loopback http) for plaintext http on another host: the body of
+/// such a response (JWKS, OIDC metadata, policy store, ...) could be forged on
+/// the wire while still being trusted for the originally configured URL.
+#[cfg(not(target_arch = "wasm32"))]
+fn no_downgrade_redirect_policy() -> reqwest::redirect::Policy {
+    reqwest::redirect::Policy::custom(|attempt| {
+        if attempt.previous().len() >= MAX_REDIRECTS {
+            return attempt.error("too many redirects");
+        }
+        let started_secure = attempt.previous().first().is_none_or(is_secure_url);
+        if started_secure && !is_secure_url(attempt.url()) {
+            let scheme = attempt.url().scheme().to_string();
+            return attempt.error(format!(
+                "refusing redirect from a secure URL to an insecure '{scheme}' URL"
+            ));
+        }
+        attempt.follow()
+    })
+}
+
 impl HttpClient {
     pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, InitializeHttpClientError> {
         Self::new_with_builder(Client::builder(), conf)
@@ -110,7 +149,8 @@ impl HttpClient {
         #[cfg(not(target_arch = "wasm32"))]
         let builder = builder
             .timeout(conf.request_timeout)
-            .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
+            .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT)
+            .redirect(no_downgrade_redirect_policy());
 
         let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
@@ -119,7 +159,14 @@ impl HttpClient {
             retry_delay: conf.retry_delay,
             max_retries: conf.max_retries,
             max_response_size_bytes: conf.max_response_size_bytes,
+            conf,
         })
+    }
+
+    /// A client with the same limits but without this client's default headers,
+    /// for requests that must not carry its credentials.
+    pub(crate) fn without_default_headers(&self) -> Result<Self, InitializeHttpClientError> {
+        Self::new(self.conf)
     }
 
     /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
@@ -406,6 +453,21 @@ mod test {
         retry_delay: Duration::from_secs(5),
         max_response_size_bytes: None,
     };
+
+    #[test]
+    fn secure_url_allows_https_and_loopback_http_only() {
+        for (raw, expected) in [
+            ("https://example.org/jwks", true),
+            ("http://localhost:8080/jwks", true),
+            ("http://127.0.0.1/jwks", true),
+            ("http://[::1]/jwks", true),
+            ("http://example.org/jwks", false),
+            ("ftp://example.org/jwks", false),
+        ] {
+            let url = url::Url::parse(raw).expect("valid url");
+            assert_eq!(super::is_secure_url(&url), expected, "{raw}");
+        }
+    }
 
     #[tokio::test]
     async fn can_fetch() {

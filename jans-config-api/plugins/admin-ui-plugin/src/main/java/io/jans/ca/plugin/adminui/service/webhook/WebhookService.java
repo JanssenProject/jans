@@ -15,6 +15,7 @@ import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
@@ -28,6 +29,8 @@ import org.apache.commons.collections.MapUtils;
 import jakarta.validation.Valid;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -277,9 +280,12 @@ public class WebhookService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
             }
 
-            if (Strings.isNullOrEmpty(webhook.getDn())) {
-                webhook.setDn(dnOfWebhook(webhook.getInum(), AppConstants.WEBHOOK_DN));
+            WebhookEntry existingWebhook = findWebhookByInum(webhook.getInum());
+            if (existingWebhook == null) {
+                log.error(ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
             }
+            webhook.setDn(existingWebhook.getDn());
             entryManager.merge(webhook);
 
             List<AuiFeature> features = getAllAuiFeatures();
@@ -375,12 +381,18 @@ public class WebhookService {
         return responseList;
     }
 
-    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCodeRequest shortCodeObj) {
+    private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCodeRequest shortCodeObj) throws ApplicationException {
         if (shortCodeObj == null) {
             return;
         }
 
         if (CommonUtils.hasShortCode(webhook.getUrl())) {
+            // Trigger callers supply shortcode values, so they must not be able to pick the destination host
+            Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
+            if (!origin.find() || origin.group().contains("${")) {
+                log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", webhook.getDisplayName(), webhook.getInum());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
+            }
             webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortcodeValueMap()));
         }
 
@@ -389,8 +401,19 @@ public class WebhookService {
         }
     }
 
+    private static final Pattern FIXED_ORIGIN_PREFIX = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*://[^/?#]*[/?#]");
+
     private static String idFromName(String name) {
         return UUID.nameUUIDFromBytes(name.getBytes(UTF_8)).toString();
+    }
+
+    private WebhookEntry findWebhookByInum(String inum) {
+        try {
+            WebhookEntry existing = entryManager.find(WebhookEntry.class, dnOfWebhook(inum, AppConstants.WEBHOOK_DN));
+            return existing != null && inum.equals(existing.getInum()) ? existing : null;
+        } catch (EntryPersistenceException e) {
+            return null;
+        }
     }
 
     private static String dnOfWebhook(String id, String baseDn) {

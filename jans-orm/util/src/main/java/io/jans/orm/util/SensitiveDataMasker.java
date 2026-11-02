@@ -34,10 +34,12 @@ public final class SensitiveDataMasker {
      * (and therefore the masking) to stop partway through the value. Absent any valid terminator, the match runs
      * through the end of input, so a truncated or malformed sensitive value is fully masked instead of partially
      * leaked.
+     * A bare scalar never starts with an object or array opener, so a nonsensitive key whose value is a nested
+     * container does not swallow the nested members.
      */
     private static final Pattern RAW_JSON_KEY_VALUE_PATTERN = Pattern.compile(
             "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)"
-                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,}\\]\\s]+)");
+                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,{}\\[\\]\\s\"][^,}\\]\\s]*)");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 

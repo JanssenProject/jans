@@ -109,8 +109,9 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    userVerificationVerifier.verifyUserPresent(authData);
 	    commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
-	    if (isAttestationModeEnabled(registration.getRpId())) {
-	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, registration.getRpId());
+	    String attestationMode = rpPolicyService.resolveAttestationMode(registration.getRpId());
+	    if (!AttestationMode.DISABLED.getValue().equalsIgnoreCase(attestationMode)) {
+	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, registration.getRpId(), attestationMode);
 	    } else {
 	        log.debug("In Global fido configuration, AttestationMode is DISABLED, hence skipping the attestation check");
 	    }
@@ -118,13 +119,8 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	    setCredIdAndCounters(authData, credIdAndCounters);
 	}
 
-	private boolean isAttestationModeEnabled(String origin) {
-	    return !AttestationMode.DISABLED.getValue()
-	            .equalsIgnoreCase(rpPolicyService.resolveAttestationMode(origin));
-	}
-
 	private void processAttestation(JsonNode attStmt, AuthData authData, byte[] clientDataHash, String signature,
-	        CredAndCounterData credIdAndCounters, int alg, String origin) {
+	        CredAndCounterData credIdAndCounters, int alg, String origin, String attestationMode) {
 	    
 	    if (attStmt.hasNonNull("x5c")) {
 	        processX5cAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, origin);
@@ -132,6 +128,11 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	        processEcdaaKeyIdAttestation(attStmt);
 	    } else {
 	        processPackedSurrogateAttestation(authData, clientDataHash, signature, alg);
+	        // Self attestation only proves key possession, not trusted authenticator provenance
+	        if (AttestationMode.ENFORCED.getValue().equalsIgnoreCase(attestationMode)) {
+	            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.FIDO_U2F_ERROR,
+	                    "Self attestation is not allowed in enforced attestation mode");
+	        }
 	    }
 	}
 
@@ -182,7 +183,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	        }
 	    }
 	    log.debug("Ski not present in MDS3");
-	    return null;
+	    return attestationCertificateService.getMetadataForU2fAuthenticatorWithoutKeyIdentifier(origin);
 	}
 
 	private void handleAttestationCertException(List<X509Certificate> certificates, Fido2MissingAttestationCertException ex) {

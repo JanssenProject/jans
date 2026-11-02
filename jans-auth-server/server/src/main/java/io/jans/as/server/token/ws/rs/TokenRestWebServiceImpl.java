@@ -44,6 +44,7 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.model.token.TokenEntity;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.util.CoreCertUtil;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import jakarta.inject.Inject;
@@ -65,6 +66,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
@@ -157,7 +159,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private JwtGrantService jwtGrantService;
 
-    private final ConcurrentMap<String, String> refreshTokenLock = Maps.newConcurrentMap();
+    // static: the resource is instantiated per request, so instance-level locks would not serialize anything
+    private static final ConcurrentMap<String, String> refreshTokenLock = Maps.newConcurrentMap();
+    private static final ConcurrentMap<String, Boolean> oneTimeCodeClaims = Maps.newConcurrentMap();
 
     @Override
     public Response requestAccessToken(String grantType, String code,
@@ -204,7 +208,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             final Function<JsonWebResponse, Void> idTokenPreProcessing = JwrService.wrapWithSidFunction(idTokenTokingBindingPreprocessing, sessionIdObj != null ? sessionIdObj.getOutsideSid() : null);
 
             final ExecutionContext executionContext = new ExecutionContext(request, response);
-            executionContext.setCertAsPem(request.getHeader(X_CLIENTCERT));
+            executionContext.setCertAsPem(CoreCertUtil.getClientCert(request).getCert());
             executionContext.setDpop(dpopStr);
             executionContext.setClient(client);
             executionContext.setAppConfiguration(appConfiguration);
@@ -361,12 +365,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         tokenRestWebServiceValidator.validateRefreshToken(refreshTokenObject, auditLog);
 
         executionContext.setGrant(authorizationGrant);
+        tokenCreatorService.checkUser(authorizationGrant);
+
+        final boolean isPublicClient = client.hasAuthenticationMethod(AuthenticationMethod.NONE);
+        if (isPublicClient) {
+            validateRefreshTokenDpopBinding(refreshToken, executionContext.getDpop(), auditLog);
+        }
 
         // The authorization server MAY issue a new refresh token, in which case
         // the client MUST discard the old refresh token and replace it with the new refresh token.
         // OAuth 2.1: refresh tokens issued to public clients are not sender-constrained here, so they
         // MUST be rotated on every use regardless of the 'skipRefreshTokenDuringRefreshing' AS setting.
-        final boolean isPublicClient = client.hasAuthenticationMethod(AuthenticationMethod.NONE);
         RefreshToken reToken = null;
         if (isPublicClient || isFalse(appConfiguration.getSkipRefreshTokenDuringRefreshing())) {
             if (isTrue(appConfiguration.getRefreshTokenExtendLifetimeOnRotation())) {
@@ -422,6 +431,44 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return response(Response.ok().entity(entity), auditLog);
     }
 
+    // RFC 9449: refresh tokens of public clients are DPoP-bound, proof must be presented on every authentication path
+    private void validateRefreshTokenDpopBinding(String refreshToken, String dpopThumbprint, OAuth2AuditLog auditLog) {
+        final TokenEntity tokenEntity = grantService.getGrantByCode(refreshToken);
+        if (tokenEntity == null || StringUtils.isBlank(tokenEntity.getDpop())) {
+            return;
+        }
+        if (!tokenEntity.getDpop().equals(dpopThumbprint)) {
+            log.trace("DPoP proof does not match refresh token binding.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, "DPoP proof does not match refresh token binding."), auditLog));
+        }
+    }
+
+    // Serializes one-time code consumption: the code is re-checked and consumed under the claim, before any credential is issued.
+    private static boolean consumeOneTimeCode(String code, BooleanSupplier stillUnused, Runnable consume) {
+        if (StringUtils.isBlank(code) || oneTimeCodeClaims.putIfAbsent(code, Boolean.TRUE) != null) {
+            return false;
+        }
+        try {
+            if (!stillUnused.getAsBoolean()) {
+                return false;
+            }
+            consume.run();
+            return true;
+        } finally {
+            oneTimeCodeClaims.remove(code);
+        }
+    }
+
+    private boolean isCibaGrantUndelivered(String authReqId) {
+        final CIBAGrant current = authorizationGrantList.getCIBAGrant(authReqId);
+        return current != null && !current.isTokensDelivered();
+    }
+
+    private static void markCibaTokensDelivered(CIBAGrant cibaGrant) {
+        cibaGrant.setTokensDelivered(true);
+        cibaGrant.save();
+    }
+
     private void removeOrphanedRefreshToken(RefreshToken replacement) {
         if (replacement == null) {
             return;
@@ -470,6 +517,15 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         // if authorization code is not found then code was already used or wrong client provided = remove all grants with this auth code
         tokenRestWebServiceValidator.validateGrant(authorizationCodeGrant, client, code, executionContext.getAuditLog(), grant -> grantService.removeAllByAuthorizationCode(code));
 
+        final AuthorizationCode authorizationCode = authorizationCodeGrant.getAuthorizationCode();
+        if (authorizationCode != null && authorizationCode.getExpirationDate() != null) {
+            authorizationCode.checkExpired();
+        }
+        if (authorizationCode == null || !authorizationCode.isValid()) {
+            log.trace("Authorization code is expired or invalid.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Authorization code is expired or invalid."), executionContext.getAuditLog()));
+        }
+
         // validate redirectUri only for Authorization Code Flow. For First-Party App redirect uri is blank. It is perfectly valid case.
         // redirect uri must be validated after grant is validated
         if (!authorizationCodeGrant.isAuthorizationChallenge()) {
@@ -477,6 +533,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
         tokenRestWebServiceValidator.validatePKCE(authorizationCodeGrant, codeVerifier, executionContext.getAuditLog(), client);
         dPoPService.validateDpopThumprint(authorizationCodeGrant.getDpopJkt(), executionContext.getDpop());
+
+        if (!consumeOneTimeCode(code,
+                () -> authorizationGrantList.getAuthorizationCodeGrant(code) != null,
+                () -> grantService.removeAuthorizationCode(code))) {
+            log.trace("Authorization code is already used by another request.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Authorization code is already used."), executionContext.getAuditLog()));
+        }
 
         authorizationCodeGrant.setIsCachedWithNoPersistence(false);
         authorizationCodeGrant.save();
@@ -514,8 +577,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         }
 
         executionContext.getAuditLog().updateOAuth2AuditLog(authorizationCodeGrant, true);
-
-        grantService.removeAuthorizationCode(authorizationCodeGrant.getAuthorizationCode().getCode());
 
         JSONObject jsonObj = new JSONObject();
         try {
@@ -586,6 +647,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), executionContext.getAuditLog()));
             }
 
+            if (!consumeOneTimeCode(deviceCode,
+                    () -> authorizationGrantList.getDeviceCodeGrant(deviceCode) != null,
+                    () -> grantService.removeByCode(deviceCode))) {
+                log.trace("Device code is already used by another request.");
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Device code is already used."), executionContext.getAuditLog()));
+            }
+
             RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
             AccessToken accessToken = deviceCodeGrant.createAccessToken(executionContext);
@@ -607,8 +675,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
             executionContext.getAuditLog().updateOAuth2AuditLog(deviceCodeGrant, true);
-
-            grantService.removeByCode(deviceCodeGrant.getDeviceCode());
 
             return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
                     accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
@@ -720,7 +786,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             if (cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.PING ||
                     cibaGrant.getClient().getBackchannelTokenDeliveryMode() == BackchannelTokenDeliveryMode.POLL) {
-                if (!cibaGrant.isTokensDelivered()) {
+                if (!cibaGrant.isTokensDelivered() && consumeOneTimeCode(authReqId,
+                        () -> isCibaGrantUndelivered(authReqId),
+                        () -> markCibaTokensDelivered(cibaGrant))) {
                     RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
                     AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
 
@@ -733,9 +801,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                     IdToken idToken = cibaGrant.createIdToken(
                             null, null, accessToken, refToken, null, executionContext);
-
-                    cibaGrant.setTokensDelivered(true);
-                    cibaGrant.save();
 
                     RefreshToken reToken = null;
                     if (tokenCreatorService.isRefreshTokenAllowed(client, scope, cibaGrant)) {

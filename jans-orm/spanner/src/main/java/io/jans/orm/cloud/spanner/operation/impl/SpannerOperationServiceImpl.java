@@ -195,7 +195,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
         boolean result = addEntryImpl(tableMapping, key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, attributes);
+        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, getAttributeNames(attributes));
         
         return result;
     }
@@ -260,7 +260,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
         boolean result = updateEntryImpl(tableMapping, key, mods);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, describeModifications(mods));
 
         return result;
     }
@@ -590,8 +590,13 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
         if (orderBy != null) {
         	OrderByElement[] orderByElements = new OrderByElement[orderBy.length];
+        	Map<String, StructField> columTypes = tableMapping.getColumTypes();
         	for (int i = 0; i < orderBy.length; i++) {
-        		Column column = new Column(orderBy[i].getName());
+        		String sortName = orderBy[i].getName();
+        		if ((sortName == null) || !columTypes.containsKey(sortName.toLowerCase())) {
+        			throw new SearchException(String.format("Failed to build order by. Column '%s' is undefined", sortName));
+        		}
+        		Column column = new Column(sortName);
         		orderByElements[i] = new OrderByElement();
         		orderByElements[i].setExpression(column);
         		
@@ -753,7 +758,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+			if (isSkipHashed && isPreHashedPassword(passwords[i])) {
 				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
 				results[i] = passwords[i];
 				continue;
@@ -1329,6 +1334,37 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 	@Override
 	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
         throw new UnsupportedOperationException("Method not implemented.");
+	}
+
+	private boolean isPreHashedPassword(String password) {
+		if (persistenceExtension != null) {
+			// Extension may use its own hash format
+			return PasswordEncryptionHelper.findAlgorithmString(password) != null;
+		}
+
+		// Unknown {prefix} would be stored and later compared as plaintext
+		return PasswordEncryptionHelper.findAlgorithm(password) != null;
+	}
+
+	private static List<String> getAttributeNames(Collection<AttributeData> attributes) {
+		List<String> names = new ArrayList<String>();
+		if (attributes != null) {
+			for (AttributeData attribute : attributes) {
+				names.add(attribute.getName());
+			}
+		}
+		return names;
+	}
+
+	private static List<String> describeModifications(List<AttributeDataModification> mods) {
+		List<String> descriptions = new ArrayList<String>();
+		if (mods != null) {
+			for (AttributeDataModification mod : mods) {
+				AttributeData attribute = mod.getAttribute() != null ? mod.getAttribute() : mod.getOldAttribute();
+				descriptions.add(mod.getModificationType() + ":" + (attribute == null ? null : attribute.getName()));
+			}
+		}
+		return descriptions;
 	}
 
 }

@@ -21,9 +21,11 @@ import io.jans.as.client.TokenResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.service.EncryptionService;
+import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.ClientBuilder;
 
@@ -71,6 +73,7 @@ public class LockAuditTokenService {
 	private EncryptionService encryptionService;
 
 	private volatile String cachedTokenEndpoint;
+	private volatile String cachedTokenEndpointIssuer;
 
 	/**
 	 * {@code AtomicReference} rather than a {@code volatile CachedToken} field — {@code volatile} only
@@ -79,6 +82,17 @@ public class LockAuditTokenService {
 	 * for a user-defined type. This is the JDK type that says so directly.
 	 */
 	private final AtomicReference<CachedToken> cachedToken = new AtomicReference<>();
+
+	/**
+	 * Issuer or audit client credentials may change on reload; drop caches so a new secret is never
+	 * sent to the previous issuer's token endpoint. Synchronized with {@link #requestNewToken()} so
+	 * an in-flight request cannot republish a token obtained under the old configuration.
+	 */
+	public synchronized void onConfigurationUpdate(@Observes @ConfigurationUpdate AppConfiguration updatedConfiguration) {
+		cachedTokenEndpoint = null;
+		cachedTokenEndpointIssuer = null;
+		cachedToken.set(null);
+	}
 
 	/**
 	 * @return a cached access token for {@link #LOCK_LOG_WRITE_SCOPE} if one is still usable, or a
@@ -184,14 +198,14 @@ public class LockAuditTokenService {
 	 * endpoint does not change without a redeploy.
 	 */
 	private String resolveTokenEndpoint() {
-		if (cachedTokenEndpoint != null) {
-			return cachedTokenEndpoint;
-		}
-
 		String issuer = appConfiguration.getIssuer();
 		if (StringHelper.isEmpty(issuer)) {
 			log.error("Issuer is not configured, cannot discover the token endpoint for Lock audit delivery");
 			return null;
+		}
+
+		if (cachedTokenEndpoint != null && issuer.equals(cachedTokenEndpointIssuer)) {
+			return cachedTokenEndpoint;
 		}
 
 		try {
@@ -213,6 +227,7 @@ public class LockAuditTokenService {
 			LockAuditUrlValidator.requireSecure(response.getTokenEndpoint(), "token_endpoint");
 
 			cachedTokenEndpoint = response.getTokenEndpoint();
+			cachedTokenEndpointIssuer = issuer;
 			return cachedTokenEndpoint;
 		} catch (Exception e) {
 			log.error("Failed to discover OpenID configuration for Lock audit delivery", e);

@@ -78,6 +78,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseOperationServiceImpl.class);
 
+    private static final String SCOPE_KEY_PARAMETER = "__jans_scope_key";
+
     private Properties props;
     private CouchbaseConnectionProvider connectionProvider;
 
@@ -244,6 +246,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 			MutateInOptions options = MutateInOptions.mutateInOptions();
             if (expiration != null) {
 				options.expiry(Duration.ofSeconds(expiration));
+			} else {
+				options.preserveExpiry(true);
 			}
 
             MutateInResult result = bucketMapping.getBucket().defaultCollection().mutateIn(key, mods, options);
@@ -297,7 +301,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
     private int deleteImpl(BucketMapping bucketMapping, String key, QueryScanConsistency queryScanConsistency, ConvertedExpression expression, int count) throws DeleteException {
         StringBuilder query = new StringBuilder("DELETE FROM `").append(bucketMapping.getBucketName()).append("` WHERE ").append(expression.expression());
         if (enableScopeSupport) { 
-        	query.append("AND META().id LIKE ").append(key).append("%");
+        	query.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
+        	expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
         }
 
         query.append(" LIMIT ").append(count).append(" RETURNING default.*");
@@ -325,15 +330,24 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         return result;
     }
 
+	private static String scopeKeyPrefix(String key) {
+		// "_" is the key of the whole DB tree
+		return "_".equals(key) ? "" : escapeLikePattern(key);
+	}
+
+	private static String escapeLikePattern(String value) {
+		return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+	}
+
 	private boolean deleteRecursivelyImpl(BucketMapping bucketMapping, String key) throws EntryNotFoundException, DeleteException {
 		try {
 	        if (enableScopeSupport) {
 	            StringBuilder query = new StringBuilder("DELETE FROM `").append(bucketMapping.getBucketName()).append("` WHERE ").
-	            		append("META().id LIKE $1%");
+	            		append("META().id LIKE $1");
 	
 	            LOG.debug("Execution query: '" + query + "'");
 
-	            QueryOptions queryOptions = QueryOptions.queryOptions().scanConsistency(queryScanConsistency).parameters(JsonArray.from(key));
+	            QueryOptions queryOptions = QueryOptions.queryOptions().scanConsistency(queryScanConsistency).parameters(JsonArray.from(scopeKeyPrefix(key) + "%"));
 	            QueryResult result = connectionProvider.getCluster().query(query.toString(), queryOptions);
 	            if (QueryStatus.SUCCESS != result.metaData().status()) {
 	                throw new DeleteException(String.format("Failed to delete entries. Query: '%s'. Warnings: '%s'", query, result.metaData().warnings()));
@@ -470,9 +484,11 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         StringBuilder finalExpression = new StringBuilder(expression.expression());
         if (enableScopeSupport) { 
 			if (SearchScope.BASE == scope) {
-				finalExpression.append(" AND META().id NOT LIKE ").append(key).append("\\\\_%\\\\_");
+				finalExpression.append(" AND META().id NOT LIKE $").append(SCOPE_KEY_PARAMETER);
+				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "\\_%\\_");
 			} else {
-				finalExpression.append(" AND META().id LIKE ").append(key).append("%");
+				finalExpression.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
+				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
 			}
         } else {
             if (scope != null) {

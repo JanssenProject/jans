@@ -90,6 +90,9 @@ import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private static final String SUCCESSFUL_RP_REDIRECT_COUNT = "successful_rp_redirect_count";
+    private static final Set<String> PROTECTED_RESPONSE_HEADERS = Set.of(
+            "set-cookie", "set-cookie2", "location", "refresh", "content-type", "content-length", "transfer-encoding",
+            "cache-control", "pragma", "content-security-policy", "strict-transport-security", "x-frame-options");
 
     @Inject
     private Logger log;
@@ -526,8 +529,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         addCustomHeaders(builder, authzRequest);
         updateSession(authzRequest, sessionUser, user);
 
-        runCiba(authzRequest, client);
-        processDeviceAuthorization(deviceAuthzUserCode, user);
+        runCiba(authzRequest, client, user);
+        processDeviceAuthorization(deviceAuthzUserCode, user, scopes);
         if (StringUtils.isNotBlank(deviceAuthzUserCode)) {
             deviceAuthorizationService.removeUserCodeFromSession(sessionIdService.getSessionId(authzRequest.getHttpRequest()));
         }
@@ -558,9 +561,21 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
             for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
+                if (isProtectedResponseHeader(entry.getKey())) {
+                    log.debug("Skipped protected custom response header: {}", entry.getKey());
+                    continue;
+                }
                 builder.header(entry.getKey(), entry.getValue());
             }
         }
+    }
+
+    static boolean isProtectedResponseHeader(String name) {
+        if (StringUtils.isBlank(name)) {
+            return true;
+        }
+        final String lower = name.trim().toLowerCase(Locale.ROOT);
+        return PROTECTED_RESPONSE_HEADERS.contains(lower) || lower.startsWith("access-control-");
     }
 
     private void addResponseParameterIss(RedirectUri redirectUri, ResponseMode responseMode) {
@@ -900,7 +915,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return StringUtils.isNotBlank(acr) ? acr : acrValuesStr;
     }
 
-    private void runCiba(AuthzRequest authzRequest, Client client) {
+    private void runCiba(AuthzRequest authzRequest, Client client, User user) {
         String authReqId = authzRequest.getAuthReqId();
         if (StringUtils.isBlank(authReqId)) {
             return;
@@ -910,6 +925,16 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         if (cibaRequest == null || cibaRequest.getStatus() == CibaRequestStatus.EXPIRED) {
             log.trace("User responded too late and the grant {} has expired, {}", authReqId, cibaRequest);
+            return;
+        }
+
+        if (System.currentTimeMillis() > cibaRequest.getCreationTime() + cibaRequest.getExpiresIn() * 1000L) {
+            log.trace("CIBA request {} passed its expiration deadline.", authReqId);
+            return;
+        }
+
+        if (user == null || cibaRequest.getUser() == null || !StringUtils.equalsIgnoreCase(user.getDn(), cibaRequest.getUser().getDn())) {
+            log.debug("Authenticated user does not match the user of CIBA request {}.", authReqId);
             return;
         }
 
@@ -1160,8 +1185,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
      *
      * @param userCode User code used in the device code flow.
      * @param user     Authenticated user that is giving the permissions.
+     * @param approvedScopes Scopes evaluated and approved in this authorization request.
      */
-    private void processDeviceAuthorization(String userCode, User user) {
+    private void processDeviceAuthorization(String userCode, User user, Set<String> approvedScopes) {
         if (StringUtils.isBlank(userCode)) {
             return;
         }
@@ -1169,6 +1195,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
         if (cacheData == null || cacheData.getStatus() == DeviceAuthorizationStatus.EXPIRED) {
             log.trace("User responded too late and the authorization {} has expired, {}", userCode, cacheData);
+            return;
+        }
+
+        if (cacheData.getScopes() != null && (approvedScopes == null || !approvedScopes.containsAll(cacheData.getScopes()))) {
+            log.debug("Approved scopes {} do not cover device authorization scopes {}, user_code: {}", approvedScopes, cacheData.getScopes(), userCode);
             return;
         }
 

@@ -98,6 +98,8 @@ public class ScimResourceSerializer {
             extendedSet.addAll(IntrospectUtil.allAttrs.get(resourceClass));
             tempSet = expandAttributesPaths(attributes, defaultSchema, schemas, extendedSet);
             tempSet.removeAll(neverSet);
+            //A requested sub-path would otherwise make containsProperty select its never-returned parent
+            tempSet.removeIf(path -> neverSet.stream().anyMatch(never -> path.startsWith(never + ".")));
             include.addAll(tempSet);
 
         } else if (exclussions != null) {

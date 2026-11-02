@@ -17,6 +17,7 @@
 import jarray
 import json
 import sys
+import threading
 from com.google.common.io import BaseEncoding
 from com.bastiaanjansen.otp import HMACAlgorithm
 from com.bastiaanjansen.otp import HOTPGenerator
@@ -40,6 +41,7 @@ from io.jans.util import StringHelper
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
+        self.totpCacheLock = threading.Lock()
 
     def init(self, customScript, configurationAttributes):
         print "OTP. Initialization"
@@ -543,17 +545,25 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def validateTotpKey(self, secretKey, totpKey, user_name):
         localTotpKey = self.generateTotpKey(secretKey)
-        cachedOTP = self.getCachedOTP(user_name)
+        if not StringHelper.equals(localTotpKey, totpKey):
+            return { "result": False }
 
-        if StringHelper.equals(localTotpKey, totpKey) and not StringHelper.equals(localTotpKey, cachedOTP):
+        # replay check and cache update must not interleave between concurrent logins
+        with self.totpCacheLock:
+            cachedOTP = self.getCachedOTP(user_name)
+            if StringHelper.equals(localTotpKey, cachedOTP):
+                return { "result": False }
+
             userService = CdiUtil.bean(UserService)
             if cachedOTP is None:
-                userService.addUserAttribute(user_name, "jansOTPCache",localTotpKey)
+                updated = userService.addUserAttribute(user_name, "jansOTPCache",localTotpKey)
             else :
-                userService.replaceUserAttribute(user_name, "jansOTPCache", cachedOTP, localTotpKey)
-            print "OTP. Caching OTP: '%s'" % localTotpKey
-            return { "result": True }
-        return { "result": False }
+                updated = userService.replaceUserAttribute(user_name, "jansOTPCache", cachedOTP, localTotpKey)
+
+        if updated is None:
+            print "OTP. Failed to cache used OTP"
+            return { "result": False }
+        return { "result": True }
 	
     def getCachedOTP(self, user_name):
         userService = CdiUtil.bean(UserService)

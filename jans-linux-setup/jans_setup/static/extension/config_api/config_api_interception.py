@@ -34,8 +34,6 @@ class ConfigApiAuthorization(ConfigApiType):
     # response_as_json_object - is org.codehaus.jettison.json.JSONObject, you can use any method to manipulate json
     # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
     def authorize(self, response_as_json_object, context):
-        print(" response_as_json_object: %s" % response_as_json_object)
-        print(" context: %s" % context)
 
         print("Config Authentication process")
         request = context.httpRequest
@@ -55,7 +53,6 @@ class ConfigApiAuthorization(ConfigApiType):
         print("ConfigApiType.app_configuration: %s" % app_configuration)
         print("ConfigApiType.custom_script_configuration: %s" % custom_script_configuration)
         print("ConfigApiType.issuer: %s" % issuer)
-        print("ConfigApiType.token: %s" % token)
         print("ConfigApiType.method: %s" % method)
         print("ConfigApiType.path: %s" % path)
 
@@ -67,7 +64,6 @@ class ConfigApiAuthorization(ConfigApiType):
           print("ConfigApiType.path: %s" % path)
   
         response_as_json_object.accumulate("key_from_script", "value_from_script")
-        print(" final response_as_json_object: %s" % response_as_json_object)
 
         return True
 

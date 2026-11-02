@@ -2,6 +2,7 @@
 
 import base64
 import binascii
+import hashlib
 import json
 import logging
 import os
@@ -132,11 +133,12 @@ def get_sys_random_chars(size: int = 12, chars: str = "") -> str:
     return "".join(random.SystemRandom().choices(chars, k=size))
 
 
-def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
+def exec_cmd(cmd: str, env: _t.Optional[dict[str, str]] = None) -> tuple[bytes, bytes, int]:
     """Execute shell command.
 
     Args:
         cmd: Shell command to be executed.
+        env: Optional extra environment variables passed to the command.
 
     Returns:
         A sequence consists of stdout, stderr, and return code from executed shell command.
@@ -145,6 +147,7 @@ def exec_cmd(cmd: str) -> tuple[bytes, bytes, int]:
     # ignore bandit rule as input is escaped via `shlex.split`
     popen = subprocess.Popen(  # nosec: B603
         args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env={**os.environ, **env} if env else None,
     )
     stdout, stderr = popen.communicate()
     retcode = popen.returncode
@@ -227,37 +230,53 @@ def get_server_certificate(
     host: str,
     port: int,
     filepath: str,
-    server_hostname: str = ""
+    server_hostname: str = "",
+    fingerprint: _t.Optional[str] = None,
 ) -> str:
     """Get PEM-formatted certificate of a given address.
+
+    By default the certificate is fetched without verification (trust on first use) so
+    self-signed certificates work. Set `CN_SSL_CERT_VERIFY=true` to require a valid chain
+    and hostname, and/or pin the expected certificate by its SHA-256 fingerprint.
 
     Args:
         host: Hostname of a server.
         port: Port of SSL-secured server.
         filepath: Path to save the downloaded certificate.
         server_hostname: Optional hostname of the server.
+        fingerprint: Expected SHA-256 fingerprint (hex, colons optional) of the certificate.
+            If `None`, the `CN_SSL_CERT_FINGERPRINT` environment variable is used (if any).
 
     Returns:
         Certificate text.
+
+    Raises:
+        ssl.SSLCertVerificationError: If the certificate does not match the expected fingerprint.
     """
     server_hostname = server_hostname or host
 
+    if fingerprint is None:
+        fingerprint = os.environ.get("CN_SSL_CERT_FINGERPRINT", "")
+    expected_fp = fingerprint.replace(":", "").strip().lower()
+
     with socket.create_connection((host, port)) as conn:
-        # create client-side socket context
         context = ssl.create_default_context(purpose=ssl.Purpose.SERVER_AUTH)
-        # we don't need to validate cert at the moment
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
+        if not as_boolean(os.environ.get("CN_SSL_CERT_VERIFY", "false")):
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
 
         with context.wrap_socket(conn, server_hostname=server_hostname) as sock:
             # getpeercert may returns `None` if there's no certificate
             der = sock.getpeercert(True)
-            if der:
-                cert = ssl.DER_cert_to_PEM_cert(der)
-            else:
-                cert = ""
-            pathlib.Path(filepath).write_text(cert)
-            return cert
+
+    if expected_fp and (not der or hashlib.sha256(der).hexdigest() != expected_fp):
+        raise ssl.SSLCertVerificationError(
+            f"Certificate presented by {host}:{port} does not match the expected SHA-256 fingerprint"
+        )
+
+    cert = ssl.DER_cert_to_PEM_cert(der) if der else ""
+    pathlib.Path(filepath).write_text(cert)
+    return cert
 
 
 # @TODO: change to different library or use stdlib
@@ -449,6 +468,9 @@ def generate_keystore(  # nosec: B107
     pkcs_fn = f"/etc/certs/{suffix}.pkcs12"
     name = alias or hostname
 
+    # pass secrets via environment so they don't show up in process arguments
+    pass_env = {"CN_KEYSTORE_PASSWD": keypasswd, "CN_KEYSTORE_IN_PASSWD": in_passwd}
+
     # converts key to pkcs12
     cmd = [
         "openssl",
@@ -458,13 +480,13 @@ def generate_keystore(  # nosec: B107
         f"-in {in_cert}",
         f"-out {pkcs_fn}",
         f"-name {name}",
-        f"-passout pass:{keypasswd}",
+        "-passout env:CN_KEYSTORE_PASSWD",
     ]
     if in_passwd:
-        cmd.append(f"-passin pass:{in_passwd}")
+        cmd.append("-passin env:CN_KEYSTORE_IN_PASSWD")
 
     cmds = " ".join(cmd)
-    out, err, retcode = exec_cmd(cmds)
+    out, err, retcode = exec_cmd(cmds, env=pass_env)
     if retcode != 0:
         err = err or out
         raise RuntimeError(f"Failed to generate PKCS12 keystore {pkcs_fn}; reason={err.decode()}")
@@ -474,10 +496,10 @@ def generate_keystore(  # nosec: B107
         "keytool",
         "-importkeystore",
         f"-srckeystore {pkcs_fn}",
-        f"-srcstorepass {keypasswd}",
+        "-srcstorepass:env CN_KEYSTORE_PASSWD",
         "-srcstoretype PKCS12",
         f"-destkeystore {jks_fn}",
-        f"-deststorepass {keypasswd}",
+        "-deststorepass:env CN_KEYSTORE_PASSWD",
         "-deststoretype JKS",
         "-keyalg RSA",
         "-noprompt",
@@ -486,7 +508,7 @@ def generate_keystore(  # nosec: B107
         cmd.append(f"-alias {alias}")
     cmds = " ".join(cmd)
 
-    out, err, retcode = exec_cmd(cmds)
+    out, err, retcode = exec_cmd(cmds, env=pass_env)
     if retcode != 0:
         err = err or out
         raise RuntimeError(f"Failed to generate JKS keystore {jks_fn}; reason={err.decode()}")

@@ -430,7 +430,7 @@ public class SqlFilterConverter {
 			if (expressionValue instanceof Boolean) {
 				typedArrayExpression = Expressions.asString(((Boolean) expressionValue).toString());
 			} else if (expressionValue instanceof String) {
-				typedArrayExpression = Expressions.asString("\"" + (String) expressionValue + "\"");
+				typedArrayExpression = Expressions.asString("\"" + escapeJsonPathString((String) expressionValue) + "\"");
 			} else {
 				typedArrayExpression = Expressions.constant(expressionValue);
 			}
@@ -449,6 +449,21 @@ public class SqlFilterConverter {
 					typedArrayExpression);
 		}
 		return ConvertedExpression.build(operation, jsonAttributes);
+	}
+
+	private static String escapeJsonPathString(String value) {
+		StringBuilder sb = new StringBuilder(value.length() + 8);
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if ((c == '"') || (c == '\\')) {
+				sb.append('\\').append(c);
+			} else if (c < 0x20) {
+				sb.append(String.format("\\u%04x", (int) c));
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 
 	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {

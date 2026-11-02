@@ -97,13 +97,9 @@ public class RequestReaderInterceptor {
     }
 
     private void processRequest(InvocationContext context) {
-        logger.debug(
-                " Process Request Data -  context:{} , context.getClass():{}, context.getContextData():{}, context.getMethod():{} , context.getParameters():{} , context.getTarget():{} ",
-                context, context.getClass(), context.getContextData(), context.getMethod(), context.getParameters(),
-                context.getTarget());
+        logger.debug(" Process Request Data - context.getMethod():{}", context.getMethod());
 
         Object[] ctxParameters = context.getParameters();
-        logger.debug(" Request  Parameters -  ctxParameters:{} ", ctxParameters);
 
         Method method = context.getMethod();
 
@@ -124,14 +120,14 @@ public class RequestReaderInterceptor {
                 Object obj = ctxParameters[i];
                 if (!clazz.isPrimitive() && obj != null) {
                     processCustomAttributes(obj);
-                    logger.debug("Request object post processing -  propertyName:{}, obj:{} ", propertyName, obj);
+                    logger.debug("Request object post processing -  propertyName:{}", propertyName);
                 }
             }
         }
     }
 
     private <T> void processCustomAttributes(T obj) {
-        logger.debug("Object for custom attribute obj:{}", obj);
+        logger.debug("Object for custom attribute class:{}", obj.getClass());
 
         Class<?> entryClass = obj.getClass();
         List<PropertyAnnotation> propertiesAnnotations = persistenceEntryManager
@@ -153,9 +149,7 @@ public class RequestReaderInterceptor {
                 List<AttributeData> listAttributes = persistenceEntryManager
                         .getAttributeDataListFromCustomAttributesList(obj, (AttributesList) ldapAttribute,
                                 propertyName);
-                logger.debug("Custom AttributesList before conversion listAttributes:{}", listAttributes);
                 processAttributeData(obj, propertyName, ldapAttribute, listAttributes);
-                logger.debug("Custom AttributesList after conversion listAttributes:{}", listAttributes);
 
             } catch (Exception ex) {
                 logger.error("Error while processing Custom Attributes", ex);
@@ -166,16 +160,14 @@ public class RequestReaderInterceptor {
     private List<AttributeData> processAttributeData(Object obj, String propertyName, Annotation ldapAttribute,
             List<AttributeData> listAttributes)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        logger.debug("Attribute Data for processing obj:{}, propertyName:{}, ldapAttribute:{}, listAttributes:{}", obj,
-                propertyName, ldapAttribute, listAttributes);
+        logger.debug("Attribute Data for processing propertyName:{}, ldapAttribute:{}", propertyName, ldapAttribute);
 
         if (listAttributes != null && !listAttributes.isEmpty()) {
             for (AttributeData attData : listAttributes) {
-                logger.debug("AttributeData - attData:{}", attData);
                 JansAttribute jansAttribute = attributeService.getByLdapName(attData.getName());
 
-                logger.debug("AttributeData details - attData.getName():{}, attData.getValue():{},jansAttribute:{}",
-                        attData.getName(), attData.getValue(), jansAttribute);
+                logger.debug("AttributeData details - attData.getName():{}, jansAttribute:{}", attData.getName(),
+                        jansAttribute);
 
                 if (attData.getValue() != null && jansAttribute != null) {
                     AttributeDataType attributeDataType = jansAttribute.getDataType();
@@ -183,7 +175,7 @@ public class RequestReaderInterceptor {
                             "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}",
                             attData.getName(), attributeDataType, AttributeDataType.DATE.getValue());
                     if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())) {
-                        logger.debug(" Calling decodeTime() - attData.getValue():{}", attData.getValue());
+                        logger.debug(" Calling decodeTime() - attData.getName():{}", attData.getName());
                         AttributeData attributeData = decodeTime(attData);
                         listAttributes.remove(attData);
                         listAttributes.add(attributeData);
@@ -191,25 +183,20 @@ public class RequestReaderInterceptor {
                 }
             }
 
-            logger.debug("Getting updated custom attribute list for propertyName:{} , listAttributes:{} ", propertyName,
-                    listAttributes);
+            logger.debug("Getting updated custom attribute list for propertyName:{}", propertyName);
             List<Object> data = persistenceEntryManager.getCustomAttributesListFromAttributeDataList(obj,
                     (AttributesList) ldapAttribute, propertyName, listAttributes);
-            logger.debug("updated custom attribute data:{}", data);
 
-            logger.debug("Setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
-                    data);
+            logger.debug("Setting the custom attribute in request object propertyName:{}", propertyName);
             // set data
             setObjectData(obj, propertyName, data);
-            logger.debug("After setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
-                    data);
+            logger.debug("After setting the custom attribute in request object propertyName:{}", propertyName);
 
         }
         return listAttributes;
     }
 
     private AttributeData decodeTime(AttributeData attributeData) {
-        logger.debug("Date data to decode attributeData:{}", attributeData);
         AttributeData atrData = attributeData;
         if (atrData == null || atrData.getValue() == null) {
             return atrData;
@@ -233,15 +220,12 @@ public class RequestReaderInterceptor {
 
     private void setObjectData(Object obj, String propertyName, Object propertyValue)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        logger.debug("Data to set new value - obj:{}, propertyName:{}, propertyValue:{}", obj, propertyName,
-                propertyValue);
+        logger.debug("Data to set new value - propertyName:{}", propertyName);
         Setter setterMethod = DataUtil.getSetterMethod(obj.getClass(), propertyName);
         propertyValue = setterMethod.getMethod().invoke(obj, propertyValue);
-        logger.debug("After setterMethod invoked key:{}, propertyValue:{} ", propertyName, propertyValue);
 
         Getter getterMethod = DataUtil.getGetterMethod(obj.getClass(), propertyName);
         propertyValue = getterMethod.get(obj);
-        logger.debug("Verify new value key:{}, propertyValue:{} ", propertyName, propertyValue);
 
     }
 

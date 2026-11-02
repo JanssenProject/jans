@@ -25,6 +25,8 @@ import jakarta.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 
+import static io.jans.configapi.core.util.Util.escapeLog;
+
 /**
  * @author Mougang T.Gasmyr
  */
@@ -53,13 +55,13 @@ public class AuthorizationFilter extends BaseFilter {
 
     @SuppressWarnings({ "all" })
     public void filter(ContainerRequestContext context) {
-        log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), info.getPath(),
+        log.debug("AuthorizationFilter - {} {} from IP:{}", context.getMethod(), escapeLog(info.getPath()),
                 request.getRemoteAddr());
 
         String authorizationHeader = getAuthorizationHeader(context);
         String issuer = context.getHeaderString(ApiConstants.ISSUER);
         boolean configOauthEnabled = authorizationService.isConfigOauthEnabled();
-        log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", issuer, configOauthEnabled);
+        log.debug("AuthorizationFilter - issuer:{}, configOauthEnabled:{}", escapeLog(issuer), configOauthEnabled);
 
         if (!configOauthEnabled) {
             log.debug("OAuth validation disabled - authorization granted");
@@ -69,7 +71,7 @@ public class AuthorizationFilter extends BaseFilter {
         log.info("*** AuthorizationFilter::filter() - Config Api OAuth Valdation Enabled ***");
         if (!isTokenBasedAuthentication(authorizationHeader)) {
             log.warn("AuthorizationFilter - token-based authorization required for {} {}", context.getMethod(),
-                    info.getPath());
+                    escapeLog(info.getPath()));
             abortWithUnauthorized(context, Response.Status.UNAUTHORIZED, "ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED!");
             log.info("======ONLY TOKEN BASED AUTHORIZATION IS SUPPORTED======================");
             return;
@@ -77,15 +79,21 @@ public class AuthorizationFilter extends BaseFilter {
         try {
             authorizationHeader = this.authorizationService.processAuthorization(authorizationHeader, issuer,
                     resourceInfo, context.getMethod(), request.getRequestURI(), httpHeaders);
+            String[] principal = this.authorizationService.consumeAuthenticatedPrincipal();
+            if (principal != null) {
+                request.setAttribute(ApiConstants.AUTHENTICATED_SUBJECT_ATTRIBUTE, principal[0]);
+                request.setAttribute(ApiConstants.AUTHENTICATED_CLIENT_ATTRIBUTE, principal[1]);
+            }
 
             if (authorizationHeader != null && authorizationHeader.trim().length() > 0) {
                 context.getHeaders().remove(HttpHeaders.AUTHORIZATION);
                 context.getHeaders().add(HttpHeaders.AUTHORIZATION, authorizationHeader);
             }
-            log.debug("AuthorizationFilter - authorization granted for {} {}", context.getMethod(), info.getPath());
+            log.debug("AuthorizationFilter - authorization granted for {} {}", context.getMethod(), escapeLog(info.getPath()));
         } catch (Exception ex) {
-            log.error("AuthorizationFilter - authorization failed for {} {}: {}", context.getMethod(), info.getPath(),
-                    ex.getMessage(), ex);
+            this.authorizationService.consumeAuthenticatedPrincipal();
+            log.error("AuthorizationFilter - authorization failed for {} {}: {}", context.getMethod(), escapeLog(info.getPath()),
+                    escapeLog(ex.getMessage()), ex);
             abortWithUnauthorized(context, Response.Status.UNAUTHORIZED, ex.getMessage());
         }
 

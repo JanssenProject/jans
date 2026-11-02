@@ -38,6 +38,7 @@ func resourceOidcClient() *schema.Resource {
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "The client secret.  The client MAY omit the parameter if the client secret is an empty string.",
 			},
@@ -53,6 +54,7 @@ func resourceOidcClient() *schema.Resource {
 			},
 			"registration_access_token": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "",
 			},

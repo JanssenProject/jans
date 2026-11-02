@@ -61,8 +61,7 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
 
-        this.useTrustManager = StringHelper.isNotEmpty(trustStoreType) && StringHelper.isNotEmpty(trustStorePath)
-                && StringHelper.isNotEmpty(trustStorePassword);
+        this.useTrustManager = StringHelper.isNotEmpty(trustStoreType) && StringHelper.isNotEmpty(trustStorePath);
     }
 
     public SslDefaultHttpClient(String trustStoreType, String trustStorePath, String trustStorePassword,
@@ -105,7 +104,7 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
             ctx.init(keyManagers, trustManagers, new SecureRandom());
 
             // Pass the keystore to the SSLSocketFactory
-            SSLSocketFactory sf = new SSLSocketFactory(ctx, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            SSLSocketFactory sf = new SSLSocketFactory(ctx, SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
 
             return sf;
         } catch (Exception ex) {
@@ -137,7 +136,7 @@ public class SslDefaultHttpClient extends DefaultHttpClient {
 
         try {
             KeyStore keyStore = KeyStore.getInstance(storeType);
-            keyStore.load(keyStoreInput, storePassword.toCharArray());
+            keyStore.load(keyStoreInput, storePassword == null ? null : storePassword.toCharArray());
 
             return keyStore;
         } finally {

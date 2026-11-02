@@ -148,6 +148,10 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 				EvaluationSemantic: ExecuteAll,
 			}
 		}
+		// One read lock for the whole batch: re-acquiring it per item while a
+		// writer waits in Reconfigure would deadlock.
+		p.mtx.RLock()
+		defer p.mtx.RUnlock()
 		for _, eval := range request.Evaluations {
 			subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
 			if err != nil {
@@ -169,8 +173,6 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 				}
 			}
 			context := eval.Context
-			p.mtx.RLock()
-			defer p.mtx.RUnlock()
 			response := p.buildEvaluationResponse(subject, action, resource, context, p.config.Evaluation_Logic)
 			responseList = append(responseList, *response)
 			if request.Options.EvaluationSemantic == DenyOnFirstDeny {

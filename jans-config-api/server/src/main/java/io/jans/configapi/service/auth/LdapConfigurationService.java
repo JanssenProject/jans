@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class LdapConfigurationService {
 
     private static final String AUTH = "auth";
+    private static final String LDAP = "ldap";
 
     @Inject
     Logger log;
@@ -52,7 +53,12 @@ public class LdapConfigurationService {
 
     public void save(List<GluuLdapConfiguration> ldapConfigurations) {
         GluuConfiguration configuration = configurationService.findGluuConfiguration();
-        configuration.setIdpAuthn(getIDPAuthConfs(ldapConfigurations));
+        List<IDPAuthConf> idpAuthn = new ArrayList<>();
+        if (configuration.getIdpAuthn() != null) {
+            configuration.getIdpAuthn().stream().filter(c -> !isLdapAuthConf(c)).forEach(idpAuthn::add);
+        }
+        idpAuthn.addAll(getIDPAuthConfs(ldapConfigurations));
+        configuration.setIdpAuthn(idpAuthn);
         configurationService.merge(configuration);
     }
 
@@ -73,7 +79,7 @@ public class LdapConfigurationService {
 
     public GluuLdapConfiguration findByName(String name) {
         List<GluuLdapConfiguration> ldapConfigurations = findLdapConfigurations();
-        log.debug(" findByName name = name " + name + " ldapConfigurations = " + ldapConfigurations);
+        log.debug("findByName - name:{}", name);
 
         Optional<GluuLdapConfiguration> matchingLdapConfiguration = ldapConfigurations.stream()
                 .filter(d -> d.getConfigId().equals(name)).findFirst();
@@ -85,8 +91,13 @@ public class LdapConfigurationService {
         if (idpConfList == null) {
             return Lists.newArrayList();
         }
-        return idpConfList.stream().filter(c -> c.getType().equalsIgnoreCase(AUTH))
+        return idpConfList.stream().filter(this::isLdapAuthConf)
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    private boolean isLdapAuthConf(IDPAuthConf idpAuthConf) {
+        return idpAuthConf != null
+                && (AUTH.equalsIgnoreCase(idpAuthConf.getType()) || LDAP.equalsIgnoreCase(idpAuthConf.getType()));
     }
 
     private List<IDPAuthConf> getIDPAuthConfs(List<GluuLdapConfiguration> ldapConfigurations) {
@@ -118,8 +129,7 @@ public class LdapConfigurationService {
 
     private List<GluuLdapConfiguration> excludeFromConfigurations(List<GluuLdapConfiguration> ldapConfigurations,
             GluuLdapConfiguration ldapConfiguration) {
-        log.debug("\n\n\n excludeFromConfigurations ldapConfigurations = " + ldapConfigurations
-                + " , ldapConfiguration = " + ldapConfiguration + "\n\n\n");
+        log.debug("excludeFromConfigurations - configId:{}", ldapConfiguration.getConfigId());
         boolean hadConfiguration = Iterables.removeIf(ldapConfigurations,
                 c -> c.getConfigId().equals(ldapConfiguration.getConfigId()));
         if (!hadConfiguration) {

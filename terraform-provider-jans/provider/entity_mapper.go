@@ -3,6 +3,8 @@ package provider
 import (
 	"fmt"
 	"reflect"
+	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -178,9 +180,48 @@ func patchFromResourceData(d *schema.ResourceData, entity any) ([]jans.PatchRequ
 	return ret, err
 }
 
-// recursivePatchFromResourceData is the recursive part of the functionality
-// of patchFromResourceData, used for nested structs. It should never be
-// called on its own, only via patchFromResourceData.
+// declaredValue returns the value at path when the practitioner declared it,
+// including false, zero and empty values that GetOk would report as unset.
+// It falls back to GetOk when the raw config cannot answer for the path.
+func declaredValue(d *schema.ResourceData, path string) (any, bool) {
+
+	switch pathConfigState(d.GetRawConfig(), path) {
+	case configNull:
+		return nil, false
+	case configSet:
+		return d.Get(path), true
+	default:
+		return d.GetOk(path)
+	}
+}
+
+// pathConfigState is attrConfigState for a dotted schema path such as
+// "block.0.attr".
+func pathConfigState(cfg cty.Value, path string) configState {
+
+	for _, part := range strings.Split(path, ".") {
+
+		if idx, err := strconv.Atoi(part); err == nil {
+			if cfg.IsNull() || !cfg.IsKnown() || !(cfg.Type().IsListType() || cfg.Type().IsTupleType()) {
+				return configUnavailable
+			}
+			if idx >= cfg.LengthInt() {
+				return configNull
+			}
+			cfg = cfg.Index(cty.NumberIntVal(int64(idx)))
+			continue
+		}
+
+		state := attrConfigState(cfg, part)
+		if state != configSet {
+			return state
+		}
+		cfg = cfg.GetAttr(part)
+	}
+
+	return configSet
+}
+
 func remapSliceElemKeys(val interface{}, elemType reflect.Type) interface{} {
 	list, ok := val.([]interface{})
 	if !ok {
@@ -240,7 +281,7 @@ func recursivePatchFromResourceData(d *schema.ResourceData, entity any, jsonPath
 
 		jsonTag = strings.TrimSuffix(jsonTag, ",omitempty")
 
-		val, ok := d.GetOk(schemaPath + schemaTag)
+		val, ok := declaredValue(d, schemaPath+schemaTag)
 		if !ok {
 			// value was not set
 			continue
@@ -260,8 +301,8 @@ func recursivePatchFromResourceData(d *schema.ResourceData, entity any, jsonPath
 		if t.Kind() == reflect.Struct {
 
 			subPath := jsonPath + jsonTag + "/"
-			schemaPath := schemaTag + ".0."
-			newPatches, err := recursivePatchFromResourceData(d, v, subPath, schemaPath, data)
+			subSchemaPath := schemaPath + schemaTag + ".0."
+			newPatches, err := recursivePatchFromResourceData(d, v, subPath, subSchemaPath, data)
 			if err != nil {
 				return nil, err
 			}
@@ -518,7 +559,7 @@ func setFieldValue(f reflect.Value, v interface{}) error {
 		f.Set(valueToSet)
 
 	case reflect.Slice:
-		elemSlice, err := convertSlice(vType, v)
+		elemSlice, err := convertSlice(vType, v, f)
 		if err != nil {
 			return fmt.Errorf("failed to convert slice: %w", err)
 		}
@@ -577,8 +618,10 @@ func setFieldValue(f reflect.Value, v interface{}) error {
 // convertSlice will take the provided value and convert it to a slice of the
 // correct type. If the elements in the slice are structs, they will be
 // converted from a map to a struct first. If the value is nil, an empty slice
-// will be returned. For slices, this will run recursively.
-func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, error) {
+// will be returned. For slices, this will run recursively. Struct elements
+// start from their counterpart in existing, so fields missing from the map keep
+// their current value instead of being reset to the zero value.
+func convertSlice(targetType reflect.Type, value interface{}, existing reflect.Value) (reflect.Value, error) {
 
 	// if the field is a slice, we need to initialize a new slice of
 	// the correct type and add all items to it
@@ -592,7 +635,7 @@ func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, er
 	// from the map to the struct first, before we can add them to the slice
 	if targetType.Elem().Kind() == reflect.Struct {
 
-		for _, elem := range value.([]interface{}) {
+		for i, elem := range value.([]interface{}) {
 
 			m, ok := elem.(map[string]interface{})
 			if !ok {
@@ -601,6 +644,9 @@ func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, er
 
 			// create a new struct of the correct type
 			newElem := reflect.New(elemType)
+			if current, found := existingSliceElem(existing, elemType, m, i); found {
+				newElem.Elem().Set(current)
+			}
 
 			getter := func(key string) (any, bool) {
 				val, ok := m[key]
@@ -620,7 +666,7 @@ func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, er
 
 		subType := reflect.SliceOf(elemType.Elem())
 		for _, elem := range value.([]interface{}) {
-			val, err := convertSlice(subType, elem)
+			val, err := convertSlice(subType, elem, reflect.Value{})
 			if err != nil {
 				return reflect.ValueOf(nil), fmt.Errorf("failed to convert slice: %w", err)
 			}
@@ -639,4 +685,44 @@ func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, er
 	}
 
 	return elemSlice, nil
+}
+
+// sliceElemIdentityKeys are schema keys that identify a struct element of a
+// list independently of its position.
+var sliceElemIdentityKeys = []string{"config_id"}
+
+// existingSliceElem returns the element of existing that corresponds to the
+// decoded map m at index i: matched by identity key when the element type has
+// one, by position otherwise.
+func existingSliceElem(existing reflect.Value, elemType reflect.Type, m map[string]interface{}, i int) (reflect.Value, bool) {
+
+	if !existing.IsValid() || existing.Kind() != reflect.Slice || existing.Type().Elem() != elemType {
+		return reflect.Value{}, false
+	}
+
+	for f := 0; f < elemType.NumField(); f++ {
+		tag, ok := elemType.Field(f).Tag.Lookup("schema")
+		if !ok || !slices.Contains(sliceElemIdentityKeys, tag) {
+			continue
+		}
+
+		id, ok := m[tag]
+		if !ok {
+			return reflect.Value{}, false
+		}
+
+		for j := 0; j < existing.Len(); j++ {
+			if reflect.DeepEqual(existing.Index(j).Field(f).Interface(), id) {
+				return existing.Index(j), true
+			}
+		}
+
+		return reflect.Value{}, false
+	}
+
+	if i < existing.Len() {
+		return existing.Index(i), true
+	}
+
+	return reflect.Value{}, false
 }

@@ -9,10 +9,29 @@ import { database } from "./db/index.js";
 import { ApiKey } from "./db/models.js";
 
 const app = express();
-app.use(express.json());
 
 // Constants
 const PORT = parseInt(process.env.PORT || "3001", 10);
+// Stored provider keys are served unauthenticated, so listen on loopback unless told otherwise.
+const HOST = process.env.HOST || "127.0.0.1";
+const ALLOWED_HOSTNAMES = new Set([
+  "localhost", "127.0.0.1", "[::1]",
+  ...(process.env.ALLOWED_HOSTS || "").split(",").map((h) => h.trim().toLowerCase()).filter(Boolean),
+]);
+const MAX_ISSUER_LENGTH = 2048;
+
+// Host check blocks DNS rebinding; Origin check blocks web pages, leaving browser extensions and non-browser clients.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!ALLOWED_HOSTNAMES.has((req.hostname || "").toLowerCase())) {
+    return res.status(403).json({ error: "Host not allowed" });
+  }
+  if (origin && !/^(chrome|moz)-extension:\/\//.test(origin)) {
+    return res.status(403).json({ error: "Origin not allowed" });
+  }
+  next();
+});
+app.use(express.json());
 const SERVER_NAME = "jans-tarp-mcp-server";
 const SERVER_VERSION = "1.0.0";
 
@@ -45,7 +64,8 @@ interface OIDCClientConfig {
 // HTTP Client with retry and timeout configuration
 const httpClient = axios.create({
   timeout: 10000,
-  maxRedirects: 3,
+  // Redirects would bypass the same-origin check on discovered endpoints.
+  maxRedirects: 0,
   validateStatus: (status) => status >= 200 && status < 300,
 });
 
@@ -81,7 +101,7 @@ async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetada
 
   try {
     const response = await httpClient.get(
-      `${issuer.replace(/\/+$/, '')}/.well-known/openid-configuration`
+      `${stripTrailingSlashes(issuer)}/.well-known/openid-configuration`
     );
 
     if (!response.data) {
@@ -97,6 +117,32 @@ async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetada
     }
     throw error;
   }
+}
+
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === "/") end--;
+  return value.slice(0, end);
+}
+
+/**
+ * Ensures a discovered endpoint is served from the issuer's origin, so provider
+ * metadata cannot steer the server's requests to unrelated hosts.
+ */
+function requireIssuerOrigin(issuer: string, endpoint: string | undefined, name: string): string {
+  if (!endpoint) {
+    throw new Error(`OIDC provider missing ${name}`);
+  }
+  let endpointOrigin: string;
+  try {
+    endpointOrigin = new URL(endpoint).origin;
+  } catch {
+    throw new Error(`Invalid ${name}: ${endpoint}`);
+  }
+  if (endpointOrigin !== new URL(issuer).origin) {
+    throw new Error(`${name} is not on the issuer origin`);
+  }
+  return endpoint;
 }
 
 /**
@@ -116,9 +162,16 @@ function generateRandomString(bytes: number): string {
  * @throws Error if `issuer` is not a valid URL.
  */
 function validateIssuerUrl(issuer: string): void {
+  if (issuer.length > MAX_ISSUER_LENGTH) {
+    throw new Error("Invalid issuer URL: too long");
+  }
+  let url: URL;
   try {
-    new URL(issuer);
+    url = new URL(issuer);
   } catch {
+    throw new Error(`Invalid issuer URL: ${issuer}`);
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
     throw new Error(`Invalid issuer URL: ${issuer}`);
   }
 }
@@ -161,6 +214,7 @@ server.registerTool(
     if (!metadata.registration_endpoint) {
       throw new Error("OIDC provider does not support dynamic client registration");
     }
+    requireIssuerOrigin(input.issuer, metadata.registration_endpoint, "registration endpoint");
 
     const registrationData = {
       redirect_uris: input.redirect_uris,
@@ -234,9 +288,7 @@ server.registerTool(
 
     const metadata = await discoverOIDCMetadata(issuer);
 
-    if (!metadata.authorization_endpoint) {
-      throw new Error("OIDC provider missing authorization endpoint");
-    }
+    requireIssuerOrigin(issuer, metadata.authorization_endpoint, "authorization endpoint");
 
     const state = generateRandomString(16);
 
@@ -303,9 +355,10 @@ server.registerTool(
 
     const metadata = await discoverOIDCMetadata(issuer);
 
-    if (!metadata.token_endpoint) {
-      throw new Error("OIDC provider missing token endpoint");
-    }
+    const tokenEndpoint = requireIssuerOrigin(issuer, metadata.token_endpoint, "token endpoint");
+    const userinfoEndpoint = metadata.userinfo_endpoint
+      ? requireIssuerOrigin(issuer, metadata.userinfo_endpoint, "userinfo endpoint")
+      : undefined;
 
     // Build token request
     const tokenParams = new URLSearchParams({
@@ -330,7 +383,7 @@ server.registerTool(
 
     try {
       const response = await httpClient.post(
-        metadata.token_endpoint,
+        tokenEndpoint,
         tokenParams.toString(),
         { headers }
       );
@@ -342,10 +395,10 @@ server.registerTool(
 
       // Fetch userinfo if endpoint exists and we have an access token
       let userinfo = null;
-      if (metadata.userinfo_endpoint && tokens.access_token) {
+      if (userinfoEndpoint && tokens.access_token) {
         try {
           const userinfoResponse = await httpClient.get(
-            metadata.userinfo_endpoint,
+            userinfoEndpoint,
             {
               headers: {
                 Authorization: `Bearer ${tokens.access_token}`,
@@ -445,7 +498,7 @@ app.get("/health", (_req, res) => {
 });
 
 // Routes for LLM API Key Management
-// WARNING: These endpoints lack authentication. 
+// WARNING: These endpoints lack authentication; any local process can call them.
 // For production use, add authentication middleware.
 /**
  * Store an LLM API key
@@ -746,8 +799,8 @@ app.get("/", (_req, res) => {
   });
 });
 
-const httpServer = app.listen(PORT, async () => {
-  console.log(`MCP server running on http://localhost:${PORT}`);
+const httpServer = app.listen(PORT, HOST, async () => {
+  console.log(`MCP server running on http://${HOST}:${PORT}`);
 
   // Initialize database
   await database.initialize();

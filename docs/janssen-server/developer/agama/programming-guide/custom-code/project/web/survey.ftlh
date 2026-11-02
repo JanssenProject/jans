@@ -49,9 +49,8 @@
     <script src="ans.js"></script>
     <script>
         window.onload = (event) => { 
-            let choices = [<#list answer.choice as c>"${c}"<#sep>, </#list>]
-            
             <#outputformat 'undefined'>
+                let choices = [<#list answer.choice as c>"${escStr(c!"")}"<#sep>, </#list>]
                 let text = "${escStr(answer.text!"")}"
             </#outputformat>
 

@@ -139,6 +139,10 @@ public class OpenIdProtectionService implements OpenIdProtection {
                     return AuthorizationOutcome.denied(introspectionFailure);
                 }
 
+                if (iresp.getCnf() != null && !iresp.getCnf().isEmpty()) {
+                    return AuthorizationOutcome.denied(senderConstrainedTokenDenial());
+                }
+
                 return AuthorizationOutcome.allowed(new AuthenticatedClient(iresp.getClientId(), false));
             }
 
@@ -172,6 +176,10 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token signature", "The access token signature is invalid"));
             }
 
+            if (claims.hasClaim(JwtClaimName.CNF)) {
+                return AuthorizationOutcome.denied(senderConstrainedTokenDenial());
+            }
+
             List<String> tokenScopes = claims.getClaimAsStringList("scope");    //tokenScopes is never null
             if (tokenScopes.containsAll(scopes)) {
                 return AuthorizationOutcome.allowed(new AuthenticatedClient(clientIdFromClaims(claims), true));
@@ -186,6 +194,14 @@ public class OpenIdProtectionService implements OpenIdProtection {
             log.error(e.getMessage(), e);
             return AuthorizationOutcome.denied(simpleResponse(INTERNAL_SERVER_ERROR, e.getMessage()));
         }
+    }
+
+    /**
+     * DPoP or mTLS bound tokens ({@code cnf}) need proof of possession, which this bearer path does not verify.
+     */
+    private Response senderConstrainedTokenDenial() {
+        log.error("Sender-constrained access token presented as bearer token");
+        return BearerChallenge.invalidToken("Sender-constrained token", "The access token is bound to a key and cannot be used as a bearer token");
     }
 
     /**

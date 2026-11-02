@@ -27,6 +27,52 @@ macro_rules! ffi_guard_int {
     };
 }
 
+/// Output structure value reported when a panic is caught, so callers never inspect or free
+/// uninitialized fields.
+trait PanicResult {
+    fn panic_result() -> Self;
+}
+
+impl PanicResult for CedarlingResult {
+    fn panic_result() -> Self {
+        CedarlingResult::error(CedarlingErrorCode::Internal, "internal panic caught at FFI boundary")
+    }
+}
+
+impl PanicResult for CedarlingInstanceResult {
+    fn panic_result() -> Self {
+        CedarlingInstanceResult::error(
+            CedarlingErrorCode::Internal,
+            "internal panic caught at FFI boundary",
+        )
+    }
+}
+
+impl PanicResult for CedarlingStringArray {
+    fn panic_result() -> Self {
+        CedarlingStringArray {
+            items: ptr::null_mut(),
+            count: 0,
+        }
+    }
+}
+
+/// Like `ffi_guard_int`, but also fills the `$result` output on panic.
+macro_rules! ffi_guard_out {
+    ($result:ident, $body:block) => {
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> c_int { $body })) {
+            Ok(v) => v,
+            Err(_) => {
+                set_last_error("internal panic caught at FFI boundary");
+                if !$result.is_null() {
+                    unsafe { $result.write(PanicResult::panic_result()) };
+                }
+                CedarlingErrorCode::Internal as c_int
+            },
+        }
+    };
+}
+
 macro_rules! ffi_guard_void {
     ($body:block) => {
         if std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| $body)).is_err() {
@@ -80,7 +126,7 @@ pub unsafe extern "C" fn cedarling_new(
     config_json: *const c_char,
     result: *mut CedarlingInstanceResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -121,7 +167,7 @@ pub unsafe extern "C" fn cedarling_new_with_env(
     config_json: *const c_char,
     result: *mut CedarlingInstanceResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -165,7 +211,7 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned(
     request_json: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -207,7 +253,7 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
     request_json: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -257,7 +303,7 @@ pub unsafe extern "C" fn cedarling_authorize_unsigned_batch(
     request_json: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -305,7 +351,7 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer_batch(
     request_json: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -351,7 +397,7 @@ pub unsafe extern "C" fn cedarling_context_push(
     ttl_secs: i64,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -412,7 +458,7 @@ pub unsafe extern "C" fn cedarling_context_get(
     key: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -452,7 +498,7 @@ pub unsafe extern "C" fn cedarling_context_get_entry(
     key: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -492,7 +538,7 @@ pub unsafe extern "C" fn cedarling_context_remove(
     key: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -530,7 +576,7 @@ pub unsafe extern "C" fn cedarling_context_clear(
     instance_id: u64,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -553,7 +599,7 @@ pub unsafe extern "C" fn cedarling_context_list(
     instance_id: u64,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -576,7 +622,7 @@ pub unsafe extern "C" fn cedarling_context_stats(
     instance_id: u64,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -600,7 +646,7 @@ pub unsafe extern "C" fn cedarling_pop_logs(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         if result.is_null() {
             clear_last_error();
             set_last_error("null result pointer");
@@ -635,7 +681,7 @@ pub unsafe extern "C" fn cedarling_get_log_by_id(
     log_id: *const c_char,
     result: *mut CedarlingResult,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -676,7 +722,7 @@ pub unsafe extern "C" fn cedarling_get_log_ids(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         if result.is_null() {
             clear_last_error();
             set_last_error("null result pointer");
@@ -711,7 +757,7 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
     tag: *const c_char,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -767,7 +813,7 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
     request_id: *const c_char,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -824,7 +870,7 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
     tag: *const c_char,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         clear_last_error();
         if result.is_null() {
             set_last_error("null result pointer");
@@ -1084,7 +1130,7 @@ pub unsafe extern "C" fn cedarling_loaded_trusted_issuer_ids(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         if result.is_null() {
             clear_last_error();
             set_last_error("null result pointer");
@@ -1118,7 +1164,7 @@ pub unsafe extern "C" fn cedarling_failed_trusted_issuer_ids(
     instance_id: u64,
     result: *mut CedarlingStringArray,
 ) -> c_int {
-    ffi_guard_int!({
+    ffi_guard_out!(result, {
         if result.is_null() {
             clear_last_error();
             set_last_error("null result pointer");

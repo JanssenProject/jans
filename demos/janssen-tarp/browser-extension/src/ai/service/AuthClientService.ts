@@ -1,12 +1,13 @@
 
 import { ILooseObject } from '../../shared/types';
+import { assertSameIssuer, assertSecureUrl, normalizeIssuer } from '../../shared/urlSecurity';
 
 export default class AuthClientService {
 
   constructor() {
   }
 
-  public async getClientByClientId(clientId: string): Promise<ILooseObject> {
+  public async getClientByClientId(clientId: string, issuer?: string): Promise<ILooseObject> {
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(["oidcClients"], (result) => {
         if (chrome.runtime.lastError) {
@@ -15,7 +16,8 @@ export default class AuthClientService {
           const clientArr: ILooseObject[] = Array.isArray(result.oidcClients)
             ? (result.oidcClients as ILooseObject[])
             : [];
-          const record = clientArr.find((item: ILooseObject) => item.clientId === clientId);
+          const record = clientArr.find((item: ILooseObject) => item.clientId === clientId
+            && (!issuer || normalizeIssuer(item.opHost) === normalizeIssuer(issuer)));
 
           resolve(record || {});
         }
@@ -23,17 +25,26 @@ export default class AuthClientService {
     });
   }
 
-  public async saveClientInTarpStorage(registrationResp: ILooseObject): Promise<void> {
+  public async saveClientInTarpStorage(registrationResp: ILooseObject, expectedIssuer: string): Promise<void> {
     const structured = registrationResp?.structuredContent as ILooseObject | undefined;
     const registrationClientUri = structured?.registration_client_uri as string | undefined;
     if (!registrationClientUri) {
       throw new Error("Invalid registration response");
     }
-    const issuer = new URL(registrationClientUri).origin;
-    const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`);
+    const issuer = normalizeIssuer(expectedIssuer);
+    assertSecureUrl(issuer, "Issuer");
+    if (new URL(registrationClientUri).origin !== new URL(issuer).origin) {
+      throw new Error("Registration response does not belong to the requested issuer");
+    }
+    const discoveryRes = await fetch(`${issuer}/.well-known/openid-configuration`, { redirect: 'error' });
     if (!discoveryRes.ok) throw new Error("Failed to fetch OIDC metadata");
 
     const discoveryMetadata = await discoveryRes.json() as ILooseObject;
+    assertSameIssuer(discoveryMetadata?.issuer, issuer);
+    assertSecureUrl(discoveryMetadata?.authorization_endpoint, "Authorization endpoint");
+    assertSecureUrl(discoveryMetadata?.token_endpoint, "Token endpoint");
+    if (discoveryMetadata?.userinfo_endpoint) assertSecureUrl(discoveryMetadata.userinfo_endpoint, "Userinfo endpoint");
+    if (discoveryMetadata?.end_session_endpoint) assertSecureUrl(discoveryMetadata.end_session_endpoint, "End session endpoint");
 
     if (!structured?.client_id || !structured?.client_secret) {
       throw new Error("Registration response missing required client credentials");

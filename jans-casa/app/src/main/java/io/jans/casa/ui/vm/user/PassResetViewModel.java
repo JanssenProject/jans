@@ -120,7 +120,7 @@ public class PassResetViewModel extends UserViewModel {
 
         if ((newPasswordConfirm != null && newPasswordConfirm.equals(newPassword))) {
 
-            Boolean success = pst.changePassword(user.getId(), newPassword); 
+            Boolean success = pst.setInitialPassword(user.getId(), newPassword);
             if (success == null) {
                 UIUtils.showMessageUI(false, Labels.getLabel("usr.pass.validation_failed"));
             } else if (!success) {

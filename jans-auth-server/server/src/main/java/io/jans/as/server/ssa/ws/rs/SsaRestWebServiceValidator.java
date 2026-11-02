@@ -12,16 +12,21 @@ import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
+import io.jans.as.server.service.token.TokenService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -50,6 +55,15 @@ public class SsaRestWebServiceValidator {
     @Inject
     private SsaService ssaService;
 
+    @Inject
+    private HttpServletRequest httpRequest;
+
+    @Inject
+    private TokenService tokenService;
+
+    @Inject
+    private AuthorizationGrantList authorizationGrantList;
+
     /**
      * Get client from session
      *
@@ -74,7 +88,7 @@ public class SsaRestWebServiceValidator {
      * @throws WebApplicationException with status {@code 401} and key <b>UNAUTHORIZED_CLIENT</b> if you don't have the scope.
      */
     public void checkScopesPolicy(Client client, String scope) throws WebApplicationException {
-        List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
+        List<String> scopes = getAuthorizedScopes(client);
         if (!scopes.contains(scope)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
         }
@@ -91,10 +105,29 @@ public class SsaRestWebServiceValidator {
         if (client == null || scopeList == null || scopeList.isEmpty()) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
         }
-        List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
+        List<String> scopes = getAuthorizedScopes(client);
         if (scopeList.stream().noneMatch(scopes::contains)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
         }
+    }
+
+    /**
+     * Scope ids the caller is authorized for: the bearer token's granted scopes, or the client's registered scopes
+     * when the client authenticated directly.
+     *
+     * @param client Authenticated client
+     * @return List of scope ids
+     */
+    public List<String> getAuthorizedScopes(Client client) {
+        final String authorization = httpRequest != null ? httpRequest.getHeader("Authorization") : null;
+        if (tokenService.isBearerAuthToken(authorization)) {
+            final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(tokenService.getBearerToken(authorization));
+            if (grant == null || grant.getScopes() == null || !client.getClientId().equals(grant.getClientId())) {
+                return new ArrayList<>();
+            }
+            return new ArrayList<>(grant.getScopes());
+        }
+        return scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
     }
 
     /**

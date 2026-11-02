@@ -41,7 +41,12 @@ public class SecurityInterceptor implements Serializable {
 
     @AroundInvoke
     public Object invoke(InvocationContext ctx) throws Exception {
-        InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
+        Class<?> targetClass = (ctx.getTarget() == null) ? ctx.getMethod().getDeclaringClass() : ctx.getTarget().getClass();
+        InterceptSecure is = securityExtension.getInterceptSecure(targetClass, ctx.getMethod());
+        if (is == null) {
+            log.error("Failed to resolve security constraints for method: '{}'", ctx.getMethod());
+            throw new SecurityEvaluationException();
+        }
 
         // SecurityChecking restrictions
         Secure[] constraints = (is == null) ? new Secure[0] : is.value();

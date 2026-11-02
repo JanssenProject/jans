@@ -29,7 +29,7 @@ class LinkInterception(LinkInterceptionType):
     def isStartProcess(self, configurationAttributes):
         print "Link Interception. Is start process method"
 
-        return False
+        return True
     
     # Get bind credentials required to access source server 
     #   configId is the source server

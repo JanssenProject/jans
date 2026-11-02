@@ -75,7 +75,7 @@ public abstract class BaseOAuthProtectionService implements IProtectionService, 
             }
             
             token = token.replaceFirst("Bearer\\s+","");
-            log.debug("Validating token {}", token);
+            log.debug("Validating access token");
 
             List<String> scopes = getRequestedScopes(resourceInfo);
             log.info("Call requires scopes: {}", scopes);
@@ -98,6 +98,11 @@ public abstract class BaseOAuthProtectionService implements IProtectionService, 
 
             if (!oidcConfig.getIssuer().equals(claims.getClaimAsString(JwtClaimName.ISSUER)))
                 return IProtectionService.simpleResponse(FORBIDDEN, "Invalid token issuer");
+
+            //DPoP proof-of-possession is not verified here, so key-bound tokens cannot be accepted as bearer tokens
+            JSONObject cnf = claims.getClaimAsJSON(JwtClaimName.CNF);
+            if (cnf != null && cnf.has(JwtClaimName.JKT))
+                return IProtectionService.simpleResponse(FORBIDDEN, "DPoP-bound tokens are not supported");
 
             int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
             if (1000L * exp < System.currentTimeMillis())

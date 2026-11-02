@@ -5,6 +5,7 @@ Currently, hooks are meant to be overriden manually. In the future,
 we can use specialized hooks/plugins system.
 """
 import itertools
+import json
 import os
 import typing as _t
 from contextlib import suppress
@@ -313,8 +314,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
             conf["grantTypesSupportedByDynamicRegistration"].append(grant_type)
             should_update = True
 
-    # featureflags
-    for flag in [
+    # featureflags; each default is seeded only once so flags removed by admins stay removed
+    try:
+        seeded_flags = set(json.loads(manager.config.get("auth_seeded_feature_flags") or "[]"))
+    except (TypeError, ValueError):
+        seeded_flags = set()
+
+    default_flags = [
         "health_check",
         "userinfo",
         "clientinfo",
@@ -340,10 +346,16 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "access_evaluation",
         "identity_assertion_authz_grant",
         "client_id_metadata_document",
-    ]:
+    ]
+    for flag in default_flags:
+        if flag in seeded_flags:
+            continue
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
             should_update = True
+
+    if not seeded_flags.issuperset(default_flags):
+        manager.config.set("auth_seeded_feature_flags", json.dumps(sorted(seeded_flags.union(default_flags))))
 
     # remove tx_token
     for attr in ["grantTypesSupported", "grantTypesSupportedByDynamicRegistration"]:

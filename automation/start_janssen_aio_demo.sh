@@ -12,6 +12,8 @@ demo_volumes_dir="$demo_dir/volumes"
 prepare_dirs() {
     mkdir -p "$demo_dir"
     mkdir -p "$demo_templates_dir"
+    # holds keys and Vault AppRole credentials; bind mounts don't need host-side traversal
+    chmod 700 "$demo_templates_dir"
     touch "$demo_templates_dir/vault_role_id"
     touch "$demo_templates_dir/vault_secret_id"
     mkdir -p "$demo_volumes_dir"

@@ -30,8 +30,10 @@ Repeat 6 times max
           When uiFeedback.succeed is true
                // add entry in log file for successfull login attempt.
                Log "@info Valid credentials provided"
+               // Finish with the identity resolved during authentication, not the submitted login text.
+               authenticatedUserId = Call validationService getAuthenticatedUserId
                // Password validation completed successfuly!
-               Finish credentials.username
+               Finish authenticatedUserId
           // Invalid credentials provided.
           Log "@error Invalid credentials provided"
           When conf.enableLock is true

@@ -37,6 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -91,10 +92,13 @@ public class AdminUISecurityService {
     Tika tika = new Tika();
 
     private static final long MAX_ENTRY_SIZE = 3_000_000; // 3 MB
+    private static final long MAX_ARCHIVE_UNCOMPRESSED_SIZE = 30_000_000; // 30 MB
 
     private static final ReentrantLock POLICY_STORE_ACTIVATION_LOCK = new ReentrantLock();
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
+    private static final String TRUSTED_ISSUERS_DIR = "trusted-issuers/";
+    private static final String TRUSTED_ISSUERS_ROOT_FILE = "trusted-issuers.json";
 
     /**
      * Searches persisted policy stores matching the given request.
@@ -466,43 +470,49 @@ public class AdminUISecurityService {
             }
 
             boolean adminUiIssuerFound = false;
+            long totalUncompressed = 0;
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
                     String entryName = entry.getName();
-                    if (entry.isDirectory() || entryName == null ||
-                            !entryName.startsWith("trusted-issuers/") || !entryName.endsWith(".json")) {
-                        zis.closeEntry();
-                        continue;
-                    }
-                    if (entryName.contains("..") || entryName.startsWith("/")) {
+                    if (entryName == null || entryName.contains("..") || entryName.startsWith("/")) {
                         throw new ApplicationException(
                                 Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Invalid trusted-issuer file path"
+                                "Invalid policy-store file path"
                         );
                     }
+                    // Cedarling matches extensions case-insensitively, so must the issuer checks.
+                    String normalizedName = entryName.toLowerCase(Locale.ROOT);
+                    boolean legacyIssuerFile = !entry.isDirectory()
+                            && normalizedName.startsWith(TRUSTED_ISSUERS_DIR) && normalizedName.endsWith(".json");
+                    boolean rootIssuersFile = !entry.isDirectory() && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
+                    if (!legacyIssuerFile && !rootIssuersFile) {
+                        totalUncompressed += drainEntrySafely(zis, MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed);
+                        continue;
+                    }
 
-                    JSONObject issuer = new JSONObject(readEntryContentSafely(zis));
-                    String endpointField = issuer.has("openid_configuration_endpoint")
+                    String content = readEntryContentSafely(zis);
+                    totalUncompressed += content.length();
+                    if (totalUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
+                        throw new IOException("ZIP archive too large when decompressed");
+                    }
+                    JSONObject issuerDoc = new JSONObject(content);
+                    if (rootIssuersFile) {
+                        validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
+                        continue;
+                    }
+
+                    String endpointField = issuerDoc.has("openid_configuration_endpoint")
                             ? "openid_configuration_endpoint"
                             : "configuration_endpoint";
-                    if (!issuer.has(endpointField)) {
+                    if (!issuerDoc.has(endpointField)) {
                         throw new ApplicationException(
                                 Response.Status.BAD_REQUEST.getStatusCode(),
                                 "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName
                         );
                     }
-                    URI endpointUri = new URI(issuer.getString(endpointField));
-                    String issuerDomain = endpointUri.getHost();
-                    if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
-                        log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
-                        throw new ApplicationException(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
-                        );
-                    }
+                    validateIssuerEndpointHost(issuerDoc.getString(endpointField), expectedDomain, entryName);
                     adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
-                    zis.closeEntry();
                 }
             }
 
@@ -736,6 +746,47 @@ public class AdminUISecurityService {
      */
     public String getDnForPolicyStore(String inum) {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
+    }
+
+    private void validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
+            throws ApplicationException, URISyntaxException {
+        for (String tokenType : issuersDoc.keySet()) {
+            JSONObject tokenConfig = issuersDoc.optJSONObject(tokenType);
+            JSONObject endpoints = tokenConfig == null ? null : tokenConfig.optJSONObject("configuration_endpoints");
+            if (endpoints == null) {
+                continue;
+            }
+            for (String field : new String[]{"configuration", "jwks"}) {
+                if (endpoints.has(field)) {
+                    validateIssuerEndpointHost(endpoints.optString(field, null), expectedDomain, entryName);
+                }
+            }
+        }
+    }
+
+    private void validateIssuerEndpointHost(String endpoint, String expectedDomain, String entryName)
+            throws ApplicationException, URISyntaxException {
+        String issuerDomain = endpoint == null ? null : new URI(endpoint).getHost();
+        if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
+            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
+            );
+        }
+    }
+
+    private long drainEntrySafely(InputStream is, long remainingBudget) throws IOException {
+        byte[] buffer = new byte[4096];
+        long totalRead = 0;
+        int len;
+        while ((len = is.read(buffer)) != -1) {
+            totalRead += len;
+            if (totalRead > remainingBudget) {
+                throw new IOException("ZIP archive too large when decompressed");
+            }
+        }
+        return totalRead;
     }
 
     /**

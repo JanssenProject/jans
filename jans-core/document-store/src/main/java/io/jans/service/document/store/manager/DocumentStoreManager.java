@@ -223,9 +223,10 @@ public class DocumentStoreManager {
 
 			String prevDocumentStoreEntryInum = newDocumentStoreEntry.getKey();
 			if (!newLoadedDocumentsInums.contains(prevDocumentStoreEntryInum)) {
-				// Remove old document
-				removeDocument((Document) newDocumentStoreEntry.getValue());
-				it.remove();
+				// Remove old document, keep it tracked for retry if the file could not be removed
+				if (removeDocument((Document) newDocumentStoreEntry.getValue())) {
+					it.remove();
+				}
 
 				modified = true;
 			}
@@ -249,19 +250,24 @@ public class DocumentStoreManager {
 		}
 	}
 
-	private void removeDocument(Document document) {
+	private boolean removeDocument(Document document) {
 		try {
-			File file = new File(document.getFileName());
-			
+			File file = Paths.get(document.getFilePath(), document.getFileName()).toFile();
+			if (!file.exists()) {
+				return true;
+			}
+
 			boolean res = file.delete();
 			if (res) {
 				log.info("File was {} removed successfully", document.getFileName());
 			} else {
 				log.error("Failed to remove file {}", document.getFileName());
 			}
+			return res;
 		} catch (Exception ex) {
 			log.error("Failed to remove file {}", document.getFileName(), ex);
 		}
+		return false;
 	}
 
 	public List<String> getSupportedServiceTypes() {

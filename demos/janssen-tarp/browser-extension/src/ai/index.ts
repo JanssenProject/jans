@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Utils from '../options/Utils';
 import AuthenticationService from '../features/authentication/services/authenticationService';
 import { ILooseObject } from "../shared/types";
+import { assertSecureUrl, normalizeIssuer } from "../shared/urlSecurity";
 import StorageHelper from './helper/StorageHelper'
 import ConfigurationManager from './helper/ConfigurationManager'
 import { STORAGE_KEYS, DEFAULT_VALUES, LLMProviderType, providerRequiresApiKey } from './helper/Constants';
@@ -170,7 +171,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
     arguments: enhancedArgs as unknown as ILooseObject,
   });
 
-  await authClientService.saveClientInTarpStorage(toolResult);
+  await authClientService.saveClientInTarpStorage(toolResult, args.issuer);
 
   return {
     tool: "registerOIDCClient",
@@ -191,10 +192,18 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
  */
 async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
   try {
-    const oidcClient = await authClientService.getClientByClientId(args.client_id);
+    const oidcClient = await authClientService.getClientByClientId(args.client_id, args.issuer);
     if (!oidcClient?.clientId) {
       throw new Error(`Client with ID ${args.client_id} not found`);
     }
+
+    // Authorization and token exchange must hit the provider the stored client belongs to.
+    const clientIssuer = normalizeIssuer(oidcClient.opHost || (oidcClient.openidConfiguration as ILooseObject | undefined)?.issuer);
+    if (!clientIssuer || (args.issuer && normalizeIssuer(args.issuer) !== clientIssuer)) {
+      throw new Error(`Issuer ${args.issuer ?? ''} does not match the issuer of client ${args.client_id}`);
+    }
+    assertSecureUrl(oidcClient.authorizationEndpoint, "Authorization endpoint");
+    assertSecureUrl(oidcClient.tokenEndpoint, "Token endpoint");
 
     const { secret, hashed } = await Utils.generateRandomChallengePair();
 
@@ -205,6 +214,7 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
 
     const authArgs = {
       ...args,
+      issuer: clientIssuer,
       scope: oidcClient.scope,
       response_type: (Array.isArray(oidcClient.responseType) ? oidcClient.responseType[0] : undefined) || 'code',
       redirect_uri: redirectUri,
@@ -225,6 +235,9 @@ async function handleStartAuthFlow(args: any): Promise<ToolCallResult> {
     const authorizationUrl = structured?.authorization_url as string | undefined;
     if (!authorizationUrl) {
       throw new Error("No authorization URL returned from MCP server");
+    }
+    if (authorizationUrl.split('?')[0] !== String(oidcClient.authorizationEndpoint).split('?')[0]) {
+      throw new Error("Authorization URL does not match the client's authorization endpoint");
     }
 
     const code = await authenticationService.invokeAuthFlow(authorizationUrl);

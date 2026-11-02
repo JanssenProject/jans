@@ -158,6 +158,13 @@ paths:
                     }
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/data.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/health.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /api/v1/health/service-status:
     get:
       tags:
@@ -15693,14 +15700,6 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
@@ -15708,6 +15707,14 @@ components:
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -17621,10 +17628,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17695,6 +17702,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.

@@ -45,12 +45,15 @@ instance, to list all the clients configured on the Janssen server, select
 ### Development mode
 
 The MCP server can be run in development mode by adding `-dev` flag to the
-command line, which will disable SSL certificate validation. This is useful
+command line. In this mode the server trusts the PEM certificate (the Janssen
+server's self-signed certificate or its CA) at the path given by
+`JANS_CA_CERT_FILE`; hostname verification stays enabled. This is useful
 when running MCP server against a Janssen server with self-signed certificate.
 
     ```bash
     export JANS_HOST_URL="https://example.jans.host.io" &&
     export JANS_OAUTH_ACCESS_TOKEN="b6c8ef0b-09b5-xxx-xxx-xxx" &&
+    export JANS_CA_CERT_FILE="/path/to/jans-ca.crt" &&
     npx @modelcontextprotocol/inspector java -jar target/jans-mcp-config-api-server-0.0.1.jar -dev
     ```
 

@@ -467,7 +467,7 @@ public class AdminUIService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(role))
+                    .stream().filter(ele -> !ele.getRole().equals(role))
                     .collect(Collectors.toList());
             adminConf.getDynamic().setRolePermissionMapping(roleScopeMapping);
             entryManager.merge(adminConf);
@@ -498,7 +498,9 @@ public class AdminUIService {
             log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
         }
-        if (permissions.stream().noneMatch(ele -> rolePermissionMappingArg.getPermissions().contains(ele.getPermission()))) {
+        List<String> requestedPermissions = rolePermissionMappingArg.getPermissions();
+        Set<String> catalog = permissions.stream().map(AdminPermission::getPermission).collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(requestedPermissions) || !catalog.containsAll(requestedPermissions)) {
             log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
         }

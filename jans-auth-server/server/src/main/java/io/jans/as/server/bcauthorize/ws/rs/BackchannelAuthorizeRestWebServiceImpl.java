@@ -14,6 +14,8 @@ import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -173,6 +175,12 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
                 throw new WebApplicationException(builder.build());
             }
+            if (!isCibaRequestSigningAlgAllowed(jwtRequest, client)) {
+                log.error("CIBA request object signing algorithm is not allowed for client {}", client.getClientId());
+                builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
+                builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
+                throw new WebApplicationException(builder.build());
+            }
             authorizeRestWebServiceValidator.validateCibaRequestObject(jwtRequest, client.getClientId());
             // JWT wins
             if (!jwtRequest.getScopes().isEmpty()) {
@@ -205,7 +213,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 requestedExpiry = Math.toIntExact(jwtRequest.getExp() - System.currentTimeMillis() / 1000);
             }
         }
-        if (appConfiguration.isFapi() && jwtRequest == null) {
+        if (jwtRequest == null && (appConfiguration.isFapi() || client.getBackchannelAuthenticationRequestSigningAlg() != null)) {
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
             return builder.build();
@@ -344,4 +352,15 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         return responseJsonObject;
     }
 
+    private static boolean isCibaRequestSigningAlgAllowed(JwtAuthorizationRequest jwtRequest, Client client) {
+        final SignatureAlgorithm signatureAlgorithm = jwtRequest.getNestedJwt() != null
+                ? jwtRequest.getNestedJwt().getHeader().getSignatureAlgorithm()
+                : SignatureAlgorithm.fromString(jwtRequest.getAlgorithm());
+        if (signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE
+                || signatureAlgorithm.getFamily() == AlgorithmFamily.HMAC) {
+            return false;
+        }
+        final AsymmetricSignatureAlgorithm registeredAlg = client.getBackchannelAuthenticationRequestSigningAlg();
+        return registeredAlg == null || registeredAlg.getParamName().equals(signatureAlgorithm.getName());
+    }
 }

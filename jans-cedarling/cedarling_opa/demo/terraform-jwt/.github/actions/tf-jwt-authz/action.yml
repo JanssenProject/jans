@@ -15,7 +15,8 @@ inputs:
     description: >
       Terraform sub-command (and any extra flags) to authorize and run.
       For gated commands use e.g. "plan", "apply -auto-approve", "destroy -auto-approve".
-      Non-auth commands (init, fmt, validate) are forwarded to Terraform directly.
+      init, fmt, validate, version, output, show, providers and graph are forwarded
+      to Terraform directly; other sub-commands are rejected.
     required: true
   opa_policy_path:
     description: 'OPA policy path to query, appended to /v1/data/ (default: infra/terraform_jwt)'
@@ -71,17 +72,45 @@ runs:
         OPA_POLICY_PATH: ${{ inputs.opa_policy_path }}
       run: |
         # ── Map sub-command → Cedar action ────────────────────────────────────
-        TF_SUBCOMMAND=$(echo "${TF_COMMAND}" | awk '{print $1}')
+        # Parse once; the same argument vector is authorized and executed.
+        read -r -a TF_ARGS <<< "${TF_COMMAND}"
+        TF_SUBCOMMAND=""
+        DESTROY_FLAG=""
+        for arg in "${TF_ARGS[@]}"; do
+          case "${arg}" in
+            -destroy|-destroy=true) DESTROY_FLAG="yes" ;;
+            -chdir=*) ;;
+            -*)
+              if [[ -z "${TF_SUBCOMMAND}" ]]; then
+                echo "::error::Only -chdir= may precede the Terraform sub-command, got '${arg}'."
+                exit 1
+              fi
+              ;;
+            *)
+              if [[ -z "${TF_SUBCOMMAND}" ]]; then
+                TF_SUBCOMMAND="${arg}"
+              fi
+              ;;
+          esac
+        done
         case "${TF_SUBCOMMAND}" in
           plan)    CEDAR_ACTION="Plan" ;;
           apply)   CEDAR_ACTION="Apply" ;;
           destroy) CEDAR_ACTION="Destroy" ;;
+          init|fmt|validate|version|output|show|providers|graph)
+            # Read-only or local-only commands: no authorization check.
+            exec terraform "${TF_ARGS[@]}"
+            ;;
           *)
-            # No authorization check for init, fmt, validate, output, etc.
-            # shellcheck disable=SC2086
-            exec terraform ${TF_COMMAND}
+            echo "::error::'terraform ${TF_SUBCOMMAND}' is not supported by this action."
+            echo "::error::Gated: plan, apply, destroy. Ungated: init, fmt, validate, version, output, show, providers, graph."
+            exit 1
             ;;
         esac
+        # `plan -destroy` / `apply -destroy` destroy infrastructure, so they need Destroy.
+        if [[ -n "${DESTROY_FLAG}" ]]; then
+          CEDAR_ACTION="Destroy"
+        fi
 
         # ── Decode JWT claims for display (Cedarling verifies the signature) ──
         JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)
@@ -141,8 +170,7 @@ runs:
           echo "tf-jwt-authz: ALLOWED"
           [[ -n "${REASONS}" ]] && echo "  Granted by Cedar policy: ${REASONS}"
           echo ""
-          # shellcheck disable=SC2086
-          exec terraform ${TF_COMMAND}
+          exec terraform "${TF_ARGS[@]}"
         else
           echo "::error::tf-jwt-authz: DENIED"
           echo "::error::The pipeline is not permitted to run 'terraform ${TF_SUBCOMMAND}' on workspace '${TF_WORKSPACE}'."

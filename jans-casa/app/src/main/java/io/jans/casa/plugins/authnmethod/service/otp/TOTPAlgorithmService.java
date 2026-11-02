@@ -39,6 +39,10 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
         hmacShaAlgorithm = HMACAlgorithm.valueOf(conf.getHmacShaAlgorithm().toUpperCase());
     }
 
+    public int getTimeStep() {
+        return conf.getTimeStep();
+    }
+
     public byte[] generateSecretKey() {
         return Utils.randomBytes(conf.getKeyLength());
     }

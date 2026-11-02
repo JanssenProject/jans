@@ -140,11 +140,16 @@ public class ApiHealthCheck  {
      * @return a JAX-RS Response whose entity is a StatsData object containing current server statistics (returned with HTTP 200).
      */
     @Operation(summary = "Returns application server status", description = "Returns application server status", operationId = "get-server-stat", tags = {
-    "Health - Check" })
+    "Health - Check" }, security = {
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.APP_DATA_READ_ACCESS }),
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS }),
+            @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    })
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = StatsData.class), examples = @ExampleObject(name = "Response json example", value = "example/health/server-stat.json"))),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.APP_DATA_READ_ACCESS }, groupScopes = {ApiAccessConstants.HEALTH_ADMIN_ACCESS}, superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS})
     @Path(ApiConstants.SERVER_STAT)
     public Response getServerStat() {
         logger.debug("Server Stat - Entry");

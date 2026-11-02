@@ -16,6 +16,8 @@ const MAX_UNCOMPRESSED_BYTES = 200 * 1024 * 1024; // 200 MB
 const MAX_ENTRIES = 10_000;
 /** Maximum time to wait for the download before aborting (ms). */
 const DOWNLOAD_TIMEOUT_MS = 30_000;
+/** Maximum directory depth of an archive entry path. */
+const MAX_PATH_DEPTH = 64;
 
 function formatBytesLimit(bytes: number): string {
   return `${Math.round(bytes / (1024 * 1024))} MB`;
@@ -77,42 +79,40 @@ export async function downloadAndExtractPolicyStore(uri: string): Promise<Policy
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS);
 
-  let response: Response;
+  let buffer: Uint8Array;
   try {
-    response = await fetch(uri, { method: 'GET', signal: controller.signal });
+    let response: Response;
+    try {
+      response = await fetch(uri, { method: 'GET', signal: controller.signal });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to download policy store from "${uri}": ${msg}`);
+    }
+
+    if (!response.ok) {
+      throw new Error(`Failed to download policy store: HTTP ${response.status} ${response.statusText}`);
+    }
+
+    // Reject oversized archives up front via the advertised length, before buffering.
+    const declaredLength = Number(response.headers.get('content-length'));
+    if (Number.isFinite(declaredLength) && declaredLength > MAX_ARCHIVE_BYTES) {
+      throw new Error(
+        `Policy store archive is too large (${formatBytesLimit(declaredLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
+      );
+    }
+
+    // Count decoded bytes while streaming: Content-Length covers the encoded body only.
+    buffer = await readBodyWithLimit(response, MAX_ARCHIVE_BYTES);
   } catch (err) {
     if (controller.signal.aborted) {
       throw new Error(
         `Timed out downloading policy store after ${DOWNLOAD_TIMEOUT_MS / 1000}s. The archive may be too large or the server unreachable.`,
       );
     }
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Failed to download policy store from "${uri}": ${msg}`);
+    throw err;
   } finally {
     clearTimeout(timeout);
   }
-
-  if (!response.ok) {
-    throw new Error(`Failed to download policy store: HTTP ${response.status} ${response.statusText}`);
-  }
-
-  // Reject oversized archives up front via the advertised length, before buffering.
-  const declaredLength = Number(response.headers.get('content-length'));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_ARCHIVE_BYTES) {
-    throw new Error(
-      `Policy store archive is too large (${formatBytesLimit(declaredLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
-    );
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-  // Guard again on the actual size in case Content-Length was absent or wrong.
-  if (arrayBuffer.byteLength > MAX_ARCHIVE_BYTES) {
-    throw new Error(
-      `Policy store archive is too large (${formatBytesLimit(arrayBuffer.byteLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
-    );
-  }
-
-  const buffer = new Uint8Array(arrayBuffer);
 
   let extracted: Record<string, Uint8Array>;
   try {
@@ -122,11 +122,40 @@ export async function downloadAndExtractPolicyStore(uri: string): Promise<Policy
     throw new Error(`Could not read the policy store archive (expected a .cjar/ZIP file): ${msg}`);
   }
 
+  const tooDeep = Object.keys(extracted).find((p) => p.split('/').filter(Boolean).length > MAX_PATH_DEPTH);
+  if (tooDeep) {
+    throw new Error(`Policy store entry path is too deep (limit ${MAX_PATH_DEPTH} levels): ${tooDeep.slice(0, 200)}`);
+  }
+
   return Object.entries(extracted)
     // fflate emits directory entries with trailing "/" and zero-length content; skip them.
     .filter(([path]) => !path.endsWith('/'))
     .map(([path, bytes]) => ({ path, size: bytes.length, bytes }))
     .sort((a, b) => a.path.localeCompare(b.path));
+}
+
+async function readBodyWithLimit(response: Response, limit: number): Promise<Uint8Array> {
+  if (!response.body) return new Uint8Array(0);
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > limit) {
+      await reader.cancel();
+      throw new Error(`Policy store archive is too large; the limit is ${formatBytesLimit(limit)}.`);
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    out.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return out;
 }
 
 /**
@@ -138,11 +167,12 @@ export function buildTree(entries: PolicyStoreEntry[]): TreeNode {
 
   for (const entry of entries) {
     const parts = entry.path.split('/').filter(Boolean);
+    if (parts.length > MAX_PATH_DEPTH) continue;
     let current = root;
 
     parts.forEach((part, index) => {
       const isLeaf = index === parts.length - 1;
-      const path = parts.slice(0, index + 1).join('/');
+      const path = current.path ? `${current.path}/${part}` : part;
       let child = current.children.find((c) => c.name === part);
 
       if (!child) {
@@ -163,12 +193,16 @@ export function buildTree(entries: PolicyStoreEntry[]): TreeNode {
   return root;
 }
 
-function sortTree(node: TreeNode) {
-  node.children.sort((a, b) => {
-    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
-    return a.name.localeCompare(b.name);
-  });
-  node.children.forEach(sortTree);
+function sortTree(root: TreeNode) {
+  const stack: TreeNode[] = [root];
+  while (stack.length) {
+    const node = stack.pop() as TreeNode;
+    node.children.sort((a, b) => {
+      if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+    stack.push(...node.children);
+  }
 }
 
 /** Decodes an entry's bytes as UTF-8 text. */

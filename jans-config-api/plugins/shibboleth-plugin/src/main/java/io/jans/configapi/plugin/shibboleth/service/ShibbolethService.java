@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.jans.configapi.core.util.Util.escapeLog;
+
 @ApplicationScoped
 public class ShibbolethService {
 
@@ -39,11 +41,11 @@ public class ShibbolethService {
         logger.info("Updating Shibboleth IDP configuration");
         
         configuration.setRevision(configuration.getRevision() + 1);
-        
+        configuration.setDn(SHIBBOLETH_CONFIG_DN);
+
         if (persistenceEntryManager.contains(SHIBBOLETH_CONFIG_DN, ShibbolethIdpConfiguration.class)) {
             persistenceEntryManager.merge(configuration);
         } else {
-            configuration.setDn(SHIBBOLETH_CONFIG_DN);
             persistenceEntryManager.persist(configuration);
         }
     }
@@ -59,7 +61,7 @@ public class ShibbolethService {
     }
 
     public TrustedServiceProvider getTrustedServiceProvider(String entityId) {
-        logger.debug("Fetching trusted service provider: {}", entityId);
+        logger.debug("Fetching trusted service provider: {}", escapeLog(entityId));
         
         List<TrustedServiceProvider> providers = getTrustedServiceProviders();
         for (TrustedServiceProvider provider : providers) {
@@ -71,7 +73,7 @@ public class ShibbolethService {
     }
 
     public void addTrustedServiceProvider(TrustedServiceProvider serviceProvider) {
-        logger.info("Adding trusted service provider: {}", serviceProvider.getEntityId());
+        logger.info("Adding trusted service provider: {}", escapeLog(serviceProvider.getEntityId()));
         
         ShibbolethIdpConfiguration config = getConfiguration();
         List<TrustedServiceProvider> providers = config.getShibbolethIdpProperties().getTrustedServiceProviders();
@@ -84,7 +86,7 @@ public class ShibbolethService {
     }
 
     public void updateTrustedServiceProvider(TrustedServiceProvider serviceProvider) {
-        logger.info("Updating trusted service provider: {}", serviceProvider.getEntityId());
+        logger.info("Updating trusted service provider: {}", escapeLog(serviceProvider.getEntityId()));
         
         ShibbolethIdpConfiguration config = getConfiguration();
         List<TrustedServiceProvider> providers = config.getShibbolethIdpProperties().getTrustedServiceProviders();
@@ -99,7 +101,7 @@ public class ShibbolethService {
     }
 
     public void deleteTrustedServiceProvider(String entityId) {
-        logger.info("Deleting trusted service provider: {}", entityId);
+        logger.info("Deleting trusted service provider: {}", escapeLog(entityId));
         
         ShibbolethIdpConfiguration config = getConfiguration();
         List<TrustedServiceProvider> providers = config.getShibbolethIdpProperties().getTrustedServiceProviders();

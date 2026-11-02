@@ -85,6 +85,11 @@ public class UmaTokenService {
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
             Client client = umaValidationService.validate(identity.getSessionClient().getClient());
+            umaValidationService.validateRestrictedByClient(client.getDn(), permissions);
+            if (rpt != null && !client.getClientId().equals(rpt.getClientId())) {
+                log.error("RPT was issued to another client, rpt clientId: {}, clientId: {}", rpt.getClientId(), client.getClientId());
+                throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_RPT, "RPT was issued to another client.");
+            }
             Map<Scope, Boolean> scopes = umaValidationService.validateScopes(scope, permissions, client);
             pct = pctService.updateClaims(pct, idToken, client.getClientId(), permissions); // creates new pct if pct is null in request
             Claims claims = new Claims(idToken, pct, claimToken);
@@ -107,7 +112,7 @@ public class UmaTokenService {
 
             log.trace("Access granted.");
 
-            updatePermissionsWithClientRequestedScope(permissions, scopes);
+            updatePermissionsWithClientRequestedScope(permissions, scopes, scriptMap);
             addPctToPermissions(permissions, pct);
 
             boolean upgraded = false;
@@ -145,16 +150,25 @@ public class UmaTokenService {
         }
     }
 
-    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<Scope, Boolean> scopes) {
+    private void updatePermissionsWithClientRequestedScope(List<UmaPermission> permissions, Map<Scope, Boolean> scopes,
+                                                           Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap) {
         log.trace("Updating permissions with requested scopes ...");
+        // only scopes requested by client are added (ticket scopes stay per permission) and only if their policies allow it
+        List<String> requestedScopeDns = new ArrayList<>();
+        for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
+            if (Boolean.TRUE.equals(entry.getValue())) {
+                if (expressionService.isScopeAuthorized(scriptMap, entry.getKey().getDn())) {
+                    requestedScopeDns.add(entry.getKey().getDn());
+                } else {
+                    log.trace("Skip requested scope because it is not authorized by policy, scope: {}", entry.getKey().getId());
+                }
+            }
+        }
+
         for (UmaPermission permission : permissions) {
             Set<String> scopeDns = new HashSet<>(permission.getScopeDns());
-
-            for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
-                log.trace("Updating permissions with scope: {}, isRequestedScope: {}, permisson: {}", entry.getKey().getId(), entry.getValue(), permission.getDn());
-                scopeDns.add(entry.getKey().getDn());
-            }
-
+            log.trace("Updating permission {} with requested scopes: {}", permission.getDn(), requestedScopeDns);
+            scopeDns.addAll(requestedScopeDns);
             permission.setScopeDns(new ArrayList<>(scopeDns));
         }
     }

@@ -26,9 +26,9 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
 
     public ScriptTokenExchangeControl externalValidate(ExecutionContext context) {
         final Client client = context.getClient();
-        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getPostAuthnScripts());
+        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getTokenExchangeScripts());
         if (scripts.isEmpty()) {
-            return ScriptTokenExchangeControl.fail();
+            return ScriptTokenExchangeControl.ok();
         }
         log.trace("Found {} token-exchange scripts.", scripts.size());
 
@@ -62,6 +62,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(script.getCustomScript(), ex);
+            result = ScriptTokenExchangeControl.fail();
         }
 
         log.trace("Finished 'validate' method, script name: {}, clientId: {}, result: {}", script.getName(), client.getClientId(), result);
@@ -71,7 +72,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
 
     public boolean externalModifyResponse(JSONObject response, ExecutionContext context) {
         final Client client = context.getClient();
-        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getPostAuthnScripts());
+        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getTokenExchangeScripts());
         if (scripts.isEmpty()) {
             return false;
         }

@@ -16,6 +16,7 @@ use url::Url;
 use crate::{
     LogLevel, LogWriter,
     async_sleep::sleep,
+    common::issuer_utils::IssClaim,
     http::HttpClient,
     jwt::{
         IssuerConfig, TokenCache,
@@ -40,6 +41,7 @@ struct StatusListUpdateCtx {
     /// `ttl`, this value is used directly.
     refresh_interval_max: Duration,
     status_list_url: Url,
+    iss: IssClaim,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<JwtValidator>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
@@ -58,13 +60,25 @@ pub(crate) struct InitForIssArgs<'a> {
     pub cancel_tkn: CancellationToken,
 }
 
+/// Floor for an issuer-requested `ttl`, so `ttl: 0` cannot turn the refresh
+/// worker into a busy loop.
+const MIN_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
+
 /// Resolve effective refresh interval as `min(jwt_ttl, refresh_interval_max)`,
-/// or `refresh_interval_max` when the JWT omits `ttl`.
+/// or `refresh_interval_max` when the JWT omits `ttl`. Never below
+/// [`MIN_REFRESH_INTERVAL`] unless the configured max itself is lower.
 fn effective_refresh_interval(jwt_ttl_secs: Option<u64>, max: Duration) -> Duration {
     match jwt_ttl_secs {
-        Some(t) => Duration::from_secs(t).min(max),
+        Some(t) => Duration::from_secs(t).max(MIN_REFRESH_INTERVAL).min(max),
         None => max,
     }
+}
+
+/// Per the status list spec, `sub` is the status list's own URI; `iss`, when
+/// present, must be the issuer whose endpoint served it.
+fn is_bound_to(jwt: &StatusListJwt, iss: &IssClaim, status_list_url: &Url) -> bool {
+    let sub_matches = Url::parse(&jwt.sub).is_ok_and(|sub| sub == *status_list_url);
+    sub_matches && jwt.iss.as_ref().is_none_or(|jwt_iss| jwt_iss == iss)
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -126,6 +140,15 @@ impl StatusListCache {
         let decoding_key = key_service.get_key(&decoding_key_info);
 
         let decoded_jwt_iss = decoded_jwt.iss();
+        // The response must not pick another trusted issuer's validator.
+        if decoded_jwt_iss
+            .as_ref()
+            .is_some_and(|decoded| *decoded != iss)
+        {
+            return Err(UpdateStatusListError::UnboundStatusList(
+                status_list_url.to_string(),
+            ));
+        }
         // get validator
         let validator_key = ValidatorInfo {
             iss: decoded_jwt_iss.as_ref(),
@@ -143,6 +166,11 @@ impl StatusListCache {
             .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
             .try_into()
             .map_err(DecodeJwtError::DeserializeClaims)?;
+        if !is_bound_to(&status_list_jwt, &iss, status_list_url) {
+            return Err(UpdateStatusListError::UnboundStatusList(
+                status_list_url.to_string(),
+            ));
+        }
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -157,6 +185,7 @@ impl StatusListCache {
             ttl,
             refresh_interval_max,
             status_list_url: status_list_url.clone(),
+            iss: iss.clone(),
             decoding_key,
             validator,
             status_lists: self.status_lists.clone(),
@@ -194,6 +223,7 @@ where
         mut ttl,
         refresh_interval_max,
         status_list_url,
+        iss,
         decoding_key,
         validator,
         status_lists,
@@ -262,6 +292,13 @@ where
                 continue;
             },
         };
+        if !is_bound_to(&status_list_jwt, &iss, &status_list_url) {
+            handle_err(
+                "bind the updated status list JWT",
+                &UpdateStatusListError::UnboundStatusList(status_list_url.to_string()),
+            );
+            continue;
+        }
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
         ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
@@ -303,6 +340,23 @@ mod test {
     use crate::jwt::test_utils::MockServer;
     use std::collections::HashSet;
     use std::time::Duration;
+
+    #[test]
+    fn zero_ttl_is_floored() {
+        let max = Duration::from_secs(300);
+        assert_eq!(
+            effective_refresh_interval(Some(0), max),
+            MIN_REFRESH_INTERVAL
+        );
+        assert_eq!(
+            effective_refresh_interval(Some(0), Duration::from_millis(200)),
+            Duration::from_millis(200)
+        );
+        assert_eq!(
+            effective_refresh_interval(Some(60), max),
+            Duration::from_secs(60)
+        );
+    }
 
     #[tokio::test]
     async fn keep_status_list_updated() {

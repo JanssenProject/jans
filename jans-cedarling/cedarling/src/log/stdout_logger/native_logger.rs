@@ -62,10 +62,19 @@ fn spawn_writer_thread(
                 next_flush_deadline = now + flush_timeout;
             }
 
-            // Compute remaining time until next flush deadline
-            let remaining = next_flush_deadline.saturating_duration_since(now);
-            match receiver.recv_timeout(remaining) {
+            // Nothing to flush: block instead of polling with an expired deadline.
+            let received = if buffer.is_empty() {
+                receiver
+                    .recv()
+                    .map_err(|_| mpsc::RecvTimeoutError::Disconnected)
+            } else {
+                receiver.recv_timeout(next_flush_deadline.saturating_duration_since(now))
+            };
+            match received {
                 Ok(LogMessage::Log(serializer)) => {
+                    if buffer.is_empty() {
+                        next_flush_deadline = Instant::now() + flush_timeout;
+                    }
                     let json_string = serializer();
                     buffer.push_str(&json_string);
                     buffer.push('\n');

@@ -156,8 +156,9 @@ func resourceSsaValidationConfig() *schema.Resource {
 				Optional: true,
 			},
 			"shared_secret": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 		},
 	}
@@ -1502,11 +1503,13 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"pairwise_calculation_key": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Key to calculate algorithmic pairwise IDs.",
 			},
 			"pairwise_calculation_salt": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Salt to calculate algorithmic pairwise IDs.",
 			},
@@ -1542,6 +1545,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"key_store_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "The password of the Key Store.",
 			},
@@ -1640,6 +1644,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"jms_password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "JMS Password.",
 			},
@@ -1876,6 +1881,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"dcr_signature_validation_shared_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Specifies shared secret for Dynamic Client Registration.",
 			},
@@ -2161,8 +2167,9 @@ func resourceAppConfiguration() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"api_key": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:      schema.TypeString,
+							Sensitive: true,
+							Optional:  true,
 						},
 						"auth_domain": {
 							Type:     schema.TypeString,
@@ -2193,8 +2200,9 @@ func resourceAppConfiguration() *schema.Resource {
 							Optional: true,
 						},
 						"notification_key": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:      schema.TypeString,
+							Sensitive: true,
+							Optional:  true,
 						},
 						"public_vapid_key": {
 							Type:     schema.TypeString,

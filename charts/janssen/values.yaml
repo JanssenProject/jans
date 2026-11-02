@@ -193,8 +193,8 @@ config:
     # -- Add custom secret envs to the service.
     # variable1: value1
     secret: {}
-  # -- Admin password to log in to the UI.
-  adminPassword: Test1234#
+  # -- Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret.
+  adminPassword: ""
   # -- City. Used for certificate creation.
   city: Austin
   # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
@@ -270,7 +270,7 @@ config:
     # -- Base URL of Vault.
     cnVaultAddr: http://localhost:8200
     # -- Verify connection to Vault.
-    cnVaultVerify: false
+    cnVaultVerify: true
     # -- Path to the file that contains Vault AppRole role ID.
     cnVaultRoleIdFile: /etc/certs/vault_role_id
     # -- Path to the file that contains Vault AppRole secret ID.

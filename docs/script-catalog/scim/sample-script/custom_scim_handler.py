@@ -76,7 +76,7 @@ class ScimEventHandler(ScimType):
         
         print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
         for user in results.getEntries():
-            print "Flushing addresses for user %s" % user.getUid() 
+            print "Flushing addresses for user %s" % ("%s" % user.getUid()).replace("\r", "_").replace("\n", "_")
             user.setAttribute("jansAddress", None)
         
         return True
@@ -91,10 +91,34 @@ class ScimEventHandler(ScimType):
 
         expected_user_type = self.getUserType(context.getRequestHeaders())
 
-        if expected_user_type != None and entity.getAttribute("jansUsrTyp") == expected_user_type:
+        if (expected_user_type != None and entity.getAttribute("jansUsrTyp") == expected_user_type
+                and self.payloadKeepsUserType(payload, expected_user_type)):
             return None
         else:
             return BaseScimWebService.getErrorResponse(403, None, "Attempt to handle a not allowed user type")
+
+    # payload is a UserResource (POST/PUT), a PatchRequest (PATCH) or None
+    def payloadKeepsUserType(self, payload, expected_user_type):
+        if payload is None:
+            return True
+
+        if hasattr(payload, "getUserType"):
+            user_type = payload.getUserType()
+            return user_type is None or user_type == expected_user_type
+
+        if hasattr(payload, "getOperations"):
+            for operation in payload.getOperations():
+                path = operation.getPath()
+                value = operation.getValue()
+                if path is None:
+                    if hasattr(value, "keySet"):
+                        for key in value.keySet():
+                            if str(key).lower() == "usertype" and value.get(key) != expected_user_type:
+                                return False
+                elif "usertype" in path.lower():
+                    if str(operation.getType()).lower() == "remove" or value != expected_user_type:
+                        return False
+        return True
 
     def manageSearchOperation(self, context, searchRequest, configurationAttributes):
         print "manageSearchOperation. SCIM endpoint invoked is %s (HTTP %s)" % (context.getPath(), context.getMethod())

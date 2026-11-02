@@ -34,11 +34,22 @@ for i, eext in enumerate(exclude_extensions):
 
 for i, edir in enumerate(exclude_dirs):
     if not edir.startswith('/'):
-        exclude_dirs[i] = os.path.join(argsp.directory, edir)
+        edir = os.path.join(argsp.directory, edir)
+    exclude_dirs[i] = os.path.normpath(edir)
 
 for i, efn in enumerate(exclude_files):
     if not efn.startswith('/'):
-        exclude_files[i] = os.path.join(argsp.directory, efn)
+        efn = os.path.join(argsp.directory, efn)
+    exclude_files[i] = os.path.normpath(efn)
+
+
+def is_excluded(fpath):
+    path_s = os.path.normpath(fpath.as_posix())
+    if fpath.is_file() and fpath.suffix in exclude_extensions:
+        return True
+    if path_s in exclude_files:
+        return True
+    return any(path_s == edir or path_s.startswith(edir + os.sep) for edir in exclude_dirs)
 
 
 if not agama_path.is_dir():
@@ -56,22 +67,21 @@ if not agama_zip_fn.endswith('.gama'):
 file_list = []
 mandatory_dirs = {'web': False, 'code': False}
 
+agama_real_path = os.path.realpath(agama_path)
+
 for fpath in agama_path.glob("**/*"):
-    add = True
     relative_path = fpath.relative_to(agama_path)
-    if fpath.is_file() and fpath.suffix in exclude_extensions:
+    # ZipFile.write follows links, which would pull in files from outside the project
+    if fpath.is_symlink() or not os.path.realpath(fpath).startswith(os.path.join(agama_real_path, '')):
+        print("Not zipping symbolic link", fpath)
+        continue
+    if fpath.is_dir() and fpath.parts[-1] in mandatory_dirs:
+        mandatory_dirs[fpath.parts[-1]] = True
+    if is_excluded(fpath):
         print("Not zipping", fpath)
         continue
-    if fpath.is_dir():
-        if fpath.parts[-1] in mandatory_dirs:
-            mandatory_dirs[fpath.parts[-1]] = True
 
-        if fpath.as_posix().startswith(tuple(exclude_dirs)) or fpath.as_posix().startswith(tuple(exclude_files)):
-            print("Not zipping", fpath)
-            add = False
-
-    if add:
-        file_list.append((fpath, relative_path))
+    file_list.append((fpath, relative_path))
 
 # check if directories code and web exists
 flow_files = []
@@ -142,6 +152,9 @@ for fpath, rpath in flow_files:
 
 # check configs in project.json
 project_metadata_fn = agama_path.joinpath('project.json')
+if project_metadata_fn.is_symlink():
+    print("{} must not be a symbolic link".format(project_metadata_fn))
+    sys.exit()
 if project_metadata_fn.exists():
     try:
         project_metadata = json.loads(project_metadata_fn.open().read(), object_pairs_hook=OrderedDict)
@@ -179,7 +192,17 @@ if not 'projectName' in project_metadata:
     for key in project_metadata:
         project_metadata_new[key] = project_metadata[key]
 
-    project_metadata_fn.open('w').write(json.dumps(project_metadata_new, indent=2))
+    # Write a new file and swap it in, relative to the project directory, so a
+    # project.json or directory replaced meanwhile cannot redirect the write.
+    project_dir_fd = os.open(agama_path, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0))
+    try:
+        tmp_name = '.project.json.{}.tmp'.format(os.getpid())
+        tmp_fd = os.open(tmp_name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644, dir_fd=project_dir_fd)
+        with os.fdopen(tmp_fd, 'w') as w:
+            w.write(json.dumps(project_metadata_new, indent=2))
+        os.replace(tmp_name, 'project.json', src_dir_fd=project_dir_fd, dst_dir_fd=project_dir_fd)
+    finally:
+        os.close(project_dir_fd)
 
 
 agama_zip_obj = zipfile.ZipFile(agama_zip_fn, 'w')

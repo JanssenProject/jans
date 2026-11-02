@@ -2,6 +2,9 @@ package io.jans.fido2.service.verifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -11,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -31,6 +36,17 @@ class DomainVerifierTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private AppConfiguration appConfiguration;
+
+    private void configureOrigins(String... origins) {
+        RequestedParty requestedParty = new RequestedParty();
+        requestedParty.setOrigins(List.of(origins));
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setRequestedParties(List.of(requestedParty));
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+    }
 
     @Test
     void verifyDomain_valid_true() {
@@ -95,5 +111,24 @@ class DomainVerifierTest {
 
         verify(log).debug("Domains comparison {} {}", domain, originValue);
         verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    void verifyDomain_listedSubdomain_true() {
+        configureOrigins("testurl", "test1.testurl");
+        ObjectNode clientDataNode = mapper.createObjectNode();
+        when(commonVerifiers.verifyThatFieldString(clientDataNode, "origin")).thenReturn("https://test1.testurl");
+
+        assertTrue(domainVerifier.verifyDomain("testurl", clientDataNode));
+    }
+
+    @Test
+    void verifyDomain_unlistedSubdomain_rejected() {
+        configureOrigins("testurl");
+        ObjectNode clientDataNode = mapper.createObjectNode();
+        when(commonVerifiers.verifyThatFieldString(clientDataNode, "origin")).thenReturn("https://test1.testurl");
+        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).build()));
+
+        assertThrows(WebApplicationException.class, () -> domainVerifier.verifyDomain("testurl", clientDataNode));
     }
 }

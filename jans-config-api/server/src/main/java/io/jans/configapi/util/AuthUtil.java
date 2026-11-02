@@ -454,7 +454,7 @@ public class AuthUtil {
     }
 
     public boolean isValidIssuer(String issuer) {
-        log.info("Is issuer:{} present in approvedIssuer list ? {} ", issuer,
+        log.info("Is issuer:{} present in approvedIssuer list ? {} ", Util.escapeLog(issuer),
                 this.configurationFactory.getApiApprovedIssuer().contains(issuer));
         return this.configurationFactory.getApiApprovedIssuer().contains(issuer);
     }
@@ -755,7 +755,7 @@ public class AuthUtil {
             return userInum;
         }
         userInum = httpHeaders.getHeaderString("User-inum");
-        log.info(" Logged in userInum:{}", userInum);
+        log.info(" Logged in userInum:{}", Util.escapeLog(userInum));
         return userInum;
     }
 

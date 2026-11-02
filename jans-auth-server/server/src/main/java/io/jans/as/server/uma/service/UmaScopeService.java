@@ -14,6 +14,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.UmaErrorResponseType;
+import io.jans.as.model.util.Pair;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
@@ -73,7 +74,7 @@ public class UmaScopeService {
     public Scope getOrCreate(Client client, String scopeId, Set<String> regExps) {
         Scope fromLdap = getScope(scopeId);
         if (fromLdap != null) { // already exists
-            return fromLdap;
+            return ensureTemplatePolicies(fromLdap, regExps);
         }
 
         if (isFalse(appConfiguration.getAllowSpontaneousScopes())) {
@@ -89,6 +90,35 @@ public class UmaScopeService {
         }
 
         return spontaneousScopeService.createSpontaneousScopeIfNeeded(regExps, scopeId, client.getClientId());
+    }
+
+    // Spontaneous scopes share one namespace with OIDC, so an existing one may have been created without this resource template's policies.
+    private Scope ensureTemplatePolicies(Scope scope, Set<String> regExps) {
+        if (scope.getScopeType() != ScopeType.SPONTANEOUS || regExps == null || regExps.isEmpty()) {
+            return scope;
+        }
+        final Pair<Boolean, String> allowed = spontaneousScopeService.isAllowedBySpontaneousScopes(regExps, scope.getId());
+        if (isFalse(allowed.getFirst()) || StringUtils.equals(allowed.getSecond(), scope.getId())) {
+            return scope;
+        }
+        final Scope template = getScope(allowed.getSecond());
+        if (template == null || template.getUmaAuthorizationPolicies() == null || template.getUmaAuthorizationPolicies().isEmpty()) {
+            return scope;
+        }
+
+        final List<String> policies = scope.getUmaAuthorizationPolicies() != null ? new ArrayList<>(scope.getUmaAuthorizationPolicies()) : new ArrayList<>();
+        if (policies.containsAll(template.getUmaAuthorizationPolicies())) {
+            return scope;
+        }
+        for (String policy : template.getUmaAuthorizationPolicies()) {
+            if (!policies.contains(policy)) {
+                policies.add(policy);
+            }
+        }
+        scope.setUmaAuthorizationPolicies(policies);
+        ldapEntryManager.merge(scope);
+        log.debug("Added template policies to spontaneous scope {}", scope.getId());
+        return scope;
     }
 
     public Scope getScope(String scopeId) {

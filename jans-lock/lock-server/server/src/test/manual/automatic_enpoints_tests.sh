@@ -102,7 +102,7 @@ INVALID_TOKEN="$(prop invalid.token this-is-definitely-not-a-valid-token)"
 
 CURL_TLS=""
 GRPC_TLS=()
-if is_true "$(prop tls.insecure true)"; then
+if is_true "$(prop tls.insecure false)"; then
   CURL_TLS="-k"
   GRPC_TLS=(-insecure)
 fi
@@ -389,10 +389,19 @@ GRPC_OUT=""
 t_pass() { echo "✅  $1"; }
 t_fail() { echo "❌  $1"; [[ -n "${2:-}" ]] && echo "    $2"; exit 1; }
 
+# is_bearer_token VALUE: RFC 6750 b64token, so a token can never carry shell or curl config syntax
+is_bearer_token() { [[ "$1" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; }
+
 get_token() { # CLIENT_ID CLIENT_SECRET SCOPE: credentials go to curl through stdin, not the process list
-  printf 'user = "%s:%s"\n' "$1" "$2" \
+  local token
+  token="$(printf 'user = "%s:%s"\n' "$1" "$2" \
     | curl -sS $CURL_TLS -K - "${HOST}/jans-auth/restv1/token" -d "grant_type=client_credentials" -d "scope=$3" \
-    | jq -r '.access_token // empty'
+    | jq -r '.access_token // empty')"
+  if [[ -n "$token" ]] && ! is_bearer_token "$token"; then
+    echo "❌ access_token is not a valid bearer token, ignoring it" >&2
+    return 0
+  fi
+  printf '%s' "$token"
 }
 
 get_audit_token() { get_token "$AUDIT_CLIENT_ID" "$AUDIT_CLIENT_SECRET" "$1"; }
@@ -628,14 +637,16 @@ run_trace_tests() {
   rest_post "$api" "$write_token" "$rec_rest_1"
   expect_http "submit record (genesis of the REST chain)" 202
   expect_rest_jq "acceptance is not a replay" '.accepted == true and .idempotent_replay == false'
-  digest_rest_1="$(jq -r '.content_digest' <<<"$HTTP_BODY")"
-  receipt_rest_1="$(jq -r '.receipt_sequence' <<<"$HTTP_BODY")"
+  digest_rest_1="$(jq -r '.content_digest | tostring | select(test("^sha256:[0-9a-f]{64}$"))' <<<"$HTTP_BODY")"
+  receipt_rest_1="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
+  [[ -n "$digest_rest_1" && -n "$receipt_rest_1" ]] || t_fail "REST  receipt carries no well-formed content_digest and receipt_sequence" "$HTTP_BODY"
 
   grpc TraceService/SubmitRecord "$write_token" "{\"assertion\": \"$(b64 "$rec_grpc_1")\"}"
   expect_grpc "submit record (genesis of the gRPC chain)"
   expect_grpc_jq "acceptance is not a replay" '.accepted == true and .idempotentReplay == false'
-  digest_grpc_1="$(jq -r '.contentDigest' <<<"$GRPC_OUT")"
-  receipt_grpc_1="$(jq -r '.receiptSequence' <<<"$GRPC_OUT")"
+  digest_grpc_1="$(jq -r '.contentDigest | tostring | select(test("^sha256:[0-9a-f]{64}$"))' <<<"$GRPC_OUT")"
+  receipt_grpc_1="$(jq -r '.receiptSequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$GRPC_OUT")"
+  [[ -n "$receipt_grpc_1" ]] || t_fail "gRPC  receipt carries no well-formed receiptSequence" "$GRPC_OUT"
   [[ "$digest_grpc_1" == "$(py digest <<<"$rec_grpc_1")" ]] || t_fail "gRPC  content_digest differs from the digest of the submitted bytes" "$digest_grpc_1"
   t_pass "gRPC  content_digest matches the digest of the submitted record"
 

@@ -26,7 +26,7 @@ Kubernetes: `>=v1.22.0-0`
 |-----|------|---------|-------------|
 | additionalAnnotations | object | `{}` | Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken |
 | additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
-| adminPassword | string | `"Test1234#"` | Admin password to log in to the UI. |
+| adminPassword | string | `""` | Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. |
 | city | string | `"Austin"` | City. Used for certificate creation. |
 | configmap.cnAwsAccessKeyId | string | `""` |  |
 | configmap.cnAwsDefaultRegion | string | `"us-west-1"` |  |
@@ -72,7 +72,7 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnVaultRoleIdFile | string | `"/etc/certs/vault_role_id"` | Path to file contains Vault AppRole role ID. |
 | configmap.cnVaultSecretId | string | `""` | Vault AppRole SecretID. |
 | configmap.cnVaultSecretIdFile | string | `"/etc/certs/vault_secret_id"` | Path to file contains Vault AppRole secret ID. |
-| configmap.cnVaultVerify | bool | `false` | Verify connection to Vault. |
+| configmap.cnVaultVerify | bool | `true` | Verify connection to Vault. |
 | configmap.containerMetadataName | string | `"kubernetes"` |  |
 | configmap.lbAddr | string | `""` | Loadbalancer address for AWS if the FQDN is not registered. |
 | countryCode | string | `"US"` | Country code. Used for certificate creation. |

@@ -15,6 +15,7 @@ import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.BadRequestException;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +29,8 @@ import static io.jans.as.model.util.Util.escapeLog;
 @DependsOn("appInitializer")
 @Named
 public class StatResponseService {
+
+    private static final int MAX_MONTHS = 240;
 
     @Inject
     private Logger log;
@@ -44,6 +47,10 @@ public class StatResponseService {
             .build();
 
     public StatResponse buildResponse(Set<String> months) {
+        if (months.size() > MAX_MONTHS) {
+            throw new BadRequestException("Too many months requested, maximum is " + MAX_MONTHS);
+        }
+
         final String cacheKey = months.toString();
         final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
         if (cachedResponse != null) {

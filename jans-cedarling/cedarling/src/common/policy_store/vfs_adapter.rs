@@ -98,6 +98,13 @@ impl Default for PhysicalVfs {
 impl VfsFileSystem for PhysicalVfs {
     fn open_file(&self, path: &str) -> io::Result<Box<dyn Read + Send>> {
         let vfs_path = self.get_path(path)?;
+        // Devices, FIFOs and sockets (possibly behind a symlink) could be read without end
+        if !std::fs::metadata(vfs_path.as_str())?.is_file() {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("'{path}' is not a regular file"),
+            ));
+        }
         let file = vfs_path
             .open_file()
             .map_err(|e| io::Error::new(io::ErrorKind::NotFound, e))?;

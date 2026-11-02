@@ -97,6 +97,11 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 		try {
 			Principal subjectX500Principal = certificate.getSubjectX500Principal();
 
+			if (!isIssuedByTrustedIssuer(certificate, issuer, issuers)) {
+				status.setValidity(CertificateValidity.INVALID);
+				return status;
+			}
+
 			String crlURL = getCrlUri(certificate);
 			if (crlURL == null) {
 				log.error("CRL's URL for '" + subjectX500Principal + "' is empty");
@@ -131,6 +136,20 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 		}
 
 		return status;
+	}
+
+	// Certificate-supplied network locations are used only once the certificate is proven to be issued by a trusted issuer
+	private static boolean isIssuedByTrustedIssuer(X509Certificate certificate, X509Certificate issuer, List<X509Certificate> issuers) {
+		if (issuer == null || issuers == null || !issuers.contains(issuer)) {
+			return false;
+		}
+		try {
+			certificate.verify(issuer.getPublicKey());
+			return true;
+		} catch (Exception ex) {
+			log.error("Certificate '" + certificate.getSubjectX500Principal() + "' is not signed by trusted issuer", ex);
+			return false;
+		}
 	}
 
 	private boolean validateCRL(X509CRL x509crl, X509Certificate certificate, X509Certificate issuerCertificate, Date validationDate) {
@@ -202,6 +221,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 		HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 		try {
 			con.setUseCaches(false);
+			con.setInstanceFollowRedirects(false);
 
 			InputStream in = new BoundedInputStream(con.getInputStream(), maxCrlSize);
 			try {

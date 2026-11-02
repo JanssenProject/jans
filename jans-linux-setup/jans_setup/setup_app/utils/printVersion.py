@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from __future__ import print_function
 
+import re
 import zipfile
 import glob
 import os
@@ -62,6 +63,8 @@ if __name__ == '__main__':
 
     t_path = args.target
     if args.artifact:
+        if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]*', args.artifact):
+            parser.error("artifact must be an application name")
         t_path = t_path.replace('*', args.artifact)
 
     target = os.path.join(t_path, '*.war')

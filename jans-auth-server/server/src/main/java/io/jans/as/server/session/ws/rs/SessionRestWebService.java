@@ -5,6 +5,8 @@ import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.util.CertUtils;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
@@ -15,6 +17,7 @@ import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.util.CoreCertUtil;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -68,6 +71,9 @@ public class SessionRestWebService {
     @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
 
+    @Inject
+    private DpopService dpopService;
+
     @POST
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
@@ -78,7 +84,7 @@ public class SessionRestWebService {
             @Context SecurityContext securityContext) {
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACTIVE_SESSION);
-            AuthorizationGrant grant = validateToken(getToken(authorization));
+            AuthorizationGrant grant = validateToken(getToken(authorization), request);
 
             ExecutionContext executionContext = new ExecutionContext(request, response);
             executionContext.setGrant(grant);
@@ -160,7 +166,7 @@ public class SessionRestWebService {
         return (int) (date.getTime() / 1000L);
     }
 
-    private AuthorizationGrant validateToken(String accessToken) {
+    private AuthorizationGrant validateToken(String accessToken, HttpServletRequest request) {
         if (StringUtils.isBlank(accessToken)) {
             throw new WebApplicationException(response(Response.Status.BAD_REQUEST, INVALID_TOKEN));
         }
@@ -176,6 +182,7 @@ public class SessionRestWebService {
             log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, false);
             throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
         }
+        validateSenderConstraint(accessTokenObject, request);
 
         final Set<String> scopes = authorizationGrant.getScopes();
         if (BooleanUtils.isFalse(appConfiguration.getOpenidScopeBackwardCompatibility()) && !scopes.contains(DefaultScope.OPEN_ID.toString())) {
@@ -189,6 +196,34 @@ public class SessionRestWebService {
         }
 
         return authorizationGrant;
+    }
+
+    // Sender-constrained tokens (RFC 8705 / RFC 9449) must be presented together with proof of the bound key.
+    private void validateSenderConstraint(AbstractToken accessTokenObject, HttpServletRequest request) {
+        final String x5ts256 = accessTokenObject.getX5ts256();
+        if (StringUtils.isNotBlank(x5ts256)
+                && !x5ts256.equals(CertUtils.confirmationMethodHashS256(CoreCertUtil.getClientCert(request).getCert()))) {
+            log.trace("Client certificate does not match access token binding.");
+            throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
+        }
+
+        final String jkt = accessTokenObject.getDpop();
+        if (StringUtils.isBlank(jkt)) {
+            return;
+        }
+        final String dpop = request != null ? request.getHeader("DPoP") : null;
+        boolean valid = false;
+        try {
+            valid = StringUtils.isNotBlank(dpop) && dpopService.validateDpop(dpop) && jkt.equals(DpopService.getDpopJwkThumbprint(dpop));
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.trace("Failed to validate DPoP proof.", e);
+        }
+        if (!valid) {
+            log.trace("DPoP proof does not match access token binding.");
+            throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
+        }
     }
 
     private Response response(Response.Status status, UserInfoErrorResponseType errorResponseType) {

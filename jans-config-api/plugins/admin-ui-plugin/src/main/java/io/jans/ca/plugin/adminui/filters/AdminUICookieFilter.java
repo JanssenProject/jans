@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -251,6 +252,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             return Optional.empty();
         }
         log.debug("Admin UI session exist in persistence.");
+        if (adminUISession.getExpirationDate() == null || !adminUISession.getExpirationDate().after(new Date())) {
+            log.debug("Admin UI session has expired.");
+            return Optional.empty();
+        }
         configApiSessionService.updateSessionExpiryDate(adminUISession);
         String ujwtString = adminUISession.getUjwt();
         return Optional.ofNullable(ujwtString);

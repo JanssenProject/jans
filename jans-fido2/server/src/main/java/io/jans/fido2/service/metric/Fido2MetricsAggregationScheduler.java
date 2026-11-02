@@ -246,20 +246,21 @@ public class Fido2MetricsAggregationScheduler {
      * Job for data cleanup
      */
     public static class DataCleanupJob implements Job {
+        private static final Logger log = LoggerFactory.getLogger(DataCleanupJob.class);
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            try {
-                Fido2MetricsService metricsService = (Fido2MetricsService) context.getJobDetail()
-                    .getJobDataMap().get(Fido2MetricsConstants.METRICS_SERVICE);
-                
-                if (metricsService != null) {
-                    int retentionDays = (Integer) context.getJobDetail()
-                        .getJobDataMap().getOrDefault("retentionDays", 30);
-                    metricsService.cleanupOldData(retentionDays);
-                }
-            } catch (Exception e) {
-                throw new JobExecutionException("Failed to execute data cleanup", e);
+            Fido2MetricsAggregationScheduler scheduler = (Fido2MetricsAggregationScheduler) context.getJobDetail()
+                .getJobDataMap().get(Fido2MetricsConstants.SCHEDULER);
+            if (scheduler == null) {
+                return;
             }
+            // Read on each run so retention changes apply without a restart
+            int retentionDays = scheduler.getDataRetentionDays();
+            if (retentionDays <= 0) {
+                log.warn("Invalid fido2MetricsRetentionDays {}, skipping metrics cleanup", retentionDays);
+                return;
+            }
+            executeAggregationJob(context, "cleanup", svc -> svc.cleanupOldData(retentionDays));
         }
     }
 
@@ -470,8 +471,27 @@ public class Fido2MetricsAggregationScheduler {
      * Called during application startup by AppInitializer
      */
     public void initTimer() {
+        if (!appConfiguration.isFido2MetricsEnabled()) {
+            log.info("FIDO2 metrics are disabled, skipping scheduler initialization");
+            return;
+        }
+
+        // Prepare JobDataMap with required services
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(Fido2MetricsConstants.METRICS_SERVICE, metricsService);
+        jobDataMap.put(Fido2MetricsConstants.SCHEDULER, this);
+
+        // Retention is enforced independently of aggregation
+        try {
+            String cleanupCron = getConfigString("fido2.metrics.cleanup.cron", "0 30 2 * * ?");
+            registerAggregationJob("DataCleanup", DataCleanupJob.class, cleanupCron, jobDataMap);
+            log.info("Registered FIDO2 metrics data cleanup job with cron: {}", cleanupCron);
+        } catch (Exception e) {
+            log.error("Failed to register FIDO2 metrics data cleanup job: {}", e.getMessage(), e);
+        }
+
         if (!isAggregationEnabled()) {
-            log.info("FIDO2 metrics aggregation is disabled, skipping scheduler initialization");
+            log.info("FIDO2 metrics aggregation is disabled, skipping aggregation jobs");
             return;
         }
 
@@ -479,11 +499,6 @@ public class Fido2MetricsAggregationScheduler {
         initializeClusterEnvironment();
 
         try {
-            // Prepare JobDataMap with required services
-            JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put(Fido2MetricsConstants.METRICS_SERVICE, metricsService);
-            jobDataMap.put(Fido2MetricsConstants.SCHEDULER, this);
-
             // Register hourly aggregation job
             if (isAggregationTypeEnabled(Fido2MetricsConstants.HOURLY)) {
                 String hourlyCron = getConfigString("fido2.metrics.aggregation.hourly.cron", "0 5 * * * ?");

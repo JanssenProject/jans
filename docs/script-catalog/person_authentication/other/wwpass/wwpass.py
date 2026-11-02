@@ -86,6 +86,9 @@ class WWPassConnection(object):
         """
 
         self.context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
+        # responses are unpickled, so the SPFE must be authenticated
+        self.context.verify_mode = ssl.CERT_REQUIRED
+        self.context.check_hostname = True
         self.context.load_cert_chain(certfile=cert_file, keyfile=key_file)
         if cafile is None:
             self.context.load_verify_locations(cadata=DEFAULT_CADATA)

@@ -178,10 +178,13 @@ public class IdJagServiceTest {
     // ---- validateSubjectToken — SAML2 short-circuit ----
 
     @Test
-    public void validateSubjectToken_whenSaml2Type_shouldReturnNull() {
-        Jwt result = idJagService.validateSubjectToken(
-                "saml-blob-here", "urn:ietf:params:oauth:token-type:saml2", executionContext);
-        assertNull(result);
+    public void validateSubjectToken_whenSaml2Type_shouldThrow() {
+        try {
+            idJagService.validateSubjectToken("saml-blob-here", "urn:ietf:params:oauth:token-type:saml2", executionContext);
+            fail("Expected WebApplicationException for unvalidated SAML2 token");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
     }
 
     @Test

@@ -71,7 +71,7 @@ public class FaviconServlet extends HttpServlet {
             directory.mkdir();
         }
         File faviconPath = new File(organization.getJsFaviconPath());
-        if (!faviconPath.exists()) {
+        if (!LogoServlet.isImageFile(faviconPath)) {
             return false;
         }
         try (InputStream in = new FileInputStream(faviconPath); OutputStream out = response.getOutputStream()) {
