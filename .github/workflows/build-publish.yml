@@ -432,7 +432,14 @@ jobs:
         cd "$DIR"
         for f in *; do
           [ -f "$f" ] || continue
-          cosign sign-blob --yes --bundle "${f}.bundle" "$f"
+          # A Rekor upload that times out and is retried internally fails with 409; signing
+          # again uses fresh ephemeral keys, so it creates a new, valid log entry.
+          for attempt in 1 2 3; do
+            cosign sign-blob --yes --bundle "${f}.bundle" "$f" && break
+            [ "$attempt" -lt 3 ] || exit 1
+            echo "::warning::signing $f failed (attempt $attempt), retrying"
+            sleep $((attempt * 10))
+          done
           gh release upload "$TAG" "$f" "${f}.bundle" --repo "${{ github.repository }}" --clobber
         done
 
