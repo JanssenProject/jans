@@ -898,13 +898,13 @@ class SqlClient(SqlSchemaMixin):
                         self.adapter.on_create_index_error(exc)
             return
 
-        state = self.get_index_state(table_name, index_name)
-        if state:
-            logger.debug("index %s on %s already exists; skipping", index_name, table_name)
-            return
-
         query = self.adapter.prepare_index_query(query)
         for attempt in range(1, retries + 1):
+            # re-read the state: a timed-out concurrent build can leave an invalid index behind
+            state = self.get_index_state(table_name, index_name)
+            if state:
+                logger.debug("index %s on %s already exists; skipping", index_name, table_name)
+                return
             try:
                 self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=state is False)
                 return
