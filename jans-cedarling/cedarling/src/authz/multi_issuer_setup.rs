@@ -7,11 +7,10 @@
 //! the record of which inputs were used or dropped.
 
 use super::{AuthorizeError, DropReason, DroppedToken, MultiIssuerValidationError};
-use crate::TokenInput;
 use crate::entity_builder::{
     MultiIssuerEntitiesBuilder, MultiIssuerEntityError, MultiIssuerSetupEntities,
 };
-use crate::jwt::{MultiIssuerTokenValidator, TokenValidation, ValidatedToken};
+use crate::jwt::{CheckedToken, MultiIssuerTokenValidator, TokenValidation, ValidatedToken};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 
@@ -49,21 +48,22 @@ impl From<MultiIssuerSetupError> for AuthorizeError {
 impl MultiIssuerSetup {
     /// Validates the tokens of one multi-issuer request and builds their
     /// entities in one pass, recording each input as used or dropped in
-    /// request order.
+    /// request order. Log entries carry the validator's request id.
     pub(super) async fn validate_and_build(
-        tokens: &[TokenInput],
         mut validator: MultiIssuerTokenValidator<'_>,
         mut entities: MultiIssuerEntitiesBuilder<'_>,
         log_service: &impl LogWriter,
     ) -> Result<Self, MultiIssuerSetupError> {
-        if tokens.is_empty() {
-            return Err(MultiIssuerValidationError::EmptyTokenArray.into());
-        }
-
+        let request_id = validator.request_id();
         let mut used_tokens = Vec::new();
         let mut dropped = Vec::new();
-        for (index, input) in tokens.iter().enumerate() {
-            let reason = match validator.validate(index, input).await? {
+        while let Some(CheckedToken {
+            index,
+            input,
+            outcome,
+        }) = validator.next().await?
+        {
+            let reason = match outcome {
                 TokenValidation::Accepted(validated) => match entities.add(&validated) {
                     Ok(()) => {
                         used_tokens.push(validated);
@@ -73,7 +73,7 @@ impl MultiIssuerSetup {
                         log_service.log_any(
                             LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                                 LogLevel::ERROR,
-                                None,
+                                request_id,
                             ))
                             .set_message(format!(
                                 "Failed to build token entity for token '{}' at index {index}",
@@ -90,8 +90,19 @@ impl MultiIssuerSetup {
         }
         validator.ensure_any_validated()?;
 
+        let entities = entities.finish().inspect_err(|_| {
+            log_service.log_any(
+                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                    LogLevel::ERROR,
+                    request_id,
+                ))
+                .set_message("No valid tokens found for multi-issuer authorization".to_string())
+                .set_error("All tokens failed validation or entity building".to_string()),
+            );
+        })?;
+
         Ok(Self {
-            entities: entities.finish(log_service)?,
+            entities,
             used_tokens,
             dropped,
         })

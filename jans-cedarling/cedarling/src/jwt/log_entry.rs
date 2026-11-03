@@ -6,6 +6,7 @@
 use crate::log::interface::{Indexed, Loggable};
 use crate::log::{BaseLogEntry, LogLevel};
 use serde::Serialize;
+use uuid7::Uuid;
 
 #[derive(Serialize, Clone)]
 pub(super) struct JwtLogEntry {
@@ -21,6 +22,19 @@ impl JwtLogEntry {
         base.level = level;
 
         Self { base, msg }
+    }
+
+    /// A log message about a token, carrying the request id when the call
+    /// that validates it has one.
+    pub(super) fn new_opt_request_id(
+        msg: String,
+        level: LogLevel,
+        request_id: Option<Uuid>,
+    ) -> Self {
+        Self {
+            base: BaseLogEntry::new_system_opt_request_id(level, request_id),
+            msg,
+        }
     }
 }
 

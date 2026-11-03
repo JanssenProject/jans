@@ -671,18 +671,21 @@ policy_stores:
     default_entities: {}
 "#;
 
-/// A token that validates but fails entity building is reported only as
-/// dropped, never as used, and drops from both stages are in input order.
-#[tokio::test]
-async fn entity_build_failure_is_dropped_and_not_logged_as_used() {
+/// A Cedarling on [`ENTITY_BUILD_FAILURE_STORE_RAW`] with the API-key processor.
+async fn entity_build_failure_cedarling() -> crate::Cedarling {
     let cedarling = get_cedarling_with_callback(
         PolicyStoreSource::Yaml(ENTITY_BUILD_FAILURE_STORE_RAW.to_string()),
         |_| {},
     )
     .await;
     cedarling.set_custom_token_processor(Some(Arc::new(ApiKeyProcessor)));
+    cedarling
+}
 
-    let request = AuthorizeMultiIssuerRequest::new_with_fields(
+/// Tokens: index 0 validates but fails entity building, index 1 has an
+/// unknown mapping, index 2 is used.
+fn entity_build_failure_request() -> AuthorizeMultiIssuerRequest {
+    AuthorizeMultiIssuerRequest::new_with_fields(
         vec![
             TokenInput::new("Custom::Broken".to_string(), "secret-admin-key".to_string()),
             TokenInput::new("Unknown::Token".to_string(), "not-a-jwt".to_string()),
@@ -698,7 +701,15 @@ async fn entity_build_failure_is_dropped_and_not_logged_as_used() {
         .expect("resource entity should build"),
         "Custom::Action::\"Read\"".to_string(),
         None,
-    );
+    )
+}
+
+/// A token that validates but fails entity building is reported only as
+/// dropped, never as used, and drops from both stages are in input order.
+#[tokio::test]
+async fn entity_build_failure_is_dropped_and_not_logged_as_used() {
+    let cedarling = entity_build_failure_cedarling().await;
+    let request = entity_build_failure_request();
 
     let result = cedarling
         .authorize_multi_issuer(request)
@@ -731,5 +742,35 @@ async fn entity_build_failure_is_dropped_and_not_logged_as_used() {
     assert!(
         !logged_tokens.contains_key("Custom::Broken"),
         "a dropped token must not also be logged as used, got {logged_tokens:?}"
+    );
+}
+
+/// The log entries about each dropped token carry the id of the request they
+/// belong to, so they can be found with the decision.
+#[tokio::test]
+async fn token_drop_logs_carry_the_request_id() {
+    let cedarling = entity_build_failure_cedarling().await;
+
+    let result = cedarling
+        .authorize_multi_issuer(entity_build_failure_request())
+        .await
+        .expect("the buildable token should authorize the request");
+
+    let messages: Vec<String> =
+        crate::log::interface::LogStorage::get_logs_by_request_id(&cedarling, &result.request_id)
+            .iter()
+            .filter_map(|log| log.get("msg").and_then(|msg| msg.as_str()))
+            .map(str::to_string)
+            .collect();
+    assert!(
+        messages.iter().any(|msg| msg
+            .contains("Failed to build token entity for token 'Custom::Broken' at index 0")),
+        "the entity-build failure must be logged under the request id, got {messages:?}"
+    );
+    assert!(
+        messages
+            .iter()
+            .any(|msg| msg.contains("Token dropped at index 1")),
+        "the unknown-mapping drop must be logged under the request id, got {messages:?}"
     );
 }

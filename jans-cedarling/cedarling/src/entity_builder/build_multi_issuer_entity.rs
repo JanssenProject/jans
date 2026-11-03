@@ -10,8 +10,6 @@ use crate::common::policy_store::token_types::{EntityTypeName, TokenType};
 use crate::common::policy_store::{ContextKey, TokenTypeKind};
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::{Token, TokenIssuer, ValidatedToken};
-use crate::log::interface::LogWriter;
-use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -229,19 +227,8 @@ impl MultiIssuerEntitiesBuilder<'_> {
 
     /// Finish the token entities of the request. Fails when no token produced
     /// an entity.
-    pub(crate) fn finish(
-        self,
-        log_service: &impl LogWriter,
-    ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
+    pub(crate) fn finish(self) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
         if self.tokens.is_empty() {
-            log_service.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                    LogLevel::ERROR,
-                    None,
-                ))
-                .set_message("No valid tokens found for multi-issuer authorization".to_string())
-                .set_error("All tokens failed validation or entity building".to_string()),
-            );
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
@@ -411,7 +398,6 @@ mod tests {
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata, TokenTypes};
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
-    use crate::log::NopLogger;
     use cedar_policy::EvalResult;
     use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
@@ -505,7 +491,7 @@ mod tests {
             .collect();
         BuiltSetup {
             added,
-            entities: setup.finish(&NopLogger),
+            entities: setup.finish(),
         }
     }
 

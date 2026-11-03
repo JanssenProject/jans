@@ -65,9 +65,6 @@ pub use log_level::*;
 pub use stdout_logger::StdOutLoggerMode;
 
 #[cfg(test)]
-pub(crate) use nop_logger::NopLogger;
-
-#[cfg(test)]
 mod test;
 
 #[cfg(test)]

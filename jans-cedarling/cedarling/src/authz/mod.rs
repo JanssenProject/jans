@@ -238,7 +238,7 @@ impl Authz {
             used_tokens,
             dropped: dropped_tokens,
         } = self
-            .multi_issuer_setup(&request.tokens, custom_processor)
+            .multi_issuer_setup(request_id, &request.tokens, custom_processor)
             .await?;
 
         let resource = self
@@ -466,7 +466,7 @@ impl Authz {
             used_tokens,
             dropped: dropped_tokens,
         } = self
-            .multi_issuer_setup(&request.tokens, custom_processor)
+            .multi_issuer_setup(batch_id, &request.tokens, custom_processor)
             .await?;
 
         // Atomic snapshot: pushed data captured once for the whole batch.
@@ -1050,26 +1050,30 @@ impl Authz {
     /// Validates tokens once and builds token/issuer entities once so they can
     /// be reused across every item in a batch. Callers combine the result
     /// with a per-item resource entity + per-item multi-issuer context to
-    /// complete each authorization decision.
+    /// complete each authorization decision. Log entries carry `request_id`:
+    /// the request id of a single call, or the batch id of a batch.
     async fn multi_issuer_setup(
         &self,
+        request_id: Uuid,
         tokens: &[crate::TokenInput],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
-        let validator = self.config.jwt_service.multi_issuer_validator(
-            custom_processor,
-            &self.config.policy_store.token_types,
-            self.custom_token_timeout(),
-        );
-        MultiIssuerSetup::validate_and_build(
-            tokens,
-            validator,
-            self.config.entity_builder.multi_issuer_entities_builder(),
-            self.config.log_service.as_ref(),
-        )
-        .await
-        .map_err(AuthorizeError::from)
-        .inspect_err(|e| {
+        let setup = async {
+            let validator = self.config.jwt_service.multi_issuer_validator(
+                Some(request_id),
+                tokens,
+                custom_processor,
+                &self.config.policy_store.token_types,
+                self.custom_token_timeout(),
+            )?;
+            MultiIssuerSetup::validate_and_build(
+                validator,
+                self.config.entity_builder.multi_issuer_entities_builder(),
+                self.config.log_service.as_ref(),
+            )
+            .await
+        };
+        setup.await.map_err(AuthorizeError::from).inspect_err(|e| {
             self.config.metrics.record_error(e);
             self.config.metrics.record_authz_error();
         })
@@ -1309,21 +1313,21 @@ impl Authz {
         resources: &[crate::EntityData],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
-        if tokens.is_empty() {
-            return Err(MultiIssuerValidationError::EmptyTokenArray.into());
-        }
-
+        // The result has no request id, so the token logs carry none either.
         let mut validator = self.config.jwt_service.multi_issuer_validator(
+            None,
+            tokens,
             custom_processor,
             &self.config.policy_store.token_types,
             self.custom_token_timeout(),
-        );
+        )?;
         let mut principal_types: HashSet<cedar_policy::EntityTypeName> = HashSet::new();
-        for (index, input) in tokens.iter().enumerate() {
-            if let jwt::TokenValidation::Accepted(validated) =
-                validator.validate(index, input).await?
-            {
-                principal_types.insert(validated.token_type.entity_type().cedar().clone());
+        while let Some(jwt::CheckedToken { outcome, .. }) = validator.next().await? {
+            match outcome {
+                jwt::TokenValidation::Accepted(validated) => {
+                    principal_types.insert(validated.token_type.entity_type().cedar().clone());
+                },
+                jwt::TokenValidation::Dropped(_) => {},
             }
         }
         validator.ensure_any_validated()?;
