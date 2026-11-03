@@ -222,12 +222,11 @@ public class DocumentStoreManager {
 			Entry<String, Object> newDocumentStoreEntry = it.next();
 
 			String prevDocumentStoreEntryInum = newDocumentStoreEntry.getKey();
-			if (!newLoadedDocumentsInums.contains(prevDocumentStoreEntryInum)) {
-				// Remove old document, keep it tracked for retry if the file could not be removed
-				if (removeDocument((Document) newDocumentStoreEntry.getValue())) {
-					it.remove();
-					modified = true;
-				}
+			// Remove old document, keep it tracked for retry if the file could not be removed
+			if (!newLoadedDocumentsInums.contains(prevDocumentStoreEntryInum)
+					&& removeDocument((Document) newDocumentStoreEntry.getValue())) {
+				it.remove();
+				modified = true;
 			}
 		}
 
