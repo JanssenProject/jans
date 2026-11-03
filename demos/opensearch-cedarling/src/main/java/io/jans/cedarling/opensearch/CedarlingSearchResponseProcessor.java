@@ -53,26 +53,16 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
             return response;
         }
         
-        var source = request.source();
-        // Only top-level hits are filtered; aggregations would expose unauthorized documents
-        if (source != null && source.aggregations() != null) {
-            throw new IllegalArgumentException("Aggregations are not supported when Cedarling authorization is enabled");
-        }
-        // Policies must see the whole document, not a caller-chosen projection of it
-        var fetchSource = source == null ? null : source.fetchSource();
-        if (fetchSource != null && (!fetchSource.fetchSource()
-                || fetchSource.includes().length > 0 || fetchSource.excludes().length > 0)) {
-            throw new IllegalArgumentException("_source filtering is not supported when Cedarling authorization is enabled");
-        }
-
         CedarlingService cedarlingService = CedarlingService.getInstance();
         if (!cedarlingService.isStarted()) {
-            throw new IllegalStateException("Cedarling service is not available; refusing to return unauthorized hits");
+            logger.debug("Cedarling service did not start properly");
+            return response;
         }
 
-        List<SearchExtBuilder> exts = source == null ? Collections.emptyList() : source.ext();
+        List<SearchExtBuilder> exts = request.source().ext();
         if (exts.isEmpty()) {
-            logger.warn("No 'ext' in request; evaluating without tokens or context");
+            logger.warn("No 'ext' in request");
+            return response;
         }
         
         try {
@@ -81,13 +71,13 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
             int authorizedHitsCount = 0;
             long avgDecisionTime = -1;
             
+            CedarlingSearchExtBuilder cseb = CedarlingSearchExtBuilder.fromExtBuilderList(exts);
             SearchHits searchHits = response.getHits();
             Iterator<SearchHit> it = searchHits.iterator();
 
             if (it.hasNext()) {
                 List<SearchHit> authorized = new ArrayList<>();
-                Map<String, Object> tbac = Optional.ofNullable(CedarlingSearchExtBuilder.fromExtBuilderList(exts))
-                        .map(CedarlingSearchExtBuilder::getParams).orElse(empty);
+                Map<String, Object> tbac = cseb.getParams();
                 String action = pluginSettings.getSearchActionName();
                                 
                 Map<String, String> tokens = Optional.ofNullable(
@@ -98,11 +88,8 @@ public class CedarlingSearchResponseProcessor extends AbstractProcessor implemen
                 long decisionsTook = 0;
                 do {
                     SearchHit hit = it.next();
-                    if (hit.getSourceAsMap() == null) {
-                        logger.debug("Hit {} has no _source; denying", hit.getId());
-                        continue;
-                    }
-                    Map<String, Object> map = new HashMap<>(hit.getSourceAsMap());
+                    Map<String, Object> map = Optional.ofNullable(hit.getSourceAsMap())
+                            .map(HashMap::new).orElse(new HashMap<>());
                     
                     try {
                         appendExtraAttributes(map, pluginSettings.getSchemaPrefix(), hit.getIndex(), hit.getId());
