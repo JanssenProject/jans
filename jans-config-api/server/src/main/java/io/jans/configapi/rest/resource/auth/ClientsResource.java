@@ -308,6 +308,8 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         client.setClientId(existingClient.getClientId());
+        // GET responses omit the registration access token, so a GET-then-PUT must not clear it
+        client.setRegistrationAccessToken(existingClient.getRegistrationAccessToken());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
         if (StringUtils.isNotBlank(client.getClientSecret())) {

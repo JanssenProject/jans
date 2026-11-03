@@ -51,8 +51,15 @@ for arg in "$@"; do
         -chdir=*)
             CHDIR_ARG="${arg}"
             ;;
-        -destroy|-destroy=true)
+        -destroy|--destroy)
             DESTROY_FLAG="yes"
+            ;;
+        -destroy=*|--destroy=*)
+            # Terraform parses booleans with Go's strconv.ParseBool, so fail closed on anything but false
+            case "${arg#*=}" in
+                0|f|F|false|FALSE|False) ;;
+                *) DESTROY_FLAG="yes" ;;
+            esac
             ;;
         -*)
             ;;

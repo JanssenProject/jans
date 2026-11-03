@@ -31,9 +31,10 @@ public class PolicyToScopeMapper {
     );
     // Scopes can only express grants, so restrictive constructs cannot be converted without broadening access.
     private static final Pattern UNSUPPORTED_POLICY_PATTERN = Pattern.compile(
-            "\\b(forbid|unless)\\b"
+            "\\bforbid\\s*\\(|\\bunless\\s*\\{"
     );
-    private static final Pattern LINE_COMMENT_PATTERN = Pattern.compile("//[^\\n]*");
+    // One pass, so whichever of a string literal or a comment starts first wins
+    private static final Pattern STRING_OR_COMMENT_PATTERN = Pattern.compile("\"(?:[^\"\\\\\\n]|\\\\.)*\"|//[^\\n]*");
 
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
@@ -212,7 +213,8 @@ public class PolicyToScopeMapper {
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            if (UNSUPPORTED_POLICY_PATTERN.matcher(LINE_COMMENT_PATTERN.matcher(content).replaceAll("")).find()) {
+            String code = STRING_OR_COMMENT_PATTERN.matcher(content).replaceAll(" ");
+            if (UNSUPPORTED_POLICY_PATTERN.matcher(code).find()) {
                 throw new IllegalStateException("Policy uses forbid/unless, which cannot be mapped to scopes: " + entry.getName());
             }
 

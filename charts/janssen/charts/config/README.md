@@ -26,7 +26,7 @@ Kubernetes: `>=v1.22.0-0`
 |-----|------|---------|-------------|
 | additionalAnnotations | object | `{}` | Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken |
 | additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
-| adminPassword | string | `""` | Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. |
+| adminPassword | string | `""` | Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. Set it explicitly when rendering with `helm template` or GitOps tools (ArgoCD, Flux), which cannot read the existing Secret and would generate a new password on every render. |
 | city | string | `"Austin"` | City. Used for certificate creation. |
 | configmap.cnAwsAccessKeyId | string | `""` |  |
 | configmap.cnAwsDefaultRegion | string | `"us-west-1"` |  |

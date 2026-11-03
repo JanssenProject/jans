@@ -78,7 +78,14 @@ runs:
         DESTROY_FLAG=""
         for arg in "${TF_ARGS[@]}"; do
           case "${arg}" in
-            -destroy|-destroy=true) DESTROY_FLAG="yes" ;;
+            -destroy|--destroy) DESTROY_FLAG="yes" ;;
+            -destroy=*|--destroy=*)
+              # Terraform parses booleans with Go's strconv.ParseBool, so fail closed on anything but false
+              case "${arg#*=}" in
+                0|f|F|false|FALSE|False) ;;
+                *) DESTROY_FLAG="yes" ;;
+              esac
+              ;;
             -chdir=*) ;;
             -*)
               if [[ -z "${TF_SUBCOMMAND}" ]]; then

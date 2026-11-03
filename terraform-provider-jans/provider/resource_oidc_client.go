@@ -683,6 +683,7 @@ func resourceOidcClient() *schema.Resource {
 						"require_pkce": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.",
 						},
 						"minimum_acr_level": {

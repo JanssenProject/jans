@@ -1,7 +1,7 @@
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
 fqdn: demoexample.jans.io
-# -- Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret.
+# -- Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. Set it explicitly when rendering with `helm template` or GitOps tools (ArgoCD, Flux), which cannot read the existing Secret and would generate a new password on every render.
 adminPassword: ""
 # -- City. Used for certificate creation.
 city: Austin

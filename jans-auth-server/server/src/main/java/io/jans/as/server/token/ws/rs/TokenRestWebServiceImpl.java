@@ -671,6 +671,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             deviceCodeGrant.checkScopesPolicy(scope);
             AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), deviceCodeGrant);
+            // the saves above re-cache the grant under the device code
+            grantService.removeByCode(deviceCode);
 
             log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 

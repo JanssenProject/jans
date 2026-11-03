@@ -62,13 +62,14 @@ public class SsaValidateAction {
         Response.ResponseBuilder builder = Response.ok();
         boolean claimed = false;
         try {
-            // concurrent validations of the same one-time SSA must not both observe ACTIVE
-            claimed = jti != null && jtiClaims.putIfAbsent(jti, Boolean.TRUE) == null;
-            if (!claimed) {
-                throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_JTI, "Invalid JTI or not exists");
-            }
             Ssa ssa = ssaRestWebServiceValidator.getValidSsaByJti(jti);
             if (ssa.getAttributes().getOneTimeUse()) {
+                // concurrent validations of the same one-time SSA must not both observe ACTIVE
+                claimed = jtiClaims.putIfAbsent(jti, Boolean.TRUE) == null;
+                if (!claimed) {
+                    throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_JTI, "Invalid JTI or not exists");
+                }
+                ssa = ssaRestWebServiceValidator.getValidSsaByJti(jti);
                 ssa.setState(SsaState.USED);
                 ssaService.merge(ssa);
                 log.info("Ssa jti: '{}', updated with status: {}", ssa.getId(), ssa.getState());

@@ -22,7 +22,8 @@ public class JansPasswordService extends PasswordService {
     public static final String ACTIVE = "active";
     public static final String CACHE_PREFIX = "lock_user_";
     // Keeps the lock record past its expiry so an unlock can prove this mechanism set the lock.
-    private static final int LOCK_RECORD_RETENTION = 7 * 24 * 3600;
+    // Memcached reads TTLs above 30 days as absolute timestamps.
+    private static final int LOCK_RECORD_RETENTION = 30 * 24 * 3600;
     private static AuthenticationService authenticationService = CdiUtil.bean(AuthenticationService.class);
     private static UserService userService = CdiUtil.bean(UserService.class);
     private static CacheService cacheService = CdiUtil.bean(CacheService.class);
@@ -103,7 +104,7 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             long lockExpiresAt = System.currentTimeMillis() + DEFAULT_LOCK_EXP_TIME * 1000L;
-            cacheService.put(DEFAULT_LOCK_EXP_TIME + LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
+            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             return "Your account has been locked.";

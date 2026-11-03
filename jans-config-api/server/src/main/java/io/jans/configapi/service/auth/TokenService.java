@@ -151,12 +151,11 @@ public class TokenService {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);
         }
 
-        boolean statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
-        persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
-        if (!statusInvalidated) {
+        if (!tokenStatusListService.invalidate(tokenEntity)) {
             throw new InternalServerErrorException(
-                    "Token removed but its status list entry could not be invalidated - " + tknCde);
+                    "Token status list entry could not be invalidated, token not removed - " + tknCde);
         }
+        persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
     }
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {

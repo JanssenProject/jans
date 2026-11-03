@@ -127,6 +127,9 @@ This is an example of a configuration for a couple of identity providers:
 }
 ```
 
+!!! Note
+    `Mappings.GITHUB` builds the local `uid` from the immutable GitHub account id (`github-<id>`), not from the login name, which users can change and GitHub can reassign. Users provisioned by earlier versions have `uid` `github-<login>`; rename them to `github-<id>` (or enable `emailLinkingSafe` if e-mail matching is acceptable) so they are not provisioned again as new users.
+
 The table below explains the meaning of properties:
 
 |Name|Description|Mandatory|

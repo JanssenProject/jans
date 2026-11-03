@@ -170,6 +170,15 @@ public class AuthorizationChallengeService {
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
+        if (StringUtils.isNotBlank(authzRequest.getCodeChallenge())
+                && CodeVerifier.CodeChallengeMethod.fromString(authzRequest.getCodeChallengeMethod()) != CodeVerifier.CodeChallengeMethod.S256) {
+            log.debug("PKCE code_challenge_method is invalid: {} (only S256 is allowed).", authzRequest.getCodeChallengeMethod());
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "PKCE code_challenge_method must be S256"))
+                    .build());
+        }
+
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setSessionId(sessionUser);
 
@@ -196,15 +205,6 @@ public class AuthorizationChallengeService {
         String grantAcr = executionContext.getScript() != null ? executionContext.getScript().getName() : authzRequest.getAcrValues();
 
         log.trace("Creating authorization code grant with: scope {}, acr {}", scopes, grantAcr);
-
-        if (StringUtils.isNotBlank(authzRequest.getCodeChallenge())
-                && CodeVerifier.CodeChallengeMethod.fromString(authzRequest.getCodeChallengeMethod()) != CodeVerifier.CodeChallengeMethod.S256) {
-            log.debug("PKCE code_challenge_method is invalid: {} (only S256 is allowed).", authzRequest.getCodeChallengeMethod());
-            throw new WebApplicationException(errorResponseFactory
-                    .newErrorResponse(Response.Status.BAD_REQUEST)
-                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "PKCE code_challenge_method must be S256"))
-                    .build());
-        }
 
         AuthorizationCodeGrant authorizationGrant = authorizationGrantList.createAuthorizationCodeGrant(user, client, new Date());
         authorizationGrant.setNonce(authzRequest.getNonce());

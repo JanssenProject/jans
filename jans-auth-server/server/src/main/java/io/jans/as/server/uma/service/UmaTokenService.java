@@ -85,7 +85,6 @@ public class UmaTokenService {
             UmaPCT pct = umaValidationService.validatePct(pctCode);
             UmaRPT rpt = umaValidationService.validateRPT(rptCode);
             Client client = umaValidationService.validate(identity.getSessionClient().getClient());
-            umaValidationService.validateRestrictedByClient(client.getDn(), permissions);
             if (rpt != null && !client.getClientId().equals(rpt.getClientId())) {
                 log.error("RPT was issued to another client, rpt clientId: {}, clientId: {}", rpt.getClientId(), client.getClientId());
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, UmaErrorResponseType.INVALID_RPT, "RPT was issued to another client.");

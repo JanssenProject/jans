@@ -50,7 +50,7 @@ public class TokenStatusListService {
     /**
      * @return {@code true} if the token has no status list index or it was marked invalid
      */
-    public boolean invalidate(TokenEntity tokenEntity) {
+    public synchronized boolean invalidate(TokenEntity tokenEntity) {
         Integer index = tokenEntity.getAttributes() != null ? tokenEntity.getAttributes().getStatusListIndex() : null;
         if (index == null || index < 0) {
             return true;
@@ -92,12 +92,18 @@ public class TokenStatusListService {
             persistenceEntryManager.merge(pool);
 
             StatusIndexPool reloaded = persistenceEntryManager.find(StatusIndexPool.class, poolDn);
-            if (LOCK_KEY.equals(reloaded.getLockKey())) {
+            // another writer may have merged stale data after us, so the bit itself must be checked
+            if (LOCK_KEY.equals(reloaded.getLockKey()) && isInvalid(reloaded, index, bitSize)) {
                 return true;
             }
             logger.debug("Status index pool {} lock lost on attempt {}", poolDn, attempt);
         }
         logger.error("Unable to update status index pool {} for index:{}", poolDn, index);
         return false;
+    }
+
+    private static boolean isInvalid(StatusIndexPool pool, int index, int bitSize) throws IOException {
+        return StringUtils.isNotBlank(pool.getData())
+                && StatusList.fromEncoded(pool.getData(), bitSize).get(index) == TokenStatus.INVALID.getValue();
     }
 }

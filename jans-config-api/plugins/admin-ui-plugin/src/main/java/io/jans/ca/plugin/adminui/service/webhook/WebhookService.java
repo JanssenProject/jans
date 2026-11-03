@@ -360,8 +360,8 @@ public class WebhookService {
         for (WebhookEntry webhook : webhooks) {
             validateWebhookEntry(webhook);
             ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getInum())).findAny().orElse(null);
-            replaceShortCodeWithValues(webhook, shortCodeObj);
             if (webhook.isJansEnabled()) {
+                replaceShortCodeWithValues(webhook, shortCodeObj);
                 Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
                 callables.add(callable);
             }

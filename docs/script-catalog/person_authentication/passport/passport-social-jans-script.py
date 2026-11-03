@@ -203,7 +203,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getExtraParametersForStep(self, configurationAttributes, step):
         print "Passport. getExtraParametersForStep called"
         if step == 1:
-            return Arrays.asList("selectedProvider", "externalProviders")
+            return Arrays.asList("selectedProvider", "externalProviders", "passport_request_id")
         elif step == 2:
             return Arrays.asList("passport_user_profile")
         return None

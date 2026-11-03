@@ -72,11 +72,11 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 	}
 	namespace, ok := config["namespace"].(string)
 	if !ok {
-		return denyAll(errors.New("No cedar namespace provided")), nil
+		return denyPath(protectedPath, h, errors.New("No cedar namespace provided")), nil
 	}
 	cedarling_instance, err := cedarling_go.NewCedarlingWithEnv(nil)
 	if err != nil {
-		return denyAll(fmt.Errorf("Error initializing Cedarling: %s", err)), nil
+		return denyPath(protectedPath, h, fmt.Errorf("Error initializing Cedarling: %s", err)), nil
 	}
 	logger.Debug(fmt.Sprintf("The plugin is now protecting %s\n", protectedPath))
 
@@ -135,6 +135,18 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 func denyAll(err error) http.Handler {
 	logger.Error(fmt.Sprintf("[PLUGIN: %s] %s; denying all requests", pluginName, err))
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
+	})
+}
+
+// denyPath fails closed only for the protected path, leaving unrelated endpoints served.
+func denyPath(protectedPath string, h http.Handler, err error) http.Handler {
+	logger.Error(fmt.Sprintf("[PLUGIN: %s] %s; denying requests to %s", pluginName, err, protectedPath))
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if !pathMatches(protectedPath, req.URL.Path) {
+			h.ServeHTTP(w, req)
+			return
+		}
 		http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
 	})
 }

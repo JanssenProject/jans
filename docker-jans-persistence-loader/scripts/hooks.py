@@ -19,6 +19,46 @@ def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _
     return ctx
 
 
+AUTH_DEFAULT_FEATURE_FLAGS = [
+    "health_check",
+    "userinfo",
+    "clientinfo",
+    "id_generation",
+    "registration",
+    "introspection",
+    "revoke_token",
+    "revoke_session",
+    "active_session",
+    "end_session",
+    "status_session",
+    "jans_configuration",
+    "ciba",
+    "device_authz",
+    "metric",
+    "stat",
+    "par",
+    "ssa",
+    "global_token_revocation",
+    "status_list",
+    "logout_status_jwt",
+    "rate_limit",
+    "access_evaluation",
+    "identity_assertion_authz_grant",
+    "client_id_metadata_document",
+]
+
+
+def mark_auth_feature_flags_seeded(manager):
+    """Record default feature flags as seeded; call only after the updated config is persisted."""
+    try:
+        seeded_flags = set(json.loads(manager.config.get("auth_seeded_feature_flags") or "[]"))
+    except (TypeError, ValueError):
+        seeded_flags = set()
+
+    if not seeded_flags.issuperset(AUTH_DEFAULT_FEATURE_FLAGS):
+        manager.config.set("auth_seeded_feature_flags", json.dumps(sorted(seeded_flags.union(AUTH_DEFAULT_FEATURE_FLAGS))))
+
+
 def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
     hostname = manager.config.get("hostname")
@@ -320,42 +360,12 @@ def transform_auth_dynamic_config_hook(conf, manager):
     except (TypeError, ValueError):
         seeded_flags = set()
 
-    default_flags = [
-        "health_check",
-        "userinfo",
-        "clientinfo",
-        "id_generation",
-        "registration",
-        "introspection",
-        "revoke_token",
-        "revoke_session",
-        "active_session",
-        "end_session",
-        "status_session",
-        "jans_configuration",
-        "ciba",
-        "device_authz",
-        "metric",
-        "stat",
-        "par",
-        "ssa",
-        "global_token_revocation",
-        "status_list",
-        "logout_status_jwt",
-        "rate_limit",
-        "access_evaluation",
-        "identity_assertion_authz_grant",
-        "client_id_metadata_document",
-    ]
-    for flag in default_flags:
+    for flag in AUTH_DEFAULT_FEATURE_FLAGS:
         if flag in seeded_flags:
             continue
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)
             should_update = True
-
-    if not seeded_flags.issuperset(default_flags):
-        manager.config.set("auth_seeded_feature_flags", json.dumps(sorted(seeded_flags.union(default_flags))))
 
     # remove tx_token
     for attr in ["grantTypesSupported", "grantTypesSupportedByDynamicRegistration"]:

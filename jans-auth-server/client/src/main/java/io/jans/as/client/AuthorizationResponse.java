@@ -204,6 +204,9 @@ public class AuthorizationResponse extends BaseResponse {
         if (signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE) {
             return false;
         }
+        if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) && sharedKey == null) {
+            return false;
+        }
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
         return cryptoProvider.verifySignature(

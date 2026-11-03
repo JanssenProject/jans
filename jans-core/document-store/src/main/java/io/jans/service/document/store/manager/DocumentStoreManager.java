@@ -226,9 +226,8 @@ public class DocumentStoreManager {
 				// Remove old document, keep it tracked for retry if the file could not be removed
 				if (removeDocument((Document) newDocumentStoreEntry.getValue())) {
 					it.remove();
+					modified = true;
 				}
-
-				modified = true;
 			}
 		}
 

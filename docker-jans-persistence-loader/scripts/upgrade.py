@@ -1,4 +1,5 @@
 import contextlib
+import copy
 import itertools
 import json
 import logging.config
@@ -17,6 +18,7 @@ from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 from utils import get_role_scope_mappings
+from hooks import mark_auth_feature_flags_seeded
 from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -249,6 +251,7 @@ class Upgrade:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+        mark_auth_feature_flags_seeded(self.manager)
 
     def update_attributes_entries(self):
         def _update_claim_names():
@@ -573,6 +576,9 @@ class Upgrade:
 
 def _merge_role_mapping(conf, defaults):
     """Add new default roles/permissions without restoring ones removed by admins."""
+    if not isinstance(conf, dict):
+        return copy.deepcopy(defaults), True
+
     should_update = False
 
     for key in ("roles", "permissions", "rolePermissionMapping"):

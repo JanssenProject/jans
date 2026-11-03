@@ -123,7 +123,7 @@ fn is_secure_url(url: &url::Url) -> bool {
 #[cfg(not(target_arch = "wasm32"))]
 fn no_downgrade_redirect_policy() -> reqwest::redirect::Policy {
     reqwest::redirect::Policy::custom(|attempt| {
-        if attempt.previous().len() >= MAX_REDIRECTS {
+        if attempt.previous().len() > MAX_REDIRECTS {
             return attempt.error("too many redirects");
         }
         let started_secure = attempt.previous().first().is_none_or(is_secure_url);

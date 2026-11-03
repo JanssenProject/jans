@@ -652,11 +652,18 @@ public class TocService {
 			throw new Fido2RuntimeException(
 					"Fido2 MDS cert and TOC properties are not set, the downloaded TOC can't be verified");
 		}
+		LocalDate cachedNextUpdate = nextUpdate;
 		Pair<LocalDate, Map<String, JsonNode>> parsedToc = parseTOC(mdsTocRootCertsFolder, encodedToc);
-		// An authentic but expired blob (e.g. replayed by a mirror) must not replace the cached one
 		LocalDate tocNextUpdate = parsedToc.getFirst();
 		if (tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
-			throw new Fido2RuntimeException("The downloaded MDS TOC expired on " + tocNextUpdate);
+			// An expired blob is still better than none (FIDO may publish late), but it must not roll
+			// back a cached TOC that is as new or newer, e.g. when replayed by a mirror
+			if (cachedNextUpdate != null && !tocNextUpdate.isAfter(cachedNextUpdate)) {
+				nextUpdate = cachedNextUpdate;
+				throw new Fido2RuntimeException("The downloaded MDS TOC expired on " + tocNextUpdate
+						+ " and is not newer than the cached one");
+			}
+			log.warn("The downloaded MDS TOC expired on {}, using it until a newer one is published", tocNextUpdate);
 		}
 	}
 

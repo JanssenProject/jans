@@ -63,7 +63,8 @@ public class RateLimitService {
     private static final int MIN_BUCKET_RETENTION_IN_SECONDS = 120;
 
     private final AtomicReference<Cache<String, Bucket>> buckets = new AtomicReference<>(newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS));
-    private RateLimitConfig rateLimitConfiguration;
+    private volatile RateLimitConfig rateLimitConfiguration;
+    private volatile int bucketRetentionInSeconds = MIN_BUCKET_RETENTION_IN_SECONDS;
 
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
         // if rate_limit flag is disabled immediately return
@@ -71,22 +72,25 @@ public class RateLimitService {
             return httpRequest;
         }
 
+        // snapshot so a concurrent configuration reload cannot change rules mid-request
+        final RateLimitConfig config = rateLimitConfiguration;
+
         // no rate limit configuration -> return
-        if (rateLimitConfiguration == null || isEmpty(rateLimitConfiguration.getRateLimitRules())) {
+        if (config == null || isEmpty(config.getRateLimitRules())) {
             return httpRequest;
         }
 
         String requestPath = canonicalPath(httpRequest.getRequestURI());
         String method = httpRequest.getMethod();
 
-        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(requestPath, method);
+        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(config, requestPath, method);
 
         // no matching rules
         if (matchedRules.isEmpty()) {
             return httpRequest;
         }
 
-        RateLimitContext rateLimitContext = new RateLimitContext(httpRequest, rateLimitConfiguration.isRateLoggingEnabled());
+        RateLimitContext rateLimitContext = new RateLimitContext(httpRequest, config.isRateLoggingEnabled());
         final List<Pair<String, RateLimitRule>> keyWithRules = buildKeyPerRule(rateLimitContext, matchedRules);
         final Cache<String, Bucket> currentBuckets = buckets.get();
 
@@ -98,7 +102,7 @@ public class RateLimitService {
 
             // namespace by rule so overlapping rules producing the same key do not share one bucket
             // if key is too long -> hash it to reduce amount of space it takes in memory
-            String key = saveSpaceIfNeeded(ruleIndex(rule) + "_" + keyWithRule.getFirst());
+            String key = saveSpaceIfNeeded(ruleIndex(config, rule) + "_" + keyWithRule.getFirst());
             Bucket bucket;
             try {
                 bucket = currentBuckets.get(key, () -> newBucket(requestLimit, periodLimit));
@@ -138,8 +142,8 @@ public class RateLimitService {
         return keyWithRules;
     }
 
-    private int ruleIndex(RateLimitRule rule) {
-        final List<RateLimitRule> rules = rateLimitConfiguration.getRateLimitRules();
+    private static int ruleIndex(RateLimitConfig config, RateLimitRule rule) {
+        final List<RateLimitRule> rules = config.getRateLimitRules();
         for (int i = 0; i < rules.size(); i++) {
             if (rules.get(i) == rule) {
                 return i;
@@ -253,9 +257,13 @@ public class RateLimitService {
     }
 
     public List<RateLimitRule> matchRulesByPathAndMethod(String requestPath, String method) {
+        return matchRulesByPathAndMethod(rateLimitConfiguration, requestPath, method);
+    }
+
+    private List<RateLimitRule> matchRulesByPathAndMethod(RateLimitConfig config, String requestPath, String method) {
         List<RateLimitRule> result = new ArrayList<>();
 
-        for (RateLimitRule rule : rateLimitConfiguration.getRateLimitRules()) {
+        for (RateLimitRule rule : config.getRateLimitRules()) {
             if (!rule.isWellFormed()) {
                 log.error("Invalid rate limit rule: {}", rule);
                 continue;
@@ -348,8 +356,14 @@ public class RateLimitService {
 
     public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         try {
-            rateLimitConfiguration = appConfiguration.getRateLimitConfiguration();
-            buckets.set(newBucketCache(maxPeriodInSeconds(rateLimitConfiguration)));
+            final RateLimitConfig config = appConfiguration.getRateLimitConfiguration();
+            // keep counters across unrelated config reloads; rebuild only when retention must change
+            final int retention = maxPeriodInSeconds(config);
+            if (retention != bucketRetentionInSeconds) {
+                buckets.set(newBucketCache(retention));
+                bucketRetentionInSeconds = retention;
+            }
+            rateLimitConfiguration = config;
 
             if (rateLimitConfiguration == null) {
                 log.info("Rate limiting is not configured.");

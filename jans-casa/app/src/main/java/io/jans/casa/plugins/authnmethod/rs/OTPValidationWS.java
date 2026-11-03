@@ -28,6 +28,8 @@ public class OTPValidationWS {
 
     private static final String USED_TOTP_PREFIX = "casa_totp_used_";
 
+    private static final Object TOTP_LOCK = new Object();
+
     @Inject
     private Logger logger;
 
@@ -93,9 +95,12 @@ public class OTPValidationWS {
         byte[] digest = md.digest(String.join(":", userId, key, code).getBytes(StandardCharsets.UTF_8));
         String cacheKey = USED_TOTP_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
 
-        if (cacheProvider.get(cacheKey) != null) return false;
-        cacheProvider.put(2 * tAS.getTimeStep() + 1, cacheKey, true);
-        return true;
+        //CacheProvider has no atomic put-if-absent; this at least serializes check-and-put on this node
+        synchronized (TOTP_LOCK) {
+            if (cacheProvider.get(cacheKey) != null) return false;
+            cacheProvider.put(2 * tAS.getTimeStep() + 1, cacheKey, true);
+            return true;
+        }
 
     }
     

@@ -190,8 +190,11 @@ public class MailService {
         Properties props = new Properties();
 
         props.put("mail.from", mailFrom);
-        props.put("mail.smtp.ssl.checkserveridentity", "true");
-        props.put("mail.smtps.ssl.checkserveridentity", "true");
+        // serverTrust is the admin's explicit opt-out for this relay's certificate
+        if (!smtpConfiguration.isServerTrust()) {
+            props.put("mail.smtp.ssl.checkserveridentity", "true");
+            props.put("mail.smtps.ssl.checkserveridentity", "true");
+        }
 
         SmtpConnectProtectionType smtpConnectProtect = smtpConfiguration.getConnectProtection();
 
@@ -290,11 +293,9 @@ public class MailService {
                 msg.setContent(mp);
             }
 
-            if (signMessage) {
-                if (!isReadyForSign) {
-                    log.error("Failed to send signed message: signing key or certificate is not available");
-                    return false;
-                }
+            if (signMessage && !isReadyForSign) {
+                log.warn("Signing key or certificate is not available, sending message unsigned");
+            } else if (signMessage) {
                 MimeMultipart multiPart = createMultipartWithSignature(privateKey, x509Certificates, smtpConfiguration.getSigningAlgorithm(), msg);
                 msg.setContent(multiPart);
             }

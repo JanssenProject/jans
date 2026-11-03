@@ -193,7 +193,7 @@ Kubernetes: `>=v1.23.0-0`
 | config-api.volumeMounts | list | `[]` | Configure any additional volumesMounts that need to be attached to the containers |
 | config-api.volumes | list | `[]` | Configure any additional volumes that need to be attached to the pod |
 | config.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
-| config.adminPassword | string | `""` | Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. |
+| config.adminPassword | string | `""` | Admin password to log in to the UI. If empty, a random password is generated and kept in the `<release>-admin-password` Secret. Set it explicitly when rendering with `helm template` or GitOps tools (ArgoCD, Flux), which cannot read the existing Secret and would generate a new password on every render. |
 | config.city | string | `"Austin"` | City. Used for certificate creation. |
 | config.configmap.cnCacheType | string | `"NATIVE_PERSISTENCE"` | Cache type. `NATIVE_PERSISTENCE`, `REDIS`. or `IN_MEMORY`. Defaults to `NATIVE_PERSISTENCE` . |
 | config.configmap.cnConfigKubernetesConfigMap | string | `"cn"` | The name of the Kubernetes ConfigMap that will hold the configuration layer |

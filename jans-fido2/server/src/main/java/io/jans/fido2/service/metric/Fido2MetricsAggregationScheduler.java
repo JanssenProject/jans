@@ -481,6 +481,9 @@ public class Fido2MetricsAggregationScheduler {
         jobDataMap.put(Fido2MetricsConstants.METRICS_SERVICE, metricsService);
         jobDataMap.put(Fido2MetricsConstants.SCHEDULER, this);
 
+        // Cleanup also uses the cluster lock, so detect the cluster before registering any job
+        initializeClusterEnvironment();
+
         // Retention is enforced independently of aggregation
         try {
             String cleanupCron = getConfigString("fido2.metrics.cleanup.cron", "0 30 2 * * ?");
@@ -494,9 +497,6 @@ public class Fido2MetricsAggregationScheduler {
             log.info("FIDO2 metrics aggregation is disabled, skipping aggregation jobs");
             return;
         }
-
-        // Initialize cluster environment detection (moved from @PostConstruct to avoid blocking)
-        initializeClusterEnvironment();
 
         try {
             // Register hourly aggregation job

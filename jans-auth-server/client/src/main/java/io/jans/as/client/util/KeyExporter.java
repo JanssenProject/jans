@@ -134,6 +134,10 @@ public class KeyExporter {
         }
 
         private static void writeOwnerOnly(Path path, String content) throws IOException {
+            Path parent = path.toAbsolutePath().getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
             if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
                 Set<PosixFilePermission> ownerOnly = PosixFilePermissions.fromString("rw-------");
                 if (Files.exists(path)) {

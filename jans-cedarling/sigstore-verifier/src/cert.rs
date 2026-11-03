@@ -49,10 +49,10 @@ const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
 /// OID for Extended Key Usage: code signing.
 const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
 
-/// OID for id-ecPublicKey (RFC 5480).
 /// id-ce-nameConstraints (RFC 5280 §4.2.1.10).
 const OID_NAME_CONSTRAINTS: &str = "2.5.29.30";
 
+/// OID for id-ecPublicKey (RFC 5480).
 const OID_EC_PUBLIC_KEY: &str = "1.2.840.10045.2.1";
 /// OID for the secp256r1 / prime256v1 named curve.
 const OID_CURVE_P256: &str = "1.2.840.10045.3.1.7";
