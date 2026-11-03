@@ -34,7 +34,7 @@ use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 pub(crate) use build_multi_issuer_entity::{
-    MultiIssuerEntityError, MultiIssuerSetup, MultiIssuerSetupEntities,
+    MultiIssuerEntitiesBuilder, MultiIssuerEntityError, MultiIssuerSetupEntities,
 };
 pub(crate) use built_entities::BuiltEntities;
 

@@ -15,8 +15,7 @@ use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
-    BuiltEntities, EntityBuilder, MultiIssuerSetup, MultiIssuerSetupEntities,
-    UnsignedPrincipalBuild,
+    BuiltEntities, EntityBuilder, MultiIssuerSetupEntities, UnsignedPrincipalBuild,
 };
 use crate::jwt;
 use crate::log::interface::LogWriter;
@@ -31,6 +30,7 @@ use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
 use chrono::Utc;
 use metrics::MetricsCollector;
+use multi_issuer_setup::MultiIssuerSetup;
 use request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItem, RequestUnsigned,
@@ -49,6 +49,7 @@ mod dropped_token;
 mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
+mod multi_issuer_setup;
 mod options;
 
 pub(crate) mod request;
@@ -1055,50 +1056,22 @@ impl Authz {
         tokens: &[crate::TokenInput],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
-        let record_validation_error = |e: &MultiIssuerValidationError| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        };
-
-        if tokens.is_empty() {
-            let err = MultiIssuerValidationError::EmptyTokenArray;
-            record_validation_error(&err);
-            return Err(err.into());
-        }
-
-        let log_service = self.config.log_service.as_ref();
-        let mut validator = self.config.jwt_service.multi_issuer_validator(
+        let validator = self.config.jwt_service.multi_issuer_validator(
             custom_processor,
             &self.config.policy_store.token_types,
             self.custom_token_timeout(),
         );
-        let mut setup = self.config.entity_builder.multi_issuer_setup_builder();
-
-        // Validate and build each token in input order, so every input is
-        // recorded as used or dropped at the point its outcome is known.
-        for (index, input) in tokens.iter().enumerate() {
-            match validator
-                .validate(index, input)
-                .await
-                .inspect_err(record_validation_error)?
-            {
-                jwt::TokenValidation::Accepted(validated) => {
-                    setup.add_validated(validated, log_service);
-                },
-                jwt::TokenValidation::Dropped(reason) => {
-                    setup.record_drop(&input.mapping, index, reason);
-                },
-            }
-        }
-
-        validator
-            .ensure_any_validated()
-            .inspect_err(record_validation_error)?;
-
-        setup.finish(log_service).map_err(|e| {
-            self.config.metrics.record_error(&e);
+        MultiIssuerSetup::validate_and_build(
+            tokens,
+            validator,
+            self.config.entity_builder.multi_issuer_entities_builder(),
+            self.config.log_service.as_ref(),
+        )
+        .await
+        .map_err(AuthorizeError::from)
+        .inspect_err(|e| {
+            self.config.metrics.record_error(e);
             self.config.metrics.record_authz_error();
-            AuthorizeError::MultiIssuerEntity(e)
         })
     }
 
