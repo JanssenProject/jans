@@ -31,8 +31,12 @@
   ],
   "exclusiveAuthScopes": [
     "jans_stat",
+    "https://jans.io/oauth/lock/stat.readonly",
+    "revoke_session",
+    "https://jans.io/auth/ssa.admin",
     "https://jans.io/scim/users.read",
-    "https://jans.io/scim/users.write"
+    "https://jans.io/scim/users.write",
+    "https://jans.io/scim/tokens"
   ],
   "corsConfigurationFilters": [
     {
