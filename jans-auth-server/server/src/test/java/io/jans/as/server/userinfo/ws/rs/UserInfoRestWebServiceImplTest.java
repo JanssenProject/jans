@@ -4,6 +4,8 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.common.ScopeType;
+import io.jans.as.persistence.model.Scope;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -30,12 +32,18 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 @Listeners(MockitoTestNGListener.class)
 public class UserInfoRestWebServiceImplTest {
@@ -106,6 +114,7 @@ public class UserInfoRestWebServiceImplTest {
         lenient().when(grant.getJwtAuthorizationRequest()).thenReturn(null);
         lenient().when(grant.getSub()).thenReturn("test-sub");
         lenient().when(grant.getClient()).thenReturn(client);
+        lenient().when(grant.getClientId()).thenReturn("test-client");
         lenient().when(appConfiguration.getIssuer()).thenReturn("https://example.com");
         lenient().when(externalDynamicScopeService.isEnabled()).thenReturn(false);
     }
@@ -141,6 +150,38 @@ public class UserInfoRestWebServiceImplTest {
 
         assertNotNull(claims);
         assertEquals(claims.getClaimAsString("iss"), "https://example.com");
+    }
+
+    @Test
+    public void getJSonResponse_whenDebugEnabled_shouldLogClaimNamesWithoutValues() throws Exception {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+        when(user.getUserId()).thenReturn("test-user");
+        Scope scope = new Scope();
+        scope.setId("profile");
+        scope.setScopeType(ScopeType.OAUTH);
+        when(scopeService.getScopeById("profile")).thenReturn(scope);
+        Map<String, Object> scopeClaims = new HashMap<>();
+        scopeClaims.put("name", "secret-name-value");
+        when(scopeService.getClaims(user, scope)).thenReturn(scopeClaims);
+
+        String response = userInfoRestWebServiceImpl.getJSonResponse(user, grant, Collections.singletonList("profile"));
+
+        assertTrue(response.contains("secret-name-value"));
+        verify(log).debug(eq("Scope '{}' contributed claims: {}"), eq("profile"), eq(Collections.singleton("name")));
+        verify(log).debug(eq("User Info claims returned for user: {}, client: {}: {}"), eq("test-user"), eq("test-client"),
+                eq(new HashSet<>(Arrays.asList("name", "sub"))));
+    }
+
+    @Test
+    public void getJSonResponse_whenScopeNotFound_shouldLogMissingScope() throws Exception {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+        when(user.getUserId()).thenReturn("test-user");
+        when(scopeService.getScopeById("removed")).thenReturn(null);
+        when(scopeService.getClaims(user, null)).thenReturn(new HashMap<>());
+
+        userInfoRestWebServiceImpl.getJSonResponse(user, grant, Collections.singletonList("removed"));
+
+        verify(log).debug(eq("Unable to find scope in persistence, no claims added. Is it removed? Scope name: {}"), eq("removed"));
     }
 
     private JwtClaims invokeCreateJwtClaims() throws Exception {
