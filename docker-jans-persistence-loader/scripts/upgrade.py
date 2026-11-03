@@ -417,7 +417,12 @@ class Upgrade:
         except TypeError:
             conf = entry.attrs["jansConfDyn"]
 
-        conf, should_update = _merge_role_mapping(conf, role_mapping)
+        try:
+            seeded = json.loads(self.manager.config.get("admin_ui_seeded_role_mapping") or "{}")
+        except (TypeError, ValueError):
+            seeded = {}
+
+        conf, should_update = _merge_role_mapping(conf, role_mapping, seeded)
 
         # licenseSpringCredentials must be removed in favor of SCAN license credentials
         if "licenseSpringCredentials" in conf:
@@ -428,6 +433,12 @@ class Upgrade:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+        # recorded only after the merge is persisted, so a failed save re-seeds on the next run
+        self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps({
+            "roles": sorted({role.get("role") for role in role_mapping.get("roles", [])} | set(seeded.get("roles", []))),
+            "permissions": sorted({perm.get("permission") for perm in role_mapping.get("permissions", [])} | set(seeded.get("permissions", []))),
+        }))
 
     def update_auth_errors_config(self):
         kwargs = {"table_name": "jansAppConf"}
@@ -574,10 +585,14 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
-def _merge_role_mapping(conf, defaults):
+def _merge_role_mapping(conf, defaults, seeded=None):
     """Add new default roles/permissions without restoring ones removed by admins."""
     if not isinstance(conf, dict):
         return copy.deepcopy(defaults), True
+
+    seeded = seeded or {}
+    seeded_roles = set(seeded.get("roles", []))
+    seeded_perms = set(seeded.get("permissions", []))
 
     should_update = False
 
@@ -586,14 +601,14 @@ def _merge_role_mapping(conf, defaults):
             conf[key] = []
             should_update = True
 
-    known_roles = {role.get("role") for role in conf["roles"]}
+    known_roles = {role.get("role") for role in conf["roles"]} | seeded_roles
     for role in defaults.get("roles", []):
         if role.get("role") not in known_roles:
             conf["roles"].append(role)
             should_update = True
 
     # permissions unknown to the stored config are new in this release, hence never revoked
-    known_perms = {perm.get("permission") for perm in conf["permissions"]}
+    known_perms = {perm.get("permission") for perm in conf["permissions"]} | seeded_perms
     known_perms.update(itertools.chain.from_iterable(
         mapping.get("permissions") or [] for mapping in conf["rolePermissionMapping"]
     ))
@@ -617,11 +632,13 @@ def _merge_role_mapping(conf, defaults):
         mapping = mappings.get(default_mapping.get("role"))
 
         if mapping is None:
-            conf["rolePermissionMapping"].append(default_mapping)
-            should_update = True
+            if default_mapping.get("role") not in seeded_roles:
+                conf["rolePermissionMapping"].append(default_mapping)
+                should_update = True
             continue
 
-        mapping.setdefault("permissions", [])
+        if not isinstance(mapping.get("permissions"), list):
+            mapping["permissions"] = []
         for perm in default_mapping.get("permissions", []):
             if perm in new_perms and perm not in mapping["permissions"]:
                 mapping["permissions"].append(perm)

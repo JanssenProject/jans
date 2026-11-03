@@ -90,6 +90,9 @@ public abstract class BaseOAuthProtectionService implements IProtectionService, 
                     log.error(e.getMessage());
                 }
 
+                if (iresp != null && iresp.getCnf() != null && iresp.getCnf().containsKey(JwtClaimName.JKT))
+                    return IProtectionService.simpleResponse(FORBIDDEN, "DPoP-bound tokens are not supported");
+
                 return processIntrospectionResponse(iresp, scopes);
             }
 

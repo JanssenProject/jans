@@ -250,10 +250,10 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_EXEC_ID, traceExecutionId));
 		List<TraceRecordEntry> entities = persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class,
-				filter, new String[] { ATTR_EXEC_AUTHORITY });
+				filter, new String[] { ATTR_EXEC_AUTHORITY, ATTR_DOMAIN_ID });
 		Set<String> distinct = new LinkedHashSet<>();
 		for (TraceRecordEntry entity : entities) {
-			if (entity.getExecAuthority() != null) {
+			if (entity.getExecAuthority() != null && domainId.equals(entity.getDomainId())) {
 				distinct.add(entity.getExecAuthority());
 			}
 		}

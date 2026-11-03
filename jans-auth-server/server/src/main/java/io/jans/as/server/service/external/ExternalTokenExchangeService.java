@@ -12,7 +12,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.WebApplicationException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yuriy Z
@@ -24,9 +27,16 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
         super(CustomScriptType.TOKEN_EXCHANGE);
     }
 
+    // Earlier versions read token-exchange scripts from postAuthnScripts; the type filter keeps only token-exchange ones
+    private List<CustomScriptConfiguration> getClientScripts(Client client) {
+        Set<String> dns = new LinkedHashSet<>(client.getAttributes().getTokenExchangeScripts());
+        dns.addAll(client.getAttributes().getPostAuthnScripts());
+        return getCustomScriptConfigurationsByDns(new ArrayList<>(dns));
+    }
+
     public ScriptTokenExchangeControl externalValidate(ExecutionContext context) {
         final Client client = context.getClient();
-        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getTokenExchangeScripts());
+        final List<CustomScriptConfiguration> scripts = getClientScripts(client);
         if (scripts.isEmpty()) {
             return ScriptTokenExchangeControl.ok();
         }
@@ -72,7 +82,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
 
     public boolean externalModifyResponse(JSONObject response, ExecutionContext context) {
         final Client client = context.getClient();
-        final List<CustomScriptConfiguration> scripts = getCustomScriptConfigurationsByDns(client.getAttributes().getTokenExchangeScripts());
+        final List<CustomScriptConfiguration> scripts = getClientScripts(client);
         if (scripts.isEmpty()) {
             return false;
         }

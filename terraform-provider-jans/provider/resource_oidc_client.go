@@ -53,10 +53,12 @@ func resourceOidcClient() *schema.Resource {
 				Description: "",
 			},
 			"registration_access_token": {
-				Type:        schema.TypeString,
-				Sensitive:   true,
-				Optional:    true,
-				Description: "",
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+				// Config API never returns or overwrites the stored token, so state cannot track it.
+				DiffSuppressFunc: func(_, _, _ string, _ *schema.ResourceData) bool { return true },
+				Description:      "Write-only; the server neither returns nor updates it after creation.",
 			},
 			"client_id_issued_at": {
 				Type:        schema.TypeString,

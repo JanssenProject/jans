@@ -109,6 +109,10 @@ async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetada
     }
 
     const metadata = response.data as OIDCDiscoveryMetadata;
+    // OIDC Discovery 4.3: metadata must be for the issuer it was fetched from
+    if (stripTrailingSlashes(String(metadata.issuer ?? "")) !== stripTrailingSlashes(issuer)) {
+      throw new Error("OIDC discovery issuer does not match the requested issuer");
+    }
     metadataCache.set(issuer, { metadata, timestamp: now });
     return metadata;
   } catch (error) {
@@ -126,8 +130,8 @@ function stripTrailingSlashes(value: string): string {
 }
 
 /**
- * Ensures a discovered endpoint is served from the issuer's origin, so provider
- * metadata cannot steer the server's requests to unrelated hosts.
+ * Ensures a discovered endpoint uses the issuer's scheme. Providers may host endpoints
+ * on other origins, so trust in them comes from the issuer-matched discovery metadata.
  */
 function requireIssuerOrigin(issuer: string, endpoint: string | undefined, name: string): string {
   if (!endpoint) {
@@ -139,8 +143,8 @@ function requireIssuerOrigin(issuer: string, endpoint: string | undefined, name:
   } catch {
     throw new Error(`Invalid ${name}: ${endpoint}`);
   }
-  if (endpointOrigin !== new URL(issuer).origin) {
-    throw new Error(`${name} is not on the issuer origin`);
+  if (new URL(endpointOrigin).protocol !== new URL(issuer).protocol) {
+    throw new Error(`${name} does not use the issuer's scheme`);
   }
   return endpoint;
 }
