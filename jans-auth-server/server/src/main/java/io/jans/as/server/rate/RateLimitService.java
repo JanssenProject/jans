@@ -63,7 +63,7 @@ public class RateLimitService {
     private static final int MIN_BUCKET_RETENTION_IN_SECONDS = 120;
 
     private final AtomicReference<Cache<String, Bucket>> buckets = new AtomicReference<>(newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS));
-    private volatile RateLimitConfig rateLimitConfiguration;
+    private final AtomicReference<RateLimitConfig> rateLimitConfiguration = new AtomicReference<>();
     private volatile int bucketRetentionInSeconds = MIN_BUCKET_RETENTION_IN_SECONDS;
 
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
@@ -73,7 +73,7 @@ public class RateLimitService {
         }
 
         // snapshot so a concurrent configuration reload cannot change rules mid-request
-        final RateLimitConfig config = rateLimitConfiguration;
+        final RateLimitConfig config = rateLimitConfiguration.get();
 
         // no rate limit configuration -> return
         if (config == null || isEmpty(config.getRateLimitRules())) {
@@ -257,7 +257,7 @@ public class RateLimitService {
     }
 
     public List<RateLimitRule> matchRulesByPathAndMethod(String requestPath, String method) {
-        return matchRulesByPathAndMethod(rateLimitConfiguration, requestPath, method);
+        return matchRulesByPathAndMethod(rateLimitConfiguration.get(), requestPath, method);
     }
 
     private List<RateLimitRule> matchRulesByPathAndMethod(RateLimitConfig config, String requestPath, String method) {
@@ -363,9 +363,9 @@ public class RateLimitService {
                 buckets.set(newBucketCache(retention));
                 bucketRetentionInSeconds = retention;
             }
-            rateLimitConfiguration = config;
+            rateLimitConfiguration.set(config);
 
-            if (rateLimitConfiguration == null) {
+            if (config == null) {
                 log.info("Rate limiting is not configured.");
             }
         } catch (Exception e) {
