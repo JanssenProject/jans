@@ -3197,9 +3197,12 @@ accepts no tokens.</p>
 </tr>
 </tbody>
 </table>
-<p>Unknown fields are rejected, so a misspelled field, or a JWT-only field such as
-<code>configuration_endpoints</code> on a <code>custom</code> entry, fails the load with a message
-naming it.</p>
+<p>Unknown fields are ignored, so other PDPs can add their own. Cedarling does not
+log them: <code>cedarling-cli validate</code> reports each one with a suggestion for a likely
+typo, and <code>--strict</code> fails on them. Run it with <code>--strict</code> in CI, as a misspelled
+<code>required_claims</code> would otherwise leave the claims unchecked. Unknown fields inside
+<code>configuration_endpoints</code> and JWT-only fields such as <code>configuration_endpoints</code> on
+a <code>custom</code> entry still fail the load with a message naming them.</p>
 <p>These rules are checked when the store loads, and a violation fails the load:</p>
 <ul>
 <li>Each entity type appears once. A duplicate key is an error rather than
@@ -3488,10 +3491,10 @@ unless { context has tokens.acme_access_token };
 urgent, but every load logs the warnings below.</p>
 <h3 id="unknown-fields">Unknown fields<a class="headerlink" href="#unknown-fields" title="Permanent link">#</a></h3>
 <p>Unknown keys in <code>metadata.json</code> are ignored in every version. In version 2,
-unknown keys in <code>trusted-issuers.json</code> entries are rejected with an error naming
-them. In versions 0 and 1, unknown keys in trusted-issuer files are ignored, so a
-misspelled optional key is silently dropped, and unknown keys in custom-issuer
-files are rejected. Migration carries over every field the newer version has a
+unknown keys in <code>trusted-issuers.json</code> entries are ignored and reported by
+<code>cedarling-cli validate</code>, except inside <code>configuration_endpoints</code>, where they are
+rejected. In versions 0 and 1, unknown keys in trusted-issuer and custom-issuer
+files are ignored, so a misspelled optional key is silently dropped. Migration carries over every field the newer version has a
 place for and reports what it cannot carry over.</p>
 <h3 id="warnings">Warnings<a class="headerlink" href="#warnings" title="Permanent link">#</a></h3>
 <p>Warnings are non-fatal: the store loads and is migrated to the current version
@@ -4401,7 +4404,7 @@ namespace MyApp {
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 03, 2026
   </span>
 
     
