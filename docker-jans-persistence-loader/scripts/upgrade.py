@@ -421,6 +421,8 @@ class Upgrade:
             seeded = json.loads(self.manager.config.get("admin_ui_seeded_role_mapping") or "{}")
         except (TypeError, ValueError):
             seeded = {}
+        if not isinstance(seeded, dict):
+            seeded = {}
 
         conf, should_update = _merge_role_mapping(conf, role_mapping, seeded)
 
@@ -435,9 +437,12 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
         # recorded only after the merge is persisted, so a failed save re-seeds on the next run
+        def _names(items, key):
+            return {item.get(key) for item in items or [] if isinstance(item, dict) and isinstance(item.get(key), str)}
+
         self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps({
-            "roles": sorted({role.get("role") for role in role_mapping.get("roles", [])} | set(seeded.get("roles", []))),
-            "permissions": sorted({perm.get("permission") for perm in role_mapping.get("permissions", [])} | set(seeded.get("permissions", []))),
+            "roles": sorted(_names(role_mapping.get("roles"), "role") | _seeded_names(seeded, "roles")),
+            "permissions": sorted(_names(role_mapping.get("permissions"), "permission") | _seeded_names(seeded, "permissions")),
         }))
 
     def update_auth_errors_config(self):
@@ -585,14 +590,19 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
+def _seeded_names(seeded, key):
+    names = seeded.get(key)
+    return {name for name in names if isinstance(name, str)} if isinstance(names, list) else set()
+
+
 def _merge_role_mapping(conf, defaults, seeded=None):
     """Add new default roles/permissions without restoring ones removed by admins."""
     if not isinstance(conf, dict):
         return copy.deepcopy(defaults), True
 
-    seeded = seeded or {}
-    seeded_roles = set(seeded.get("roles", []))
-    seeded_perms = set(seeded.get("permissions", []))
+    seeded = seeded if isinstance(seeded, dict) else {}
+    seeded_roles = _seeded_names(seeded, "roles")
+    seeded_perms = _seeded_names(seeded, "permissions")
 
     should_update = False
 

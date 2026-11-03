@@ -64,7 +64,7 @@ interface OIDCClientConfig {
 // HTTP Client with retry and timeout configuration
 const httpClient = axios.create({
   timeout: 10000,
-  // Redirects would bypass the same-origin check on discovered endpoints.
+  // Redirects would bypass the checks on discovered endpoints.
   maxRedirects: 0,
   validateStatus: (status) => status >= 200 && status < 300,
 });
@@ -110,7 +110,7 @@ async function discoverOIDCMetadata(issuer: string): Promise<OIDCDiscoveryMetada
 
     const metadata = response.data as OIDCDiscoveryMetadata;
     // OIDC Discovery 4.3: metadata must be for the issuer it was fetched from
-    if (stripTrailingSlashes(String(metadata.issuer ?? "")) !== stripTrailingSlashes(issuer)) {
+    if (normalizeIssuer(String(metadata.issuer ?? "")) !== normalizeIssuer(issuer)) {
       throw new Error("OIDC discovery issuer does not match the requested issuer");
     }
     metadataCache.set(issuer, { metadata, timestamp: now });
@@ -129,22 +129,43 @@ function stripTrailingSlashes(value: string): string {
   return value.slice(0, end);
 }
 
+// Compares issuers the way URLs are equal: host case and default ports do not matter.
+function normalizeIssuer(value: string): string {
+  try {
+    const url = new URL(value);
+    return url.origin + stripTrailingSlashes(url.pathname);
+  } catch {
+    return stripTrailingSlashes(value);
+  }
+}
+
+function isLocalHostname(hostname: string): boolean {
+  return hostname === "localhost"
+    || hostname.endsWith(".localhost")
+    || hostname.startsWith("[")
+    || /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
+}
+
 /**
- * Ensures a discovered endpoint uses the issuer's scheme. Providers may host endpoints
- * on other origins, so trust in them comes from the issuer-matched discovery metadata.
+ * Accepts endpoints on the issuer's origin. Providers may host endpoints elsewhere
+ * (e.g. Google), so other origins are allowed only as public HTTPS host names, which
+ * keeps provider metadata from steering requests to loopback or internal addresses.
  */
 function requireIssuerOrigin(issuer: string, endpoint: string | undefined, name: string): string {
   if (!endpoint) {
     throw new Error(`OIDC provider missing ${name}`);
   }
-  let endpointOrigin: string;
+  let url: URL;
   try {
-    endpointOrigin = new URL(endpoint).origin;
+    url = new URL(endpoint);
   } catch {
     throw new Error(`Invalid ${name}: ${endpoint}`);
   }
-  if (new URL(endpointOrigin).protocol !== new URL(issuer).protocol) {
-    throw new Error(`${name} does not use the issuer's scheme`);
+  if (url.origin === new URL(issuer).origin) {
+    return endpoint;
+  }
+  if (url.protocol !== "https:" || isLocalHostname(url.hostname)) {
+    throw new Error(`${name} must be on the issuer origin or a public HTTPS host`);
   }
   return endpoint;
 }

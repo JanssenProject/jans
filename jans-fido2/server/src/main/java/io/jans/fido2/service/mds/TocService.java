@@ -789,8 +789,14 @@ public class TocService {
 			return nextUpdate;
 		}
 		try {
-			return getNextUpdateDate();
-		} catch (DocumentException e) {
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(appConfiguration.getFido2Configuration().getMdsTocsFolder());
+			if (documents == null || documents.isEmpty()) {
+				return null;
+			}
+			String description = documents.get(0).getDescription();
+			return (description == null || "mdsTocsFolder".equals(description)) ? null : stringToLocalDate(description);
+		} catch (Exception e) {
+			log.debug("No persisted MDS TOC date available: {}", e.getMessage());
 			return null;
 		}
 	}

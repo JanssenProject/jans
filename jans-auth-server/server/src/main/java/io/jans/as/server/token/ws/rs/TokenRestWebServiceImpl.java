@@ -676,7 +676,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
                 deviceCodeGrant.checkScopesPolicy(scope);
                 AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), deviceCodeGrant);
-                grantService.removeByCode(deviceCode);
 
                 log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
@@ -685,6 +684,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
                         accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
             } finally {
+                // also on failure: the code was already consumed above and must not be re-usable
+                grantService.removeByCode(deviceCode);
                 oneTimeCodeClaims.remove(deviceCode);
             }
         } else {
