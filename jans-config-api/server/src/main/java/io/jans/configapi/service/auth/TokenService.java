@@ -151,11 +151,13 @@ public class TokenService {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);
         }
 
-        if (!tokenStatusListService.invalidate(tokenEntity)) {
-            throw new InternalServerErrorException(
-                    "Token status list entry could not be invalidated, token not removed - " + tknCde);
-        }
+        // removal is the primary revocation, so it must not wait on the status list
+        boolean statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
         persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
+        if (!statusInvalidated) {
+            throw new InternalServerErrorException(
+                    "Token removed but its status list entry could not be invalidated - " + tknCde);
+        }
     }
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {

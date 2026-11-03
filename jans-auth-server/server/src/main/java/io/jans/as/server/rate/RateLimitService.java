@@ -100,9 +100,9 @@ public class RateLimitService {
             int requestLimit = getRequestLimit(rule.getRequestCount());
             int periodLimit = getPeriodLimit(rule.getPeriodInSeconds());
 
-            // namespace by rule so overlapping rules producing the same key do not share one bucket
+            // namespace by rule and its limits so overlapping rules do not share a bucket and edited limits take effect
             // if key is too long -> hash it to reduce amount of space it takes in memory
-            String key = saveSpaceIfNeeded(ruleIndex(config, rule) + "_" + keyWithRule.getFirst());
+            String key = saveSpaceIfNeeded(ruleIndex(config, rule) + "_" + requestLimit + "_" + periodLimit + "_" + keyWithRule.getFirst());
             Bucket bucket;
             try {
                 bucket = currentBuckets.get(key, () -> newBucket(requestLimit, periodLimit));

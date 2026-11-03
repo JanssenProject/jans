@@ -647,39 +647,46 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, REASON_CLIENT_NOT_AUTHORIZED), executionContext.getAuditLog()));
             }
 
-            if (!consumeOneTimeCode(deviceCode,
-                    () -> authorizationGrantList.getDeviceCodeGrant(deviceCode) != null,
-                    () -> grantService.removeByCode(deviceCode))) {
+            // token creation re-caches the grant under the device code, so the claim is held until it is removed for good
+            if (StringUtils.isBlank(deviceCode) || oneTimeCodeClaims.putIfAbsent(deviceCode, Boolean.TRUE) != null) {
                 log.trace("Device code is already used by another request.");
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Device code is already used."), executionContext.getAuditLog()));
             }
+            try {
+                if (authorizationGrantList.getDeviceCodeGrant(deviceCode) == null) {
+                    log.trace("Device code is already used by another request.");
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Device code is already used."), executionContext.getAuditLog()));
+                }
+                grantService.removeByCode(deviceCode);
 
-            RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
+                RefreshToken refToken = tokenCreatorService.createRefreshToken(executionContext, scope);
 
-            AccessToken accessToken = deviceCodeGrant.createAccessToken(executionContext);
+                AccessToken accessToken = deviceCodeGrant.createAccessToken(executionContext);
 
-            ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), deviceCodeGrant, client, appConfiguration, attributeService);
-            context.setExecutionContext(executionContext);
+                ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), deviceCodeGrant, client, appConfiguration, attributeService);
+                context.setExecutionContext(executionContext);
 
 
-            executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
-            executionContext.setPreProcessing(null);
-            executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
+                executionContext.setIncludeIdTokenClaims(Boolean.TRUE.equals(appConfiguration.getLegacyIdTokenClaims()));
+                executionContext.setPreProcessing(null);
+                executionContext.setPostProcessor(externalUpdateTokenService.buildModifyIdTokenProcessor(context));
 
-            IdToken idToken = deviceCodeGrant.createIdToken(
-                    null, null, accessToken, refToken, null, executionContext);
+                IdToken idToken = deviceCodeGrant.createIdToken(
+                        null, null, accessToken, refToken, null, executionContext);
 
-            deviceCodeGrant.checkScopesPolicy(scope);
-            AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), deviceCodeGrant);
-            // the saves above re-cache the grant under the device code
-            grantService.removeByCode(deviceCode);
+                deviceCodeGrant.checkScopesPolicy(scope);
+                AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), deviceCodeGrant);
+                grantService.removeByCode(deviceCode);
 
-            log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
+                log.info("Device authorization in token endpoint processed and return to the client, device_code: {}", deviceCodeGrant.getDeviceCode());
 
-            executionContext.getAuditLog().updateOAuth2AuditLog(deviceCodeGrant, true);
+                executionContext.getAuditLog().updateOAuth2AuditLog(deviceCodeGrant, true);
 
-            return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
-                    accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
+                return Response.ok().entity(getJSonResponse(accessToken, accessToken.getTokenType(),
+                        accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
+            } finally {
+                oneTimeCodeClaims.remove(deviceCode);
+            }
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);
             log.trace("DeviceAuthorizationCacheControl data : '{}'", cacheData);

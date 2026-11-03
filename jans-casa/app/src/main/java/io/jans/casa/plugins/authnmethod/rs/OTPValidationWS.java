@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,11 @@ public class OTPValidationWS {
 
     private static final String USED_TOTP_PREFIX = "casa_totp_used_";
 
-    private static final Object TOTP_LOCK = new Object();
+    private static final Object[] TOTP_LOCKS = new Object[64];
+
+    static {
+        Arrays.setAll(TOTP_LOCKS, i -> new Object());
+    }
 
     @Inject
     private Logger logger;
@@ -96,7 +101,7 @@ public class OTPValidationWS {
         String cacheKey = USED_TOTP_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
 
         //CacheProvider has no atomic put-if-absent; this at least serializes check-and-put on this node
-        synchronized (TOTP_LOCK) {
+        synchronized (TOTP_LOCKS[Math.floorMod(cacheKey.hashCode(), TOTP_LOCKS.length)]) {
             if (cacheProvider.get(cacheKey) != null) return false;
             cacheProvider.put(2 * tAS.getTimeStep() + 1, cacheKey, true);
             return true;

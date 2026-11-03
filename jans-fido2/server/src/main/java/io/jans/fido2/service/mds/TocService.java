@@ -652,7 +652,7 @@ public class TocService {
 			throw new Fido2RuntimeException(
 					"Fido2 MDS cert and TOC properties are not set, the downloaded TOC can't be verified");
 		}
-		LocalDate cachedNextUpdate = nextUpdate;
+		LocalDate cachedNextUpdate = cachedTocNextUpdate();
 		Pair<LocalDate, Map<String, JsonNode>> parsedToc = parseTOC(mdsTocRootCertsFolder, encodedToc);
 		LocalDate tocNextUpdate = parsedToc.getFirst();
 		if (tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
@@ -780,6 +780,18 @@ public class TocService {
 		} catch (Exception e) {
 			log.error("Failed to Save the nextUpdateDate of the MDS into jansDocument ", e);
 			throw new DocumentException(e);
+		}
+	}
+
+	// After a restart nothing is loaded in memory yet, so fall back to the date stored with the cached TOC
+	private LocalDate cachedTocNextUpdate() {
+		if (nextUpdate != null) {
+			return nextUpdate;
+		}
+		try {
+			return getNextUpdateDate();
+		} catch (DocumentException e) {
+			return null;
 		}
 	}
 
