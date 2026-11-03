@@ -784,7 +784,7 @@ mod test {
     use super::TrustedIssuerLoadingInfo;
     use super::test_utils::*;
     use super::{CustomTokenError, CustomTokenProcessor, ProcessedTokenClaims, Token, TokenIssuer};
-    use super::{EntityTypeName, TokenValidation, ValidatedToken};
+    use super::{TokenValidation, ValidatedToken};
     use crate::JwtConfig;
     use crate::app_types::PdpID;
     use crate::authz::MultiIssuerValidationError;
@@ -799,9 +799,7 @@ mod test {
     use crate::http::HttpClient;
     use crate::http::HttpClientConfig;
     use crate::log::{LogStrategy, Logger};
-    use crate::{
-        DropReason, DroppedToken, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig,
-    };
+    use crate::{DropReason, LogConfig, LogLevel, LogStorage, LogTypeConfig, MemoryLogConfig};
     use async_trait::async_trait;
     use jsonwebtoken::Algorithm;
     use serde_json::json;
@@ -813,47 +811,38 @@ mod test {
     use tokio::test;
     use url::Url;
 
-    /// Validated tokens of one request, by entity type, plus its drops.
-    #[derive(Debug)]
-    struct ValidatedTokens {
-        tokens: HashMap<EntityTypeName, ValidatedToken>,
-        dropped: Vec<DroppedToken>,
+    // Feeds `tokens` to the request validator in input order, the way `Authz`
+    // drives it. The outcome at position `i` is the one for input `i`.
+    async fn validate_all(
+        svc: &JwtService,
+        tokens: &[TokenInput],
+        custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
+        token_types: &TokenTypes,
+        custom_timeout: Option<Duration>,
+    ) -> Result<Vec<TokenValidation>, MultiIssuerValidationError> {
+        let mut validator =
+            svc.multi_issuer_validator(custom_processor, token_types, custom_timeout);
+        let mut outcomes = Vec::with_capacity(tokens.len());
+        for (index, input) in tokens.iter().enumerate() {
+            outcomes.push(validator.validate(index, input).await?);
+        }
+        validator.ensure_any_validated()?;
+        Ok(outcomes)
     }
 
-    impl JwtService {
-        /// Run every input through [`MultiIssuerTokenValidator`](super::MultiIssuerTokenValidator)
-        /// in request order and collect the outcomes.
-        async fn validate_multi_issuer_tokens(
-            &self,
-            tokens: &[TokenInput],
-            custom_processor: Option<&Arc<dyn CustomTokenProcessor>>,
-            token_types: &TokenTypes,
-            custom_timeout: Option<Duration>,
-        ) -> Result<ValidatedTokens, MultiIssuerValidationError> {
-            if tokens.is_empty() {
-                return Err(MultiIssuerValidationError::EmptyTokenArray);
-            }
-            let mut validator =
-                self.multi_issuer_validator(custom_processor, token_types, custom_timeout);
-            let mut validated = ValidatedTokens {
-                tokens: HashMap::new(),
-                dropped: Vec::new(),
-            };
-            for (index, input) in tokens.iter().enumerate() {
-                match validator.validate(index, input).await? {
-                    TokenValidation::Accepted(token) => {
-                        let entity_type = token.token_type.entity_type().clone();
-                        validated.tokens.insert(entity_type, token);
-                    },
-                    TokenValidation::Dropped(reason) => {
-                        let dropped = DroppedToken::new(input.mapping.clone(), index, reason);
-                        validated.dropped.push(dropped);
-                    },
-                }
-            }
-            validator.ensure_any_validated()?;
-            Ok(validated)
-        }
+    // The token accepted for `entity_type`, if any.
+    fn accepted<'a>(
+        outcomes: &'a [TokenValidation],
+        entity_type: &str,
+    ) -> Option<&'a ValidatedToken> {
+        outcomes.iter().find_map(|outcome| match outcome {
+            TokenValidation::Accepted(token)
+                if token.token_type.entity_type().as_str() == entity_type =>
+            {
+                Some(token)
+            },
+            _ => None,
+        })
     }
 
     static HTTP_CLIENT: LazyLock<HttpClient> = LazyLock::new(|| {
@@ -1067,17 +1056,16 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let out = validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("custom token should validate");
         assert!(
-            out.tokens.contains_key("Acme::CustomToken"),
+            accepted(&out, "Acme::CustomToken").is_some(),
             "validated output should contain the custom token under its mapping name"
         );
 
         // Second call is served from the token cache: processor not re-invoked.
-        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("cached custom token should validate");
         assert_eq!(
@@ -1127,7 +1115,7 @@ mod test {
                 "a late request on the previous store still gets its result",
             ),
         ] {
-            svc.validate_multi_issuer_tokens(&tokens, Some(&processor), store, None)
+            validate_all(&svc, &tokens, Some(&processor), store, None)
                 .await
                 .expect("custom token should validate");
             assert_eq!(calls.load(Ordering::SeqCst), expected_calls, "{what}");
@@ -1148,10 +1136,10 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("first non-cacheable custom token should validate");
-        svc.validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("second non-cacheable custom token should validate");
         assert_eq!(
@@ -1174,8 +1162,7 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let err = validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect_err("no token survives, so the request has no valid tokens");
         assert!(
@@ -1194,26 +1181,18 @@ mod test {
             TokenInput::new("Ok::T".to_string(), "p2".to_string()),
         ];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let out = validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("a custom failure must not fail the whole request");
-        assert_eq!(
-            out.tokens
-                .keys()
-                .map(crate::common::policy_store::token_types::EntityTypeName::as_str)
-                .collect::<Vec<_>>(),
-            vec!["Ok::T"],
-            "only the succeeding custom token should be kept"
-        );
         assert!(
             matches!(
-                &out.dropped[..],
-                [DroppedToken { mapping, index: 0, reason: DropReason::CustomProcessingFailed }]
-                    if mapping == "Fail::T"
+                &out[..],
+                [
+                    TokenValidation::Dropped(DropReason::CustomProcessingFailed),
+                    TokenValidation::Accepted(ok),
+                ] if ok.token_type.entity_type().as_str() == "Ok::T"
             ),
-            "the failing token should be reported as dropped, got {:?}",
-            out.dropped
+            "the failing token should be dropped and only the succeeding one kept, got {out:?}"
         );
     }
 
@@ -1247,30 +1226,25 @@ mod test {
             TokenInput::new("Ok::T".to_string(), "p2".to_string()),
         ];
 
-        let out = svc
-            .validate_multi_issuer_tokens(
-                &tokens,
-                Some(&processor),
-                &index,
-                Some(Duration::from_millis(50)),
-            )
-            .await
-            .expect("a timed-out custom token must not fail the whole request");
-        assert!(
-            out.tokens.contains_key("Ok::T"),
-            "the token that finished in time should be kept"
-        );
+        let out = validate_all(
+            &svc,
+            &tokens,
+            Some(&processor),
+            &index,
+            Some(Duration::from_millis(50)),
+        )
+        .await
+        .expect("a timed-out custom token must not fail the whole request");
         assert!(
             matches!(
-                &out.dropped[..],
-                [DroppedToken {
-                    index: 0,
-                    reason: DropReason::CustomProcessingTimedOut,
-                    ..
-                }]
+                &out[..],
+                [
+                    TokenValidation::Dropped(DropReason::CustomProcessingTimedOut),
+                    TokenValidation::Accepted(ok),
+                ] if ok.token_type.entity_type().as_str() == "Ok::T"
             ),
-            "the slow token should be dropped as timed out, got {:?}",
-            out.dropped
+            "the slow token should be dropped as timed out and the one that finished in time \
+             kept, got {out:?}"
         );
     }
 
@@ -1373,12 +1347,11 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        let validated = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let validated = validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("a custom token whose exp is in the future should validate");
         assert!(
-            validated.tokens.contains_key("Acme::CustomToken"),
+            accepted(&validated, "Acme::CustomToken").is_some(),
             "an unexpired custom token should reach the validated token map"
         );
     }
@@ -1392,8 +1365,7 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        let err = svc
-            .validate_multi_issuer_tokens(&tokens, None, &index, None)
+        let err = validate_all(&svc, &tokens, None, &index, None)
             .await
             .expect_err("only token skipped -> no validated tokens");
         assert!(
@@ -1416,11 +1388,13 @@ mod test {
             "payload-1".to_string(),
         )];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, Some(&processor), &index, None)
+        let out = validate_all(&svc, &tokens, Some(&processor), &index, None)
             .await
             .expect("no timeout -> slow processor completes");
-        assert!(out.tokens.contains_key("Acme::CustomToken"));
+        assert!(
+            accepted(&out, "Acme::CustomToken").is_some(),
+            "a slow processor without a timeout should run to completion and be accepted"
+        );
         assert_eq!(calls.load(Ordering::SeqCst), 1);
     }
 
@@ -1493,17 +1467,20 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), id_tkn),
         ];
 
-        let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
-            .await;
-        assert!(result.is_ok());
-
-        let validated_tokens = result.unwrap().tokens;
-        assert_eq!(validated_tokens.len(), 2);
+        let out = validate_all(&jwt_service, &tokens, None, &token_types, None)
+            .await
+            .expect("both tokens should validate");
 
         // Verify the tokens have the correct mapping
-        assert!(validated_tokens.contains_key("Jans::Access_Token"));
-        assert!(validated_tokens.contains_key("Jans::Id_Token"));
+        assert!(
+            matches!(
+                &out[..],
+                [TokenValidation::Accepted(access), TokenValidation::Accepted(id)]
+                    if access.token_type.entity_type().as_str() == "Jans::Access_Token"
+                        && id.token_type.entity_type().as_str() == "Jans::Id_Token"
+            ),
+            "each token should be accepted under its own mapping, got {out:?}"
+        );
     }
 
     /// Two issuers sharing one `iss` and its keys both validate their own tokens,
@@ -1558,24 +1535,26 @@ mod test {
             TokenInput::new("Beta::Access_token".to_string(), token("b")),
         ];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
+        let out = validate_all(&svc, &tokens, None, &token_types, None)
             .await
             .expect("both tokens should validate");
         for (mapping, name) in [
             ("Acme::Access_token", "Acme"),
             ("Beta::Access_token", "Beta"),
         ] {
-            let iss = &out.tokens[mapping].token.iss;
+            let iss = &accepted(&out, mapping)
+                .expect("mapping should be accepted")
+                .token
+                .iss;
             assert!(
                 matches!(iss, TokenIssuer::Jwt(issuer) if issuer.name.to_string() == name),
                 "{mapping} should keep the issuer its mapping names, got {iss:?}"
             );
         }
         assert!(
-            out.dropped.is_empty(),
-            "no token should be dropped: {:?}",
-            out.dropped
+            out.iter()
+                .all(|outcome| matches!(outcome, TokenValidation::Accepted(_))),
+            "no token should be dropped: {out:?}"
         );
     }
 
@@ -1644,26 +1623,19 @@ mod test {
             TokenInput::new("Partner::Access_token".to_string(), token(&iss)),
         ];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
+        let out = validate_all(&svc, &tokens, None, &token_types, None)
             .await
             .expect("the token with the configured iss should validate");
-        assert_eq!(
-            out.tokens.get("Partner::Access_token").map(|t| t.index),
-            Some(1),
-            "the token carrying the configured iss should be kept"
-        );
         assert!(
             matches!(
-                &out.dropped[..],
-                [DroppedToken {
-                    index: 0,
-                    reason: DropReason::JwtValidationFailed,
-                    ..
-                }]
+                &out[..],
+                [
+                    TokenValidation::Dropped(DropReason::JwtValidationFailed),
+                    TokenValidation::Accepted(kept),
+                ] if kept.index == 1
             ),
-            "the token with another iss should be dropped, got {:?}",
-            out.dropped
+            "the token with another iss should be dropped and the one carrying the configured \
+             iss kept, got {out:?}"
         );
         jwks.assert();
         discovery.assert();
@@ -1747,31 +1719,23 @@ mod test {
             TokenInput::new("Partner::Access_token".to_string(), token(claims)),
         ];
 
-        let out = svc
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
+        let out = validate_all(&svc, &tokens, None, &token_types, None)
             .await
             .expect("the token without `status` should validate");
-        assert_eq!(
-            out.tokens.get("Partner::Access_token").map(|t| t.index),
-            Some(1),
-            "the token without `status` should be kept"
-        );
         assert!(
             matches!(
-                &out.dropped[..],
-                [DroppedToken {
-                    index: 0,
-                    reason: DropReason::JwtValidationFailed,
-                    ..
-                }]
+                &out[..],
+                [
+                    TokenValidation::Dropped(DropReason::JwtValidationFailed),
+                    TokenValidation::Accepted(kept),
+                ] if kept.index == 1
             ),
-            "the token with `status` should be dropped, got {:?}",
-            out.dropped
+            "the token with `status` should be dropped and the one without it kept, got {out:?}"
         );
     }
 
     #[test]
-    async fn test_validate_multi_issuer_tokens_empty_array() {
+    async fn test_validate_multi_issuer_tokens_no_inputs_fails() {
         let server = MockServer::new_with_defaults()
             .await
             .expect("mock server should start");
@@ -1797,13 +1761,15 @@ mod test {
         .await
         .expect("Should create JwtService");
 
-        let result = jwt_service
-            .validate_multi_issuer_tokens(&[], None, &token_types, None)
-            .await;
-        assert!(matches!(
-            result,
-            Err(MultiIssuerValidationError::EmptyTokenArray)
-        ));
+        // Rejecting an empty request is up to the caller; the validator only
+        // knows that nothing was accepted.
+        let err = validate_all(&jwt_service, &[], None, &token_types, None)
+            .await
+            .expect_err("a request with no inputs has no valid tokens");
+        assert!(
+            matches!(err, MultiIssuerValidationError::TokenValidationFailed),
+            "no inputs should fail as no valid tokens, got {err:?}"
+        );
     }
 
     #[test]
@@ -1839,9 +1805,7 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), "also-invalid".to_string()),
         ];
 
-        let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
-            .await;
+        let result = validate_all(&jwt_service, &tokens, None, &token_types, None).await;
         assert!(matches!(
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
@@ -1908,13 +1872,19 @@ mod test {
             TokenInput::new("Jans::Id_Token".to_string(), "invalid-jwt".to_string()),
         ];
 
-        let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
-            .await;
-        assert!(result.is_ok());
-
-        let validated_tokens = result.unwrap().tokens;
-        assert_eq!(validated_tokens.len(), 1); // Only the valid token should be returned
+        let out = validate_all(&jwt_service, &tokens, None, &token_types, None)
+            .await
+            .expect("an invalid token must not fail the whole request");
+        assert!(
+            matches!(
+                &out[..],
+                [
+                    TokenValidation::Accepted(_),
+                    TokenValidation::Dropped(DropReason::JwtValidationFailed),
+                ]
+            ),
+            "only the valid token should be accepted, got {out:?}"
+        );
     }
 
     #[test]
@@ -1979,23 +1949,19 @@ mod test {
             TokenInput::new("Jans::Access_Token".to_string(), token_two), // Duplicate type from same issuer
         ];
 
-        let out = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
+        let out = validate_all(&jwt_service, &tokens, None, &token_types, None)
             .await
             .expect("a duplicate must not fail the request");
-        assert_eq!(
-            out.tokens.get("Jans::Access_Token").map(|t| t.index),
-            Some(0),
-            "the first token for the mapping should be kept"
-        );
-        assert_eq!(
-            out.dropped,
-            vec![DroppedToken::new(
-                "Jans::Access_Token",
-                1,
-                DropReason::DuplicateToken
-            )],
-            "the later token for the mapping should be dropped as a duplicate"
+        assert!(
+            matches!(
+                &out[..],
+                [
+                    TokenValidation::Accepted(first),
+                    TokenValidation::Dropped(DropReason::DuplicateToken),
+                ] if first.index == 0
+            ),
+            "the first token for the mapping should be kept and the later one dropped as a \
+             duplicate, got {out:?}"
         );
     }
 
@@ -2038,9 +2004,7 @@ mod test {
 
         let tokens = vec![TokenInput::new("Jans::Access_Token".to_string(), token)];
 
-        let result = jwt_service
-            .validate_multi_issuer_tokens(&tokens, None, &token_types, None)
-            .await;
+        let result = validate_all(&jwt_service, &tokens, None, &token_types, None).await;
         assert!(matches!(
             result,
             Err(MultiIssuerValidationError::TokenValidationFailed)
@@ -2092,15 +2056,15 @@ mod test {
             .generate_token_with_hs256sig(&mut claims_before_rotation, None)
             .expect("Token signed with initial key should be generated");
 
-        jwt_service
-            .validate_multi_issuer_tokens(
-                &[TokenInput::new(mapping.clone(), token_before_rotation)],
-                None,
-                &token_types,
-                None,
-            )
-            .await
-            .expect("Token signed with initial key should validate before key rotation");
+        validate_all(
+            &jwt_service,
+            &[TokenInput::new(mapping.clone(), token_before_rotation)],
+            None,
+            &token_types,
+            None,
+        )
+        .await
+        .expect("Token signed with initial key should validate before key rotation");
 
         server
             .rotate_signing_key_hs256("rotated_hs256_key_after_init")
@@ -2116,30 +2080,30 @@ mod test {
             .generate_token_with_hs256sig(&mut claims_after_rotation, None)
             .expect("Token signed with rotated key should be generated");
 
-        jwt_service
-            .validate_multi_issuer_tokens(
-                &[TokenInput::new(
-                    mapping.clone(),
-                    token_after_rotation.clone(),
-                )],
-                None,
-                &token_types,
-                None,
-            )
-            .await
-            .expect_err("First call after rotation should fail");
+        validate_all(
+            &jwt_service,
+            &[TokenInput::new(
+                mapping.clone(),
+                token_after_rotation.clone(),
+            )],
+            None,
+            &token_types,
+            None,
+        )
+        .await
+        .expect_err("First call after rotation should fail");
 
         tokio::time::sleep(std::time::Duration::from_millis(200)).await;
 
-        jwt_service
-            .validate_multi_issuer_tokens(
-                &[TokenInput::new(mapping, token_after_rotation)],
-                None,
-                &token_types,
-                None,
-            )
-            .await
-            .expect("Token signed with rotated key should validate after background JWKS refresh");
+        validate_all(
+            &jwt_service,
+            &[TokenInput::new(mapping, token_after_rotation)],
+            None,
+            &token_types,
+            None,
+        )
+        .await
+        .expect("Token signed with rotated key should validate after background JWKS refresh");
     }
 
     #[test]
@@ -2191,32 +2155,30 @@ mod test {
             .generate_token_with_hs256sig(&mut claims_after_rotation, None)
             .expect("Token signed with rotated key should be generated");
 
-        jwt_service
-            .validate_multi_issuer_tokens(
-                &[TokenInput::new(
-                    mapping.clone(),
-                    token_after_rotation.clone(),
-                )],
-                None,
-                &token_types,
-                None,
-            )
-            .await
-            .expect_err("First call with rotated kid should fail (stale key)");
+        validate_all(
+            &jwt_service,
+            &[TokenInput::new(
+                mapping.clone(),
+                token_after_rotation.clone(),
+            )],
+            None,
+            &token_types,
+            None,
+        )
+        .await
+        .expect_err("First call with rotated kid should fail (stale key)");
 
         tokio::time::sleep(std::time::Duration::from_millis(200)).await;
 
-        jwt_service
-            .validate_multi_issuer_tokens(
-                &[TokenInput::new(mapping, token_after_rotation)],
-                None,
-                &token_types,
-                None,
-            )
-            .await
-            .expect(
-                "Validation should recover from unknown rotated kid after background JWKS refresh",
-            );
+        validate_all(
+            &jwt_service,
+            &[TokenInput::new(mapping, token_after_rotation)],
+            None,
+            &token_types,
+            None,
+        )
+        .await
+        .expect("Validation should recover from unknown rotated kid after background JWKS refresh");
     }
 
     #[test]
