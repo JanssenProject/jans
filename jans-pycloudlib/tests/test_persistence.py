@@ -437,3 +437,65 @@ def test_simple_json_mysql(monkeypatch, gmanager, env_value, expected):
     monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
     monkeypatch.setenv("MYSQL_SIMPLE_JSON", env_value)
     assert SqlClient(gmanager).use_simple_json is expected
+
+
+@pytest.mark.parametrize("query, expected", [
+    ('CREATE INDEX "t_a" ON "t" ("a")', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    ('CREATE UNIQUE INDEX "t_a" ON "t" ("a")', 'CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+])
+def test_postgresql_adapter_prepare_index_query(query, expected):
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    assert PostgresqlAdapter().prepare_index_query(query) == expected
+
+
+def test_adapters_is_lock_timeout():
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    assert PostgresqlAdapter().is_lock_timeout(PGException("55P03"))
+    assert not PostgresqlAdapter().is_lock_timeout(PGException("42P07"))
+    assert MysqlAdapter().is_lock_timeout(MSException(1205))
+    assert not MysqlAdapter().is_lock_timeout(MSException(1061))
+
+
+def test_postgresql_adapter_is_lock_timeout_pg8000():
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    # pg8000 has no pgcode attribute; the SQLSTATE is in a dict passed as the first argument
+    exc = Exception()
+    exc.orig = namedtuple("Orig", "args")([{"C": "55P03", "M": "canceling statement due to lock timeout"}])
+    assert PostgresqlAdapter().is_lock_timeout(exc)
+
+
+def test_sql_client_create_index_skips_existing(monkeypatch, sql_client):
+    ran = []
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: True)
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: ran.append(a))
+
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x")
+    assert ran == []
+
+
+def test_sql_client_create_index_retries_on_lock_timeout(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(drop_first)
+        if len(calls) < 3:
+            exc = OperationalError("stmt", {}, Exception())
+            exc.orig = MSException(1205)
+            raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x")
+    assert calls == [False, False, False]
