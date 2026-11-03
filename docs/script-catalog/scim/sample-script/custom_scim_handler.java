@@ -20,10 +20,6 @@ import io.jans.scim.service.external.OperationContext;
 import io.jans.orm.model.base.Entry;
 import jakarta.ws.rs.core.Response;
 import io.jans.scim.model.scim2.SearchRequest;
-import io.jans.scim.model.scim2.patch.PatchOperation;
-import io.jans.scim.model.scim2.patch.PatchOperationType;
-import io.jans.scim.model.scim2.patch.PatchRequest;
-import io.jans.scim.model.scim2.user.UserResource;
 import jakarta.ws.rs.core.MultivaluedMap;
 
 import org.json.JSONObject;
@@ -146,7 +142,7 @@ public class ScimEventHandler implements ScimType {
         scriptLogger.info("{} entries returned of {}", res.getEntriesCount(), res.getTotalEntriesCount());
         for (Object entry : res.getEntries()) {   
             ScimCustomPerson user = (ScimCustomPerson) entry;     
-            scriptLogger.info("Flushing addresses for user {}", String.valueOf(user.getUid()).replaceAll("[\\r\\n]", "_"));
+            scriptLogger.info("Flushing addresses for user {}", user.getUid());
             user.setAttribute("jansAddress", "");
         }
         return true;
@@ -171,40 +167,12 @@ public class ScimEventHandler implements ScimType {
         ScimCustomPerson ent = (ScimCustomPerson) entity;    
         String jansUsrType = ent.getAttribute("jansUsrTyp");
         
-        if(expected_user_type != null && expected_user_type.equals(jansUsrType)
-                && payloadKeepsUserType(payload, expected_user_type)){ 
+        if(expected_user_type != null && jansUsrType.equals(expected_user_type)){ 
             return null;
         }
         else{
             return new BaseScimWebService().getErrorResponse(403, null, "Attempt to handle a not allowed user type");
         }        
-    }
-
-    // payload is a UserResource (POST/PUT), a PatchRequest (PATCH) or null
-    private boolean payloadKeepsUserType(Object payload, String expectedUserType) {
-        if (payload instanceof UserResource) {
-            String userType = ((UserResource) payload).getUserType();
-            return userType == null || userType.equals(expectedUserType);
-        }
-        if (payload instanceof PatchRequest) {
-            for (PatchOperation operation : ((PatchRequest) payload).getOperations()) {
-                String path = operation.getPath();
-                Object value = operation.getValue();
-                if (path == null) {
-                    if (value instanceof Map) {
-                        for (Map.Entry<?, ?> e : ((Map<?, ?>) value).entrySet()) {
-                            if ("usertype".equalsIgnoreCase(String.valueOf(e.getKey())) && !expectedUserType.equals(e.getValue())) {
-                                return false;
-                            }
-                        }
-                    }
-                } else if (path.toLowerCase().contains("usertype")
-                        && (operation.getType() == PatchOperationType.REMOVE || !expectedUserType.equals(value))) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     @Override
