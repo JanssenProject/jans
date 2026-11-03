@@ -56,6 +56,7 @@ import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Path;
@@ -69,6 +70,7 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides interface for User Info REST web services
@@ -246,7 +248,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     private String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                   Collection<String> scopes) throws Exception {
-        log.trace("Building JWT reponse with next scopes {0} for user {1} and user custom attributes {0}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWT reponse with next scopes {} for user {}", scopes, user.getUserId());
 
         Jwt jwt = new Jwt();
 
@@ -290,7 +292,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJweResponse(
             KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
             User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
-        log.trace("Building JWE reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWE reponse with next scopes {} for user {}", scopes, user.getUserId());
 
         Jwe jwe = new Jwe();
 
@@ -335,7 +337,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
-        log.trace("Building JSON reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.debug("Building User Info claims, user: {}, client: {}, scopes: {}, user custom attribute names: {}", user.getUserId(), authorizationGrant.getClientId(), scopes, getCustomAttributeNames(user));
 
         JsonWebResponse jwr = new JsonWebResponse();
 
@@ -346,6 +348,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         for (String scopeName : scopes) {
             Scope scope = scopeService.getScopeById(scopeName);
             if ((scope != null) && (ScopeType.DYNAMIC == scope.getScopeType())) {
+                log.debug("Scope '{}' is dynamic, its claims are produced by dynamic scope script (if enabled)", scopeName);
                 dynamicScopes.add(scope);
                 continue;
             }
@@ -355,7 +358,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 continue;
             }
             if (scope == null) {
-                log.trace("Unable to find scope in persistence. Is it removed? Scope name: {}", scopeName);
+                log.debug("Unable to find scope in persistence, no claims added. Is it removed? Scope name: {}", scopeName);
+            } else {
+                log.debug("Scope '{}' contributed claims: {}", scopeName, claims.keySet());
             }
 
             if (scope != null && Boolean.TRUE.equals(scope.isGroupClaims())) {
@@ -405,7 +410,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         String ldapClaimName = jansAttribute.getName();
 
                         Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
+                        if (attribute == null) {
+                            log.debug("Claim '{}' requested via 'claims' parameter (userinfo) is not returned: user has no value for attribute '{}'", claimName, ldapClaimName);
+                        }
                         jwr.getClaims().setClaimFromJsonObject(claimName, attribute);
+                    } else {
+                        log.debug("Claim '{}' requested via 'claims' parameter (userinfo) is not returned: no attribute found with this claim name", claimName);
                     }
                 }
             }
@@ -423,8 +433,15 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = jansAttribute.getName();
                         Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
+                        if (attribute == null) {
+                            log.debug("Claim '{}' requested via request object (userinfo) is not returned: user has no value for attribute '{}'", claim.getName(), ldapClaimName);
+                        }
                         jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
+                    } else {
+                        log.debug("Claim '{}' requested via request object (userinfo) is not returned: not allowed by client claims or granted scopes", claim.getName());
                     }
+                } else {
+                    log.debug("Claim '{}' requested via request object (userinfo) is not returned: no attribute found with this claim name", claim.getName());
                 }
             }
         }
@@ -435,9 +452,22 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
             DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwr, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
+        } else if (!dynamicScopes.isEmpty()) {
+            log.debug("Dynamic scopes {} are skipped: dynamic scope script is not enabled", dynamicScopes.stream().map(Scope::getId).collect(Collectors.toList()));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("User Info claims returned for user: {}, client: {}: {}", user.getUserId(), authorizationGrant.getClientId(), jwr.getClaims().keys());
         }
 
         return jwr.toString();
+    }
+
+    private static List<String> getCustomAttributeNames(User user) {
+        if (user.getCustomAttributes() == null) {
+            return Collections.emptyList();
+        }
+        return user.getCustomAttributes().stream().map(CustomObjectAttribute::getName).collect(Collectors.toList());
     }
 
     public boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
