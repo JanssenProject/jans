@@ -253,7 +253,7 @@ public class ScopeService {
 
         final List<String> scopeClaims = scope.getClaims();
         if (scopeClaims == null) {
-            log.trace("No claims set for scope: {}", scope.getId());
+            log.debug("No claims set for scope: {}", scope.getId());
             return claims;
         }
 
@@ -311,6 +311,8 @@ public class ScopeService {
 
         if (attribute != null) {
             claims.put(claimName, attribute instanceof JSONArray ? JsonApplier.getStringList((JSONArray) attribute) : attribute);
+        } else {
+            log.debug("Claim '{}' is not returned: user '{}' has no value for attribute '{}'", claimName, user.getUserId(), ldapName);
         }
     }
 
