@@ -431,7 +431,7 @@ cedarling_clear_last_error();
 
 ## Configuration
 
-For complete configuration documentation, see [cedarling-properties.md](../../../docs/cedarling/reference/cedarling-properties.md).
+For complete configuration documentation, see [cedarling-properties.md](https://github.com/JanssenProject/jans/blob/main/docs/cedarling/reference/cedarling-properties.md).
 
 ### Example Configuration
 

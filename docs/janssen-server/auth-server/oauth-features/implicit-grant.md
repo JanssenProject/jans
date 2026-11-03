@@ -10,11 +10,26 @@ tags:
 
 # OAuth 2.0 Implicit Grant
 
-The [Implicit Grant](https://tools.ietf.org/html/rfc6749#section-1.3.2) :
+!!! warning "Legacy grant"
+    The Implicit Grant is not included in OAuth 2.1 and is not enabled in
+    Janssen's default supported grant types. It is not recommended for new
+    integrations. Legacy deployments may explicitly configure support for
+    this grant. For new applications, use the Authorization Code Grant with
+    PKCE (`S256`) instead. Verify the grant types advertised in the
+    deployment's discovery metadata.
 
-!!! [OAuth 2.0 Security Best Current Practice](https://tools.ietf.org/html/draft-ietf-oauth-security-topics) absolutely discourages the use of Implicit flow.
-Instead, use Authorization code flow with PKCE -[OAuth 2.0 for Browser-Based Apps](https://tools.ietf.org/html/draft-ietf-oauth-browser-based-apps).
-[Further reading](https://oauth.net/2/grant-types/implicit/)
+
+The [Implicit Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-4.2) 
+is a legacy OAuth 2.0 flow in which an access token is returned directly
+in the authorization response, without exchanging an authorization code
+at the token endpoint.
+
+The [OAuth 2.0 Security Best Current Practice (RFC 9700)](https://datatracker.ietf.org/doc/html/rfc9700)
+recommends against using the Implicit Grant because of security risks
+associated with access tokens exposed through the authorization response.
+
+For additional background, see
+[OAuth 2.0 Implicit Grant](https://oauth.net/2/grant-types/implicit/).
 
 
 ### Sequence Diagram
@@ -54,4 +69,3 @@ sequenceDiagram
 
 
 ```
-

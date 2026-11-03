@@ -29,7 +29,52 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 - `token_type_hint` - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
 - `response_as_jwt` - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
 
+The `token` parameter is the token being inspected, and it is distinct from the credential
+used to authenticate the caller to the introspection endpoint. Authenticate the request
+using the configured client authentication method or an `Authorization: Bearer` header
+where supported.
+
+## Sample POST Request (recommended)
+
+Send the token being inspected in the form-encoded request body. This keeps
+it out of URLs, which servers, proxies and browsers can log.
+
+### Request
+
+```shell
+curl -X POST 'https://janssen.server.host/jans-auth/restv1/introspection' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H 'Authorization: Bearer <CALLER_ACCESS_TOKEN>' \
+  --data-urlencode 'token=<TOKEN_TO_INSPECT>' \
+  --data-urlencode 'response_as_jwt=false'
+```
+
+### Response
+
+```json
+{
+    "sub": "",
+    "iss": "https://janssen.server.host",
+    "active": true,
+    "token_type": "Bearer",
+    "client_id": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
+    "aud": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
+    "nbf": null,
+    "scope": "",
+    "acr_values": null,
+    "cnf": null,
+    "exp": 1668941216,
+    "iat": 1668781885,
+    "jti": null,
+    "username": null
+}
+```
+
 ## Sample GET Request
+
+GET is supported for compatibility. It places the inspected token in the URL
+query, where it can appear in server, proxy and browser logs. Prefer POST.
 
 ### Request
 
@@ -53,39 +98,6 @@ curl -X 'GET'   'https://janssen.server.host/jans-auth/restv1/introspection?toke
     "cnf": null,
     "exp": 1668705523,
     "iat": 1668705223,
-    "jti": null,
-    "username": null
-}
-```
-## Sample POST Request
-
-### Request
-
-```shell
-curl -X 'POST' \
-  'https://janssen.server.host/jans-auth/restv1/introspection' \
-  -H 'accept: application/json' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  -d 'token=eyJra....3ZkB-Ajwg'  
-  -H "Authorization: Bearer eyJra...BpKo7g"
-```
-
-### Response
-
-```json
-{
-    "sub": "",
-    "iss": "https://janssen.server.host",
-    "active": true,
-    "token_type": "Bearer",
-    "client_id": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
-    "aud": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
-    "nbf": null,
-    "scope": "",
-    "acr_values": null,
-    "cnf": null,
-    "exp": 1668941216,
-    "iat": 1668781885,
     "jti": null,
     "username": null
 }

@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "ESNext.Disposable"],
+    "noEmit": true
+  },
+  "include": ["../.build/docs/types/*.d.ts"]
+}

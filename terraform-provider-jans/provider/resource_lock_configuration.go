@@ -244,6 +244,146 @@ func resourceLockConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Each clean up iteration fetches a chunk of expired data per base dn and removes it.",
 			},
+			"trace_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Trace and evidence pipeline configuration of the Lock server.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether the trace pipeline is enabled.",
+						},
+						"default_evidence_domain_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Default evidence domain id applied when a client has no explicit binding.",
+						},
+						"default_allowed_producer_ids": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Producer ids allowed by default when a client has no explicit binding.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"client_domain_bindings": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Per-client bindings of evidence domain and allowed producer ids.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"client_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Client id the binding applies to.",
+									},
+									"evidence_domain_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Evidence domain id bound to the client.",
+									},
+									"allowed_producer_ids": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "Producer ids the client may act on behalf of.",
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+								},
+							},
+						},
+						"lateness_threshold_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum lateness in seconds tolerated for a trace record.",
+						},
+						"policy_mismatch_grace_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Grace period in seconds applied on a policy mismatch.",
+						},
+						"policy_release_retention_days": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Number of days a policy release is retained.",
+						},
+						"max_future_skew_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum future clock skew in seconds accepted for a trace record.",
+						},
+						"max_request_bytes": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum size in bytes of a trace request.",
+						},
+						"max_json_depth": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum JSON nesting depth accepted in a trace request.",
+						},
+						"max_string_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum length of a string value in a trace request.",
+						},
+						"max_array_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of elements in an array in a trace request.",
+						},
+						"max_object_members": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of members in an object in a trace request.",
+						},
+						"receipt_allocation_retry_limit": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of receipt allocation retries.",
+						},
+						"correlation_retry_limit": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of correlation retries.",
+						},
+						"receipt_repair_interval_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Interval in seconds between receipt repair runs.",
+						},
+						"pending_receipt_timeout_seconds": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Timeout in seconds for a pending receipt.",
+						},
+						"max_bulk_records": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum number of records in a bulk trace request.",
+						},
+						"max_bulk_request_bytes": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Maximum size in bytes of a bulk trace request.",
+						},
+						"chain_registration_mode": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Chain registration mode of the trace pipeline.",
+						},
+						"crypto_provider": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Crypto provider used by the trace pipeline.",
+						},
+					},
+				},
+			},
 		},
 	}
 }

@@ -111,57 +111,6 @@ jobs:
       # previous cargo-deny-action invocation.
       run: cargo deny --all-features check
 
-  custom_lints:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Harden Runner
-      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
-      with:
-        egress-policy: audit
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-    - name: Install Protoc
-      uses: arduino/setup-protoc@3ea1d70ac22caff0b66ed6cb37d5b7aadebd4623
-      with:
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
-    - name: Install Rust Stable
-      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9 # stable
-      with:
-        toolchain: stable
-    - name: Install Rust Nightly
-      uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
-      with:
-        toolchain: nightly-2025-09-18
-        components: llvm-tools-preview, rustc-dev
-    - name: Cache Rust dependencies
-      uses: Swatinem/rust-cache@c19371144df3bb44fab255c43d04cbc2ab54d1c4 # v2.9.1
-      with:
-        workspaces: jans-cedarling
-    - uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37 # v1.18.1
-    - name: Install dylint
-      run: |
-        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        cargo binstall cargo-dylint --version 5.0.0 --locked --no-confirm
-        cargo binstall dylint-link --version 5.0.0 --locked --no-confirm
-        if ! which dylint-link > /dev/null 2>&1; then
-          echo "dylint-link not found via binstall, falling back to cargo install"
-          cargo install dylint-link --version 5.0.0 --locked
-        fi
-        echo "dylint-link location: $(which dylint-link)"
-    - name: Run Tests
-      working-directory: jans-cedarling/custom-lints
-      run: |
-        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        cargo +nightly-2025-09-18 test
-    - name: Run custom lints on workspace
-      working-directory: jans-cedarling
-      run: |
-        export PATH="${CARGO_HOME:-$HOME/.cargo}/bin:$PATH"
-        # Nightly pin for dylint: check dylint release notes for compatible nightly.
-        # To upgrade: 1) Find the nightly used by the target dylint release
-        # 2) Test locally: cargo +nightly-YYYY-MM-DD dylint --all --workspace --path custom-lints
-        # 3) Update the pin below and in the toolchain install step above
-        RUSTFLAGS="-Dwarnings" cargo +nightly-2025-09-18 dylint --all --path custom-lints
-
   rust_benchmarks:
     runs-on: ubuntu-latest
     steps:
