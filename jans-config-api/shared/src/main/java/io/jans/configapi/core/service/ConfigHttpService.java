@@ -213,7 +213,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
 
-        log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+        // header values are not logged: Authorization carries the caller's bearer token
+        log.info("\n\n requestUri{}, headerNames:{}, parameters:{}", requestUri,
+                headers == null ? null : headers.keySet(), parameters);
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();

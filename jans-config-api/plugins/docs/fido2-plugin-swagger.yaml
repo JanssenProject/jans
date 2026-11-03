@@ -1752,7 +1752,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/JsonNode"
+                type: array
+                items:
+                  $ref: "#/components/schemas/JsonNode"
         "401":
           description: Unauthorized
         "403":
