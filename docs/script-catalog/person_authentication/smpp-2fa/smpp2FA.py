@@ -24,7 +24,7 @@ from org.jsmpp.bean import Alphabet, BindType, ESMClass, GeneralDataCoding, Mess
 from org.jsmpp.extra import NegativeResponseException, ResponseTimeoutException
 from org.jsmpp.session import BindParameter, SMPPSession
 from org.jsmpp.util import AbsoluteTimeFormatter
-from java.security import SecureRandom
+import random
 
 
 class SmppAttributeError(Exception):
@@ -282,7 +282,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Generate Random six digit code
-            code = 100000 + SecureRandom().nextInt(900000)
+            code = random.randint(100000, 999999)
 
             # Get code and save it in LDAP temporarily with special session entry
             self.identity.setWorkingParameter("code", code)
