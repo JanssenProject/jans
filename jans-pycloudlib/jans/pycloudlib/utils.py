@@ -46,6 +46,7 @@ from jans.pycloudlib.pki import generate_private_key
 from jans.pycloudlib.pki import generate_public_key
 from jans.pycloudlib.pki import generate_csr
 from jans.pycloudlib.pki import sign_csr
+from jans.pycloudlib._fs import open_private  # noqa: F401
 
 # Default charset
 _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
