@@ -106,10 +106,10 @@ class SQLBackend:
             if column_type == "TEXT":
                 # set key length to 255
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (255))"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 if self.client.get_server_version() < (8, 0):
                     # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
@@ -122,7 +122,7 @@ class SQLBackend:
                             f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
                         ])
                         try:
-                            self.client.create_index(query)
+                            self.client.create_index(query, table_name, index_str_fmt)
                         except OperationalError as exc:
                             # re-raise exception if the code isn't one of the following code
                             # 1060 - duplicate column error
@@ -135,7 +135,7 @@ class SQLBackend:
                         })
                         name = f"{table_name}_json_{i}"
                         query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
-                        self.client.create_index(query)
+                        self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -143,7 +143,7 @@ class SQLBackend:
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
 
     def create_pgsql_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
@@ -156,7 +156,7 @@ class SQLBackend:
 
             if column_type.lower() != "jsonb":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                     index_str_fmt = Template(index_str).safe_substitute({
@@ -164,12 +164,12 @@ class SQLBackend:
                     })
                     name = f"{table_name}_json_{i}"
                     query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {index_str_fmt}"
-                    self.client.create_index(query)
+                    self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {custom}"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
 
     def create_indexes(self):
         # exclude tables that created externally https://github.com/JanssenProject/jans/issues/10512
@@ -195,7 +195,7 @@ class SQLBackend:
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD UNIQUE INDEX {self.client.quoted_id(index_name)} ({self.client.quoted_id(column)})"
             else:
                 query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, index_name)
 
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
