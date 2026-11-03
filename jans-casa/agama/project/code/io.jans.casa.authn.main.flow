@@ -45,9 +45,7 @@ When prompt2fa is false     //skip 2FA?
 methods = Call reinutil computeUserMethods methods
 
 When methods.empty is true      //No suitable methods found for this user?
-    Log "@w No usable 2FA method found for user %" reinutil.inum
-    obj = { success: false, error: "No usable second factor is available for your account. Contact your administrator" }
-    Finish obj
+    Finish uid
 
 userData = { uid: uid, inum: reinutil.inum, name: reinutil.name }
 //reinutil = null
