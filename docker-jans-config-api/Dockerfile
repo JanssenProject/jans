@@ -43,8 +43,8 @@ RUN wget -nv https://repo1.maven.org/maven2/org/python/jython-installer/${JYTHON
 # Config API
 # ==========
 
-ENV CN_VERSION=0.0.0-nightly
-ENV CN_RELEASE_TAG=nightly
+ENV CN_VERSION=2.6.1
+ENV CN_RELEASE_TAG=v2.6.1
 ENV CN_BUILD_DATE='2026-10-06T16:25:49Z'
 
 # Base URL for the released WAR + plugin jars; overridable (e.g. CI serving locally-built artifacts)
@@ -83,7 +83,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/templates/jans-config-api \
     /opt/jans/bin
 
-ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
+ARG JANS_SOURCE_VERSION=e790bb44acd321a824e7d481db47e409cd07455a
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -240,7 +240,7 @@ EXPOSE $CN_CONFIG_API_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="0.0.0-nightly" \
+    org.opencontainers.image.version="2.6.1-1" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 

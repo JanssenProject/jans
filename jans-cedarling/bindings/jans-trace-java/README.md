@@ -45,7 +45,7 @@ Add the installed jar to a Maven project with:
 <dependency>
     <groupId>io.jans</groupId>
     <artifactId>jans-trace-java</artifactId>
-    <version>0.0.0-nightly</version>
+    <version>2.6.1</version>
 </dependency>
 ```
 
