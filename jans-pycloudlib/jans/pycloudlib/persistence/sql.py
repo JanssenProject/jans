@@ -7,11 +7,13 @@ import json
 import logging
 import os
 import re
+import time
 import typing as _t
 import warnings
 import weakref
 from collections import defaultdict
 from collections.abc import Callable
+from contextlib import nullcontext
 from functools import cached_property
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -194,6 +196,18 @@ class CloudSqlConnectorMixin:
                 self._cloudsql_connector = None
 
 
+def _pg_error_code(exc: DatabaseError) -> _t.Optional[str]:
+    """Get SQLSTATE of a PostgreSQL error, whichever driver (psycopg2 or pg8000) raised it."""
+    orig = exc.orig
+    code = getattr(orig, "pgcode", None) or getattr(orig, "sqlstate", None)
+    if code:
+        return str(code)
+    # pg8000 puts the error fields in a dict as the first argument
+    if orig is not None and orig.args and isinstance(orig.args[0], dict):
+        return orig.args[0].get("C")
+    return None
+
+
 class PostgresqlAdapter(CloudSqlConnectorMixin):
     """Class for PostgreSQL adapter."""
 
@@ -214,6 +228,50 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
 
     #: Fallback driver name for warning messages
     fallback_driver_name = "psycopg2"
+
+    #: Query to find an index; returns ``indisvalid`` if the index exists (uses ``current_schema()``,
+    #: which follows the search_path set for the connection).
+    index_state_query = (
+        "SELECT i.indisvalid "
+        "FROM pg_index i "
+        "JOIN pg_class c ON c.oid = i.indexrelid "
+        "JOIN pg_class t ON t.oid = i.indrelid "
+        "JOIN pg_namespace n ON n.oid = t.relnamespace "
+        "WHERE n.nspname = current_schema() AND t.relname = :table_name AND c.relname = :index_name"
+    )
+
+    #: Whether index DDL must run outside a transaction (needed by ``CREATE INDEX CONCURRENTLY``).
+    index_ddl_autocommit = True
+
+    def prepare_index_query(self, query: str) -> str:
+        """Make index creation non-blocking for writers.
+
+        A plain ``CREATE INDEX`` takes a SHARE lock, which waits for (auto)vacuum and makes every writer
+        of the table queue behind it. ``CONCURRENTLY`` only takes SHARE UPDATE EXCLUSIVE.
+        """
+        for prefix in ("CREATE UNIQUE INDEX ", "CREATE INDEX "):
+            if query.startswith(prefix):
+                return f"{prefix}CONCURRENTLY IF NOT EXISTS {query[len(prefix):]}"
+        return query
+
+    def drop_index_query(self, table_name: str, index_name: str) -> str:
+        """Query to drop an index (left invalid by a failed concurrent build)."""
+        return f"DROP INDEX CONCURRENTLY IF EXISTS {self.quote_char}{index_name}{self.quote_char}"
+
+    def set_lock_timeout_query(self, seconds: int) -> str:
+        """Query to limit how long a statement waits for a lock."""
+        return f"SET lock_timeout = '{int(seconds)}s'"
+
+    #: Query to restore the default lock timeout.
+    reset_lock_timeout_query = "RESET lock_timeout"
+
+    def is_lock_timeout(self, exc: DatabaseError) -> bool:
+        """Check whether the error is a lock timeout (SQLSTATE 55P03, lock_not_available).
+
+        Args:
+            exc: Exception instance.
+        """
+        return _pg_error_code(exc) == "55P03"
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -296,6 +354,40 @@ class MysqlAdapter(CloudSqlConnectorMixin):
 
     #: Fallback driver name for warning messages
     fallback_driver_name = "pymysql"
+
+    #: Query to find an index; returns a row if the index exists.
+    index_state_query = (
+        "SELECT 1 FROM information_schema.statistics "
+        "WHERE table_schema = DATABASE() AND table_name = :table_name "
+        "AND LOWER(index_name) = LOWER(:index_name) LIMIT 1"
+    )
+
+    #: MySQL DDL commits implicitly, so it runs in a regular transaction block.
+    index_ddl_autocommit = False
+
+    def prepare_index_query(self, query: str) -> str:
+        """Return the index query unchanged."""
+        return query
+
+    def drop_index_query(self, table_name: str, index_name: str) -> str:
+        """Query to drop an index."""
+        q = self.quote_char
+        return f"DROP INDEX {q}{index_name}{q} ON {q}{table_name}{q}"
+
+    def set_lock_timeout_query(self, seconds: int) -> str:
+        """Query to limit how long a statement waits for a metadata lock."""
+        return f"SET SESSION lock_wait_timeout = {int(seconds)}"
+
+    #: Query to restore the default lock timeout.
+    reset_lock_timeout_query = "SET SESSION lock_wait_timeout = DEFAULT"
+
+    def is_lock_timeout(self, exc: DatabaseError) -> bool:
+        """Check whether the error is a lock timeout (1205, lock wait timeout exceeded).
+
+        Args:
+            exc: Exception instance.
+        """
+        return bool(exc.orig is not None and exc.orig.args and exc.orig.args[0] == 1205)
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -760,14 +852,98 @@ class SqlClient(SqlSchemaMixin):
         # finalized table mapping
         return dict(table_mapping)
 
-    def create_index(self, query: str) -> None:
-        """Create index using raw query."""
+    def get_index_state(self, table_name: str, index_name: str) -> _t.Optional[bool]:
+        """Look up an index in the catalog, which takes no lock on the table.
+
+        Returns:
+            ``None`` if the index does not exist, ``False`` if it exists but is invalid
+            (e.g. left by a failed concurrent build), otherwise ``True``.
+        """
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
+            row = conn.execute(
+                text(self.adapter.index_state_query),
+                {"table_name": table_name, "index_name": index_name},
+            ).fetchone()
+        if row is None:
+            return None
+        return bool(row[0])
+
+    def create_index(
+        self,
+        query: str,
+        table_name: _t.Optional[str] = None,
+        index_name: _t.Optional[str] = None,
+        lock_timeout: int = 10,
+        retries: int = 3,
+    ) -> None:
+        """Create index using raw query.
+
+        If ``table_name`` and ``index_name`` are given, the index is created only when it
+        does not exist yet, and without holding up writers of the table:
+
+        - the catalog is checked first, because trying the DDL and ignoring "already exists"
+          still takes the table lock, so each start would wait for vacuum or long transactions
+          while every writer queues behind it;
+        - PostgreSQL builds the index ``CONCURRENTLY``;
+        - the DDL waits at most ``lock_timeout`` seconds for a lock and is retried ``retries`` times.
+
+        Without the names, the query is run as is and "already exists" errors are ignored.
+        """
+        if table_name is None or index_name is None:
+            with self.engine.connect() as conn:
+                with conn.begin():
+                    try:
+                        conn.execute(text(query))
+                    except DatabaseError as exc:
+                        self.adapter.on_create_index_error(exc)
+            return
+
+        state = self.get_index_state(table_name, index_name)
+        if state:
+            logger.debug("index %s on %s already exists; skipping", index_name, table_name)
+            return
+
+        query = self.adapter.prepare_index_query(query)
+        for attempt in range(1, retries + 1):
+            try:
+                self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=state is False)
+                return
+            except DatabaseError as exc:
+                if self.adapter.is_lock_timeout(exc):
+                    if attempt == retries:
+                        raise
+                    logger.warning(
+                        "could not lock %s to create index %s (attempt %s of %s); retrying",
+                        table_name, index_name, attempt, retries,
+                    )
+                    time.sleep(attempt * 5)
+                    continue
+                self.adapter.on_create_index_error(exc)
+                return
+
+    def _run_index_ddl(
+        self, query: str, table_name: str, index_name: str, lock_timeout: int, drop_first: bool,
+    ) -> None:
+        with self.engine.connect() as conn:
+            if self.adapter.index_ddl_autocommit:
+                # must be set before the connection starts a transaction
+                conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+                tx = nullcontext()
+            else:
+                tx = conn.begin()
+
+            try:
+                with tx:
+                    conn.execute(text(self.adapter.set_lock_timeout_query(lock_timeout)))
+                    if drop_first:
+                        conn.execute(text(self.adapter.drop_index_query(table_name, index_name)))
                     conn.execute(text(query))
-                except DatabaseError as exc:
-                    self.adapter.on_create_index_error(exc)
+            finally:
+                # the connection goes back to the pool, so do not leave the timeout set on it
+                try:
+                    conn.execute(text(self.adapter.reset_lock_timeout_query))
+                except DatabaseError:
+                    pass
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
