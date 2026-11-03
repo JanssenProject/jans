@@ -46,12 +46,14 @@ from jans.pycloudlib.pki import generate_private_key
 from jans.pycloudlib.pki import generate_public_key
 from jans.pycloudlib.pki import generate_csr
 from jans.pycloudlib.pki import sign_csr
-from jans.pycloudlib._fs import open_private  # noqa: F401
+from jans.pycloudlib import _fs
 
 # Default charset
 _DEFAULT_CHARS = "".join([string.ascii_letters, string.digits])
 
 logger = logging.getLogger(__name__)
+
+open_private = _fs.open_private
 
 
 def as_boolean(val: _t.Any) -> bool:
