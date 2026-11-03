@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import contextlib
 import os
 import stat
 import sys
@@ -205,10 +206,9 @@ if not 'projectName' in project_metadata:
             w.write(json.dumps(project_metadata_new, indent=2))
         os.replace(tmp_name, 'project.json', src_dir_fd=project_dir_fd, dst_dir_fd=project_dir_fd)
     finally:
-        try:
+        # the temp file is gone after a successful replace
+        with contextlib.suppress(FileNotFoundError):
             os.unlink(tmp_name, dir_fd=project_dir_fd)
-        except FileNotFoundError:
-            pass
         os.close(project_dir_fd)
 
 
