@@ -366,7 +366,6 @@ public class ClientsResource extends ConfigBaseResource {
         }
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
-        final String dn = existingClient.getDn();
         final String clientId = existingClient.getClientId();
         final String storedSecret = existingClient.getClientSecret();
         final String registrationAccessToken = existingClient.getRegistrationAccessToken();
@@ -375,7 +374,6 @@ public class ClientsResource extends ConfigBaseResource {
         existingClient.setClientSecret("");
         existingClient.setRegistrationAccessToken("");
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
-        existingClient.setDn(dn);
         existingClient.setClientId(clientId);
         existingClient.setRegistrationAccessToken(registrationAccessToken);
 

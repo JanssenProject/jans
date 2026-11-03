@@ -484,19 +484,14 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     }
 
     private TokenEntity lockAndRemoveRefreshToken(String refreshTokenCode) {
+        if (refreshTokenLock.putIfAbsent(refreshTokenCode, refreshTokenCode) != null) {
+            log.trace("Refresh token is already used by another request. Refresh token  code: {}", refreshTokenCode);
+            return null;
+        }
         try {
-            synchronized (refreshTokenLock) {
-                if (refreshTokenLock.containsKey(refreshTokenCode)) {
-                    log.trace("Refresh token is already used by another request. Refresh token  code: {}", refreshTokenCode);
-                    return null;
-                }
-
-                refreshTokenLock.put(refreshTokenCode, refreshTokenCode);
-
-                final TokenEntity token = grantService.getGrantByCode(refreshTokenCode);
-                grantService.remove(token);
-                return token;
-            }
+            final TokenEntity token = grantService.getGrantByCode(refreshTokenCode);
+            grantService.remove(token);
+            return token;
         } catch (Exception e) {
             // ignore
             log.trace(e.getMessage(), e);

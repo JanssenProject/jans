@@ -343,11 +343,9 @@ public class AssetResource extends ConfigBaseResource {
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
-            asset.setDn(assets.get(0).getDn());
             asset.setBaseDn(assets.get(0).getBaseDn());
         } else {
             asset.setInum(null);
-            asset.setDn(null);
         }
 
         InputStream assetStream = assetForm.getAssetFile();

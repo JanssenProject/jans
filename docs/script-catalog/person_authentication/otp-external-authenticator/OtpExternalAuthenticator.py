@@ -41,7 +41,7 @@ from io.jans.util import StringHelper
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
-        self.totpCacheLock = threading.Lock()
+        self.totpCacheLocks = [threading.Lock() for i in range(64)]
 
     def init(self, customScript, configurationAttributes):
         print "OTP. Initialization"
@@ -549,7 +549,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return { "result": False }
 
         # replay check and cache update must not interleave between concurrent logins
-        with self.totpCacheLock:
+        with self.totpCacheLocks[hash((user_name or "").lower()) % len(self.totpCacheLocks)]:
             cachedOTP = self.getCachedOTP(user_name)
             if StringHelper.equals(localTotpKey, cachedOTP):
                 return { "result": False }

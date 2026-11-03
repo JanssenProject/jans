@@ -47,7 +47,7 @@ class Introspection(IntrospectionType):
             return True
 
         sessionIdService = CdiUtil.bean(SessionIdService)
-        session = sessionIdService.getSessionById(sessionDn, False)
+        session = sessionIdService.getSessionByDn(sessionDn, False)
         if session is None:
             print "Introspection. Failed to load session '%s'" % sessionDn
             return True

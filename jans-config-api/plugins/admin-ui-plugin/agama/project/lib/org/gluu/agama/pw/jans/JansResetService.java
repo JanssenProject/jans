@@ -159,18 +159,22 @@ public class JansResetService extends ResetService{
 
         String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4); 
 
-        SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
-        String from = smtpConfiguration.getFromEmailAddress();
+        try {
+            SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
+            String from = smtpConfiguration.getFromEmailAddress();
 
-        MailService mailService = CdiUtil.bean(MailService.class);
-        if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
-            LogUtils.log("E-mail delivery succeeded");
-            return otp;
+            MailService mailService = CdiUtil.bean(MailService.class);
+            if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
+                LogUtils.log("E-mail delivery succeeded");
+                return otp;
+            }
+            LogUtils.log("E-mail delivery failed, check jans-auth logs");
+        } catch (Exception e) {
+            LogUtils.log("E-mail delivery failed: %", e.getMessage());
         }
 
-        LogUtils.log("E-mail delivery failed, check jans-auth logs");
-        // A null code could match an absent passcode in the flow, so delivery failure must stop recovery.
-        throw new IllegalStateException("Verification code delivery failed");
+        // Unguessable code, like the unknown-mail path, so failures neither reveal accounts nor match an absent passcode.
+        return UUID.randomUUID().toString();
     } 
 
     private static String sanitizeForLog(String value) {

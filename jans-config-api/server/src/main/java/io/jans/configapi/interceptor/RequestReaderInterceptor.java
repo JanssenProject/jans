@@ -38,7 +38,6 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 
 import io.jans.orm.model.AttributeData;
-import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
@@ -222,11 +221,7 @@ public class RequestReaderInterceptor {
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         logger.debug("Data to set new value - propertyName:{}", propertyName);
         Setter setterMethod = DataUtil.getSetterMethod(obj.getClass(), propertyName);
-        propertyValue = setterMethod.getMethod().invoke(obj, propertyValue);
-
-        Getter getterMethod = DataUtil.getGetterMethod(obj.getClass(), propertyName);
-        propertyValue = getterMethod.get(obj);
-
+        setterMethod.getMethod().invoke(obj, propertyValue);
     }
 
     private DataFormatConversionConf getDataFormatConversionConf() {

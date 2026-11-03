@@ -12,6 +12,7 @@ import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
@@ -141,8 +142,7 @@ public class SsaRestWebServiceValidatorTest {
         client.setClientId("test_client");
         AuthorizationGrant grant = mock(AuthorizationGrant.class);
         when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
-        when(tokenService.isBearerAuthToken("Bearer token")).thenReturn(true);
-        when(tokenService.getBearerToken("Bearer token")).thenReturn("token");
+        when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
         when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
         when(grant.getScopes()).thenReturn(Collections.singleton("openid"));
         when(grant.getClientId()).thenReturn("test_client");

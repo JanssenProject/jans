@@ -187,6 +187,10 @@ func declaredValue(d *schema.ResourceData, path string) (any, bool) {
 
 	switch pathConfigState(d.GetRawConfig(), path) {
 	case configNull:
+		// raw config carries no schema Defaults; a planned default still shows as a change
+		if d.HasChange(path) {
+			return d.GetOk(path)
+		}
 		return nil, false
 	case configSet:
 		return d.Get(path), true
@@ -635,7 +639,7 @@ func convertSlice(targetType reflect.Type, value interface{}, existing reflect.V
 	// from the map to the struct first, before we can add them to the slice
 	if targetType.Elem().Kind() == reflect.Struct {
 
-		for i, elem := range value.([]interface{}) {
+		for _, elem := range value.([]interface{}) {
 
 			m, ok := elem.(map[string]interface{})
 			if !ok {
@@ -644,7 +648,7 @@ func convertSlice(targetType reflect.Type, value interface{}, existing reflect.V
 
 			// create a new struct of the correct type
 			newElem := reflect.New(elemType)
-			if current, found := existingSliceElem(existing, elemType, m, i); found {
+			if current, found := existingSliceElem(existing, elemType, m); found {
 				newElem.Elem().Set(current)
 			}
 
@@ -692,9 +696,9 @@ func convertSlice(targetType reflect.Type, value interface{}, existing reflect.V
 var sliceElemIdentityKeys = []string{"config_id"}
 
 // existingSliceElem returns the element of existing that corresponds to the
-// decoded map m at index i: matched by identity key when the element type has
-// one, by position otherwise.
-func existingSliceElem(existing reflect.Value, elemType reflect.Type, m map[string]interface{}, i int) (reflect.Value, bool) {
+// decoded map m, matched by identity key. Elements of types without one start
+// from the zero value.
+func existingSliceElem(existing reflect.Value, elemType reflect.Type, m map[string]interface{}) (reflect.Value, bool) {
 
 	if !existing.IsValid() || existing.Kind() != reflect.Slice || existing.Type().Elem() != elemType {
 		return reflect.Value{}, false
@@ -720,9 +724,6 @@ func existingSliceElem(existing reflect.Value, elemType reflect.Type, m map[stri
 		return reflect.Value{}, false
 	}
 
-	if i < existing.Len() {
-		return existing.Index(i), true
-	}
-
+	// positional matching would copy undeclared fields across reordered elements
 	return reflect.Value{}, false
 }

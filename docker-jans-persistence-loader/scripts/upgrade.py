@@ -1,6 +1,5 @@
 import contextlib
 import copy
-import itertools
 import json
 import logging.config
 import os
@@ -443,6 +442,7 @@ class Upgrade:
         self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps({
             "roles": sorted(_names(role_mapping.get("roles"), "role") | _seeded_names(seeded, "roles")),
             "permissions": sorted(_names(role_mapping.get("permissions"), "permission") | _seeded_names(seeded, "permissions")),
+            "grants": sorted(list(grant) for grant in _default_grants(role_mapping) | _seeded_grants(seeded)),
         }))
 
     def update_auth_errors_config(self):
@@ -595,14 +595,35 @@ def _seeded_names(seeded, key):
     return {name for name in names if isinstance(name, str)} if isinstance(names, list) else set()
 
 
+def _seeded_grants(seeded):
+    grants = seeded.get("grants")
+    if not isinstance(grants, list):
+        return set()
+    return {
+        tuple(grant) for grant in grants
+        if isinstance(grant, list) and len(grant) == 2 and all(isinstance(part, str) for part in grant)
+    }
+
+
+def _default_grants(defaults):
+    return {
+        (mapping.get("role"), perm)
+        for mapping in defaults.get("rolePermissionMapping") or []
+        if isinstance(mapping.get("role"), str)
+        for perm in mapping.get("permissions") or []
+        if isinstance(perm, str)
+    }
+
+
 def _merge_role_mapping(conf, defaults, seeded=None):
-    """Add new default roles/permissions without restoring ones removed by admins."""
+    """Add new default roles/permissions/grants without restoring ones removed by admins."""
     if not isinstance(conf, dict):
         return copy.deepcopy(defaults), True
 
     seeded = seeded if isinstance(seeded, dict) else {}
     seeded_roles = _seeded_names(seeded, "roles")
     seeded_perms = _seeded_names(seeded, "permissions")
+    seeded_grants = _seeded_grants(seeded)
 
     should_update = False
 
@@ -617,40 +638,28 @@ def _merge_role_mapping(conf, defaults, seeded=None):
             conf["roles"].append(role)
             should_update = True
 
-    # permissions unknown to the stored config are new in this release, hence never revoked
     known_perms = {perm.get("permission") for perm in conf["permissions"]} | seeded_perms
-    known_perms.update(itertools.chain.from_iterable(
-        mapping.get("permissions") or [] for mapping in conf["rolePermissionMapping"]
-    ))
-
-    new_perms = set()
     for perm in defaults.get("permissions", []):
         if perm.get("permission") not in known_perms:
             conf["permissions"].append(perm)
-            new_perms.add(perm.get("permission"))
             should_update = True
-
-    new_perms.update(
-        perm
-        for mapping in defaults.get("rolePermissionMapping", [])
-        for perm in mapping.get("permissions") or []
-        if perm not in known_perms
-    )
 
     mappings = {mapping.get("role"): mapping for mapping in conf["rolePermissionMapping"]}
     for default_mapping in defaults.get("rolePermissionMapping", []):
-        mapping = mappings.get(default_mapping.get("role"))
+        role = default_mapping.get("role")
+        mapping = mappings.get(role)
 
         if mapping is None:
-            if default_mapping.get("role") not in seeded_roles:
-                conf["rolePermissionMapping"].append(default_mapping)
+            if role not in seeded_roles:
+                conf["rolePermissionMapping"].append(copy.deepcopy(default_mapping))
                 should_update = True
             continue
 
         if not isinstance(mapping.get("permissions"), list):
             mapping["permissions"] = []
         for perm in default_mapping.get("permissions", []):
-            if perm in new_perms and perm not in mapping["permissions"]:
+            # a seeded pair missing from the stored mapping was revoked by an admin
+            if perm not in mapping["permissions"] and (role, perm) not in seeded_grants:
                 mapping["permissions"].append(perm)
                 should_update = True
     return conf, should_update

@@ -293,6 +293,11 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				IOUtils.closeQuietly(out);
 			}
 
+			int status = con.getResponseCode();
+			if (status != HttpURLConnection.HTTP_OK) {
+				throw new IOException("Failed to get OCSP response from '" + url + "', status: " + status + ", location: " + con.getHeaderField("Location") + " (redirects are not followed)");
+			}
+
 			byte[] responseBytes = IOUtils.toByteArray(con.getInputStream());
 			OCSPResp ocspResp = new OCSPResp(responseBytes);
 

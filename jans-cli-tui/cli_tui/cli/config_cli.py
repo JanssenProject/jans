@@ -1019,8 +1019,10 @@ class JCA_CLI:
 
         root = next(root for root in self.user_file_roots() if resolved.startswith(os.path.join(root, '')))
         parts = Path(os.path.relpath(resolved, root)).parts
-        dir_flags = os.O_RDONLY | os.O_NOFOLLOW | getattr(os, 'O_DIRECTORY', 0)
-        fd = os.open(root, os.O_RDONLY | getattr(os, 'O_DIRECTORY', 0))
+        # search-only fds so traverse-only (x without r) directories still work
+        search_flag = getattr(os, 'O_PATH', getattr(os, 'O_SEARCH', os.O_RDONLY))
+        dir_flags = search_flag | os.O_NOFOLLOW | getattr(os, 'O_DIRECTORY', 0)
+        fd = os.open(root, search_flag | getattr(os, 'O_DIRECTORY', 0))
         try:
             for part in parts[:-1]:
                 next_fd = os.open(part, dir_flags, dir_fd=fd)

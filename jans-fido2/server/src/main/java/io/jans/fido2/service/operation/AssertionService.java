@@ -396,8 +396,8 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
-		externalFido2InterceptionService
-				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService
+				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext));
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);

@@ -946,6 +946,13 @@ func resourceOidcClientUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if err := fromSchemaResource(d, &client); err != nil {
 		return diag.FromErr(err)
 	}
+	// computed attributes.require_pkce keeps its state value, so a top-level change to false must override it
+	if d.HasChange("require_pkce") && !d.HasChange("attributes.0.require_pkce") {
+		if client.Attributes == nil {
+			client.Attributes = &jans.OidcClientAttribute{}
+		}
+		client.Attributes.RequirePkce = client.RequirePkce
+	}
 	tflog.Debug(ctx, "Updating OidcClient", map[string]interface{}{"inum": client.Inum})
 	if _, err := c.UpdateOidcClient(ctx, &client); err != nil {
 		return diag.FromErr(err)

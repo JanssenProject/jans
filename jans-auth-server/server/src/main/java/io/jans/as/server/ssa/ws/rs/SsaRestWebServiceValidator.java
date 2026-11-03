@@ -15,6 +15,7 @@ import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.session.SessionClient;
+import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
@@ -24,6 +25,7 @@ import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -112,7 +114,7 @@ public class SsaRestWebServiceValidator {
     }
 
     /**
-     * Scope ids the caller is authorized for: the bearer token's granted scopes, or the client's registered scopes
+     * Scope ids the caller is authorized for: the presented access token's granted scopes, or the client's registered scopes
      * when the client authenticated directly.
      *
      * @param client Authenticated client
@@ -120,8 +122,9 @@ public class SsaRestWebServiceValidator {
      */
     public List<String> getAuthorizedScopes(Client client) {
         final String authorization = httpRequest != null ? httpRequest.getHeader("Authorization") : null;
-        if (tokenService.isBearerAuthToken(authorization)) {
-            final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(tokenService.getBearerToken(authorization));
+        final String token = tokenService.getToken(authorization, HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken);
+        if (StringUtils.isNotBlank(token)) {
+            final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
             if (grant == null || grant.getScopes() == null || !client.getClientId().equals(grant.getClientId())) {
                 return new ArrayList<>();
             }

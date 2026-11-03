@@ -156,7 +156,9 @@ public class DpopService {
 
         // Validate the token was issued within an acceptable timeframe.
         int seconds = appConfiguration.getDpopTimeframe();
-        long diff = (new Date().getTime() - iat) / 1000;
+        // RFC 9449 iat is NumericDate seconds; legacy jans clients send milliseconds
+        long iatMillis = iat < 100_000_000_000L ? iat * 1000L : iat;
+        long diff = (new Date().getTime() - iatMillis) / 1000;
         if (diff > seconds) {
             throw new InvalidJwtException("The DPoP token has expired.");
         }

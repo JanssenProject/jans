@@ -471,6 +471,7 @@ public class AdminUISecurityService {
 
             boolean adminUiIssuerFound = false;
             long totalUncompressed = 0;
+            List<String> localEntryNames = new ArrayList<>();
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
@@ -481,6 +482,7 @@ public class AdminUISecurityService {
                                 "Invalid policy-store file path"
                         );
                     }
+                    localEntryNames.add(entryName);
                     // Cedarling matches extensions case-insensitively, so must the issuer checks.
                     String normalizedName = entryName.toLowerCase(Locale.ROOT);
                     boolean legacyIssuerFile = !entry.isDirectory()
@@ -516,6 +518,9 @@ public class AdminUISecurityService {
                 }
             }
 
+            // Cedarling resolves files by central-directory name, so the validated local headers must match it.
+            verifyCentralDirectoryMatches(zipBytes, localEntryNames);
+
             if (!adminUiIssuerFound) {
                 throw new ApplicationException(
                         Response.Status.BAD_REQUEST.getStatusCode(),
@@ -530,6 +535,40 @@ public class AdminUISecurityService {
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     "Error processing trusted issuers: " + e.getMessage()
             );
+        }
+    }
+
+    /**
+     * Rejects archives whose central-directory entry names differ from their local-header names or repeat.
+     *
+     * @param zipBytes        the policy-store archive bytes
+     * @param localEntryNames entry names read from the local file headers
+     * @throws ApplicationException with HTTP 400 if the names do not match
+     * @throws IOException          if the archive cannot be read
+     */
+    private static void verifyCentralDirectoryMatches(byte[] zipBytes, List<String> localEntryNames)
+            throws ApplicationException, IOException {
+        Path tempFile = createSecureTempFile("adminui-policy-store-check-", ".cjar");
+        Path tempDirectory = tempFile.getParent();
+        try {
+            Files.write(tempFile, zipBytes);
+            List<String> centralEntryNames = new ArrayList<>();
+            try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
+                Enumeration<? extends ZipEntry> entries = zipFile.entries();
+                while (entries.hasMoreElements()) {
+                    centralEntryNames.add(entries.nextElement().getName());
+                }
+            }
+            boolean duplicates = new HashSet<>(centralEntryNames).size() != centralEntryNames.size();
+            if (duplicates || !centralEntryNames.equals(localEntryNames)) {
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Inconsistent policy-store archive entries"
+                );
+            }
+        } finally {
+            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempDirectory);
         }
     }
 
@@ -591,9 +630,14 @@ public class AdminUISecurityService {
             // Remove duplicate permissions efficiently
             List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
 
+            // Derived scopes come only from the stored resource-scope mappings, which may extend the permission catalog.
+            Set<String> resourceScopes = adminUIResourceScopesMappings.stream()
+                    .map(AdminUIResourceScopesMapping::getScopes).filter(Objects::nonNull)
+                    .flatMap(List::stream).collect(Collectors.toSet());
+
             // Update services
             adminUIService.resetRoles(roles);
-            adminUIService.resetPermissionsToRole(updatedMappings);
+            adminUIService.resetPermissionsToRole(updatedMappings, resourceScopes);
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Sync of role-to-scope mappings from the policy store completed successfully.");

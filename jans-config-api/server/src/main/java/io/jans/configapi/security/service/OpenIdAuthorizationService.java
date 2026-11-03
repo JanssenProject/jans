@@ -119,6 +119,12 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             logger.info("Non JWT Token Introspection");
             IntrospectionResponse introspectionResponse = introspect(token, acccessToken, issuer);
             requireActive(introspectionResponse);
+            if (introspectionResponse.getCnf() != null
+                    && introspectionResponse.getCnf().containsKey(JwtClaimName.JKT)) {
+                logger.error("DPoP-bound token presented as Bearer token.");
+                throw new WebApplicationException("DPoP-bound token cannot be used as Bearer token.",
+                        Response.status(Response.Status.UNAUTHORIZED).build());
+            }
             tokenScopes = introspectionResponse.getScope();
             setAuthenticatedPrincipal(introspectionResponse.getSubject(), introspectionResponse.getClientId());
         }

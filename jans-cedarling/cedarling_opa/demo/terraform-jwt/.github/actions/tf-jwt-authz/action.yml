@@ -73,7 +73,7 @@ runs:
       run: |
         # ── Map sub-command → Cedar action ────────────────────────────────────
         # Parse once; the same argument vector is authorized and executed.
-        read -r -a TF_ARGS <<< "${TF_COMMAND}"
+        read -r -d '' -a TF_ARGS <<< "${TF_COMMAND}" || true
         TF_SUBCOMMAND=""
         DESTROY_FLAG=""
         for arg in "${TF_ARGS[@]}"; do

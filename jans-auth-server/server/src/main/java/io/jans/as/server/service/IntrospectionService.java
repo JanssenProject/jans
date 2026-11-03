@@ -87,6 +87,10 @@ public class IntrospectionService {
 
         KeyEncryptionAlgorithm keyAlgorithm = KeyEncryptionAlgorithm.fromName(client.getAttributes().getIntrospectionEncryptedResponseAlg());
         BlockEncryptionAlgorithm blockAlgorithm = BlockEncryptionAlgorithm.fromName(client.getAttributes().getIntrospectionEncryptedResponseEnc());
+        // RFC 9701: enc defaults to A128CBC-HS256 when only alg is registered
+        if (keyAlgorithm != null && StringUtils.isBlank(client.getAttributes().getIntrospectionEncryptedResponseEnc())) {
+            blockAlgorithm = BlockEncryptionAlgorithm.A128CBC_PLUS_HS256;
+        }
 
         final boolean encryptionRequested = StringUtils.isNotBlank(client.getAttributes().getIntrospectionEncryptedResponseAlg())
                 || StringUtils.isNotBlank(client.getAttributes().getIntrospectionEncryptedResponseEnc());

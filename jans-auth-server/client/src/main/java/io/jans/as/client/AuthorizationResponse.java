@@ -159,7 +159,7 @@ public class AuthorizationResponse extends BaseResponse {
                 if (params != null) {
                     if (params.containsKey(RESPONSE)) {
                         response = params.remove(RESPONSE);
-                        // only authenticated JWT claims are loaded; unsigned outer parameters are discarded
+                        // only JARM claims are loaded; outer parameters are discarded (bare JWE still accepted for encryption-only clients)
                         params = getJarmClaims(response);
                     }
 

@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -358,7 +357,7 @@ public class SqlFilterConverter {
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
-    				String likeString = StringEscapeUtils.escapeJava(like.toString());
+    				String likeString = like.toString();
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
 							currentGenericFilter, typedPathColumn, Expressions.constant("like_regex"),
 							likeString);

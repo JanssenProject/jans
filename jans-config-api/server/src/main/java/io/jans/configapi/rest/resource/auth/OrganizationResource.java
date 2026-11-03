@@ -96,9 +96,7 @@ public class OrganizationResource extends ConfigBaseResource {
         logger.trace("Organization patch request - pathString:{} ", escapeLog(pathString));
         GluuOrganization organization = organizationService.getOrganization();
         try {
-            final String dn = organization.getDn();
             organization = Jackson.applyPatch(pathString, organization);
-            organization.setDn(dn);
             organizationService.updateOrganization(organization);
 
         } catch (Exception ex) {

@@ -223,6 +223,12 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 			con.setUseCaches(false);
 			con.setInstanceFollowRedirects(false);
 
+			int status = con.getResponseCode();
+			if (status != HttpURLConnection.HTTP_OK) {
+				log.error("Failed to download CRL from '" + url + "', status: " + status + ", location: " + con.getHeaderField("Location") + " (redirects are not followed)");
+				return null;
+			}
+
 			InputStream in = new BoundedInputStream(con.getInputStream(), maxCrlSize);
 			try {
 				CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");

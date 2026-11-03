@@ -4,7 +4,10 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.DPoPJwtPayloadParam;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.common.AbstractToken;
@@ -18,6 +21,7 @@ import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.CoreCertUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -37,6 +41,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -182,7 +187,7 @@ public class SessionRestWebService {
             log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, false);
             throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
         }
-        validateSenderConstraint(accessTokenObject, request);
+        validateSenderConstraint(accessToken, accessTokenObject, request);
 
         final Set<String> scopes = authorizationGrant.getScopes();
         if (BooleanUtils.isFalse(appConfiguration.getOpenidScopeBackwardCompatibility()) && !scopes.contains(DefaultScope.OPEN_ID.toString())) {
@@ -199,7 +204,7 @@ public class SessionRestWebService {
     }
 
     // Sender-constrained tokens (RFC 8705 / RFC 9449) must be presented together with proof of the bound key.
-    private void validateSenderConstraint(AbstractToken accessTokenObject, HttpServletRequest request) {
+    private void validateSenderConstraint(String accessToken, AbstractToken accessTokenObject, HttpServletRequest request) {
         final String x5ts256 = accessTokenObject.getX5ts256();
         if (StringUtils.isNotBlank(x5ts256)
                 && !x5ts256.equals(CertUtils.confirmationMethodHashS256(CoreCertUtil.getClientCert(request).getCert()))) {
@@ -214,7 +219,8 @@ public class SessionRestWebService {
         final String dpop = request != null ? request.getHeader("DPoP") : null;
         boolean valid = false;
         try {
-            valid = StringUtils.isNotBlank(dpop) && dpopService.validateDpop(dpop) && jkt.equals(DpopService.getDpopJwkThumbprint(dpop));
+            valid = StringUtils.isNotBlank(dpop) && dpopService.validateDpop(dpop) && jkt.equals(DpopService.getDpopJwkThumbprint(dpop))
+                    && isDpopProofForRequest(Jwt.parseOrThrow(dpop), accessToken, request);
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -224,6 +230,19 @@ public class SessionRestWebService {
             log.trace("DPoP proof does not match access token binding.");
             throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
         }
+    }
+
+    // RFC 9449 section 7.1: the proof must be for this method, this endpoint and this access token
+    private static boolean isDpopProofForRequest(Jwt dpop, String accessToken, HttpServletRequest request) {
+        final String htm = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM);
+        final String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
+        final String ath = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.ATH);
+        if (!request.getMethod().equals(htm) || StringUtils.isBlank(htu)
+                || !Base64Util.base64urlencode(DigestUtils.sha256(accessToken)).equals(ath)) {
+            return false;
+        }
+        // path only: scheme/host differ behind a TLS-terminating proxy
+        return request.getRequestURI().equals(URI.create(htu).getRawPath());
     }
 
     private Response response(Response.Status status, UserInfoErrorResponseType errorResponseType) {

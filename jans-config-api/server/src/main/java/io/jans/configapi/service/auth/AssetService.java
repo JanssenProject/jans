@@ -219,7 +219,6 @@ public class AssetService {
                 throw new InvalidAttributeException("Asset with inum '" + inum + "' does not exist!!!");
             }
             asset.setDn(existingAsset.getDn());
-            asset.setBaseDn(existingAsset.getBaseDn());
             dbDocumentService.updateDocument(asset);
         }
 

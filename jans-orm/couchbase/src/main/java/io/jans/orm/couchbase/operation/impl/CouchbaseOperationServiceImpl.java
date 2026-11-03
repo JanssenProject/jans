@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseOperationServiceImpl.class);
 
     private static final String SCOPE_KEY_PARAMETER = "__jans_scope_key";
+    private static final Pattern SORT_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]+$");
 
     private Properties props;
     private CouchbaseConnectionProvider connectionProvider;
@@ -520,6 +522,9 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         			baseQueryWithOrder.append(", ");
         		}
         		Sort order = orderBy[i];
+        		if ((order.getName() == null) || !SORT_NAME_PATTERN.matcher(order.getName()).matches()) {
+        			throw new SearchException(String.format("Invalid sort attribute name '%s'", order.getName()));
+        		}
         		baseQueryWithOrder.append(order.getName());
             	if ((order.getSortOrder() != null) && (SortOrder.DEFAULT != order.getSortOrder())) {
             		baseQueryWithOrder.append(" ").append(order.getSortOrder().getShortValue());

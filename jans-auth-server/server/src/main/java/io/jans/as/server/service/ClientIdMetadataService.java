@@ -323,6 +323,9 @@ public class ClientIdMetadataService {
             // Validate spiffe_id / spiffe_bundle_endpoint using the same logic as DCR
             registerParamsValidator.validateSpiffe(registerRequest);
 
+            // CIMD documents are not verified as software statements, so neither the client nor hooks may carry one
+            stripSoftwareStatement(registerRequest);
+
             // Build Client from RegisterRequest using the same DCR mapping path
             Client client = buildClientFromRequest(registerRequest, clientIdUrl);
 
@@ -338,9 +341,6 @@ public class ClientIdMetadataService {
             int ttlSeconds = calculateTtl(result.cacheControl);
             attrs.setCimdExpiresAt(System.currentTimeMillis() + (ttlSeconds * 1000L));
             client.setAttributes(attrs);
-
-            // CIMD documents are not verified as software statements, so hooks must never see an unverified one
-            stripSoftwareStatement(registerRequest);
 
             // Execute external DCR script (allows server operators to customize/reject CIMD clients).
             // httpRequest is null since this is not an HTTP registration request.

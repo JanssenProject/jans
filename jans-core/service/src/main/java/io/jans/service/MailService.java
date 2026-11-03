@@ -76,6 +76,7 @@ public class MailService {
     private SmtpConfiguration smtpConfiguration;
 
     private long connectionTimeout = 5000;
+    private long readTimeout = 60000;
     
     private KeyStore keyStore = null;
 
@@ -204,7 +205,7 @@ public class MailService {
             props.put("mail.smtp.host", smtpConfiguration.getHost());
             props.put("mail.smtp.port", smtpConfiguration.getPort());
             props.put("mail.smtp.connectiontimeout", String.valueOf(this.connectionTimeout));
-            props.put("mail.smtp.timeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtp.timeout", String.valueOf(this.readTimeout));
 
             props.put("mail.smtp.socketFactory.class", "com.sun.mail.util.MailSSLSocketFactory");
             props.put("mail.smtp.socketFactory.port", smtpConfiguration.getPort());
@@ -220,7 +221,7 @@ public class MailService {
             props.put("mail.smtps.host", smtpConfiguration.getHost());
             props.put("mail.smtps.port", smtpConfiguration.getPort());
             props.put("mail.smtps.connectiontimeout", String.valueOf(this.connectionTimeout));
-            props.put("mail.smtps.timeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtps.timeout", String.valueOf(this.readTimeout));
 
             props.put("mail.smtp.socketFactory.class", "com.sun.mail.util.MailSSLSocketFactory");
             props.put("mail.smtp.socketFactory.port", smtpConfiguration.getPort());
@@ -235,7 +236,7 @@ public class MailService {
             props.put("mail.smtp.host", smtpConfiguration.getHost());
             props.put("mail.smtp.port", smtpConfiguration.getPort());
             props.put("mail.smtp.connectiontimeout", String.valueOf(this.connectionTimeout));
-            props.put("mail.smtp.timeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtp.timeout", String.valueOf(this.readTimeout));
         }
 
         Session session = null;

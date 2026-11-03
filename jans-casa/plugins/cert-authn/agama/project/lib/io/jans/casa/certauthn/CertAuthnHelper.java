@@ -70,10 +70,6 @@ public class CertAuthnHelper {
         
     }
 
-    public static String decryptValue(String val) throws StringEncrypter.EncryptionException {
-        return encrypter.decrypt(val);
-    }
-
     public static String lookupUid(String uidRef) {
 
         if (uidRef == null) return null;

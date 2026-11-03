@@ -155,7 +155,12 @@ func denyPath(protectedPath string, h http.Handler, err error) http.Handler {
 // KrakenD-style parameters ({id} or :id) and a trailing catch-all (* or *name).
 func pathMatches(pattern, reqPath string) bool {
 	p := strings.Split(strings.Trim(pattern, "/"), "/")
-	r := strings.Split(strings.Trim(path.Clean("/"+reqPath), "/"), "/")
+	// The router may route either the raw or the cleaned path, so match both to fail closed.
+	return segmentsMatch(p, strings.Split(strings.Trim(reqPath, "/"), "/")) ||
+		segmentsMatch(p, strings.Split(strings.Trim(path.Clean("/"+reqPath), "/"), "/"))
+}
+
+func segmentsMatch(p, r []string) bool {
 	for i, seg := range p {
 		if i == len(p)-1 && strings.HasPrefix(seg, "*") {
 			return true

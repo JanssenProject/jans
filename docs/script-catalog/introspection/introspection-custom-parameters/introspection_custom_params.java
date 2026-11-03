@@ -79,7 +79,7 @@ public class Introspection implements IntrospectionType {
         }
 
         SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
-        SessionId session = sessionIdService.getSessionById(sessionDn, false);
+        SessionId session = sessionIdService.getSessionByDn(sessionDn, false);
         if(session == null) {
             scriptLogger.info("Introspection Java script. Failed to load session");
             return true;

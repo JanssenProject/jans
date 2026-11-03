@@ -31,7 +31,7 @@ import net.agkn.hll.HLL;
 @ApplicationScoped
 public class StatResponseService {
 
-    private static final int MAX_MONTHS = 240;
+    public static final int MAX_MONTHS = 240;
 
 	@Inject
     private Logger log;

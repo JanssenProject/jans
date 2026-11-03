@@ -203,6 +203,10 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
 
         Set<String> monthList = Months.getMonths(months, startMonth, endMonth);
 
+        if (monthList.size() > StatResponseService.MAX_MONTHS) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Too many months requested, maximum is " + StatResponseService.MAX_MONTHS);
+        }
+
         if (monthList.isEmpty()) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");
         }

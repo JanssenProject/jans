@@ -657,11 +657,11 @@ public class TocService {
 		LocalDate tocNextUpdate = parsedToc.getFirst();
 		if (tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
 			// An expired blob is still better than none (FIDO may publish late), but it must not roll
-			// back a cached TOC that is as new or newer, e.g. when replayed by a mirror
-			if (cachedNextUpdate != null && !tocNextUpdate.isAfter(cachedNextUpdate)) {
+			// back a newer cached TOC, e.g. when replayed by a mirror
+			if (cachedNextUpdate != null && tocNextUpdate.isBefore(cachedNextUpdate)) {
 				nextUpdate = cachedNextUpdate;
 				throw new Fido2RuntimeException("The downloaded MDS TOC expired on " + tocNextUpdate
-						+ " and is not newer than the cached one");
+						+ " and is older than the cached one");
 			}
 			log.warn("The downloaded MDS TOC expired on {}, using it until a newer one is published", tocNextUpdate);
 		}

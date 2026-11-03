@@ -330,10 +330,8 @@ public class ScopesResource extends ConfigBaseResource {
         
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
-        final String dn = existingScope.getDn();
         final String existingInum = existingScope.getInum();
         existingScope = Jackson.applyPatch(pathString, existingScope);
-        existingScope.setDn(dn);
         existingScope.setInum(existingInum);
         scopeService.updateScope(existingScope);
 

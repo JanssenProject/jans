@@ -1198,7 +1198,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             return;
         }
 
-        if (cacheData.getScopes() != null && (approvedScopes == null || !approvedScopes.containsAll(cacheData.getScopes()))) {
+        // offline_access may be stripped by checkOfflineAccessScopes and is not required for device approval
+        final Set<String> requiredScopes = cacheData.getScopes() != null ? new HashSet<>(cacheData.getScopes()) : null;
+        if (requiredScopes != null) {
+            requiredScopes.remove(ScopeConstants.OFFLINE_ACCESS);
+        }
+        if (requiredScopes != null && (approvedScopes == null || !approvedScopes.containsAll(requiredScopes))) {
             log.debug("Approved scopes {} do not cover device authorization scopes {}, user_code: {}", approvedScopes, cacheData.getScopes(), userCode);
             return;
         }

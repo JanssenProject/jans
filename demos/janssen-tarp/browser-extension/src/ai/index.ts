@@ -156,8 +156,13 @@ async function initializeMCPClient(): Promise<void> {
  * @returns A ToolCallResult containing the MCP tool response for the registered OIDC client
  */
 async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promise<ToolCallResult> {
+  // Validate before registering: the provider returns client_secret and RAT in the response.
+  const issuer = normalizeIssuer(args.issuer);
+  assertSecureUrl(issuer, "Issuer");
+
   const enhancedArgs: OIDCClientRegistrationArgs = {
     ...args,
+    issuer,
     redirect_uris: [chrome.identity.getRedirectURL()],
     token_endpoint_auth_method: "client_secret_basic",
     userinfo_signed_response_alg: "RS256",
@@ -171,7 +176,7 @@ async function handleRegisterOIDCClient(args: OIDCClientRegistrationArgs): Promi
     arguments: enhancedArgs as unknown as ILooseObject,
   });
 
-  await authClientService.saveClientInTarpStorage(toolResult, args.issuer);
+  await authClientService.saveClientInTarpStorage(toolResult, issuer);
 
   return {
     tool: "registerOIDCClient",

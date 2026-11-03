@@ -24,9 +24,9 @@ log = logging.getLogger("ldif")
 
 # kept unambiguous (no overlap between repetitions) so matching stays linear on malformed input
 ATTRTYPE_PATTERN = r"[\w.-]+(;[\w-]+)*"
-ATTRVALUE_PATTERN = r'((([^,+\\ ]|\\.)+([ ]+([^,+\\ ]|\\.)+)*)|"[^"]*")'
+ATTRVALUE_PATTERN = r'((([^,+\\ "]|\\.)([^,+\\ ]|\\.)*([ ]+([^,+\\ ]|\\.)+)*)|"[^"]*")'
 ATTR_PATTERN = ATTRTYPE_PATTERN + r"[ ]*=[ ]*" + ATTRVALUE_PATTERN
-RDN_PATTERN = ATTR_PATTERN + r"([ ]*\+[ ]*" + ATTR_PATTERN + r")*[ ]*"
+RDN_PATTERN = ATTR_PATTERN + r"([ ]*\+[ ]*" + ATTR_PATTERN + r")*"
 DN_PATTERN = RDN_PATTERN + r"([ ]*,[ ]*" + RDN_PATTERN + r")*[ ]*"
 DN_REGEX = re.compile("^%s$" % DN_PATTERN)
 

@@ -213,7 +213,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
                 requestedExpiry = Math.toIntExact(jwtRequest.getExp() - System.currentTimeMillis() / 1000);
             }
         }
-        if (jwtRequest == null && (appConfiguration.isFapi() || client.getBackchannelAuthenticationRequestSigningAlg() != null)) {
+        if (appConfiguration.isFapi() && jwtRequest == null) {
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
             builder.entity(errorResponseFactory.getErrorAsJson(INVALID_REQUEST));
             return builder.build();

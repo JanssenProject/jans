@@ -1,3 +1,4 @@
+import atexit
 import contextlib
 import tempfile
 import warnings
@@ -119,7 +120,11 @@ class DBUtils:
             return None
 
         if getattr(self, '_rdbm_rootcert', None) != rootcert or not os.path.exists(self._rdbm_rootcert_fn):
+            old_fn = getattr(self, '_rdbm_rootcert_fn', None)
+            if old_fn and os.path.exists(old_fn):
+                os.remove(old_fn)
             fd, fn = tempfile.mkstemp(prefix='jans-rdbm-ca-', suffix='.pem')
+            atexit.register(lambda p=fn: os.path.exists(p) and os.remove(p))
             with os.fdopen(fd, 'w') as w:
                 w.write(rootcert)
             self._rdbm_rootcert = rootcert

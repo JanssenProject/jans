@@ -249,6 +249,9 @@ public class DocumentStoreManager {
 	}
 
 	private boolean removeDocument(Document document) {
+		if (StringHelper.isEmpty(document.getFilePath())) {
+			return true;
+		}
 		try {
 			File file = Paths.get(document.getFilePath(), document.getFileName()).toFile();
 			if (!file.exists()) {

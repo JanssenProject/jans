@@ -104,6 +104,7 @@ class AssertionServiceTest {
     void allowInterceptionHooks() {
         when(externalFido2InterceptionService.authenticateAssertionStart(any(), any())).thenReturn(true);
         when(externalFido2InterceptionService.authenticateAssertionFinish(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.verifyAssertionStart(any(), any())).thenReturn(true);
         when(externalFido2InterceptionService.verifyAssertionFinish(any(), any())).thenReturn(true);
     }
 

@@ -49,6 +49,8 @@ public class Fido2MetricsService {
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
     private PersistenceEntryManager persistenceEntryManager;
 
+    private static final int CLEANUP_BATCH_SIZE = 1000;
+
     /** Response keys for the attestation-rejection analysis. */
     private static final String TOTAL_REJECTIONS = "totalRejections";
     private static final String REGISTRATION_ATTEMPTS = "registrationAttempts";
@@ -347,15 +349,16 @@ public class Fido2MetricsService {
                 
                 // Cleanup old metrics entries
                 Filter filter = Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, cutoffDate);
-                List<Fido2MetricsEntry> entries = persistenceEntryManager.findEntries(
-                    METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter
-                );
+                int totalRemoved = 0;
+                int removed;
+                do {
+                    removed = persistenceEntryManager.remove(
+                        METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter, CLEANUP_BATCH_SIZE
+                    );
+                    totalRemoved += removed;
+                } while (removed >= CLEANUP_BATCH_SIZE);
                 
-                for (Fido2MetricsEntry entry : entries) {
-                    persistenceEntryManager.remove(entry);
-                }
-                
-                log.info("Cleaned up {} old metrics entries", entries.size());
+                log.info("Cleaned up {} old metrics entries", totalRemoved);
             } catch (Exception e) {
                 log.error("Failed to cleanup old data: {}", e.getMessage(), e);
             }

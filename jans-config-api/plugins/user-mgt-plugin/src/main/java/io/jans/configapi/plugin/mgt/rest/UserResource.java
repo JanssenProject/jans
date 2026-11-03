@@ -860,7 +860,7 @@ public class UserResource extends BaseResource {
 
         }
 
-        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.equalsIgnoreCase("api-admin")));
+        isAdmin = loggedInUserRoleList.stream().anyMatch(ele -> ele.equalsIgnoreCase("admin") || ele.equalsIgnoreCase("api-admin"));
         if (logger.isInfoEnabled()) {
             logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }

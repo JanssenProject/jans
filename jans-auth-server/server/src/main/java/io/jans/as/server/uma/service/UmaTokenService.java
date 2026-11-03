@@ -156,8 +156,13 @@ public class UmaTokenService {
         List<String> requestedScopeDns = new ArrayList<>();
         for (Map.Entry<Scope, Boolean> entry : scopes.entrySet()) {
             if (Boolean.TRUE.equals(entry.getValue())) {
-                if (expressionService.isScopeAuthorized(scriptMap, entry.getKey().getDn())) {
-                    requestedScopeDns.add(entry.getKey().getDn());
+                final String scopeDn = entry.getKey().getDn();
+                // already on every permission: adding is a no-op, so don't re-run its policies
+                if (permissions.stream().allMatch(p -> p.getScopeDns() != null && p.getScopeDns().contains(scopeDn))) {
+                    continue;
+                }
+                if (expressionService.isScopeAuthorized(scriptMap, scopeDn)) {
+                    requestedScopeDns.add(scopeDn);
                 } else {
                     log.trace("Skip requested scope because it is not authorized by policy, scope: {}", entry.getKey().getId());
                 }

@@ -17,11 +17,21 @@ export const assertSecureUrl = (url: unknown, label: string): void => {
   }
 };
 
-export const normalizeIssuer = (issuer: unknown): string => {
-  const s = typeof issuer === 'string' ? issuer.trim() : '';
+const stripTrailingSlashes = (s: string): string => {
   let end = s.length;
   while (end > 0 && s[end - 1] === '/') end--;
   return s.slice(0, end);
+};
+
+export const normalizeIssuer = (issuer: unknown): string => {
+  const s = typeof issuer === 'string' ? issuer.trim() : '';
+  if (!s) return '';
+  try {
+    const u = new URL(s);
+    return stripTrailingSlashes(u.origin + u.pathname);
+  } catch {
+    return stripTrailingSlashes(s);
+  }
 };
 
 export const assertSameIssuer = (actual: unknown, expected: unknown): void => {

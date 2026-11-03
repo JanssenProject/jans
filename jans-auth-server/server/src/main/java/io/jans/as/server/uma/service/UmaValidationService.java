@@ -547,14 +547,6 @@ public class UmaValidationService {
         }
     }
 
-    public void validateRestrictedByClient(String clientDn, List<UmaPermission> permissions) {
-        if (isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
-            for (UmaPermission permission : permissions) {
-                validateRestrictedByClient(clientDn, permission.getResourceId());
-            }
-        }
-    }
-
     private void validateRestrictedByClient(String patClientDn, UmaResource resource) {
         if (isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
             final List<String> clients = resource.getClients();

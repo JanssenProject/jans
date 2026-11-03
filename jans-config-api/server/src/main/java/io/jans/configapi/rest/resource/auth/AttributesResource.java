@@ -299,7 +299,6 @@ public class AttributesResource extends ConfigBaseResource {
 
         existingAttribute = Jackson.applyPatch(pathString, existingAttribute);
         existingAttribute.setInum(inum);
-        existingAttribute.setBaseDn(attributeService.getDnForAttribute(inum));
         attributeService.updateAttribute(existingAttribute);
         return Response.ok(existingAttribute).build();
     }

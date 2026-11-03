@@ -60,8 +60,12 @@ public class JansPasswordService extends PasswordService {
         authenticatedUserId = currentUser.getUserId();
         if (Boolean.valueOf(flowConfig.get("ENABLE_ACCOUNT_LOCK"))) {
             logger.info("Credentials are valid and user account locked feature is activated");
-            userService.setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, 0);
-            userService.updateUser(currentUser);
+            // Identity's user may be a partial or pre-login snapshot; merging it would drop attributes.
+            User freshUser = userService.getUser(authenticatedUserId);
+            if (freshUser != null) {
+                userService.setCustomAttribute(freshUser, INVALID_LOGIN_COUNT_ATTRIBUTE, 0);
+                userService.updateUser(freshUser);
+            }
             logger.info("Invalid login count reset to zero for {} .", authenticatedUserId);
         }
         return true;
