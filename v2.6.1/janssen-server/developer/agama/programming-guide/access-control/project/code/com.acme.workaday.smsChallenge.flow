@@ -1,0 +1,23 @@
+Flow com.acme.workaday.smsChallenge
+    Basepath ""
+    Configs conf
+    Inputs name phoneNumber
+
+rnd = Call java.lang.Math#random
+rnd = Call java.lang.Float#floatToIntBits rnd
+strRand = Call java.lang.Integer#toString rnd 36
+
+//Call some.java.package#sendSMS conf phoneNumber name strRand
+Log "Random code sent to % was" name strRand 
+
+data = { failed: false, name: name }
+Repeat 3 times max
+    obj = RRF "code_prompt.ftlh" data
+    
+    When obj.code is strRand
+        Finish true
+
+    data.failed = true
+
+obj = { success: false, error: "The number of allowed attempts has been exceeded" }
+Finish obj

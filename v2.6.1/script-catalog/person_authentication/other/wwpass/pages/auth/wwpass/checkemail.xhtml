@@ -1,0 +1,163 @@
+<!DOCTYPE composition
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:b="http://bootsfaces.net/ui"
+    template="/WEB-INF/incl/layout/template.xhtml">
+    <f:metadata>
+      <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
+
+      <f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
+    </f:metadata>
+
+    <ui:define name="head">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="WWPass Bind page description" />
+        <style>
+.body {
+  font-family: "Roboto", "Arial", sans-serif;
+  color: #707070;
+  font-weight: 300;
+  background: #EEF2FA;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  min-width: 320px;
+  min-height: 100vh;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  margin: 0;
+  padding: 0 !important;
+  width: auto !important; }
+
+.content {
+  width: 100%;
+  max-width: 290px;
+  margin: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column; }
+
+.content--center {
+  text-align: center; }
+
+.content--narrow {
+  max-width: 290px; }
+
+.content__element {
+  width: 100%;
+  max-width: 690px;
+  background-color: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 15px;
+  -webkit-margin-before: 10px;
+          margin-block-start: 10px;
+  -webkit-padding-after: 15px;
+          padding-block-end: 15px; }
+
+.content__element--first {
+  -webkit-box-ordinal-group: 0;
+      -ms-flex-order: -1;
+          order: -1; }
+
+#status {
+  display: none; }
+
+.button {
+  display: flex;
+  min-width: 200px;
+  height: 40px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 34px;
+  font-weight: 400;
+  text-decoration: none;
+  text-align: center;
+  border-radius: 4px;
+  -webkit-padding-start: 15px;
+          padding-inline-start: 15px;
+  -webkit-padding-end: 15px;
+          padding-inline-end: 15px;
+  display: inline-block;
+  -webkit-margin-before: 20px;
+          margin-block-start: 20px;
+  -webkit-margin-after: 30px;
+          margin-block-end: 30px;
+  cursor: pointer;
+  -webkit-box-sizing: border-box;
+          box-sizing: border-box; }
+
+.form__label {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-margin-before: 5px;
+          margin-block-start: 5px;
+  font-size: 13px;
+  line-height: 18px; }
+
+.text {
+  font-size: 15px;
+  line-height: 22px;
+  max-width: 910px;
+  -webkit-margin-start: 10px;
+          margin-inline-start: 10px;
+  -webkit-margin-end: 10px;
+          margin-inline-end: 10px; }
+    </style>
+  </ui:define>
+
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['login.pageTitle']}" />
+    </ui:define>
+
+    <ui:define name="body">
+      <h:panelGroup>
+        <div class="content">
+          <div class="content__element content__element--first content--center  content--narrow">
+            <div id="email_check">
+              <b:form id="checkEmailForm" name="checkEmailForm" method="post" class="form from--bind" enctype="application/x-www-form-urlencoded">
+                <input type="hidden" name="loginForm" value="checkEmailForm" />
+                <p class="text">Enter a code that was sent to #{identity.getWorkingParameter('email')}</p>
+                <label for="code" class="form__label" value="">
+                  Email code
+                </label>
+                <input placeholder="Paste your email code here" name="code"
+                  required="true" autocomplete="off" value="" class="form__input">
+                <p class="text">If you don't receive the email, check that the email address is associated with an active user account.</p>
+              </input>
+
+                <h:commandButton id="loginButton" styleClass="button button--action"
+                      value="Verify email" action="#{authenticator.authenticate}" />
+              </b:form>
+            </div>
+          </div>
+        </div>
+      </h:panelGroup>
+      <script>
+        // 90% of session lifetime
+        var timeout = 0#{identity.getWorkingParameter('sessionLifetime')} * 900;
+        // Prevent session timeout while the tab is open
+        setInterval(function(){fetch(window.location.href)}, timeout);
+        /* ]]> */
+      </script>
+    </ui:define>
+
+</ui:composition>
+

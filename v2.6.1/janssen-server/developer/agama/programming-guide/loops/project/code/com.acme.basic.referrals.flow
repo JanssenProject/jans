@@ -1,0 +1,22 @@
+Flow com.acme.basic.referrals
+    Basepath "referrals"
+
+refs = [ ]
+pageData = { first: true }
+
+Repeat 3 times max
+    data = RRF "referred.ftlh" pageData
+    name = data.name
+    
+    Quit When name is null
+    
+    it = idx[0]    
+    refs[it] = data
+    Log "% - added %" it data.name
+    
+    pageData = { first: false, name: name }
+
+pageData = { referrals: refs } 
+RRF "thanks.ftlh" pageData
+
+Finish true
