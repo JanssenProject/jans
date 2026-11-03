@@ -17,7 +17,7 @@ Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 ```bash
 # Helm chart: janssen/janssen
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/v2.6.1/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
