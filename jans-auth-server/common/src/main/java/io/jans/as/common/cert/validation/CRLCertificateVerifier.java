@@ -225,7 +225,7 @@ public class CRLCertificateVerifier implements CertificateVerifier {
 
 			int status = con.getResponseCode();
 			if (status != HttpURLConnection.HTTP_OK) {
-				log.error("Failed to download CRL from '" + url + "', status: " + status + ", location: " + con.getHeaderField("Location") + " (redirects are not followed)");
+				log.error("Failed to download CRL from '{}', status: {}, location: {} (redirects are not followed)", url, status, con.getHeaderField("Location"));
 				return null;
 			}
 
