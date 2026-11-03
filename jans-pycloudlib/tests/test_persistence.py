@@ -499,3 +499,56 @@ def test_sql_client_create_index_retries_on_lock_timeout(monkeypatch, sql_client
 
     sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x")
     assert calls == [False, False, False]
+
+
+def test_sql_client_create_index_drops_invalid_index_on_retry(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+
+    # no index at first; the timed-out concurrent build then leaves an invalid one behind
+    states = iter([None, False])
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: next(states))
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(drop_first)
+        if len(calls) == 1:
+            exc = OperationalError("stmt", {}, Exception())
+            exc.orig = PGException("55P03").orig
+            raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    sql_client.create_index('CREATE INDEX "x" ON "t" ("a")', "t", "x")
+    assert calls == [False, True]
+
+
+def test_sql_client_create_index_stops_retry_when_index_became_valid(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+
+    # another process finished building the index while this one waited
+    states = iter([None, True])
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: next(states))
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(drop_first)
+        exc = OperationalError("stmt", {}, Exception())
+        exc.orig = PGException("55P03").orig
+        raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    sql_client.create_index('CREATE INDEX "x" ON "t" ("a")', "t", "x")
+    assert calls == [False]
