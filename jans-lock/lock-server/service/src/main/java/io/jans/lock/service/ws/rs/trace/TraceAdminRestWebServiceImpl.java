@@ -237,7 +237,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 	}
 
 	private TraceRequestContext resolveContext() {
-		SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+		SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 		return evidenceDomainResolver.resolve(identity);
 	}
 
@@ -279,9 +279,13 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 		return new AuditLogEntry(getClientIpAddress(), actionType);
 	}
 
+	private HttpServletRequest currentRequest() {
+		return ServerUtil.isGrpcCall() ? null : getHttpRequest();
+	}
+
 	private String getClientIpAddress() {
-		HttpServletRequest request = getHttpRequest();
-		return request == null ? null : InetAddressUtility.getIpAddress(request);
+		HttpServletRequest request = currentRequest();
+		return request == null ? ServerUtil.getClientContextIpAddress() : InetAddressUtility.getIpAddress(request);
 	}
 
 	// -- DTO mapping ------------------------------------------------------------------------------

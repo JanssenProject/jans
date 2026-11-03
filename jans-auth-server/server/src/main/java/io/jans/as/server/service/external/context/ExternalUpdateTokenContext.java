@@ -153,6 +153,18 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
         this.executionContext = executionContext;
     }
 
+    // Persisted with the access token, readable in introspection script via ExternalIntrospectionContext#getTokenAttribute
+    public void putTokenAttribute(String key, String value) {
+        if (executionContext != null && key != null && value != null) {
+            executionContext.getAttributes().put(key, value);
+        }
+    }
+
+    @Nullable
+    public String getTokenAttribute(String key) {
+        return executionContext != null ? executionContext.getAttribute(key) : null;
+    }
+
     // Usually expected to be called in : "def modifyAccessToken(self, accessToken, context):"
     public void overwriteAccessTokenScopes(AccessToken accessToken, Set<String> newScopes) {
         if (grant == null) {

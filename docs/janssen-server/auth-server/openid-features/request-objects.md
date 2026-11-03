@@ -38,7 +38,9 @@ The following is a non-normative example of Request Object claims before base64u
 {
   "iss": "s6BhdRkqt3",
   "aud": "https://janssen.example.com",
-  "response_type": "code id_token",
+  "response_type": "code",
+  "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+  "code_challenge_method": "S256",
   "client_id": "s6BhdRkqt3",
   "redirect_uri": "https://client.example.org/cb",
   "scope": "openid",
@@ -74,7 +76,7 @@ Non-normative example (line breaks in values are for display only):
 
 ```text
 https://janssen.example.com/jans-auth/restv1/authorize?
-  response_type=code%20id_token
+  response_type=code
   &client_id=s6BhdRkqt3
   &redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb
   &scope=openid
@@ -115,7 +117,7 @@ Non-normative authorization request example:
 
 ```text
 https://janssen.example.com/jans-auth/restv1/authorize?
-  response_type=code%20id_token
+  response_type=code
   &client_id=s6BhdRkqt3
   &request_uri=https%3A%2F%2Fclient.example.org%2Frequest.jwt
   %23GkurKxf5T0Y-mnPFCHqWOMiZi4VS138cQO_V7PZHAdM
@@ -123,6 +125,12 @@ https://janssen.example.com/jans-auth/restv1/authorize?
   &nonce=n-0S6_WzA2Mj
   &scope=openid
 ```
+
+For the Authorization Code Flow, clients should use PKCE with the `S256`
+code challenge method. When using a Request Object, include
+`code_challenge` and `code_challenge_method` in the JWT. The client
+must send the corresponding `code_verifier` when exchanging the
+authorization code at the token endpoint.
 
 Janssen additionally validates `request_uri` against the client's pre-registered `request_uris` (when configured) and against [requestUriBlockList](../../reference/json/properties/janssenauthserver-properties.md#requesturiblocklist) (for example to block `localhost`).
 

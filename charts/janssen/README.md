@@ -306,7 +306,7 @@ Kubernetes: `>=v1.23.0-0`
 | gateway-api.additionalConfig.istio | object | `{}` | Configuration for Istio. |
 | gateway-api.additionalConfig.kgateway | object | `{}` | Configuration for kgateway. |
 | gateway-api.additionalConfig.nginx | object | `{"enableAuditGrpcRewriteSnippets":false}` | Configuration for NGINX Fabric. |
-| gateway-api.additionalConfig.nginx.enableAuditGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to forward audit gRPC requests `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService`. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup. |
+| gateway-api.additionalConfig.nginx.enableAuditGrpcRewriteSnippets | bool | `false` | Enable URL rewrite to forward Lock gRPC requests (`/io.jans.lock.audit.AuditService`, `/io.jans.lock.trace.TraceService`, `/io.jans.lock.trace.TraceAdminService`) to the same paths under `/jans-auth`. Snippet support must be enabled during NGINX installation (otherwise endpoints will return HTTP status code 500). See https://docs.nginx.com/nginx-gateway-fabric/traffic-management/snippets#setup. |
 | gateway-api.additionalConfig.traefik | object | `{}` | Configuration for Traefik. |
 | gateway-api.gateway | object | `{"annotations":{},"attachLbIp":false,"className":"nginx","enabled":true,"gatewayNamespace":"","httpPort":80,"httpSectionName":"http","httpsPort":443,"httpsSectionName":"https","infrastructure":{"annotations":{},"labels":{},"parametersRef":{}},"labels":{},"name":"jans-gateway","tlsSecretName":"tls-certificate"}` | Configuration for Gateway resource |
 | gateway-api.gateway.annotations | object | `{}` | Specific annotations for the Gateway resource |
@@ -336,7 +336,7 @@ Kubernetes: `>=v1.23.0-0`
 | gateway-api.routes.fido2WebauthnEnabled | bool | `false` | Enable endpoint /.well-known/webauthn |
 | gateway-api.routes.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | gateway-api.routes.labels | object | `{}` | Specific labels for the HTTPRoute resource |
-| gateway-api.routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, global.auth-server.lockEnabled must be enabled) |
+| gateway-api.routes.lockAuditEnabled | bool | `false` | Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService (if enabled, global.auth-server.lockEnabled must be enabled) |
 | gateway-api.routes.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration (if enabled, global.auth-server.lockEnabled must be enabled) |
 | gateway-api.routes.oauthServerConfigEnabled | bool | `true` | Enable endpoint /.well-known/oauth-authorization-server |
 | gateway-api.routes.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |
@@ -386,7 +386,7 @@ Kubernetes: `>=v1.23.0-0`
 | global.auth-server.ingress.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
 | global.auth-server.ingress.firebaseMessagingLabels | object | `{}` | Firebase Messaging ingress resource labels. key app is taken |
 | global.auth-server.ingress.lockAdditionalAnnotations | object | `{}` | Lock ingress resource additional annotations. |
-| global.auth-server.ingress.lockAuditEnabled | bool | `false` | Enable gRPC endpoint /io.jans.lock.audit.AuditService |
+| global.auth-server.ingress.lockAuditEnabled | bool | `false` | Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService |
 | global.auth-server.ingress.lockConfigAdditionalAnnotations | object | `{}` | Lock config ingress resource additional annotations. |
 | global.auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration |
 | global.auth-server.ingress.lockConfigLabels | object | `{}` | Lock config ingress resource labels. key app is taken |

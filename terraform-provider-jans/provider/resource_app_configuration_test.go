@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/jans/terraform-provider-jans/jans"
@@ -51,6 +52,10 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			{"code", "id_token"},
 		},
 		CookieSameSite:                             "strict",
+		SecurityHeadersEnabled:                     true,
+		ApplySecurityHeadersIfUriContainsAny:       []string{"/jans-auth", "/.well-known"},
+		StrictTokenRedirectUriValidation:           true,
+		AllowStartupOnJwksUriFetchFailure:          true,
 		DisableExternalLoggerConfiguration:         true,
 		IdJagLifetime:                              3600,
 		IdJagIssueRefreshToken:                     true,
@@ -83,8 +88,8 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 16 {
-		t.Errorf("Got %d patches, expected 16", len(patches))
+	if len(patches) != 20 {
+		t.Errorf("Got %d patches, expected 20", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {
@@ -210,4 +215,24 @@ func testAccReourceCheckAppConfigurationDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func TestAppConfigFalseBoolPatches(t *testing.T) {
+	raw := cty.ObjectVal(map[string]cty.Value{
+		"security_headers_enabled":                cty.False,
+		"strict_token_redirect_uri_validation":    cty.NullVal(cty.Bool),
+		"allow_startup_on_jwks_uri_fetch_failure": cty.True,
+	})
+	vals := map[string]any{
+		"security_headers_enabled":                false,
+		"strict_token_redirect_uri_validation":    false,
+		"allow_startup_on_jwks_uri_fetch_failure": true,
+	}
+	patches := appConfigFalseBoolPatches(raw, func(k string) any { return vals[k] })
+	if len(patches) != 1 {
+		t.Fatalf("expected 1 patch for configured false, got %d: %+v", len(patches), patches)
+	}
+	if p := patches[0]; p.Op != "replace" || p.Path != "/securityHeadersEnabled" || p.Value != false {
+		t.Errorf("unexpected patch: %+v", p)
+	}
 }

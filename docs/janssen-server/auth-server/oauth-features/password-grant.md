@@ -10,14 +10,27 @@ tags:
 
 # Password Grant
 
-Janssen Server supports the password grant. At the same time, inline with
+!!! warning "Legacy grant"
+    The Resource Owner Password Credentials (ROPC) Grant is not included in
+    OAuth 2.1 and is not enabled in Janssen's default supported grant types.
+    It is not recommended for new integrations. Legacy deployments may
+    explicitly configure support for this grant. For new applications,
+    use the Authorization Code Grant with PKCE (`S256`) instead.
+    Verify the grant types advertised in the deployment's discovery metadata.
+
+Janssen Server can support the password grant when explicitly enabled. At the same time, in line with
 [OAuth 2.0 security best practices](https://oauth.net/2/oauth-best-practice/), this password grant should never be used
 in practice. [OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-08) has removed this grant type.
 
 ## Configuration
 
-A client can use the password grant if it is enabled in the configuration. An administrator can use
-[TUI](../../config-guide/config-tools/jans-tui/README.md) to enable password grant for a client.
+A client can use the password grant only when it is enabled both for the authorization server and
+for that client. Add `password` to the authorization server's
+[grantTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#granttypessupported)
+property (in TUI, navigate to **Auth Server -> Properties -> grantTypesSupported**), and add
+`password` to the client's grant types using
+[TUI](../../config-guide/config-tools/jans-tui/README.md). Otherwise, the token endpoint rejects
+the request. See the [token endpoint documentation](../endpoints/token.md#token-endpoint) for details.
 
 ![](../../../assets/image-tui-client-registration-basic.png)
 

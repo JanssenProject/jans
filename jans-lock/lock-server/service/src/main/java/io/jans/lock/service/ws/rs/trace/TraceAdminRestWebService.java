@@ -63,7 +63,7 @@ public interface TraceAdminRestWebService {
 	@Path("/producer-keys")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RegisterProducerKey")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_write", path = "/audit/trace/admin/producer-keys")
 	Response registerProducerKey(ProducerKeyRegistrationRequest request);
 
@@ -79,7 +79,7 @@ public interface TraceAdminRestWebService {
 	@GET
 	@Path("/producer-keys")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "ListProducerKeys")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_read", path = "/audit/trace/admin/producer-keys")
 	Response listProducerKeys(
 			@Parameter(description = "Restrict the result to one producer id") @QueryParam("producer_id") String producerId);
@@ -99,7 +99,7 @@ public interface TraceAdminRestWebService {
 	@Path("/producer-keys/revoke")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RevokeProducerKey")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_revoke", path = "/audit/trace/admin/producer-keys/revoke")
 	Response revokeProducerKey(ProducerKeyRevokeRequest request);
 
@@ -118,7 +118,7 @@ public interface TraceAdminRestWebService {
 	@Path("/producer-chains")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RegisterProducerChain")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_chain_write", path = "/audit/trace/admin/producer-chains")
 	Response registerProducerChain(ProducerChainRegistrationRequest request);
 
@@ -134,7 +134,7 @@ public interface TraceAdminRestWebService {
 	@GET
 	@Path("/producer-chains")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "ListProducerChains")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_chain_read", path = "/audit/trace/admin/producer-chains")
 	Response listProducerChains(
 			@Parameter(description = "Restrict the result to one producer id") @QueryParam("producer_id") String producerId);

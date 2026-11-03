@@ -115,6 +115,39 @@ public class StatusListTest {
         System.out.println(statusList.getLst().length());
     }
 
+    @Test
+    public void getLst_withTrailingValidEntries_shouldCoverEveryEntry() throws IOException {
+        StatusList statusList = new StatusList(2);
+        statusList.set(0, 1);
+        statusList.set(20, 0);
+
+        StatusList decoded = StatusList.fromEncoded(statusList.getLst(), 2);
+
+        assertEquals(24, decoded.getSize());
+        assertEquals(1, decoded.get(0));
+        assertEquals(0, decoded.get(20));
+    }
+
+    @Test
+    public void getLst_withEnsuredSizeAndNoSetEntries_shouldEncodeValidEntries() throws IOException {
+        StatusList statusList = new StatusList(2);
+        statusList.ensureSize(100);
+
+        StatusList decoded = StatusList.fromEncoded(statusList.getLst(), 2);
+
+        assertEquals(100, decoded.getSize());
+        assertEquals(0, decoded.get(99));
+    }
+
+    @Test
+    public void ensureSize_shouldNotShrinkList() {
+        StatusList statusList = new StatusList(1);
+        statusList.set(30, 1);
+        statusList.ensureSize(5);
+
+        assertEquals(31, statusList.getSize());
+    }
+
     private static void assertEncodedValueAndPrintDecoded(String expectedEncodedValue, StatusList statusList) throws IOException {
         System.out.println("Decoded: " + statusList.toString());
         final String encoded = statusList.getLst();

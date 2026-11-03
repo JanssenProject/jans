@@ -9,6 +9,7 @@ package io.jans.lock.service.grpc.security;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,15 +24,21 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.jans.core.cedarling.model.AuditActionType;
 import io.jans.core.cedarling.model.AuditLogEntry;
+import io.jans.lock.model.audit.grpc.AuditServiceGrpc;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.LockProtectionMode;
+import io.jans.lock.model.trace.grpc.TraceAdminServiceGrpc;
+import io.jans.lock.model.trace.grpc.TraceServiceGrpc;
 import io.jans.lock.service.CedarlingProtectionService;
 import io.jans.lock.service.app.audit.ApplicationAuditLogger;
+import io.jans.lock.service.grpc.util.GrpcStatusMapper;
 import io.jans.lock.service.openid.OpenIdProtection;
 import io.jans.lock.service.security.AuthenticatedClientContext;
 import io.jans.lock.service.security.AuthenticatingProtection;
 import io.jans.lock.service.security.AuthorizationOutcome;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebService;
+import io.jans.lock.service.ws.rs.trace.TraceAdminRestWebService;
+import io.jans.lock.service.ws.rs.trace.TraceRestWebService;
 import io.jans.lock.util.HeaderUtils;
 import io.jans.lock.util.ServerUtil;
 import io.jans.service.security.api.ProtectedApi;
@@ -48,6 +55,12 @@ import jakarta.ws.rs.core.Response;
  */
 @ApplicationScoped
 public class GrpcAuthorizationInterceptor implements ServerInterceptor {
+
+    /** REST interface that carries the {@code @ProtectedApi} metadata of each gRPC service. */
+    private static final Map<String, Class<?>> PROTECTED_API_BY_SERVICE = Map.of(
+            AuditServiceGrpc.SERVICE_NAME, AuditRestWebService.class,
+            TraceServiceGrpc.SERVICE_NAME, TraceRestWebService.class,
+            TraceAdminServiceGrpc.SERVICE_NAME, TraceAdminRestWebService.class);
 
     @Inject
     private Logger log;
@@ -94,6 +107,13 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
         try {
             // Extract method-specific ResourceInfo
         	ResourceInfo resourceInfo = extractResourceInfo(methodName);
+            if (resourceInfo == null) {
+                log.warn("gRPC call to '{}' is rejected: no protected API is mapped to it", methodName);
+                call.close(Status.PERMISSION_DENIED
+                        .withDescription("Access to method is not protected"), new Metadata());
+
+                return new ServerCall.Listener<ReqT>() {};
+            }
             log.debug("gRPC call requires access to: {}", resourceInfo);
 
             String clientIp = ServerUtil.getGrpcClientIpAddress(call, headers);
@@ -112,7 +132,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
                 log.warn("Authorization failed for gRPC call '{}': {}", methodName, authorizationResponse.getEntity());
                 
                 // Map HTTP status to gRPC status
-                Status grpcStatus = mapHttpStatusToGrpcStatus(authorizationResponse.getStatusInfo().toEnum());
+                Status grpcStatus = GrpcStatusMapper.fromHttpStatus(authorizationResponse.getStatusInfo().toEnum());
                 call.close(grpcStatus.withDescription(String.valueOf(authorizationResponse.getEntity())), new Metadata());
                 
                 return new ServerCall.Listener<ReqT>() {};
@@ -128,39 +148,10 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             log.error("Error during gRPC authorization for '{}'", methodName, e);
             
             call.close(Status.INTERNAL
-                    .withDescription("Authorization error: " + e.getMessage())
+                    .withDescription("Authorization error")
                     .withCause(e), new Metadata());
             
             return new ServerCall.Listener<ReqT>() {};
-        }
-    }
-
-    /**
-     * Map HTTP status codes to gRPC status codes.
-     *
-     * @param httpStatus HTTP response status
-     * @return corresponding gRPC Status
-     */
-    private Status mapHttpStatusToGrpcStatus(Response.Status httpStatus) {
-        if (httpStatus == null) {
-            return Status.INTERNAL;
-        }
-
-        switch (httpStatus) {
-            case UNAUTHORIZED:
-                return Status.UNAUTHENTICATED;
-            case FORBIDDEN:
-                return Status.PERMISSION_DENIED;
-            case BAD_REQUEST:
-                return Status.INVALID_ARGUMENT;
-            case NOT_FOUND:
-                return Status.NOT_FOUND;
-            case INTERNAL_SERVER_ERROR:
-                return Status.INTERNAL;
-            case SERVICE_UNAVAILABLE:
-                return Status.UNAVAILABLE;
-            default:
-                return Status.UNKNOWN;
         }
     }
 
@@ -170,7 +161,7 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
      * @param methodName full gRPC method name (e.g., "io.jans.lock.audit.AuditService/ProcessHealth")
      * @return requested resource info
      */
-    private ResourceInfo extractResourceInfo(String methodName) {
+    ResourceInfo extractResourceInfo(String methodName) {
         // Parse method name: "package.Service/Method"
         String[] parts = methodName.split("/");
         if (parts.length != 2) {
@@ -178,10 +169,14 @@ public class GrpcAuthorizationInterceptor implements ServerInterceptor {
             return null;
         }
 
-        String method = parts[1];
-        
+        Class<?> protectedApi = PROTECTED_API_BY_SERVICE.get(parts[0]);
+        if (protectedApi == null) {
+            log.warn("No protected API found for gRPC service: {}", parts[0]);
+            return null;
+        }
+
         // Map gRPC methods to ResourceInfo (same as REST API)
-        Optional<ResourceInfo> resourceInfo = getProtectionApiMethod(AuditRestWebService.class, method);
+        Optional<ResourceInfo> resourceInfo = getProtectionApiMethod(protectedApi, parts[1]);
         if (resourceInfo.isPresent()) {
         	return resourceInfo.get();
         }

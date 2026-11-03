@@ -8,6 +8,10 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 /**
@@ -40,5 +44,87 @@ public class HeadersFilterTest {
         HeadersFilter.addXFrameOptionsResponseHeader(request, response, appConfiguration);
 
         verify(response, times(0)).addHeader("X-Frame-Options", "SAMEORIGIN");
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_forTokenRequest_shouldAddSecurityHeaders() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response).addHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'");
+        verify(response).addHeader("X-Content-Type-Options", "nosniff");
+        verify(response).addHeader("Referrer-Policy", "no-referrer");
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_forAuthorizeRequest_shouldNotAddSecurityHeaders() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/authorize");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response, never()).addHeader(anyString(), anyString());
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_whenDisabled_shouldNotAddSecurityHeaders() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setSecurityHeadersEnabled(false);
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response, never()).addHeader(anyString(), anyString());
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_withEmptyAndNullUriListEntries_shouldIgnoreThem() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setApplySecurityHeadersIfUriContainsAny(Arrays.asList("", " ", null));
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response, never()).addHeader(anyString(), anyString());
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_withValidEntryAmongEmptyAndNull_shouldAddSecurityHeaders() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setApplySecurityHeadersIfUriContainsAny(Arrays.asList("", null, "/restv1/token"));
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response).addHeader("X-Content-Type-Options", "nosniff");
+    }
+
+    @Test
+    public void addSecurityResponseHeaders_withCustomUriList_shouldUseConfiguredList() {
+        HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setApplySecurityHeadersIfUriContainsAny(Collections.singletonList("/restv1/par"));
+
+        when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token");
+
+        HeadersFilter.addSecurityResponseHeaders(request, response, appConfiguration);
+
+        verify(response, never()).addHeader(anyString(), anyString());
     }
 }

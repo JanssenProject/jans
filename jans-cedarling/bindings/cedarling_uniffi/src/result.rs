@@ -5,28 +5,36 @@
 
 use cedarling::{self as core, bindings::cedar_policy};
 
+/// Result of an authorization request.
 #[derive(Debug, uniffi::Record)]
 pub struct AuthorizeResult {
     pub response: Response,
+    /// `true` if the request is allowed.
     pub decision: bool,
+    /// Identifier of this request, also used in its logs.
     pub request_id: String,
 }
 
+/// Cedar decision together with its diagnostics.
 #[derive(Debug, uniffi::Record)]
 pub struct Response {
     pub decision: Decision,
     pub diagnostics: Diagnostics,
 }
 
+/// Cedar authorization decision.
 #[derive(Debug, uniffi::Enum)]
 pub enum Decision {
     Allow,
     Deny,
 }
 
+/// Policies that determined the decision and errors raised during evaluation.
 #[derive(Debug, uniffi::Record)]
 pub struct Diagnostics {
+    /// IDs of the policies that contributed to the decision.
     pub reasons: Vec<String>,
+    /// Errors raised while evaluating policies.
     pub errors: Vec<String>,
 }
 

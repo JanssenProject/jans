@@ -15,6 +15,9 @@ import io.jans.as.server.model.token.IdTokenFactory;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.model.token.TokenEntity;
+import org.mockito.ArgumentCaptor;
 import io.jans.as.server.service.logout.LogoutStatusJwtService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.StatusListIndexService;
@@ -28,7 +31,10 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
@@ -188,6 +194,26 @@ public class AuthorizationGrantTest {
 
         assertNotEquals(authorizationGrant.getEphemeralSub(), other.getEphemeralSub());
         assertNotEquals(authorizationGrant.getSub(), other.getSub());
+    }
+
+    @Test
+    public void createAccessToken_whenScriptPutsTokenAttribute_shouldPersistAttributeInTokenEntity() {
+        when(appConfiguration.getAccessTokenLifetime()).thenReturn(300);
+        when(externalUpdateTokenService.modifyAccessToken(any(AccessToken.class), any(ExternalUpdateTokenContext.class)))
+                .thenAnswer(invocation -> {
+                    ExternalUpdateTokenContext scriptContext = invocation.getArgument(1);
+                    scriptContext.putTokenAttribute("user_inum", "inum-1");
+                    return true;
+                });
+
+        authorizationGrant.init(new User(), AuthorizationGrantType.CLIENT_CREDENTIALS, new Client(), new Date());
+
+        final AccessToken accessToken = authorizationGrant.createAccessToken(new ExecutionContext());
+
+        assertNotNull(accessToken);
+        final ArgumentCaptor<TokenEntity> captor = ArgumentCaptor.forClass(TokenEntity.class);
+        verify(grantService).persist(captor.capture());
+        assertEquals("inum-1", captor.getValue().getAttributes().getAttributes().get("user_inum"));
     }
 
     private static Client ephemeralClient() {

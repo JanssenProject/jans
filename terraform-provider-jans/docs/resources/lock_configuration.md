@@ -41,6 +41,7 @@ Resource for managing the Jans Lock plugin configuration. This resource cannot b
 - `stat_enabled` (Boolean) Whether statistics collection is enabled.
 - `stat_timer_interval_in_seconds` (Number) Interval of the statistics timer in seconds.
 - `token_channels` (List of String) Message channels the Lock server listens on for tokens.
+- `trace_configuration` (Block List, Max: 1) Trace and evidence pipeline configuration of the Lock server. (see [below for nested schema](#nestedblock--trace_configuration))
 
 ### Read-Only
 
@@ -79,3 +80,40 @@ Optional:
 - `tls_cert_chain_file_path` (String) Path to the TLS certificate chain file.
 - `tls_private_key_file_path` (String) Path to the TLS private key file.
 - `use_tls` (Boolean) Whether the gRPC server uses TLS.
+
+
+<a id="nestedblock--trace_configuration"></a>
+### Nested Schema for `trace_configuration`
+
+Optional:
+
+- `chain_registration_mode` (String) Chain registration mode of the trace pipeline.
+- `client_domain_bindings` (Block List) Per-client bindings of evidence domain and allowed producer ids. (see [below for nested schema](#nestedblock--trace_configuration--client_domain_bindings))
+- `correlation_retry_limit` (Number) Maximum number of correlation retries.
+- `crypto_provider` (String) Crypto provider used by the trace pipeline.
+- `default_allowed_producer_ids` (List of String) Producer ids allowed by default when a client has no explicit binding.
+- `default_evidence_domain_id` (String) Default evidence domain id applied when a client has no explicit binding.
+- `enabled` (Boolean) Whether the trace pipeline is enabled.
+- `lateness_threshold_seconds` (Number) Maximum lateness in seconds tolerated for a trace record.
+- `max_array_length` (Number) Maximum number of elements in an array in a trace request.
+- `max_bulk_records` (Number) Maximum number of records in a bulk trace request.
+- `max_bulk_request_bytes` (Number) Maximum size in bytes of a bulk trace request.
+- `max_future_skew_seconds` (Number) Maximum future clock skew in seconds accepted for a trace record.
+- `max_json_depth` (Number) Maximum JSON nesting depth accepted in a trace request.
+- `max_object_members` (Number) Maximum number of members in an object in a trace request.
+- `max_request_bytes` (Number) Maximum size in bytes of a trace request.
+- `max_string_length` (Number) Maximum length of a string value in a trace request.
+- `pending_receipt_timeout_seconds` (Number) Timeout in seconds for a pending receipt.
+- `policy_mismatch_grace_seconds` (Number) Grace period in seconds applied on a policy mismatch.
+- `policy_release_retention_days` (Number) Number of days a policy release is retained.
+- `receipt_allocation_retry_limit` (Number) Maximum number of receipt allocation retries.
+- `receipt_repair_interval_seconds` (Number) Interval in seconds between receipt repair runs.
+
+<a id="nestedblock--trace_configuration--client_domain_bindings"></a>
+### Nested Schema for `trace_configuration.client_domain_bindings`
+
+Optional:
+
+- `allowed_producer_ids` (List of String) Producer ids the client may act on behalf of.
+- `client_id` (String) Client id the binding applies to.
+- `evidence_domain_id` (String) Evidence domain id bound to the client.

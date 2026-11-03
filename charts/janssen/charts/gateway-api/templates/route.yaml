@@ -636,6 +636,7 @@ spec:
 {{- end }}
 
 {{- if and (index .Values.global "auth-server" "lockEnabled") ($lockAuditEnabled) }}
+{{- $lockGrpcServices := dict "io.jans.lock.audit.AuditService" (list "ProcessLog" "ProcessBulkLog" "ProcessHealth" "ProcessBulkHealth" "ProcessTelemetry" "ProcessBulkTelemetry") "io.jans.lock.trace.TraceService" (list "SubmitRecord" "SubmitBulkRecords" "GetRecord" "SearchRecords" "GetExecution") "io.jans.lock.trace.TraceAdminService" (list "RegisterProducerKey" "ListProducerKeys" "RevokeProducerKey" "RegisterProducerChain" "ListProducerChains") }}
 ---
 {{- /* ======================================================== */}}
 {{- /* 6. gRPC APPS                                             */}}
@@ -668,49 +669,41 @@ spec:
   - {{ .Values.global.fqdn | quote }}
   rules:
   {{- if ne .Values.gateway.className "nginx" }}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
     - path:
         type: PathPrefix
-        value: /io.jans.lock.audit.AuditService
+        value: /{{ $grpcService }}
     filters:
     - type: URLRewrite
       urlRewrite:
         path:
           type: ReplacePrefixMatch
-          replacePrefixMatch: /jans-auth/io.jans.lock.audit.AuditService
+          replacePrefixMatch: /jans-auth/{{ $grpcService }}
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051
+  {{- end }}
   {{- else }}
+  {{- /* One rule per service: a GRPCRoute rule allows at most 8 matches */}}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
+    {{- range $grpcMethod := $grpcMethods }}
     - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessLog
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkLog
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessHealth
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkHealth
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessTelemetry
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkTelemetry
-    {{- if .Values.additionalConfig.nginx.enableAuditGrpcRewriteSnippets }}
+        service: {{ $grpcService }}
+        method: {{ $grpcMethod }}
+    {{- end }}
+    {{- if $.Values.additionalConfig.nginx.enableAuditGrpcRewriteSnippets }}
     filters:
     - type: ExtensionRef
       extensionRef:
         group: gateway.nginx.org
         kind: SnippetsFilter
-        name: {{ .Release.Name }}-nginx-audit-grpc-rewrite
+        name: {{ $.Release.Name }}-nginx-audit-grpc-rewrite
     {{- end }}
     backendRefs:
     - name: {{ $authSvc }}-grpc
       port: 50051
+  {{- end }}
   {{- end }}
 {{- end }}

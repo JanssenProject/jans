@@ -273,6 +273,7 @@ spec:
 
 {{- /* Auth Server: gRPC (Lock Server Audit) */}}
 {{- if and (index .Values "auth-server" "lockEnabled") ($lockAuditEnabled) }}
+{{- $lockGrpcServices := dict "io.jans.lock.audit.AuditService" (list "ProcessLog" "ProcessBulkLog" "ProcessHealth" "ProcessBulkHealth" "ProcessTelemetry" "ProcessBulkTelemetry") "io.jans.lock.trace.TraceService" (list "SubmitRecord" "SubmitBulkRecords" "GetRecord" "SearchRecords" "GetExecution") "io.jans.lock.trace.TraceAdminService" (list "RegisterProducerKey" "ListProducerKeys" "RevokeProducerKey" "RegisterProducerChain" "ListProducerChains") }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 {{- if ne $className "nginx" }}
@@ -300,38 +301,30 @@ spec:
   hostnames:
   - {{ .Values.fqdn | quote }}
   rules:
-  {{- /* DONT use URL rewrite to forward `/io.jans.lock.audit.AuditService` to `/jans-auth/io.jans.lock.audit.AuditService` as AIO image handles it internally */}}
+  {{- /* DONT use URL rewrite to forward the Lock gRPC services (`/io.jans.lock.audit.AuditService` and others) to `/jans-auth/...` as AIO image handles it internally */}}
   {{- if ne $className "nginx" }}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
     - path:
         type: PathPrefix
-        value: /io.jans.lock.audit.AuditService
+        value: /{{ $grpcService }}
     backendRefs:
     - name: {{ $svcName }}-grpc
       port: 50051
+  {{- end }}
   {{- else }}
+  {{- /* One rule per service: a GRPCRoute rule allows at most 8 matches */}}
+  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
+    {{- range $grpcMethod := $grpcMethods }}
     - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessLog
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkLog
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessHealth
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkHealth
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessTelemetry
-    - method:
-        service: io.jans.lock.audit.AuditService
-        method: ProcessBulkTelemetry
+        service: {{ $grpcService }}
+        method: {{ $grpcMethod }}
+    {{- end }}
     backendRefs:
     - name: {{ $svcName }}-grpc
       port: 50051
+  {{- end }}
   {{- end }}
 {{- end }}
 

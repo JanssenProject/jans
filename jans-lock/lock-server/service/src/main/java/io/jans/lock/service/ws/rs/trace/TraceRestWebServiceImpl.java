@@ -165,7 +165,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			log.debug("Submitting TRACE record");
 			checkEnabled();
 
-			SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+			SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 			TraceRequestContext context = evidenceDomainResolver.resolve(identity);
 
 			AcceptanceResult result = ingestionService.ingest(body, context);
@@ -191,7 +191,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			checkEnabled();
 
 			TraceConfiguration config = appConfiguration.getTraceConfiguration();
-			SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+			SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 			TraceRequestContext context = evidenceDomainResolver.resolve(identity);
 
 			List<String> elements = splitBulkElements(body, config);
@@ -343,7 +343,7 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	}
 
 	private TraceRequestContext resolveContext() {
-		SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+		SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 		return evidenceDomainResolver.resolve(identity);
 	}
 
@@ -363,9 +363,13 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		return new AuditLogEntry(getClientIpAddress(), actionType);
 	}
 
+	private HttpServletRequest currentRequest() {
+		return ServerUtil.isGrpcCall() ? null : getHttpRequest();
+	}
+
 	private String getClientIpAddress() {
-		HttpServletRequest request = getHttpRequest();
-		return request == null ? null : InetAddressUtility.getIpAddress(request);
+		HttpServletRequest request = currentRequest();
+		return request == null ? ServerUtil.getClientContextIpAddress() : InetAddressUtility.getIpAddress(request);
 	}
 
 	// -- bulk ingestion -----------------------------------------------------

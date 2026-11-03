@@ -44,6 +44,7 @@
 							<outputFileName>lock-server</outputFileName>
 							<outputPath>${project.parent.basedir}/..</outputPath>
 							<prettyPrint>true</prettyPrint>
+							<sortOutput>true</sortOutput>
 							<resourcePackages>
 								<package>io.jans.lock.service.ws.rs</package>
 							</resourcePackages>

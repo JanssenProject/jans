@@ -47,8 +47,6 @@ import jakarta.ws.rs.core.SecurityContext;
  * endpoints the {@code trace.readonly} scope; the evidence domain is always derived from the
  * authenticated client's binding, never from the request body.
  *
- * <p>Not exposed over gRPC: no {@code grpcMethodName} is set.
- *
  * @author Yuriy Movchan
  */
 @Path("/audit/trace")
@@ -68,7 +66,7 @@ public interface TraceRestWebService {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }, grpcMethodName = "SubmitRecord")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_write", path = "/audit/trace")
 	Response submitRecord(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
@@ -86,7 +84,7 @@ public interface TraceRestWebService {
 	@Path("/bulk")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS }, grpcMethodName = "SubmitBulkRecords")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_bulk_write", path = "/audit/trace/bulk")
 	Response submitBulkRecords(InputStream body, @Context HttpServletRequest request, @Context SecurityContext sec);
 
@@ -104,7 +102,7 @@ public interface TraceRestWebService {
 	@GET
 	@Path("/records/{record_id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS }, grpcMethodName = "GetRecord")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_record_read", path = "/audit/trace/records")
 	Response getRecord(@PathParam("record_id") String recordId,
 			@Parameter(description = "Disambiguate a bare record_id used by more than one producer") @QueryParam("producer_id") String producerId);
@@ -121,7 +119,7 @@ public interface TraceRestWebService {
 	@GET
 	@Path("/records")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS }, grpcMethodName = "SearchRecords")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_record_read", path = "/audit/trace/records")
 	Response searchRecords(
 			@Parameter(description = "trace.policy.policy_store_id to match") @QueryParam("policy_store_id") String policyStoreId,
@@ -146,7 +144,7 @@ public interface TraceRestWebService {
 	@GET
 	@Path("/executions/{trace_execution_id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_READ_ACCESS }, grpcMethodName = "GetExecution")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_execution_read", path = "/audit/trace/executions")
 	Response getExecution(@PathParam("trace_execution_id") String traceExecutionId,
 			@Parameter(description = "Disambiguate a bare trace_execution_id used by more than one authority") @QueryParam("execution_authority") String executionAuthority,

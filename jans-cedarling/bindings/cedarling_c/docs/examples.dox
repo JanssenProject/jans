@@ -1,0 +1,15 @@
+/**
+ * \example basic_example.c
+ * Minimal unsigned authorization: initialize, create an instance, authorize,
+ * read logs, and free everything.
+ */
+
+/**
+ * \example authorize_unsigned.c
+ * Unsigned authorization with custom principals, in more detail.
+ */
+
+/**
+ * \example authorize_multi_issuer.c
+ * JWT-based authorization with tokens from multiple issuers.
+ */

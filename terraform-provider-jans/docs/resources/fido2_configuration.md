@@ -110,6 +110,11 @@ Optional:
 - `mds_download_startup_retry_interval` (Number) Delay in seconds between MDS TOC download retries at server startup.
 - `mds_tocs_folder` (String) MDS TOC files folder.
 - `metadata_servers` (Block List) Sources of URLs with external metadata. (see [below for nested schema](#nestedblock--fido2_configuration--metadata_servers))
+- `native_readiness_allow_external_fetch` (Boolean) Whether native readiness checks may fetch authenticator metadata from external sources.
+- `native_readiness_cache_ttl_seconds` (Number) Time in seconds that native readiness results are cached.
+- `native_readiness_enabled` (Boolean) Boolean value specifying whether native passkey readiness checks are enabled.
+- `native_readiness_max_response_bytes` (Number) Maximum size in bytes of a native readiness external fetch response.
+- `native_readiness_timeout_ms` (Number) Timeout in milliseconds for native readiness external fetches.
 - `record_abandoned_assertions` (Boolean) Whether assertion ceremonies that lapse without being completed are relabelled as abandoned instead of being deleted unlabelled.
 - `requested_credential_types` (List of String) List of Requested Credential Types.
 - `requested_parties` (Block List) Authenticators metadata in json format. (see [below for nested schema](#nestedblock--fido2_configuration--requested_parties))

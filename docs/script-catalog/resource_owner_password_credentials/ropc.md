@@ -7,6 +7,13 @@ tags:
 ---
 
 # Resource Owner Password Credential
+
+!!! warning "Legacy OAuth grant"
+    This catalog page documents scripts for the Resource Owner Password Credentials
+    grant, which is not in the default supported grant types and is not recommended for
+    new integrations. Use only for an existing deployment that explicitly enables the
+    legacy flow.
+
 Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant ([RFC 6749](https://www.rfc-editor.org/rfc/rfc6749#section-4.3)).
 
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).

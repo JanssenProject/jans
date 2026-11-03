@@ -11,8 +11,8 @@ tags:
 # Authorization Server Issuer Identification (RFC 9207)
 
 Janssen Server supports OAuth 2.0 Authorization Server Issuer Identification as defined in
-[RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207). When enabled, the authorization
-server includes its own issuer identifier (`iss`) in every authorization response — both
+[RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207). By default, the authorization
+server includes its own issuer identifier (`iss`) in authorization responses — both
 successful responses and redirect-based error responses — so that clients can detect and
 reject mix-up attacks.
 
@@ -30,9 +30,10 @@ expected, and rejects the response if they do not match.
 
 ## How It Works
 
-When `authorizationResponseIssParameterSupported` is set to `true` in Janssen Server
-configuration, the `iss` parameter is appended to every authorization redirect sent back to
-the client's `redirect_uri`.
+When `authorizationResponseIssParameterSupported` is `true` in Janssen Server
+configuration, the `iss` parameter is appended to every non-JARM authorization redirect sent
+back to the client's `redirect_uri`, except for JARM responses, where the issuer is included
+in the JWT authorization response. This is the default.
 
 ### Successful Authorization Response
 
@@ -68,11 +69,11 @@ sequenceDiagram
     participant AS as Authorization Server
 
     Client->>UA: Redirect to /authorize
-    UA->>AS: GET /authorize?response_type=code&client_id=...&state=xyz
+    UA->>AS: GET /authorize?response_type=code&client_id=...&state=xyz&code_challenge=...&code_challenge_method=S256
     AS->>UA: 302 redirect_uri?code=...&state=xyz&iss=https://server.example.com
     UA->>Client: code + state + iss
     Client->>Client: Verify iss == expected issuer
-    Client->>AS: POST /token (code exchange)
+    Client->>AS: POST /token (code + code_verifier)
     AS->>Client: access_token
 ```
 
@@ -89,8 +90,10 @@ the OpenID Connect discovery document at `/.well-known/openid-configuration`:
 }
 ```
 
-Clients that read this metadata entry know they MUST validate the `iss` parameter in every
-authorization response they receive from this server.
+For non-JARM authorization responses, the client must validate the `iss`
+authorization response parameter against the expected issuer. For JARM
+responses, the client must validate the `iss` claim in the JWT authorization
+response instead.
 
 ## Relationship to JARM
 
@@ -105,17 +108,18 @@ The issuer is already secured inside the JWT.
 
 ## Configuring Janssen Server
 
-Issuer identification is **opt-in** and disabled by default so that existing deployments
-are unaffected. To enable it, set the following property:
+Issuer identification is enabled by default. To disable it for compatibility with clients
+that cannot process the parameter, set the following property:
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `authorizationResponseIssParameterSupported` | Boolean | `false` | When `true`, the `iss` parameter is added to all authorization redirect responses per RFC 9207. |
+| `authorizationResponseIssParameterSupported` | Boolean | `true` | When `true`, the `iss` parameter is added to authorization redirect responses per RFC 9207. |
 
 ### Using the TUI
 
 Navigate to **Auth Server → Configuration → Properties** and set
-`authorizationResponseIssParameterSupported` to `true`.
+`authorizationResponseIssParameterSupported` to `false` only when compatibility requires
+disabling issuer identification.
 
 ### Using the Config API
 
@@ -123,7 +127,7 @@ Navigate to **Auth Server → Configuration → Properties** and set
 curl -X PATCH https://<jans-host>/jans-config-api/api/v1/jans-auth-server/config \
   -H "Authorization: Bearer <access_token>" \
   -H "Content-Type: application/json-patch+json" \
-  -d '[{"op":"replace","path":"/authorizationResponseIssParameterSupported","value":true}]'
+  -d '[{"op":"replace","path":"/authorizationResponseIssParameterSupported","value":false}]'
 ```
 
 See the [configuration reference](../../../janssen-server/reference/json/properties/janssenauthserver-properties.md#authorizationresponseissparametersupported)
@@ -134,7 +138,9 @@ for the full property description.
 When a client receives an authorization response from a server that has advertised
 `authorization_response_iss_parameter_supported: true`, it MUST:
 
-1. Extract the `iss` parameter from the redirect response.
+1. For non-JARM authorization responses, extract the `iss` parameter from the
+   redirect response. For JARM responses, extract the `iss` claim from the
+   validated JWT authorization response.
 2. Compare its value to the expected issuer identifier using simple string comparison
    (as defined in [RFC 3986 §6.2.1](https://datatracker.ietf.org/doc/html/rfc3986#section-6.2.1)).
 3. Reject the response if `iss` is absent or does not match the expected value.
