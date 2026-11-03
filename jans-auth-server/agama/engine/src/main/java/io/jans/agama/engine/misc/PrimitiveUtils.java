@@ -83,6 +83,8 @@ public class PrimitiveUtils {
                     return value.longValue();
                 case SHORT:
                     return value.shortValue();
+                default:
+                    break;
             }
         }
         return null;
