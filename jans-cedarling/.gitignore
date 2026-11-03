@@ -9,7 +9,6 @@ coverage.txt
 lcov.info
 test_profile.profraw
 *profiling*.svg
-/custom-lints/Cargo.lock
 
 # files for debug
 cedar_files/demo_tokens_data.txt

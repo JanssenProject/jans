@@ -15706,8 +15706,6 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
           type: boolean
         adminCanAccess:
@@ -15715,6 +15713,8 @@ components:
         userCanAccess:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -18754,9 +18754,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object

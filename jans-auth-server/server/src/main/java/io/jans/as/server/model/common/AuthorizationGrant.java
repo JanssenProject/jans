@@ -328,6 +328,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
 
             final TokenEntity tokenEntity = asToken(accessToken);
+            tokenEntity.getAttributes().getAttributes().putAll(context.getAttributes());
             context.setAccessTokenEntity(tokenEntity);
 
             persist(tokenEntity);
