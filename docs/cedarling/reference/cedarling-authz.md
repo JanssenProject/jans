@@ -10,9 +10,11 @@ tags:
 # Authorization Using Cedarling
 
 The **Policy Store** contains the Cedar Policies, Cedar Schema, and optionally, a list of the
-Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
-or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
-a Jans Lock Server OAuth protected endpoint.
+Trusted IDPs. The Cedarling loads its Policy Store during initialization from a local directory or
+Cedar Archive (`.cjar`), from inline YAML, or as a `.cjar` fetched via HTTPS (see
+[Policy Store Formats](./cedarling-policy-store.md#policy-store-formats)). In enterprise
+deployments, the Cedarling can retrieve its Policy Store from a Jans Lock Server OAuth protected
+endpoint.
 
 Developers need to define Cedar Schema that makes sense for their application. For example, a
 developer writing a customer support application might define an "Issue" Resource and Actions like
@@ -21,23 +23,21 @@ grain access controls needed to implement the business rules of their applicatio
 to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy
 Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-![Diagram showing Cedarling authorization flow with JWTs, Resource, Action, and Context](../../assets/lock-cedarling-diagram-2.jpg)
+![Diagram showing Cedarling authorization flow: tokens and a resource become entities that a policy evaluates](../../assets/cedarling/cedarling-authz.png)
 
-The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Principal entities
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are used by the Cedarling to create
-User, Workload, and Role entities based on token claims.
+The tokens, the Action, and the Resource are sent in the authz request, along with an optional
+Context. The Cedarling validates each token and turns it into a Cedar entity under
+`context.tokens`, named after its trusted issuer and token type (for example
+`context.tokens.bar_access_token`). The Resource
+becomes a Cedar entity too. Policies then compare token claims with resource attributes: in the
+diagram, the access token lists the customers the caller supports, and the policy allows the
+request because the ticket belongs to one of them. When the application has already authenticated
+the caller, it can pass an asserted principal instead of tokens (see
+[Unsigned Authorization](#unsigned-authorization-authorize_unsigned)).
 
-The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
-of saying "User can perform action", we can say "Role can perform action"--a convenient way to
-implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
-domain may use the `role` user claim of the OpenID Userinfo token; another domain may use the
-`memberOf` claim in the OIDC id_token.
-
-Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC
-conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a
-"private" Resource from the private network, during business hours. In this case "Admins" is the role,
-but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
-"slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
+Policies can express RBAC conditions, ABAC conditions, or both. For example, a policy may allow
+Admins to access a "private" Resource from the private network during business hours. "Admins" is
+the role, read from a token claim such as `role` or `memberOf`, and the other conditions are ABAC.
 
 The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
 Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
@@ -54,8 +54,8 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | | `authorize_multi_issuer` | `authorize_unsigned` |
 |---|---|---|
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
-| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are validated when listed in `required_claims` | No — accepts raw entity data as-is |
-| **Principal source** | Derived from JWT token claims | Supplied directly by the application |
+| **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are checked when present and required when listed in `required_claims` | No — accepts raw entity data as-is |
+| **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
 | **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
@@ -199,20 +199,13 @@ permit(
 
 The Cedarling uses a deterministic algorithm to generate token collection field names. The final key is always **lowercase** and uses only **underscores** as separators, making it a valid Cedar identifier.
 
-**Pattern**: `{issuer_name}_{token_type}`
+**Pattern**: `{issuer}_{token_type}`
 
-Both components are individually normalized, then joined with a single underscore.
+The key is derived once, when the policy store loads, from the
+`trusted-issuers.json` entry the token's `mapping` names. The token's `iss` claim
+plays no part in it.
 
-**Step 1 — Issuer Name Resolution**:
-
-1. Look up the JWT's `iss` claim in the trusted issuer configuration from the policy store
-2. If a matching trusted issuer is found, use its `name` field (e.g., `"Acme"`)
-3. If no trusted issuer matches, extract the hostname from the `iss` URL:
-    - Strip the protocol (`https://`, `http://`)
-    - Take everything before the first `/`
-    - Strip port numbers (everything after `:`)
-    - Example: `https://unknown.issuer.com:8080/auth` → `unknown.issuer.com`
-4. **Sanitize**: replace all `.` (dots), ` ` (spaces), and `-` (hyphens) with `_`, then convert to **lowercase**
+**Step 1 — Issuer**: the entry's `issuer`, lowercased (e.g. `"Acme"` --> `acme`).
 
 **Step 2 — Token Type Simplification**:
 
@@ -221,24 +214,26 @@ Both components are individually normalized, then joined with a single underscor
 3. Convert to **lowercase**
 4. Underscores within the token type name are preserved
 
-**Step 3 — Combine**:
-
-Join the sanitized issuer name and simplified token type with `_`:
+**Step 3 — Combine** with `_`:
 
 ```text
-{sanitized_issuer}_{simplified_token_type}
+{lowercase_issuer}_{simplified_token_type}
 ```
 
 **Examples**:
 
-| JWT `iss` claim | Trusted issuer `name` | Token `mapping` | Resulting key |
-|---|---|---|---|
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Access_Token` | `acme_access_token` |
-| `https://idp.acme.com/auth` | `"Acme"` | `Jans::Id_Token` | `acme_id_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Jans::Access_Token` | `dolphin_access_token` |
-| `https://idp.dolphin.sea/auth` | `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
-| `https://unknown.issuer.com/auth` | _(not configured)_ | `Custom::Employee_Token` | `unknown_issuer_com_employee_token` |
-| `https://login.microsoftonline.com/tenant` | `"Microsoft"` | `Jans::Id_Token` | `microsoft_id_token` |
+| Entry `issuer` | Token `mapping` | Resulting key |
+|---|---|---|
+| `"Acme"` | `Acme::Access_Token` | `acme_access_token` |
+| `"Acme"` | `Acme::Id_Token` | `acme_id_token` |
+| `"Dolphin"` | `Dolphin::Access_Token` | `dolphin_access_token` |
+| `"Dolphin"` | `Acme::DolphinToken` | `dolphin_dolphintoken` |
+| `"Microsoft"` | `Microsoft::Id_Token` | `microsoft_id_token` |
+
+Each entity type belongs to one issuer, so a mapping names exactly one entry. A
+mapping with no entry gets no key: the token is dropped. A store where two
+token types derive the same key, or one derives `total_token_count`, does not
+load.
 
 Tokens are then accessible in Cedar policies as `context.tokens.{key}`, e.g.:
 
@@ -256,8 +251,8 @@ context.tokens.acme_access_token.hasTag("scope")
 
 **Non-Deterministic Token Detection**:
 
-- System rejects requests with multiple tokens of the same type from the same issuer
-- Example: Two "Jans::Access_Token" from "Acme" issuer will fail
+- Only one token per mapping is used: the first accepted one
+- Later tokens for the same mapping are dropped as `duplicate_token` and logged
 - This prevents ambiguous policy evaluation
 
 ### Use Cases
@@ -596,6 +591,94 @@ response.results.forEach((r, i) => {
 
 Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer Authorization](#multi-issuer-authorization-authorize_multi_issuer-recommended) for the token contract.
 
+## Authorize options and TRACE context
+
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
+
+| Field | Required | Meaning |
+|---|---|---|
+| `execution_id` | yes | `trace_execution_id` issued by the execution initiator (gateway, PEP, host, agent runtime or scheduler) |
+| `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
+| `workload_id` | yes | Stable id of the workload the decision is made for |
+| `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
+
+```json
+{
+  "principal": { "cedar_entity_mapping": { "entity_type": "Jans::User", "id": "1" } },
+  "action": "Jans::Action::\"Read\"",
+  "resource": { "cedar_entity_mapping": { "entity_type": "Jans::Issue", "id": "2" } },
+  "context": {},
+  "options": {
+    "trace": {
+      "execution_id": "01J9Z3K4N6Q8R0S2T4V6W8X0Y2",
+      "execution_authority": "https://gateway.example.com",
+      "workload_id": "billing-service",
+      "workload_instance_id": "billing-service-7f9c"
+    }
+  }
+}
+```
+
+With TRACE enabled, the decision log entry of every decision says what happened to its record in `trace_record_status`. In a batch, each item has its own decision log entry and its own status. The field is absent when TRACE is disabled.
+
+```json
+{
+    "log_kind": "Decision",
+    "request_id": "019394db-f52b-7b06-88b8-a288670a32c2",
+    "action": "Jans::Action::\"Read\"",
+    "resource": "Jans::Issue::\"2\"",
+    "decision": "ALLOW",
+    "trace_record_status": "emitted"
+}
+```
+
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
+
+In Rust, attach options with `with_options`:
+
+```rust
+let request = request.with_options(AuthorizeOptions::with_trace(TraceContext::new(
+    execution_id,
+    execution_authority,
+    workload_id,
+)));
+```
+
+In Python, pass `options` to the request constructor:
+
+```python
+from cedarling_python import AuthorizeOptions, RequestUnsigned, TraceContext
+
+options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority, workload_id))
+request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
+```
+
+In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none. Java does not see Kotlin default arguments, so Java code that calls the generated `Cedarling` class directly must pass the last argument itself (`null` for no options); `CedarlingAdapter` keeps the overloads without it:
+
+```java
+AuthorizeOptions options = new AuthorizeOptions(
+        new TraceContext(executionId, executionAuthority, workloadId, null));
+AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
+```
+
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+
+```go
+request := cedarling_go.RequestUnsigned{
+    Action:   action,
+    Resource: resource,
+    Options: &cedarling_go.AuthorizeOptions{Trace: &cedarling_go.TraceContext{
+        ExecutionID:        executionID,
+        ExecutionAuthority: executionAuthority,
+        WorkloadID:         workloadID,
+    }},
+}
+```
+
 ## Policy Introspection
 
 Cedarling also provides methods to discover which policies are potentially applicable to a given authorization request **without executing authorization**. This is useful for:
@@ -625,4 +708,4 @@ After an authorization call, the policies that determined the decision are repor
 
 Unknown policy IDs are silently skipped. Resolve annotations promptly after the authorization call; a concurrent policy-store refresh may swap the store, dropping IDs that no longer resolve.
 
-See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples.
+See the [Interfaces](./cedarling-interfaces.md#annotation-lookup) reference for signatures and examples, and [Policy Annotation Patterns](../patterns/annotation-patterns.md) for worked scenarios: labeling what each policy checks, multi-step flows, step-up evidence, and the design constraints behind them.

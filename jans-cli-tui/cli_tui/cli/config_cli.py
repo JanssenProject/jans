@@ -106,6 +106,19 @@ def unobscure(s=''):
     decrypted = cipher.decrypt(base64.b64decode(s), padmode=pyDes.PAD_PKCS5)
     return decrypted.decode('utf-8')
 
+def deep_merge(base, head):
+  """Recursively merges head dictionary into base dictionary."""
+  merged = base.copy()
+  for key, value in head.items():
+    if (
+        key in merged
+        and isinstance(merged[key], dict)
+        and isinstance(value, dict)
+    ):
+      merged[key] = deep_merge(merged[key], value)
+    else:
+      merged[key] = value
+  return merged
 
 name_regex = re.compile('[^a-zA-Z0-9]')
 
@@ -119,7 +132,12 @@ def get_plugin_name_from_title(title):
     return ''
 
 cfg_yaml = {}
+yaml_updates = {}
 
+yaml_updates_fn = os.path.join(cur_dir, 'ops/updates.json')
+if os.path.exists(yaml_updates_fn):
+    with open(yaml_updates_fn) as f:
+        yaml_updates = json.load(f)
 
 # load yaml files
 def read_swagger(op_mode):
@@ -130,6 +148,8 @@ def read_swagger(op_mode):
         with open(yaml_fn) as f:
             config_ = yaml_obj.load(f.read().replace('\t', ''))
             plugin_name = get_plugin_name_from_title(config_['info']['title'])
+            if op_mode in yaml_updates and plugin_name in yaml_updates[op_mode]:
+                config_ = deep_merge(config_, yaml_updates[op_mode][plugin_name])
             cfg_yaml[op_mode][plugin_name] = config_
 
             for path in config_['paths']:
@@ -964,10 +984,9 @@ class JCA_CLI:
         return None
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
-        if req in endpoint.info:
-            for key in endpoint.info[req]['content']:
-                return key
-        return None
+        request_info = endpoint.info.get(req) or {}
+        content = request_info.get('content') or {}
+        return next(iter(content), None)
 
 
     def resolve_user_file(self, path):
@@ -987,12 +1006,40 @@ class JCA_CLI:
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
+        schema = {}
         mime_type = self.get_mime_for_endpoint(endpoint)
+        content = endpoint.info.get('requestBody', {}).get('content', {})
+        if mime_type and 'schema' in content.get(mime_type, {}):
+            if '$ref' in content[mime_type]['schema']:
+                schema_ref = content[mime_type]['schema']['$ref']
+                schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
+            else:
+                schema = content[mime_type]['schema']
+
+        if 'required' in schema:
+            required = schema['required']
+            for requirename in required:
+                data_ = copy.deepcopy(data)
+                if isinstance(data, (str, bytes)):
+                    try:
+                        data_ = json.loads(data_)
+                    except (json.JSONDecodeError, TypeError, ValueError):
+                        data_ = None
+                if data is None or (data_ is not None and requirename not in data_):
+                    err = f"{requirename} is required, but not exists in data"
+
+                    if self.wrapped:
+                        class FakeResponse:
+                            status_code = 800
+                            text = err
+                            reason = "Invalid data"
+
+                        return FakeResponse()
+
+                    self.print_exception(err)
 
         if mime_type == 'multipart/form-data':
             data_js = json.loads(data) if (isinstance(data, str) or isinstance(data, bytes)) else copy.deepcopy(data)
-            schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
-            schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
             multi_part_fields = {}
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':

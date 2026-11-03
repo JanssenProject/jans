@@ -26,8 +26,9 @@ use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
-    BatchItem, BootstrapConfig, Cedarling, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, AuthorizeOptions, BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeUnsignedRequest, BatchItem, BootstrapConfig, Cedarling, EntityData,
+    RequestUnsigned, TokenInput,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
@@ -289,6 +290,7 @@ fn build_bench_fn<'a>(
                 action: scenario.action.clone(),
                 resource,
                 context,
+                options: AuthorizeOptions::default(),
             };
             Ok(Box::new(move || {
                 runtime

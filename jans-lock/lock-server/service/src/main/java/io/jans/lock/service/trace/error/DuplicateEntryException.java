@@ -9,11 +9,10 @@ package io.jans.lock.service.trace.error;
 import io.jans.lock.service.trace.store.TraceStore;
 
 /**
- * Thrown by a {@link TraceStore} insert operation when the composite key already exists (design
- * decision D-8 step 4 — a receipt-sequence race — or step 5 — a record identity race). A new
+ * Thrown by a {@link TraceStore} insert operation when the composite key already exists (a receipt-sequence race or a record identity race). A new
  * checked exception owned by this package: it is deliberately <strong>not</strong>
- * {@code io.jans.orm.exception.operation.DuplicateEntryException}, which the ORM store (task 13)
- * cannot rely on for SQL backends (design decision D-8 — duplicate detection there is
+ * {@code io.jans.orm.exception.operation.DuplicateEntryException}, which the ORM store
+ * cannot rely on for SQL backends (duplicate detection there is a
  * {@code contains(dn)} pre-check plus re-probe on failure, never this exception type in the ORM's
  * own cause chain).
  *

@@ -52,7 +52,6 @@ Casa is a plugin-oriented, Java web application. Existing functionality can be e
 - [Accounts linking](./plugins/accts-linking/account-linking-index.md)
 - [Consent management](./plugins/consent-management.md)
 - [Custom branding](./plugins/custom-branding.md)
-- [BioID](./plugins/bioid.md)
 - [Email OTP](./plugins/email-otp.md)
 - [Certificate authentication](./plugins/cert-authn.md)
 

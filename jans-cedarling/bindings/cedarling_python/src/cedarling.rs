@@ -556,9 +556,9 @@ impl Cedarling {
         self.inner.policy_store_id()
     }
 
-    /// Returns true if trusted issuer with the given policy-store id is loaded.
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    /// Returns true if the trusted issuer with the given name (its `issuer`) is loaded.
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     /// Returns true if trusted issuer with the given iss claim is loaded.

@@ -18,6 +18,7 @@ The URI to invoke the Device Authorization Endpoint in Janssen Auth Server can b
 The Device Authorization Grant defined by [RFC 8628](https://tools.ietf.org/html/rfc8628) contains a call to the Device Authorization endpoint in Step 2 of the diagram below. The details of the entire flow can be found in this [article](../oauth-features/device-grant.md)
 
 ```mermaid
+%%{init: {"sequence": {"useMaxWidth": false, "diagramMarginX": 10, "messageMargin": 20}}}%%
 sequenceDiagram
 autonumber 1
     title Oauth2.0 Device Authorization flow

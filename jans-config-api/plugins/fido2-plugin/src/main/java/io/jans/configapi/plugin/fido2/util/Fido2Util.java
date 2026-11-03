@@ -27,6 +27,7 @@ import jakarta.ws.rs.core.Response.Status;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 
 import org.slf4j.Logger;
@@ -69,6 +70,12 @@ public class Fido2Util {
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers, Map<String, String> data) {
         validateFido2Url(requestUri);
         return configHttpService.executeGet(requestUri, headers, data);
+    }
+
+    public HttpServiceResponse executePost(String requestUri, Map<String, String> headers, String body) {
+        validateFido2Url(requestUri);
+        return configHttpService.executePost(configHttpService.getHttpsClient(), requestUri, null, headers, body,
+                ContentType.APPLICATION_JSON, null);
     }
 
     public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse)

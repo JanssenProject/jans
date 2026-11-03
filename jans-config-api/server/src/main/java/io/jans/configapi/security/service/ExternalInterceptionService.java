@@ -36,9 +36,8 @@ public class ExternalInterceptionService implements Serializable {
             ApiAppConfiguration apiAppConfiguration, Map<String, Object> requestParameters,
             JSONObject responseAsJsonObject) {
         log.debug(
-                "External Interception Service - Authorization script params -  request:{}, response:{}, apiAppConfiguration:{}, requestParameters:{}, responseAsJsonObject:{}, externalConfigService{}, externalConfigService.isEnabled():{} ",
-                request, response, apiAppConfiguration, requestParameters, responseAsJsonObject, externalConfigService,
-                externalConfigService.isEnabled());
+                "External Interception Service - Authorization script params -  externalConfigService{}, externalConfigService.isEnabled():{} ",
+                externalConfigService, externalConfigService.isEnabled());
         if (externalConfigService.isEnabled()) {
             return externalConfigService.checkAuthorization(request, response, apiAppConfiguration, requestParameters,
                     responseAsJsonObject);

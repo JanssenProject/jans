@@ -265,7 +265,10 @@ public class AuditResource extends BaseResource {
 	public Response getLogEntrysByRange(
 			@Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
 			@Parameter(description = "Event start date in ISO8601 format") @QueryParam("eventStartDate") @NotNull String eventStartDateIso8601,
-			@Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndDate") @NotNull String eventEndDateIso8601) {
+			@Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndDate") @NotNull String eventEndDateIso8601,
+			@Parameter(description = "Cedarling request_id to match") @QueryParam("requestId") String requestId,
+			@Parameter(description = "Policy store id to match") @QueryParam("policyStoreId") String policyStoreId,
+			@Parameter(description = "Policy store version to match") @QueryParam("policyStoreVersion") String policyStoreVersion) {
 		logger.debug("Get Log entries by by event range");
 
         checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
@@ -277,7 +280,8 @@ public class AuditResource extends BaseResource {
 		Date eventEndDate = decodeTime(eventEndDateIso8601);
 		checkResourceNotNull(eventStartDate, EVENT_END_DATE_PARSE_ERR);
 
-		List<LogEntry> entries = auditService.getLogEntrysByRange(eventStartDate, eventEndDate, limit);
+		List<LogEntry> entries = auditService.getLogEntrysByRange(eventStartDate, eventEndDate, requestId,
+				policyStoreId, policyStoreVersion, limit);
 
 		return Response.ok(entries).build();
 	}

@@ -19,7 +19,7 @@ Learn more about each part of the validation process:
 - [Signature Validation](#jwt-signature-validation): Verifies the token's origin using trusted issuer keys.
 - [Content Validation](#jwt-content-validation): Ensures required claims like `exp` or `client_id` are present.
 - [Schema and Claims Compatibility](#schema-and-claims-compatibility): How Cedar schema must match JWT payload structure.
-- [JWT Status Validation](#jwt-status-validation): Checks if a token has been explicitly revoked.
+- [JWT Status Validation](#jwt-status-validation): Checks if a token has been revoked or suspended.
 - [Local JWKS](#local-jwks): Using local key stores for testing.
 
 **Key Configuration Properties:**
@@ -45,7 +45,7 @@ On initialization, Cedarling will fetch the latest public keys from the issuers 
 
 ### Example Policy Store
 
-Cedarling only validates tokens issued by [trusted issuers](./cedarling-policy-store.md#trusted-issuers-schema) listed in the policy store. Tokens from issuers not listed in the policy store will be **ignored** and will not be used for [entity creation](./cedarling-entities.md).
+Cedarling only validates tokens whose type is declared in the policy store's [`trusted-issuers.json`](./cedarling-policy-store.md#trusted-issuersjson), and only from the issuer declared for that type. Other tokens are **dropped** and are not used for [entity creation](./cedarling-entities.md).
 
 To allow an Access token like the one below to be used for authorization:
 
@@ -53,48 +53,41 @@ To allow an Access token like the one below to be used for authorization:
 {
   "iss": "https://test.issuer.com",
   "aud": "abc123",
-  "exp": 1234567890
+  "client_id": "abc123",
+  "exp": 4102444800
 }
 ```
 
-You **MUST** define a trusted issuer in your policy store with a matching `openid_configuration_endpoint` (same host as the token's `iss` claim):
+You **MUST** declare its token type in `trusted-issuers.json`, with a discovery URL whose issuer is the token's `iss` claim:
 
 ```json
 {
-  // ... other fields have been omitted for brevity
-  "trusted_issuers": {
-    "my_trusted_issuer_id": {
-      "name": "my trusted issuer",
-      "description": "an IDP that i trust",
-      "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration",
-      "token_metadata": { 
-        "access_token": { 
-          "entity_type_name": "Jans::Access_token",
-          "token_id": "jti",
-          "required_claims": ["exp", "client_id"]
-        }
-      }
-    }
+  "Jans::Access_token": {
+    "type": "jwt",
+    "issuer": "MyIdp",
+    "configuration_endpoints": {
+      "configuration": "https://test.issuer.com/.well-known/openid-configuration"
+    },
+    "token_id": "jti",
+    "required_claims": ["exp", "client_id"]
   }
 }
 ```
-
-Additionally, only tokens **explicitly named** in the `token_metadata` section will be validated. All other tokens will be ignored.
 
 ### Validation Requirements
 
 In summary, for a token to be validated by Cedarling, two conditions must be met:
 
-1. The `iss` (Issuer) claim must match the **host** of an `openid_configuration_endpoint` in the policy store.
-2. The token must be provided under a **token name** defined in the corresponding `token_metadata`
+1. The token must be provided under a `mapping` equal to an entity type declared in `trusted-issuers.json`.
+2. Its `iss` (Issuer) claim must equal the expected `iss` of that entry: the `configuration` URL without `/.well-known/openid-configuration`, **path included**, or the explicit `iss` of the static form. The discovery document must declare the same issuer.
 
   ```js
   // Example authorizeMultiIssuer call
   const result = await cedarling.authorizeMultiIssuer(
     JSON.stringify({
       tokens: [
-        { mapping: "Jans::Access_Token", payload: "<access_token>" }, // will be validated
-        { mapping: "Jans::Id_Token", payload: "<id_token>" }, // ignored unless defined in token_metadata
+        { mapping: "Jans::Access_token", payload: "<access_token>" }, // will be validated
+        { mapping: "Jans::Id_token", payload: "<id_token>" }, // dropped unless declared in trusted-issuers.json
       ],
       // ...
     }),
@@ -103,32 +96,26 @@ In summary, for a token to be validated by Cedarling, two conditions must be met
 
 ## JWT Content Validation
 
-Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined in the `token_metadata` section of the policy store.
+Cedarling also supports validating the contents of a JWT by enforcing the presence of required claims. These requirements are defined per token type in the policy store's `trusted-issuers.json`.
 
 ### Required Claims
 
-You can specify required claims in your token metadata configuration. If `exp` or `nbf` are included in `required_claims`, Cedarling will validate them according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (checking expiration and not-before timestamps against the current time).
+You can specify required claims in a token type's entry. If `exp` or `nbf` are included in `required_claims`, Cedarling will validate them according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) (checking expiration and not-before timestamps against the current time).
 
 ```json
 {
-  // ... other fields have been omitted for brevity
-  "trusted_issuers": {
-    "my_trusted_issuer_id": {
-      "name": "my trusted issuer",
-      "description": "an IDP that i trust",
-      "openid_configuration_endpoint": "https://test.issuer.com/.well-known/openid-configuration",
-      "token_metadata": { 
-        "access_token": {
-          "entity_type_name": "Jans::Access_token",
-          "required_claims": ["exp", "client_id"]
-        }
-      }
-    }
+  "Jans::Access_token": {
+    "type": "jwt",
+    "issuer": "MyIdp",
+    "configuration_endpoints": {
+      "configuration": "https://test.issuer.com/.well-known/openid-configuration"
+    },
+    "required_claims": ["exp", "client_id"]
   }
 }
 ```
 
-The above configuration means that any `access_token` must contain both the `exp` and `client_id` claims, or it will be rejected. Registered claims like `exp` and `nbf` will also be validated according to [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1) standards (e.g., checking that the token is not expired).
+The above configuration means that any `Jans::Access_token` must contain both the `exp` and `client_id` claims, or it will be dropped.
 
 ## Schema and Claims Compatibility
 
@@ -188,13 +175,11 @@ Cedar schema types must match the JWT claim value types:
 | Record (`{ field: Type }`) | JSON object |
 | Entity reference | Resolved from built entities |
 
-A type mismatch on a **required** attribute causes an error. A type mismatch on an **optional** attribute causes the attribute to be silently skipped.
-
 ## JWT Status Validation
 
 Cedarling optionally supports JWT revocation checks by validating the status bit of a "Status Token" JWT, as proposed in the [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/) draft.
 
-This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
+This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property. An issuer with a static JWKS, or without a `status_list_endpoint`, has no Status List, so its tokens that carry a `status` claim are rejected.
 
 > ℹ️ **Use Case**
 >
@@ -204,15 +189,26 @@ This feature is toggled with the `CEDARLING_JWT_STATUS_VALIDATION` property.
 
 By design, the refresh interval for the Status List JWT is driven by the `ttl` claim **inside the Status List JWT itself**, as defined by the IETF spec. Cedarling spawns a background task that re-fetches the list every `ttl` seconds.
 
-The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` (default `300` seconds) caps that interval: the effective refresh interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`, so the issuer can always request a *more frequent* refresh, but never a less frequent one. When the issuer omits the `ttl` claim, the max value is used directly so the cache cannot silently go stale forever. A value of `0` or an unset variable resolves to the built-in default. Non-zero values below `5` seconds are clamped up to `5` seconds.
+The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps that interval, so the issuer can request a more frequent refresh, but never a less frequent one:
+
+- The effective interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`.
+- Without a `ttl` claim, the max value is used, so the cache cannot go stale forever.
+- `0` or an unset variable means the default, `300` seconds.
+- Non-zero values below `5` seconds are raised to `5` seconds.
 
 Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
 
 ## JWT Validation Flow Diagram
 
-JWTs (JSON Web Tokens) contain authorization information that is used by the Cedarling to construct token entities in the `authorize_multi_issuer` flow. To verify the authenticity of this information, the Cedarling can verify the integrity of the JWT by validating its signature and status (active, expired, or revoked). It does so by fetching the public keyset and the list of active tokens from the issuer of the JWT.
+JWTs (JSON Web Tokens) contain authorization information that the Cedarling uses to construct token entities in the `authorize_multi_issuer` flow. The Cedarling runs these checks on each JWT:
 
-![Cedarling JWT validation flow diagram showing token verification process](../../assets/lock-cedarling-diagram-4.jpg)
+- **Claims**, such as `exp`: always checked.
+- **Signature**: checked against the issuer's JWKS when `CEDARLING_JWT_SIG_VALIDATION` is enabled. When it is disabled, the JWT is decoded without verification.
+- **Status**: checked against the issuer's Status List when `CEDARLING_JWT_STATUS_VALIDATION` is enabled and the issuer publishes a `status_list_endpoint`. The `Invalid` and `Suspended` statuses fail validation.
+
+A token that fails any check is dropped. Cedarling logs the failure when the configured logger is enabled.
+
+![Cedarling JWT validation flow diagram: signature, claims and status checks against the issuer's JWKS and Status List](../../assets/cedarling/cedarling-jwt-validation.png)
 
 ## Local JWKS
 

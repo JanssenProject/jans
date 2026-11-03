@@ -26,11 +26,14 @@ The entity type names are defined in the Cedar schema within the policy store.
 
 ## Trusted Issuer
 
-Cedarling creates a Trusted Issuer entity at startup for each trusted issuer defined in the [policy store](./cedarling-policy-store.md#trusted-issuers-schema).
+Cedarling creates a Trusted Issuer entity at startup for each JWT issuer declared in the policy store's [`trusted-issuers.json`](./cedarling-policy-store.md#trusted-issuersjson).
 
-- *Namespace:* Corresponds to the trusted issuer name in the policy store.
+- *Namespace:* The entry's `issuer`, so `"issuer": "Acme"` gives `Acme::TrustedIssuer`.
 - *Type Name:* `TrustedIssuer`
-- *Entity ID:* Set using the issuer URL (corresponds to `iss` in tokens).
+- *Entity ID:* The issuer's expected `iss`, path included (for example `https://kc.example/realms/a`). It matches the `iss` claim of its tokens.
+- *Attributes:* `issuer_entity_id` holds the `protocol`, `host` and `path` of that `iss`, so issuers that share a host but differ by path (Keycloak realms, Entra tenants) can be told apart in policies.
+
+Issuers that share one `iss` each get their own entity, in their own namespace. Custom (non-JWT) issuers have no `TrustedIssuer` entity.
 
 ## Principal Entities
 
@@ -172,8 +175,8 @@ Cedarling builds:
 
 Token entities are created only in the `authorize_multi_issuer` interface. Cedarling builds one entity per JWT token provided in the request.
 
-- *Type Name:* Determined by the `entity_type_name` attribute from the [TEMS](./cedarling-policy-store.md#token-metadata-schema), or derived from the token's mapping name.
-- *Entity ID:* Extracted from the `jti` (JWT ID) claim by default, configurable via `token_id` in TEMS.
+- *Type Name:* The token's `mapping`, which must equal an entity type declared in the policy store's [`trusted-issuers.json`](./cedarling-policy-store.md#trusted-issuersjson).
+- *Entity ID:* Extracted from the `jti` (JWT ID) claim by default, configurable via the entry's `token_id`.
 - *Attributes:* JWT claims are mapped to entity attributes based on the Cedar schema. Reserved claims (`iss`, `jti`, `exp`) are typed correctly (entity reference, string, long). Synthetic attributes `token_type` and `validated_at` are added automatically.
 - *Tags:* Non-reserved JWT claims are also added as entity tags (`Set<String>`), enabling `hasTag`/`getTag` operations in policies.
 

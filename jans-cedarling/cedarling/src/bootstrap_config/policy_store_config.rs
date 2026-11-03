@@ -29,6 +29,31 @@ pub struct PolicyStoreConfig {
     /// a single `.cjar` entry, in bytes. `0` disables the cap.
     #[serde(default = "default_policy_store_max_file_size")]
     pub max_file_size: u64,
+
+    /// Sigstore signature check applied to `.cjar` sources.
+    #[serde(default)]
+    pub signature: PolicyStoreSignature,
+}
+
+/// Sigstore (cosign keyless) signature check for a `.cjar` policy store.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub enum PolicyStoreSignature {
+    /// The archive is loaded without a signature check.
+    #[default]
+    Disabled,
+    /// The archive loads only if its bundle verifies for this signer.
+    Enforce(SigstoreSigner),
+}
+
+/// Expected signer of a `.cjar` policy store, and where its bundle lives.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct SigstoreSigner {
+    /// Expected certificate SAN, matched exactly.
+    pub cert_identity: String,
+    /// Expected OIDC issuer, matched exactly.
+    pub cert_oidc_issuer: String,
+    /// Bundle location; `None` means the store location plus `.sigstore.json`.
+    pub bundle_uri: Option<String>,
 }
 
 /// Serde default for [`PolicyStoreConfig::max_file_size`], so a config
@@ -87,7 +112,16 @@ impl Default for PolicyStoreConfig {
             ),
             refresh_interval_secs: 0,
             max_file_size: default_policy_store_max_file_size(),
+            signature: PolicyStoreSignature::Disabled,
         }
+    }
+}
+
+impl PolicyStoreSource {
+    /// `true` for `.cjar` sources, the only ones that can carry a Sigstore signature.
+    /// URL sources count, since what they serve is only known once fetched.
+    pub(crate) fn is_archive(&self) -> bool {
+        !matches!(self, Self::Yaml(_) | Self::FileYaml(_) | Self::Directory(_))
     }
 }
 
@@ -206,6 +240,7 @@ impl TryFrom<PolicyStoreConfigRaw> for PolicyStoreConfig {
             source,
             refresh_interval_secs: 0,
             max_file_size: default_policy_store_max_file_size(),
+            signature: PolicyStoreSignature::Disabled,
         })
     }
 }

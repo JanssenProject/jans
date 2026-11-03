@@ -385,6 +385,20 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 result.setCodeChallenge(tokenEntity.getCodeChallenge());
                 result.setCodeChallengeMethod(tokenEntity.getCodeChallengeMethod());
+                result.setRedirectUri(tokenEntity.getAttributes().getRedirectUri());
+                final String storedEphemeralSub = tokenEntity.getAttributes().getEphemeralSub();
+                if (StringUtils.isNotBlank(storedEphemeralSub)) {
+                    if (user == null) {
+                        log.warn("Rejecting restore of grant with stored ephemeral sub: user '{}' not found (grantId: {})", tokenEntity.getUserId(), grantId);
+                        return null;
+                    }
+                    result.setEphemeralSub(storedEphemeralSub);
+                } else if (AuthorizationGrant.isEphemeralSubjectType(client, result.getUser())) {
+                    log.warn("Token has no stored ephemeral sub but client is ephemeral (client: {}, grantId: {}). Token was issued before client switched to ephemeral subject type. Rejecting restore.", client.getClientId(), grantId);
+                    return null;
+                } else {
+                    result.setEphemeralSub(null);
+                }
 
                 if (StringUtils.isNotBlank(jwtRequest)) {
                     try {

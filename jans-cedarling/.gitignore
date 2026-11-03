@@ -9,7 +9,6 @@ coverage.txt
 lcov.info
 test_profile.profraw
 *profiling*.svg
-/custom-lints/Cargo.lock
 
 # files for debug
 cedar_files/demo_tokens_data.txt
@@ -97,5 +96,6 @@ docs/_build/
 # Pyenv
 .python-version
 
-# allow commit of cedarling_native_apps bindings
+# allow commit of the uniffi-bindgen binaries of the UniFFI crates
 !/bindings/cedarling_uniffi/src/bin
+!/bindings/jans_trace_uniffi/src/bin

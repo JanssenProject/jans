@@ -10,9 +10,9 @@ tags:
 
 ## Background
 
-Refresh tokens are an optimization that allows a client to renew an access token
-without having to re-authenticate. You should not issue a refresh token to
-untrusted clients, i.e. public clients.
+Refresh tokens allow clients to obtain new access tokens without requiring
+the user to authenticate again. Janssen Auth Server supports refresh tokens for both confidential and public
+clients.
 
 ## Server properties.
 
@@ -42,6 +42,10 @@ However if intention is to leave Refresh Token after logout, it's required to se
 : *Default: False* - Boolean value specifying whether to skip refreshing tokens on refreshing.
 By default AS always creates new Refresh Token on refresh call to Token Endpoint. This property allows to avoid (skip) new Refresh Token creation.
 
+For public clients (`token_endpoint_auth_method=none`), a successful refresh always
+returns a replacement refresh token, even when `skipRefreshTokenDuringRefreshing` is
+enabled. Clients must store and use the newly returned refresh token.
+
 `refreshTokenExtendLifetimeOnRotation`
 : *Default: False* - Boolean value specifying whether to extend refresh tokens on rotation. By default lifetime is not extended, expiration date is set to date of previous Refresh Token. With this property it's possible to have all further Refresh Token have fixed (extended in relation to previous Refresh Token) lifetime.
 
@@ -55,5 +59,3 @@ To revoke a token, a client can do so via the [revocation endpoint](../endpoints
 ### online_access scope
 
 If `online_access` scope is present then refresh token expires when the session ends (for example via front channel logout).
-
-

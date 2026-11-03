@@ -270,8 +270,8 @@ impl DataApi for Cedarling {
 }
 
 impl TrustedIssuerLoadingInfo for Cedarling {
-    fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.instance.is_trusted_issuer_loaded_by_name(issuer_id)
+    fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.instance.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {

@@ -27,6 +27,10 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Transpiler {
     
+    //Raise this number every time a backwards incompatible change is introduced
+    //in generated JS code. This will provoke flows retranspilation, see #15455
+    public static final String VERSION = String.valueOf(1);
+    
     public static final String UTIL_SCRIPT_NAME = "util.js";    
     public static final String UTIL_SCRIPT_CONTENTS;
     
@@ -232,12 +236,6 @@ public class Transpiler {
 
     private void logXml(XdmNode node) {
         logger.debug("\n{}", node.toString());
-        //System.out.println("\n" + node.toString());
-    }
-    
-    private void generateFromXml(String fileName, OutputStream out) throws Exception {
-        NodeModel model = NodeModel.parse(Paths.get(fileName).toFile());
-        jsGenerator.process(model, new OutputStreamWriter(out, UTF_8));       
     }
     
     /**
@@ -299,8 +297,6 @@ public class Transpiler {
         System.out.println("\nInputs: " + tr.getInputs(doc));
         System.out.println("\nTimeout: " + tr.getTimeout(doc));
         System.out.println("\n" + tr.generateJS(doc));
-
-        //tr.generateFromXml("Sample.xml", System.out);
     }
 
 }

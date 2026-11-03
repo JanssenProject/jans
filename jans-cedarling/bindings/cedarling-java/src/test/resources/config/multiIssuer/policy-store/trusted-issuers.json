@@ -1,0 +1,23 @@
+{
+    "Jans::Access_token": {
+        "type": "jwt",
+        "issuer": "Jans",
+        "configuration_endpoints": {
+            "configuration": "https://op-provider.gluu.org/.well-known/openid-configuration"
+        }
+    },
+    "Jans::id_token": {
+        "type": "jwt",
+        "issuer": "Jans",
+        "configuration_endpoints": {
+            "configuration": "https://op-provider.gluu.org/.well-known/openid-configuration"
+        }
+    },
+    "Jans::Userinfo_token": {
+        "type": "jwt",
+        "issuer": "Jans",
+        "configuration_endpoints": {
+            "configuration": "https://op-provider.gluu.org/.well-known/openid-configuration"
+        }
+    }
+}

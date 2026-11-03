@@ -1,6 +1,6 @@
 ## Python version
 
-`jans-pycloudlib` only supports Python 3.9 and above.
+`jans-pycloudlib` only supports Python 3.10 and above.
 
 ## Install jans-pycloudlib
 

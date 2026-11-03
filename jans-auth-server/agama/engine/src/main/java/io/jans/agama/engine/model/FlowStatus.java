@@ -26,7 +26,10 @@ public class FlowStatus {
     private boolean allowCallbackResume;
     private String jsonInput;
     private String startUrl;
-    
+
+    private String currentQname;
+    private int currentLine;
+
     private FlowResult result;
 
     public Object getTemplateDataModel() {
@@ -123,6 +126,22 @@ public class FlowStatus {
 
     public void setStartUrl(String startUrl) {
         this.startUrl = startUrl;
+    }
+
+    public String getCurrentQname() {
+        return currentQname;
+    }
+
+    public void setCurrentQname(String currentQname) {
+        this.currentQname = currentQname;
+    }
+
+    public int getCurrentLine() {
+        return currentLine;
+    }
+
+    public void setCurrentLine(int currentLine) {
+        this.currentLine = currentLine;
     }
 
 }

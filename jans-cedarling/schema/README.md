@@ -5,6 +5,7 @@ This directory contains the JSON Schema definition for validating Cedarling poli
 ## Files
 
 - `policy_store_schema.json` - JSON Schema (Draft 2020-12) that defines the structure of policy store files
+- `trusted_issuers_schema.json` - JSON Schema (Draft 2020-12) for the `trusted-issuers.json` file of a v2 policy store; rules it cannot express are checked when the store loads
 - `cedarling_core.cedarschema` - Cedar schema defining entity types, actions, and context
 - `minimal_policy_store.json` - Minimal working example of a policy store
 

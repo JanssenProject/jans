@@ -28,6 +28,8 @@ tags:
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
 | allowRevokeForOtherClients | Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint | [Details](#allowrevokeforotherclients) |
 | allowSpontaneousScopes | Specifies whether to allow spontaneous scopes | [Details](#allowspontaneousscopes) |
+| allowStartupOnJwksUriFetchFailure | Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails. | [Details](#allowstartuponjwksurifetchfailure) |
+| applySecurityHeadersIfUriContainsAny | Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true. | [Details](#applysecurityheadersifuricontainsany) |
 | applyXFrameOptionsHeaderIfUriContainsAny | Add X-Frame-Options header to response if any string in the list is contained by request uri. | [Details](#applyxframeoptionsheaderifuricontainsany) |
 | archivedJwkLifetimeInSeconds | Archived JWK lifetime in seconds | [Details](#archivedjwklifetimeinseconds) |
 | archivedJwksUri | URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP | [Details](#archivedjwksuri) |
@@ -166,7 +168,7 @@ tags:
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idJagIssueRefreshToken | Whether to issue refresh tokens after accepting an ID-JAG (Resource AS role). Spec recommends false. | [Details](#idjagissuerefreshtoken) |
 | idJagLifetime | Lifetime in seconds for ID-JAGs issued by this AS (IdP role). | [Details](#idjaglifetime) |
-| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. | [Details](#idjagtrustedidpissuers) |
+| idJagTrustedIdpIssuers | Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used. | [Details](#idjagtrustedidpissuers) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
 | idTokenFilterClaimsBasedOnAccessToken | Boolean value specifying whether idToken filters claims based on accessToken | [Details](#idtokenfilterclaimsbasedonaccesstoken) |
@@ -277,6 +279,7 @@ tags:
 | saveTokensInCache | Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincache) |
 | saveTokensInCacheAndDontSaveInPersistence | Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code)) | [Details](#savetokensincacheanddontsaveinpersistence) |
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
+| securityHeadersEnabled | Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny | [Details](#securityheadersenabled) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
 | sessionAuthnTimeCheckDuringPromptLoginThresholdMs | Integer value that allows to specify session authentication time threshold in milliseconds when client is configured from prompt login (has property defaultPromptLogin=true). For high-latency environments, consider increasing this value to 2000-5000ms. | [Details](#sessionauthntimecheckduringpromptloginthresholdms) |
 | sessionIdCookieLifetime | The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidcookielifetime) |
@@ -308,8 +311,9 @@ tags:
 | statusListIndexAllocationBlockSize | Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100. | [Details](#statuslistindexallocationblocksize) |
 | statusListResponseJwtLifetime | The status list response JWT lifetime (used to set exp claim in JWT). | [Details](#statuslistresponsejwtlifetime) |
 | statusListResponseJwtSignatureAlgorithm | The status list signature algorithm to sign response JWT. Defaults to RS256. | [Details](#statuslistresponsejwtsignaturealgorithm) |
+| strictTokenRedirectUriValidation | Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client. | [Details](#stricttokenredirecturivalidation) |
 | subjectIdentifiersPerClientSupported | A list of the subject identifiers supported per client | [Details](#subjectidentifiersperclientsupported) |
-| subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. | [Details](#subjecttypessupported) |
+| subjectTypesSupported | This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default. | [Details](#subjecttypessupported) |
 | tokenEndpoint | The token endpoint URL | [Details](#tokenendpoint) |
 | tokenEndpointAuthMethodsSupported | A list of Client Authentication methods supported by this Token Endpoint | [Details](#tokenendpointauthmethodssupported) |
 | tokenEndpointAuthSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods | [Details](#tokenendpointauthsigningalgvaluessupported) |
@@ -511,6 +515,24 @@ tags:
 - Default value: None
 
 
+## allowStartupOnJwksUriFetchFailure
+
+- Description: Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.
+
+- Required: No
+
+- Default value: false
+
+
+## applySecurityHeadersIfUriContainsAny
+
+- Description: Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.
+
+- Required: No
+
+- Default value: /restv1/token, /restv1/userinfo, /restv1/introspection, /restv1/jwks, /restv1/register, /restv1/revoke
+
+
 ## applyXFrameOptionsHeaderIfUriContainsAny
 
 - Description: Add X-Frame-Options header to response if any string in the list is contained by request uri.
@@ -603,11 +625,13 @@ tags:
 
 ## authorizationCodeLifetime
 
-- Description: The lifetime of the Authorization Code
+- Description: The authorization code lifetime in seconds. The effective value
+  is capped at 600 seconds; values that are zero, negative, or greater than 600
+  use the 600-second maximum.
 
 - Required: No
 
-- Default value: None
+- Default value:  60 seconds (standard installation)
 
 
 ## authorizationEncryptionAlgValuesSupported
@@ -1755,7 +1779,7 @@ tags:
 
 ## idJagTrustedIdpIssuers
 
-- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.
+- Description: Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.
 
 - Required: No
 
@@ -2752,6 +2776,15 @@ tags:
 - Default value: 1440
 
 
+## securityHeadersEnabled
+
+- Description: Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny
+
+- Required: No
+
+- Default value: true
+
+
 ## serviceDocumentation
 
 - Description: URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider
@@ -3031,6 +3064,15 @@ tags:
 - Default value: None
 
 
+## strictTokenRedirectUriValidation
+
+- Description: Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.
+
+- Required: No
+
+- Default value: true
+
+
 ## subjectIdentifiersPerClientSupported
 
 - Description: A list of the subject identifiers supported per client
@@ -3042,7 +3084,7 @@ tags:
 
 ## subjectTypesSupported
 
-- Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.
+- Description: This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default.
 
 - Required: No
 
@@ -3380,5 +3422,4 @@ tags:
 - Required: No
 
 - Default value: SAMEORIGIN
-
 

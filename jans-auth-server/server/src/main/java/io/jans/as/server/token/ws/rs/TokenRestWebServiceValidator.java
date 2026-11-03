@@ -20,6 +20,7 @@ import io.jans.as.server.model.common.AuthorizationCodeGrant;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.RefreshToken;
+import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -59,6 +60,9 @@ public class TokenRestWebServiceValidator {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private RedirectionUriService redirectionUriService;
 
     public void validatePKCE(AuthorizationCodeGrant grant, String codeVerifier, OAuth2AuditLog oAuth2AuditLog, Client client) {
         log.trace("PKCE validation, code_verifier: {}, code_challenge: {}, method: {}",
@@ -175,6 +179,35 @@ public class TokenRestWebServiceValidator {
             log.trace(msg);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
         }
+    }
+
+    public void validateRedirectUri(AuthorizationGrant grant, Client client, String redirectUri, OAuth2AuditLog auditLog, Consumer<AuthorizationGrant> onFailure) {
+        final boolean strict = isTrue(appConfiguration.getStrictTokenRedirectUriValidation());
+        final String grantRedirectUri = grant.getRedirectUri();
+
+        if (strict && StringUtils.isBlank(redirectUri) && StringUtils.isNotBlank(grantRedirectUri)) {
+            log.debug("redirect_uri is not set at token request but present in authorization request. Grant's redirect_uri: '{}'", grantRedirectUri);
+            invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri does not match the value from the authorization request.");
+        }
+
+        validateRedirectUri(redirectUri, auditLog);
+
+        if (redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
+            log.debug("redirect_uri is not registered for client. clientId: '{}', redirect_uri: '{}'", client.getClientId(), redirectUri);
+            invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri is not valid for the client.");
+        }
+
+        if (strict && (StringUtils.isBlank(grantRedirectUri) || !grantRedirectUri.equals(redirectUri))) {
+            log.debug("redirect_uri does not match authorization request. Grant's redirect_uri: '{}', request's: '{}'", grantRedirectUri, redirectUri);
+            invalidRedirectUriGrant(grant, auditLog, onFailure, "redirect_uri does not match the value from the authorization request.");
+        }
+    }
+
+    private void invalidRedirectUriGrant(AuthorizationGrant grant, OAuth2AuditLog auditLog, Consumer<AuthorizationGrant> onFailure, String message) {
+        if (onFailure != null) {
+            onFailure.accept(grant);
+        }
+        throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, message), auditLog));
     }
 
 

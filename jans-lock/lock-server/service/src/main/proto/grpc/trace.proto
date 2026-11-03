@@ -1,0 +1,212 @@
+syntax = "proto3";
+
+package io.jans.lock.trace;
+
+option java_multiple_files = true;
+option java_package = "io.jans.lock.model.trace.grpc";
+option java_outer_classname = "TraceProto";
+
+// Ingestion flags shared by acceptance, bulk result and stored record messages
+message TraceFlags {
+  bool coverage_gap_flag = 1;
+  bool chain_link_failure_flag = 2;
+  bool equivocation_flag = 3;
+  bool late_flag = 4;
+  bool policy_mismatch_flag = 5;
+  bool reserved_member_flag = 6;
+  repeated string reserved_members = 7;
+}
+
+// Submit a single TRACE assertion. The assertion travels as the exact bytes the producer signed,
+// so digest and signature verification run over the original text.
+message SubmitRecordRequest {
+  bytes assertion = 1;
+}
+
+message RecordAcceptance {
+  bool accepted = 1;
+  string producer_id = 2;
+  string record_id = 3;
+  string content_digest = 4;
+  int64 receipt_sequence = 5;
+  string received_at = 6;
+  bool idempotent_replay = 7;
+  TraceFlags flags = 8;
+}
+
+// Submit a JSON array of TRACE assertions. The body is the exact array text, handed unchanged to
+// the same bulk pipeline the REST endpoint uses.
+message SubmitBulkRecordsRequest {
+  bytes records = 1;
+}
+
+message TraceError {
+  string error = 1;
+  string error_description = 2;
+  string reason = 3;
+}
+
+message BulkResultEntry {
+  int32 index = 1;
+  bool accepted = 2;
+  string producer_id = 3;
+  string record_id = 4;
+  string content_digest = 5;
+  optional int64 receipt_sequence = 6;
+  string received_at = 7;
+  optional bool idempotent_replay = 8;
+  optional TraceFlags flags = 9;
+  optional TraceError error = 10;
+}
+
+message BulkAcceptance {
+  repeated BulkResultEntry results = 1;
+}
+
+message GetRecordRequest {
+  string record_id = 1;
+  optional string producer_id = 2;
+}
+
+message SearchRecordsRequest {
+  optional string policy_store_id = 1;
+  optional string policy_store_version = 2;
+  optional string bundle_hash = 3;
+  // RFC 3339, inclusive
+  optional string received_from = 4;
+  // RFC 3339, inclusive
+  optional string received_to = 5;
+  // Paging offset, default 0
+  optional int32 start = 6;
+  // Paging size 1-1000, default 100
+  optional int32 count = 7;
+}
+
+message GetExecutionRequest {
+  string trace_execution_id = 1;
+  optional string execution_authority = 2;
+  // Paging offset, default 0
+  optional int32 start = 3;
+  // Paging size 1-1000, default 100
+  optional int32 count = 4;
+}
+
+message RecordVerification {
+  bool signature_valid = 1;
+  string key_id = 2;
+  string key_thumbprint = 3;
+  optional bool key_authorized = 4;
+  string verified_at = 5;
+  string algorithm = 6;
+}
+
+message RecordIngestion {
+  int64 receipt_sequence = 1;
+  string received_at = 2;
+  string prev_receipt_hash = 3;
+  string receipt_hash = 4;
+  string receipt_state = 5;
+  TraceFlags flags = 6;
+}
+
+message RecordEnvelope {
+  string producer_id = 1;
+  string record_id = 2;
+  // Parsed assertion re-emitted as JSON text; member order and number formatting can differ from the
+  // received text. Use assertion_raw for the exact text.
+  string assertion = 3;
+  string assertion_raw = 4;
+  string content_digest = 5;
+  RecordVerification verification = 6;
+  RecordIngestion ingestion = 7;
+}
+
+message RecordSearchResult {
+  repeated RecordEnvelope records = 1;
+}
+
+message ExecutionResult {
+  string execution_authority = 1;
+  string trace_execution_id = 2;
+  string ordering = 3;
+  string completeness = 4;
+  repeated RecordEnvelope records = 5;
+}
+
+// Trace Service
+service TraceService {
+  rpc SubmitRecord(SubmitRecordRequest) returns (RecordAcceptance);
+  rpc SubmitBulkRecords(SubmitBulkRecordsRequest) returns (BulkAcceptance);
+  rpc GetRecord(GetRecordRequest) returns (RecordEnvelope);
+  rpc SearchRecords(SearchRecordsRequest) returns (RecordSearchResult);
+  rpc GetExecution(GetExecutionRequest) returns (ExecutionResult);
+}
+
+// Trace Admin messages
+message RegisterProducerKeyRequest {
+  string producer_id = 1;
+  string kid = 2;
+  map<string, string> public_key_jwk = 3;
+  repeated string authorized_event_kinds = 4;
+  string valid_from = 5;
+  optional string valid_until = 6;
+}
+
+message ListProducerKeysRequest {
+  optional string producer_id = 1;
+}
+
+message RevokeProducerKeyRequest {
+  string producer_id = 1;
+  string kid = 2;
+}
+
+message ProducerKey {
+  string evidence_domain_id = 1;
+  string producer_id = 2;
+  string kid = 3;
+  map<string, string> public_key_jwk = 4;
+  repeated string authorized_event_kinds = 5;
+  string valid_from = 6;
+  optional string valid_until = 7;
+  optional string revoked_at = 8;
+  string registered_by = 9;
+  string created_at = 10;
+}
+
+message ProducerKeyList {
+  repeated ProducerKey keys = 1;
+}
+
+message RegisterProducerChainRequest {
+  string producer_id = 1;
+  string producer_instance_id = 2;
+  string producer_chain_id = 3;
+}
+
+message ListProducerChainsRequest {
+  optional string producer_id = 1;
+}
+
+message ProducerChain {
+  string evidence_domain_id = 1;
+  string producer_id = 2;
+  string producer_instance_id = 3;
+  string producer_chain_id = 4;
+  string registered_by = 5;
+  string genesis_kind = 6;
+  string created_at = 7;
+}
+
+message ProducerChainList {
+  repeated ProducerChain chains = 1;
+}
+
+// Trace Admin Service
+service TraceAdminService {
+  rpc RegisterProducerKey(RegisterProducerKeyRequest) returns (ProducerKey);
+  rpc ListProducerKeys(ListProducerKeysRequest) returns (ProducerKeyList);
+  rpc RevokeProducerKey(RevokeProducerKeyRequest) returns (ProducerKey);
+  rpc RegisterProducerChain(RegisterProducerChainRequest) returns (ProducerChain);
+  rpc ListProducerChains(ListProducerChainsRequest) returns (ProducerChainList);
+}

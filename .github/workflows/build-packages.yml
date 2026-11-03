@@ -1134,10 +1134,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - krakend-builder-image: 'builder:2.9.0'
-            krakend-builder-digest: 'sha256:c885b27a4ce1a30202d60548fb0083cdd0d1831df801b4601e95b0fb6d612a7d'
-          - krakend-builder-image: 'builder:2.9.0-linux-generic'
-            krakend-builder-digest: 'sha256:3633ef6815d716d42eeb38149aa5dc02eec4ab0e7b276811549b0e2dc5513584'
+          - krakend-builder-image: 'builder:2.13.11'
+            krakend-builder-digest: 'sha256:8570c175eb2a95c7a5e395b0fe8bd06d17e14b3e7634a75ac143327a4f6a7038'
+          - krakend-builder-image: 'builder:2.13.11-linux-generic'
+            krakend-builder-digest: 'sha256:aa44df14e42701a3f9aaa4ee5804259f0570d6ec0913bc24f3b27b0d2f2e50f7'
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -1177,7 +1177,7 @@ jobs:
         echo KRAKEND_BUILDER_IMAGE_CLEAN=${KRAKEND_BUILDER_IMAGE_CLEAN} >> $GITHUB_ENV
         echo CC="aarch64-linux-musl-gcc" >> $GITHUB_ENV
         echo ADD_GIT="apk add --no-cache git" >> $GITHUB_ENV
-        if [ "${{ matrix.krakend-builder-image }}" == "builder:2.9.0-linux-generic" ]; then
+        if [ "${{ matrix.krakend-builder-image }}" == "builder:2.13.11-linux-generic" ]; then
           echo CC="aarch64-linux-gnu-gcc" >> $GITHUB_ENV
           echo ADD_GIT="ls" >> $GITHUB_ENV # no-op
         fi

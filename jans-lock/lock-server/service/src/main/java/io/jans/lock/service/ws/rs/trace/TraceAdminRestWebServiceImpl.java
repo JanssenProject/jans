@@ -9,6 +9,8 @@ package io.jans.lock.service.ws.rs.trace;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +55,7 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Admin REST implementation for TRACE producer-key and producer-chain registration, listing and
- * revocation (design §6, §8, TRACE MVP task 15). Every method follows the same shape: check
+ * revocation (design §6, §8). Every method follows the same shape: check
  * {@code traceConfiguration.enabled} &rarr; resolve the submitting client's identity and evidence
  * domain &rarr; delegate to the relevant registry &rarr; map the result to a wire DTO. Every
  * {@link RuntimeException} raised by the TRACE packages is translated to the structured error
@@ -109,7 +111,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 			Long validUntilMs = parseOptionalTimestamp(request.getValidUntil());
 
 			TraceProducerKeyEntry key = producerKeyRegistry.register(context.getEvidenceDomainId(), request.getProducerId(),
-					request.getKid(), request.getPublicKeyJwk(), validFromMs, validUntilMs, context.getClientId(),
+					request.getKid(), request.getPublicKeyJwk(), request.getAuthorizedEventKinds(), validFromMs, validUntilMs, context.getClientId(),
 					context.getReceivedAtMs());
 
 			response = Response.status(Response.Status.CREATED).cacheControl(ServerUtil.cacheControl(true))
@@ -235,7 +237,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 	}
 
 	private TraceRequestContext resolveContext() {
-		SubmitterIdentity identity = submitterIdentityService.resolve(getHttpRequest());
+		SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 		return evidenceDomainResolver.resolve(identity);
 	}
 
@@ -277,9 +279,13 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 		return new AuditLogEntry(getClientIpAddress(), actionType);
 	}
 
+	private HttpServletRequest currentRequest() {
+		return ServerUtil.isGrpcCall() ? null : getHttpRequest();
+	}
+
 	private String getClientIpAddress() {
-		HttpServletRequest request = getHttpRequest();
-		return request == null ? null : InetAddressUtility.getIpAddress(request);
+		HttpServletRequest request = currentRequest();
+		return request == null ? ServerUtil.getClientContextIpAddress() : InetAddressUtility.getIpAddress(request);
 	}
 
 	// -- DTO mapping ------------------------------------------------------------------------------
@@ -290,6 +296,8 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 		response.setProducerId(key.getProducerId());
 		response.setKid(key.getKid());
 		response.setPublicKeyJwk(filterJwk(key.getPublicKeyJwk()));
+		response.setAuthorizedEventKinds(key.getAuthorizedEventKinds() == null ? Collections.emptyList()
+				: new ArrayList<>(key.getAuthorizedEventKinds()));
 		response.setValidFrom(formatInstant(key.getValidFromMs()));
 		response.setValidUntil(key.getValidUntilMs() == null ? null : formatInstant(key.getValidUntilMs()));
 		response.setRevokedAt(key.getRevokedAtMs() == null ? null : formatInstant(key.getRevokedAtMs()));
@@ -305,6 +313,7 @@ public class TraceAdminRestWebServiceImpl extends BaseResource implements TraceA
 		response.setProducerInstanceId(registration.getProducerInstanceId());
 		response.setProducerChainId(registration.getProducerChainId());
 		response.setRegisteredBy(registration.getRegisteredBy());
+		response.setGenesisKind(registration.getGenesisKind());
 		response.setCreatedAt(formatInstant(registration.getRegisteredAtMs()));
 		return response;
 	}

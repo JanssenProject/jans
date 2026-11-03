@@ -1,0 +1,60 @@
+namespace Jans {
+  type Url = {"host": String, "path": String, "protocol": String};
+  entity Access_Token = {
+    token_type: String,
+    jti: String,
+    iss: JansTestIssuer::TrustedIssuer,
+    validated_at: Long,
+    exp: Long,
+    sub?: String,
+    aud?: String,
+    org_id?: String,
+  } tags Set<String>;
+  entity Id_Token = {
+    token_type: String,
+    jti: String,
+    iss: JansTestIssuer::TrustedIssuer,
+    validated_at: Long,
+    exp: Long,
+    sub?: String,
+    aud?: Set<String>,
+    acr?: String,
+  } tags Set<String>;
+  entity Userinfo_Token = {
+    token_type: String,
+    jti: String,
+    iss: JansTestIssuer::TrustedIssuer,
+    validated_at: Long,
+    exp: Long,
+    sub?: String,
+    aud?: String,
+    country?: String,
+  } tags Set<String>;
+  entity Issue = {"country": String, "org_id": String};
+  entity TrustedIssuer = {"issuer_entity_id": Url};
+  entity User = {"country": String, "email": String, "sub": String, "username": String};
+  entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String, "access_token": Access_Token};
+  action "Update" appliesTo {
+    principal: [Workload, User],
+    resource: [Issue],
+    context: Context
+  };
+  action "DeniedAction" appliesTo {
+    principal: [Workload, User],
+    resource: [Issue],
+    context: Context
+  };
+}
+namespace JansTestIssuer {
+  entity TrustedIssuer = {"issuer_entity_id": Jans::Url};
+}
+
+type Context = {
+  tokens: {
+    janstestissuer_access_token?: Jans::Access_Token,
+    janstestissuer_id_token?: Jans::Id_Token,
+    janstestissuer_userinfo_token?: Jans::Userinfo_Token,
+    total_token_count: Long
+  },
+  some_context?: String
+};

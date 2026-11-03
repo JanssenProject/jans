@@ -757,10 +757,8 @@ mod internal_tests {
 
     #[test]
     fn parse_cert_and_signature_bad_base64_certificate_rejected() {
-        let json = message_signature_bundle_json(
-            &json!({ "rawBytes": "!!!not-base64!!!" }),
-            &b64(b"sig"),
-        );
+        let json =
+            message_signature_bundle_json(&json!({ "rawBytes": "!!!not-base64!!!" }), &b64(b"sig"));
         let parsed = ParsedBundle::from_json(&json).unwrap();
         let err = SigstoreBlobVerifier::parse_cert_and_signature(&parsed)
             .expect_err("non-base64 certificate must be rejected");
@@ -918,7 +916,10 @@ mod internal_tests {
             tree_size: "1".into(),
             hashes: vec![],
             checkpoint: Some(Checkpoint {
-                envelope: format!("origin\n1\n{}\n\n\u{2014} k AAAAAAAAAAAAAAAA\n", b64(&[0u8; 32])),
+                envelope: format!(
+                    "origin\n1\n{}\n\n\u{2014} k AAAAAAAAAAAAAAAA\n",
+                    b64(&[0u8; 32])
+                ),
             }),
         }
     }
@@ -1110,12 +1111,8 @@ mod internal_tests {
             "predicate": {}
         }))
         .unwrap();
-        let err = verify_dsse_artifact_binding(
-            "application/vnd.in-toto+json",
-            &payload,
-            "aabb",
-        )
-        .expect_err("in-toto Statement whose subject is not an array must be rejected");
+        let err = verify_dsse_artifact_binding("application/vnd.in-toto+json", &payload, "aabb")
+            .expect_err("in-toto Statement whose subject is not an array must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::InvalidBundleFormat { .. }),
             "must be InvalidBundleFormat, got {err:?}"
@@ -1209,7 +1206,7 @@ mod e2e_tests {
 
     use std::collections::BTreeMap;
 
-    use p256::ecdsa::{Signature, SigningKey, signature::Signer, signature::hazmat::PrehashSigner};
+    use p256::ecdsa::{Signature, SigningKey, signature::Signer};
     use serde_json::json;
     use sha2::{Digest, Sha256, Sha384};
 
@@ -1217,52 +1214,12 @@ mod e2e_tests {
     use crate::cert::Cert;
     use crate::policy::IdentityMatch;
     use crate::test_support::{
-        Ca, LeafOpts, der_to_pem, ec_pub_pem, make_leaf_with_real_sct,
-        make_p384_leaf_with_real_sct, make_root,
+        Ca, LeafOpts, b64, der_to_pem, ec_pub_pem, inclusion_proof_value, make_leaf_with_real_sct,
+        make_p384_leaf_with_real_sct, make_root, message_signature_bundle, rekor_key_id,
     };
-
-    fn b64(bytes: &[u8]) -> String {
-        base64::Engine::encode(&base64::engine::general_purpose::STANDARD, bytes)
-    }
 
     const ARTIFACT: &[u8] = b"hello sigstore end-to-end";
     const INTEGRATED_TIME: i64 = 1_700_000_000; // 2023-11-14, inside leaf validity
-
-    /// The material an assembled bundle is built from — tweak fields for
-    /// negative cases, then call [`Fixture::bundle_json`].
-    /// Inclusion proof for a single-entry log containing `body_b64`'s bytes:
-    /// root = RFC 6962 leaf hash, empty audit path, checkpoint signed by `rekor_sk`.
-    fn inclusion_proof_value(rekor_sk: &SigningKey, body_b64: &str) -> serde_json::Value {
-        let body_bytes =
-            base64::Engine::decode(&base64::engine::general_purpose::STANDARD, body_b64).unwrap();
-        // RFC 6962 leaf hash: SHA-256(0x00 || entry).
-        let mut h = Sha256::new();
-        h.update([0x00]);
-        h.update(&body_bytes);
-        let root: [u8; 32] = h.finalize().into();
-
-        // Signed note: body lines (origin, size, root) then "— <name> <b64>".
-        let signed_text = format!("rekor.test \u{2014} log\n1\n{}\n", b64(&root));
-        let note_hash: [u8; 32] = Sha256::digest(signed_text.as_bytes()).into();
-        let note_sig: Signature = PrehashSigner::sign_prehash(rekor_sk, &note_hash).unwrap();
-        let mut sig_blob = rekor_key_id(rekor_sk)[..4].to_vec();
-        sig_blob.extend_from_slice(note_sig.to_der().as_bytes());
-        let envelope = format!("{signed_text}\n\u{2014} rekor.test {}\n", b64(&sig_blob));
-
-        json!({
-            "logIndex": "0",
-            "rootHash": b64(&root),
-            "treeSize": "1",
-            "hashes": [],
-            "checkpoint": { "envelope": envelope }
-        })
-    }
-
-    /// SHA-256 key ID of a Rekor signing key's uncompressed SPKI point.
-    fn rekor_key_id(rekor_sk: &SigningKey) -> [u8; 32] {
-        crate::crypto::p256_key_id(rekor_sk.verifying_key().to_encoded_point(false).as_bytes())
-            .expect("P-256 uncompressed point is 65 bytes")
-    }
 
     /// Sign the Rekor SET over the canonical `{body, integratedTime, logIndex, logID}`
     /// payload, as Rekor does for an `inclusionPromise`.
@@ -1344,58 +1301,15 @@ mod e2e_tests {
             rekor_sk: &SigningKey,
             rekor_log_id: &[u8; 32],
         ) -> Vec<u8> {
-            let digest: [u8; 32] = Sha256::digest(artifact).into();
-            let digest_hex: String = crate::hex::encode(&digest);
-
-            let sig: Signature = self.leaf_sk.sign(artifact);
-            let sig_b64 = b64(sig.to_der().as_bytes());
-
-            // hashedrekord tlog body.
-            let body = json!({
-                "apiVersion": "0.0.1",
-                "kind": "hashedrekord",
-                "spec": {
-                    "data": { "hash": { "algorithm": "sha256", "value": digest_hex } },
-                    "signature": {
-                        "content": sig_b64,
-                        "publicKey": { "content": b64(der_to_pem(&self.leaf_cert.der).as_bytes()) }
-                    }
-                }
-            });
-            let body_b64 = b64(&serde_json::to_vec(&body).unwrap());
-
-            // Rekor SET over the canonical payload (body as base64 STRING).
-            let log_id_hex: String = crate::hex::encode(rekor_log_id);
-            let mut payload = BTreeMap::new();
-            payload.insert("body".to_string(), json!(body_b64.clone()));
-            payload.insert("integratedTime".to_string(), json!(INTEGRATED_TIME));
-            payload.insert("logIndex".to_string(), json!(42));
-            payload.insert("logID".to_string(), json!(log_id_hex));
-            let canonical = serde_json_canonicalizer::to_vec(&payload).unwrap();
-            let set_sig: Signature = rekor_sk.sign(&canonical);
-
-            let bundle = json!({
-                "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
-                "verificationMaterial": {
-                    "certificate": { "rawBytes": b64(&self.leaf_cert.der) },
-                    "tlogEntries": [{
-                        "logIndex": "42",
-                        "logId": { "keyId": b64(rekor_log_id) },
-                        "kindVersion": { "kind": "hashedrekord", "version": "0.0.1" },
-                        "integratedTime": INTEGRATED_TIME.to_string(),
-                        "inclusionPromise": {
-                            "signedEntryTimestamp": b64(set_sig.to_der().as_bytes())
-                        },
-                        "inclusionProof": self.inclusion_proof_value(&body_b64),
-                        "canonicalizedBody": body_b64
-                    }]
-                },
-                "messageSignature": {
-                    "messageDigest": { "algorithm": "SHA2_256", "digest": b64(&digest) },
-                    "signature": sig_b64
-                }
-            });
-            serde_json::to_vec(&bundle).unwrap()
+            message_signature_bundle(
+                artifact,
+                &self.leaf_cert.der,
+                &self.leaf_sk,
+                rekor_sk,
+                &self.rekor_sk,
+                rekor_log_id,
+                INTEGRATED_TIME,
+            )
         }
 
         /// `bundle_json_with_log_id` using the trust-root key's own logId — the

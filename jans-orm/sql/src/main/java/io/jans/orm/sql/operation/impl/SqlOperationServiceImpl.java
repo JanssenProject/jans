@@ -238,41 +238,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean updateEntryImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods) throws PersistenceException {
 		try {
-			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
-
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
-
-			for (AttributeDataModification attributeMod : mods) {
-				AttributeData attribute = attributeMod.getAttribute();
-				Path path = Expressions.stringPath(attribute.getName());
-
-				AttributeType attributeType = getAttributeType(columTypes, attribute);
-				if (attributeType == null) {
-		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
-				}
-
-				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
-				
-				AttributeModificationType type = attributeMod.getModificationType();
-                if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
-					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
-    				} else {
-    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
-    				}
-                } else if (AttributeModificationType.REPLACE == type) {
-					if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-    					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
-    				} else {
-    					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
-    				}
-                } else if (AttributeModificationType.REMOVE == type) {
-    				sqlUpdateQuery.setNull(path);
-                } else {
-                    throw new UnsupportedOperationException("Operation type '" + type + "' is not implemented");
-                }
-			}
+			SQLUpdateClause sqlUpdateQuery = buildUpdateClause(tableMapping, tableRelationalPath, mods);
 
 			Predicate whereExp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
 					Expressions.constant(key));
@@ -283,6 +250,84 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         } catch (QueryException ex) {
             throw new PersistenceException("Failed to update entry", ex);
         }
+	}
+
+	@Override
+	public boolean updateEntryWithVersion(String key, String objectClass, List<AttributeDataModification> mods,
+			String versionAttributeName, Object expectedVersionValue) throws UnsupportedOperationException, PersistenceException {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+        boolean result = updateEntryWithVersionImpl(tableMapping, key, mods, versionAttributeName, expectedVersionValue);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+
+        return result;
+	}
+
+	private boolean updateEntryWithVersionImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods,
+			String versionAttributeName, Object expectedVersionValue) throws PersistenceException {
+		try {
+			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+			SQLUpdateClause sqlUpdateQuery = buildUpdateClause(tableMapping, tableRelationalPath, mods);
+
+			Predicate docIdPredicate = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
+					Expressions.constant(key));
+			Predicate versionPredicate = ExpressionUtils.eq(Expressions.path(Object.class, versionAttributeName),
+					Expressions.constant(expectedVersionValue));
+			Predicate whereExp = ExpressionUtils.allOf(docIdPredicate, versionPredicate);
+
+			long rowInserted = sqlUpdateQuery.where(whereExp).execute();
+
+			return rowInserted == 1;
+        } catch (QueryException ex) {
+            throw new PersistenceException("Failed to update entry", ex);
+        }
+	}
+
+	/**
+	 * Shared SET-clause builder for {@link #updateEntryImpl} and {@link #updateEntryWithVersionImpl} --
+	 * only the WHERE predicate differs between a plain update and a versioned (CAS) one.
+	 */
+	private SQLUpdateClause buildUpdateClause(TableMapping tableMapping, RelationalPathBase<Object> tableRelationalPath,
+			List<AttributeDataModification> mods) throws PersistenceException {
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+
+		SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
+
+		for (AttributeDataModification attributeMod : mods) {
+			AttributeData attribute = attributeMod.getAttribute();
+			Path path = Expressions.stringPath(attribute.getName());
+
+			AttributeType attributeType = getAttributeType(columTypes, attribute);
+			if (attributeType == null) {
+	            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+			}
+
+			boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
+
+			AttributeModificationType type = attributeMod.getModificationType();
+            if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
+				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
+				} else {
+					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
+				}
+            } else if (AttributeModificationType.REPLACE == type) {
+				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlUpdateQuery.set(path, convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
+				} else {
+					sqlUpdateQuery.set(path, convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
+				}
+            } else if (AttributeModificationType.REMOVE == type) {
+				sqlUpdateQuery.setNull(path);
+            } else {
+                throw new UnsupportedOperationException("Operation type '" + type + "' is not implemented");
+            }
+		}
+
+		return sqlUpdateQuery;
 	}
 
     @Override

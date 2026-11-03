@@ -286,13 +286,14 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: .cedar template files
 ├── entities/               # Optional: .json entity files
-└── trusted-issuers/        # Optional: .json issuer configurations
+└── trusted-issuers.json    # Optional: accepted token types and their issuers
 ```
 
 **metadata.json structure:**
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
@@ -323,6 +324,7 @@ Regenerate Kotlin/Swift bindings from the library (`uniffi-bindgen generate …`
 - **`load_from_json`** — Policy store location comes from the JSON (`CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_URI`, or `CEDARLING_POLICY_STORE_LOCAL` for inline YAML; inline JSON is rejected), same as core Cedarling bootstrap rules.
 - **`load_from_file`** — Load bootstrap from a path, then resolve the policy store from fields in that file.
 - **`load_from_json_with_archive_bytes`** — Pass the bootstrap JSON as a string **and** the raw bytes of a `.cjar` archive. Fields `CEDARLING_POLICY_STORE_URI`, `CEDARLING_POLICY_STORE_LOCAL_FN`, `CEDARLING_POLICY_STORE_LOCAL`, and `CEDARLING_POLICY_STORE_CJAR_URL` in the JSON are **ignored**; the archive is the only policy source. This mirrors the WASM helper `initFromArchiveBytes` and fits **Android `assets/`**, where you open files with `AssetManager` (no ordinary filesystem path for native code), or any host that already has the archive in memory.
+- **Signature check** — With `CEDARLING_POLICY_STORE_SIGSTORE_MODE` set to `enforce` (plus `CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY` and `CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER`), the archive loads only if its Sigstore bundle verifies. Archive bytes have no location to derive the bundle from, so also set `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to an HTTPS URL or a file path (for example, the bundle copied from Android assets to `filesDir`, or a path from `Bundle.main` on iOS). See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#verifying-policy-store-signatures).
 
 **Kotlin (Android assets):**
 
@@ -618,11 +620,11 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 UniFFI `Cedarling` exposes trusted issuer loading status methods:
 
-- `isTrustedIssuerLoadedByName(issuerId: String): Boolean`
+- `isTrustedIssuerLoadedByName(issuerName: String): Boolean`
 - `isTrustedIssuerLoadedByIss(issClaim: String): Boolean`
 - `totalIssuers(): Long`
 - `loadedTrustedIssuersCount(): Long`
 - `loadedTrustedIssuerIds(): List<String>`
 - `failedTrustedIssuerIds(): List<String>`
 
-Use these APIs to inspect trusted issuer loading outcomes when your policy store contains `trusted-issuers/` definitions.
+Use these APIs to inspect trusted issuer loading outcomes when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.

@@ -16,8 +16,8 @@ use std::sync::LazyLock;
 use std::time::Duration;
 
 use cedarling::{
-    AuthorizationConfig, BootstrapConfig, Cedarling, DataApi, DataStoreConfig, EntityData,
-    HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
+    AuthorizationConfig, AuthorizeOptions, BootstrapConfig, Cedarling, DataApi, DataStoreConfig,
+    EntityData, HttpClientConfig, JwtConfig, LogConfig, LogLevel, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, RequestUnsigned,
 };
 use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
@@ -103,6 +103,7 @@ static BSCONFIG: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
     http_client_config: HttpClientConfig::default(),
+    trace_config: None,
 });
 
 static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| BootstrapConfig {
@@ -122,6 +123,7 @@ static BSCONFIG_WITH_DATA_POLICY: LazyLock<BootstrapConfig> = LazyLock::new(|| B
     max_default_entities: None,
     data_store_config: DataStoreConfig::default(),
     http_client_config: HttpClientConfig::default(),
+    trace_config: None,
 });
 
 // =============================================================================
@@ -338,6 +340,7 @@ fn bench_authorization_with_data(c: &mut Criterion) {
             }
         }))
         .unwrap(),
+        options: AuthorizeOptions::default(),
     };
 
     // Validate that the authorization request executes correctly before benchmarking
@@ -412,6 +415,7 @@ fn bench_authorization_varying_data_size(c: &mut Criterion) {
                 }
             }))
             .unwrap(),
+            options: AuthorizeOptions::default(),
         };
 
         // Validate that the authorization request executes correctly before benchmarking

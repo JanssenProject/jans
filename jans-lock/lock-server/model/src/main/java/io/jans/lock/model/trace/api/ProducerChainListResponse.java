@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Response body of the producer-chain listing admin endpoint (task 15).
+ * Response body of the producer-chain listing admin endpoint.
  *
  * @author Yuriy Movchan
  */

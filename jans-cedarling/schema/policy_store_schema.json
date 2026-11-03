@@ -197,11 +197,6 @@
                     "description": "A user-defined, human-readable identifier for this trusted issuer (e.g., 'Google', 'Azure AD').",
                     "type": "string"
                 },
-                "description": {
-                    "description": "A short description explaining the purpose of this trusted issuer.",
-                    "type": "string",
-                    "default": ""
-                },
                 "openid_configuration_endpoint": {
                     "description": "The URL to the trusted issuer's OpenID Connect discovery document, which contains metadata about the issuer (e.g., authorization endpoint, token endpoint).",
                     "type": "string",
@@ -219,17 +214,12 @@
                 }
             },
             "required": ["name", "openid_configuration_endpoint"],
-            "additionalProperties": true
+            "additionalProperties": false
         },
         "TokenMetadata": {
             "description": "Describes how Cedarling should interpret and map JWT tokens from a specific trusted issuer.",
             "type": "object",
             "properties": {
-                "trusted": {
-                    "description": "Indicates whether tokens from this issuer should be considered trusted by default. Defaults to true.",
-                    "type": "boolean",
-                    "default": true
-                },
                 "entity_type_name": {
                     "description": "The Cedar entity type that tokens from this issuer should be mapped to (e.g., 'Jans::AccessToken'). This is required.",
                     "type": "string"
@@ -250,7 +240,7 @@
                 }
             },
             "required": ["entity_type_name"],
-            "additionalProperties": true
+            "additionalProperties": false
         }
     }
 }

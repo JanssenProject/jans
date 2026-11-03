@@ -14,8 +14,7 @@ import net.sf.saxon.sapling.SaplingElement;
 import net.sf.saxon.sapling.SaplingNode;
 import net.sf.saxon.sapling.Saplings;
 
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
@@ -81,11 +80,19 @@ public class Visitor {
 
                 RuleContext ruleCtx = (RuleContext) child;
                 int ind = ruleCtx.getRuleIndex();
-                
+
                 if (RULES_AS_TEXT.contains(ind)) {
                     elem = Saplings.elem(getRuleName(ind)).withText(makeTextOf(child));
                 } else {
                     elem = visitElement(child, ind);
+                }
+                
+                if (ind == AuthnFlowParser.RULE_statement || ind == AuthnFlowParser.RULE_quit_stmt
+                         || ind == AuthnFlowParser.RULE_option) {
+                    
+                    ParserRuleContext prc = (ParserRuleContext) child;
+                    int line = prc.getStart().getLine();
+                    elem = elem.withAttr("line", String.valueOf(line));
                 }
 
             } else if (child instanceof TerminalNode) {

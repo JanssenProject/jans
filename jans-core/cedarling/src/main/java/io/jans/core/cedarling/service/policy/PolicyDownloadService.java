@@ -16,17 +16,18 @@
 
 package io.jans.core.cedarling.service.policy;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -66,15 +67,25 @@ import jakarta.ws.rs.core.MediaType;
 @ApplicationScoped
 public class PolicyDownloadService {
 
-	private static final int DEFAULT_INTERVAL = 30;
+	/** Seconds between policy store reloads; each reload publishes a {@link PolicySnapshotEvent}. */
+	public static final int RELOAD_INTERVAL_SECONDS = 30;
 
 	public static final MediaType APPLICATION_ZIP_TYPE = new MediaType("application", "zip");
+
+	public static final int MAX_ARCHIVE_BYTES = 16 * 1024 * 1024;
+
+	public static final int MAX_SIGSTORE_BUNDLE_BYTES = 1024 * 1024;
+
+	public static final String SIGSTORE_BUNDLE_SUFFIX = ".sigstore.json";
 
 	@Inject
 	private Logger log;
 
 	@Inject
 	private Event<TimerEvent> timerEvent;
+
+	@Inject
+	private Event<PolicySnapshotEvent> policySnapshotEvent;
 
     @Inject
 	private CedarlingConfiguration cedarlingConfiguration;
@@ -87,7 +98,8 @@ public class PolicyDownloadService {
 
 	private ObjectMapper objectMapper;
 
-	private Map<String, LoadedPolicySource> loadedPolicySourcesUris;
+	private final AtomicReference<Map<String, LoadedPolicySource>> loadedPolicySourcesUris = new AtomicReference<>(
+			Collections.emptyMap());
 
 	private AtomicBoolean isActive;
 
@@ -97,14 +109,14 @@ public class PolicyDownloadService {
 		this.isActive = new AtomicBoolean(false);
 
 		this.objectMapper = new ObjectMapper();	
-		this.loadedPolicySourcesUris = new HashMap<>();
+		this.loadedPolicySourcesUris.set(Collections.emptyMap());
 	}
 
 	public void initTimer() {
 		log.debug("Initializing Policy Download Service Timer");
 
 		final int delay = 30;
-		final int interval = DEFAULT_INTERVAL;
+		final int interval = RELOAD_INTERVAL_SECONDS;
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new PolicyDownloadEvent(),
 				Scheduled.Literal.INSTANCE));
@@ -144,7 +156,7 @@ public class PolicyDownloadService {
 			return;
 		}
 
-		List<String> downloadedPolicies = new ArrayList<>();
+		Map<String, LoadedPolicySource> reloaded = new LinkedHashMap<>();
 		for(PolicySource policySource : cedarlingConfiguration.getPolicySources()) {
 			// Load policy source from specified source
 			List<LoadedPolicySource> loadedPolicySources = loadPolicy(policySource);
@@ -154,24 +166,15 @@ public class PolicyDownloadService {
 
 			for(LoadedPolicySource loadedPolicySource : loadedPolicySources) {
 				String policyStoreUri = loadedPolicySource.getPolicyStoreUri();
-
-				// Collect list of policyStoreUris
-				downloadedPolicies.add(policyStoreUri);
-
-				// Update loadedPolicySourcesUris
-				loadedPolicySourcesUris.put(policyStoreUri, loadedPolicySource);
+				if (reloaded.put(policyStoreUri, loadedPolicySource) != null) {
+					log.warn("Policy '{}' from '{}' replaces a policy loaded from another source", policyStoreUri, loadedPolicySource.getSourceUri());
+				}
 			}
 		}
 
-		// Remove unloaded policy Uris 
-		for (Iterator<Entry<String, LoadedPolicySource>> it = loadedPolicySourcesUris.entrySet().iterator(); it.hasNext();) {
-			Entry<String, LoadedPolicySource> item = it.next();
-			if (!downloadedPolicies.contains(item.getKey())) {
-				it.remove();
-			}
-		}
+		publish(Collections.unmodifiableMap(reloaded));
 
-		log.debug("End URIs policies reload. Count policies: {}", loadedPolicySourcesUris.size());
+		log.debug("End URIs policies reload. Count policies: {}", reloaded.size());
 	}
 
 	private List<LoadedPolicySource> loadPolicy(PolicySource policySource) {
@@ -212,8 +215,9 @@ public class PolicyDownloadService {
                 if (responseMediaType.isCompatible(MediaType.APPLICATION_JSON_TYPE)
                         || responseMediaType.isCompatible(MediaType.TEXT_PLAIN_TYPE)) {
                     return loadJsonPolicyFromResponse(httpResponse, policyStoreUri);
-                } else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)) {
-                    return loadZipPoliciesFromResponse(httpResponse, policyStoreUri);
+                } else if (responseMediaType.isCompatible(APPLICATION_ZIP_TYPE)
+                        || responseMediaType.isCompatible(MediaType.APPLICATION_OCTET_STREAM_TYPE)) {
+                    return loadArchiveFromResponse(httpResponse, policyStoreUri, decryptedAuthorizationToken);
                 }
             }
 
@@ -239,10 +243,91 @@ public class PolicyDownloadService {
 		return null;
 	}
 
-	private List<LoadedPolicySource> loadZipPoliciesFromResponse(HttpResponse httpResponse, String policyStoreUri) throws IOException {
+	private List<LoadedPolicySource> loadArchiveFromResponse(HttpResponse httpResponse, String policyStoreUri, String authorizationToken) throws IOException {
+		byte[] archive;
+		try (InputStream is = httpResponse.getEntity().getContent()) {
+			archive = is.readNBytes(MAX_ARCHIVE_BYTES + 1);
+		}
+
+		if (archive.length > MAX_ARCHIVE_BYTES) {
+			log.error("Policy archive from URI {} exceeds {} bytes", policyStoreUri, MAX_ARCHIVE_BYTES);
+			return Collections.emptyList();
+		}
+
+		JsonNode policyStore;
+		try {
+			policyStore = CjarArchive.readPolicyStoreMetadata(archive, getMaxEntries(), objectMapper);
+		} catch (IllegalStateException ex) {
+			log.error("Rejected policy archive from URI {}: {}", policyStoreUri, ex.getMessage());
+			return Collections.emptyList();
+		}
+
+		if (policyStore == null) {
+			return loadZipPolicies(new ByteArrayInputStream(archive), policyStoreUri);
+		}
+
+		String policyStoreId = CjarArchive.text(policyStore, "id");
+		if (StringHelper.isEmpty(policyStoreId)) {
+			log.error("Policy store archive from URI {} has no policy_store.id in metadata.json", policyStoreUri);
+			return Collections.emptyList();
+		}
+
+		String bundleHash = CjarArchive.bundleHash(archive);
+		String sigstoreBundle = loadSigstoreBundle(policyStoreUri, authorizationToken);
+		log.debug("End policy store archive load from: '{}', id: '{}', bundle hash: '{}', sigstore bundle: {}", policyStoreUri, policyStoreId, bundleHash, sigstoreBundle != null);
+
+		LoadedPolicySource loadedPolicySource = new LoadedPolicySource(policyStoreId, archive, bundleHash, policyStoreUri);
+		loadedPolicySource.setPolicyStoreName(CjarArchive.text(policyStore, "name"));
+		loadedPolicySource.setPolicyStoreVersion(CjarArchive.text(policyStore, "version"));
+		loadedPolicySource.setSigstoreBundle(sigstoreBundle);
+
+		return Arrays.asList(loadedPolicySource);
+	}
+
+	private String loadSigstoreBundle(String policyStoreUri, String authorizationToken) {
+		String bundleUri = policyStoreUri + SIGSTORE_BUNDLE_SUFFIX;
+		HttpGet request = new HttpGet(bundleUri);
+		if (StringHelper.isNotEmpty(authorizationToken)) {
+			request.setHeader("Authorization", "Bearer " + authorizationToken);
+		}
+
+		try {
+			HttpResponse httpResponse = httpService.getHttpsClient().execute(request);
+			if (!httpService.isResponseStastusCodeOk(httpResponse)) {
+				log.debug("No Sigstore bundle at URI {}", bundleUri);
+				EntityUtils.consumeQuietly(httpResponse.getEntity());
+				return null;
+			}
+
+			if (httpResponse.getEntity() == null) {
+				log.debug("Empty Sigstore bundle response from URI {}", bundleUri);
+				return null;
+			}
+
+			byte[] bundle;
+			try (InputStream is = httpResponse.getEntity().getContent()) {
+				bundle = is.readNBytes(MAX_SIGSTORE_BUNDLE_BYTES + 1);
+			}
+
+			if (bundle.length > MAX_SIGSTORE_BUNDLE_BYTES) {
+				log.error("Sigstore bundle from URI {} exceeds {} bytes", bundleUri, MAX_SIGSTORE_BUNDLE_BYTES);
+				return null;
+			}
+
+			String bundleJson = new String(bundle, StandardCharsets.UTF_8);
+			objectMapper.readTree(bundleJson);
+
+			return bundleJson;
+		} catch (IOException ex) {
+			log.warn("Failed to load Sigstore bundle from URI {}", bundleUri, ex);
+			return null;
+		}
+	}
+
+	private List<LoadedPolicySource> loadZipPolicies(InputStream zipStream, String policyStoreUri) throws IOException {
 		List<LoadedPolicySource> result = new ArrayList<>();
 
-		try (ZipInputStream zis = new ZipInputStream(httpResponse.getEntity().getContent())) {
+		try (ZipInputStream zis = new ZipInputStream(zipStream)) {
 			ZipEntry ze;
 			int entriesCount = 0;
           
@@ -341,24 +426,54 @@ public class PolicyDownloadService {
 	}
 
 	private void cleanAllPolicies() {
-		loadedPolicySourcesUris.clear();
+		publish(Collections.emptyMap());
 	}
 
-	public Map<String, LoadedPolicySource> getLoadedPolicies() {
-		if (loadedPolicySourcesUris == null) {
-			return new HashMap<>();
+	/**
+	 * Swaps in the new set atomically, so readers see either the previous or the new one, then
+	 * tells observers. An observer failure is logged and never undoes the swap.
+	 */
+	private void publish(Map<String, LoadedPolicySource> snapshot) {
+		Map<String, LoadedPolicySource> previous = loadedPolicySourcesUris.getAndSet(snapshot);
+		try {
+			policySnapshotEvent.fire(new PolicySnapshotEvent(previous, snapshot, System.currentTimeMillis()));
+		} catch (RuntimeException ex) {
+			log.error("Policy snapshot observer failed", ex);
 		}
+	}
 
-		return new HashMap<>(loadedPolicySourcesUris);
+	/**
+	 * @return the current snapshot, unmodifiable; a reload publishes a new map instead of
+	 *         changing this one
+	 */
+	public Map<String, LoadedPolicySource> getLoadedPolicies() {
+		return loadedPolicySourcesUris.get();
 	}
 
 	public class LoadedPolicySource {
 		private final String policyStoreUri;
 		private final String policyJson;
+		private final byte[] archive;
+		private final String bundleHash;
+		private final String sourceUri;
+		private String policyStoreName;
+		private String policyStoreVersion;
+		private String sigstoreBundle;
 
 		public LoadedPolicySource(String policyStoreUri, String policyJson) {
+			this(policyStoreUri, policyJson, null, null, policyStoreUri);
+		}
+
+		public LoadedPolicySource(String policyStoreId, byte[] archive, String bundleHash, String sourceUri) {
+			this(policyStoreId, null, archive, bundleHash, sourceUri);
+		}
+
+		private LoadedPolicySource(String policyStoreUri, String policyJson, byte[] archive, String bundleHash, String sourceUri) {
 			this.policyStoreUri = policyStoreUri;
 			this.policyJson = policyJson;
+			this.archive = archive;
+			this.bundleHash = bundleHash;
+			this.sourceUri = sourceUri;
 		}
 
 		public String getPolicyJson() {
@@ -369,9 +484,50 @@ public class PolicyDownloadService {
 			return policyStoreUri;
 		}
 
+		public boolean isArchive() {
+			return archive != null;
+		}
+
+		public byte[] getArchive() {
+			return archive;
+		}
+
+		public String getBundleHash() {
+			return bundleHash;
+		}
+
+		public String getSourceUri() {
+			return sourceUri;
+		}
+
+		public String getPolicyStoreName() {
+			return policyStoreName;
+		}
+
+		public void setPolicyStoreName(String policyStoreName) {
+			this.policyStoreName = policyStoreName;
+		}
+
+		public String getPolicyStoreVersion() {
+			return policyStoreVersion;
+		}
+
+		public void setPolicyStoreVersion(String policyStoreVersion) {
+			this.policyStoreVersion = policyStoreVersion;
+		}
+
+		public String getSigstoreBundle() {
+			return sigstoreBundle;
+		}
+
+		public void setSigstoreBundle(String sigstoreBundle) {
+			this.sigstoreBundle = sigstoreBundle;
+		}
+
 		@Override
 		public String toString() {
-			return "LoadedPolicySource [policyJson=" + policyJson + ", policyStoreUri=" + policyStoreUri + "]";
+			return "LoadedPolicySource [policyStoreUri=" + policyStoreUri + ", sourceUri=" + sourceUri
+					+ ", bundleHash=" + bundleHash + ", policyJson=" + policyJson + "]";
 		}
 	}
 }

@@ -13,11 +13,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * A single TRACE record envelope (design §10, §11.2, TRACE MVP task 21): the stored assertion plus
+ * A single TRACE record envelope (design §10, §11.2): the stored assertion plus
  * the verification outcome and the Lock-derived ingestion metadata. {@code assertion} is the
- * request body text re-parsed as a JSON value, never re-serialized by hand (design decision D-13):
+ * request body text re-parsed as a JSON value, never re-serialized by hand:
  * Jackson re-emits it, so semantic identity with the originally signed bytes is preserved, not
- * byte-for-byte identity.
+ * byte-for-byte identity. {@code assertionRaw} carries the exact accepted text (design §10, §14).
  *
  * @author Yuriy Movchan
  */
@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public class TraceRecordResponse {
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("record_id")
@@ -34,8 +34,12 @@ public class TraceRecordResponse {
 	private String recordId;
 
 	@JsonProperty("assertion")
-	@Schema(description = "The complete producer-signed assertion, as received (design §7)")
+	@Schema(description = "The complete producer-signed assertion as a parsed JSON value. A re-emission: member order, whitespace and number formatting can differ from the received text. Use assertion_raw for the exact text")
 	private JsonNode assertion;
+
+	@JsonProperty("assertion_raw")
+	@Schema(description = "The exact accepted assertion text, byte for byte as received. Verify the signature and content_digest over its JCS form")
+	private String assertionRaw;
 
 	@JsonProperty("content_digest")
 	@Schema(description = "sha256:<hex> digest of the full signed assertion", example = "sha256:abc123...")
@@ -71,6 +75,14 @@ public class TraceRecordResponse {
 
 	public void setAssertion(JsonNode assertion) {
 		this.assertion = assertion;
+	}
+
+	public String getAssertionRaw() {
+		return assertionRaw;
+	}
+
+	public void setAssertionRaw(String assertionRaw) {
+		this.assertionRaw = assertionRaw;
 	}
 
 	public String getContentDigest() {

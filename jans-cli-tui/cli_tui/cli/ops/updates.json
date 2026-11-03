@@ -1,0 +1,17 @@
+{
+  "jca": {
+    "User-Mgt": {
+      "components": {
+        "schemas": {
+          "CustomUser": {
+            "required": [
+              "userId",
+              "mail"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+

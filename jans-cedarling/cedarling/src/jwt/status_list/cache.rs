@@ -76,9 +76,8 @@ pub(crate) struct StatusListCache {
 impl StatusListCache {
     /// Initializes the statuslist for the given issuer
     ///
-    /// If the issuer's `OpenID` configuration does not include a
-    /// `status_list_endpoint`, the initialization is silently skipped with a
-    /// WARN-level log message rather than failing.
+    /// An issuer with no `status_list_endpoint`, including every static-form
+    /// issuer, is skipped with a WARN log; its tokens carrying `status` are rejected.
     pub(crate) async fn init_for_iss(
         &self,
         iss_config: &IssuerConfig,
@@ -93,22 +92,22 @@ impl StatusListCache {
             refresh_interval_max,
             cancel_tkn,
         } = args;
-        let Some(openid_config) = iss_config.openid_config.as_ref() else {
+        let Some(status_list_url) = iss_config
+            .openid_config
+            .as_ref()
+            .and_then(|openid_config| openid_config.status_list_endpoint.as_ref())
+        else {
             if let Some(logger) = &logger {
-                logger.log_any(JwtLogEntry::new(
-                    "issuer has no OpenID configuration; status validation skipped".into(),
-                    Some(LogLevel::WARN),
-                ));
-            }
-            return Ok(());
-        };
-        let Some(status_list_url) = openid_config.status_list_endpoint.as_ref() else {
-            if let Some(logger) = &logger {
+                let source = if iss_config.openid_config.is_some() {
+                    "its discovery document has no status_list_endpoint"
+                } else {
+                    "its static JWKS comes with no status list"
+                };
                 logger.log_any(JwtLogEntry::new(
                     format!(
-                        "issuer '{}' does not publish a status_list_endpoint; \
-                         status validation skipped",
-                        openid_config.issuer,
+                        "trusted issuer '{}': {source}; with status validation on, its tokens \
+                         that carry a `status` claim will be rejected",
+                        iss_config.policy.name,
                     ),
                     Some(LogLevel::WARN),
                 ));
@@ -118,7 +117,7 @@ impl StatusListCache {
         let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url, &http_client)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let iss = iss_config.policy.iss_claim();
+        let iss = iss_config.policy.iss_claim().clone();
 
         let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
 
@@ -320,23 +319,27 @@ mod test {
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .fetch_keys(
+                &mock_server.openid_config().issuer,
+                &mock_server.openid_config().jwks_uri,
+                None,
+                http_client.clone(),
+            )
             .await
             .unwrap();
         // we initialize the status list with a 1 sec ttl
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
         let status_list = StatusListCache::default();
 
-        let ti = TrustedIssuer::new(
-            "some_iss".into(),
-            "is a trusted issuer".into(),
+        let ti = TrustedIssuer::from_configuration(
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -435,22 +438,26 @@ mod test {
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .fetch_keys(
+                &mock_server.openid_config().issuer,
+                &mock_server.openid_config().jwks_uri,
+                None,
+                http_client.clone(),
+            )
             .await
             .unwrap();
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
         let status_list = StatusListCache::default();
 
-        let ti = TrustedIssuer::new(
-            "some_iss".into(),
-            "is a trusted issuer".into(),
+        let ti = TrustedIssuer::from_configuration(
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -516,7 +523,12 @@ mod test {
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .fetch_keys(
+                &mock_server.openid_config().issuer,
+                &mock_server.openid_config().jwks_uri,
+                None,
+                http_client.clone(),
+            )
             .await
             .unwrap();
         // initial JWT has no `ttl` claim - relies on the max to schedule a refresh
@@ -524,16 +536,15 @@ mod test {
             .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b1111_1110]);
         let status_list = StatusListCache::default();
 
-        let ti = TrustedIssuer::new(
-            "some_iss".into(),
-            "is a trusted issuer".into(),
+        let ti = TrustedIssuer::from_configuration(
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(
@@ -607,7 +618,12 @@ mod test {
         let key_service = KeyService::default();
         let mut mock_server = MockServer::new_with_defaults().await.unwrap();
         key_service
-            .get_keys_using_oidc(&mock_server.openid_config(), None, http_client.clone())
+            .fetch_keys(
+                &mock_server.openid_config().issuer,
+                &mock_server.openid_config().jwks_uri,
+                None,
+                http_client.clone(),
+            )
             .await
             .unwrap();
         // JWT ttl = 10s, much larger than refresh_interval_max = 1s
@@ -618,16 +634,15 @@ mod test {
         );
         let status_list = StatusListCache::default();
 
-        let ti = TrustedIssuer::new(
-            "some_iss".into(),
-            "is a trusted issuer".into(),
+        let ti = TrustedIssuer::from_configuration(
+            "some_iss",
             mock_server.openid_config_endpoint().unwrap(),
-            HashMap::default(),
-        );
+        )
+        .expect("test configuration endpoint should derive an iss");
 
         let iss_config = IssuerConfig {
-            issuer_id: "some_iss_id".into(),
             policy: Arc::new(ti),
+            tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
         validators.init_for_iss(

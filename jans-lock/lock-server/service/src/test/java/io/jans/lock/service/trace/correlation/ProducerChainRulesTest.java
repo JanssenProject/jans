@@ -22,8 +22,7 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 
 /**
- * Pure unit tests for {@link ProducerChainRules}: no store, no CDI (design §8, §12, design
- * decisions D-9, D-11).
+ * Pure unit tests for {@link ProducerChainRules}: no store, no CDI (design §8, §12).
  */
 class ProducerChainRulesTest {
 

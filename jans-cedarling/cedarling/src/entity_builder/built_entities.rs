@@ -6,7 +6,6 @@
 use cedar_policy::{Entity, EntityUid};
 use smol_str::{SmolStr, ToSmolStr};
 use std::collections::{HashMap, hash_map::Entry};
-use url::Origin;
 
 type TypeName = SmolStr;
 type TypeId = SmolStr;
@@ -31,8 +30,8 @@ impl FromIterator<EntityUid> for BuiltEntities {
     }
 }
 
-impl From<&HashMap<Origin, Entity>> for BuiltEntities {
-    fn from(src: &HashMap<Origin, Entity>) -> Self {
+impl From<&HashMap<EntityUid, Entity>> for BuiltEntities {
+    fn from(src: &HashMap<EntityUid, Entity>) -> Self {
         let mut built_entities = BuiltEntities::default();
 
         for entity in src.values() {

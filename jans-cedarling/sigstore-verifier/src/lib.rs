@@ -28,7 +28,7 @@
 //! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
-#[cfg(test)]
+#[cfg(any(test, feature = "test-support"))]
 mod test_support;
 
 pub(crate) mod bundle;
@@ -42,6 +42,8 @@ pub(crate) mod hex;
 pub(crate) mod merkle;
 pub mod policy;
 pub(crate) mod sct;
+#[cfg(feature = "test-support")]
+pub mod testing;
 pub(crate) mod tlog;
 pub mod trust_root;
 pub mod verifier;

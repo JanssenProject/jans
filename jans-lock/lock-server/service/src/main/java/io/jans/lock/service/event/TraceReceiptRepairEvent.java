@@ -1,7 +1,7 @@
 package io.jans.lock.service.event;
 
 /**
- * Fired on the {@code TraceReceiptRepairTimer} schedule (design §9, TRACE MVP design decision D-8).
+ * Fired on the {@code TraceReceiptRepairTimer} schedule (design §9).
  *
  * @author Yuriy Movchan
  */

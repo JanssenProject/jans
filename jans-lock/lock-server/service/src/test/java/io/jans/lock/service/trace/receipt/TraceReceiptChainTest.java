@@ -34,6 +34,7 @@ import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.trace.crypto.TraceTime;
 import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -41,17 +42,18 @@ import io.jans.lock.service.trace.receipt.ChainVerificationReport.Entry;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport.EntryStatus;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
+import io.jans.lock.service.trace.testkit.TraceTestCrypto;
+import io.jans.lock.trace.crypto.bc.ReceiptHashes;
 
 /**
  * Tests for {@link TraceReceiptChain}: sequential allocation and linkage, cross-node contention on
- * the same sequence, retry exhaustion, and the VOID-tombstone-then-continue case (design §9, TRACE
- * MVP design decision D-8; task 18 acceptance criteria).
+ * the same sequence, retry exhaustion, and the VOID-tombstone-then-continue case (design §9).
  */
 class TraceReceiptChainTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
-	private static final String PRODUCER = "producer-1/1.0.0";
+	private static final String PRODUCER = "producer-1";
 
 	private static final String NODE_ID = "node-1";
 
@@ -83,12 +85,14 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 		setField(chain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(chain, "store", backingStore);
 		setField(chain, "appConfiguration", appConfiguration);
+		setField(chain, "cryptoProvider", TraceTestCrypto.javaProvider());
 		return chain;
 	}
 
-	private void insertMatchingRecord(String recordId, String contentDigest) throws DuplicateEntryException {
+	private void insertMatchingRecord(String recordId, String contentDigest, long receiptSequence)
+			throws DuplicateEntryException {
 		StoredTraceRecord record = StoredTraceRecordFactory.builder().domainId(DOMAIN).producerId(PRODUCER)
-				.recordId(recordId).contentDigest(contentDigest).build();
+				.recordId(recordId).contentDigest(contentDigest).receiptSequence(receiptSequence).build();
 		store.insertRecord(record);
 	}
 
@@ -102,21 +106,21 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 				NODE_ID);
 		assertEquals(1L, claim1.getSeq());
 		assertEquals(TraceConstants.ZERO_HASH, claim1.getPrevReceiptHash());
-		insertMatchingRecord("rec-1", "sha256:" + digest('1'));
+		insertMatchingRecord("rec-1", "sha256:" + digest('1'), 1);
 		chain.commit(DOMAIN, claim1.getSeq());
 
 		ReceiptClaim claim2 = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 2_000L,
 				NODE_ID);
 		assertEquals(2L, claim2.getSeq());
 		assertEquals(claim1.getReceiptHash(), claim2.getPrevReceiptHash());
-		insertMatchingRecord("rec-2", "sha256:" + digest('2'));
+		insertMatchingRecord("rec-2", "sha256:" + digest('2'), 2);
 		chain.commit(DOMAIN, claim2.getSeq());
 
 		ReceiptClaim claim3 = chain.claim(DOMAIN, PRODUCER, "rec-3", "rec-3-key", "sha256:" + digest('3'), 3_000L,
 				NODE_ID);
 		assertEquals(3L, claim3.getSeq());
 		assertEquals(claim2.getReceiptHash(), claim3.getPrevReceiptHash());
-		insertMatchingRecord("rec-3", "sha256:" + digest('3'));
+		insertMatchingRecord("rec-3", "sha256:" + digest('3'), 3);
 		chain.commit(DOMAIN, claim3.getSeq());
 
 		ChainVerificationReport report = chain.verifyDomain(DOMAIN, 100);
@@ -195,12 +199,12 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 
 		ReceiptClaim claim1 = chain.claim(DOMAIN, PRODUCER, "rec-1", "rec-1-key", "sha256:" + digest('1'), 1_000L,
 				NODE_ID);
-		insertMatchingRecord("rec-1", "sha256:" + digest('1'));
+		insertMatchingRecord("rec-1", "sha256:" + digest('1'), 1);
 		chain.commit(DOMAIN, claim1.getSeq());
 
 		ReceiptClaim claim2 = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 2_000L,
 				NODE_ID);
-		// No matching record row inserted for rec-2: the identity race's loser, voided (D-8 step 5).
+		// No matching record row inserted for rec-2: the identity race's loser, voided.
 		chain.voidClaim(DOMAIN, claim2.getSeq());
 
 		ReceiptClaim claim3 = chain.claim(DOMAIN, PRODUCER, "rec-3", "rec-3-key", "sha256:" + digest('3'), 3_000L,
@@ -209,7 +213,7 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 		assertEquals(claim2.getReceiptHash(), claim3.getPrevReceiptHash(),
 				"prev hash must link to the voided position's hash, not skip it");
 		assertNotEquals(claim1.getReceiptHash(), claim2.getReceiptHash());
-		insertMatchingRecord("rec-3", "sha256:" + digest('3'));
+		insertMatchingRecord("rec-3", "sha256:" + digest('3'), 3);
 		chain.commit(DOMAIN, claim3.getSeq());
 
 		ChainVerificationReport report = chain.verifyDomain(DOMAIN, 100);
@@ -239,4 +243,23 @@ class TraceReceiptChainTest extends BaseLockServiceTest {
 
 	}
 
+	@Test
+	void testClaim_ReceivedAtMillis_HashUsesRfc3339String() {
+		TraceReceiptChain chain = newChain(store);
+
+		ReceiptClaim zeroMillis = chain.claim(DOMAIN, PRODUCER, "rec-1", "rec-1-key", "sha256:" + digest('1'), 1_800_000_000_000L,
+				NODE_ID);
+		assertEquals(
+				ReceiptHashes.receiptHash(DOMAIN, 1L, 1_800_000_000_000L, PRODUCER, "rec-1", "sha256:" + digest('1'),
+						TraceConstants.ZERO_HASH),
+				zeroMillis.getReceiptHash());
+		assertEquals(1_800_000_000_000L, store.findReceipt(DOMAIN, 1L).orElseThrow().getReceivedAtMs());
+		assertEquals("2027-01-15T08:00:00.000Z", TraceTime.formatMillis(
+				store.findReceipt(DOMAIN, 1L).orElseThrow().getReceivedAtMs()));
+
+		ReceiptClaim oneMilli = chain.claim(DOMAIN, PRODUCER, "rec-2", "rec-2-key", "sha256:" + digest('2'), 1_800_000_000_001L,
+				NODE_ID);
+		assertEquals(zeroMillis.getReceiptHash(), oneMilli.getPrevReceiptHash());
+		assertNotEquals(zeroMillis.getReceiptHash(), oneMilli.getReceiptHash());
+	}
 }

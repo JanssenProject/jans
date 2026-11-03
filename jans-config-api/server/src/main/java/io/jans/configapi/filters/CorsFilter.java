@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-@WebFilter(filterName = "CorsFilter", asyncSupported = true, urlPatterns = { "*" })
+@WebFilter(filterName = "CorsFilter", asyncSupported = true, urlPatterns = { "/*" })
 public class CorsFilter implements Filter {
 
     @Inject
@@ -125,7 +125,11 @@ public class CorsFilter implements Filter {
                 request.getMethod(), corsConfiguration.getPreflightMaxAge());
         if ("OPTIONS".equals(request.getMethod())) {
             log.debug("CorsFilter::doFilter() - OPTIONS method");
-            if ((requestedMethods != null || requestedMethods != null) && corsConfiguration.getPreflightMaxAge() != 0) {
+            if (StringUtils.isBlank(requestedMethods)) {
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+            if (corsConfiguration.getPreflightMaxAge() != 0) {
                 log.debug("CorsFilter::doFilter() - setting PreflightMaxAge ");
                 response.addHeader(ACCESS_CONTROL_MAX_AGE, String.valueOf(corsConfiguration.getPreflightMaxAge()));
             }

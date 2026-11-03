@@ -63,6 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
+        trace_config: None,
     })
     .await?;
 

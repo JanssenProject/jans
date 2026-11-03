@@ -1,6 +1,6 @@
 module cedarling-krakend
 
-go 1.22.9
+go 1.26.0
 
 require github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go v0.0.0-20260327092028-934291d101e0
 

@@ -422,6 +422,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
             authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
             authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
+            authorizationGrant.setRedirectUri(authzRequest.getRedirectUri());
             authorizationGrant.setClaims(authzRequest.getClaims());
             authorizationGrant.setDpopJkt(authzRequest.getDpopJkt());
 

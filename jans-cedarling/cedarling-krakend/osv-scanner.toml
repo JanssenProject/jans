@@ -1,0 +1,7 @@
+# osv-scanner.toml — read by OSV-Scanner and the OpenSSF Scorecard "Vulnerabilities"
+# check. Must live next to the go.mod it applies to; does NOT propagate to parent/child dirs.
+
+# Plugins run inside the KrakenD process and must be built with its exact Go
+# (GOTOOLCHAIN=local in krakend/builder), so scan stdlib as the pinned
+# krakend/builder:2.13.11 Go. Keep in sync with build-packages.yml.
+GoVersionOverride = "1.26.8"

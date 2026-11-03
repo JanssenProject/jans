@@ -332,6 +332,31 @@ func resourceFido2Configuration() *schema.Resource {
                                                         Optional:    true,
                                                         Description: "Interval in seconds between Lock audit event flushes.",
                                                 },
+                                                "native_readiness_enabled": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Boolean value specifying whether native passkey readiness checks are enabled.",
+                                                },
+                                                "native_readiness_allow_external_fetch": {
+                                                        Type:        schema.TypeBool,
+                                                        Optional:    true,
+                                                        Description: "Whether native readiness checks may fetch authenticator metadata from external sources.",
+                                                },
+                                                "native_readiness_max_response_bytes": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Maximum size in bytes of a native readiness external fetch response.",
+                                                },
+                                                "native_readiness_timeout_ms": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Timeout in milliseconds for native readiness external fetches.",
+                                                },
+                                                "native_readiness_cache_ttl_seconds": {
+                                                        Type:        schema.TypeInt,
+                                                        Optional:    true,
+                                                        Description: "Time in seconds that native readiness results are cached.",
+                                                },
                                         },
                                 },
                         },

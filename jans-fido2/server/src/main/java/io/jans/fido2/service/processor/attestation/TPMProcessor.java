@@ -40,7 +40,9 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseKeyType;
+import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.AuthData;
@@ -235,7 +237,8 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
 		switch (keyType) {
 		case RSA:
-			if (algorithmToUse == -65535 || algorithmToUse == -257) {
+			if (algorithmToUse == CoseRSAAlgorithm.RS65535.getNumericValue()
+				|| algorithmToUse == CoseRSAAlgorithm.RS256.getNumericValue()) {
 				byte[] keyBufferFromTPM = Arrays.copyOfRange(tpm, 2, tpm.length);
 				byte[] rsaKeyN = base64Service.decode(uncompressedECPointNode.get("-1").asText());
 				if (!Arrays.equals(keyBufferFromTPM, rsaKeyN)) {
@@ -249,7 +252,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
 			}
 			break;
 		case EC2:
-			if (algorithmToUse == -7) {
+			if (algorithmToUse == CoseEC2Algorithm.ES256.getNumericValue()) {
 				byte[] x = base64Service.decode(uncompressedECPointNode.get("-2").asText());
 				byte[] y = base64Service.decode(uncompressedECPointNode.get("-3").asText());
 				byte[] buffer = ByteBuffer.allocate(1 + x.length + y.length).put(UNCOMPRESSED_POINT_INDICATOR).put(x)

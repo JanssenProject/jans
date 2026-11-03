@@ -1,0 +1,3 @@
+# Local overrides of automatic_enpoints_tests.properties (client secrets)
+*.local.properties
+__pycache__/

@@ -86,7 +86,7 @@ resolved, because this runs on the request path.
 > **The Authorization Server and Casa are callers too.** Neither is a browser-facing reverse proxy,
 > but both relay passkey ceremonies to FIDO2 and send the connecting address they observed on the
 > browser's request (`getRemoteAddr()`, not a browser-supplied header) as `X-Forwarded-For` on that
-> call — see [Request context on raw entries](passkey-telemetry.md#request-context-on-raw-entries).
+> call — see [Requests relayed by the Authorization Server and Casa](passkey-telemetry.md#requests-relayed-by-the-authorization-server-and-casa).
 > If `trustedProxyEnabled` is `true`, their addresses need to be in `trustedProxyIpRanges` as well,
 > the same as any other trusted hop, or their forwarded value is ignored in favor of the connecting
 > address.
@@ -121,6 +121,11 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `lockAuditClientId` | String | — | OAuth2 client ID used to obtain a token, via the client credentials grant, for the `https://jans.io/oauth/lock/log.write` scope. |
 | `lockAuditClientPassword` | String | — | OAuth2 client secret paired with `lockAuditClientId`. Encrypted at rest, same as other client secrets, and deliberately excluded from configuration logging. |
 | `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike `lockAuditEnabled`, `lockAuditEndpoint` and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect. |
+| `nativeReadinessEnabled` | Boolean | `false` | Makes the native app readiness endpoint available. When `false` the endpoint does no work. |
+| `nativeReadinessAllowExternalFetch` | Boolean | `false` | Allows the readiness checks to make outbound requests to a relying party's `/.well-known` association files. Outbound requests need both this and `nativeReadinessEnabled`. |
+| `nativeReadinessMaxResponseBytes` | Integer | `131072` | Maximum number of bytes read from one association file. The server also enforces a fixed upper bound, so a mis-set value cannot remove the limit. |
+| `nativeReadinessTimeoutMs` | Integer | `3000` | Overall deadline in milliseconds for fetching one association file. The server also enforces a fixed upper bound. |
+| `nativeReadinessCacheTtlSeconds` | Integer | `3600` | Time in seconds a readiness result is served from cache before the files are fetched again. |
 
 ### Lock Server audit delivery
 
@@ -199,7 +204,7 @@ An entry under `rp` may also list the Android and iOS apps that share its RP ID,
 | `androidApps[].packageName` | Android application package name |
 | `androidApps[].sha256CertFingerprints` | SHA-256 fingerprints of the app signing certificate, colon-separated hex |
 | `androidApps[].distribution` | `play-store` or `self-signed`: which signing certificate the fingerprints belong to |
-| `iosApps[].teamId` | Apple Developer Team ID |
+| `iosApps[].teamId` | Apple Developer Team ID, or the app's App ID prefix when that differs (older apps) |
 | `iosApps[].bundleId` | Application bundle identifier |
 
 This is the single place an RP's native apps are recorded. It is what the `assetlinks.json` and
@@ -211,6 +216,70 @@ checked against.
 ceremony. When an origin is rejected, the server log says which RPs were considered and that configured native
 apps are not matched against it, to make that visible. An RP with neither list behaves exactly as it did before
 these fields existed, and nothing needs changing on upgrade.
+
+To check that the `assetlinks.json` and `apple-app-site-association` files an RP has deployed match these
+entries, see [Native App Readiness](native-app-readiness.md).
+
+#### Exporting the association files
+
+The server generates both files from these fields, for you to deploy on the RP-ID host. They are the same
+files the readiness check compares a deployed copy against.
+
+| Request | File |
+| --- | --- |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/assetlinks.json` | Android `assetlinks.json`, one statement per `androidApps` entry |
+| `GET /jans-fido2/restv1/rp/{rpConfigId}/association/apple-app-site-association` | Apple file, one `TeamID.BundleID` per complete `iosApps` entry |
+
+`{rpConfigId}` is the RP `id` as configured, URL-encoded. The answer is a JSON download, `404` when the RP is
+not configured or has no app of that platform. Nothing is served from Jans: both Apple and Android fetch
+`https://<rp-id>/.well-known/...` without following redirects, so deploy each file on the RP-ID host itself.
+Apple's file is named `apple-app-site-association`, with no `.json` extension.
+
+**Merge the exported entries into any file that is already there; do not replace it.** The exports describe
+only the passkey (`webcredentials` and `get_login_creds`) entries. A host that already serves these files may
+also use them for universal links or Android App Links, such as `applinks` in the Apple file or other
+statements in `assetlinks.json`, and overwriting the file removes those. Add the exported statements to the
+Android array, and the exported app IDs to `webcredentials.apps`, and leave everything else as it is.
+
+**Check that `teamId` is the app's App ID prefix.** Apple expects `<App ID prefix>.<bundle ID>` in
+`webcredentials.apps`. For most apps the prefix is the Team ID, but for older apps it can be a different value.
+Use the prefix shown for the app's App ID under Identifiers in your Apple Developer account (it is also the
+part before the bundle ID in the app's `application-identifier` entitlement), and record that value as `teamId`.
+
+After deploying, run the native app readiness check for the same RP
+(`POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, which needs `nativeReadinessEnabled` and
+`nativeReadinessAllowExternalFetch`) to confirm the deployed files match the configured apps. A mismatched
+fingerprint or Team ID is the most common deployment failure, and the check reports it.
+
+### Native app readiness
+
+The `nativeReadiness*` properties control a check that compares the `assetlinks.json` and
+`apple-app-site-association` files an RP has deployed with the `androidApps` and `iosApps` recorded under
+`rp` (see above). Everything is off by default, so an upgrade changes nothing until an administrator turns it
+on.
+
+- `nativeReadinessEnabled` is the master switch. While it is `false` the endpoint does no work.
+- `nativeReadinessAllowExternalFetch` is a second, separate opt-in. The server only contacts an RP's
+  `/.well-known` files when both flags are `true`; with only `nativeReadinessEnabled` set it reports what is
+  configured and does not fetch.
+- `nativeReadinessMaxResponseBytes` (default 128 KiB) and `nativeReadinessTimeoutMs` (default 3 seconds) bound
+  each fetch. The server also applies a fixed upper limit to both (256 KiB and 10 seconds), so a mistaken value
+  cannot make a fetch unbounded. A value of zero or less falls back to the default. The time limit covers the
+  HTTP fetch only; the name lookup happens before it starts and is bounded only by the server's DNS resolver.
+- `nativeReadinessCacheTtlSeconds` is how long a result is reused before the files are fetched again. It is
+  never shorter than 60 seconds.
+
+The check is run with `POST /jans-fido2/restv1/rp/{rpConfigId}/readiness`, where `rpConfigId` is the RP `id`
+exactly as configured, URL-encoded. The body is empty or `{"recheck": true}`, which skips the cached result.
+The endpoint cannot be pointed at any other host: only the stored RP ID is ever fetched, and it must be a
+public host name. Like the other diagnostic endpoints, it relies on the infrastructure or the Config API
+plugin for authentication.
+
+The response lists, for `android` and `ios`, each check with a `status` of `pass`, `warn` or `fail` and a short
+`reason`, together with `checkedAt`, `fromCache` and `nextRecheckAllowedAt`. It never contains the content of
+the fetched files. A request that would exceed a rate limit gets HTTP 429 with a `Retry-After` header and
+causes no fetch. The limits apply per server node: one fetch per RP per minute, 20 files per minute in total,
+and 3 checks at a time. Each executed check is written to the server log as a `native-readiness-audit` line.
 
 ### Advertised algorithms
 

@@ -45,6 +45,8 @@ resource "jans_app_configuration" "global" {
 - `allow_post_logout_redirect_without_validation` (Boolean) Allows post logout redirect without validation for End Session Endpoint.
 - `allow_revoke_for_other_clients` (Boolean) Boolean value ture allow revoke for other clients.
 - `allow_spontaneous_scopes` (Boolean) Specifies whether to allow spontaneous scopes.
+- `allow_startup_on_jwks_uri_fetch_failure` (Boolean) Boolean value specifying whether the server may start when the JWKS URI fetch fails.
+- `apply_security_headers_if_uri_contains_any` (List of String) List of URI fragments; security headers are applied when the request URI contains any of them.
 - `apply_x_frame_options_header_if_uri_contains_any` (List of String) List of URIs that should have X-Frame-Options header applied.
 - `archived_jwk_lifetime_in_seconds` (Number) The archived jwk lifetime in seconds.
 - `archived_jwks_uri` (String) Archved URLs of the OP's JSON Web Key Set (JWK) document.
@@ -320,6 +322,7 @@ resource "jans_app_configuration" "global" {
 - `save_tokens_in_cache` (Boolean) Boolean value specifying whether to save token in cache.
 - `save_tokens_in_cache_and_dont_save_in_persistence` (Boolean) Boolean value specifying whether to save token in cache and don't save in persistence.
 - `sector_identifier_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the sector identifier.
+- `security_headers_enabled` (Boolean) Boolean value specifying whether security headers are added to responses.
 - `server_session_id_lifetime` (Number) The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
 - `service_documentation` (String) URL of a page containing human-readable information that developers might want or need to know 
                                                         when using the OpenID Provider. Example: http://gluu.org/docs
@@ -353,6 +356,7 @@ resource "jans_app_configuration" "global" {
 - `status_list_index_allocation_block_size` (Number) The size of status list index allocation block.
 - `status_list_response_jwt_lifetime` (Number) The lifetime of status list response JWT.
 - `status_list_response_jwt_signature_algorithm` (String) The signature algorithm for status list response JWT.
+- `strict_token_redirect_uri_validation` (Boolean) Boolean value specifying whether strict redirect URI validation is enforced at the token endpoint.
 - `subject_identifiers_per_client_supported` (List of String) A list of the subject identifiers supported per client.
 - `subject_types_supported` (List of String) A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
 - `token_endpoint` (String) The token endpoint URL. Example: https://server.example.com/restv1/token

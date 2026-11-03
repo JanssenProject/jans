@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.ads.model.*;
 import io.jans.agama.dsl.*;
 import io.jans.agama.dsl.error.SyntaxException;
-import io.jans.agama.engine.misc.FlowUtils;
 import io.jans.agama.engine.service.*;
 import io.jans.agama.model.*;
 import io.jans.orm.PersistenceEntryManager;
@@ -65,9 +64,6 @@ public class Deployer {
     
     @Inject
     private PersistenceEntryManager entryManager;
-    
-    @Inject
-    private FlowUtils futils;
     
     @Inject
     private AgamaPersistenceService aps;
@@ -280,7 +276,7 @@ public class Deployer {
                 fl.setTranspiled(compiled);
                 
                 fl.setQname(qname);
-                fl.setTransHash(futils.hash(compiled));
+                fl.setTransHash(Transpiler.VERSION);
                 // revision = 0 assumed by default                
                 fl.setEnabled(!noDirectLaunch.contains(qname));
                 

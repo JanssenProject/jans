@@ -290,7 +290,8 @@
                     <artifactId>dokka-maven-plugin</artifactId>
                     <version>${dokka.version}</version>
                     <configuration>
-                        <!-- Optional: Output in Javadoc format for consistency -->
+                        <!-- Modern Dokka HTML; a fixed path keeps the docs script independent of defaults. -->
+                        <outputDir>${project.build.directory}/dokka/html</outputDir>
                         <sourceDirectories>
                             <sourceDirectory>${project.basedir}/src/main/java</sourceDirectory>
                             <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
@@ -300,7 +301,7 @@
                         <execution>
                             <phase>pre-site</phase>
                             <goals>
-                                <goal>javadoc</goal>
+                                <goal>dokka</goal>
                             </goals>
                         </execution>
                     </executions>

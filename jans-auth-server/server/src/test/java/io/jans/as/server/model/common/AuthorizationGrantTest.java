@@ -5,6 +5,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -14,6 +15,9 @@ import io.jans.as.server.model.token.IdTokenFactory;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.model.token.TokenEntity;
+import org.mockito.ArgumentCaptor;
 import io.jans.as.server.service.logout.LogoutStatusJwtService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.token.StatusListIndexService;
@@ -27,7 +31,13 @@ import org.testng.annotations.Test;
 
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 import static org.testng.AssertJUnit.assertNull;
 
 /**
@@ -111,5 +121,104 @@ public class AuthorizationGrantTest {
         authorizationGrant.fillPayloadOfAccessTokenJwt(claims, accessToken, context);
 
         assertNull(claims.getClaim("code"));
+    }
+
+    @Test
+    public void init_whenClientIsEphemeral_shouldGenerateEphemeralSub() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+
+        assertNotNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void init_whenClientIsNotEphemeral_shouldNotGenerateEphemeralSub() {
+        final Client client = new Client();
+        client.setSubjectType(SubjectType.PUBLIC);
+
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void getSub_whenClientIsEphemeral_shouldReturnSameValueOnEveryCall() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+
+        final String first = authorizationGrant.getSub();
+
+        assertEquals(first, authorizationGrant.getEphemeralSub());
+        assertEquals(first, authorizationGrant.getSub());
+        verifyNoInteractions(sectorIdentifierService);
+    }
+
+    @Test
+    public void getSub_whenEphemeralSubIsRestored_shouldReturnRestoredValue() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+        authorizationGrant.setEphemeralSub("restored-sub");
+
+        assertEquals("restored-sub", authorizationGrant.getSub());
+    }
+
+    @Test
+    public void getSub_whenEphemeralSubIsMissing_shouldReturnBlankAndNotGenerate() {
+        authorizationGrant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, ephemeralClient(), new Date());
+        authorizationGrant.setEphemeralSub(null);
+
+        assertEquals("", authorizationGrant.getSub());
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void init_whenEphemeralClientWithoutUser_shouldNotGenerateEphemeralSub() {
+        authorizationGrant.init(null, AuthorizationGrantType.CLIENT_CREDENTIALS, ephemeralClient(), new Date());
+
+        assertNull(authorizationGrant.getEphemeralSub());
+    }
+
+    @Test
+    public void getSub_whenEphemeralClientWithoutUser_shouldReturnClientId() {
+        final Client client = ephemeralClient();
+        client.setClientId("client-id");
+        authorizationGrant.init(null, AuthorizationGrantType.CLIENT_CREDENTIALS, client, new Date());
+
+        assertEquals("client-id", authorizationGrant.getSub());
+    }
+
+    @Test
+    public void getSub_whenTwoGrantsOfEphemeralClient_shouldReturnDifferentValues() {
+        final SimpleAuthorizationGrant other = new SimpleAuthorizationGrant();
+        final User user = new User();
+        final Client client = ephemeralClient();
+        authorizationGrant.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+        other.init(user, AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+
+        assertNotEquals(authorizationGrant.getEphemeralSub(), other.getEphemeralSub());
+        assertNotEquals(authorizationGrant.getSub(), other.getSub());
+    }
+
+    @Test
+    public void createAccessToken_whenScriptPutsTokenAttribute_shouldPersistAttributeInTokenEntity() {
+        when(appConfiguration.getAccessTokenLifetime()).thenReturn(300);
+        when(externalUpdateTokenService.modifyAccessToken(any(AccessToken.class), any(ExternalUpdateTokenContext.class)))
+                .thenAnswer(invocation -> {
+                    ExternalUpdateTokenContext scriptContext = invocation.getArgument(1);
+                    scriptContext.putTokenAttribute("user_inum", "inum-1");
+                    return true;
+                });
+
+        authorizationGrant.init(new User(), AuthorizationGrantType.CLIENT_CREDENTIALS, new Client(), new Date());
+
+        final AccessToken accessToken = authorizationGrant.createAccessToken(new ExecutionContext());
+
+        assertNotNull(accessToken);
+        final ArgumentCaptor<TokenEntity> captor = ArgumentCaptor.forClass(TokenEntity.class);
+        verify(grantService).persist(captor.capture());
+        assertEquals("inum-1", captor.getValue().getAttributes().getAttributes().get("user_inum"));
+    }
+
+    private static Client ephemeralClient() {
+        final Client client = new Client();
+        client.setSubjectType(SubjectType.EPHEMERAL);
+        return client;
     }
 }

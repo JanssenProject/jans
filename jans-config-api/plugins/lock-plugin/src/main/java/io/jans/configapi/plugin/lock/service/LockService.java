@@ -74,6 +74,17 @@ public class LockService {
         return jsonNode;
     }
 
+    public JsonNode getPolicyStores(String url, String token) throws ApiApplicationException, JsonProcessingException {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        if (StringUtils.isNotBlank(token)) {
+            headers.put(AUTHORIZATION, token);
+        }
+
+        HttpServiceResponse httpServiceResponse = configHttpService.executeGet(url, headers);
+        return getResponseJsonNode(httpServiceResponse);
+    }
+
     public JsonNode getResponseJsonNode(HttpServiceResponse serviceResponse)
             throws ApiApplicationException, JsonProcessingException {
         JsonNode jsonNode = null;

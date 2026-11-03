@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.model.trace.entity.TraceChainEntry;
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ChainIdentity;
@@ -26,14 +29,13 @@ import io.jans.lock.service.BaseLockServiceTest;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 
 /**
- * Tests for {@link ProducerChainRegistry}: pre-registration lookup, the design decision D-5
- * genesis-hash matrix, and create-only chain registration.
+ * Tests for {@link ProducerChainRegistry}: pre-registration lookup, the genesis-hash matrix, and create-only chain registration.
  */
 class ProducerChainRegistryTest extends BaseLockServiceTest {
 
 	private static final String DOMAIN = "domain-1";
 
-	private static final String PRODUCER = "cedarling-fleet-1/1.0.0";
+	private static final String PRODUCER = "cedarling-fleet-1";
 
 	private static final String INSTANCE = "instance-1";
 
@@ -107,8 +109,8 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 	}
 
 	@Test
-	void testRegister_ProducerIdNotNameSemver_InvalidRequest() {
-		ChainIdentity id = new ChainIdentity(DOMAIN, "not-a-producer", INSTANCE, CHAIN);
+	void testRegister_ProducerIdBadFormat_InvalidRequest() {
+		ChainIdentity id = new ChainIdentity(DOMAIN, "-bad producer", INSTANCE, CHAIN);
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
 				() -> registry.register(id, REGISTERED_BY, 1000L));
@@ -127,7 +129,7 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 		assertEquals(TraceErrorResponseType.INVALID_REQUEST, ex.getErrorId());
 	}
 
-	// -- checkGenesis: design decision D-5 matrix --------------------------------------------------
+	// -- checkGenesis: genesis-hash matrix --------------------------------------------------
 
 	@Test
 	void testCheckGenesis_Seq1WithSentinel_Passes() {
@@ -162,12 +164,132 @@ class ProducerChainRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testList_FiltersByProducerId() {
 		registry.register(chainIdentity(), REGISTERED_BY, 1000L);
-		registry.register(new ChainIdentity(DOMAIN, "other-producer/2.0.0", INSTANCE, CHAIN), REGISTERED_BY, 1000L);
+		registry.register(new ChainIdentity(DOMAIN, "other-producer", INSTANCE, CHAIN), REGISTERED_BY, 1000L);
 
 		List<TraceChainEntry> filtered = registry.list(DOMAIN, PRODUCER);
 
 		assertEquals(1, filtered.size());
 		assertTrue(filtered.get(0).getProducerId().equals(PRODUCER));
+	}
+
+	// -- register: genesis kind -------------------------------------------------------------
+
+	@Test
+	void testRegister_AdminRegistration_GenesisKindPreRegistered() {
+		TraceChainEntry registration = registry.register(chainIdentity(), REGISTERED_BY, 1000L);
+
+		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED, registration.getGenesisKind());
+		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED,
+				store.findChain(chainIdentity()).orElseThrow().getGenesisKind());
+	}
+
+	@Test
+	void testGenesisKind_RowStoredWithoutAttribute_ReadsAsPreRegistered() {
+		TraceChainEntry legacy = new TraceChainEntry();
+
+		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED, legacy.getGenesisKind());
+	}
+
+	// -- requireRegisteredOrObserveGenesis ---------------------------------------------------
+
+	@Test
+	void testObserveGenesis_UnregisteredGenesis_RegistersFirstObserved() {
+		TraceChainEntry chain = registry.requireRegisteredOrObserveGenesis(chainIdentity(), 1L,
+				TraceConstants.ZERO_HASH, REGISTERED_BY, 2000L);
+
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED, chain.getGenesisKind());
+		assertEquals(REGISTERED_BY, chain.getRegisteredBy());
+		assertEquals(2000L, chain.getRegisteredAtMs());
+		TraceChainEntry stored = store.findChain(chainIdentity()).orElseThrow();
+		assertEquals(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED, stored.getGenesisKind());
+	}
+
+	@Test
+	void testObserveGenesis_AlreadyRegistered_ReturnsExistingUnchanged() {
+		registry.register(chainIdentity(), "2200.admin", 1000L);
+
+		TraceChainEntry chain = registry.requireRegisteredOrObserveGenesis(chainIdentity(), 1L,
+				TraceConstants.ZERO_HASH, REGISTERED_BY, 2000L);
+
+		assertEquals(TraceChainEntry.GENESIS_KIND_PRE_REGISTERED, chain.getGenesisKind());
+		assertEquals("2200.admin", chain.getRegisteredBy());
+		assertEquals(1, store.findChains(DOMAIN, null).size());
+	}
+
+	@Test
+	void testObserveGenesis_AlreadyRegisteredNonGenesisPosition_ReturnsExisting() {
+		registry.register(chainIdentity(), REGISTERED_BY, 1000L);
+
+		TraceChainEntry chain = registry.requireRegisteredOrObserveGenesis(chainIdentity(), 7L,
+				"sha256:" + repeat('a', 64), REGISTERED_BY, 2000L);
+
+		assertEquals(chainIdentity(), toChainIdentity(chain));
+	}
+
+	@Test
+	void testObserveGenesis_UnregisteredNonGenesis_ChainNotRegisteredNothingStored() {
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> registry.requireRegisteredOrObserveGenesis(chainIdentity(), 2L, "sha256:" + repeat('a', 64),
+						REGISTERED_BY, 2000L));
+
+		assertEquals(TraceErrorResponseType.CHAIN_NOT_REGISTERED, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testObserveGenesis_UnregisteredGenesisWithoutSentinel_InvalidGenesis() {
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> registry.requireRegisteredOrObserveGenesis(chainIdentity(), 1L, "sha256:" + repeat('a', 64),
+						REGISTERED_BY, 2000L));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testObserveGenesis_UnregisteredNonGenesisWithSentinel_InvalidGenesis() {
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> registry.requireRegisteredOrObserveGenesis(chainIdentity(), 3L, TraceConstants.ZERO_HASH,
+						REGISTERED_BY, 2000L));
+
+		assertEquals(TraceErrorResponseType.INVALID_GENESIS, ex.getErrorId());
+		assertTrue(store.findChains(DOMAIN, null).isEmpty());
+	}
+
+	@Test
+	void testObserveGenesis_ConcurrentRegistrationWins_CountsAsRegistered() {
+		InMemoryTraceStore racingStore = new InMemoryTraceStore() {
+			private boolean raced;
+
+			@Override
+			public Optional<TraceChainEntry> findChain(ChainIdentity id) {
+				if (!raced) {
+					raced = true;
+					TraceChainEntry competitor = new TraceChainEntry();
+					competitor.setDomainId(id.getDomainId());
+					competitor.setProducerId(id.getProducerId());
+					competitor.setProducerInstanceId(id.getProducerInstanceId());
+					competitor.setProducerChainId(id.getProducerChainId());
+					competitor.setRegisteredBy("2200.other-node");
+					competitor.setGenesisKind(TraceChainEntry.GENESIS_KIND_FIRST_OBSERVED);
+					competitor.setCreationDate(new Date(1500L));
+					try {
+						insertChain(competitor);
+					} catch (DuplicateEntryException ex) {
+						throw new IllegalStateException(ex);
+					}
+					return Optional.empty();
+				}
+				return super.findChain(id);
+			}
+		};
+		setField(registry, "traceStore", racingStore);
+
+		TraceChainEntry chain = registry.requireRegisteredOrObserveGenesis(chainIdentity(), 1L,
+				TraceConstants.ZERO_HASH, REGISTERED_BY, 2000L);
+
+		assertEquals("2200.other-node", chain.getRegisteredBy());
+		assertEquals(1, racingStore.findChains(DOMAIN, null).size());
 	}
 
 	private static ChainIdentity toChainIdentity(TraceChainEntry entity) {

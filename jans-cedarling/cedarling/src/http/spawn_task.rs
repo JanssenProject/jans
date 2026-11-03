@@ -47,6 +47,11 @@ where
     JoinHandle { receiver: rx }
 }
 
+/// A spawned task that did not finish: it panicked or was cancelled.
+#[derive(Debug, thiserror::Error)]
+#[error("{0}")]
+pub struct TaskEnded(String);
+
 /// This is a helper struct for managing the async handles.
 ///
 /// This is needed because the WASM bindings need special treatment.
@@ -66,6 +71,22 @@ impl<T> JoinHandle<T>
 where
     T: Send + 'static,
 {
+    /// Like [`Self::await_result`], for a caller that must not fail with the
+    /// task: an error says why it did not finish.
+    pub async fn try_await_result(self) -> Result<T, TaskEnded> {
+        #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
+        {
+            self.handle.await.map_err(|err| TaskEnded(err.to_string()))
+        }
+
+        #[cfg(any(target_arch = "wasm32", target_arch = "wasm64"))]
+        {
+            self.receiver
+                .await
+                .map_err(|_| TaskEnded("the task was dropped before completing".to_string()))
+        }
+    }
+
     pub async fn await_result(self) -> T {
         #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
         {
@@ -78,5 +99,24 @@ where
                 .await
                 .expect("Task was dropped before completing")
         }
+    }
+}
+
+#[cfg(all(test, not(any(target_arch = "wasm32", target_arch = "wasm64"))))]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn cancelled_task_is_an_error_not_a_panic() {
+        let join = spawn_task(std::future::pending::<()>());
+        join.handle.abort();
+        let err = join
+            .try_await_result()
+            .await
+            .expect_err("a cancelled task did not finish");
+        assert!(
+            err.to_string().contains("cancelled"),
+            "the error says the task was cancelled: {err}"
+        );
     }
 }

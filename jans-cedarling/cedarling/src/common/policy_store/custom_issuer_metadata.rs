@@ -7,17 +7,17 @@
 //!
 //! A custom issuer's tokens are validated by a registered
 //! [`CustomTokenProcessor`](crate::CustomTokenProcessor) rather than the JWT
-//! pipeline. Unlike [`TokenEntityMetadata`](super::TokenEntityMetadata), a custom
-//! issuer has no `openid_configuration_endpoint` and its `token_id` is supplied
-//! by the processor (not read from a claim).
+//! pipeline. Unlike a JWT issuer, a custom issuer has no `iss` or key source, and
+//! its `token_id` is supplied by the processor (not read from a claim).
 
-use serde::Deserialize;
-use std::collections::{HashMap, HashSet};
+#[cfg(test)]
+use std::collections::HashMap;
+use std::collections::HashSet;
 
-/// Configuration for a single custom issuer, keyed by issuer name in the policy
-/// store's `custom_issuers` map.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
+/// Configuration for a single custom issuer, keyed by issuer name. Only tests
+/// still describe custom issuers this way, through `TokenTypes::build`.
+#[cfg(test)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct CustomIssuerMetadata {
     /// Token types this issuer emits, keyed by the request `TokenInput.mapping`
     /// (a Cedar entity type name) that routes a token to the custom path.
@@ -29,14 +29,8 @@ pub(crate) struct CustomIssuerMetadata {
 }
 
 /// Per-token configuration for a custom issuer.
-#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub(crate) struct CustomTokenMetadata {
-    /// When true, a processing failure (or timeout) for this token fails the whole
-    /// authorization request instead of being skipped.
-    #[serde(default)]
-    pub(crate) required: bool,
     /// Claims required to be present in the processed output.
-    #[serde(default)]
     pub(crate) required_claims: HashSet<String>,
 }

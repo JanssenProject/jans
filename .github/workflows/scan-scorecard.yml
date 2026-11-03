@@ -11,8 +11,33 @@ on:
 permissions: read-all
 
 jobs:
+  # Separate job: publishing rejects runs whose scorecard job has run steps
+  check-token:
+    name: Check Scorecard PAT
+    runs-on: ubuntu-latest
+    if: github.repository == 'JanssenProject/jans'
+    outputs:
+      valid: ${{ steps.pat.outputs.valid }}
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Validate SCORECARD_TOKEN
+        id: pat
+        env:
+          SCORECARD_TOKEN: ${{ secrets.SCORECARD_TOKEN }}
+        run: |
+          if [ -n "$SCORECARD_TOKEN" ] && curl -sf -o /dev/null -H "Authorization: Bearer $SCORECARD_TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY"; then
+            echo "valid=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::SCORECARD_TOKEN missing or invalid; falling back to GITHUB_TOKEN"
+          fi
+
   analysis:
     name: Scorecard analysis
+    needs: check-token
     runs-on: ubuntu-latest
     if: github.repository == 'JanssenProject/jans'
     permissions:
@@ -37,10 +62,12 @@ jobs:
           persist-credentials: false
 
       - name: "Run analysis"
-        uses: ossf/scorecard-action@4eaacf0543bb3f2c246792bd56e8cdeffafb205a # v2.4.3
+        uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
         with:
           results_file: results.sarif
           results_format: sarif
+          # PAT needed to read classic branch protection
+          repo_token: ${{ needs.check-token.outputs.valid == 'true' && secrets.SCORECARD_TOKEN || github.token }}
           # Publishes the score to the public OpenSSF Scorecard API.
           publish_results: true
 

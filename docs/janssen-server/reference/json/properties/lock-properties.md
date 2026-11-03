@@ -15,12 +15,16 @@ tags:
 | baseDN | Entry Base distinguished name (DN) that identifies the starting point of a search | [Details](#basedn) |
 | baseEndpoint | Lock base endpoint URL | [Details](#baseendpoint) |
 | cedarlingConfiguration | Cedarling configuration | [Details](#cedarlingconfiguration) |
+| chainRegistrationMode | How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED | [Details](#chainregistrationmode) |
 | cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
 | cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
 | clientDomainBindings | OAuth client to evidence-domain bindings | [Details](#clientdomainbindings) |
 | clientId | Lock Client ID | [Details](#clientid) |
 | clientId | OAuth client id bound to the evidence domain | [Details](#clientid) |
 | clientPassword | Lock client password | [Details](#clientpassword) |
+| correlationRetryLimit | Maximum retries when a correlation neighbor update hits a version conflict | [Details](#correlationretrylimit) |
+| cryptoProvider | TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA | [Details](#cryptoprovider) |
+| defaultAllowedProducerIds | Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none | [Details](#defaultallowedproducerids) |
 | defaultEvidenceDomainId | Evidence domain id used when a submitting client has no explicit binding | [Details](#defaultevidencedomainid) |
 | disableExternalLoggerConfiguration | Choose whether to disable external log4j configuration override | [Details](#disableexternalloggerconfiguration) |
 | disableJdkLogger | Choose whether to disable JDK loggers | [Details](#disablejdklogger) |
@@ -36,6 +40,7 @@ tags:
 | maxArrayLength | Maximum accepted JSON array length in a TRACE assertion | [Details](#maxarraylength) |
 | maxBulkRecords | Maximum number of assertions accepted in one POST /audit/trace/bulk request | [Details](#maxbulkrecords) |
 | maxBulkRequestBytes | Maximum total body size, in bytes, buffered for one POST /audit/trace/bulk request; clamped to 16777216 regardless of this value | [Details](#maxbulkrequestbytes) |
+| maxFutureSkewSeconds | Seconds a signed_at may be ahead of Lock's clock before the record is rejected | [Details](#maxfutureskewseconds) |
 | maxJsonDepth | Maximum accepted JSON nesting depth of a TRACE assertion | [Details](#maxjsondepth) |
 | maxObjectMembers | Maximum accepted JSON object member count in a TRACE assertion | [Details](#maxobjectmembers) |
 | maxRequestBytes | Maximum accepted TRACE request body size in bytes | [Details](#maxrequestbytes) |
@@ -46,6 +51,8 @@ tags:
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | openIdIssuer | OpenID issuer URL | [Details](#openidissuer) |
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
+| policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag | [Details](#policymismatchgraceseconds) |
+| policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
@@ -104,6 +111,15 @@ tags:
 - Default value: None
 
 
+## chainRegistrationMode
+
+- Description: How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED
+
+- Required: No
+
+- Default value: PRE_REGISTERED
+
+
 ## cleanServiceBatchChunkSize
 
 - Description: Each clean up iteration fetches chunk of expired data per base dn and removes it from storage
@@ -152,6 +168,33 @@ tags:
 ## clientPassword
 
 - Description: Lock client password
+
+- Required: No
+
+- Default value: None
+
+
+## correlationRetryLimit
+
+- Description: Maximum retries when a correlation neighbor update hits a version conflict
+
+- Required: No
+
+- Default value: 3
+
+
+## cryptoProvider
+
+- Description: TRACE cryptography implementation: JAVA (BouncyCastle, in-process) or NATIVE (jans-trace-core through the jans-trace-java binding); an unknown value is treated as JAVA
+
+- Required: No
+
+- Default value: JAVA
+
+
+## defaultAllowedProducerIds
+
+- Description: Producer ids a client without an explicit binding may submit records for in the default evidence domain; empty means none
 
 - Required: No
 
@@ -293,6 +336,15 @@ tags:
 - Default value: 4194304
 
 
+## maxFutureSkewSeconds
+
+- Description: Seconds a signed_at may be ahead of Lock's clock before the record is rejected
+
+- Required: No
+
+- Default value: 300
+
+
 ## maxJsonDepth
 
 - Description: Maximum accepted JSON nesting depth of a TRACE assertion
@@ -381,6 +433,24 @@ tags:
 - Required: No
 
 - Default value: 120
+
+
+## policyMismatchGraceSeconds
+
+- Description: Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag
+
+- Required: No
+
+- Default value: 300
+
+
+## policyReleaseRetentionDays
+
+- Description: Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window
+
+- Required: No
+
+- Default value: 30
 
 
 ## protectionMode

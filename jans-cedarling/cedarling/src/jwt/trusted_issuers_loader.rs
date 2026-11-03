@@ -5,7 +5,7 @@
 
 use chrono::Utc;
 use std::{
-    collections::HashMap,
+    collections::{HashMap, hash_map::Entry},
     sync::{Arc, Mutex},
     time::Duration,
 };
@@ -17,12 +17,14 @@ use crate::http_utils::Backoff;
 use crate::{
     JwtConfig, LogLevel,
     async_sleep::sleep,
-    common::{issuer_utils::IssClaim, policy_store::TrustedIssuer},
+    common::{
+        issuer_utils::IssClaim,
+        policy_store::{KeySource, TokenTypes},
+    },
     http::HttpClient,
     jwt::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
         OpenIdConfig, TokenCache,
-        key_service::KeyServiceError,
         loading_state::TrustedIssuerLoadingState,
         status_list::{InitForIssArgs, StatusListCache},
         validation::JwtValidatorCache,
@@ -40,13 +42,24 @@ pub(crate) enum TrustedIssuerLoaderError {
     )]
     SemaphoreAcquire,
     #[error(
-        "failed to extract errors Arc - other references may still exist indicating concurrent access during issuer loading"
+        "discovery document at '{configuration}' declares issuer '{found}', \
+         but the configured iss is '{expected}'"
     )]
-    ErrorsArcExtraction,
+    DiscoveryIssuerMismatch {
+        configuration: String,
+        expected: IssClaim,
+        found: IssClaim,
+    },
     #[error(
-        "failed to extract errors from Mutex - mutex may be poisoned due to panic while holding lock"
+        "issuers '{}' resolve to iss '{iss}' with different JWKS ('{}'); none of them is loaded",
+        .issuers.join("', '"),
+        .jwks.join("', '")
     )]
-    ErrorsMutexExtraction,
+    ConflictingJwks {
+        iss: IssClaim,
+        issuers: Vec<String>,
+        jwks: Vec<String>,
+    },
 }
 
 /// Loads and initializes trusted issuers for JWT validation.
@@ -69,8 +82,9 @@ impl TrustedIssuerLoader {
     /// Load trusted issuers either synchronously or asynchronously based on configuration.
     pub(super) async fn load_trusted_issuers(
         &self,
-        trusted_issuers: HashMap<String, TrustedIssuer>,
+        token_types: &TokenTypes,
     ) -> Result<(), JwtServiceInitError> {
+        let trusted_issuers = unresolved_issuers(token_types);
         match self.jwt_config.trusted_issuer_loader {
             TrustedIssuerLoaderConfig::Sync { workers } => {
                 load_trusted_issuers(self, trusted_issuers, workers.get())
@@ -106,14 +120,32 @@ impl TrustedIssuerLoader {
     }
 }
 
+/// Every JWT issuer of `token_types` with its token types, not yet resolved.
+fn unresolved_issuers(token_types: &TokenTypes) -> Vec<IssuerConfig> {
+    token_types
+        .jwt_issuers()
+        .iter()
+        .map(|(name, issuer)| IssuerConfig {
+            policy: issuer.clone(),
+            tokens: token_types
+                .jwt_tokens_of(name)
+                .map(|token| (token.entity_type.clone(), token.metadata.clone()))
+                .collect(),
+            openid_config: None,
+        })
+        .collect()
+}
+
+/// Loads every issuer in two phases. Key sources are resolved first, so that
+/// issuers whose keys would collide under one `iss` are all rejected before any
+/// of them is installed; the outcome then does not depend on task order.
 async fn load_trusted_issuers(
     loader: &TrustedIssuerLoader,
-    trusted_issuers: HashMap<String, TrustedIssuer>,
+    trusted_issuers: Vec<IssuerConfig>,
     workers: usize,
 ) -> Result<(), JwtServiceInitError> {
     let semaphore = Arc::new(tokio::sync::Semaphore::new(workers));
-    let mut handles = Vec::new();
-    let errors = Arc::new(Mutex::new(Vec::new()));
+    let mut errors = Vec::new();
 
     // Load local JWKS once before processing issuers to avoid redundant work
     if loader.jwt_config.jwt_sig_validation
@@ -125,96 +157,232 @@ async fn load_trusted_issuers(
             .map_err(JwtServiceInitError::PrepareKeys)?;
     }
 
-    for (issuer_id, iss) in trusted_issuers {
-        let permit = semaphore
-            .clone()
-            .acquire_owned()
-            .await
-            .map_err(|_| TrustedIssuerLoaderError::SemaphoreAcquire)?;
-        let loader_clone = loader.clone();
-        let errors_clone = errors.clone();
-
-        let http_client_clone = loader.http_client.clone();
-        let handle = spawn_task(async move {
-            let result =
-                load_trusted_issuer(&loader_clone, issuer_id.clone(), iss, http_client_clone).await;
-            drop(permit); // Release the permit
-
-            if let Err(error) = result {
-                // log error but without failing the entire load process
-                loader_clone.logger.log_any(
-                    LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                        LogLevel::WARN,
-                        None,
-                    ))
-                    .set_message(format!("Could not load trusted issuer: {issuer_id}"))
-                    .set_error(error.to_string()),
-                );
-
-                // we can't return the error from this async task
-                // and we don't want to panic
-                if let Ok(mut guard) = errors_clone.lock() {
-                    guard.push(error);
-                }
-                loader_clone
-                    .loading_state
-                    .add_trusted_issuer_failed(issuer_id.clone());
-            }
-        });
-        handles.push(handle);
+    let mut handles = Vec::new();
+    for issuer in trusted_issuers {
+        let permit = acquire(&semaphore).await?;
+        let loader = loader.clone();
+        handles.push(spawn_task(async move {
+            let http_client = loader.http_client.clone();
+            let issuer_id = issuer.policy.name.to_string();
+            let resolved = resolve_trusted_issuer(&loader, issuer, &http_client).await;
+            drop(permit);
+            (issuer_id, resolved)
+        }));
+    }
+    let mut resolved = Vec::with_capacity(handles.len());
+    for handle in handles {
+        match handle.await_result().await {
+            (_, Ok(issuer)) => resolved.push(issuer),
+            (issuer_id, Err(error)) => {
+                record_failure(loader, &issuer_id, &error);
+                errors.push(error);
+            },
+        }
     }
 
-    // Await all tasks to complete
+    let (resolved, rejected) = if loader.jwt_config.jwt_sig_validation {
+        reject_conflicting_key_sources(resolved)
+    } else {
+        // No keys are loaded, so a shared `iss` cannot plant any.
+        (resolved, Vec::new())
+    };
+    for (issuer_id, error) in rejected {
+        loader.logger.log_any(JwtLogEntry::new(
+            format!("trusted issuer '{issuer_id}' not loaded: {error}"),
+            Some(LogLevel::ERROR),
+        ));
+        loader.loading_state.add_trusted_issuer_failed(issuer_id);
+        errors.push(error.into());
+    }
+
+    let mut handles = Vec::new();
+    for issuer in resolved {
+        let permit = acquire(&semaphore).await?;
+        let loader = loader.clone();
+        handles.push(spawn_task(async move {
+            let issuer_id = issuer.config.policy.name.to_string();
+            let installed = install_trusted_issuer(&loader, issuer).await;
+            drop(permit);
+            (issuer_id, installed)
+        }));
+    }
     for handle in handles {
-        handle.await_result().await;
+        if let (issuer_id, Err(error)) = handle.await_result().await {
+            record_failure(loader, &issuer_id, &error);
+            errors.push(error);
+        }
     }
 
     loader.check_keys_loaded();
 
-    let errors = Arc::into_inner(errors)
-        .ok_or(TrustedIssuerLoaderError::ErrorsArcExtraction)?
-        .into_inner()
-        .map_err(|_| TrustedIssuerLoaderError::ErrorsMutexExtraction)?;
-
-    let aggregated_error: Vec<_> = errors.into_iter().collect();
-    if !aggregated_error.is_empty() {
+    if !errors.is_empty() {
         return Err(JwtServiceInitError::LoadTrustedIssuersAggregate(
-            aggregated_error.into(),
+            errors.into(),
         ));
     }
 
     Ok(())
 }
 
-pub(super) async fn load_trusted_issuer(
-    loader: &TrustedIssuerLoader,
-    issuer_id: String,
-    iss: TrustedIssuer,
-    http_client: HttpClient,
-) -> Result<(), JwtServiceInitError> {
-    // this is what we expect to find in the JWT `iss` claim
-    let mut iss_claim = iss.iss_claim();
+async fn acquire(
+    semaphore: &Arc<tokio::sync::Semaphore>,
+) -> Result<tokio::sync::OwnedSemaphorePermit, TrustedIssuerLoaderError> {
+    semaphore
+        .clone()
+        .acquire_owned()
+        .await
+        .map_err(|_| TrustedIssuerLoaderError::SemaphoreAcquire)
+}
 
-    let mut iss_config = IssuerConfig {
-        issuer_id,
-        policy: Arc::new(iss),
-        openid_config: None,
-    };
+/// Logs an issuer that could not be loaded and marks it failed, without failing
+/// the others.
+fn record_failure(loader: &TrustedIssuerLoader, issuer_id: &str, error: &JwtServiceInitError) {
+    loader.logger.log_any(
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ))
+        .set_message(format!("Could not load trusted issuer: {issuer_id}"))
+        .set_error(error.to_string()),
+    );
+    loader
+        .loading_state
+        .add_trusted_issuer_failed(issuer_id.to_string());
+}
 
-    if loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation {
-        iss_claim =
-            update_openid_config(&mut iss_config, loader.logger.as_ref(), http_client.clone())
-                .await?;
+/// An issuer whose key source is known, ready to be installed.
+struct ResolvedIssuer {
+    config: IssuerConfig,
+    /// What tokens of this issuer carry in `iss`.
+    iss: IssClaim,
+    /// Unknown when discovery was skipped because no validation needs it.
+    jwks_uri: Option<url::Url>,
+}
+
+/// Splits off every issuer whose `iss` is shared with another issuer that loads
+/// its keys from a different JWKS. Keys are stored per `iss`, so either key set
+/// would also validate the other issuer's tokens; with no order between them,
+/// none of them is trusted.
+fn reject_conflicting_key_sources(
+    resolved: Vec<ResolvedIssuer>,
+) -> (Vec<ResolvedIssuer>, Vec<(String, TrustedIssuerLoaderError)>) {
+    let mut sources_by_iss: HashMap<&IssClaim, Vec<(&str, &url::Url)>> = HashMap::new();
+    for issuer in &resolved {
+        if let Some(jwks_uri) = &issuer.jwks_uri {
+            sources_by_iss
+                .entry(&issuer.iss)
+                .or_default()
+                .push((issuer.config.policy.name.as_str(), jwks_uri));
+        }
     }
 
-    insert_keys(
-        &loader.key_service,
-        &loader.jwt_config,
-        &iss_config,
-        loader.logger.as_ref(),
-        http_client.clone(),
-    )
-    .await?;
+    let mut conflicts: HashMap<IssClaim, (Vec<String>, Vec<String>)> = HashMap::new();
+    for (iss, sources) in sources_by_iss {
+        let mut jwks: Vec<String> = sources.iter().map(|(_, uri)| uri.to_string()).collect();
+        jwks.sort();
+        jwks.dedup();
+        if jwks.len() > 1 {
+            let mut issuers: Vec<String> =
+                sources.iter().map(|(id, _)| (*id).to_string()).collect();
+            issuers.sort();
+            conflicts.insert(iss.clone(), (issuers, jwks));
+        }
+    }
+
+    let (rejected, kept): (Vec<_>, Vec<_>) = resolved
+        .into_iter()
+        .partition(|issuer| issuer.jwks_uri.is_some() && conflicts.contains_key(&issuer.iss));
+    let rejected = rejected
+        .into_iter()
+        .map(|issuer| {
+            let (issuers, jwks) = conflicts[&issuer.iss].clone();
+            let error = TrustedIssuerLoaderError::ConflictingJwks {
+                iss: issuer.iss,
+                issuers,
+                jwks,
+            };
+            (issuer.config.policy.name.to_string(), error)
+        })
+        .collect();
+    (kept, rejected)
+}
+
+/// Resolves and installs one issuer, without checking it against others.
+#[cfg(test)]
+pub(super) async fn load_trusted_issuer(
+    loader: &TrustedIssuerLoader,
+    issuer: IssuerConfig,
+    http_client: HttpClient,
+) -> Result<(), JwtServiceInitError> {
+    let resolved = resolve_trusted_issuer(loader, issuer, &http_client).await?;
+    install_trusted_issuer(loader, resolved).await
+}
+
+/// Finds where an issuer's keys come from: its discovery document, checked
+/// against the expected `iss`, or its static JWKS.
+async fn resolve_trusted_issuer(
+    loader: &TrustedIssuerLoader,
+    mut config: IssuerConfig,
+    http_client: &HttpClient,
+) -> Result<ResolvedIssuer, JwtServiceInitError> {
+    // this is what we expect to find in the JWT `iss` claim
+    let iss_claim = config.policy.iss_claim().clone();
+
+    if let KeySource::Discovery { configuration } = &config.policy.key_source
+        && (loader.jwt_config.jwt_sig_validation || loader.jwt_config.jwt_status_validation)
+    {
+        config.openid_config = Some(
+            discover(
+                configuration,
+                &iss_claim,
+                config.policy.name.as_str(),
+                loader.logger.as_ref(),
+                http_client,
+            )
+            .await?,
+        );
+    }
+
+    let jwks_uri = match &config.policy.key_source {
+        KeySource::Discovery { .. } => config
+            .openid_config
+            .as_ref()
+            .map(|openid| openid.jwks_uri.clone()),
+        KeySource::Static { jwks } => Some(jwks.clone()),
+    };
+
+    Ok(ResolvedIssuer {
+        config,
+        iss: iss_claim,
+        jwks_uri,
+    })
+}
+
+/// Fetches the keys of a resolved issuer and makes it available for validation.
+async fn install_trusted_issuer(
+    loader: &TrustedIssuerLoader,
+    issuer: ResolvedIssuer,
+) -> Result<(), JwtServiceInitError> {
+    let ResolvedIssuer {
+        config: iss_config,
+        iss: iss_claim,
+        jwks_uri,
+    } = issuer;
+    let http_client = loader.http_client.clone();
+
+    if loader.jwt_config.jwt_sig_validation
+        && let Some(jwks_uri) = &jwks_uri
+    {
+        loader
+            .key_service
+            .fetch_keys(
+                &iss_claim,
+                jwks_uri,
+                loader.logger.as_ref(),
+                http_client.clone(),
+            )
+            .await?;
+    }
 
     loader.validators.init_for_iss(
         &iss_config,
@@ -246,41 +414,9 @@ pub(super) async fn load_trusted_issuer(
     }
 
     if loader.jwt_config.jwt_sig_validation
-        && let Some(openid_config) = iss_config.openid_config.clone()
+        && let Some(jwks_uri) = jwks_uri
     {
-        let notify = Arc::new(Notify::new());
-
-        let initial_interval = Duration::from_secs(
-            loader
-                .jwt_config
-                .jwks_refresh_interval
-                .unwrap_or(DEFAULT_JWKS_REFRESH_INTERVAL_SECS),
-        );
-        let min_interval = Duration::from_secs(loader.jwt_config.jwks_refresh_min_interval);
-        let config_override = loader.jwt_config.jwks_refresh_interval;
-
-        {
-            let mut notifiers = loader
-                .jwks_refresh_notifiers
-                .lock()
-                .expect("acquire jwks_refresh_notifiers lock");
-            notifiers.insert(iss_claim.clone(), notify.clone());
-        }
-
-        let key_service = loader.key_service.clone();
-        let logger = loader.logger.clone();
-        let cancel_tkn = loader.jwks_cancel_token.clone();
-        spawn_task(keep_jwks_updated(JwksRefreshParams {
-            key_service,
-            openid_config,
-            initial_interval,
-            min_interval,
-            config_override,
-            notify,
-            logger,
-            cancel_tkn,
-            http_client: loader.http_client.clone(),
-        }));
+        spawn_jwks_refresh(loader, iss_claim.clone(), jwks_uri);
     }
 
     loader.issuer_configs.insert(iss_claim, iss_config);
@@ -288,50 +424,75 @@ pub(super) async fn load_trusted_issuer(
     Ok(())
 }
 
-/// Fetches the `OpenID` configuration for a trusted issuer and updates the issuer configuration accordingly.
-async fn update_openid_config(
-    iss_config: &mut IssuerConfig,
-    logger: Option<&Logger>,
-    http_client: HttpClient,
-) -> Result<IssClaim, JwtServiceInitError> {
-    let openid_config =
-        OpenIdConfig::get_from_url(iss_config.policy.get_oidc_endpoint(), &http_client)
-            .await
-            .inspect_err(|e| {
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "failed to get openid configuration for trusted issuer: '{}': {}",
-                        iss_config.issuer_id, e
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
-            })?;
+/// Starts the background task that keeps the JWKS of `iss` fresh, once per `iss`:
+/// issuers sharing an `iss` share its keys, as conflicting JWKS were rejected.
+fn spawn_jwks_refresh(loader: &TrustedIssuerLoader, iss: IssClaim, jwks_uri: url::Url) {
+    let notify = Arc::new(Notify::new());
 
-    let iss_claim = openid_config.issuer.clone();
-    iss_config.openid_config = Some(openid_config);
+    let initial_interval = Duration::from_secs(
+        loader
+            .jwt_config
+            .jwks_refresh_interval
+            .unwrap_or(DEFAULT_JWKS_REFRESH_INTERVAL_SECS),
+    );
+    let min_interval = Duration::from_secs(loader.jwt_config.jwks_refresh_min_interval);
+    let config_override = loader.jwt_config.jwks_refresh_interval;
 
-    Ok(iss_claim)
+    {
+        let mut notifiers = loader
+            .jwks_refresh_notifiers
+            .lock()
+            .expect("acquire jwks_refresh_notifiers lock");
+        match notifiers.entry(iss.clone()) {
+            Entry::Occupied(_) => return,
+            Entry::Vacant(slot) => {
+                slot.insert(notify.clone());
+            },
+        }
+    }
+
+    spawn_task(keep_jwks_updated(JwksRefreshParams {
+        key_service: loader.key_service.clone(),
+        iss,
+        jwks_uri,
+        initial_interval,
+        min_interval,
+        config_override,
+        notify,
+        logger: loader.logger.clone(),
+        cancel_tkn: loader.jwks_cancel_token.clone(),
+        http_client: loader.http_client.clone(),
+    }));
 }
 
-/// Inserts keys into the key service based on the JWT configuration and issuer configuration.
-async fn insert_keys(
-    key_service: &KeyService,
-    jwt_config: &JwtConfig,
-    iss_config: &IssuerConfig,
+/// Fetches the `OpenID` configuration of a discovery issuer and checks that it
+/// is for the expected `iss` (OIDC Discovery §4.3).
+async fn discover(
+    configuration: &url::Url,
+    expected: &IssClaim,
+    issuer_id: &str,
     logger: Option<&Logger>,
-    http_client: HttpClient,
-) -> Result<(), KeyServiceError> {
-    if !jwt_config.jwt_sig_validation {
-        return Ok(());
+    http_client: &HttpClient,
+) -> Result<OpenIdConfig, JwtServiceInitError> {
+    let openid_config = OpenIdConfig::get_from_url(configuration, http_client)
+        .await
+        .inspect_err(|e| {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "failed to get openid configuration for trusted issuer: '{issuer_id}': {e}"
+                ),
+                Some(LogLevel::ERROR),
+            ));
+        })?;
+    if openid_config.issuer != *expected {
+        return Err(TrustedIssuerLoaderError::DiscoveryIssuerMismatch {
+            configuration: configuration.to_string(),
+            expected: expected.clone(),
+            found: openid_config.issuer,
+        }
+        .into());
     }
-
-    if let Some(openid_config) = iss_config.openid_config.as_ref() {
-        key_service
-            .get_keys_using_oidc(openid_config, logger, http_client)
-            .await?;
-    }
-
-    Ok(())
+    Ok(openid_config)
 }
 
 /// Logs a critical error that occurred during the loading of trusted issuers.
@@ -348,7 +509,8 @@ fn log_load_trusted_issuers_error(logger: Option<&Logger>, error: &JwtServiceIni
 
 struct JwksRefreshParams {
     key_service: Arc<KeyService>,
-    openid_config: OpenIdConfig,
+    iss: IssClaim,
+    jwks_uri: url::Url,
     initial_interval: Duration,
     min_interval: Duration,
     config_override: Option<u64>,
@@ -362,7 +524,8 @@ struct JwksRefreshParams {
 async fn keep_jwks_updated(params: JwksRefreshParams) {
     let JwksRefreshParams {
         key_service,
-        openid_config,
+        iss,
+        jwks_uri,
         initial_interval,
         min_interval,
         config_override,
@@ -389,15 +552,12 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
         }
 
         logger.log_any(JwtLogEntry::new(
-            format!(
-                "refreshing JWKS for issuer '{}'",
-                openid_config.issuer.as_str()
-            ),
+            format!("refreshing JWKS for issuer '{}'", iss.as_str()),
             Some(LogLevel::DEBUG),
         ));
 
         match key_service
-            .refresh_keys_using_oidc(&openid_config, logger.as_ref(), &http_client)
+            .refresh_keys(&iss, &jwks_uri, logger.as_ref(), &http_client)
             .await
         {
             Ok(max_age) => {
@@ -417,7 +577,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
                 logger.log_any(JwtLogEntry::new(
                     format!(
                         "refreshed JWKS for issuer '{}', next refresh in {}s",
-                        openid_config.issuer.as_str(),
+                        iss.as_str(),
                         interval.as_secs(),
                     ),
                     Some(LogLevel::INFO),
@@ -427,7 +587,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
                 logger.log_any(JwtLogEntry::new(
                     format!(
                         "failed to refresh JWKS for issuer '{}': {}",
-                        openid_config.issuer.as_str(),
+                        iss.as_str(),
                         err,
                     ),
                     Some(LogLevel::ERROR),
@@ -445,15 +605,18 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::common::policy_store::{IssuerName, TokenEntityMetadata, TrustedIssuer};
     use crate::http::HttpClientConfig;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
         MockServer, create_failing_trusted_issuer, create_unreachable_trusted_issuer,
+        generate_jwks, generate_keypair_hs256,
     };
     use crate::{common::issuer_utils::IssClaim, jwt_config::WorkersCount};
     use jsonwebtoken::Algorithm;
     use mockito::Server;
-    use std::collections::HashMap;
+    use serde_json::json;
+    use std::collections::{HashMap, HashSet};
     use std::sync::{Arc, LazyLock};
     use tokio::time::{Duration, sleep};
     use url::Url;
@@ -487,6 +650,30 @@ mod test {
         panic!("{message} (failed after {max_retries} retries)");
     }
 
+    /// Token types with each issuer named by its key and declaring one token
+    /// type in its own namespace, so issuers loaded together never conflict.
+    fn token_types(issuers: HashMap<String, TrustedIssuer>) -> TokenTypes {
+        TokenTypes::build(
+            issuers.into_iter().map(|(id, mut issuer)| {
+                let tokens = HashMap::from([(
+                    format!("{id}::Access_token"),
+                    TokenEntityMetadata::builder().build(),
+                )]);
+                issuer.name = IssuerName::for_test(&id);
+                issuer.with_tokens(tokens)
+            }),
+            [],
+        )
+        .expect("test token types should build")
+    }
+
+    /// One issuer ready to load, named `id`.
+    fn unresolved(id: &str, issuer: TrustedIssuer) -> IssuerConfig {
+        let token_types = token_types(HashMap::from([(id.to_string(), issuer)]));
+        let mut issuers = unresolved_issuers(&token_types);
+        issuers.pop().expect("one issuer should be loaded")
+    }
+
     /// Helper to create a `TrustedIssuerLoader` with proper loading state initialized
     /// with the given number of issuers.
     fn create_loader(jwt_config: JwtConfig, issuer_count: usize) -> TrustedIssuerLoader {
@@ -511,7 +698,9 @@ mod test {
     /// and that the issuer configuration is properly inserted into the index.
     #[tokio::test]
     async fn load_single_trusted_issuer_sync() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -526,14 +715,15 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load single trusted issuer successfully in sync mode");
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -551,8 +741,12 @@ mod test {
     #[tokio::test]
     async fn load_multiple_trusted_issuers_async() {
         // Create two mock servers
-        let server1 = MockServer::new_with_defaults().await.unwrap();
-        let server2 = MockServer::new_with_defaults().await.unwrap();
+        let server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         let trusted_issuer_1 = server1.trusted_issuer();
         let trusted_issuer_2 = server2.trusted_issuer();
@@ -572,31 +766,23 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully in async mode");
 
         // Verify both issuers were loaded with retry for async operations
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim1) },
             20,
             10,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim2) },
             20,
             10,
             "second trusted issuer should be inserted into issuer index",
@@ -621,7 +807,7 @@ mod test {
         // No mocks created, so request will fail
 
         let mut trusted_issuer = TrustedIssuer::default();
-        trusted_issuer.set_oidc_endpoint(
+        trusted_issuer.set_configuration_endpoint(
             Url::parse(&(server.url() + "/.well-known/openid-configuration")).unwrap(),
         );
 
@@ -637,7 +823,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect_err(
             "should fail to load trusted issuer when OpenID endpoint is unreachable in sync mode",
         );
@@ -653,7 +841,7 @@ mod test {
         let server = Server::new_async().await;
 
         let mut trusted_issuer = TrustedIssuer::default();
-        trusted_issuer.set_oidc_endpoint(
+        trusted_issuer.set_configuration_endpoint(
             Url::parse(&(server.url() + "/.well-known/openid-configuration")).unwrap(),
         );
 
@@ -671,7 +859,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Async mode should not return error for individual failures
         result.expect("async mode should not fail entire load process when individual issuers cannot be loaded");
     }
@@ -728,7 +918,9 @@ mod test {
     /// the key service when signature validation is enabled.
     #[tokio::test]
     async fn load_with_jwks_config() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         // Provide JWKS directly in config (invalid key but parsing will succeed)
@@ -748,7 +940,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect(
             "should load trusted issuer successfully when JWKS is provided in configuration",
         );
@@ -788,7 +982,9 @@ mod test {
     /// are properly fetched and stored in the key service.
     #[tokio::test]
     async fn load_trusted_issuer_with_signature_validation() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -803,14 +999,15 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load trusted issuer successfully with signature validation enabled");
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -831,13 +1028,396 @@ mod test {
         );
     }
 
+    fn sig_validation_config() -> JwtConfig {
+        JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: false,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            ..Default::default()
+        }
+    }
+
+    /// Serves `keys` as a JWKS at `path`, expecting `hits` requests.
+    fn mock_jwks(server: &mut mockito::ServerGuard, path: &str, hits: usize) -> mockito::Mock {
+        let keys = generate_keypair_hs256(Some("static_key")).expect("should generate keys");
+        server
+            .mock("GET", path)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(json!({ "keys": generate_jwks(&[keys]).keys }).to_string())
+            .expect(hits)
+            .create()
+    }
+
+    /// Serves a discovery document at `path` declaring `issuer`.
+    fn mock_discovery(
+        server: &mut mockito::ServerGuard,
+        path: &str,
+        issuer: &str,
+        jwks_path: &str,
+        hits: usize,
+    ) -> mockito::Mock {
+        server
+            .mock("GET", path)
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(
+                json!({ "issuer": issuer, "jwks_uri": server.url() + jwks_path }).to_string(),
+            )
+            .expect(hits)
+            .create()
+    }
+
+    #[tokio::test]
+    async fn discovery_issuer_mismatch_fails_to_load() {
+        let mut server = Server::new_async().await;
+        let discovery = mock_discovery(
+            &mut server,
+            "/.well-known/openid-configuration",
+            "https://other.example",
+            "/jwks",
+            1,
+        );
+        let jwks = mock_jwks(&mut server, "/jwks", 0);
+        let mut issuer = TrustedIssuer::default();
+        issuer.set_configuration_endpoint(
+            Url::parse(&(server.url() + "/.well-known/openid-configuration")).expect("valid url"),
+        );
+        let loader = create_loader(sig_validation_config(), 1);
+
+        let err = load_trusted_issuer(&loader, unresolved("jans", issuer), HTTP_CLIENT.clone())
+            .await
+            .expect_err("a discovery document for another issuer must not load");
+        assert!(
+            matches!(
+                &err,
+                JwtServiceInitError::LoadTrustedIssuers(
+                    TrustedIssuerLoaderError::DiscoveryIssuerMismatch { expected, found, .. }
+                ) if *expected == IssClaim::new(&server.url())
+                    && *found == IssClaim::new("https://other.example")
+            ),
+            "expected DiscoveryIssuerMismatch naming both issuers, got: {err:?}"
+        );
+        assert!(
+            !loader
+                .issuer_configs
+                .contains_iss(&IssClaim::new(&server.url())),
+            "a mismatched issuer must not be indexed"
+        );
+        assert!(
+            !loader.key_service.has_keys(),
+            "no keys should be fetched for a mismatched issuer"
+        );
+        discovery.assert();
+        jwks.assert();
+    }
+
+    #[tokio::test]
+    async fn path_based_discovery_issuer_loads() {
+        let mut server = Server::new_async().await;
+        let iss = server.url() + "/realms/a";
+        let discovery = mock_discovery(
+            &mut server,
+            "/realms/a/.well-known/openid-configuration",
+            &iss,
+            "/jwks",
+            1,
+        );
+        let jwks = mock_jwks(&mut server, "/jwks", 1);
+        let mut issuer = TrustedIssuer::default();
+        issuer.set_configuration_endpoint(
+            Url::parse(&(iss.clone() + "/.well-known/openid-configuration")).expect("valid url"),
+        );
+        let loader = create_loader(sig_validation_config(), 1);
+
+        load_trusted_issuer(&loader, unresolved("jans", issuer), HTTP_CLIENT.clone())
+            .await
+            .expect("a path-based issuer whose discovery matches should load");
+        assert!(
+            loader.issuer_configs.contains_iss(&IssClaim::new(&iss)),
+            "the issuer should be indexed by its full iss, path included"
+        );
+        discovery.assert();
+        jwks.assert();
+    }
+
+    #[tokio::test]
+    async fn static_issuer_loads_keys_without_discovery() {
+        let mut server = Server::new_async().await;
+        let url = server.url();
+        let discovery = mock_discovery(
+            &mut server,
+            "/.well-known/openid-configuration",
+            &url,
+            "/keys",
+            0,
+        );
+        let jwks = mock_jwks(&mut server, "/keys", 1);
+        let iss = Url::parse(&server.url()).expect("valid url");
+        let issuer = TrustedIssuer::new(
+            IssuerName::for_test("Partner"),
+            iss.clone(),
+            KeySource::Static {
+                jwks: Url::parse(&(server.url() + "/keys")).expect("valid url"),
+            },
+        );
+        let loader = create_loader(sig_validation_config(), 1);
+
+        load_trusted_issuer(&loader, unresolved("partner", issuer), HTTP_CLIENT.clone())
+            .await
+            .expect("a static issuer should load");
+
+        let key_info = DecodingKeyInfo {
+            issuer: Some(IssClaim::new(iss.as_str())),
+            kid: Some("static_key".to_string()),
+            algorithm: Algorithm::HS256,
+        };
+        assert!(
+            loader.key_service.get_key(&key_info).is_some(),
+            "keys from the static JWKS should be stored under the configured iss"
+        );
+        discovery.assert();
+        jwks.assert();
+    }
+
+    /// Loads `issuers` the way `JwtService` does, with two workers so the
+    /// issuers race each other.
+    async fn load_concurrently(
+        issuers: Vec<(&str, TrustedIssuer)>,
+    ) -> (TrustedIssuerLoader, Result<(), JwtServiceInitError>) {
+        let config = JwtConfig {
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::Sync {
+                workers: WorkersCount::new(2),
+            },
+            ..sig_validation_config()
+        };
+        let loader = create_loader(config, issuers.len());
+        let issuers = issuers
+            .into_iter()
+            .map(|(id, issuer)| (id.to_string(), issuer))
+            .collect();
+        let result = loader.load_trusted_issuers(&token_types(issuers)).await;
+        (loader, result)
+    }
+
+    /// The per-issuer errors of a failed load.
+    fn issuer_errors(err: JwtServiceInitError) -> Vec<JwtServiceInitError> {
+        match err {
+            JwtServiceInitError::LoadTrustedIssuersAggregate(errors) => errors.0,
+            other => vec![other],
+        }
+    }
+
+    fn static_issuer(name: &str, iss: &str, jwks: &str) -> TrustedIssuer {
+        TrustedIssuer::new(
+            IssuerName::for_test(name),
+            Url::parse(iss).expect("valid url"),
+            KeySource::Static {
+                jwks: Url::parse(jwks).expect("valid url"),
+            },
+        )
+    }
+
+    fn discovery_issuer(name: &str, iss: &str) -> TrustedIssuer {
+        let mut issuer = TrustedIssuer::default();
+        issuer.name = IssuerName::for_test(name);
+        issuer.set_configuration_endpoint(
+            Url::parse(&format!("{iss}/.well-known/openid-configuration")).expect("valid url"),
+        );
+        issuer
+    }
+
+    /// Two key sources only found to share an `iss` after discovery: there is no
+    /// order between them, so neither is trusted, and neither key set is fetched.
+    #[tokio::test]
+    async fn key_sources_sharing_an_iss_with_different_jwks_are_both_rejected() {
+        let mut server = Server::new_async().await;
+        let iss = server.url();
+        let discovery = mock_discovery(
+            &mut server,
+            "/.well-known/openid-configuration",
+            &iss,
+            "/discovered-keys",
+            1,
+        );
+        let static_jwks = mock_jwks(&mut server, "/static-keys", 0);
+        let discovered_jwks = mock_jwks(&mut server, "/discovered-keys", 0);
+
+        let (loader, result) = load_concurrently(vec![
+            (
+                "Partner",
+                static_issuer("Partner", &iss, &format!("{iss}/static-keys")),
+            ),
+            ("Other", discovery_issuer("Other", &iss)),
+        ])
+        .await;
+
+        let errors = issuer_errors(result.expect_err("both issuers should fail to load"));
+        assert_eq!(
+            errors.len(),
+            2,
+            "both issuers should be reported: {errors:?}"
+        );
+        for error in &errors {
+            assert!(
+                matches!(
+                    error,
+                    JwtServiceInitError::LoadTrustedIssuers(TrustedIssuerLoaderError::ConflictingJwks {
+                        iss: conflict_iss,
+                        issuers,
+                        jwks,
+                    }) if *conflict_iss == IssClaim::new(&iss)
+                        && issuers == &["Other".to_string(), "Partner".to_string()]
+                        && jwks.len() == 2
+                ),
+                "expected ConflictingJwks naming both issuers and both JWKS, got: {error:?}"
+            );
+        }
+        assert!(
+            !loader.issuer_configs.contains_iss(&IssClaim::new(&iss)),
+            "neither issuer should be loaded"
+        );
+        assert_eq!(
+            loader.loading_state.failed_issuers(),
+            HashSet::from(["Other".to_string(), "Partner".to_string()]),
+            "both issuers should be marked failed"
+        );
+        discovery.assert();
+        static_jwks.assert();
+        discovered_jwks.assert();
+    }
+
+    /// Issuers may share an `iss` when they agree on its keys: a token carrying
+    /// that `iss` then verifies the same way whichever token type names it.
+    #[tokio::test]
+    async fn key_sources_sharing_an_iss_and_jwks_both_load() {
+        let mut server = Server::new_async().await;
+        let iss = server.url();
+        let _jwks = mock_jwks(&mut server, "/keys", 2);
+
+        let (loader, result) = load_concurrently(vec![
+            ("Acme", static_issuer("Acme", &iss, &format!("{iss}/keys"))),
+            ("Beta", static_issuer("Beta", &iss, &format!("{iss}/keys"))),
+        ])
+        .await;
+
+        result.expect("issuers sharing an iss and its keys should both load");
+        assert_eq!(
+            loader.issuer_configs.loaded_issuer_ids(),
+            HashSet::from(["Acme".to_string(), "Beta".to_string()]),
+            "both issuers should be loaded"
+        );
+    }
+
+    /// Issuers sharing an `iss` get one JWKS refresh task, so the notifier that
+    /// wakes it is never replaced by one no task listens on.
+    #[tokio::test]
+    async fn one_jwks_refresh_per_iss() {
+        let loader = create_loader(sig_validation_config(), 2);
+        let iss = IssClaim::new("https://idp.example");
+        let jwks = Url::parse("https://idp.example/keys").expect("valid url");
+        let notifier = || {
+            loader
+                .jwks_refresh_notifiers
+                .lock()
+                .expect("acquire jwks_refresh_notifiers lock")
+                .get(&iss)
+                .cloned()
+                .expect("a refresh should be registered for the iss")
+        };
+
+        spawn_jwks_refresh(&loader, iss.clone(), jwks.clone());
+        let first = notifier();
+        spawn_jwks_refresh(&loader, iss.clone(), jwks);
+        loader.jwks_cancel_token.cancel();
+
+        assert!(
+            Arc::ptr_eq(&first, &notifier()),
+            "a second issuer for the iss should reuse the running refresh"
+        );
+    }
+
+    /// An issuer that fails to resolve its key source takes no part in the
+    /// conflict check, so it cannot block another issuer with the same `iss`.
+    #[tokio::test]
+    async fn failed_discovery_does_not_block_another_issuer_for_the_iss() {
+        let mut server = Server::new_async().await;
+        let iss = server.url();
+        let _discovery = server
+            .mock("GET", "/.well-known/openid-configuration")
+            .with_status(500)
+            .create();
+        let _jwks = mock_jwks(&mut server, "/static-keys", 1);
+
+        let (loader, result) = load_concurrently(vec![
+            ("Broken", discovery_issuer("Broken", &iss)),
+            (
+                "Partner",
+                static_issuer("Partner", &iss, &format!("{iss}/static-keys")),
+            ),
+        ])
+        .await;
+
+        let errors = issuer_errors(result.expect_err("the broken issuer should be reported"));
+        assert_eq!(
+            errors.len(),
+            1,
+            "only the broken issuer should fail: {errors:?}"
+        );
+        assert_eq!(
+            loader.issuer_configs.loaded_issuer_ids(),
+            HashSet::from(["Partner".to_string()]),
+            "the issuer whose keys resolved should still load"
+        );
+        assert_eq!(
+            loader.loading_state.failed_issuers(),
+            HashSet::from(["Broken".to_string()]),
+            "only the broken issuer should be marked failed"
+        );
+    }
+
+    #[tokio::test]
+    async fn issuer_with_several_tokens_is_fetched_once() {
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let issuer = server.trusted_issuer().with_tokens(
+            [
+                "Jans::Access_token",
+                "Jans::Id_token",
+                "Jans::Userinfo_token",
+            ]
+            .into_iter()
+            .map(|entity_type| (entity_type.into(), TokenEntityMetadata::builder().build()))
+            .collect(),
+        );
+        let token_types = TokenTypes::build([issuer], []).expect("test token types should build");
+        let loader = create_loader(sig_validation_config(), 1);
+
+        loader
+            .load_trusted_issuers(&token_types)
+            .await
+            .expect("issuer should load");
+
+        // Both mocks expect exactly one request.
+        server
+            .endpoints
+            .oidc
+            .as_ref()
+            .expect("discovery mock")
+            .assert();
+        server.endpoints.jwks.as_ref().expect("jwks mock").assert();
+    }
+
     /// Tests synchronous loading of a single trusted issuer with status validation enabled.
     ///
     /// Verifies that when `jwt_status_validation` is true, the status list cache is initialized
     /// for the issuer and contains the expected status list.
     #[tokio::test]
     async fn load_trusted_issuer_with_status_validation_sync() {
-        let mut server = MockServer::new_with_defaults().await.unwrap();
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         // Generate status list endpoint before creating trusted issuer
         // First consume the default OIDC mock to allow clean replacement
         let client = reqwest::Client::new();
@@ -862,14 +1442,15 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load trusted issuer successfully with status validation enabled");
 
         // Verify issuer config was inserted
         let issuer_claim = server.issuer();
-        let trusted_issuer_from_index = loader.issuer_configs.get_trusted_issuer(&issuer_claim);
         assert!(
-            trusted_issuer_from_index.is_some(),
+            loader.issuer_configs.contains_iss(&issuer_claim),
             "trusted issuer should be inserted into issuer index"
         );
 
@@ -889,8 +1470,12 @@ mod test {
     #[tokio::test]
     async fn load_multiple_trusted_issuers_async_with_signature_validation() {
         // Create two mock servers
-        let server1 = MockServer::new_with_defaults().await.unwrap();
-        let server2 = MockServer::new_with_defaults().await.unwrap();
+        let server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
 
         let trusted_issuer_1 = server1.trusted_issuer();
         let trusted_issuer_2 = server2.trusted_issuer();
@@ -910,31 +1495,23 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully in async mode with signature validation");
 
         // Verify both issuers were loaded with retry for async operations
         let issuer_claim1 = server1.issuer();
         let issuer_claim2 = server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim1) },
             20,
             10,
             "first trusted issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim2) },
             20,
             10,
             "second trusted issuer should be inserted into issuer index",
@@ -988,7 +1565,11 @@ mod test {
         const NUM_ISSUERS: usize = 10;
         let mut servers = Vec::new();
         for _ in 0..NUM_ISSUERS {
-            servers.push(MockServer::new_with_defaults().await.unwrap());
+            servers.push(
+                MockServer::new_with_defaults()
+                    .await
+                    .expect("mock server should start"),
+            );
         }
 
         let jwt_config = JwtConfig {
@@ -1007,19 +1588,16 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load multiple trusted issuers successfully with max workers");
 
         // Verify all issuers were loaded with retry for async operations
         for (i, server) in servers.iter().enumerate() {
             let issuer_claim = server.issuer();
             retry_assert(
-                || async {
-                    loader
-                        .issuer_configs
-                        .get_trusted_issuer(&issuer_claim)
-                        .is_some()
-                },
+                || async { loader.issuer_configs.contains_iss(&issuer_claim) },
                 20,
                 10,
                 &format!("trusted issuer {i} should be inserted into issuer index"),
@@ -1044,7 +1622,11 @@ mod test {
         const NUM_ISSUERS: usize = 5;
         let mut servers = Vec::new();
         for _ in 0..NUM_ISSUERS {
-            servers.push(MockServer::new_with_defaults().await.unwrap());
+            servers.push(
+                MockServer::new_with_defaults()
+                    .await
+                    .expect("mock server should start"),
+            );
         }
 
         let jwt_config = JwtConfig {
@@ -1063,17 +1645,16 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("should load many trusted issuers successfully with single worker");
 
         // Verify all issuers were loaded
         for (i, server) in servers.iter().enumerate() {
             let issuer_claim = server.issuer();
             assert!(
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim)
-                    .is_some(),
+                loader.issuer_configs.contains_iss(&issuer_claim),
                 "trusted issuer {i} should be inserted into issuer index"
             );
         }
@@ -1091,7 +1672,9 @@ mod test {
     /// quickly (within a short timeout) while issuer loading continues in the background.
     #[tokio::test]
     async fn async_loading_returns_immediately() {
-        let server = MockServer::new_with_defaults().await.unwrap();
+        let server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let trusted_issuer = server.trusted_issuer();
 
         let jwt_config = JwtConfig {
@@ -1114,7 +1697,9 @@ mod test {
         // in `impl GetFromUrl<OpenIdConfig> for OpenIdConfig{`
         // we have 5ms delay (for tests), so if initialization is sync it should take at least 5ms.
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("async loading should return Ok immediately");
 
         let expected_start_delay = Duration::from_millis(1);
@@ -1131,12 +1716,7 @@ mod test {
         // but eventually loads within a reasonable time
         let issuer_claim = server.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&issuer_claim)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&issuer_claim) },
             20,
             10,
             "trusted issuer should eventually be inserted into issuer index via async loading",
@@ -1151,12 +1731,14 @@ mod test {
     #[tokio::test]
     async fn load_trusted_issuer_with_invalid_url_sync() {
         // Create a valid mock server for successful issuer
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         // Create an invalid issuer with a URL that will fail to fetch
         let mut invalid_issuer = TrustedIssuer::default();
-        invalid_issuer.set_oidc_endpoint(
+        invalid_issuer.set_configuration_endpoint(
             Url::parse("invalid://example.com/.well-known/openid-configuration").unwrap(),
         );
 
@@ -1173,17 +1755,16 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Should return error because at least one issuer failed
         result.expect_err("sync mode should return error when an issuer has invalid URL");
 
         // Verify valid issuer was loaded despite the error
         let valid_issuer_claim = valid_server.issuer();
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&valid_issuer_claim)
-                .is_some(),
+            loader.issuer_configs.contains_iss(&valid_issuer_claim),
             "valid issuer should be loaded even when another issuer fails in sync mode"
         );
     }
@@ -1195,14 +1776,18 @@ mod test {
     #[tokio::test]
     async fn load_trusted_issuer_with_invalid_url_async() {
         // Create two valid mock servers for successful issuers
-        let valid_server1 = MockServer::new_with_defaults().await.unwrap();
-        let valid_server2 = MockServer::new_with_defaults().await.unwrap();
+        let valid_server1 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let valid_server2 = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer1 = valid_server1.trusted_issuer();
         let valid_issuer2 = valid_server2.trusted_issuer();
 
         // Create an invalid issuer with a URL that will fail to fetch
         let mut invalid_issuer = TrustedIssuer::default();
-        invalid_issuer.set_oidc_endpoint(
+        invalid_issuer.set_configuration_endpoint(
             Url::parse("invalid://example.com/.well-known/openid-configuration").unwrap(),
         );
 
@@ -1222,7 +1807,9 @@ mod test {
 
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Async mode should return Ok immediately even if some issuers fail
         result.expect(
             "async mode should not fail entire load process when an issuer has invalid URL",
@@ -1232,24 +1819,14 @@ mod test {
         let valid_issuer_claim1 = valid_server1.issuer();
         let valid_issuer_claim2 = valid_server2.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim1)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim1) },
             20,
             10,
             "first valid issuer should be inserted into issuer index",
         )
         .await;
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim2)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim2) },
             20,
             10,
             "second valid issuer should be inserted into issuer index",
@@ -1264,7 +1841,9 @@ mod test {
     #[tokio::test]
     async fn failed_trusted_issuer_ids_tracks_failures() {
         // Create a mix of successful and failing issuers
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         let failing_server = MockServer::new_with_failing_oidc().await.unwrap();
@@ -1287,17 +1866,16 @@ mod test {
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
         // In sync mode, load_trusted_issuers returns error, but some issuers may still be loaded
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         // Should return error because at least one issuer failed
         result.expect_err("sync mode should return error when issuers fail");
 
         // Verify valid issuer was loaded
         let valid_issuer_claim = valid_server.issuer();
         assert!(
-            loader
-                .issuer_configs
-                .get_trusted_issuer(&valid_issuer_claim)
-                .is_some(),
+            loader.issuer_configs.contains_iss(&valid_issuer_claim),
             "valid issuer should be loaded even when other issuers fail"
         );
 
@@ -1342,7 +1920,9 @@ mod test {
     #[tokio::test]
     async fn failed_trusted_issuer_ids_async_mode() {
         // Create a mix of successful and failing issuers
-        let valid_server = MockServer::new_with_defaults().await.unwrap();
+        let valid_server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
         let valid_issuer = valid_server.trusted_issuer();
 
         let failing_issuer = create_failing_trusted_issuer("failing_issuer");
@@ -1363,18 +1943,15 @@ mod test {
         let loader = create_loader(jwt_config, trusted_issuers.len());
 
         // Async mode should return Ok immediately
-        let result = loader.load_trusted_issuers(trusted_issuers).await;
+        let result = loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await;
         result.expect("async mode should not fail entire load process");
 
         // Wait for async loading to complete
         let valid_issuer_claim = valid_server.issuer();
         retry_assert(
-            || async {
-                loader
-                    .issuer_configs
-                    .get_trusted_issuer(&valid_issuer_claim)
-                    .is_some()
-            },
+            || async { loader.issuer_configs.contains_iss(&valid_issuer_claim) },
             20,
             10,
             "valid issuer should eventually be loaded via async loading",

@@ -19,8 +19,12 @@ package io.jans.lock.service.ws.rs.app;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.resteasy.plugins.interceptors.GZIPDecodingInterceptor;
+import org.jboss.resteasy.plugins.interceptors.GZIPEncodingInterceptor;
+
 import io.jans.lock.service.filter.AuthorizationProcessingFilter;
 import io.jans.lock.service.filter.CedarlingAuthorizationProcessingFilter;
+import io.jans.lock.service.filter.GzipResponseFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.policy.PolicyRestWebServiceImpl;
@@ -81,6 +85,9 @@ public class ResteasyInitializer extends Application {
 	@Override
 	public Set<Class<?>> getClasses() {
 		HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        classes.add(GzipResponseFilter.class);
+        classes.add(GZIPEncodingInterceptor.class);
+        classes.add(GZIPDecodingInterceptor.class);
 
 		classes.add(ConfigurationRestWebService.class);
 

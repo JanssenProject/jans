@@ -8,8 +8,17 @@
 # quick-xml >= 0.41.0, but the only consumer is the dev-only profiling chain
 # pprof 0.15 -> inferno 0.11 -> quick-xml ^0.26, which pins the old version and
 # has no upgrade path. Not reachable: pprof only renders flamegraph SVGs from our
+# own profiling data and never parses untrusted XML.
+#
+# RUSTSEC-2026-0387: timing variability in crypto-bigint 0.5.5 constant-time
+# operations. Fixed in crypto-bigint >= 0.7.6, which needs the elliptic-curve
+# 0.14 line, but jsonwebtoken 11.1 (latest) still depends on p256/p384 0.13.
+# Accepted risk: in production these curves only verify ECDSA signatures over
+# public data with public keys (JWT and sigstore verification); ECDSA signing
+# happens in tests only, and TRACE records are signed with ed25519-dalek.
 ignore = [
     "RUSTSEC-2023-0071",
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
+    "RUSTSEC-2026-0387",
 ]

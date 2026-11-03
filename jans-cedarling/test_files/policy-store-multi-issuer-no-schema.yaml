@@ -11,14 +11,12 @@ policy_stores:
     trusted_issuers:
       AcmeIssuer:
         name: "Acme"
-        description: "Acme Corporation Identity Provider"
         openid_configuration_endpoint: "https://idp.acme.com/.well-known/openid-configuration"
         token_metadata:
           access_token:
             entity_type_name: "Acme::Access_Token"
       DolphinIssuer:
         name: "Dolphin"
-        description: "Dolphin Sea Identity Provider"
         openid_configuration_endpoint: "https://idp.dolphin.sea/.well-known/openid-configuration"
         token_metadata:
           access_token:

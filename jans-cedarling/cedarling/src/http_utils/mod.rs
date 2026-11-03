@@ -10,6 +10,8 @@ mod backoff;
 use std::fmt::Display;
 
 pub(crate) use backoff::Backoff;
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) use backoff::MAX_EXPONENTIAL_DELAY;
 
 use reqwest::{RequestBuilder, StatusCode};
 use thiserror::Error;

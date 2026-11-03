@@ -62,6 +62,7 @@ import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.model.VerificationResult;
+import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import jakarta.servlet.http.HttpServletRequest;
@@ -70,7 +71,7 @@ import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Response;
 
 /**
- * Tests for {@link TraceRestWebServiceImpl} (TRACE MVP task 20 acceptance criteria): the 202 happy
+ * Tests for {@link TraceRestWebServiceImpl} the 202 happy
  * path and idempotent-replay path, the {@code record_conflict}/{@code client_not_bound}/validation/
  * {@code storage_failure}/disabled-feature error paths, the audit-logger call on every outcome, and
  * a fixture check of the interface's protection annotations.
@@ -100,6 +101,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	private ApplicationAuditLogger applicationAuditLogger;
 
 	@Mock
+	private TraceRetrievalService retrievalService;
+
+	@Mock
 	private HttpServletRequest httpServletRequest;
 
 	private TraceConfiguration traceConfiguration;
@@ -119,6 +123,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		setField(impl, "submitterIdentityService", submitterIdentityService);
 		setField(impl, "evidenceDomainResolver", evidenceDomainResolver);
 		setField(impl, "ingestionService", ingestionService);
+		setField(impl, "retrievalService", retrievalService);
 		setField(impl, "applicationAuditLogger", applicationAuditLogger);
 
 		traceConfiguration = new TraceConfiguration();
@@ -167,16 +172,16 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	private static StoredTraceRecord storedRecord(boolean late) {
-		RecordIdentity identity = new RecordIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "record-1");
+		RecordIdentity identity = new RecordIdentity(DOMAIN, "cedarling-fleet-1", "record-1");
 		VerificationResult verification = new VerificationResult(true, "kid-1", 5000L, "Ed25519");
 		ReceiptEntry receipt = new ReceiptEntry(108422L, 5000L, "sha256:" + "0".repeat(64), "sha256:" + "1".repeat(64));
 		IngestionFlags flags = new IngestionFlags(false, false, false, late);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "spiffe://example.org/agent/planner", "exec-1");
-		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1/1.0.0", "instance-1", "chain-1");
+		ChainIdentity chainIdentity = new ChainIdentity(DOMAIN, "cedarling-fleet-1", "instance-1", "chain-1");
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, 1L);
 		return new StoredTraceRecord(identity, "{}", "sha256:" + "2".repeat(64), verification, receipt, flags,
-				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), List.of(), "AUTHORIZATION_DECISION",
-				4000L, "node-1", 5000L);
+				execution, chainPosition, "sha256:" + "0".repeat(64), List.of(), "AUTHORIZATION_DECISION",
+				4000L, "node-1", 5000L, 0L);
 	}
 
 	// -- happy path -------------------------------------------------------------------------------
@@ -197,7 +202,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		TraceAcceptanceResponse dto = (TraceAcceptanceResponse) response.getEntity();
 		assertTrue(dto.isAccepted());
-		assertEquals("cedarling-fleet-1/1.0.0", dto.getProducerId());
+		assertEquals("cedarling-fleet-1", dto.getProducerId());
 		assertEquals("record-1", dto.getRecordId());
 		assertEquals(108422L, dto.getReceiptSequence());
 		assertFalse(dto.isIdempotentReplay());
@@ -227,8 +232,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceConflictException(TraceErrorResponseType.RECORD_CONFLICT, "digest_mismatch"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(409, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -239,8 +245,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(evidenceDomainResolver.resolve(any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, "no_domain_binding"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(403, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -252,8 +259,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -264,8 +272,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(ingestionService.ingest(any(), any()))
 				.thenThrow(new TraceStorageException("receipt_allocation_retry_exhausted", "retries exhausted"));
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(500, ex.getResponse().getStatus());
 		verify(applicationAuditLogger).log(any(), org.mockito.ArgumentMatchers.eq(false));
@@ -275,8 +284,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitRecord_DisabledFeature_Returns400InvalidRequest() {
 		traceConfiguration.setEnabled(false);
 
+		InputStream requestBody = body();
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitRecord(body(), httpServletRequest, null));
+				() -> impl.submitRecord(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		@SuppressWarnings("unchecked")
@@ -287,30 +297,31 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(submitterIdentityService, never()).resolve(any());
 	}
 
-	// -- submitBulkRecords (design decision D-16) -----------------------------------------------------
+	// -- submitBulkRecords -----------------------------------------------------
 
 	@Test
-	void testSubmitBulkRecords_AllAccepted_Returns202() {
+	void testSubmitBulkRecords_AllAccepted_Returns207() {
 		when(ingestionService.ingest(any(), eq(context)))
 				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
 
 		Response response = impl.submitBulkRecords(body("[{\"a\":1},{\"b\":2}]"), httpServletRequest, null);
 
-		assertEquals(202, response.getStatus());
+		assertEquals(207, response.getStatus());
 		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
 		assertEquals(2, dto.getResults().size());
 		for (int i = 0; i < 2; i++) {
 			TraceBulkResultEntry entry = dto.getResults().get(i);
 			assertEquals(i, entry.getIndex());
 			assertTrue(entry.isAccepted());
-			assertNotNull(entry.getRecord());
+			assertEquals("record-1", entry.getRecordId());
+			assertEquals(108422L, entry.getReceiptSequence());
 		}
 		verify(ingestionService, times(2)).ingest(any(), eq(context));
 		verify(applicationAuditLogger).log(any(), eq(true));
 	}
 
 	@Test
-	void testSubmitBulkRecords_Mixed_ReturnsPerItemOutcomes() throws Exception {
+	void testSubmitBulkRecords_Mixed_ReturnsPerItemOutcomes() {
 		when(ingestionService.ingest(any(), eq(context))).thenAnswer(inv -> {
 			InputStream slice = inv.getArgument(0);
 			String text = readAll(slice);
@@ -323,13 +334,13 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		Response response = impl
 				.submitBulkRecords(body("[{\"marker\":\"good\"},{\"marker\":\"bad\"}]"), httpServletRequest, null);
 
-		assertEquals(202, response.getStatus());
+		assertEquals(207, response.getStatus());
 		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
 		assertEquals(2, dto.getResults().size());
 
 		TraceBulkResultEntry first = dto.getResults().get(0);
 		assertTrue(first.isAccepted());
-		assertNotNull(first.getRecord());
+		assertEquals("record-1", first.getRecordId());
 
 		TraceBulkResultEntry second = dto.getResults().get(1);
 		assertFalse(second.isAccepted());
@@ -337,6 +348,109 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		assertEquals("invalid_assertion", second.getError().getError());
 
 		verify(applicationAuditLogger).log(any(), eq(true));
+	}
+
+	@Test
+	void testSubmitBulkRecords_MixedProducers_Returns400BeforeAnyIngest() {
+		InputStream requestBody = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]");
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		@SuppressWarnings("unchecked")
+		Map<String, String> entity = (Map<String, String>) ex.getResponse().getEntity();
+		assertEquals("invalid_request", entity.get("error"));
+		assertEquals("bulk_mixed_producers", entity.get("reason"));
+		verify(ingestionService, never()).ingest(any(), any());
+		verify(applicationAuditLogger).log(any(), eq(false));
+	}
+
+	@Test
+	void testSubmitBulkRecords_MixedProducersLateInBatch_NothingIngested() {
+		InputStream requestBody = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-1\"},"
+						+ "{\"x\":{\"producer\":\"ignored\"},\"producer\":\"p-2\"}]");
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
+
+		assertEquals(400, ex.getResponse().getStatus());
+		verify(ingestionService, never()).ingest(any(), any());
+	}
+
+	@Test
+	void testSubmitBulkRecords_SingleProducerPlusUnreadableElements_StillProcessed() {
+		when(ingestionService.ingest(any(), eq(context))).thenThrow(
+				new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at"));
+
+		Response response = impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},5,[1],{\"a\":1},"
+				+ "{\"producer\":7},{\"producer\":\"p-1\"}]"), httpServletRequest, null);
+
+		assertEquals(207, response.getStatus());
+		TraceBulkIngestionResponse dto = (TraceBulkIngestionResponse) response.getEntity();
+		assertEquals(6, dto.getResults().size());
+		verify(ingestionService, times(6)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_NestedOrNonStringProducer_NotCounted() {
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		Response response = impl.submitBulkRecords(body("[{\"producer\":\"p-1\"},{\"producer\":{\"producer\":\"p-2\"}},"
+				+ "{\"producer\":null},{\"trace\":{\"producer\":\"p-3\"}}]"), httpServletRequest, null);
+
+		assertEquals(207, response.getStatus());
+		verify(ingestionService, times(4)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_ExactJsonMembers_AcceptedAndRejectedEntries() throws Exception {
+		when(ingestionService.ingest(any(), eq(context))).thenAnswer(inv -> {
+			String text = readAll(inv.getArgument(0));
+			if (text.contains("good")) {
+				return AcceptanceResult.fromStored(storedRecord(false), false);
+			}
+			throw new TraceValidationException(TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at");
+		});
+
+		Response response = impl.submitBulkRecords(
+				body("[{\"producer\":\"cedarling-fleet-1\",\"record_id\":\"r-good\",\"m\":\"good\"},"
+						+ "{\"producer\":\"cedarling-fleet-1\",\"record_id\":\"r-bad\",\"m\":\"bad\"},"
+						+ "{\"m\":\"bad\"},7]"),
+				httpServletRequest, null);
+
+		com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+		com.fasterxml.jackson.databind.JsonNode tree = mapper.readTree(mapper.writeValueAsString(response.getEntity()));
+		com.fasterxml.jackson.databind.JsonNode results = tree.get("results");
+		assertEquals(4, results.size());
+
+		List<String> acceptedMembers = List.of("index", "accepted", "producer_id", "record_id", "content_digest",
+				"receipt_sequence", "received_at", "idempotent_replay", "coverage_gap_flag",
+				"chain_link_failure_flag", "equivocation_flag", "late_flag", "policy_mismatch_flag",
+				"reserved_member_flag", "reserved_members");
+		assertEquals(acceptedMembers, fieldNames(results.get(0)));
+		assertEquals(0, results.get(0).get("index").intValue());
+		assertTrue(results.get(0).get("accepted").booleanValue());
+		assertEquals("cedarling-fleet-1", results.get(0).get("producer_id").textValue());
+		assertEquals("record-1", results.get(0).get("record_id").textValue());
+		assertEquals(108422L, results.get(0).get("receipt_sequence").longValue());
+		assertFalse(results.get(0).get("idempotent_replay").booleanValue());
+
+		assertEquals(List.of("index", "accepted", "producer_id", "record_id", "error"), fieldNames(results.get(1)));
+		assertFalse(results.get(1).get("accepted").booleanValue());
+		assertEquals("cedarling-fleet-1", results.get(1).get("producer_id").textValue());
+		assertEquals("r-bad", results.get(1).get("record_id").textValue());
+		assertEquals(List.of("error", "error_description", "reason"), fieldNames(results.get(1).get("error")));
+		assertEquals("invalid_assertion", results.get(1).get("error").get("error").textValue());
+		assertEquals("missing:trace.signed_at", results.get(1).get("error").get("reason").textValue());
+
+		assertEquals(List.of("index", "accepted", "error"), fieldNames(results.get(2)));
+		assertEquals(List.of("index", "accepted", "error"), fieldNames(results.get(3)));
+	}
+
+	private static List<String> fieldNames(com.fasterxml.jackson.databind.JsonNode node) {
+		List<String> names = new java.util.ArrayList<>();
+		node.fieldNames().forEachRemaining(names::add);
+		return names;
 	}
 
 	@Test
@@ -357,9 +471,27 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	}
 
 	@Test
+	void testSubmitBulkRecords_ScalarAndMultibyteElements_ForwardedWithExactSourceText() throws Exception {
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		String scalar = "42";
+		String multibyte = "{ \"note\" : \"caf\u00e9 \u65e5\u672c \uD83D\uDE00\" }";
+		impl.submitBulkRecords(body("[" + scalar + ",  " + multibyte + "]"), httpServletRequest, null);
+
+		ArgumentCaptor<InputStream> captor = ArgumentCaptor.forClass(InputStream.class);
+		verify(ingestionService, times(2)).ingest(captor.capture(), eq(context));
+
+		List<InputStream> slices = captor.getAllValues();
+		assertEquals(scalar, readAll(slices.get(0)));
+		assertEquals(multibyte, readAll(slices.get(1)));
+	}
+
+	@Test
 	void testSubmitBulkRecords_EmptyArray_Returns400() {
+		InputStream requestBody = body("[]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -368,8 +500,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 	@Test
 	void testSubmitBulkRecords_NotArray_Returns400() {
+		InputStream requestBody = body("{}");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("{}"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -379,8 +512,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_TooManyRecords_Returns400BeforeAnyIngest() {
 		traceConfiguration.setMaxBulkRecords(1);
 
+		InputStream requestBody = body("[{\"a\":1},{\"b\":2}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1},{\"b\":2}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -390,9 +524,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_BodyExceedsMaxBulkRequestBytes_Returns400BeforeAnyIngest() {
 		traceConfiguration.setMaxBulkRequestBytes(16);
 
+		InputStream requestBody = body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]"),
-						httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -404,8 +538,9 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		when(evidenceDomainResolver.resolve(any()))
 				.thenThrow(new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, "no_domain_binding"));
 
+		InputStream requestBody = body("[{\"a\":1}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(403, ex.getResponse().getStatus());
 		verify(ingestionService, never()).ingest(any(), any());
@@ -416,15 +551,62 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 	void testSubmitBulkRecords_DisabledFeature_Returns400InvalidRequest() {
 		traceConfiguration.setEnabled(false);
 
+		InputStream requestBody = body("[{\"a\":1}]");
 		WebApplicationException ex = assertThrows(WebApplicationException.class,
-				() -> impl.submitBulkRecords(body("[{\"a\":1}]"), httpServletRequest, null));
+				() -> impl.submitBulkRecords(requestBody, httpServletRequest, null));
 
 		assertEquals(400, ex.getResponse().getStatus());
 		verify(submitterIdentityService, never()).resolve(any());
 		verify(applicationAuditLogger).log(any(), eq(false));
 	}
 
-	// -- annotation fixture check (task 20 "Tests" section, extended for D-16) ------------------------
+	// -- gRPC calls --------------------------------------------------------------------------------
+
+	private void bindServletRequest(HttpServletRequest request) throws ReflectiveOperationException {
+		java.lang.reflect.Field field = io.jans.lock.service.ws.rs.base.BaseResource.class.getDeclaredField("httpRequest");
+		field.setAccessible(true);
+		field.set(impl, request);
+	}
+
+	@Test
+	void testGetRecord_GrpcCall_IgnoresServletRequestAndAuditsContextIp() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(retrievalService.findRecord(DOMAIN, "record-1", null)).thenReturn(storedRecord(false));
+
+		io.grpc.Context.current().withValue(io.jans.lock.util.ServerUtil.CLIENT_IP_CONTEXT_KEY, "10.1.2.3")
+				.run(() -> impl.getRecord("record-1", null));
+
+		verify(submitterIdentityService).resolve(null);
+		org.mockito.Mockito.verifyNoInteractions(httpServletRequest);
+		org.mockito.ArgumentCaptor<io.jans.core.cedarling.model.AuditLogEntry> entry = org.mockito.ArgumentCaptor
+				.forClass(io.jans.core.cedarling.model.AuditLogEntry.class);
+		verify(applicationAuditLogger).log(entry.capture(), eq(true));
+		assertEquals("10.1.2.3", entry.getValue().getIp());
+	}
+
+	@Test
+	void testSubmitRecord_GrpcCall_ResolvesIdentityWithoutServletRequest() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(ingestionService.ingest(any(), org.mockito.ArgumentMatchers.eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		io.grpc.Context.current().withValue(io.jans.lock.util.ServerUtil.CLIENT_IP_CONTEXT_KEY, "10.1.2.3")
+				.run(() -> impl.submitRecord(body(), null, null));
+
+		verify(submitterIdentityService).resolve(null);
+	}
+
+	@Test
+	void testGetRecord_RestCall_ResolvesIdentityFromServletRequest() throws Exception {
+		bindServletRequest(httpServletRequest);
+		when(retrievalService.findRecord(DOMAIN, "record-1", null)).thenReturn(storedRecord(false));
+
+		impl.getRecord("record-1", null);
+
+		verify(submitterIdentityService).resolve(httpServletRequest);
+	}
+
+	// -- annotation fixture check ------------------------
 
 	@Test
 	void testInterfaceMethod_CarriesBothProtectionAnnotationsWithMatchingIdAndPath() throws Exception {
@@ -439,7 +621,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE write has no gRPC transport (D-15)");
+		assertEquals("SubmitRecord", protectedApi.grpcMethodName());
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());
@@ -461,7 +643,7 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 
 		assertEquals(1, protectedApi.scopes().length);
 		assertEquals(ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS, protectedApi.scopes()[0]);
-		assertEquals("", protectedApi.grpcMethodName(), "TRACE bulk write has no gRPC transport (D-15)");
+		assertEquals("SubmitBulkRecords", protectedApi.grpcMethodName());
 
 		assertEquals("Jans::Action::\"POST\"", cedarlingApi.action());
 		assertEquals("Jans::HTTP_Request", cedarlingApi.resource());

@@ -8,7 +8,6 @@ package io.jans.configapi.security.service;
 
 import io.jans.as.client.service.IntrospectionService;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.uma.wrapper.Token;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.util.AuthUtil;
@@ -46,7 +45,7 @@ public class OpenIdService implements Serializable {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String header, String token, String issuer) throws JsonProcessingException {
-        log.debug("oAuth Introspection request , header:{}, token:{}, issuer:{}", header, token, issuer);
+        log.debug("oAuth Introspection request - issuer:{}", issuer);
 
         String introspectionUrl = authUtil.getIntrospectionEndpoint();
         if (StringUtils.isNotBlank(issuer)) {
@@ -55,12 +54,10 @@ public class OpenIdService implements Serializable {
         }
 
         log.info("oAuth Final introspectionUrl:{} ", introspectionUrl);
-        return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token, false);
+        return AuthClientFactory.getIntrospectionResponse(introspectionUrl, header, token);
     }
 
     public String requestAccessToken(final String clientId, final List<String> scope) {
-        String accessToken = authUtil.requestAccessToken(clientId, scope);
-        log.info("oAuth AccessToken response - accessToken:{}", accessToken);      
-        return accessToken;
+        return authUtil.requestAccessToken(clientId, scope);
     }
 }

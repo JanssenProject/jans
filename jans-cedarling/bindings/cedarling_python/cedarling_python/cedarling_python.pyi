@@ -3,7 +3,7 @@
 #
 # Copyright (c) 2024, Gluu, Inc.
 
-from typing import Optional, List, final, Dict, Any
+from typing import Optional, List, final, Dict, Any, ClassVar
 from datetime import timedelta
 from enum import Enum
 
@@ -523,12 +523,12 @@ class Cedarling:
         """
         ...
 
-    def is_trusted_issuer_loaded_by_name(self, issuer_id: str) -> bool:
+    def is_trusted_issuer_loaded_by_name(self, issuer_name: str) -> bool:
         """
-        Check whether a trusted issuer was loaded by issuer identifier.
+        Check whether a trusted issuer was loaded by name.
 
         Args:
-            issuer_id: The trusted issuer identifier to check.
+            issuer_name: The issuer name to check, the `issuer` of its token types.
 
         Returns:
             True if the trusted issuer is loaded, otherwise False.
@@ -584,6 +584,7 @@ class RequestUnsigned:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -591,7 +592,33 @@ class RequestUnsigned:
         resource: EntityData,
         context: Dict[str, Any],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
+
+@final
+class TraceContext:
+    """TRACE execution context, already normalized by the host."""
+
+    execution_id: str
+    execution_authority: str
+    workload_id: str
+    workload_instance_id: Optional[str]
+
+    def __init__(
+        self,
+        execution_id: str,
+        execution_authority: str,
+        workload_id: str,
+        workload_instance_id: Optional[str] = None,
+    ) -> None: ...
+
+@final
+class AuthorizeOptions:
+    """Per-call metadata of a request; never changes the decision."""
+
+    trace: Optional[TraceContext]
+
+    def __init__(self, trace: Optional[TraceContext] = None) -> None: ...
 
 @final
 class CedarEntityMapping:
@@ -664,6 +691,7 @@ class AuthorizeMultiIssuerRequest:
     action: str
     resource: EntityData
     context: Dict[str, Any]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
@@ -671,13 +699,33 @@ class AuthorizeMultiIssuerRequest:
         action: str,
         resource: EntityData,
         context: Dict[str, Any] | None = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
+
+@final
+class DropReason:
+    """Why a token was dropped; same shape as the core JSON `reason` object."""
+
+    kind: str
+    detail: Optional[str]
+    message: str
+    # `eq` without `hash` in Rust makes instances unhashable at runtime.
+    __hash__: ClassVar[None] = ...  # type: ignore[assignment]
+    def __repr__(self) -> str: ...
+
+@final
+class DroppedToken:
+    mapping: str
+    index: int
+    reason: DropReason
+    def __repr__(self) -> str: ...
 
 @final
 class MultiIssuerAuthorizeResult:
     def is_allowed(self) -> bool: ...
     def response(self) -> AuthorizeResultResponse: ...
     def request_id(self) -> str: ...
+    def dropped_tokens(self) -> List[DroppedToken]: ...
 
 @final
 class BatchItem:
@@ -700,11 +748,13 @@ class BatchAuthorizeUnsignedRequest:
 
     principal: Optional[EntityData]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         items: List[BatchItem],
         principal: Optional[EntityData] = None,
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -713,11 +763,13 @@ class BatchAuthorizeMultiIssuerRequest:
 
     tokens: List[TokenInput]
     items: List[BatchItem]
+    options: Optional[AuthorizeOptions]
 
     def __init__(
         self,
         tokens: List[TokenInput],
         items: List[BatchItem],
+        options: Optional[AuthorizeOptions] = None,
     ) -> None: ...
 
 @final
@@ -785,6 +837,7 @@ class DataEntry:
     expires_at: Optional[str]
     access_count: int
 
+    @property
     def value(self) -> Any:
         """
         Get the value stored in this entry.

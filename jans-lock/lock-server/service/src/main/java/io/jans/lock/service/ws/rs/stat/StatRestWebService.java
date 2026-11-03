@@ -6,6 +6,7 @@ import io.jans.lock.model.stat.FlatStatResponse;
 import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -20,6 +21,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -37,8 +39,8 @@ public interface StatRestWebService {
 					ApiAccessConstants.LOCK_STAT_READ_ACCESS }))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Future stat is disabled on server", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or future stat is disabled on server", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
@@ -53,8 +55,8 @@ public interface StatRestWebService {
 					ApiAccessConstants.LOCK_STAT_READ_ACCESS }))
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FlatStatResponse.class, description = "StatFound"))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Future stat is disabled on server", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope (WWW-Authenticate: Bearer error=\"insufficient_scope\"), or future stat is disabled on server", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string")), content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ForbiddenException"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST

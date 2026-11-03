@@ -18,8 +18,11 @@ client.
 
 ## Types of Subject Identifiers
 
-Janssen Server supports both subject identifier types, `public` and `pairwise`, as specified in OpenID Connect
-specification. For a particular Janssen Server deployment, the supported types are listed in the response of Janssen
+Janssen Server supports the subject identifier types `public` and `pairwise`, as specified in OpenID Connect
+specification, and the `ephemeral` type, as specified in
+[OpenID Connect Ephemeral Subject Identifier 1.0](https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html).
+The `ephemeral` type is disabled by default. See [Ephemeral Subject Identifiers](#ephemeral-subject-identifiers)
+to enable it. For a particular Janssen Server deployment, the supported types are listed in the response of Janssen
 Server's well-known configuration endpoint is given below.
 
 ```
@@ -79,6 +82,55 @@ a pairwise identifier.
 
 Sector identifier configuration influences how pairwise identifiers are calculated. See
 [this](../client-management/sector-identifiers.md) document for more details.
+
+## Ephemeral Subject Identifiers
+
+An `ephemeral` subject identifier is a random value that stays constant for one authentication session and differs for
+every new authentication request. A client can't link two visits of the same end-user, and colluding clients can't
+link two authentication responses.
+
+Janssen Server implements
+[OpenID Connect Ephemeral Subject Identifier 1.0](https://openid.net/specs/openid-connect-ephemeral-subject-identifier-1_0.html).
+
+### Enabling
+
+The `ephemeral` type is disabled by default. To enable it:
+
+1. Add `ephemeral` to the
+   [subjectTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#subjecttypessupported)
+   property. The value is then advertised in `subject_types_supported` of the
+   [well-known configuration](../endpoints/configuration.md).
+2. Register the client with `"subject_type": "ephemeral"`, for example via
+   [Dynamic Client Registration](../endpoints/client-registration.md).
+
+Example discovery response fragment:
+
+```json
+"subject_types_supported": ["public", "pairwise", "ephemeral"]
+```
+
+### Behavior
+
+- Janssen Server generates the identifier with a cryptographically secure random generator. It has 256 bits of entropy
+  and is encoded as base64url.
+- The identifier is created when the authorization grant is created and stored in the grant attributes. The ID token,
+  UserInfo response, access token, introspection response and refresh token flow of that grant all return the same
+  `sub`.
+- A new authentication request creates a new grant and a new identifier. Janssen Server never reuses a value.
+- No sector identifier is required for clients with the `ephemeral` type.
+- Grants without an end-user, such as `client_credentials`, have no ephemeral identifier. Their `sub` is the
+  `client_id`, as for other subject types.
+- Back-channel logout is not supported for these clients, because a `logout_token` cannot carry a stable `sub`.
+  Registration and client update requests that set `backchannel_logout_uri` on an `ephemeral` client are rejected with
+  `invalid_client_metadata`. Logout skips the back-channel call for such clients if one is already stored.
+  The check also runs on the final client, after any update dynamic client registration script has run.
+- A client update that switches a client to `ephemeral` can remove the stored `backchannel_logout_uri` in the same
+  request. Send `backchannel_logout_uri` with an empty value. If the request omits the parameter, Janssen Server keeps
+  the stored value.
+- A token issued before the client switched to `ephemeral` has no stored identifier. Janssen Server rejects such a
+  token as invalid instead of returning a different `sub` on each call.
+- Janssen Server also rejects a token that has a stored identifier but whose end-user no longer exists. It does not
+  fall back to the `client_id` as `sub`.
 
 ## Properties
 

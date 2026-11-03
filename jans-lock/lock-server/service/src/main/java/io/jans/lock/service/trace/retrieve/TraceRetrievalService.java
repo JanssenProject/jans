@@ -6,14 +6,19 @@
 
 package io.jans.lock.service.trace.retrieve;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import io.jans.lock.model.error.TraceErrorResponseType;
+import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.store.TraceStore;
@@ -21,8 +26,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3, task 21), extracted out of
- * {@code TraceRestWebServiceImpl} (task 22) so the acceptance suite's {@code TraceTestHarness} can
+ * Domain-scoped TRACE record/execution retrieval (design §11.2, §11.3), extracted out of
+ * {@code TraceRestWebServiceImpl} so the acceptance suite's {@code TraceTestHarness} can
  * call the exact same logic the REST layer uses instead of re-implementing bare-id ambiguity and
  * domain scoping.
  *
@@ -67,6 +72,41 @@ public class TraceRetrievalService {
 	}
 
 	/**
+	 * The state name of the receipt entry at {@code record}'s chain position, or {@code null} when
+	 * no receipt row exists there. A visible record carries a {@code COMMITTED} receipt, or a
+	 * {@code PENDING} one during the short window before the claim is settled; a {@code VOID}
+	 * entry never belongs to a stored record (design §9).
+	 */
+	public String findReceiptState(StoredTraceRecord stored) {
+		return traceStore.findReceipt(stored.getIdentity().getDomainId(), stored.getReceipt().getReceiptSequence())
+				.map(TraceReceiptEntry::getReceiptState).orElse(null);
+	}
+
+	/**
+	 * {@link #findReceiptState} for a page of records, with one store lookup per evidence domain.
+	 *
+	 * @return receipt state names by record identity; a record without a receipt row is absent
+	 */
+	public Map<RecordIdentity, String> findReceiptStates(List<StoredTraceRecord> records) {
+		Map<String, List<StoredTraceRecord>> byDomain = records.stream()
+				.collect(Collectors.groupingBy(r -> r.getIdentity().getDomainId()));
+		Map<RecordIdentity, String> states = new HashMap<>();
+		byDomain.forEach((domainId, domainRecords) -> {
+			Map<Long, String> bySequence = new HashMap<>();
+			traceStore.findReceipts(domainId, domainRecords.stream().map(r -> r.getReceipt().getReceiptSequence())
+					.collect(Collectors.toList()))
+					.forEach(receipt -> bySequence.put(receipt.getReceiptSeq(), receipt.getReceiptState()));
+			domainRecords.forEach(r -> {
+				String state = bySequence.get(r.getReceipt().getReceiptSequence());
+				if (state != null) {
+					states.put(r.getIdentity(), state);
+				}
+			});
+		});
+		return states;
+	}
+
+	/**
 	 * @param executionAuthority the {@code execution_authority} query parameter, or blank to resolve
 	 *                           it from the domain's records
 	 * @throws TraceValidationException {@code execution_not_found} (404) when nothing matches
@@ -85,6 +125,15 @@ public class TraceRetrievalService {
 			throw new TraceValidationException(TraceErrorResponseType.EXECUTION_NOT_FOUND, REASON_EXECUTION_NOT_FOUND);
 		}
 		return new ExecutionResult(authority, records);
+	}
+
+	/**
+	 * @return the domain's records naming the queried policy store release, in receipt order; an
+	 *         empty list when nothing matches
+	 */
+	public List<StoredTraceRecord> findRecordsByPolicy(String domainId, PolicyRecordQuery query, int start,
+			int count) {
+		return traceStore.findRecordsByPolicy(domainId, query, start, count);
 	}
 
 	private String resolveSoleAuthority(String domainId, String traceExecutionId) {

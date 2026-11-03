@@ -9,17 +9,13 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 
 import io.jans.agama.NativeJansFlowBridge;
-import io.jans.agama.engine.exception.FlowTimeoutException;
+import io.jans.agama.engine.exception.*;
 import io.jans.agama.engine.model.FlowStatus;
-import io.jans.agama.engine.service.FlowService;
 
 @WebServlet(urlPatterns = RestartServlet.PATH)
 public class RestartServlet extends BaseServlet {
 
     public static final String PATH = "/fl/restart";
-    
-    @Inject
-    private FlowService flowService;
 
     @Inject
     private NativeJansFlowBridge bridge;

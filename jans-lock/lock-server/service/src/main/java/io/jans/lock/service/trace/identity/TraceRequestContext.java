@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * The resolved, immutable context of one TRACE request: which client submitted it, which evidence
  * domain it is bound to, which producer ids it may forward records for, and when/where Lock
- * received it (design decisions D-1, D-2, D-3).
+ * received it.
  *
  * @author Yuriy Movchan
  */
@@ -40,14 +40,14 @@ public class TraceRequestContext {
 	}
 
 	/**
-	 * @return the authenticated OAuth client id (design decision D-2)
+	 * @return the authenticated OAuth client id
 	 */
 	public String getClientId() {
 		return clientId;
 	}
 
 	/**
-	 * @return the evidence domain the client is bound to (design decision D-1)
+	 * @return the evidence domain the client is bound to
 	 */
 	public String getEvidenceDomainId() {
 		return evidenceDomainId;
@@ -55,7 +55,7 @@ public class TraceRequestContext {
 
 	/**
 	 * @return the producer ids the client may submit records for; {@code ["*"]} means any producer
-	 *         (design decision D-3)
+	 *
 	 */
 	public List<String> getAllowedProducerIds() {
 		return allowedProducerIds;

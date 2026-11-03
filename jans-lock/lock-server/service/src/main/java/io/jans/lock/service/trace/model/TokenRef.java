@@ -16,7 +16,7 @@ import java.util.Objects;
  * never carried here, only the reference.
  *
  * <p>Placed in {@code io.jans.lock.service.trace.model} (rather than {@code validate}) so the
- * store layer (task 12) can reuse this class directly.
+ * store layer can reuse this class directly.
  *
  * @author Yuriy Movchan
  */

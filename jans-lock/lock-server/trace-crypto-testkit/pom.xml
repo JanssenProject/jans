@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<artifactId>jans-lock-server-parent</artifactId>
+		<groupId>io.jans</groupId>
+		<version>0.0.0-nightly</version>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jans-lock-trace-crypto-testkit</artifactId>
+	<packaging>jar</packaging>
+	<name>jans lock trace crypto testkit</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<!-- Shared TRACE test helpers and vectors, consumed only in test scope. A regular jar rather
+	     than a test-jar so the reactor still resolves under -Dmaven.test.skip=true. -->
+	<dependencies>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-lock-trace-crypto-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+		</dependency>
+	</dependencies>
+</project>

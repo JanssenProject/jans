@@ -153,6 +153,15 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "validateAfterInactivity": 0,
         }),
         ("disableExternalLoggerConfiguration", False),
+        ("securityHeadersEnabled", True),
+        ("applySecurityHeadersIfUriContainsAny", [
+            "/restv1/token",
+            "/restv1/userinfo",
+            "/restv1/introspection",
+            "/restv1/jwks",
+            "/restv1/register",
+            "/restv1/revoke",
+        ]),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -261,6 +270,13 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ("startEndUrlMapping", {
             "agama/agama.xhtml": "postlogin.htm",
             "agama/consent.xhtml": "agama/consent_authorize.htm",
+        }),
+        # add tracking settings
+        ("trackingSettings", {
+            "enabled": False,
+            "skipTemplateViews": False,
+            "skipInstructionFrequencies": False,
+            "excludedFlows": [],
         }),
     ]:
         if new_key not in conf["agamaConfiguration"]:

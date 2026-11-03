@@ -8,8 +8,8 @@
 
 use crate::*;
 use cedarling::{
-    AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
-    BatchItem, EntityData, RequestUnsigned, TokenInput,
+    AuthorizeMultiIssuerRequest, AuthorizeOptions, BatchAuthorizeMultiIssuerRequest,
+    BatchAuthorizeUnsignedRequest, BatchItem, EntityData, RequestUnsigned, TokenInput,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -184,6 +184,7 @@ async fn test_run_cedarling() {
             }
         }))
         .expect("ResourceData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str =
@@ -327,6 +328,7 @@ async fn test_memory_log_interface() {
             }
         }))
         .expect("ResourceData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str =
@@ -414,6 +416,7 @@ async fn test_authorize_unsigned_single_principal_allow() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -468,6 +471,7 @@ async fn test_annotations_of_determining_policies() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -546,6 +550,7 @@ async fn test_authorize_unsigned_no_principal_public_action_allow() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -588,6 +593,7 @@ async fn test_authorize_unsigned_no_principal_principal_dependent_deny() {
         }))
         .expect("ResourceData should be deserialized correctly"),
         context: json!({}),
+        options: AuthorizeOptions::default(),
     };
 
     let result = instance
@@ -662,6 +668,7 @@ async fn test_multi_issuer_authorize_single_token() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -780,6 +787,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -856,6 +864,7 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -874,6 +883,116 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
     assert!(
         !result.request_id.is_empty(),
         "request_id should be present"
+    );
+}
+
+/// `droppedTokens()` exposes typed getters backed by the core values, and
+/// `JSON.stringify` yields the same object as the core JSON form.
+#[wasm_bindgen_test]
+async fn test_multi_issuer_dropped_tokens_expose_core_values() {
+    let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    let instance = init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map");
+
+    let valid_token = generate_token_using_claims(json!({
+        "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+        "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+        "iss": "https://test.jans.org",
+        "token_type": "Bearer",
+        "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+        "acr": "basic",
+        "x5t#S256": "",
+        "scope": ["openid", "profile"],
+        "org_id": "some_long_id",
+        "auth_time": 1724830746,
+        "exp": 2000000000,
+        "iat": 1724832259,
+        "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+        "name": "Default Admin User",
+        "status": {
+            "status_list": {
+                "idx": 201,
+                "uri": "https://test.jans.org/jans-auth/restv1/status_list"
+            }
+        }
+    }));
+
+    let multi_issuer_request = AuthorizeMultiIssuerRequest {
+        tokens: vec![
+            TokenInput::new("Jans::Access_Token".to_string(), valid_token),
+            TokenInput::new("Invalid::Token".to_string(), "not-a-valid-jwt".to_string()),
+        ],
+        resource: EntityData::deserialize(json!({
+            "cedar_entity_mapping": {
+                "entity_type": "Jans::Issue",
+                "id": "random_id"
+            },
+            "org_id": "some_long_id",
+            "country": "US"
+        }))
+        .expect("Resource should be deserialized correctly"),
+        action: "Jans::Action::\"Update\"".to_string(),
+        context: Some(json!({})),
+        options: AuthorizeOptions::default(),
+    };
+    let request_str = serde_json::to_string(&multi_issuer_request)
+        .expect("Multi-issuer request should serialize to JSON");
+    let result = instance
+        .authorize_multi_issuer(&request_str)
+        .await
+        .expect("Should succeed gracefully when some tokens are invalid");
+
+    let dropped = result.dropped_tokens();
+    assert_eq!(dropped.len(), 1, "one invalid token should be dropped");
+    let first = &dropped[0];
+    assert_eq!(
+        first.mapping(),
+        "Invalid::Token",
+        "mapping of the dropped input"
+    );
+    assert_eq!(first.index(), 1, "index of the dropped input");
+
+    let reason = first.reason();
+    assert_eq!(
+        reason.kind(),
+        "jwt_validation_failed",
+        "dropped invalid mapping should report jwt_validation_failed"
+    );
+    assert_eq!(
+        reason.detail(),
+        None,
+        "detail is undefined for unit reasons"
+    );
+    assert_eq!(
+        reason.message(),
+        "JWT validation failed",
+        "message is the claim-free Display text"
+    );
+
+    // `toJSON` makes `JSON.stringify` produce the core JSON form instead of `{}`.
+    let json_str: String =
+        wasm_bindgen_futures::js_sys::JSON::stringify(&JsValue::from(first.clone()))
+            .expect("JSON.stringify(droppedToken) should succeed")
+            .into();
+    let json: serde_json::Value =
+        serde_json::from_str(&json_str).expect("stringified dropped token is valid JSON");
+    assert_eq!(
+        json,
+        json!({
+            "mapping": "Invalid::Token",
+            "index": 1,
+            "reason": {
+                "kind": "jwt_validation_failed",
+                "message": "JWT validation failed"
+            }
+        }),
+        "JSON.stringify(droppedToken) must match the core JSON form"
     );
 }
 
@@ -905,6 +1024,7 @@ async fn test_multi_issuer_authorize_validation_empty_token_array() {
         .expect("Resource should be deserialized correctly"),
         action: "Jans::Action::\"Update\"".to_string(),
         context: Some(json!({})),
+        options: AuthorizeOptions::default(),
     };
 
     let request_str = serde_json::to_string(&multi_issuer_request)
@@ -1667,6 +1787,7 @@ async fn test_drain_metrics_local_mode_snapshot_and_reset() {
             }
         }))
         .expect("resource EntityData should be deserialized correctly"),
+        options: AuthorizeOptions::default(),
     };
     let request_str =
         serde_json::to_string(&request).expect("RequestUnsigned should serialize to JSON");
@@ -1743,5 +1864,117 @@ async fn test_metrics_snapshot_json_string() {
     assert!(
         parsed.get("interval_secs").is_some(),
         "json must contain interval_secs, got: {json}"
+    );
+}
+
+/// Archive bytes have no location to derive a bundle from, so enforcing the
+/// signature check without `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` must
+/// fail and say which property to set.
+#[wasm_bindgen_test]
+async fn test_init_from_archive_bytes_enforce_requires_bundle_uri() {
+    let config = json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_LOG_TYPE": "off",
+        "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "signer@example.com",
+        "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
+    });
+    let config = serde_wasm_bindgen::to_value(&config)
+        .expect("serde json value should be converted to JsValue");
+    let config = Object::from_entries(&config).expect("map value should be converted to object");
+    let archive = js_sys::Uint8Array::from(&b"archive bytes"[..]);
+
+    let err = init_from_archive_bytes(config.into(), archive)
+        .await
+        .err()
+        .expect("enforce without a bundle URI must fail");
+    assert!(
+        err.to_string()
+            .contains("CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI"),
+        "error must name the bundle URI property, got: {err}"
+    );
+}
+
+/// Unsigned request JSON as a JS host sends it, with `principal.is_ok` and an
+/// optional `options` member.
+fn unsigned_request_json(is_ok: bool, options: Option<serde_json::Value>) -> String {
+    let mut request = json!({
+        "principal": {
+            "cedar_entity_mapping": {"entity_type": "Jans::TestPrincipal1", "id": "1"},
+            "is_ok": is_ok
+        },
+        "action": "Jans::Action::\"UpdateForTestPrincipals\"",
+        "resource": {
+            "cedar_entity_mapping": {"entity_type": "Jans::Issue", "id": "random_id"},
+            "org_id": "some_long_id",
+            "country": "US"
+        },
+        "context": {}
+    });
+    if let Some(options) = options {
+        request["options"] = options;
+    }
+    request.to_string()
+}
+
+async fn no_issuers_instance() -> Cedarling {
+    let conf_map_js_value = serde_wasm_bindgen::to_value(&*NO_ISSUERS_BOOTSTRAP_CONFIG)
+        .expect("serde json value should be converted to JsValue");
+    let conf_object =
+        Object::from_entries(&conf_map_js_value).expect("map value should be converted to object");
+    init(conf_object.into())
+        .await
+        .expect("init function should be initialized with js map")
+}
+
+/// `options` passes through the JSON boundary without binding code and never
+/// changes the decision, allow or deny.
+#[wasm_bindgen_test]
+async fn authorize_unsigned_accepts_options_field() {
+    let instance = no_issuers_instance().await;
+    let options = json!({"trace": {
+        "execution_id": "exec-1",
+        "execution_authority": "https://gateway.example.com",
+        "workload_id": "workload-1",
+        "workload_instance_id": "workload-1-a"
+    }});
+
+    for is_ok in [true, false] {
+        let plain = instance
+            .authorize_unsigned(&unsigned_request_json(is_ok, None))
+            .await
+            .expect("request without options should be authorized");
+        let traced = instance
+            .authorize_unsigned(&unsigned_request_json(is_ok, Some(options.clone())))
+            .await
+            .expect("request with options should be authorized");
+        assert_eq!(
+            plain.decision, is_ok,
+            "baseline decision should follow is_ok"
+        );
+        assert_eq!(
+            traced.decision, plain.decision,
+            "options must not change the decision (is_ok = {is_ok})"
+        );
+    }
+}
+
+/// A trace context without a mandatory member is malformed input, rejected
+/// like any other invalid request JSON.
+#[wasm_bindgen_test]
+async fn invalid_trace_context_in_json_is_error() {
+    let instance = no_issuers_instance().await;
+    let options = json!({"trace": {
+        "execution_id": "exec-1",
+        "execution_authority": "https://gateway.example.com"
+    }});
+
+    let err = instance
+        .authorize_unsigned(&unsigned_request_json(true, Some(options)))
+        .await
+        .expect_err("trace context without workload_id should be rejected");
+    assert!(
+        err.to_string().contains("workload_id"),
+        "error should name the missing member, got: {err}"
     );
 }

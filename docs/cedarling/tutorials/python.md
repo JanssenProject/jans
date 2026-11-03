@@ -131,7 +131,7 @@ Cedarling provides two main interfaces for performing authorization checks: **To
 
 #### Token-Based Authorization (Multi-Issuer)
 
-For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+For token-based authorization, use `authorize_multi_issuer` which processes JWT tokens and maps them to Cedar entities based on the token types declared in your policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 
 **1. Prepare tokens**
 
@@ -354,7 +354,7 @@ else:
 
 | Feature         | authorize_unsigned                              | authorize_multi_issuer                    |
 | --------------- | ----------------------------------------------- | ----------------------------------------- |
-| Principal Model | Directly provided entities                      | Token-derived (from `token_metadata`)     |
+| Principal Model | Directly provided entities                      | Token-derived (from `trusted-issuers.json`) |
 | Token Sources   | No tokens required                              | Multiple issuers supported                |
 | Result Type     | `AuthorizeResult`                               | `MultiIssuerAuthorizeResult`              |
 | Decision Access | `result.decision`, `result.response`            | `result.decision` (boolean)               |
@@ -406,5 +406,5 @@ logs: dict = cedarling.get_log_by_id(request_id)
 
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#step-1-create-the-cedar-policy-and-schema)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)
 - [Multi-Issuer Authorization Details](../reference/cedarling-authz.md#multi-issuer-authorization-authorize_multi_issuer-recommended)

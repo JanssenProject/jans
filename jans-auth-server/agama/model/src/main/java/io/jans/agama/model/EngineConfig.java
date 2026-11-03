@@ -20,9 +20,6 @@ public class EngineConfig {
     private String scriptsPath = "/scripts";
     
     private int maxItemsLoggedInCollections = 3;
-    
-    //transpiled code hash verification. Boolean preferred over boolean because it helps to keep the property "hidden"
-    private Boolean disableTCHV;
 
     private String pageMismatchErrorPage;
     private String interruptionErrorPage;
@@ -34,6 +31,8 @@ public class EngineConfig {
 
     private Map<String, String> defaultResponseHeaders = Map.of(
             HttpHeaders.CACHE_CONTROL, "max-age=0, no-store");
+
+    private TrackingSettings trackingSettings = new TrackingSettings();
 
     public String getJsonErrorPage(String page) {
         return "json_"+ page;
@@ -92,14 +91,6 @@ public class EngineConfig {
         this.maxItemsLoggedInCollections = maxItemsLoggedInCollections;
     }
 
-    public Boolean getDisableTCHV() {
-        return disableTCHV;
-    }
-
-    public void setDisableTCHV(Boolean disableTCHV) {
-        this.disableTCHV = disableTCHV;
-    }
-
     public String getCrashErrorPage() {
         return crashErrorPage;
     }
@@ -146,6 +137,14 @@ public class EngineConfig {
 
     public void setSerializeRules(Map<String, List<String>> serializeRules) {
         this.serializeRules = serializeRules;
+    }
+
+    public TrackingSettings getTrackingSettings() {        
+        return trackingSettings;
+    }
+
+    public void setTrackingSettings(TrackingSettings trackingSettings) {        
+        this.trackingSettings = trackingSettings;
     }
 
 }

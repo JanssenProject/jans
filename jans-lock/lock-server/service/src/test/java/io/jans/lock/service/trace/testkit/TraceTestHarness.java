@@ -15,16 +15,18 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import org.slf4j.LoggerFactory;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
+import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.correlation.TraceCorrelationService;
-import io.jans.lock.service.trace.crypto.Ed25519Capability;
-import io.jans.lock.service.trace.crypto.Ed25519Verifier;
+import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
 import io.jans.lock.service.trace.ingest.TraceIngestionService;
@@ -34,22 +36,26 @@ import io.jans.lock.service.trace.parse.CommonAssertionValidator;
 import io.jans.lock.service.trace.parse.TraceAssertionParser;
 import io.jans.lock.service.trace.receipt.ChainVerificationReport;
 import io.jans.lock.service.trace.receipt.TraceReceiptChain;
+import io.jans.lock.service.trace.receipt.TraceReceiptRepairTimer;
 import io.jans.lock.service.trace.registry.ProducerChainRegistry;
 import io.jans.lock.service.trace.registry.ProducerKeyRegistry;
 import io.jans.lock.service.trace.retrieve.TraceRetrievalService;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
+import io.jans.lock.service.trace.store.TraceStore;
+import io.jans.lock.service.trace.store.TraceKeys;
 import io.jans.lock.service.trace.validate.EventKindValidatorRegistry;
 import io.jans.lock.service.trace.verify.TraceVerificationService;
+import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 
 /**
- * Task 22 consolidated test harness: wires the real TRACE collaborators (parser, common/event-kind
+ * Test harness: wires the real TRACE collaborators (parser, common/event-kind
  * validation, verification, correlation, receipt-chain allocation, ingestion, retrieval) around one
  * shared {@link InMemoryTraceStore} and a mutable {@link TraceConfiguration}, exactly the way
- * {@code TraceIngestionServiceTest} (task 19) wires them inline. Nothing here is mocked: every
+ * {@code TraceIngestionServiceTest} wires them inline. Nothing here is mocked: every
  * collaborator, including {@link AppConfiguration}, is a real instance.
  *
  * <p>Every "now" in the suite flows through {@link #setNow(long)}: it fixes
- * {@link CommonAssertionValidator}'s clock (design D-11's {@code signed_at_in_future} check) and
+ * {@link CommonAssertionValidator}'s clock (the {@code signed_at_in_future} check) and
  * becomes the default {@code received_at_ms} for {@link #ctx(String, String, String...)}, so a test
  * is fully deterministic without touching the system clock.
  */
@@ -64,7 +70,11 @@ public final class TraceTestHarness {
 	/** One second after the design-example fixtures' {@code trace.signed_at} (1700000000s). */
 	public static final long DEFAULT_NOW_MS = 1_700_000_001_000L;
 
-	private final InMemoryTraceStore store = new InMemoryTraceStore();
+	private final TraceCryptoProvider cryptoProvider;
+
+	private final TraceKeys traceKeys;
+
+	private final TraceStore store;
 
 	private final AppConfiguration appConfiguration = new AppConfiguration();
 
@@ -80,60 +90,109 @@ public final class TraceTestHarness {
 
 	private final TraceReceiptChain receiptChain = new TraceReceiptChain();
 
+	private final TraceReceiptRepairTimer repairTimer = new TraceReceiptRepairTimer();
+
 	private final TraceIngestionService ingestionService = new TraceIngestionService();
 
 	private final TraceRetrievalService retrievalService = new TraceRetrievalService();
 
 	private volatile long nowMs = DEFAULT_NOW_MS;
 
+	/** Wires the harness over the {@code JAVA} provider. */
 	public TraceTestHarness() {
-		TraceTestKeys.installProvider();
+		this(TraceTestCrypto.javaProvider());
+	}
+
+	/** Wires the harness over {@code provider}, e.g. the {@code NATIVE} provider in a parity suite. */
+	public TraceTestHarness(TraceCryptoProvider provider) {
+		this(provider, InMemoryTraceStore::new);
+	}
+
+	/** Wires the harness over {@code provider} and the store {@code storeFactory} builds from the harness' {@link TraceKeys}. */
+	public TraceTestHarness(TraceCryptoProvider provider, Function<TraceKeys, ? extends TraceStore> storeFactory) {
+		this.cryptoProvider = provider;
+		this.traceKeys = new TraceKeys(provider);
+		this.store = storeFactory.apply(traceKeys);
 
 		TraceAssertionParser parser = new TraceAssertionParser();
 		setField(parser, "appConfiguration", appConfiguration);
+		setField(parser, "cryptoProvider", provider);
 
 		setField(commonValidator, "appConfiguration", appConfiguration);
 		setField(commonValidator, "clock", fixedClock(nowMs));
 
 		setField(keyRegistry, "traceStore", store);
 		setField(keyRegistry, "log", LoggerFactory.getLogger(ProducerKeyRegistry.class));
+		setField(keyRegistry, "cryptoProvider", provider);
 
 		setField(chainRegistry, "traceStore", store);
 
-		Ed25519Capability capability = new Ed25519Capability();
-		capability.probe();
-
 		TraceVerificationService verification = new TraceVerificationService();
 		setField(verification, "log", LoggerFactory.getLogger(TraceVerificationService.class));
-		setField(verification, "capability", capability);
+		setField(verification, "cryptoProvider", provider);
 		setField(verification, "parser", parser);
 		setField(verification, "commonValidator", commonValidator);
 		setField(verification, "eventKindRegistry", new EventKindValidatorRegistry());
 		setField(verification, "keyRegistry", keyRegistry);
-		setField(verification, "verifier", new Ed25519Verifier());
 
 		setField(correlation, "log", LoggerFactory.getLogger(TraceCorrelationService.class));
 		setField(correlation, "store", store);
 		setField(correlation, "chainRegistry", chainRegistry);
 		setField(correlation, "appConfiguration", appConfiguration);
+		setField(correlation, "traceKeys", traceKeys);
+		setField(correlation, "policyMismatchCheck", PolicyMismatchChecks.none());
 
 		setField(receiptChain, "log", LoggerFactory.getLogger(TraceReceiptChain.class));
 		setField(receiptChain, "store", store);
 		setField(receiptChain, "appConfiguration", appConfiguration);
+		setField(receiptChain, "cryptoProvider", provider);
+		setField(receiptChain, "clock", fixedClock(nowMs));
+
+		setField(repairTimer, "log", LoggerFactory.getLogger(TraceReceiptRepairTimer.class));
+		setField(repairTimer, "store", store);
+		setField(repairTimer, "appConfiguration", appConfiguration);
+		setField(repairTimer, "receiptChain", receiptChain);
 
 		setField(ingestionService, "log", LoggerFactory.getLogger(TraceIngestionService.class));
 		setField(ingestionService, "verification", verification);
 		setField(ingestionService, "correlation", correlation);
 		setField(ingestionService, "receiptChain", receiptChain);
 		setField(ingestionService, "store", store);
+		setField(ingestionService, "traceKeys", traceKeys);
 
 		setField(retrievalService, "traceStore", store);
 	}
 
 	// -- shared state access -----------------------------------------------------------------------
 
+	public TraceCryptoProvider cryptoProvider() {
+		return cryptoProvider;
+	}
+
+	/** @return the in-memory store; fails when the harness was wired over another {@link TraceStore} */
 	public InMemoryTraceStore store() {
+		return (InMemoryTraceStore) store;
+	}
+
+	public TraceStore traceStore() {
 		return store;
+	}
+
+	public TraceIngestionService ingestionService() {
+		return ingestionService;
+	}
+
+	public TraceCorrelationService correlation() {
+		return correlation;
+	}
+
+	public TraceReceiptChain receiptChain() {
+		return receiptChain;
+	}
+
+	/** Runs one repair pass directly, bypassing the CDI timer event. */
+	public void repairPendingReceipts() {
+		repairTimer.repairPendingReceipts();
 	}
 
 	public TraceConfiguration traceConfiguration() {
@@ -141,12 +200,13 @@ public final class TraceTestHarness {
 	}
 
 	/**
-	 * Fixes "now" for both {@link CommonAssertionValidator}'s {@code signed_at_in_future} check and
-	 * the default {@code received_at_ms} used by {@link #ctx(String, String, String...)}.
+	 * Fixes "now" for {@link CommonAssertionValidator}'s {@code signed_at_in_future} check, the receipt
+	 * chain's fence and claim time, and the default {@code received_at_ms} used by {@link #ctx(String, String, String...)}.
 	 */
 	public void setNow(long nowMs) {
 		this.nowMs = nowMs;
 		setField(commonValidator, "clock", fixedClock(nowMs));
+		setField(receiptChain, "clock", fixedClock(nowMs));
 	}
 
 	public long now() {
@@ -155,22 +215,40 @@ public final class TraceTestHarness {
 
 	// -- registries ---------------------------------------------------------------------------------
 
+	/** Registers a key authorized for every event kind. */
 	public KeyPair registerKey(String domainId, String producerId, String kid) {
 		return registerKey(domainId, producerId, kid, 0L, null);
 	}
 
+	/** Registers a key authorized only for {@code authorizedEventKinds}. */
+	public KeyPair registerKey(String domainId, String producerId, String kid, List<String> authorizedEventKinds) {
+		KeyPair keyPair = TraceTestKeys.generateKeyPair();
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				authorizedEventKinds, 0L, null, DEFAULT_REGISTERED_BY, 0L);
+		return keyPair;
+	}
+
 	/** Registers a caller-supplied key pair instead of generating one (e.g. to reuse it across domains). */
 	public KeyPair registerKey(String domainId, String producerId, String kid, KeyPair keyPair) {
-		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()), 0L, null,
-				DEFAULT_REGISTERED_BY, 0L);
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				allEventKinds(), 0L, null, DEFAULT_REGISTERED_BY, 0L);
 		return keyPair;
 	}
 
 	public KeyPair registerKey(String domainId, String producerId, String kid, long validFromMs, Long validUntilMs) {
 		KeyPair keyPair = TraceTestKeys.generateKeyPair();
-		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()), validFromMs,
-				validUntilMs, DEFAULT_REGISTERED_BY, Math.max(validFromMs, 0L));
+		keyRegistry.register(domainId, producerId, kid, TraceTestKeys.toJwk(keyPair.getPublic()),
+				allEventKinds(), validFromMs, validUntilMs, DEFAULT_REGISTERED_BY, Math.max(validFromMs, 0L));
 		return keyPair;
+	}
+
+	/** Revokes a registered key as of {@code revokedAtMs}. */
+	public void revokeKey(String domainId, String producerId, String kid, long revokedAtMs) {
+		keyRegistry.revoke(domainId, producerId, kid, revokedAtMs);
+	}
+
+	private static List<String> allEventKinds() {
+		return new ArrayList<>(TraceConstants.EVENT_KINDS);
 	}
 
 	public void registerChain(String domainId, String producerId, String instanceId, String chainId) {

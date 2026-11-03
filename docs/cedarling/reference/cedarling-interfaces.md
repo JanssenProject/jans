@@ -249,6 +249,10 @@ The following methods are called on the result obtained from the authorization c
 
     The request ID for this authorization call, used for log retrieval and auditing
 
+- `dropped_tokens`
+
+    The supplied tokens that were not used in this decision (empty when every token contributed). See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
+
 ## Logs
 
 These methods are called to retrieve logs from the memory of the Cedarling instance when it is running in `memory` mode.
@@ -484,7 +488,7 @@ This interface is particularly useful when `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE
 
 ### Methods
 
-- `is_trusted_issuer_loaded_by_name(issuer_id)` — Returns `true` if the trusted issuer with the given policy store key is loaded.
+- `is_trusted_issuer_loaded_by_name(issuer_name)` — Returns `true` if the trusted issuer with the given name, the `issuer` of its token types, is loaded.
 
 - `is_trusted_issuer_loaded_by_iss(iss_claim)` — Returns `true` if the trusted issuer with the given `iss` claim value is loaded.
 

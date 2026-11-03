@@ -22,6 +22,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import uniffi.cedarling_uniffi.Cedarling;
+import uniffi.cedarling_uniffi.CedarlingException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -35,11 +37,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -186,7 +187,7 @@ public class AdminUISecurityService {
      * @param adminUIPolicyStore the source of the editable field values
      * @return a {@link GenericResponse} indicating success
      * @throws ApplicationException with HTTP 400 if the request or inum is invalid, HTTP 404 if
-     *         no store exists for the inum, or HTTP 500 if the update fails
+     *                              no store exists for the inum, or HTTP 500 if the update fails
      */
     public GenericResponse editPolicyStore(String inum, AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         try {
@@ -314,7 +315,7 @@ public class AdminUISecurityService {
      * @param inum the inum of the policy store to delete
      * @return a {@link GenericResponse} indicating success
      * @throws ApplicationException with HTTP 400 if the inum is blank, or HTTP 404 if no store
-     *         exists for the inum
+     *                              exists for the inum
      */
     public GenericResponse deletePolicyStore(String inum) throws ApplicationException {
         if (Strings.isNullOrEmpty(inum)) {
@@ -367,12 +368,12 @@ public class AdminUISecurityService {
      * Validates a policy-store upload request.
      *
      * <p>Ensures the request and its base64 document are present, that the decoded bytes are a
-     * zip archive, and that the trusted-issuer domain inside the archive matches the configured
-     * Admin UI web-server host.</p>
+     * zip archive Cedarling can initialize, and that every trusted-issuer endpoint matches the
+     * configured Admin UI web-server host before Cedarling is initialized.</p>
      *
      * @param adminUIPolicyStore the policy store to validate
      * @throws ApplicationException with HTTP 400 if the request is missing/malformed, not a zip,
-     *         or its domain does not match the configured host
+     *                              Cedarling cannot initialize with it, or an issuer endpoint does not match the configured host
      */
     private void validateRequest(AdminUIPolicyStore adminUIPolicyStore) throws ApplicationException {
         if (adminUIPolicyStore == null) {
@@ -389,6 +390,12 @@ public class AdminUISecurityService {
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.BAD_REQUEST_IN_POLICY_STORE_UPLOAD.getDescription()
+            );
+        }
+        if (base64PolicyStore.length() > MAX_ENTRY_SIZE) {
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.POLICY_STORE_UPLOAD_TOO_LARGE.getDescription()
             );
         }
 
@@ -412,37 +419,106 @@ public class AdminUISecurityService {
             );
         }
 
-        try (InputStream cjarStream = new ByteArrayInputStream(zipBytes)) {
+        try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            validatePolicyStoreDomain(cjarStream, auiConfiguration.getAuiWebServerHost());
+            validateTrustedIssuerDomains(zipBytes, auiConfiguration.getAuiWebServerHost());
+
+            JSONObject cedarlingConfig = new JSONObject()
+                    .put("CEDARLING_APPLICATION_NAME", "AdminUI")
+                    .put("CEDARLING_LOG_TYPE", "off")
+                    .put("CEDARLING_LOG_LEVEL", "INFO");
+            ByteBuffer archiveBuffer = ByteBuffer.allocateDirect(zipBytes.length);
+            archiveBuffer.put(zipBytes);
+            archiveBuffer.flip();
+            try (Cedarling cedarling = Cedarling.Companion.loadFromJsonWithArchiveBytes(
+                    cedarlingConfig.toString(), archiveBuffer)) {
+                cedarling.shutDown();
+            }
+
         } catch (ApplicationException e) {
             throw e;
-        } catch (URISyntaxException | IOException e) {
+        } catch (CedarlingException e) {
+            log.error("Cedarling initialization failed for uploaded policy-store.", e);
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
-                    e.getMessage()
+                    ErrorResponse.POLICY_STORE_INITIALIZATION_ERROR.getDescription() + ": " + e.getMessage()
             );
         }
     }
 
     /**
-     * Verifies that the trusted-issuer domain inside the policy-store archive matches the
-     * host of the configured Admin UI web-server URL.
+     * Validates every trusted issuer's endpoint host before Cedarling initializes the archive.
      *
-     * @param cjarStream    the policy-store archive stream to inspect
+     * @param zipBytes      the policy-store archive bytes
      * @param webServerHost the configured Admin UI web-server URL whose host must match
-     * @throws ApplicationException with HTTP 400 if the domains do not match
-     * @throws URISyntaxException   if {@code webServerHost} is not a valid URI
+     * @throws ApplicationException with HTTP 400 if an endpoint is invalid or its host does not match
      */
-    private void validatePolicyStoreDomain(InputStream cjarStream, String webServerHost)
-            throws ApplicationException, URISyntaxException {
+    private void validateTrustedIssuerDomains(byte[] zipBytes, String webServerHost)
+            throws ApplicationException {
+        try {
+            URI webServerUri = new URI(webServerHost);
+            String expectedDomain = webServerUri.getHost();
+            if (expectedDomain == null || expectedDomain.isBlank()) {
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Invalid configured Admin UI web-server host"
+                );
+            }
 
-        URI uri = new URI(webServerHost);
-        if (!isHostnameMatching(cjarStream, uri.getHost())) {
-            log.error(ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+            boolean adminUiIssuerFound = false;
+            try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    String entryName = entry.getName();
+                    if (entry.isDirectory() || entryName == null ||
+                            !entryName.startsWith("trusted-issuers/") || !entryName.endsWith(".json")) {
+                        zis.closeEntry();
+                        continue;
+                    }
+                    if (entryName.contains("..") || entryName.startsWith("/")) {
+                        throw new ApplicationException(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                "Invalid trusted-issuer file path"
+                        );
+                    }
+
+                    JSONObject issuer = new JSONObject(readEntryContentSafely(zis));
+                    String endpointField = issuer.has("openid_configuration_endpoint")
+                            ? "openid_configuration_endpoint"
+                            : "configuration_endpoint";
+                    if (!issuer.has(endpointField)) {
+                        throw new ApplicationException(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName
+                        );
+                    }
+                    URI endpointUri = new URI(issuer.getString(endpointField));
+                    String issuerDomain = endpointUri.getHost();
+                    if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
+                        log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
+                        throw new ApplicationException(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
+                        );
+                    }
+                    adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
+                    zis.closeEntry();
+                }
+            }
+
+            if (!adminUiIssuerFound) {
+                throw new ApplicationException(
+                        Response.Status.BAD_REQUEST.getStatusCode(),
+                        "Trusted issuer file not found in ZIP: " + TRUSTED_ISSUER_FILE
+                );
+            }
+        } catch (ApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
-                    ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
+                    "Error processing trusted issuers: " + e.getMessage()
             );
         }
     }
@@ -565,7 +641,7 @@ public class AdminUISecurityService {
      * Decodes the base64 policy-store document into a temporary .cjar archive and derives
      * principal-to-scope mappings from it. The temporary file is always removed afterwards.
      *
-     * @param policyStore      the active policy-store whose document should be parsed
+     * @param policyStore        the active policy-store whose document should be parsed
      * @param resourceScopesJson the resource-to-scope mappings used during parsing
      * @return principal-to-scope mappings derived from the policy-store
      * @throws ApplicationException if the document cannot be decoded or parsed
@@ -660,74 +736,6 @@ public class AdminUISecurityService {
      */
     public String getDnForPolicyStore(String inum) {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
-    }
-
-    /**
-     * Validates that the trusted issuer's `configuration_endpoint` host inside the provided JSON stream matches the expected domain.
-     *
-     * @param zipInputStream an InputStream containing the JSON content of the trusted issuer (e.g., the `trusted-issuers/GluuFlexAdminUI.json` entry)
-     * @param expectedDomain the domain expected to match the `configuration_endpoint` host
-     * @return `true` if the `configuration_endpoint` host equals `expectedDomain` (case-insensitive), `false` otherwise
-     * @throws ApplicationException if the input cannot be read or parsed, or if the `configuration_endpoint` value is not a valid URI
-     */
-
-    private boolean isHostnameMatching(InputStream zipInputStream, String expectedDomain)
-            throws ApplicationException {
-
-        if (zipInputStream == null || expectedDomain == null || expectedDomain.isBlank()) {
-            throw new ApplicationException(
-                    Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Invalid input: zipInputStream or expectedDomain is null/empty"
-            );
-        }
-        try (ZipInputStream zis = new ZipInputStream(zipInputStream)) {
-            ZipEntry entry;
-
-            while ((entry = zis.getNextEntry()) != null) {
-                String entryName = entry.getName();
-                // Basic validation
-                if (entry.isDirectory() || entryName == null ||
-                        entryName.contains("..") || entryName.startsWith("/")) {
-                    zis.closeEntry();
-                    continue;
-                }
-                if (!TRUSTED_ISSUER_FILE.equals(entryName)) {
-                    zis.closeEntry();
-                    continue;
-                }
-                // Read safely with limit
-                String content = readEntryContentSafely(zis);
-
-                JSONObject json = new JSONObject(content);
-
-                if (!json.has("configuration_endpoint")) {
-                    throw new ApplicationException(
-                            Response.Status.BAD_REQUEST.getStatusCode(),
-                            "Missing 'configuration_endpoint' in JSON"
-                    );
-                }
-                String endpoint = json.getString("configuration_endpoint");
-                URI uri = new URI(endpoint);
-                String domain = uri.getHost();
-
-                log.info("Domain of OpenID Provider: {}, Domain of trusted issuer: {}",
-                        expectedDomain, domain);
-
-                return domain != null && domain.equalsIgnoreCase(expectedDomain);
-            }
-            throw new ApplicationException(
-                    Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Trusted issuer file not found in ZIP"
-            );
-        } catch (ApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_IN_POLICY_STORE.getDescription(), e);
-            throw new ApplicationException(
-                    Response.Status.BAD_REQUEST.getStatusCode(),
-                    "Error processing ZIP: " + e.getMessage()
-            );
-        }
     }
 
     /**

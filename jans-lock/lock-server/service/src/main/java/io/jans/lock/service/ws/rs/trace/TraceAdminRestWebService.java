@@ -19,6 +19,7 @@ import io.jans.lock.util.ApiAccessConstants;
 import io.jans.service.security.api.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -31,13 +32,13 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
  * Admin REST API for TRACE producer-key and producer-chain registration/listing/revocation
- * (design §6, §8, TRACE MVP task 15), scoped to the admin client's evidence domain (design
- * decision D-1). Every method requires the {@code trace.admin} scope.
+ * (design §6, §8), scoped to the admin client's evidence domain. Every method requires the {@code trace.admin} scope.
  *
  * <p>{@code producer_id} may contain {@code /}, so it is never carried in a path segment; every
  * identifier travels in the request body or as a query parameter.
@@ -54,15 +55,15 @@ public interface TraceAdminRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProducerKeyResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ConflictException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/producer-keys")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RegisterProducerKey")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_write", path = "/audit/trace/admin/producer-keys")
 	Response registerProducerKey(ProducerKeyRegistrationRequest request);
 
@@ -72,13 +73,13 @@ public interface TraceAdminRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProducerKeyListResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@Path("/producer-keys")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "ListProducerKeys")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_read", path = "/audit/trace/admin/producer-keys")
 	Response listProducerKeys(
 			@Parameter(description = "Restrict the result to one producer id") @QueryParam("producer_id") String producerId);
@@ -90,15 +91,15 @@ public interface TraceAdminRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProducerKeyResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "NotFoundException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/producer-keys/revoke")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RevokeProducerKey")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_key_revoke", path = "/audit/trace/admin/producer-keys/revoke")
 	Response revokeProducerKey(ProducerKeyRevokeRequest request);
 
@@ -109,15 +110,15 @@ public interface TraceAdminRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProducerChainResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "ConflictException"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@POST
 	@Path("/producer-chains")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "RegisterProducerChain")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"POST\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_chain_write", path = "/audit/trace/admin/producer-chains")
 	Response registerProducerChain(ProducerChainRegistrationRequest request);
 
@@ -127,13 +128,13 @@ public interface TraceAdminRestWebService {
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProducerChainListResponse.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "BadRequestException"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "403", description = "Forbidden"),
+			@ApiResponse(responseCode = "401", description = "Missing, expired, revoked or invalid access token", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge; error=\"invalid_token\" when a token was sent", schema = @Schema(type = "string"))),
+			@ApiResponse(responseCode = "403", description = "Access token lacks a required scope", headers = @Header(name = HttpHeaders.WWW_AUTHENTICATE, description = "Bearer challenge with error=\"insufficient_scope\"", schema = @Schema(type = "string"))),
 			@ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LockApiError.class, description = "InternalServerError"))), })
 	@GET
 	@Path("/producer-chains")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS })
+	@ProtectedApi(scopes = { ApiAccessConstants.LOCK_TRACE_ADMIN_ACCESS }, grpcMethodName = "ListProducerChains")
 	@ProtectedCedarlingApi(action = "Jans::Action::\"GET\"", resource = "Jans::HTTP_Request", id = "lock_audit_trace_admin_chain_read", path = "/audit/trace/admin/producer-chains")
 	Response listProducerChains(
 			@Parameter(description = "Restrict the result to one producer id") @QueryParam("producer_id") String producerId);

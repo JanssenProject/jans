@@ -118,6 +118,9 @@ public class StatusListService {
     public static StatusList join(List<? extends AbstractIndexPool> pools, int bitSize, Logger log) {
         StatusList result = new StatusList(bitSize);
         for (AbstractIndexPool pool : pools) {
+            if (pool.getEndIndex() != null) {
+                result.ensureSize(pool.getEndIndex() + 1);
+            }
             try {
                 final String data = pool.getData();
                 if (StringUtils.isBlank(data)) {
@@ -135,6 +138,8 @@ public class StatusListService {
             } catch (Exception e) {
                 String msg = String.format("Failed to process status list from pool: %s, nodeId: %s", pool.getId(), pool.getNodeId());
                 log.error(msg, e);
+                // The list is already padded over this pool, so skipping it would publish revoked tokens as VALID.
+                throw new IllegalStateException(msg, e);
             }
         }
         return result;

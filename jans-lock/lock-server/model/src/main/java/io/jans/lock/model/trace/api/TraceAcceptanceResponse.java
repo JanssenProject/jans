@@ -8,11 +8,12 @@ package io.jans.lock.model.trace.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * The {@code POST /audit/trace} success body (design §11.1, TRACE MVP task 20): the identity and
+ * The {@code POST /audit/trace} success body (design §11.1): the identity and
  * receipt position the record was accepted at, plus the four ingestion flags fixed at ingestion
  * time. {@code idempotent_replay=true} means these are the values of the row that already held the
  * identity, not a freshly inserted one.
@@ -21,14 +22,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @Schema(description = "TRACE record acceptance response")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TraceAcceptanceResponse {
+@JsonPropertyOrder({ "accepted", "producer_id", "record_id", "content_digest", "receipt_sequence", "received_at",
+		"idempotent_replay" })
+public class TraceAcceptanceResponse extends TraceFlagsResponse {
 
 	@JsonProperty("accepted")
 	@Schema(description = "Always true; rejections are reported as structured errors instead", example = "true")
 	private boolean accepted;
 
 	@JsonProperty("producer_id")
-	@Schema(description = "Producer id, name/semver", example = "cedarling-fleet-1/1.0.0")
+	@Schema(description = "Opaque stable producer id", example = "cedarling-fleet-1")
 	private String producerId;
 
 	@JsonProperty("record_id")
@@ -50,22 +53,6 @@ public class TraceAcceptanceResponse {
 	@JsonProperty("idempotent_replay")
 	@Schema(description = "True when this identity already existed with the same content digest")
 	private boolean idempotentReplay;
-
-	@JsonProperty("coverage_gap_flag")
-	@Schema(description = "True when this record's predecessor in its producer chain is missing")
-	private boolean coverageGapFlag;
-
-	@JsonProperty("chain_link_failure_flag")
-	@Schema(description = "True when this record's prev_record_hash does not match its predecessor")
-	private boolean chainLinkFailureFlag;
-
-	@JsonProperty("equivocation_flag")
-	@Schema(description = "True when another record already occupies this producer-chain position")
-	private boolean equivocationFlag;
-
-	@JsonProperty("late_flag")
-	@Schema(description = "True when the record arrived after the configured lateness threshold")
-	private boolean lateFlag;
 
 	public boolean isAccepted() {
 		return accepted;
@@ -121,38 +108,6 @@ public class TraceAcceptanceResponse {
 
 	public void setIdempotentReplay(boolean idempotentReplay) {
 		this.idempotentReplay = idempotentReplay;
-	}
-
-	public boolean isCoverageGapFlag() {
-		return coverageGapFlag;
-	}
-
-	public void setCoverageGapFlag(boolean coverageGapFlag) {
-		this.coverageGapFlag = coverageGapFlag;
-	}
-
-	public boolean isChainLinkFailureFlag() {
-		return chainLinkFailureFlag;
-	}
-
-	public void setChainLinkFailureFlag(boolean chainLinkFailureFlag) {
-		this.chainLinkFailureFlag = chainLinkFailureFlag;
-	}
-
-	public boolean isEquivocationFlag() {
-		return equivocationFlag;
-	}
-
-	public void setEquivocationFlag(boolean equivocationFlag) {
-		this.equivocationFlag = equivocationFlag;
-	}
-
-	public boolean isLateFlag() {
-		return lateFlag;
-	}
-
-	public void setLateFlag(boolean lateFlag) {
-		this.lateFlag = lateFlag;
 	}
 
 }

@@ -2,8 +2,8 @@ let
     _primitiveUtils = Packages.io.jans.agama.engine.misc.PrimitiveUtils,
     _scriptUtils = Packages.io.jans.agama.engine.script.ScriptUtils,
     _logUtils = Packages.io.jans.agama.engine.script.LogUtils,
-    _flowCrashEx = Packages.io.jans.agama.engine.exception.FlowCrashException,
     _errorUtil = Packages.org.mozilla.javascript.NativeErrorUtil,
+    _javaEx = Packages.java.lang.Exception,
     _booleanCls = Packages.java.lang.Class.forName("java.lang.Boolean"),
     _numberCls = Packages.java.lang.Class.forName("java.lang.Number"),
     _integerCls = Packages.java.lang.Class.forName("java.lang.Integer"),
@@ -13,15 +13,13 @@ let
     _mapCls = Packages.java.lang.Class.forName("java.util.Map"),
     _exceptionCls = Packages.java.lang.Class.forName("java.lang.Exception")
 
-function _renderReplyFetch(base, page, allowCallbackResume, data) {
-    if (_isObject(data))
-        return _scriptUtils.pauseForRender(base + "/" + page, allowCallbackResume, data)
-    throw new TypeError("Data passed to RRF was not a map or Java equivalent")
+function _renderReplyFetch(base, page, allowCallbackResume, data, qname, line) {
+    return _scriptUtils.pauseForRender(base + "/" + page, allowCallbackResume, data, qname, line)    
 }
 
-function _redirectFetchAtCallback(url) {
+function _redirectFetchAtCallback(url, qname, line) {
     if (_isString(url)) {
-        let jsonStr = _scriptUtils.pauseForExternalRedirect(url).second
+        let jsonStr = _scriptUtils.pauseForExternalRedirect(url, qname, line).second
         //string parsing via JS was preferred over returning a Java Map directly
         //because it feels more natural for RRF to return a native JS object;
         //it creates the illusion there was no Java involved
@@ -84,7 +82,7 @@ function _makeJavaException(qname, e) {
     let msg = e.toString()
     _log2(qname, ["@e An error occurred:", msg])
     _log2(qname, ["@t \n", _errorUtil.stackTraceOf(e)])
-    return new _flowCrashEx(msg)
+    return new _javaEx(msg)
 
 }
 
@@ -111,6 +109,11 @@ function _scan(val) {
     //treat undefined, null, or a Java method reference as null
     if (_isNil(val) || typeof val === "function") return null    
     return val
+}
+
+function _track(qname, lines, ex) {
+    _scriptUtils.track(qname, lines, ex)
+    lines.length = 0    
 }
 
 function _ensureNumber(val, msg) {

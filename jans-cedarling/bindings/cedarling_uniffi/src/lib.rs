@@ -10,7 +10,8 @@ use cedarling::{
     MetricsSnapshot as CoreMetricsSnapshot, PolicyStoreSource, TrustedIssuerLoadingInfo,
 };
 use std::sync::Arc;
-mod result;
+/// Result types returned by authorization calls.
+pub mod result;
 use result::{
     AuthorizeResult, BatchAuthorizeMultiIssuerResponse, BatchAuthorizeUnsignedResponse,
     MultiIssuerAuthorizeResult,
@@ -141,6 +142,56 @@ pub struct TokenInput {
     pub mapping: String,
     /// JWT token string
     pub payload: String,
+}
+
+/// TRACE execution context, already normalized by the host. Cedarling never
+/// generates `execution_id`: the execution initiator (gateway, PEP, host) owns
+/// it together with `execution_authority`.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct TraceContext {
+    /// `trace_execution_id` issued by the execution initiator
+    pub execution_id: String,
+    /// Authority that issued `execution_id`
+    pub execution_authority: String,
+    /// Stable id of the workload the decision is made for
+    pub workload_id: String,
+    /// Instance of the workload, when the host distinguishes instances
+    #[uniffi(default)]
+    pub workload_instance_id: Option<String>,
+}
+
+/// Per-call metadata of an authorization request. None of it takes part in
+/// policy evaluation: the decision is the same with or without options.
+#[derive(Debug, Clone, uniffi::Record)]
+pub struct AuthorizeOptions {
+    /// `None` means the host has no execution context, so no TRACE record can
+    /// be emitted for the decision.
+    #[uniffi(default)]
+    pub trace: Option<TraceContext>,
+}
+
+impl From<TraceContext> for core::TraceContext {
+    fn from(value: TraceContext) -> Self {
+        core::TraceContext {
+            execution_id: value.execution_id,
+            execution_authority: value.execution_authority,
+            workload_id: value.workload_id,
+            workload_instance_id: value.workload_instance_id,
+        }
+    }
+}
+
+impl From<AuthorizeOptions> for core::AuthorizeOptions {
+    fn from(value: AuthorizeOptions) -> Self {
+        core::AuthorizeOptions {
+            trace: value.trace.map(Into::into),
+        }
+    }
+}
+
+/// `None` options are the same as default options.
+fn options_to_core(options: Option<AuthorizeOptions>) -> core::AuthorizeOptions {
+    options.map(Into::into).unwrap_or_default()
 }
 
 /// One `{resource, action, context}` triple in a batch authorization request.
@@ -431,13 +482,14 @@ impl Cedarling {
     }
 
     // Handles authorization for unsigned requests
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_unsigned(
         &self,
         principal: Option<Arc<EntityData>>,
         action: String,
         resource: Arc<EntityData>,
         context: JsonValue,
+        options: Option<AuthorizeOptions>,
     ) -> Result<AuthorizeResult, AuthorizeError> {
         let core_principal: Option<core::EntityData> = principal.map(|p| p.inner.clone());
 
@@ -450,6 +502,7 @@ impl Cedarling {
             context: context
                 .try_into()
                 .map_err(|_| AuthorizeError::InvalidContext)?,
+            options: options_to_core(options),
         };
 
         let result = self.inner.authorize_unsigned(core_request).map_err(|e| {
@@ -461,13 +514,14 @@ impl Cedarling {
     }
 
     // Handles multi-issuer authorization request
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_multi_issuer(
         &self,
         tokens: Vec<TokenInput>,
         action: String,
         resource: Arc<EntityData>,
         context: Option<JsonValue>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<MultiIssuerAuthorizeResult, AuthorizeError> {
         let core_tokens: Vec<core::TokenInput> = tokens
             .into_iter()
@@ -490,6 +544,7 @@ impl Cedarling {
             resource: core_resource,
             action,
             context: core_context,
+            options: options_to_core(options),
         };
 
         let result = self
@@ -508,11 +563,12 @@ impl Cedarling {
     /// [`BatchAuthorizeUnsignedResponse`] with `batch_id` and per-item results.
     /// Batch-level failures reject the whole call; per-item failures are returned
     /// as `BatchItemError` entries that callers must inspect without affecting other items.
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_unsigned_batch(
         &self,
         principal: Option<Arc<EntityData>>,
         items: Vec<BatchItem>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<BatchAuthorizeUnsignedResponse, AuthorizeError> {
         let core_items = items
             .into_iter()
@@ -521,6 +577,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeUnsignedRequest {
             principal: principal.map(|p| p.inner.clone()),
             items: core_items,
+            options: options_to_core(options),
         };
         let response = self
             .inner
@@ -537,11 +594,12 @@ impl Cedarling {
     /// item is evaluated in input order. Batch-level failures (validation,
     /// JWT verification, status-list refresh) reject the whole call; per-item
     /// failures are returned as `BatchItemError` entries that callers must inspect.
-    #[uniffi::method]
+    #[uniffi::method(default(options = None))]
     pub fn authorize_multi_issuer_batch(
         &self,
         tokens: Vec<TokenInput>,
         items: Vec<BatchItem>,
+        options: Option<AuthorizeOptions>,
     ) -> Result<BatchAuthorizeMultiIssuerResponse, AuthorizeError> {
         let core_tokens: Vec<core::TokenInput> = tokens
             .into_iter()
@@ -557,6 +615,7 @@ impl Cedarling {
         let core_request = core::BatchAuthorizeMultiIssuerRequest {
             tokens: core_tokens,
             items: core_items,
+            options: options_to_core(options),
         };
         let response = self
             .inner
@@ -779,8 +838,8 @@ impl Cedarling {
     }
 
     #[uniffi::method]
-    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_id: &str) -> bool {
-        self.inner.is_trusted_issuer_loaded_by_name(issuer_id)
+    pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
+        self.inner.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     #[uniffi::method]

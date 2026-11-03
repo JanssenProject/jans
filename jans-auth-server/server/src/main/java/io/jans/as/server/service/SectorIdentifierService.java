@@ -107,6 +107,11 @@ public class SectorIdentifierService {
             return "";
         }
 
+        if (SubjectType.EPHEMERAL.equals(client.getSubjectType())) {
+            log.trace("Ephemeral sub is bound to grant, return blank sub for client: {}", client.getClientId());
+            return "";
+        }
+
         final String openidSubValue = getOpenidSubValue(client, user);
 
         final boolean isClientPairwise = SubjectType.PAIRWISE.equals(client.getSubjectType());

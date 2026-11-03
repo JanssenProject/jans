@@ -16,6 +16,7 @@ import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.UserService;
 import jakarta.ws.rs.WebApplicationException;
+import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -29,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
@@ -52,6 +55,9 @@ public class IdJagValidatorServiceTest {
 
     @Mock
     private AbstractCryptoProvider cryptoProvider;
+
+    @Mock
+    private IdJagIssuerJwksService issuerJwksService;
 
     @Mock
     private UserService userService;
@@ -119,7 +125,6 @@ public class IdJagValidatorServiceTest {
 
     @Test
     public void validateIdJag_whenIssuerAbsent_shouldThrow() throws Exception {
-        mockSignatureValid(true);
         Jwt jwt = new Jwt();
         jwt.getHeader().setType(JwtType.OAUTH_ID_JAG);
         jwt.getHeader().setAlgorithm(SignatureAlgorithm.RS256);
@@ -248,7 +253,6 @@ public class IdJagValidatorServiceTest {
         Map<String, TrustedIssuerConfig> trustedIssuers = new HashMap<>();
         trustedIssuers.put("https://trusted-idp.example.com", new TrustedIssuerConfig());
         when(appConfiguration.getIdJagTrustedIdpIssuers()).thenReturn(trustedIssuers);
-        mockSignatureValid(true);
 
         Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://untrusted-idp.example.com");
 
@@ -371,6 +375,94 @@ public class IdJagValidatorServiceTest {
         assertNotNull(result);
     }
 
+    @Test
+    public void validateIdJag_whenIssuerHasKeys_shouldVerifyWithIssuerJwks() throws Exception {
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwks("{\"keys\":[]}");
+        JSONObject issuerJwks = new JSONObject("{\"keys\":[]}");
+        trust("https://idp.example.com", config);
+        when(issuerJwksService.hasKeySource(config)).thenReturn(true);
+        when(issuerJwksService.getJwks(eq(config), any())).thenReturn(issuerJwks);
+        when(cryptoProvider.verifySignature(any(), any(), any(), eq(issuerJwks), any(), any(SignatureAlgorithm.class)))
+                .thenReturn(true);
+        when(userService.getUser("alice")).thenReturn(new User());
+
+        Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://idp.example.com");
+
+        assertNotNull(idJagValidatorService.validateIdJag(jwt, client, executionContext));
+    }
+
+    @Test
+    public void validateIdJag_whenIssuerJwksWrongKey_shouldThrow() throws Exception {
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri("https://idp.example.com/jwks");
+        JSONObject issuerJwks = new JSONObject("{\"keys\":[]}");
+        trust("https://idp.example.com", config);
+        when(issuerJwksService.hasKeySource(config)).thenReturn(true);
+        when(issuerJwksService.getJwks(eq(config), any())).thenReturn(issuerJwks);
+        when(cryptoProvider.verifySignature(any(), any(), any(), eq(issuerJwks), any(), any(SignatureAlgorithm.class)))
+                .thenReturn(false);
+
+        Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://idp.example.com");
+
+        try {
+            idJagValidatorService.validateIdJag(jwt, client, executionContext);
+            fail("Expected WebApplicationException");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+    }
+
+    @Test
+    public void validateIdJag_whenIssuerKeysUnavailable_shouldThrowWithoutLocalFallback() throws Exception {
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        config.setJwksUri("https://idp.example.com/jwks");
+        trust("https://idp.example.com", config);
+        when(issuerJwksService.hasKeySource(config)).thenReturn(true);
+        when(issuerJwksService.getJwks(eq(config), any())).thenReturn(null);
+
+        Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://idp.example.com");
+
+        try {
+            idJagValidatorService.validateIdJag(jwt, client, executionContext);
+            fail("Expected WebApplicationException");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+        verifyNoInteractions(cryptoProvider);
+    }
+
+    @Test
+    public void validateIdJag_whenIssuerHasNoKeys_shouldVerifyWithLocalKeys() throws Exception {
+        TrustedIssuerConfig config = new TrustedIssuerConfig();
+        trust("https://idp.example.com", config);
+        when(issuerJwksService.hasKeySource(config)).thenReturn(false);
+        when(cryptoProvider.verifySignature(any(), any(), any(), isNull(), any(), any(SignatureAlgorithm.class)))
+                .thenReturn(true);
+        when(userService.getUser("alice")).thenReturn(new User());
+
+        Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://idp.example.com");
+
+        assertNotNull(idJagValidatorService.validateIdJag(jwt, client, executionContext));
+        verify(issuerJwksService, never()).getJwks(any(), any());
+    }
+
+    @Test
+    public void validateIdJag_whenIssuerNotTrusted_shouldNotLoadIssuerKeys() throws Exception {
+        trust("https://trusted-idp.example.com", new TrustedIssuerConfig());
+
+        Jwt jwt = buildValidIdJag(client.getClientId(), "https://resource.example.com", "https://untrusted-idp.example.com");
+
+        try {
+            idJagValidatorService.validateIdJag(jwt, client, executionContext);
+            fail("Expected WebApplicationException");
+        } catch (WebApplicationException e) {
+            assertEquals(400, e.getResponse().getStatus());
+        }
+        verifyNoInteractions(issuerJwksService);
+        verifyNoInteractions(cryptoProvider);
+    }
+
     // ---- TokenRestWebServiceValidator.validateIdJagSubjectTokenType ----
     // (tested in TokenRestWebServiceValidatorTest, included here for completeness)
 
@@ -392,6 +484,12 @@ public class IdJagValidatorServiceTest {
         jwt.getClaims().setExpirationTime(exp);
         jwt.getClaims().setIat(new Date());
         return jwt;
+    }
+
+    private void trust(String issuer, TrustedIssuerConfig config) {
+        Map<String, TrustedIssuerConfig> trustedIssuers = new HashMap<>();
+        trustedIssuers.put(issuer, config);
+        when(appConfiguration.getIdJagTrustedIdpIssuers()).thenReturn(trustedIssuers);
     }
 
     private void mockSignatureValid(boolean valid) throws Exception {

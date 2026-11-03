@@ -59,6 +59,17 @@ pub enum FeatureToggle {
     Enabled,
 }
 
+/// Whether a `.cjar` policy store must carry a valid Sigstore bundle.
+#[derive(Debug, PartialEq, Deserialize, Serialize, Default, Copy, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum SigstoreMode {
+    /// No signature check.
+    #[default]
+    Disabled,
+    /// Reject a store whose bundle is missing or does not verify.
+    Enforce,
+}
+
 impl From<FeatureToggle> for bool {
     fn from(value: FeatureToggle) -> bool {
         match value {

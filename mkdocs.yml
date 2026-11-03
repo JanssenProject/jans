@@ -127,7 +127,6 @@ nav:
       - Customization:
         - janssen-server/developer/customization/README.md
         - Customize Web Pages: janssen-server/developer/customization/customize-web-pages.md
-        - Custom Client Logs: janssen-server/developer/customization/custom-client-logs.md
     - Implementation Design:
       - Implementation Design: contribute/implementation-design/README.md
       - Agama:
@@ -246,6 +245,7 @@ nav:
       - Trust Diagnostics: janssen-server/fido/trust-diagnostics.md
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
+      - Native App Readiness: janssen-server/fido/native-app-readiness.md
       - Passkey Interception Script: script-catalog/person_authentication/passkey/README.md
     - SAML:
       - Shibboleth IDP:
@@ -396,7 +396,6 @@ nav:
         - Accounts Linking:
           - casa/plugins/accts-linking/account-linking-index.md
           - Agama Project: casa/plugins/accts-linking/accts-linking-agama.md
-        - BioID: casa/plugins/bioid.md
         - Consent Management: casa/plugins/consent-management.md
         - Custom Branding: casa/plugins/custom-branding.md
         - Email OTP: casa/plugins/email-otp.md
@@ -550,6 +549,7 @@ nav:
     - Lock:
       - Lock: janssen-server/lock/README.md
       - Lock Server: janssen-server/lock/lock-server.md
+      - TRACE Evidence: janssen-server/lock/trace.md
 
   # ====================
   # 9. PRODUCT, RELEASES & SUPPORT
@@ -612,6 +612,11 @@ nav:
     - Java: cedarling/tutorials/java.md
     - Kotlin: cedarling/tutorials/kotlin.md
     - Swift: cedarling/tutorials/swift.md
+  - Patterns:
+    - Policy Annotations: cedarling/patterns/annotation-patterns.md
+    - Multi-Step Flows: cedarling/patterns/annotation-workflow.md
+    - Step-Up and Evidence: cedarling/patterns/annotation-challenge.md
+    - Client-Side Denials: cedarling/patterns/annotation-client-authority.md
   - Reference:
     - Authorization: cedarling/reference/cedarling-authz.md
     - Multi-Issuer: cedarling/reference/cedarling-multi-issuer.md
@@ -630,13 +635,12 @@ nav:
       - UniFFI Interface: cedarling/developer/mobile-apps/cedarling-uniffi.md
       - Android: cedarling/developer/mobile-apps/cedarling-android.md
       - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
-    - Sidecar:
-      - Overview: cedarling/developer/sidecar/cedarling-sidecar-overview.md
-      - Tutorial: cedarling/developer/sidecar/cedarling-sidecar-tutorial.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
-      - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
-      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
+      - C: https://janssenproject.github.io/developer-docs/cedarling-c/index.html
+      - Java/Kotlin: https://janssenproject.github.io/developer-docs/cedarling-java/index.html
+      - JavaScript/TypeScript: https://janssenproject.github.io/developer-docs/cedarling-js/index.html
+      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/index.html
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md
     - OPA: cedarling/integrations/cedarling-opa.md
@@ -645,6 +649,9 @@ nav:
       - Overview: cedarling/integrations/terraform-authz-overview.md
       - Unsigned Flow: cedarling/integrations/terraform-authz.md
       - JWT Flow: cedarling/integrations/terraform-authz-jwt.md
+  - Sidecar:
+      - Overview: cedarling/sidecar/cedarling-sidecar-overview.md
+      - Tutorial: cedarling/sidecar/cedarling-sidecar-tutorial.md
 
 
 plugins:

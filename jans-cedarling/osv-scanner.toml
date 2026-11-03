@@ -17,3 +17,8 @@ reason = "quick-xml 0.26.0 quadratic attribute check. Only consumer is the dev-o
 id = "RUSTSEC-2026-0195"
 ignoreUntil = 2027-02-01
 reason = "quick-xml 0.26.0 unbounded namespace allocation. Only consumer is the dev-only profiling chain pprof 0.15 -> inferno 0.11 -> quick-xml ^0.26 (no upgrade path); never parses untrusted XML."
+
+[[IgnoredVulns]]
+id = "RUSTSEC-2026-0374"
+ignoreUntil = 2027-02-01
+reason = "basic-toml 0.1.10 is unmaintained (informational, no vulnerability). Build-time only: uniffi 0.32 -> uniffi_bindgen -> askama 0.16 -> askama_derive proc-macro parses askama's own config at compile time; latest askama_derive still depends on it, so no upgrade path. Not linked into any shipped binary. Same exception as deny.toml."

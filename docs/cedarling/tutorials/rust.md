@@ -382,4 +382,4 @@ For a narrative walkthrough of the core types, see the
 - [Cedarling Rust Developer Guide](../developer/cedarling-rust.md)
 - [Cedarling TBAC quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-signed-tokens-tbac)
 - [Cedarling Unsigned quickstart](../quick-start/cedarling-quick-start.md#implement-rbac-using-application-asserted-identity)
-- [Cedarling Sidecar Tutorial](../developer/sidecar/cedarling-sidecar-tutorial.md)
+- [Cedarling Sidecar Tutorial](../sidecar/cedarling-sidecar-tutorial.md)

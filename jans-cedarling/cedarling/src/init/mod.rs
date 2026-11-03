@@ -12,6 +12,7 @@
 pub(crate) mod authz_builder;
 pub(crate) mod policy_store;
 pub(crate) mod policy_store_refresh;
+pub(crate) mod policy_store_signature;
 pub(crate) mod service_config;
 pub(crate) mod service_factory;
 

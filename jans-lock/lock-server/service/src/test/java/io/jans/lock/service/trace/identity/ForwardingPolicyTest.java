@@ -19,7 +19,7 @@ import io.jans.lock.model.error.TraceErrorResponseType;
 import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
- * Tests for {@link ForwardingPolicy}: design decision D-3's wildcard and exact-match rules.
+ * Tests for {@link ForwardingPolicy}: the wildcard and exact-match rules.
  */
 class ForwardingPolicyTest {
 
@@ -29,18 +29,18 @@ class ForwardingPolicyTest {
 
 	@Test
 	void testCheck_WildcardAllowlist_AllowsAnyProducer() {
-		assertDoesNotThrow(() -> ForwardingPolicy.check(ctx("*"), "any-producer/9.9.9"));
+		assertDoesNotThrow(() -> ForwardingPolicy.check(ctx("*"), "any-producer"));
 	}
 
 	@Test
 	void testCheck_ExactMatch_Allows() {
-		assertDoesNotThrow(() -> ForwardingPolicy.check(ctx("a/1.0.0"), "a/1.0.0"));
+		assertDoesNotThrow(() -> ForwardingPolicy.check(ctx("cedarling-fleet-1"), "cedarling-fleet-1"));
 	}
 
 	@Test
-	void testCheck_DifferentVersion_Rejected() {
+	void testCheck_VersionSuffixOnProducer_RejectedByteForByte() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> ForwardingPolicy.check(ctx("a/1.0.0"), "a/1.0.1"));
+				() -> ForwardingPolicy.check(ctx("cedarling-fleet-1"), "cedarling-fleet-1/1.0.0"));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
 		assertEquals(ForwardingPolicy.REASON_PRODUCER_NOT_ALLOWED, ex.getReason());
@@ -49,7 +49,7 @@ class ForwardingPolicyTest {
 	@Test
 	void testCheck_UnlistedProducer_Rejected() {
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> ForwardingPolicy.check(ctx("a/1.0.0", "b/2.0.0"), "c/1.0.0"));
+				() -> ForwardingPolicy.check(ctx("cedarling-fleet-1", "gateway-fleet-1"), "effect-observer-1"));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
 	}
@@ -60,7 +60,7 @@ class ForwardingPolicyTest {
 				"node-1");
 
 		TraceValidationException ex = assertThrows(TraceValidationException.class,
-				() -> ForwardingPolicy.check(context, "any/1.0.0"));
+				() -> ForwardingPolicy.check(context, "cedarling-fleet-1"));
 
 		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
 	}

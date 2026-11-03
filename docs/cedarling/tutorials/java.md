@@ -147,7 +147,7 @@ Cedarling provides authorization interfaces for evaluating access requests based
 
 #### Token-Based Authorization (Multi-Issuer)
 
-For token-based authorization, use `authorizeMultiIssuer` which processes JWT tokens and maps them to Cedar entities based on the `token_metadata` configuration in your policy store.
+For token-based authorization, use `authorizeMultiIssuer` which processes JWT tokens and maps them to Cedar entities based on the token types declared in your policy store's [`trusted-issuers.json`](../reference/cedarling-policy-store.md#trusted-issuersjson).
 
 **1. Prepare tokens**
 
@@ -312,7 +312,7 @@ adapter.getLogsByTag("System");
 
 ## Defined API
 
-Defined APIs are listed in the [Cedarling Java API documentation](https://janssenproject.github.io/developer-docs/jans-cedarling/bindings/cedarling-java/io/jans/cedarling/binding/wrapper/CedarlingAdapter.html).
+Defined APIs are listed in the [Cedarling Java API documentation](https://janssenproject.github.io/developer-docs/cedarling-java/cedarling-java/io.jans.cedarling.binding.wrapper/-cedarling-adapter/index.html).
 
 ## See Also
 

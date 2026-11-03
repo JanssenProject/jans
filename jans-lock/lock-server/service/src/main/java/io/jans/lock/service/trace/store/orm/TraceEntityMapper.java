@@ -23,6 +23,7 @@ import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -31,23 +32,21 @@ import io.jans.lock.service.trace.model.VerificationResult;
 import io.jans.lock.service.trace.store.TraceKeys;
 
 /**
- * Pure mapping between the task 12 {@link StoredTraceRecord} value type and the task 03
- * {@link TraceRecordEntry} ORM entity, in both directions (design decisions D-6, D-7).
+ * Pure mapping between the {@link StoredTraceRecord} value type and the {@link TraceRecordEntry} ORM entity, in both directions.
  *
  * <p>Receipts, chain registrations and producer keys need no such mapping: {@code TraceStore}
  * exposes their jans-orm entities ({@code TraceReceiptEntry}, {@code TraceChainEntry},
  * {@code TraceProducerKeyEntry}) directly, unlike {@code StoredTraceRecord} — the two shapes
  * differ enough (structured identities vs. flat hashed keys, defensive copies on read) that a
- * dedicated value type still earns its keep for records (deviation from task 12's original
- * value-type-for-every-row design, approved 2026; see the TRACE MVP task notes).
+ * dedicated value type still earns its keep for records.
  *
- * <p>{@code TraceRecordEntry} (T-1) only carries <em>hashed</em> keys for the producer chain
- * identity, capability ids and token references ({@code jansTraceChainKey}, {@code jansTraceCapKeys},
- * {@code jansTraceTokenKeys}) — it never stores {@code producer_instance_id}, {@code
- * producer_chain_id}, the raw capability ids or the raw token references as separate attributes.
+ * <p>{@code TraceRecordEntry} only carries <em>hashed</em> keys for the producer chain
+ * identity and token references ({@code jansTraceChainKey}, {@code jansTraceTokenKeys}) — it
+ * never stores {@code producer_instance_id}, {@code producer_chain_id} or the raw token references
+ * as separate attributes.
  * On the read path ({@link #toStoredTraceRecord(TraceRecordEntry)}) those raw values are recovered
  * by re-parsing the verbatim {@code jansTraceAssertion} text, consistent with the design's
- * "assertion is the source of truth, retrieval re-parses it" principle (design D-13). This is a
+ * "assertion is the source of truth, retrieval re-parses it" principle. This is a
  * deliberate re-derivation, not a schema round trip: the stored hashes remain the only thing that
  * is ever compared for equality/lookup.
  *
@@ -62,35 +61,32 @@ final class TraceEntityMapper {
 
 	// -- records ------------------------------------------------------------------------------
 
-	static TraceRecordEntry toEntity(StoredTraceRecord record, String dn) {
-		RecordIdentity identity = record.getIdentity();
-		ChainPosition chainPosition = record.getChainPosition();
-		ReceiptEntry receipt = record.getReceipt();
-		IngestionFlags flags = record.getFlags();
+	static TraceRecordEntry toEntity(StoredTraceRecord stored, String dn, TraceKeys traceKeys) {
+		RecordIdentity identity = stored.getIdentity();
+		ChainPosition chainPosition = stored.getChainPosition();
+		ReceiptEntry receipt = stored.getReceipt();
+		IngestionFlags flags = stored.getFlags();
 
 		TraceRecordEntry entity = new TraceRecordEntry();
 		entity.setDn(dn);
-		entity.setId(TraceKeys.recordKey(identity));
+		entity.setId(traceKeys.recordKey(identity));
 		entity.setDomainId(identity.getDomainId());
 		entity.setProducerId(identity.getProducerId());
 		entity.setRecordId(identity.getRecordId());
-		entity.setEventKind(record.getEventKind());
-		entity.setSignedAt(record.getSignedAt());
-		entity.setExecKey(TraceKeys.executionKey(record.getExecution()));
-		entity.setExecId(record.getExecution().getTraceExecutionId());
-		entity.setExecAuthority(record.getExecution().getExecutionAuthority());
-		entity.setChainKey(TraceKeys.chainKey(chainPosition.getChainIdentity()));
-		entity.setChainPosKey(TraceKeys.chainPositionKey(chainPosition));
+		entity.setEventKind(stored.getEventKind());
+		entity.setSignedAt(stored.getSignedAt());
+		entity.setExecKey(traceKeys.executionKey(stored.getExecution()));
+		entity.setExecId(stored.getExecution().getTraceExecutionId());
+		entity.setExecAuthority(stored.getExecution().getExecutionAuthority());
+		entity.setChainKey(traceKeys.chainKey(chainPosition.getChainIdentity()));
+		entity.setChainPosKey(traceKeys.chainPositionKey(chainPosition));
 		entity.setSeqNum(chainPosition.getSequenceNumber());
-		entity.setPrevRecordHash(record.getPrevRecordHash());
-		entity.setCapKeys(record.getCapabilityIds().stream()
-				.map(capabilityId -> TraceKeys.capabilityKey(identity.getDomainId(), capabilityId))
-				.collect(Collectors.toList()));
-		entity.setTokenKeys(record.getTokenRefs().stream()
-				.map(tokenRef -> TraceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
-		entity.setAssertion(record.getAssertionRaw());
-		entity.setContentDigest(record.getContentDigest());
-		entity.setVerification(toVerificationPojo(record.getVerification()));
+		entity.setPrevRecordHash(stored.getPrevRecordHash());
+		entity.setTokenKeys(stored.getTokenRefs().stream()
+				.map(tokenRef -> traceKeys.tokenKey(identity.getDomainId(), tokenRef)).collect(Collectors.toList()));
+		entity.setAssertion(stored.getAssertionRaw());
+		entity.setContentDigest(stored.getContentDigest());
+		entity.setVerification(toVerificationPojo(stored.getVerification()));
 		entity.setReceiptSeq(receipt.getReceiptSequence());
 		entity.setReceivedAt(new Date(receipt.getReceivedAtMs()));
 		entity.setReceivedAtMs(receipt.getReceivedAtMs());
@@ -100,8 +96,17 @@ final class TraceEntityMapper {
 		entity.setChainLinkFailure(flags.isChainLinkFailure());
 		entity.setEquivocation(flags.isEquivocation());
 		entity.setLate(flags.isLate());
-		entity.setNodeId(record.getNodeId());
-		entity.setCreationDate(new Date(record.getCreatedAtMs()));
+		entity.setPolicyMismatch(flags.isPolicyMismatch());
+		entity.setReservedMembers(flags.isReservedMember() ? new ArrayList<>(flags.getReservedMembers()) : null);
+		entity.setNodeId(stored.getNodeId());
+		PolicyRef policy = stored.getPolicy();
+		if (policy != null) {
+			entity.setPolicyStoreId(policy.getPolicyStoreId());
+			entity.setPolicyStoreVersion(policy.getPolicyStoreVersion());
+			entity.setBundleHash(policy.getBundleHash());
+		}
+		entity.setVersion(stored.getVersion());
+		entity.setCreationDate(new Date(stored.getCreatedAtMs()));
 		return entity;
 	}
 
@@ -116,20 +121,29 @@ final class TraceEntityMapper {
 		ChainIdentity chainIdentity = extractChainIdentity(assertionRoot, entity.getDomainId(),
 				entity.getProducerId(), key);
 		ChainPosition chainPosition = new ChainPosition(chainIdentity, nvl(entity.getSeqNum()));
-		List<String> capabilityIds = extractCapabilityIds(assertionRoot);
 		List<TokenRef> tokenRefs = extractTokenRefs(assertionRoot);
 
 		VerificationResult verification = toVerificationResult(entity.getVerification());
 		ReceiptEntry receipt = new ReceiptEntry(nvl(entity.getReceiptSeq()), nvl(entity.getReceivedAtMs()),
 				entity.getPrevReceiptHash(), entity.getReceiptHash());
 		IngestionFlags flags = new IngestionFlags(nvl(entity.getCoverageGap()), nvl(entity.getChainLinkFailure()),
-				nvl(entity.getEquivocation()), nvl(entity.getLate()));
+				nvl(entity.getEquivocation()), nvl(entity.getLate()), nvl(entity.getPolicyMismatch()));
+		flags.setReservedMembers(entity.getReservedMembers());
 
 		long createdAtMs = entity.getCreationDate() == null ? 0L : entity.getCreationDate().getTime();
 
 		return new StoredTraceRecord(identity, entity.getAssertion(), entity.getContentDigest(), verification,
-				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), capabilityIds, tokenRefs,
-				entity.getEventKind(), nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs);
+				receipt, flags, execution, chainPosition, entity.getPrevRecordHash(), tokenRefs, entity.getEventKind(),
+				nvl(entity.getSignedAt()), entity.getNodeId(), createdAtMs, nvl(entity.getVersion()),
+				toPolicyRef(entity));
+	}
+
+	private static PolicyRef toPolicyRef(TraceRecordEntry entity) {
+		if (entity.getPolicyStoreId() == null || entity.getPolicyStoreVersion() == null
+				|| entity.getBundleHash() == null) {
+			return null;
+		}
+		return new PolicyRef(entity.getPolicyStoreId(), entity.getPolicyStoreVersion(), entity.getBundleHash());
 	}
 
 	private static TraceVerification toVerificationPojo(VerificationResult verification) {
@@ -138,12 +152,14 @@ final class TraceEntityMapper {
 		pojo.setKeyId(verification.getKeyId());
 		pojo.setVerifiedAtMs(verification.getVerifiedAtMs());
 		pojo.setAlgorithm(verification.getAlgorithm());
+		pojo.setKeyThumbprint(verification.getKeyThumbprint());
+		pojo.setKeyAuthorized(verification.getKeyAuthorized());
 		return pojo;
 	}
 
 	private static VerificationResult toVerificationResult(TraceVerification pojo) {
 		return new VerificationResult(pojo.isSignatureValid(), pojo.getKeyId(), pojo.getVerifiedAtMs(),
-				pojo.getAlgorithm());
+				pojo.getAlgorithm(), pojo.getKeyThumbprint(), pojo.getKeyAuthorized());
 	}
 
 	private static JsonNode parseAssertion(String assertionText, String key) {
@@ -170,21 +186,6 @@ final class TraceEntityMapper {
 					+ " is missing required field producer_chain." + field);
 		}
 		return node.textValue();
-	}
-
-	private static List<String> extractCapabilityIds(JsonNode assertionRoot) {
-		JsonNode capabilityIdsNode = assertionRoot.path("trace").path("event").path("capability_ids");
-		if (!capabilityIdsNode.isArray()) {
-			return Collections.emptyList();
-		}
-		List<String> result = new ArrayList<>(capabilityIdsNode.size());
-		for (JsonNode entry : capabilityIdsNode) {
-			JsonNode idNode = entry.path("capability_id");
-			if (idNode.isTextual()) {
-				result.add(idNode.textValue());
-			}
-		}
-		return Collections.unmodifiableList(result);
 	}
 
 	private static List<TokenRef> extractTokenRefs(JsonNode assertionRoot) {

@@ -5,14 +5,12 @@ policy_stores:
     trusted_issuers:
       Acme:
         name: Acme
-        description: Synthetic example issuer
         openid_configuration_endpoint: https://acme.example.invalid/.well-known/openid-configuration
         token_metadata:
           access_token:
             entity_type_name: Acme::Access_Token
       Dolphin:
         name: Dolphin
-        description: Synthetic example issuer
         openid_configuration_endpoint: https://dolphin.example.invalid/.well-known/openid-configuration
         token_metadata:
           access_token:

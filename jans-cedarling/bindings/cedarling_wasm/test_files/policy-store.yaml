@@ -27,7 +27,6 @@ policy_stores:
     trusted_issuers:
       595426354a058891fa795ba3d5109af177c684ab5875:
         name: Jans
-        description: Janssen
         openid_configuration_endpoint: https://account.gluu.org/.well-known/openid-configuration
         token_metadata:
           access_token:

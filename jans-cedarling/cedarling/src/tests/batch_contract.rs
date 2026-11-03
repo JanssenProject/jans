@@ -9,6 +9,7 @@
 
 use super::utils::cedarling_util::get_cedarling_with_callback;
 use super::utils::*;
+use crate::AuthorizeOptions;
 use crate::authz::request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeUnsignedRequest,
     BatchItem, EntityData, RequestUnsigned, TokenInput,
@@ -155,6 +156,7 @@ async fn batch_unsigned_matches_sequence_of_single() {
                 action: item.action.clone(),
                 resource: item.resource.clone(),
                 context: item.context.clone(),
+                options: AuthorizeOptions::default(),
             })
             .await
             .expect("single call should succeed");
@@ -202,6 +204,7 @@ async fn batch_unsigned_matches_sequence_of_single() {
                 action: item.action.clone(),
                 resource: item.resource.clone(),
                 context: item.context.clone(),
+                options: AuthorizeOptions::default(),
             })
             .await
             .expect("single call should succeed");

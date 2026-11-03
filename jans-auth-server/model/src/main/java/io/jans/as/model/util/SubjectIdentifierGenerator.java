@@ -13,6 +13,8 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
 
 import java.security.KeyStoreException;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 /**
  * @author Javier Rojas Blum
@@ -20,7 +22,16 @@ import java.security.KeyStoreException;
  */
 public class SubjectIdentifierGenerator {
 
+    private static final int EPHEMERAL_SUBJECT_IDENTIFIER_BYTES = 32;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private SubjectIdentifierGenerator() {
+    }
+
+    public static String generateEphemeralSubjectIdentifier() {
+        final byte[] bytes = new byte[EPHEMERAL_SUBJECT_IDENTIFIER_BYTES];
+        SECURE_RANDOM.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,

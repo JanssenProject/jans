@@ -126,12 +126,12 @@ public class AuditService {
 	 * @param classObj the entry class used when checking whether the constructed DN already exists
 	 * @return the generated inum; if uniqueness could not be guaranteed within the retry limit, the last generated candidate
 	 */
-	public String generateInumForEntry(String dnFormat, Class classObj) {
+	public String generateInumForEntry(String dnFormat, Class<?> classObj) {
 		String baseDn = staticConfiguration.getBaseDn().getAudit();
 		String newInum = null;
 		String newDn = null;
 
-		int tryСount = 0;
+		int tryCount = 0;
 		do {
 			newInum = generateId();
 
@@ -140,7 +140,7 @@ public class AuditService {
 			if (!found) {
 				return newInum;
 			}
-		} while (++tryСount < MAX_IDGEN_TRY_COUNT);
+		} while (++tryCount < MAX_IDGEN_TRY_COUNT);
 
 		return newInum;
 	}

@@ -216,7 +216,7 @@ auth-server:
     webfingerEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
-    # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService
+    # -- Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService
     lockAuditEnabled: false
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}
@@ -685,7 +685,7 @@ gateway-api:
     oauthServerConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-server-configuration (if enabled, auth-server.lockEnabled must be enabled)
     lockConfigEnabled: false
-    # -- Enable gRPC endpoint /io.jans.lock.audit.AuditService (if enabled, auth-server.lockEnabled must be enabled)
+    # -- Enable gRPC endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService (if enabled, auth-server.lockEnabled must be enabled)
     lockAuditEnabled: false
     # -- Enable Casa endpoints /jans-casa
     casaEnabled: false

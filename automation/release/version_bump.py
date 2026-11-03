@@ -174,6 +174,10 @@ def bump(version, docker_suffix="1"):
     for rel in ls_files("*Cargo.toml"):
         if sub(rel, r'(?m)^version\s*=\s*"0\.0\.0"', f'version = "{version}"'):
             changed.append(rel)
+    if sub("jans-cedarling/Cargo.toml",
+           r'(?m)^((?:jans-trace-core|sigstore-verifier) = \{[^}\n]*version = ")0\.0\.0"', rf'\g<1>{version}"'):
+        if "jans-cedarling/Cargo.toml" not in changed:
+            changed.append("jans-cedarling/Cargo.toml")
     # Cargo.lock: keep the workspace crates' lock entries in step with their
     # Cargo.toml, or `cargo build --locked` fails on the stale lock.
     cargo_lock = "jans-cedarling/Cargo.lock"

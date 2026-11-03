@@ -27,6 +27,7 @@ import io.jans.as.server.service.external.ExternalDynamicClientRegistrationServi
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.security.StringEncrypter;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -39,6 +40,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.util.ArrayList;
+
+import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -137,12 +141,20 @@ public class RegisterUpdateAction {
 
             registerService.updateClientFromRequestObject(client, request, true);
 
+            if (requestObject.has(BACKCHANNEL_LOGOUT_URI.toString())
+                    && StringUtils.isBlank(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()))) {
+                client.getAttributes().setBackchannelLogoutUri(new ArrayList<>());
+            }
+
+            validateEphemeralSubjectTypeBackchannelLogout(client);
+
             boolean updateClient = true;
             if (externalDynamicClientRegistrationService.isEnabled()) {
                 updateClient = externalDynamicClientRegistrationService.executeExternalUpdateClientMethods(httpRequest, request, client);
             }
 
             if (updateClient) {
+                validateEphemeralSubjectTypeBackchannelLogout(client);
                 clientService.merge(client);
 
                 JSONObject jsonObject = registerJsonService.getJSONObject(client);
@@ -185,6 +197,15 @@ public class RegisterUpdateAction {
 
         log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
         throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.");
+    }
+
+    private void validateEphemeralSubjectTypeBackchannelLogout(Client client) {
+        try {
+            registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
     }
 
     private void validateSubjectType(RegisterRequest request) {

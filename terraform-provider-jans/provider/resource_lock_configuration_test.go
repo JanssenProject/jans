@@ -57,6 +57,35 @@ func TestResourceLockConfiguration_Mapping(t *testing.T) {
 		MessageConsumerType:                "DISABLED",
 		ErrorReasonEnabled:                 true,
 		CleanServiceBatchChunkSize:         100,
+		TraceConfiguration: jans.TraceConfiguration{
+			Enabled:                   true,
+			DefaultEvidenceDomainId:   "evd-default",
+			DefaultAllowedProducerIds: []string{"producer-1", "producer-2"},
+			ClientDomainBindings: []jans.TraceClientDomainBinding{
+				{
+					ClientId:           "client-1",
+					EvidenceDomainId:   "evd-1",
+					AllowedProducerIds: []string{"producer-1"},
+				},
+			},
+			LatenessThresholdSeconds:     30,
+			PolicyMismatchGraceSeconds:   15,
+			PolicyReleaseRetentionDays:   7,
+			MaxFutureSkewSeconds:         5,
+			MaxRequestBytes:              1048576,
+			MaxJsonDepth:                 32,
+			MaxStringLength:              4096,
+			MaxArrayLength:               1024,
+			MaxObjectMembers:             256,
+			ReceiptAllocationRetryLimit:  3,
+			CorrelationRetryLimit:        3,
+			ReceiptRepairIntervalSeconds: 60,
+			PendingReceiptTimeoutSeconds: 120,
+			MaxBulkRecords:               500,
+			MaxBulkRequestBytes:          2097152,
+			ChainRegistrationMode:        "auto",
+			CryptoProvider:               "default",
+		},
 	}
 
 	if err := toSchemaResource(data, cfg); err != nil {

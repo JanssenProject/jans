@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.18@sha256:307b95033a52c3ebcebcb883048f6ffd6c6019cf7cda06fad8febb9d1caf39a3
+FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:a16eb904aa472d560ff3fb6a77de0efc3482be938210d2caef0bd1f89c10d356
 
 # ===============
 # Alpine packages
@@ -9,7 +9,7 @@ FROM bellsoft/liberica-openjdk-alpine:17.0.18@sha256:307b95033a52c3ebcebcb883048
 
 RUN apk update \
     && apk upgrade --available \
-    && apk add --no-cache openssl python3 tini curl bash py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache openssl python3 tini curl bash py3-psycopg2 \
     && apk add --no-cache --virtual .build-deps wget git zip
 
 # =====
@@ -66,7 +66,7 @@ RUN mkdir -p /etc/jans/conf \
     /app/schema \
     /app/templates/jans-scim
 
-ARG JANS_SOURCE_VERSION=7205996cc5651cd3287a4fd601c5c8d58f40ce73
+ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
@@ -106,10 +106,12 @@ WORKDIR /
 # default pip timeout
 ARG PIP_TIMEOUT=15
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+RUN EXT_MANAGED_FILE=$(python3 -c "import sysconfig; print(sysconfig.get_path('stdlib') + '/EXTERNALLY-MANAGED')") \
+    && mv "${EXT_MANAGED_FILE}" "${EXT_MANAGED_FILE}.disabled" \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools --timeout ${PIP_TIMEOUT} \
     && pip3 install --no-cache-dir -r /app/requirements.txt --timeout ${PIP_TIMEOUT} \
+    && pip3 install --no-cache-dir -U --force-reinstall 'kubernetes!=36.*' --timeout ${PIP_TIMEOUT} \
     && pip3 uninstall -y pip wheel
 
 # ==========

@@ -10,15 +10,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.TokenRef;
 import io.jans.lock.service.trace.parse.ParsedAssertion;
 
 /**
- * The values the correlation service (task 17) indexes for one accepted record: execution
- * identity, capability ids, token references, chain position and parents. Built by
+ * The values the correlation service indexes for one accepted record: execution
+ * identity, token references, chain position and parents. Built by
  * {@link EventKindValidatorRegistry#validate(ParsedAssertion)}: the common fields (design §7.1)
- * are filled in by the registry, the event-kind-specific ones ({@link #getCapabilityIds()},
- * {@link #getTokenRefs()}, {@link #getWarnings()}) by the matching {@link EventKindValidator}.
+ * are filled in by the registry, the event-kind-specific ones ({@link #getTokenRefs()},
+ * {@link #getWarnings()}) by the matching {@link EventKindValidator}.
  *
  * @author Yuriy Movchan
  */
@@ -27,8 +28,6 @@ public final class CorrelationInputs {
 	private final String executionAuthority;
 
 	private final String traceExecutionId;
-
-	private final List<String> capabilityIds;
 
 	private final List<TokenRef> tokenRefs;
 
@@ -42,16 +41,18 @@ public final class CorrelationInputs {
 
 	private final List<String> warnings;
 
+	private final PolicyRef policy;
+
 	private CorrelationInputs(Builder builder) {
 		this.executionAuthority = builder.executionAuthority;
 		this.traceExecutionId = builder.traceExecutionId;
-		this.capabilityIds = Collections.unmodifiableList(new ArrayList<>(builder.capabilityIds));
 		this.tokenRefs = Collections.unmodifiableList(new ArrayList<>(builder.tokenRefs));
 		this.chainPosition = builder.chainPosition;
 		this.parents = Collections.unmodifiableList(new ArrayList<>(builder.parents));
 		this.eventKind = builder.eventKind;
 		this.signedAt = builder.signedAt;
 		this.warnings = Collections.unmodifiableList(new ArrayList<>(builder.warnings));
+		this.policy = builder.policy;
 	}
 
 	public String getExecutionAuthority() {
@@ -60,14 +61,6 @@ public final class CorrelationInputs {
 
 	public String getTraceExecutionId() {
 		return traceExecutionId;
-	}
-
-	/**
-	 * @return the capability ids this record carries, deduplicated with order preserved; empty for
-	 *         a {@code RUNTIME_EFFECT} record
-	 */
-	public List<String> getCapabilityIds() {
-		return capabilityIds;
 	}
 
 	public List<TokenRef> getTokenRefs() {
@@ -98,13 +91,18 @@ public final class CorrelationInputs {
 		return warnings;
 	}
 
+	/**
+	 * @return the validated {@code trace.policy} release, or {@code null} when the record has none
+	 */
+	public PolicyRef getPolicy() {
+		return policy;
+	}
+
 	public static final class Builder {
 
 		private String executionAuthority;
 
 		private String traceExecutionId;
-
-		private List<String> capabilityIds = Collections.emptyList();
 
 		private List<TokenRef> tokenRefs = Collections.emptyList();
 
@@ -118,6 +116,8 @@ public final class CorrelationInputs {
 
 		private final List<String> warnings = new ArrayList<>();
 
+		private PolicyRef policy;
+
 		public Builder executionAuthority(String executionAuthority) {
 			this.executionAuthority = executionAuthority;
 			return this;
@@ -125,11 +125,6 @@ public final class CorrelationInputs {
 
 		public Builder traceExecutionId(String traceExecutionId) {
 			this.traceExecutionId = traceExecutionId;
-			return this;
-		}
-
-		public Builder capabilityIds(List<String> capabilityIds) {
-			this.capabilityIds = capabilityIds == null ? Collections.emptyList() : capabilityIds;
 			return this;
 		}
 
@@ -155,6 +150,11 @@ public final class CorrelationInputs {
 
 		public Builder signedAt(long signedAt) {
 			this.signedAt = signedAt;
+			return this;
+		}
+
+		public Builder policy(PolicyRef policy) {
+			this.policy = policy;
 			return this;
 		}
 

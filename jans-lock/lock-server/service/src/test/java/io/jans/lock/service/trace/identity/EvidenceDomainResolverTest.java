@@ -27,7 +27,7 @@ import io.jans.lock.service.trace.error.TraceValidationException;
 
 /**
  * Tests for {@link EvidenceDomainResolver}: binding precedence, the default-domain fallback, and
- * the fail-closed domain-id format check (design decision D-1, task 11 acceptance criteria).
+ * the fail-closed domain-id format check .
  */
 class EvidenceDomainResolverTest extends BaseLockServiceTest {
 
@@ -64,25 +64,64 @@ class EvidenceDomainResolverTest extends BaseLockServiceTest {
 	void testResolve_ExplicitBinding_WinsOverDefault() {
 		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
 		traceConfiguration.setClientDomainBindings(
-				Collections.singletonList(binding("client-1", "domain-a", "prod-x/1.0.0")));
+				Collections.singletonList(binding("client-1", "domain-a", "prod-x")));
 
 		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-1", true));
 
 		assertEquals("client-1", ctx.getClientId());
 		assertEquals("domain-a", ctx.getEvidenceDomainId());
-		assertEquals(Collections.singletonList("prod-x/1.0.0"), ctx.getAllowedProducerIds());
+		assertEquals(Collections.singletonList("prod-x"), ctx.getAllowedProducerIds());
 		assertEquals(NODE_ID, ctx.getNodeId());
 	}
 
 	@Test
-	void testResolve_NoBindingWithDefault_UsesDefaultAndWildcard() {
+	void testResolve_NoBindingWithDefault_UsesDefaultAndEmptyAllowlist() {
 		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
 		traceConfiguration.setClientDomainBindings(Collections.emptyList());
 
 		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-2", false));
 
 		assertEquals("default-domain", ctx.getEvidenceDomainId());
-		assertEquals(Collections.singletonList("*"), ctx.getAllowedProducerIds());
+		assertEquals(Collections.emptyList(), ctx.getAllowedProducerIds());
+
+		TraceValidationException ex = assertThrows(TraceValidationException.class,
+				() -> ForwardingPolicy.check(ctx, "prod-x"));
+		assertEquals(TraceErrorResponseType.PRODUCER_NOT_ALLOWED, ex.getErrorId());
+	}
+
+	@Test
+	void testResolve_NoBindingWithDefaultAllowlist_UsesConfiguredProducers() {
+		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
+		traceConfiguration.setDefaultAllowedProducerIds(Arrays.asList("prod-x", "prod-y"));
+
+		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-2", false));
+
+		assertEquals("default-domain", ctx.getEvidenceDomainId());
+		assertEquals(Arrays.asList("prod-x", "prod-y"), ctx.getAllowedProducerIds());
+		ForwardingPolicy.check(ctx, "prod-y");
+		assertThrows(TraceValidationException.class, () -> ForwardingPolicy.check(ctx, "prod-z"));
+	}
+
+	@Test
+	void testResolve_NoBindingWithNullDefaultAllowlist_FailsClosed() {
+		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
+		traceConfiguration.setDefaultAllowedProducerIds(null);
+
+		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-2", false));
+
+		assertEquals(Collections.emptyList(), ctx.getAllowedProducerIds());
+	}
+
+	@Test
+	void testResolve_ExplicitBinding_IgnoresDefaultAllowlist() {
+		traceConfiguration.setDefaultEvidenceDomainId("default-domain");
+		traceConfiguration.setDefaultAllowedProducerIds(Collections.singletonList("*"));
+		traceConfiguration.setClientDomainBindings(
+				Collections.singletonList(binding("client-1", "domain-a", "prod-x")));
+
+		TraceRequestContext ctx = resolver.resolve(new SubmitterIdentity("client-1", true));
+
+		assertEquals(Collections.singletonList("prod-x"), ctx.getAllowedProducerIds());
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 {
-  "producer": "cedarling-fleet-1/1.0.0",
+  "producer": "cedarling-fleet-1",
   "kid": "cedarling-fleet-1-2026-01",
   "record_id": "9f3e9e2a-6b0e-4b2c-9f6e-3a2f7b0c9d41",
   "trace": {
@@ -13,13 +13,11 @@
       "workload_instance_id": "04bbe9ef-a853-417c-a2b8-5328b62936e2"
     },
     "event": {
-      "outcome": "ALLOW",
-      "capability_ids": [
-        {
-          "capability_id": "invoke:payment-authorization",
-          "outcome": "ALLOW"
-        }
-      ],
+      "decision": {
+        "action": "Acme::Action::\"Pay\"",
+        "resource_type": "Acme::Payment",
+        "outcome": "ALLOW"
+      },
       "tokens": [
         {
           "issuer": "http://accounts.example.org",
@@ -40,7 +38,7 @@
     }
   },
   "producer_chain": {
-    "producer_id": "cedarling-fleet-1/1.0.0",
+    "producer_id": "cedarling-fleet-1",
     "producer_instance_id": "cedarling-001",
     "producer_chain_id": "chain-01JABC9Z0K",
     "sequence_number": 4821,
@@ -48,7 +46,7 @@
   },
   "parent_record_ids": [
     {
-      "producer_id": "jans-auth-server/1.0.0",
+      "producer_id": "jans-auth-server",
       "record_id": "R-token-issued-001",
       "relationship_type": "issued_token"
     }

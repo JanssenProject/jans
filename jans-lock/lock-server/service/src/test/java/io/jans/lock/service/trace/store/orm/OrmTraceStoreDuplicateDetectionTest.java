@@ -15,6 +15,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,7 +32,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 
 /**
- * Tests the backend-agnostic duplicate-detection protocol (design decision D-8) in isolation, with
+ * Tests the backend-agnostic duplicate-detection protocol in isolation, with
  * a plain Mockito mock of {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}:
  * {@code persist} throws a plain {@link EntryPersistenceException} — never
  * {@code io.jans.orm.exception.operation.DuplicateEntryException} in its cause chain, exactly as
@@ -65,6 +66,7 @@ class OrmTraceStoreDuplicateDetectionTest {
 		key.setProducerId("producer-1");
 		key.setKid("kid-1");
 		key.setPublicKeyJwk(jwk);
+		key.setAuthorizedEventKinds(Collections.singletonList("AUTHORIZATION_DECISION"));
 		key.setValidFrom(new Date(100L));
 		key.setRegisteredBy("client-1");
 		key.setCreationDate(new Date(100L));

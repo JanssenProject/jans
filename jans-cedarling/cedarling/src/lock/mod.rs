@@ -133,6 +133,8 @@ mod log_worker;
 mod register_client;
 pub(crate) mod ssa_validation;
 mod telemetry_ticker;
+#[cfg(not(target_arch = "wasm32"))]
+mod trace_sink;
 mod transport;
 pub(crate) use transport::{AuditItem, AuditPayload};
 
@@ -153,11 +155,11 @@ use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::{LogWriter, LoggerWeak};
-use crate::{HttpClientConfig, LockServiceConfig, LockTransport};
+use crate::{HttpClientConfig, LockServiceConfig, LockTransport, TraceEndpoint};
 use lock_config::LockConfig;
 use log_entry::LockLogEntry;
 use log_worker::AuditWorker;
-use register_client::{ClientRegistrationError, register_client};
+use register_client::{ClientRegistrationError, TokenSource, access_token_scope, register_client};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderValue};
 use ssa_validation::validate_ssa_jwt;
@@ -165,7 +167,17 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
+
+/// The Lock access token Cedarling starts with.
+struct AcquiredToken {
+    access_token: String,
+    /// What it takes to reissue the token; `None` for a pre-issued token, which
+    /// cannot be reissued.
+    source: Option<TokenSource>,
+}
 
 /// The base duration to wait for if an http request fails for workers.
 pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
@@ -174,6 +186,34 @@ pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 struct WorkerSenderAndHandle {
     tx: mpsc::Sender<AuditItem>,
     handle: crate::http::JoinHandle<()>,
+}
+
+#[derive(Clone)]
+pub(crate) struct LockAccessToken(String);
+
+impl std::fmt::Debug for LockAccessToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("LockAccessToken([REDACTED])")
+    }
+}
+
+fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -> Option<String> {
+    let url = url::Url::parse(uri).ok()?;
+    let secure = match url.scheme() {
+        "https" => true,
+        "http" => is_loopback_host(&url),
+        _ => false,
+    };
+    (secure && origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+}
+
+fn is_loopback_host(url: &url::Url) -> bool {
+    match url.host() {
+        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+        Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
+        Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
+        None => false,
+    }
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
@@ -186,12 +226,26 @@ pub(crate) struct LockService {
     health_registry: Option<HealthRegistry>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
+    lock_origin: url::Origin,
+    access_token: LockAccessToken,
+    /// Where TRACE records go; `None` when TRACE is off or Lock publishes no endpoint.
+    #[cfg(not(target_arch = "wasm32"))]
+    trace_sink: Option<Arc<TraceSink>>,
 }
 
 impl LockService {
     /// Returns the shared health registry for registering subsystem health checks.
     pub(crate) fn health_registry(&self) -> Option<&HealthRegistry> {
         self.health_registry.as_ref()
+    }
+
+    pub(crate) fn policy_store_bearer_for(&self, uri: &str) -> Option<String> {
+        bearer_for_origin(&self.lock_origin, &self.access_token, uri)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub(crate) fn trace_sink(&self) -> Option<Arc<TraceSink>> {
+        self.trace_sink.clone()
     }
 }
 
@@ -231,13 +285,14 @@ impl LockService {
         metrics: Arc<MetricsCollector>,
         app_name: Option<ApplicationName>,
         http_conf: HttpClientConfig,
+        trace: Option<&TraceEndpoint>,
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
 
         // Get lock config from the config uri endpoint first
         let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
 
-        let access_token = Self::acquire_access_token(
+        let token = Self::acquire_access_token(
             pdp_id,
             bootstrap_conf,
             &lock_config,
@@ -245,8 +300,23 @@ impl LockService {
             logger.as_ref(),
             http_conf,
             &http_client,
+            access_token_scope(trace.is_some()),
         )
         .await?;
+
+        #[cfg(not(target_arch = "wasm32"))]
+        let trace_sink = create_trace_sink(
+            trace,
+            &lock_config,
+            &token.access_token,
+            token.source,
+            bootstrap_conf.accept_invalid_certs,
+            http_conf,
+            logger.as_ref(),
+        )?;
+        // TRACE is rejected on WASM before Lock starts; the scope above is all it affects.
+        #[cfg(target_arch = "wasm32")]
+        let _ = token.source;
 
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
@@ -254,7 +324,7 @@ impl LockService {
                 let worker = create_worker(
                     bootstrap_conf,
                     AuditKind::Log(log_endpoint.0),
-                    &access_token,
+                    &token.access_token,
                     log_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
@@ -273,7 +343,7 @@ impl LockService {
                 let worker = create_worker(
                     bootstrap_conf,
                     AuditKind::Telemetry(telemetry_endpoint.0),
-                    &access_token,
+                    &token.access_token,
                     telemetry_interval,
                     logger.clone(),
                     cancel_tkn.clone(),
@@ -306,7 +376,7 @@ impl LockService {
                         registry: registry.clone(),
                     },
                     bootstrap_conf,
-                    &access_token,
+                    &token.access_token,
                     http_conf,
                 )?;
 
@@ -323,6 +393,10 @@ impl LockService {
             health_registry,
             logger,
             cancel_tkn,
+            lock_origin: bootstrap_conf.config_uri.origin(),
+            access_token: LockAccessToken(token.access_token),
+            #[cfg(not(target_arch = "wasm32"))]
+            trace_sink,
         })
     }
 
@@ -346,7 +420,8 @@ impl LockService {
         #[cfg(not(target_arch = "wasm32"))] logger: Option<&LoggerWeak>,
         http_conf: HttpClientConfig,
         http_client: &HttpClient,
-    ) -> Result<String, InitLockServiceError> {
+        scope: String,
+    ) -> Result<AcquiredToken, InitLockServiceError> {
         // Direct pre-issued access token path is not supported on WASM builds.
         #[cfg(not(target_arch = "wasm32"))]
         if let Some(direct_token) = &bootstrap_conf.access_token_jwt {
@@ -358,7 +433,10 @@ impl LockService {
                         .to_string(),
                 ));
             }
-            return Ok(direct_token.clone());
+            return Ok(AcquiredToken {
+                access_token: direct_token.clone(),
+                source: None,
+            });
         }
 
         // Validate SSA JWT if provided
@@ -382,10 +460,14 @@ impl LockService {
             bootstrap_conf.ssa_jwt.as_ref(),
             bootstrap_conf.accept_invalid_certs,
             http_conf,
+            scope,
         )
         .await?;
 
-        Ok(client_creds.access_token)
+        Ok(AcquiredToken {
+            access_token: client_creds.access_token,
+            source: Some(client_creds.source),
+        })
     }
 
     /// Graceful shutdown: cancels every worker and ticker, then awaits their
@@ -573,12 +655,50 @@ pub enum InitLockServiceError {
     InvalidAccessToken(String),
 }
 
+/// The TRACE sink; `None` when TRACE is off, or with a warning when there is no
+/// endpoint the Lock token may go to: Cedarling still decides, and each decision
+/// reports that no record was sent.
+#[cfg(not(target_arch = "wasm32"))]
+fn create_trace_sink(
+    trace: Option<&TraceEndpoint>,
+    lock_config: &LockConfig,
+    access_token: &str,
+    source: Option<TokenSource>,
+    accept_invalid_certs: bool,
+    http_conf: HttpClientConfig,
+    logger: Option<&LoggerWeak>,
+) -> Result<Option<Arc<TraceSink>>, InitLockServiceError> {
+    let Some(endpoint) = trace else {
+        return Ok(None);
+    };
+    let discovered = lock_config
+        .audit_endpoints
+        .trace_bulk
+        .as_ref()
+        .map(|url| &url.0);
+    let endpoint = match trace_sink::resolve_trace_endpoint(endpoint, discovered) {
+        Ok(endpoint) => endpoint,
+        Err(reason) => {
+            logger
+                .cloned()
+                .log_any(LockLogEntry::warn(reason.to_string()));
+            return Ok(None);
+        },
+    };
+    Ok(Some(Arc::new(TraceSink {
+        endpoint,
+        http: init_http_client(None, accept_invalid_certs, http_conf)?,
+        token: tokio::sync::RwLock::new(LockAccessToken(access_token.to_string())),
+        source,
+    })))
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::authz::metrics::MetricsMode;
     use crate::{
-        LogLevel,
+        LogLevel, TraceEndpoint,
         lock::{register_client::DCR_SCOPE, transport::test_utils::sample_log_item},
     };
     use jsonwebtoken::{EncodingKey, Header, encode};
@@ -611,8 +731,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, lock_config_endpoint) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            mock: lock_config_endpoint,
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
         let jwks_endpoint = mock_jwks_endpoint(&mut mock_idp_server);
         let dcr_endpoint = mock_dcr_endpoint(&mut mock_idp_server, pdp_id, &ssa_jwt);
@@ -642,6 +764,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock logger");
@@ -668,8 +791,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, lock_config_endpoint) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            mock: lock_config_endpoint,
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
         let dcr_endpoint = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
         let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
@@ -698,6 +823,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock logger");
@@ -716,6 +842,98 @@ mod test {
         log_endpoint.assert();
     }
 
+    #[test]
+    fn test_policy_store_bearer_only_for_lock_origin() {
+        let origin =
+            url::Url::parse("https://lock.example.org/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        let token = LockAccessToken("lock.access.token".to_string());
+
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            Some("lock.access.token".to_string()),
+            "same https origin should receive the token"
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://github.com/org/repo/releases/download/v1/store.cjar"
+            ),
+            None,
+            "other hosts must not receive the token"
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "http://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            None,
+            "a different scheme is a different origin"
+        );
+        assert_eq!(
+            bearer_for_origin(
+                &origin,
+                &token,
+                "https://lock.example.org:8443/jans-lock/api/v1/policy/abc"
+            ),
+            None,
+            "a different port is a different origin"
+        );
+        assert_eq!(
+            bearer_for_origin(&origin, &token, "not a url"),
+            None,
+            "unparsable URIs must not receive the token"
+        );
+    }
+
+    #[test]
+    fn test_policy_store_bearer_requires_https_except_loopback() {
+        let token = LockAccessToken("lock.access.token".to_string());
+        let plain_origin =
+            url::Url::parse("http://lock.example.org/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        assert_eq!(
+            bearer_for_origin(
+                &plain_origin,
+                &token,
+                "http://lock.example.org/jans-lock/api/v1/policy/abc"
+            ),
+            None,
+            "plaintext HTTP to a non-loopback host must not carry the token"
+        );
+
+        let loopback_origin =
+            url::Url::parse("http://127.0.0.1:8080/.well-known/lock-server-configuration")
+                .expect("valid url")
+                .origin();
+        assert_eq!(
+            bearer_for_origin(
+                &loopback_origin,
+                &token,
+                "http://127.0.0.1:8080/jans-lock/api/v1/policy/abc"
+            ),
+            Some("lock.access.token".to_string()),
+            "plaintext HTTP to a loopback Lock Server is allowed for local development"
+        );
+    }
+
+    #[test]
+    fn test_lock_access_token_debug_is_redacted() {
+        let token = LockAccessToken("lock.access.token".to_string());
+        assert!(
+            !format!("{token:?}").contains("lock.access.token"),
+            "Debug output must not expose the access token"
+        );
+    }
+
     #[tokio::test]
     async fn test_lock_service_invalid_ssa() {
         let pdp_id = PdpID::new();
@@ -724,8 +942,10 @@ mod test {
         let mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, _) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            ..
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
 
         let config = LockServiceConfig {
             config_uri: lock_config_uri,
@@ -750,6 +970,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await;
         assert!(result.is_err());
@@ -770,8 +991,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, lock_config_endpoint) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            mock: lock_config_endpoint,
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let log_endpoint = mock_log_endpoint(&mut mock_lock_server);
 
         // These endpoints must NOT be called when access_token_jwt is provided
@@ -811,6 +1034,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock service with direct access token");
@@ -841,8 +1065,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, lock_config_endpoint) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            mock: lock_config_endpoint,
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
 
         // DCR / token endpoints must NOT be called
         let oidc_endpoint = mock_idp_server
@@ -881,6 +1107,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock service: access_token_jwt should win over ssa_jwt");
@@ -891,11 +1118,27 @@ mod test {
         token_endpoint.assert();
     }
 
+    /// The mocked `.well-known/lock-server-configuration` endpoint.
+    struct MockedLockConfig {
+        uri: url::Url,
+        mock: Mock,
+    }
+
     /// Mocks the `.well-known/lock-server-configuration` endpoint
     fn mock_lock_config_endpoint(
         lock_server: &mut ServerGuard,
         idp_server: &ServerGuard,
-    ) -> (url::Url, Mock) {
+    ) -> MockedLockConfig {
+        mock_lock_config_endpoint_with(lock_server, idp_server, false)
+    }
+
+    /// Mocks the `.well-known/lock-server-configuration` endpoint; `trace_bulk`
+    /// adds `trace_bulk_endpoint`, as Lock does when its TRACE is enabled.
+    fn mock_lock_config_endpoint_with(
+        lock_server: &mut ServerGuard,
+        idp_server: &ServerGuard,
+        trace_bulk: bool,
+    ) -> MockedLockConfig {
         let lock_config_path = "/.well-known/lock-server-configuration";
         let lock_config_uri: url::Url = format!("{}{}", lock_server.url(), lock_config_path)
             .parse()
@@ -929,6 +1172,7 @@ mod test {
                     "log_endpoint": log_endpoint,
                     "health_endpoint": health_endpoint,
                     "telemetry_endpoint": telemetry_endpoint,
+                    "trace_bulk_endpoint": trace_bulk.then(|| trace_bulk_url(lock_server)),
                 },
                 "config": {
                     "config_endpoint": config_endpoint,
@@ -943,7 +1187,288 @@ mod test {
             .expect(1)
             .create();
 
-        (lock_config_uri, config_endpoint)
+        MockedLockConfig {
+            uri: lock_config_uri,
+            mock: config_endpoint,
+        }
+    }
+
+    fn trace_bulk_url(lock_server: &ServerGuard) -> String {
+        format!("{}/jans-auth/v1/audit/trace/bulk", lock_server.url())
+    }
+
+    /// Lock configuration with the direct access token, so no IDP is needed.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn direct_token_config(config_uri: url::Url) -> LockServiceConfig {
+        LockServiceConfig {
+            config_uri,
+            access_token_jwt: Some("some.pre.issued.access.token".to_string()), // # gitleaks:allow
+            log_interval: None,
+            health_interval: None,
+            telemetry_interval: None,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        }
+    }
+
+    /// Mocks the `/token` endpoint, matching the requested scope exactly.
+    fn mock_token_endpoint_with_scope(server: &mut ServerGuard, scope: &str) -> Mock {
+        server
+            .mock("POST", "/jans-auth/restv1/token")
+            .match_body(mockito::Matcher::UrlEncoded(
+                "scope".to_string(),
+                scope.to_string(),
+            ))
+            .with_body(json!({"access_token": "some.access.token"}).to_string())
+            .expect(1)
+            .create()
+    }
+
+    async fn start_with_dcr(
+        trace: Option<&TraceEndpoint>,
+        scope: &str,
+    ) -> Result<LockService, InitLockServiceError> {
+        let pdp_id = PdpID::new();
+        let mut mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let _oidc = mock_oidc_endpoint(&mut mock_idp_server);
+        let _dcr = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
+        let token_endpoint = mock_token_endpoint_with_scope(&mut mock_idp_server, scope);
+        let config = LockServiceConfig {
+            config_uri,
+            log_interval: None,
+            health_interval: None,
+            telemetry_interval: None,
+            transport: LockTransport::Rest,
+            ..Default::default()
+        };
+        let service = LockService::new(
+            pdp_id,
+            &config,
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            trace,
+        )
+        .await;
+        token_endpoint.assert_async().await;
+        service
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn trace_enabled_requests_trace_write() {
+        let scope = format!(
+            "{} https://jans.io/oauth/lock/trace.write",
+            register_client::ACCESS_TKN_SCOPE
+        );
+        let service = start_with_dcr(Some(&TraceEndpoint::Discovered), &scope)
+            .await
+            .expect("Lock service with TRACE should start");
+        let sink = service
+            .trace_sink()
+            .expect("a discovered trace_bulk_endpoint should give a TRACE sink");
+        assert!(
+            sink.endpoint.path().ends_with("/audit/trace/bulk"),
+            "the sink should post to the discovered bulk endpoint, got {}",
+            sink.endpoint
+        );
+        assert!(
+            sink.source.is_some(),
+            "a DCR client can reissue its token, so the sink keeps the token source"
+        );
+    }
+
+    #[tokio::test]
+    async fn trace_disabled_token_request_unchanged() {
+        let service = start_with_dcr(None, register_client::ACCESS_TKN_SCOPE)
+            .await
+            .expect("Lock service without TRACE should start");
+        #[cfg(not(target_arch = "wasm32"))]
+        assert!(
+            service.trace_sink().is_none(),
+            "without TRACE there is no TRACE sink"
+        );
+        let _ = service;
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn insecure_trace_endpoint_warns_and_starts_without_sink() {
+        use crate::log::LogStrategy;
+        use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
+
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let log = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ));
+        let endpoint = TraceEndpoint::Url(
+            "http://lock.example.com/audit/trace/bulk"
+                .parse()
+                .expect("valid URL"),
+        );
+
+        let service = LockService::new(
+            PdpID::new(),
+            &direct_token_config(config_uri),
+            Some(Arc::downgrade(&log)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            Some(&endpoint),
+        )
+        .await
+        .expect("a misconfigured TRACE endpoint should not stop Cedarling");
+
+        assert!(
+            service.trace_sink().is_none(),
+            "the Lock token must not go over plain http to a remote host"
+        );
+        let warned = log.pop_logs().iter().any(|entry| {
+            entry["level"] == "WARN"
+                && entry["message"].as_str().is_some_and(|msg| {
+                    msg.contains("CEDARLING_TRACE_ENDPOINT on http://lock.example.com")
+                })
+        });
+        assert!(
+            warned,
+            "startup should warn that the TRACE endpoint is not secure"
+        );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn explicit_trace_endpoint_overrides_discovery() {
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let url: url::Url = "https://proxy.example.com/trace/bulk"
+            .parse()
+            .expect("valid URL");
+
+        let service = LockService::new(
+            PdpID::new(),
+            &direct_token_config(config_uri),
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            Some(&TraceEndpoint::Url(url.clone())),
+        )
+        .await
+        .expect("Lock service with an explicit TRACE endpoint should start");
+        let sink = service
+            .trace_sink()
+            .expect("an explicit endpoint should give a TRACE sink");
+        assert_eq!(
+            sink.endpoint, url,
+            "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint"
+        );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn discovered_without_trace_bulk_endpoint_has_no_sink() {
+        use crate::log::LogStrategy;
+        use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
+
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, false);
+        let log = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ));
+
+        let service = LockService::new(
+            PdpID::new(),
+            &direct_token_config(config_uri),
+            Some(Arc::downgrade(&log)),
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            Some(&TraceEndpoint::Discovered),
+        )
+        .await
+        .expect("a Lock without TRACE should not stop Cedarling");
+
+        assert!(
+            service.trace_sink().is_none(),
+            "without trace_bulk_endpoint there is nowhere to send records"
+        );
+        let warned = log.pop_logs().iter().any(|entry| {
+            entry["level"] == "WARN"
+                && entry["message"]
+                    .as_str()
+                    .is_some_and(|msg| msg.contains("trace_bulk_endpoint"))
+        });
+        assert!(
+            warned,
+            "startup should warn that Lock publishes no trace_bulk_endpoint"
+        );
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[tokio::test]
+    async fn direct_access_token_has_no_token_source() {
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+
+        let service = LockService::new(
+            PdpID::new(),
+            &direct_token_config(config_uri),
+            None,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            Some(&TraceEndpoint::Discovered),
+        )
+        .await
+        .expect("Lock service with a direct token should start");
+        let sink = service
+            .trace_sink()
+            .expect("a discovered trace_bulk_endpoint should give a TRACE sink");
+        assert!(
+            sink.source.is_none(),
+            "a pre-issued token cannot be reissued, so there is no token source"
+        );
     }
 
     /// Mocks the `.well-known/openid-configuration` endpoint
@@ -1087,8 +1612,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, lock_config_endpoint) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            mock: lock_config_endpoint,
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let oidc_endpoint = mock_oidc_endpoint(&mut mock_idp_server);
         let dcr_endpoint = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
         let token_endpoint = mock_token_endpoint(&mut mock_idp_server);
@@ -1116,6 +1643,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock logger");
@@ -1137,8 +1665,10 @@ mod test {
         let mut mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
 
-        let (lock_config_uri, _) =
-            mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
+        let MockedLockConfig {
+            uri: lock_config_uri,
+            ..
+        } = mock_lock_config_endpoint(&mut mock_lock_server, &mock_idp_server);
         let _oidc = mock_oidc_endpoint(&mut mock_idp_server);
         let _dcr = mock_dcr_endpoint_without_ssa(&mut mock_idp_server, pdp_id);
         let _token = mock_token_endpoint(&mut mock_idp_server);
@@ -1168,6 +1698,7 @@ mod test {
             metrics,
             None,
             HttpClientConfig::default(),
+            None,
         )
         .await
         .expect("build lock service");

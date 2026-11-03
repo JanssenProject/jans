@@ -6,6 +6,8 @@
 
 package io.jans.lock.service.trace.ingest;
 
+import java.util.List;
+
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 
@@ -23,6 +25,8 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
  */
 public final class AcceptanceResult {
 
+	private static final boolean ACCEPTED = true;
+
 	private final String producerId;
 
 	private final String recordId;
@@ -35,27 +39,17 @@ public final class AcceptanceResult {
 
 	private final boolean idempotentReplay;
 
-	private final boolean coverageGapFlag;
-
-	private final boolean chainLinkFailureFlag;
-
-	private final boolean equivocationFlag;
-
-	private final boolean lateFlag;
+	private final IngestionFlags flags;
 
 	private AcceptanceResult(String producerId, String recordId, String contentDigest, long receiptSequence,
-			long receivedAtMs, boolean idempotentReplay, boolean coverageGapFlag, boolean chainLinkFailureFlag,
-			boolean equivocationFlag, boolean lateFlag) {
+			long receivedAtMs, boolean idempotentReplay, IngestionFlags flags) {
 		this.producerId = producerId;
 		this.recordId = recordId;
 		this.contentDigest = contentDigest;
 		this.receiptSequence = receiptSequence;
 		this.receivedAtMs = receivedAtMs;
 		this.idempotentReplay = idempotentReplay;
-		this.coverageGapFlag = coverageGapFlag;
-		this.chainLinkFailureFlag = chainLinkFailureFlag;
-		this.equivocationFlag = equivocationFlag;
-		this.lateFlag = lateFlag;
+		this.flags = flags.copy();
 	}
 
 	/**
@@ -64,18 +58,16 @@ public final class AcceptanceResult {
 	 * @param replay whether this call is reporting an idempotent replay rather than a fresh insert
 	 */
 	public static AcceptanceResult fromStored(StoredTraceRecord stored, boolean replay) {
-		IngestionFlags flags = stored.getFlags();
 		return new AcceptanceResult(stored.getIdentity().getProducerId(), stored.getIdentity().getRecordId(),
 				stored.getContentDigest(), stored.getReceipt().getReceiptSequence(),
-				stored.getReceipt().getReceivedAtMs(), replay, flags.isCoverageGap(), flags.isChainLinkFailure(),
-				flags.isEquivocation(), flags.isLate());
+				stored.getReceipt().getReceivedAtMs(), replay, stored.getFlags());
 	}
 
 	/**
 	 * @return always {@code true}; every rejection path throws instead of returning a result
 	 */
 	public boolean isAccepted() {
-		return true;
+		return ACCEPTED;
 	}
 
 	public String getProducerId() {
@@ -103,28 +95,38 @@ public final class AcceptanceResult {
 	}
 
 	public boolean isCoverageGapFlag() {
-		return coverageGapFlag;
+		return flags.isCoverageGap();
 	}
 
 	public boolean isChainLinkFailureFlag() {
-		return chainLinkFailureFlag;
+		return flags.isChainLinkFailure();
 	}
 
 	public boolean isEquivocationFlag() {
-		return equivocationFlag;
+		return flags.isEquivocation();
 	}
 
 	public boolean isLateFlag() {
-		return lateFlag;
+		return flags.isLate();
+	}
+
+	public boolean isPolicyMismatchFlag() {
+		return flags.isPolicyMismatch();
+	}
+
+	public boolean isReservedMemberFlag() {
+		return flags.isReservedMember();
+	}
+
+	public List<String> getReservedMembers() {
+		return flags.getReservedMembers();
 	}
 
 	@Override
 	public String toString() {
 		return "AcceptanceResult [producerId=" + producerId + ", recordId=" + recordId + ", contentDigest="
 				+ contentDigest + ", receiptSequence=" + receiptSequence + ", receivedAtMs=" + receivedAtMs
-				+ ", idempotentReplay=" + idempotentReplay + ", coverageGapFlag=" + coverageGapFlag
-				+ ", chainLinkFailureFlag=" + chainLinkFailureFlag + ", equivocationFlag=" + equivocationFlag
-				+ ", lateFlag=" + lateFlag + "]";
+				+ ", idempotentReplay=" + idempotentReplay + ", flags=" + flags + "]";
 	}
 
 }

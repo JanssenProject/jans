@@ -40,11 +40,6 @@
             "uri":null
         },
         {
-            "id":"domain_field_forbidden",
-            "description":"The request must not specify an evidence domain identifier.",
-            "uri":null
-        },
-        {
             "id":"producer_mismatch",
             "description":"The producer identifier does not match the registered chain's producer.",
             "uri":null

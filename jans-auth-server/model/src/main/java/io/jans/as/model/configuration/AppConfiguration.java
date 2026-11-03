@@ -44,6 +44,8 @@ public class AppConfiguration implements Configuration {
     public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
     public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
     public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
+    public static final List<String> DEFAULT_APPLY_SECURITY_HEADERS_IF_URI_CONTAINS_ANY = Collections.unmodifiableList(Arrays.asList(
+            "/restv1/token", "/restv1/userinfo", "/restv1/introspection", "/restv1/jwks", "/restv1/register", "/restv1/revoke"));
     public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
     public static final int DEFAULT_USER_INFO_LIFETIME = 3600;
     public static final int DEFAULT_ID_JAG_LIFETIME = 300;
@@ -270,6 +272,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Add X-Frame-Options header to response if any string in the list is contained by request uri.", defaultValue = "SAMEORIGIN")
     private XFrameOptions xframeOptionsHeaderValue = DEFAULT_X_FRAME_ORIGINS_VALUE;
 
+    @DocProperty(description = "Enables defense-in-depth security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) on responses of the endpoints listed in applySecurityHeadersIfUriContainsAny", defaultValue = "true")
+    private Boolean securityHeadersEnabled = true;
+
+    @DocProperty(description = "Add security headers (Content-Security-Policy, X-Content-Type-Options, Referrer-Policy) to response if any string in the list is contained by request uri and securityHeadersEnabled is true.", defaultValue = "/restv1/token, /restv1/userinfo, /restv1/introspection, /restv1/jwks, /restv1/register, /restv1/revoke")
+    private List<String> applySecurityHeadersIfUriContainsAny = new ArrayList<>(DEFAULT_APPLY_SECURITY_HEADERS_IF_URI_CONTAINS_ANY);
+
     @DocProperty(description = "This list details which OAuth 2.0 response_type values are supported by this OP.", defaultValue = "By default, every combination of code, token and id_token is supported.")
     private Set<Set<ResponseType>> responseTypesSupported;
 
@@ -279,7 +287,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list details which OAuth 2.0 grant types are supported by this OP")
     private Set<GrantType> grantTypesSupported;
 
-    @DocProperty(description = "This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.")
+    @DocProperty(description = "This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public. The ephemeral type is disabled by default.")
     private List<String> subjectTypesSupported;
 
     @DocProperty(description = "The default subject type used for dynamic client registration")
@@ -720,6 +728,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list specified which client redirection URIs are black-listed")
     private List<String> clientBlackList;
 
+    @DocProperty(description = "Boolean value to indicate whether redirect_uri at Token Endpoint must be identical to the redirect_uri from the Authorization Request. Default value is true. When false, redirect_uri at Token Endpoint must only be registered for the client.", defaultValue = "true")
+    private Boolean strictTokenRedirectUriValidation = true;
+
     @DocProperty(description = "Choose whether to include claims in ID tokens")
     private Boolean legacyIdTokenClaims;
 
@@ -770,7 +781,7 @@ public class AppConfiguration implements Configuration {
     private Boolean rotateDeviceSecret = false;
 
     // Identity Assertion Authorization Grant (ID-JAG / Cross-App Access)
-    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI.", defaultValue = "empty")
+    @DocProperty(description = "Trusted IdP issuers whose ID-JAGs this AS will accept (Resource AS role). Map keyed by IdP issuer URI. Each entry may set 'jwks' (inline, takes precedence) or 'jwksUri' to verify the ID-JAG signature with the issuer's keys; otherwise this AS's own keys are used.", defaultValue = "empty")
     private Map<String, TrustedIssuerConfig> idJagTrustedIdpIssuers = new HashMap<>();
 
     @DocProperty(description = "Lifetime in seconds for ID-JAGs issued by this AS (IdP role).", defaultValue = "300")
@@ -839,6 +850,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true", defaultValue = "true")
     private Boolean removeRefreshTokensForClientOnLogout = true;
+
+    @DocProperty(description = "Allows server to start if external jwksUri can not be fetched. Server starts without keys and retries on configuration reload. Default false: startup fails.", defaultValue = "false")
+    private Boolean allowStartupOnJwksUriFetchFailure = false;
 
     @DocProperty(description = "Boolean value specifying whether to skip refreshing tokens on refreshing", defaultValue = "false")
     private Boolean skipRefreshTokenDuringRefreshing = false;
@@ -1696,6 +1710,15 @@ public class AppConfiguration implements Configuration {
         this.allowEndSessionWithUnmatchedSid = allowEndSessionWithUnmatchedSid;
     }
 
+    public Boolean getAllowStartupOnJwksUriFetchFailure() {
+        if (allowStartupOnJwksUriFetchFailure == null) allowStartupOnJwksUriFetchFailure = false;
+        return allowStartupOnJwksUriFetchFailure;
+    }
+
+    public void setAllowStartupOnJwksUriFetchFailure(Boolean allowStartupOnJwksUriFetchFailure) {
+        this.allowStartupOnJwksUriFetchFailure = allowStartupOnJwksUriFetchFailure;
+    }
+
     public Boolean getRemoveRefreshTokensForClientOnLogout() {
         if (removeRefreshTokensForClientOnLogout == null) removeRefreshTokensForClientOnLogout = true;
         return removeRefreshTokensForClientOnLogout;
@@ -2184,6 +2207,28 @@ public class AppConfiguration implements Configuration {
 
     public void setApplyXFrameOptionsHeaderIfUriContainsAny(List<String> applyXFrameOptionsHeaderIfUriContainsAny) {
         this.applyXFrameOptionsHeaderIfUriContainsAny = applyXFrameOptionsHeaderIfUriContainsAny;
+    }
+
+    public Boolean getSecurityHeadersEnabled() {
+        if (securityHeadersEnabled == null) {
+            securityHeadersEnabled = true;
+        }
+        return securityHeadersEnabled;
+    }
+
+    public void setSecurityHeadersEnabled(Boolean securityHeadersEnabled) {
+        this.securityHeadersEnabled = securityHeadersEnabled;
+    }
+
+    public List<String> getApplySecurityHeadersIfUriContainsAny() {
+        if (applySecurityHeadersIfUriContainsAny == null) {
+            applySecurityHeadersIfUriContainsAny = new ArrayList<>(DEFAULT_APPLY_SECURITY_HEADERS_IF_URI_CONTAINS_ANY);
+        }
+        return applySecurityHeadersIfUriContainsAny;
+    }
+
+    public void setApplySecurityHeadersIfUriContainsAny(List<String> applySecurityHeadersIfUriContainsAny) {
+        this.applySecurityHeadersIfUriContainsAny = applySecurityHeadersIfUriContainsAny;
     }
 
     public XFrameOptions getXframeOptionsHeaderValue() {
@@ -3161,6 +3206,14 @@ public class AppConfiguration implements Configuration {
 
     public void setClientBlackList(List<String> clientBlackList) {
         this.clientBlackList = clientBlackList;
+    }
+
+    public Boolean getStrictTokenRedirectUriValidation() {
+        return strictTokenRedirectUriValidation;
+    }
+
+    public void setStrictTokenRedirectUriValidation(Boolean strictTokenRedirectUriValidation) {
+        this.strictTokenRedirectUriValidation = strictTokenRedirectUriValidation;
     }
 
     public Boolean getLegacyIdTokenClaims() {

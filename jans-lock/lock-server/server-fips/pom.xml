@@ -53,7 +53,7 @@
 				<executions>
 					<execution>
 						<id>build-oxauth-fips-war</id>
-						<phase>process-sources</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<target>
 								<property name="server.webapp.dir" value="${project.basedir}/../server/target/jans-lock-server-${project.version}"/>
@@ -90,7 +90,9 @@
 						WEB-INF/lib/bcpkix-jdk18on-*.jar,
 						WEB-INF/lib/bcprov-jdk18on-*.jar,
 						WEB-INF/lib/bcutil-jdk18on-*.jar,
-						WEB-INF/lib/bcmail-jdk18on-*.jar
+						WEB-INF/lib/bcmail-jdk18on-*.jar,
+						WEB-INF/lib/jans-lock-trace-crypto-native-*.jar,
+						WEB-INF/lib/jans-trace-java-*.jar
 					</packagingExcludes>
 				</configuration>
 			</plugin>

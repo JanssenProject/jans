@@ -47,6 +47,7 @@ import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
+import com.unboundid.ldap.sdk.controls.AssertionRequestControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
@@ -697,6 +698,50 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return modifyEntry(modifyRequest);
     }
 
+    @Override
+    public boolean updateEntryWithVersion(String dn, List<Modification> modifications, String versionAttributeName,
+            Object expectedVersionValue) throws DuplicateEntryException, ConnectionException {
+        Instant startTime = OperationDurationUtil.instance().now();
+
+        boolean result = updateEntryWithVersionImpl(dn, modifications, versionAttributeName, expectedVersionValue);
+
+        Duration duration = OperationDurationUtil.instance().duration(startTime);
+        OperationDurationUtil.instance().logDebug("LDAP operation: modify_with_version, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
+
+        return result;
+    }
+
+    private boolean updateEntryWithVersionImpl(String dn, List<Modification> modifications, String versionAttributeName,
+            Object expectedVersionValue) throws DuplicateEntryException, ConnectionException {
+        if (!getConnectionProvider().isSupportsAssertionRequestControl()) {
+            throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+                    "Versioned update (updateWithVersion) requires the LDAP assertion control (OID %s), which "
+                    + "the connected server does not advertise", AssertionRequestControl.ASSERTION_REQUEST_OID));
+        }
+
+        if (this.persistenceExtension != null) {
+            updateUserPasswordModification(modifications);
+        }
+
+        // Filter.createEqualityFilter() RFC-4515-escapes the assertion value for us, so this is
+        // safe even if the version type ever changes to something needing escaping.
+        Filter assertionFilter = Filter.createEqualityFilter(versionAttributeName, String.valueOf(expectedVersionValue));
+
+        ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
+        modifyRequest.addControl(new AssertionRequestControl(assertionFilter));
+
+		try {
+			return modifyEntry(modifyRequest);
+		} catch (ConnectionException ex) {
+			// Entry deleted after the caller's pre-read: same CAS-miss signal as SQL's 0-row update
+			if ((ex.getCause() instanceof LDAPException) && (((LDAPException) ex.getCause()).getResultCode()
+					.intValue() == ResultCode.NO_SUCH_OBJECT_INT_VALUE)) {
+				return false;
+			}
+			throw ex;
+		}
+	}
+
     /**
      * Use this method to add / replace / delete attribute from entry
      *
@@ -712,6 +757,11 @@ public class LdapOperationServiceImpl implements LdapOperationService {
             return ResultCode.SUCCESS.equals(modifyResult.getResultCode());
         } catch (final LDAPException ex) {
             int errorCode = ex.getResultCode().intValue();
+            if (errorCode == ResultCode.ASSERTION_FAILED_INT_VALUE) {
+                // CAS miss: the assertion control's filter no longer matched the entry. Not an
+                // error -- same "version mismatch" signal as a 0-row WHERE-predicate update.
+                return false;
+            }
             if (errorCode == ResultCode.INSUFFICIENT_ACCESS_RIGHTS_INT_VALUE) {
                 throw new ConnectionException("LDAP config error: insufficient access rights.", ex);
             }

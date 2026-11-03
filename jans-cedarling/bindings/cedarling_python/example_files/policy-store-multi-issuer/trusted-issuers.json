@@ -1,0 +1,23 @@
+{
+  "Jans::Access_Token": {
+    "type": "jwt",
+    "issuer": "JansTestIssuer",
+    "configuration_endpoints": {
+      "configuration": "https://test.jans.org/.well-known/openid-configuration"
+    }
+  },
+  "Jans::Id_Token": {
+    "type": "jwt",
+    "issuer": "JansTestIssuer",
+    "configuration_endpoints": {
+      "configuration": "https://test.jans.org/.well-known/openid-configuration"
+    }
+  },
+  "Jans::Userinfo_Token": {
+    "type": "jwt",
+    "issuer": "JansTestIssuer",
+    "configuration_endpoints": {
+      "configuration": "https://test.jans.org/.well-known/openid-configuration"
+    }
+  }
+}

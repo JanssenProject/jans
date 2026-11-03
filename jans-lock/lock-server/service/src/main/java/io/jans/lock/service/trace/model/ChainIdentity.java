@@ -10,8 +10,7 @@ import java.util.Objects;
 
 /**
  * A producer chain's external identity: {@code (evidence_domain_id, producer_id,
- * producer_instance_id, producer_chain_id)} (design decision D-6, key type {@code chain}; design
- * §8). Must be pre-registered before any record may reference it (design decision D-5).
+ * producer_instance_id, producer_chain_id)} (key type {@code chain} in {@code TraceKeys}; design §8). Must be pre-registered before any record may reference it.
  *
  * @author Yuriy Movchan
  */

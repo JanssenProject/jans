@@ -138,6 +138,16 @@ public class ServerUtil {
 	}
 
     /**
+     * Check whether the current thread handles a gRPC call: the authorization interceptor puts the
+     * client IP address into the gRPC context of every call it lets through.
+     *
+     * @return true if the current gRPC context carries a client IP address
+     */
+    public static boolean isGrpcCall() {
+        return CLIENT_IP_CONTEXT_KEY.get(Context.current()) != null;
+    }
+
+    /**
      * Set client IP address from current context
      * @return 
      */

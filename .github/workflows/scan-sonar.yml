@@ -187,18 +187,18 @@ jobs:
             [ "$dep" = "$MODULE" ] && break
             if echo "$CHANGED_MODULES" | tr ' ' '\n' | grep -qx "$dep"; then
               echo "Installing changed upstream module $dep"
-              mvn -B -q -DskipTests=true -f "$dep/pom.xml" install
+              mvn -B -U -q -DskipTests=true -f "$dep/pom.xml" install
             fi
           done
           cd "$MODULE"
           case "$MODULE" in
             "jans-auth-server"|"jans-lock"|"jans-scim"|"jans-config-api")
                   echo "Run Sonar analysis without test execution"
-                  mvn -B -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+                  mvn -B -U -DskipTests=true install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
                 ;;
             *)
             echo "Run Sonar analysis with test execution"
-            mvn -B install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+            mvn -B -U install org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
             ;;
           esac
 

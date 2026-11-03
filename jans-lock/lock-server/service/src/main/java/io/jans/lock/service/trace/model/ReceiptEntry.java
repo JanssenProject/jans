@@ -9,8 +9,7 @@ package io.jans.lock.service.trace.model;
 import java.util.Objects;
 
 /**
- * The receipt-chain data carried alongside a {@link StoredTraceRecord} (design §9, design decision
- * D-8): the sequence number this record was accepted at, when, and the hash-chain link. This is a
+ * The receipt-chain data carried alongside a {@link StoredTraceRecord} (design §9): the sequence number this record was accepted at, when, and the hash-chain link. This is a
  * plain value copy of the corresponding {@code jansTraceReceipt*} attributes on the record row —
  * it is not the allocation claim itself (see {@link ReceiptRow}).
  *

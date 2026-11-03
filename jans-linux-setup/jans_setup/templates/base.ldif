@@ -236,3 +236,8 @@ dn: ou=keys,ou=trace,ou=lock,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: keys
+
+dn: ou=policyReleases,ou=trace,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: policyReleases

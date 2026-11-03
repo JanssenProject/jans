@@ -385,10 +385,10 @@ The data is injected into the evaluation context before policy evaluation, allow
 
 ### Trusted Issuer Loading Info
 
-When trusted issuers are configured in the policy store, you can query loading status:
+When the policy store declares JWT issuers in `trusted-issuers.json`, you can query loading status. Issuers are identified by their `issuer` name in that file.
 
 ```go
-loadedByName := instance.IsTrustedIssuerLoadedByName("issuer_id")
+loadedByName := instance.IsTrustedIssuerLoadedByName("Acme")
 loadedByIss := instance.IsTrustedIssuerLoadedByIss("https://issuer.example.org")
 totalIssuers := instance.TotalIssuers()
 loadedCount := instance.LoadedTrustedIssuersCount()
@@ -427,6 +427,15 @@ config := map[string]any{
 // From Lock Server
 config := map[string]any{
     "CEDARLING_POLICY_STORE_URI": "https://lock-server.example.com/policy-store.cjar",
+}
+
+// Load a .cjar only if its Sigstore bundle verifies (any .cjar source).
+// The bundle defaults to the archive location plus ".sigstore.json".
+config := map[string]any{
+    "CEDARLING_POLICY_STORE_URI":                       "https://example.com/policy-store.cjar",
+    "CEDARLING_POLICY_STORE_SIGSTORE_MODE":             "enforce",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY":    "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+    "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com",
 }
 ```
 

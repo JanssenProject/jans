@@ -193,6 +193,19 @@ Choose either a local archive or a remote URI (they are mutually exclusive):
 
 > The optional `CEDARLING_POLICY_STORE_REFRESH_INTERVAL` (seconds) enables periodic re-fetch and atomic swap of the policy store for URL-based sources. Default `0` keeps the load-once-at-startup behavior. See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#refreshing-the-policy-store) for full semantics.
 
+**Signature check (any `.cjar` source):**
+
+```json
+{
+  "CEDARLING_POLICY_STORE_URI": "https://example.com/policy-store.cjar",
+  "CEDARLING_POLICY_STORE_SIGSTORE_MODE": "enforce",
+  "CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY": "asset-signer@prod-gluu-cloud-platform.iam.gserviceaccount.com",
+  "CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER": "https://accounts.google.com"
+}
+```
+
+> With `enforce`, the archive loads only if its Sigstore bundle verifies for this signer, and a refresh that fails the check keeps the current store. The bundle is read from the archive location plus `.sigstore.json` unless `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` is set. See [`cedarling-properties.md`](../../../docs/cedarling/reference/cedarling-properties.md#verifying-policy-store-signatures).
+
 #### New Directory-Based Format
 
 Policy stores can be structured as directories with human-readable Cedar files:
@@ -207,13 +220,14 @@ policy-store/
 │   └── deny-guest.cedar
 ├── templates/              # Optional: .cedar template files
 ├── entities/               # Optional: .json entity files
-└── trusted-issuers/        # Optional: .json issuer configurations
+└── trusted-issuers.json    # Optional: accepted token types and their issuers
 ```
 
 **metadata.json structure:**
 
 ```json
 {
+  "policy_store_spec_version": 2,
   "cedar_version": "4.4.0",
   "policy_store": {
     "id": "abc123def456",
@@ -336,7 +350,7 @@ Note: The `CedarlingAdapter` wrapper performs additional validation and may thro
 `CedarlingAdapter` exposes trusted issuer loading status methods:
 
 ```java
-boolean loadedByName = adapter.isTrustedIssuerLoadedByName("issuer_id");
+boolean loadedByName = adapter.isTrustedIssuerLoadedByName("Acme");
 boolean loadedByIss = adapter.isTrustedIssuerLoadedByIss("https://issuer.example.org");
 long totalIssuers = adapter.totalIssuers();
 long loadedCount = adapter.loadedTrustedIssuersCount();
@@ -344,4 +358,4 @@ List<String> loadedIds = adapter.loadedTrustedIssuerIds();
 List<String> failedIds = adapter.failedTrustedIssuerIds();
 ```
 
-These methods are useful when your policy store includes `trusted-issuers/` definitions.
+These methods are useful when your policy store declares JWT issuers in `trusted-issuers.json`. Issuers are identified by their `issuer` name in the policy store's `trusted-issuers.json`.
