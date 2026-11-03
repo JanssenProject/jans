@@ -15705,9 +15705,9 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -17621,10 +17621,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17695,6 +17695,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -18743,9 +18747,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
         logoutStatusJwt:
+          type: boolean
+        accessToken:
           type: boolean
     TokenEntityPagedResult:
       type: object
