@@ -22,6 +22,7 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.as.server.service.token.StatusListService;
 import io.jans.as.server.service.token.TokenService;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -182,6 +183,20 @@ public class UserInfoRestWebServiceImplTest {
         userInfoRestWebServiceImpl.getJSonResponse(user, grant, Collections.singletonList("removed"));
 
         verify(log).debug(eq("Unable to find scope in persistence, no claims added. Is it removed? Scope name: {}"), eq("removed"));
+    }
+
+    @Test
+    public void getJSonResponse_whenDebugEnabled_shouldLogCustomAttributeNamesWithoutValues() throws Exception {
+        lenient().when(log.isDebugEnabled()).thenReturn(true);
+        when(user.getUserId()).thenReturn("test-user");
+        when(user.getCustomAttributes()).thenReturn(Arrays.asList(
+                new CustomObjectAttribute("givenName", "secret-given-name"),
+                new CustomObjectAttribute("mail", "secret@example.org")));
+
+        userInfoRestWebServiceImpl.getJSonResponse(user, grant, Collections.emptyList());
+
+        verify(log).debug(eq("Building User Info claims, user: {}, client: {}, scopes: {}, user custom attribute names: {}"),
+                eq("test-user"), eq("test-client"), eq(Collections.emptyList()), eq(Arrays.asList("givenName", "mail")));
     }
 
     private JwtClaims invokeCreateJwtClaims() throws Exception {

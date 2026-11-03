@@ -56,6 +56,7 @@ import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Path;
@@ -247,7 +248,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     private String getJwtResponse(SignatureAlgorithm signatureAlgorithm, User user, AuthorizationGrant authorizationGrant,
                                   Collection<String> scopes) throws Exception {
-        log.trace("Building JWT reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWT reponse with next scopes {} for user {}", scopes, user.getUserId());
 
         Jwt jwt = new Jwt();
 
@@ -291,7 +292,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJweResponse(
             KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
             User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
-        log.trace("Building JWE reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWE reponse with next scopes {} for user {}", scopes, user.getUserId());
 
         Jwe jwe = new Jwe();
 
@@ -336,7 +337,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
      * Builds a JSon String with the response parameters.
      */
     public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
-        log.debug("Building User Info claims, user: {}, client: {}, scopes: {}, user custom attributes {}", user.getUserId(), authorizationGrant.getClientId(), scopes, user.getCustomAttributes());
+        log.debug("Building User Info claims, user: {}, client: {}, scopes: {}, user custom attribute names: {}", user.getUserId(), authorizationGrant.getClientId(), scopes, getCustomAttributeNames(user));
 
         JsonWebResponse jwr = new JsonWebResponse();
 
@@ -460,6 +461,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         return jwr.toString();
+    }
+
+    private static List<String> getCustomAttributeNames(User user) {
+        if (user.getCustomAttributes() == null) {
+            return Collections.emptyList();
+        }
+        return user.getCustomAttributes().stream().map(CustomObjectAttribute::getName).collect(Collectors.toList());
     }
 
     public boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
