@@ -685,8 +685,13 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                         accessToken.getExpiresIn(), refToken, scope, idToken, checkedAuthzDetails)).build();
             } finally {
                 // also on failure: the code was already consumed above and must not be re-usable
-                grantService.removeByCode(deviceCode);
-                oneTimeCodeClaims.remove(deviceCode);
+                try {
+                    grantService.removeByCode(deviceCode);
+                } catch (Exception e) {
+                    log.error("Failed to remove consumed device code", e);
+                } finally {
+                    oneTimeCodeClaims.remove(deviceCode);
+                }
             }
         } else {
             final DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByDeviceCode(deviceCode);

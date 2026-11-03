@@ -139,7 +139,9 @@ function normalizeIssuer(value: string): string {
   }
 }
 
-function isLocalHostname(hostname: string): boolean {
+function isLocalHostname(rawHostname: string): boolean {
+  // a trailing dot ("localhost.") resolves the same as without it
+  const hostname = rawHostname.replace(/\.+$/, "");
   return hostname === "localhost"
     || hostname.endsWith(".localhost")
     || hostname.startsWith("[")
