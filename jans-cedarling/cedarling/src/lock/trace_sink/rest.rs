@@ -68,7 +68,18 @@ impl RestTraceClient {
             .http
             .read_response_capped(response)
             .await
-            .map_err(|err| retryable(err.to_string()))?;
+            .map_err(|err| match (err.is_response_too_large(), status) {
+                // Lock processed the request; its answer would be over the cap again.
+                (true, StatusCode::MULTI_STATUS) => PostBulkError::UnreadableResponse {
+                    reason: format!("HTTP 207 body: {err}"),
+                },
+                (true, _) => PostBulkError::Rejected {
+                    status: RejectedStatus::Http(status),
+                    error: None,
+                    reason: None,
+                },
+                (false, _) => retryable(err.to_string()),
+            })?;
         if status == StatusCode::MULTI_STATUS {
             return parse_results(&bytes).map(Attempt::Results);
         }
@@ -264,6 +275,36 @@ mod tests {
                     if reason.starts_with("HTTP 207 body")
             ),
             "expected UnreadableResponse for the 207 body, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn multi_status_over_the_response_cap_is_unreadable() {
+        let mut server = Server::new_async().await;
+        let _bulk = bulk(
+            &mut server,
+            "old-token",
+            207,
+            &json!({"results": []}).to_string(),
+        );
+        let http = HttpClient::new(crate::HttpClientConfig {
+            max_response_size_bytes: Some(4),
+            ..crate::HttpClientConfig::default()
+        })
+        .expect("HTTP client");
+        let client = RestTraceClient::new(client(&server).endpoint, http);
+
+        let err = test_support::sink(TraceChannel::Rest(client), None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a 207 body over the cap should be an error");
+        assert!(
+            matches!(
+                err,
+                PostBulkError::UnreadableResponse { ref reason }
+                    if reason.starts_with("HTTP 207 body")
+            ),
+            "Lock processed the records, so they are not sent again, got {err:?}"
         );
     }
 

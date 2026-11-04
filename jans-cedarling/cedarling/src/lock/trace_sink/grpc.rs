@@ -124,6 +124,11 @@ fn failure(status: &Status) -> PostBulkError {
             },
             None => super::retryable(format!("gRPC {:?}: {}", status.code(), status.message())),
         },
+        // Lock sends no `OUT_OF_RANGE`: tonic gives it for an answer over the
+        // response cap, after Lock processed the request.
+        Code::OutOfRange => PostBulkError::UnreadableResponse {
+            reason: format!("gRPC OutOfRange: {}", status.message()),
+        },
         code => {
             let body = serde_json::from_str::<ErrorBody>(status.message()).ok();
             PostBulkError::Rejected {
@@ -718,6 +723,33 @@ mod tests {
                 reason: None,
             },
             "a plain description is no Lock error"
+        );
+    }
+
+    #[tokio::test]
+    async fn answer_over_the_response_cap_is_unreadable() {
+        let lock = mock_lock(|_| {
+            Ok(BulkAcceptance {
+                results: (0..20).map(accepted).collect(),
+            })
+        })
+        .await;
+        let http_conf = HttpClientConfig {
+            max_response_size_bytes: Some(64),
+            ..HttpClientConfig::default()
+        };
+        let client = GrpcTraceClient::new(&lock.endpoint, &http_conf).expect("gRPC client builds");
+
+        let err = test_support::sink(TraceChannel::Grpc(client), None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("an answer over the cap should be an error");
+        assert!(
+            matches!(
+                err,
+                PostBulkError::UnreadableResponse { ref reason } if reason.contains("OutOfRange")
+            ),
+            "Lock processed the records, so they are not sent again, got {err:?}"
         );
     }
 
