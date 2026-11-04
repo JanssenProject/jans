@@ -119,7 +119,7 @@ class SQLBackend:
                         query = " ".join([
                             f"ALTER TABLE {self.client.quoted_id(table_name)}",
                             f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
-                            f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
+                            f", ADD INDEX {self.client.quoted_id(index_str_fmt)} ({self.client.quoted_id(index_str_fmt)})"
                         ])
                         try:
                             self.client.create_index(query, table_name, index_str_fmt)
