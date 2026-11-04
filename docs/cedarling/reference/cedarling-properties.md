@@ -189,6 +189,7 @@ When Lock Server does not take a request (it is lost after its retries, refused 
 |---|---|---|
 | `OK` | `207` | per-record results |
 | `UNAVAILABLE`, `INTERNAL`, `UNKNOWN`, `DEADLINE_EXCEEDED`, `CANCELLED`, `ABORTED` | `5xx`, `429`, `408`, no answer | retried with the same bytes |
+| `INTERNAL` or `UNKNOWN` for a proxy's answer without `grpc-status` | other `4xx`, such as `400` or `413` | final, as over REST |
 | `UNAUTHENTICATED` | `401` | the token is renewed and the request sent once more, as for `401` |
 | `INVALID_ARGUMENT` | `400` | final; `invalid_request` with a bulk limit reason names the setting to lower, as for `400` |
 | `RESOURCE_EXHAUSTED` | none | final; gRPC refuses a message over `maxBulkRequestBytes` plus 64 KiB before Lock Server reads it, and the `ERROR` names `CEDARLING_TRACE_BULK_MAX_BYTES` |

@@ -8,6 +8,7 @@
 //! one, the REST error body being the status description.
 
 use bytes::Bytes;
+use reqwest::StatusCode;
 use tonic::codegen::http::uri::InvalidUri;
 use tonic::metadata::MetadataValue;
 use tonic::transport::{Channel, ClientTlsConfig};
@@ -101,6 +102,10 @@ fn bulk_request(
     Ok(request)
 }
 
+/// How tonic describes an HTTP answer without `grpc-status`, which comes from a
+/// proxy before Lock rather than from Lock.
+const NO_GRPC_STATUS: &str = "grpc-status header missing, mapped from HTTP status code ";
+
 /// The same split as REST: what the network or a failing Lock may answer
 /// differently next time goes again, a refusal does not. `INTERNAL` is Lock's
 /// `500` and `UNKNOWN` its answer for an unmapped HTTP status.
@@ -111,8 +116,13 @@ fn failure(status: &Status) -> PostBulkError {
         | Code::Unknown
         | Code::DeadlineExceeded
         | Code::Cancelled
-        | Code::Aborted => {
-            super::retryable(format!("gRPC {:?}: {}", status.code(), status.message()))
+        | Code::Aborted => match proxy_refusal(status) {
+            Some(http) => PostBulkError::Rejected {
+                status: RejectedStatus::Http(http),
+                error: None,
+                reason: None,
+            },
+            None => super::retryable(format!("gRPC {:?}: {}", status.code(), status.message())),
         },
         code => {
             let body = serde_json::from_str::<ErrorBody>(status.message()).ok();
@@ -123,6 +133,20 @@ fn failure(status: &Status) -> PostBulkError {
             }
         },
     }
+}
+
+/// tonic reads a proxy's `400` as `INTERNAL` and a `413` or `405` as `UNKNOWN`,
+/// both retried; REST makes such a `4xx` final, and so does this. `408` and
+/// `429` still ask to repeat the request.
+fn proxy_refusal(status: &Status) -> Option<StatusCode> {
+    let code = status
+        .message()
+        .strip_prefix(NO_GRPC_STATUS)?
+        .parse()
+        .ok()?;
+    let http = StatusCode::from_u16(code).ok()?;
+    let repeat = http == StatusCode::REQUEST_TIMEOUT || http == StatusCode::TOO_MANY_REQUESTS;
+    (http.is_client_error() && !repeat).then_some(http)
 }
 
 fn results(acceptance: BulkAcceptance) -> Result<Vec<BulkItemResult>, PostBulkError> {
@@ -570,6 +594,86 @@ mod tests {
             Some(RequestRefusal::BodyTooLarge),
             "the emitter should say to lower CEDARLING_TRACE_BULK_MAX_BYTES"
         );
+    }
+
+    /// Answers every call with `0`'s HTTP status and no `grpc-status`, as a
+    /// proxy before Lock does when it refuses the request itself.
+    #[derive(Clone)]
+    struct ProxyAnswer(u16);
+
+    impl tonic::server::NamedService for ProxyAnswer {
+        const NAME: &'static str = "io.jans.lock.trace.TraceService";
+    }
+
+    impl tonic::codegen::Service<tonic::codegen::http::Request<tonic::body::Body>> for ProxyAnswer {
+        type Response = tonic::codegen::http::Response<tonic::body::Body>;
+        type Error = std::convert::Infallible;
+        type Future = std::future::Ready<Result<Self::Response, Self::Error>>;
+
+        fn poll_ready(
+            &mut self,
+            _: &mut std::task::Context<'_>,
+        ) -> std::task::Poll<Result<(), Self::Error>> {
+            std::task::Poll::Ready(Ok(()))
+        }
+
+        fn call(&mut self, _: tonic::codegen::http::Request<tonic::body::Body>) -> Self::Future {
+            let response = tonic::codegen::http::Response::builder()
+                .status(self.0)
+                .body(tonic::body::Body::default())
+                .expect("a status-only response builds");
+            std::future::ready(Ok(response))
+        }
+    }
+
+    async fn proxy(status: u16) -> url::Url {
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("a local port is free");
+        let addr = listener.local_addr().expect("the listener has an address");
+        tokio::spawn(async move {
+            Server::builder()
+                .add_routes(tonic::service::Routes::new(ProxyAnswer(status)))
+                .serve_with_incoming(TcpListenerStream::new(listener))
+                .await
+                .expect("the proxy serves");
+        });
+        format!("http://{addr}/").parse().expect("valid URL")
+    }
+
+    #[tokio::test]
+    async fn proxy_client_error_is_final_as_over_rest() {
+        for status in [400, 405, 413, 415] {
+            let err = sink(&proxy(status).await, None)
+                .post_bulk(&bulk_body())
+                .await
+                .expect_err("a proxy refusal should be an error");
+            assert_eq!(
+                err,
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(
+                        StatusCode::from_u16(status).expect("valid status")
+                    ),
+                    error: None,
+                    reason: None,
+                },
+                "a proxy's HTTP {status} without grpc-status refuses the request, as over REST"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn proxy_answers_that_ask_to_repeat_are_retryable() {
+        for status in [408, 429, 500, 502] {
+            let err = sink(&proxy(status).await, None)
+                .post_bulk(&bulk_body())
+                .await
+                .expect_err("a failed request should be an error");
+            assert!(
+                matches!(err, PostBulkError::Retryable { .. }),
+                "a proxy's HTTP {status} without grpc-status should be retried, got {err:?}"
+            );
+        }
     }
 
     #[tokio::test]
