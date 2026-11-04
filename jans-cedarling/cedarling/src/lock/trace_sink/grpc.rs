@@ -176,23 +176,22 @@ fn is_set(flag: ProblemFlag, flags: &TraceFlags) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use mockito::{Mock, Server as HttpServer, ServerGuard};
+    use mockito::Server as HttpServer;
     use serde_json::json;
     use tokio::net::TcpListener;
-    use tokio::sync::{RwLock, mpsc};
+    use tokio::sync::mpsc;
     use tokio_stream::wrappers::TcpListenerStream;
     use tonic::Response;
     use tonic::transport::Server;
 
     use super::*;
-    use crate::http::HttpClient;
-    use crate::lock::LockAccessToken;
     use crate::lock::register_client::TokenSource;
     use crate::lock::trace_proto::trace_service_server::{TraceService, TraceServiceServer};
     use crate::lock::trace_proto::{
         ExecutionResult, GetExecutionRequest, GetRecordRequest, RecordAcceptance, RecordEnvelope,
         RecordSearchResult, SearchRecordsRequest, SubmitRecordRequest,
     };
+    use crate::lock::trace_sink::test_support::{self, source, token_endpoint};
     use crate::lock::trace_sink::{BulkSink, RequestRefusal, TraceChannel, TraceSink};
 
     /// Member order, spacing, escapes and non-ASCII text Lock signs over as sent.
@@ -301,15 +300,9 @@ mod tests {
     }
 
     fn sink(endpoint: &url::Url, source: Option<TokenSource>) -> TraceSink {
-        let http_conf = HttpClientConfig::default();
-        TraceSink {
-            channel: TraceChannel::Grpc(
-                GrpcTraceClient::new(endpoint, &http_conf).expect("gRPC client builds"),
-            ),
-            http: HttpClient::new(http_conf).expect("HTTP client"),
-            token: RwLock::new(LockAccessToken("old-token".to_string())),
-            source,
-        }
+        let client = GrpcTraceClient::new(endpoint, &HttpClientConfig::default())
+            .expect("gRPC client builds");
+        test_support::sink(TraceChannel::Grpc(client), source)
     }
 
     fn bulk_body() -> Bytes {
@@ -690,23 +683,6 @@ mod tests {
              access_denied, reason: none)",
             "the logged rejection should name the transport and its status"
         );
-    }
-
-    fn source(server: &ServerGuard) -> TokenSource {
-        TokenSource {
-            token_endpoint: format!("{}/token", server.url()),
-            client_id: "cedarling-client".to_string(),
-            client_secret: "secret".to_string(),
-            scope: "https://jans.io/oauth/lock/trace.write".to_string(),
-        }
-    }
-
-    fn token_endpoint(server: &mut ServerGuard, expected_calls: usize) -> Mock {
-        server
-            .mock("POST", "/token")
-            .with_body(json!({"access_token": "new-token"}).to_string())
-            .expect(expected_calls)
-            .create()
     }
 
     /// `UNAUTHENTICATED` for every token but `accepted`.

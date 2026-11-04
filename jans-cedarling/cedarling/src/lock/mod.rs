@@ -181,6 +181,8 @@ use tokio_util::sync::CancellationToken;
 #[cfg(all(test, not(target_arch = "wasm32")))]
 pub(crate) use trace_sink::RejectedStatus;
 #[cfg(not(target_arch = "wasm32"))]
+use trace_sink::rest::RestTraceClient;
+#[cfg(not(target_arch = "wasm32"))]
 pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
 
@@ -713,8 +715,12 @@ fn create_trace_sink(
             return Ok(None);
         },
     };
+    // One client, so REST bulk requests and token reissues share a pool.
+    let http = init_http_client(None, accept_invalid_certs, http_conf)?;
     let channel = match transport {
-        LockTransport::Rest => trace_sink::TraceChannel::Rest(endpoint),
+        LockTransport::Rest => {
+            trace_sink::TraceChannel::Rest(RestTraceClient::new(endpoint, http.clone()))
+        },
         #[cfg(feature = "grpc")]
         LockTransport::Grpc => {
             let warn = |message: String| logger.cloned().log_any(LockLogEntry::warn(message));
@@ -739,7 +745,7 @@ fn create_trace_sink(
     };
     Ok(Some(Arc::new(TraceSink {
         channel,
-        http: init_http_client(None, accept_invalid_certs, http_conf)?,
+        http,
         token: tokio::sync::RwLock::new(LockAccessToken(access_token.to_string())),
         source,
     })))
@@ -1335,8 +1341,8 @@ mod test {
             .trace_sink()
             .expect("a discovered trace_bulk_endpoint should give a TRACE sink");
         assert!(
-            matches!(&sink.channel, trace_sink::TraceChannel::Rest(endpoint)
-                if endpoint.path().ends_with("/audit/trace/bulk")),
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(client)
+                if client.endpoint.path().ends_with("/audit/trace/bulk")),
             "the sink should post to the discovered bulk endpoint, got {:?}",
             sink.channel
         );
@@ -1445,7 +1451,7 @@ mod test {
             .trace_sink()
             .expect("an explicit endpoint should give a TRACE sink");
         assert!(
-            matches!(&sink.channel, trace_sink::TraceChannel::Rest(endpoint) if *endpoint == url),
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(client) if client.endpoint == url),
             "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint, got {:?}",
             sink.channel
         );
