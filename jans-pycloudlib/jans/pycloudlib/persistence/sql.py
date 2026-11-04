@@ -229,10 +229,12 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
     #: Fallback driver name for warning messages
     fallback_driver_name = "psycopg2"
 
-    #: Query to find an index; returns ``indisvalid`` if the index exists (uses ``current_schema()``,
-    #: which follows the search_path set for the connection).
+    #: Query to find an index; returns true if the index is valid or another session is still building it
+    #: (so it must not be dropped), false if it is invalid and idle (e.g. left by a failed concurrent build).
+    #: Uses ``current_schema()``, which follows the search_path set for the connection.
     index_state_query = (
-        "SELECT i.indisvalid "
+        "SELECT (i.indisvalid OR EXISTS ("
+        "SELECT 1 FROM pg_stat_progress_create_index p WHERE p.index_relid = i.indexrelid)) "
         "FROM pg_index i "
         "JOIN pg_class c ON c.oid = i.indexrelid "
         "JOIN pg_class t ON t.oid = i.indrelid "
@@ -246,8 +248,10 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
     def prepare_index_query(self, query: str) -> str:
         """Make index creation non-blocking for writers.
 
-        A plain ``CREATE INDEX`` takes a SHARE lock, which waits for (auto)vacuum and makes every writer
-        of the table queue behind it. ``CONCURRENTLY`` only takes SHARE UPDATE EXCLUSIVE.
+        A plain ``CREATE INDEX`` takes a SHARE lock, which blocks every writer of the table.
+        ``CONCURRENTLY`` takes SHARE UPDATE EXCLUSIVE instead, so writers keep working. It is
+        self-conflicting and still waits on a running (auto)vacuum; that wait is avoided by checking
+        the catalog first (see ``SqlClient.create_index``), not by ``CONCURRENTLY``.
         """
         for prefix in ("CREATE UNIQUE INDEX ", "CREATE INDEX "):
             if query.startswith(prefix):
@@ -281,7 +285,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
-        if exc.orig.pgcode not in ["42P07"]:
+        if _pg_error_code(exc) not in ["42P07"]:
             raise exc
 
     def on_create_index_error(self, exc: DatabaseError) -> None:
@@ -292,7 +296,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
-        if exc.orig.pgcode not in ["42P07"]:
+        if _pg_error_code(exc) not in ["42P07"]:
             raise exc
 
     def on_insert_into_error(self, exc: DatabaseError) -> None:
@@ -303,7 +307,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 23505: unique violation
-        if exc.orig.pgcode not in ["23505"]:
+        if _pg_error_code(exc) not in ["23505"]:
             raise exc
 
     @property
@@ -362,7 +366,8 @@ class MysqlAdapter(CloudSqlConnectorMixin):
         "AND LOWER(index_name) = LOWER(:index_name) LIMIT 1"
     )
 
-    #: MySQL DDL commits implicitly, so it runs in a regular transaction block.
+    #: MySQL DDL commits implicitly and cannot be rolled back; the transaction block only wraps the
+    #: ``SET`` of the lock timeout.
     index_ddl_autocommit = False
 
     def prepare_index_query(self, query: str) -> str:
@@ -370,7 +375,10 @@ class MysqlAdapter(CloudSqlConnectorMixin):
         return query
 
     def drop_index_query(self, table_name: str, index_name: str) -> str:
-        """Query to drop an index."""
+        """Query to drop an index.
+
+        Part of the adapter interface; not used for MySQL as its index state is never "invalid".
+        """
         q = self.quote_char
         return f"DROP INDEX {q}{index_name}{q} ON {q}{table_name}{q}"
 
@@ -885,7 +893,8 @@ class SqlClient(SqlSchemaMixin):
           still takes the table lock, so each start would wait for vacuum or long transactions
           while every writer queues behind it;
         - PostgreSQL builds the index ``CONCURRENTLY``;
-        - the DDL waits at most ``lock_timeout`` seconds for a lock and is retried ``retries`` times.
+        - the DDL waits at most ``lock_timeout`` seconds for a lock and is retried ``retries`` times;
+          if all attempts time out, a warning is logged and the next start tries again.
 
         Without the names, the query is run as is and "already exists" errors are ignored.
         """
@@ -899,6 +908,7 @@ class SqlClient(SqlSchemaMixin):
             return
 
         query = self.adapter.prepare_index_query(query)
+        retries = max(retries, 1)
         for attempt in range(1, retries + 1):
             # re-read the state: a timed-out concurrent build can leave an invalid index behind
             state = self.get_index_state(table_name, index_name)
@@ -911,7 +921,12 @@ class SqlClient(SqlSchemaMixin):
             except DatabaseError as exc:
                 if self.adapter.is_lock_timeout(exc):
                     if attempt == retries:
-                        raise
+                        # do not fail the whole job; the next start retries
+                        logger.warning(
+                            "could not lock %s to create index %s after %s attempts; will retry on next start",
+                            table_name, index_name, retries,
+                        )
+                        return
                     logger.warning(
                         "could not lock %s to create index %s (attempt %s of %s); retrying",
                         table_name, index_name, attempt, retries,
@@ -924,6 +939,15 @@ class SqlClient(SqlSchemaMixin):
     def _run_index_ddl(
         self, query: str, table_name: str, index_name: str, lock_timeout: int, drop_first: bool,
     ) -> None:
+        """Run index DDL once with a bounded lock wait.
+
+        Args:
+            query: Index creation query, already prepared by the adapter.
+            table_name: Name of the table the index belongs to.
+            index_name: Name of the index.
+            lock_timeout: Maximum seconds to wait for a lock.
+            drop_first: Drop the index first (it is invalid, e.g. left by a failed concurrent build).
+        """
         with self.engine.connect() as conn:
             if self.adapter.index_ddl_autocommit:
                 # must be set before the connection starts a transaction
@@ -942,8 +966,10 @@ class SqlClient(SqlSchemaMixin):
                 # the connection goes back to the pool, so do not leave the timeout set on it
                 try:
                     conn.execute(text(self.adapter.reset_lock_timeout_query))
-                except DatabaseError:
-                    pass
+                except DatabaseError as exc:
+                    # do not return a connection with a lock timeout still set to the pool
+                    logger.debug("unable to reset lock timeout; invalidating connection: %s", exc)
+                    conn.invalidate()
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
