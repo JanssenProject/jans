@@ -141,8 +141,8 @@ public class Fido2ReadinessService {
     public Outcome export(String rpConfigId, AssociationFile file, String token) throws JsonProcessingException {
         requireRpConfigId(rpConfigId);
         log.info("Fido2 association file export, file:{}", file.getFileName());
-        return outcomeOf(fido2Util.executeGet(getAssociationFileUrl(rpConfigId, file),
-                buildHeaders(token, principalOf(token)), null));
+        return outcomeOf(fido2Util.executeGetWithoutRedirects(getAssociationFileUrl(rpConfigId, file),
+                buildHeaders(token, principalOf(token))));
     }
 
     private Outcome outcomeOf(HttpServiceResponse serviceResponse) throws JsonProcessingException {

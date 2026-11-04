@@ -262,6 +262,27 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         return executeGet(httpClient, requestUri, headers, null);
     }
 
+    /**
+     * A GET that hands a redirect back unfollowed. Used where the request carries credentials, so they are never
+     * sent to whatever host a redirect points at.
+     */
+    public HttpServiceResponse executeGetWithoutRedirects(String requestUri, Map<String, String> headers) {
+        HttpGet httpGet = new HttpGet(requestUri);
+        httpGet.setConfig(RequestConfig.custom().setRedirectsEnabled(false).build());
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        try {
+            HttpResponse httpResponse = this.getHttpsClient().execute(httpGet);
+            return new HttpServiceResponse(httpGet, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute get request", ex);
+        }
+        return null;
+    }
+
     @Override
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) {
         return executeGet(httpClient, requestUri, null, null);

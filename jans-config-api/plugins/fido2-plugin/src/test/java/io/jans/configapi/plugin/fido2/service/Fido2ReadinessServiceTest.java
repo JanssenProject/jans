@@ -183,14 +183,14 @@ public class Fido2ReadinessServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void associationFile_isFetchedFromTheEncodedRpSegment_withTheCallerToken() throws Exception {
-        when(fido2Util.executeGet(anyString(), anyMap(), isNull()))
+        when(fido2Util.executeGetWithoutRedirects(anyString(), anyMap()))
                 .thenReturn(upstream(200, "[{\"relation\":[]}]", null));
 
         Outcome outcome = service.export("https://jans.io", AssociationFile.ASSETLINKS, "Bearer abc");
 
         ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
-        verify(fido2Util).executeGet(eq(BASE + "https%3A%2F%2Fjans.io/association/assetlinks.json"),
-                headers.capture(), isNull());
+        verify(fido2Util).executeGetWithoutRedirects(eq(BASE + "https%3A%2F%2Fjans.io/association/assetlinks.json"),
+                headers.capture());
         assertEquals(headers.getValue().get("Authorization"), "Bearer abc");
         assertEquals(headers.getValue().get(Constants.REQUESTED_BY_HEADER), "inum-1234");
         assertEquals(outcome.getStatus(), 200);
@@ -201,7 +201,7 @@ public class Fido2ReadinessServiceTest {
 
     @Test
     public void associationFile_notFound_isReturnedUnchanged_andInvalidIdIsRejectedWithoutCalling() throws Exception {
-        when(fido2Util.executeGet(anyString(), anyMap(), isNull())).thenReturn(upstream(404, null, null));
+        when(fido2Util.executeGetWithoutRedirects(anyString(), anyMap())).thenReturn(upstream(404, null, null));
 
         assertEquals(service.export("nope.example", AssociationFile.ASSETLINKS, "Bearer abc").getStatus(), 404);
         clearInvocations(fido2Util);
@@ -210,7 +210,7 @@ public class Fido2ReadinessServiceTest {
                     () -> service.export(id, AssociationFile.ASSETLINKS, "Bearer abc"));
             assertEquals(e.getResponse().getStatus(), 400);
         }
-        verify(fido2Util, never()).executeGet(anyString(), anyMap(), isNull());
+        verify(fido2Util, never()).executeGetWithoutRedirects(anyString(), anyMap());
     }
 
     @Test
