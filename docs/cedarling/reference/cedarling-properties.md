@@ -192,7 +192,7 @@ When Lock Server does not take a request (it is lost after its retries, refused 
 | `INTERNAL` or `UNKNOWN` for a proxy's answer without `grpc-status` | other `4xx`, such as `400` or `413` | final, as over REST |
 | `UNAUTHENTICATED` | `401` | the token is renewed and the request sent once more, as for `401` |
 | `INVALID_ARGUMENT` | `400` | final; `invalid_request` with a bulk limit reason names the setting to lower, as for `400` |
-| `RESOURCE_EXHAUSTED` | none | final; gRPC refuses a message over `maxBulkRequestBytes` plus 64 KiB before Lock Server reads it, and the `ERROR` names `CEDARLING_TRACE_BULK_MAX_BYTES` |
+| `RESOURCE_EXHAUSTED` | none | final; gRPC refused the message before Lock Server read it. On the direct gRPC port (`plain_server`, `tls_server`) the limit is `maxBulkRequestBytes` plus 64 KiB; through the proxy and servlet bridge it is at least 10 MiB, so a body too large is refused as `INVALID_ARGUMENT` instead. A server or proxy slowing Cedarling down gives the same status. The `ERROR` names both causes and `CEDARLING_TRACE_BULK_MAX_BYTES` |
 | `OUT_OF_RANGE` | `207` over `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` | final; Lock Server processed the request, so its records are not sent again |
 | `UNIMPLEMENTED` | none | final; Lock Server or its proxy has no `io.jans.lock.trace.TraceService` route (an older Lock Server, or a proxy whose `404` gRPC reports as `UNIMPLEMENTED`), and the `ERROR` says to update them or set `CEDARLING_TRACE_TRANSPORT` to `rest` |
 | `PERMISSION_DENIED`, `NOT_FOUND`, `ALREADY_EXISTS`, `FAILED_PRECONDITION`, any other | `403`, `404`, `409`, other `4xx` | final |

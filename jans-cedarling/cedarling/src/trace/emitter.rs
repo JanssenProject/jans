@@ -635,6 +635,13 @@ impl Emitter {
                  io.jans.lock.trace.TraceService route: update Lock Server and its proxy routes, \
                  or set CEDARLING_TRACE_TRANSPORT to rest"
                 .to_string(),
+            #[cfg(feature = "grpc")]
+            RequestRefusal::GrpcLimit => format!(
+                "gRPC refused the message as RESOURCE_EXHAUSTED: it may be over the Lock Server \
+                 gRPC limit (traceConfiguration.maxBulkRequestBytes plus 64 KiB on the direct \
+                 gRPC port), or a server or proxy is slowing Cedarling down; if the requests \
+                 are large, lower CEDARLING_TRACE_BULK_MAX_BYTES (now {bytes})"
+            ),
             RequestRefusal::Unexplained => format!(
                 "Lock Server gives the reason only with errorReasonEnabled; it refuses a request \
                  Cedarling builds this way when TRACE is disabled in Lock Server \
@@ -1082,6 +1089,9 @@ mod tests {
         /// No `TraceService` behind the gRPC address.
         #[cfg(feature = "grpc")]
         Unimplemented,
+        /// gRPC refused the message before Lock read it.
+        #[cfg(feature = "grpc")]
+        ResourceExhausted,
     }
 
     /// Answers each request with the next scripted reply, then accepts all.
@@ -1148,6 +1158,12 @@ mod tests {
                 Reply::Rejected => Err(PostBulkError::Rejected {
                     status: RejectedStatus::Http(reqwest::StatusCode::FORBIDDEN),
                     error: Some("access_denied".to_string()),
+                    reason: None,
+                }),
+                #[cfg(feature = "grpc")]
+                Reply::ResourceExhausted => Err(PostBulkError::Rejected {
+                    status: RejectedStatus::Grpc(tonic::Code::ResourceExhausted),
+                    error: None,
                     reason: None,
                 }),
                 #[cfg(feature = "grpc")]
@@ -2317,6 +2333,15 @@ mod tests {
                 no_route.contains("io.jans.lock.trace.TraceService route")
                     && no_route.contains("CEDARLING_TRACE_TRANSPORT to rest"),
                 "a missing gRPC route says what to update or how to fall back: {no_route}"
+            );
+
+            let limit = refusal_error(Reply::ResourceExhausted).await;
+            assert!(
+                limit.contains("may be over")
+                    && limit.contains("slowing Cedarling down")
+                    && limit.contains("CEDARLING_TRACE_BULK_MAX_BYTES (now 4194304)"),
+                "RESOURCE_EXHAUSTED names both causes and the setting, without blaming one: \
+                 {limit}"
             );
         }
     }

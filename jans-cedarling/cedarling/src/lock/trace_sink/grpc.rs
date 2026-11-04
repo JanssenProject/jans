@@ -574,7 +574,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn message_over_the_transport_limit_is_a_body_too_large() {
+    async fn resource_exhausted_points_at_the_grpc_limit() {
         let lock = mock_lock(|_| {
             Err(Status::resource_exhausted(
                 "gRPC message exceeds maximum size 4259840: 5000000",
@@ -596,8 +596,8 @@ mod tests {
         );
         assert_eq!(
             err.refusal(),
-            Some(RequestRefusal::BodyTooLarge),
-            "the emitter should say to lower CEDARLING_TRACE_BULK_MAX_BYTES"
+            Some(RequestRefusal::GrpcLimit),
+            "the emitter should name the gRPC limit and the setting, not only the body size"
         );
     }
 

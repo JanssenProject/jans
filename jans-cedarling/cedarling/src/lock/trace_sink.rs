@@ -122,14 +122,12 @@ impl RejectedStatus {
         }
     }
 
-    /// gRPC refuses a message over Lock's transport limit (`maxBulkRequestBytes`
-    /// plus 64 KiB) before Lock reads it, so no Lock error comes with it.
-    fn is_message_too_large(self) -> bool {
-        match self {
-            Self::Http(_) => false,
-            #[cfg(feature = "grpc")]
-            Self::Grpc(code) => code == tonic::Code::ResourceExhausted,
-        }
+    /// gRPC refused the message before Lock read it, so no Lock error comes with
+    /// it: over the direct gRPC port's limit, or a server or proxy slowing the
+    /// client down (`ENHANCE_YOUR_CALM`).
+    #[cfg(feature = "grpc")]
+    fn is_over_grpc_limit(self) -> bool {
+        self == Self::Grpc(tonic::Code::ResourceExhausted)
     }
 
     /// No `TraceService` behind the address: Lock answers `UNIMPLEMENTED`, and a
@@ -165,6 +163,10 @@ pub(crate) enum RequestRefusal {
     /// or a proxy without the `io.jans.lock.trace.TraceService` route.
     #[cfg(feature = "grpc")]
     NoGrpcRoute,
+    /// gRPC `RESOURCE_EXHAUSTED`: the body may be over a gRPC message limit,
+    /// or a server or proxy is slowing Cedarling down.
+    #[cfg(feature = "grpc")]
+    GrpcLimit,
 }
 
 impl PostBulkError {
@@ -178,8 +180,9 @@ impl PostBulkError {
         else {
             return None;
         };
-        if status.is_message_too_large() {
-            return Some(RequestRefusal::BodyTooLarge);
+        #[cfg(feature = "grpc")]
+        if status.is_over_grpc_limit() {
+            return Some(RequestRefusal::GrpcLimit);
         }
         #[cfg(feature = "grpc")]
         if status.is_missing_route() {
