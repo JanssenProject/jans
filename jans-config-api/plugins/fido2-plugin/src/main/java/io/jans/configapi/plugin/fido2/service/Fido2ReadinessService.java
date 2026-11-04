@@ -104,10 +104,7 @@ public class Fido2ReadinessService {
      */
     public Outcome check(String rpConfigId, boolean recheck, String token)
             throws JsonProcessingException {
-        if (StringUtils.isBlank(rpConfigId)) {
-            throw new WebApplicationException("The relying party id is required",
-                    Response.Status.BAD_REQUEST.getStatusCode());
-        }
+        requireRpConfigId(rpConfigId);
         String url = getReadinessUrl(rpConfigId);
         log.info("Fido2 native app readiness check, recheck:{}", recheck);
 
@@ -142,10 +139,7 @@ public class Fido2ReadinessService {
      *         of that platform
      */
     public Outcome export(String rpConfigId, AssociationFile file, String token) throws JsonProcessingException {
-        if (StringUtils.isBlank(rpConfigId)) {
-            throw new WebApplicationException("The relying party id is required",
-                    Response.Status.BAD_REQUEST.getStatusCode());
-        }
+        requireRpConfigId(rpConfigId);
         log.info("Fido2 association file export, file:{}", file.getFileName());
         return outcomeOf(fido2Util.executeGet(getAssociationFileUrl(rpConfigId, file),
                 buildHeaders(token, principalOf(token)), null));
@@ -212,6 +206,17 @@ public class Fido2ReadinessService {
         } catch (Exception ex) {
             log.warn("Unable to resolve the caller of the Fido2 native app readiness check: {}", ex.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * A blank id, or a dot segment, is refused before any URL is built: {@code ..} would climb out of the
+     * {@code /rp/} path and the caller's token would go to another FIDO2 endpoint.
+     */
+    private static void requireRpConfigId(String rpConfigId) {
+        if (StringUtils.isBlank(rpConfigId) || ".".equals(rpConfigId) || "..".equals(rpConfigId)) {
+            throw new WebApplicationException("A valid relying party id is required",
+                    Response.Status.BAD_REQUEST.getStatusCode());
         }
     }
 

@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -199,13 +200,17 @@ public class Fido2ReadinessServiceTest {
     }
 
     @Test
-    public void associationFile_notFound_isReturnedUnchanged_andBlankIdIsRejected() throws Exception {
+    public void associationFile_notFound_isReturnedUnchanged_andInvalidIdIsRejectedWithoutCalling() throws Exception {
         when(fido2Util.executeGet(anyString(), anyMap(), isNull())).thenReturn(upstream(404, null, null));
 
         assertEquals(service.export("nope.example", AssociationFile.ASSETLINKS, "Bearer abc").getStatus(), 404);
-        WebApplicationException e = expectThrows(WebApplicationException.class,
-                () -> service.export(" ", AssociationFile.ASSETLINKS, "Bearer abc"));
-        assertEquals(e.getResponse().getStatus(), 400);
+        clearInvocations(fido2Util);
+        for (String id : new String[] { " ", ".", ".." }) {
+            WebApplicationException e = expectThrows(WebApplicationException.class,
+                    () -> service.export(id, AssociationFile.ASSETLINKS, "Bearer abc"));
+            assertEquals(e.getResponse().getStatus(), 400);
+        }
+        verify(fido2Util, never()).executeGet(anyString(), anyMap(), isNull());
     }
 
     @Test
