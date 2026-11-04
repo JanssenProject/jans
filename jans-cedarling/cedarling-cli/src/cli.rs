@@ -64,7 +64,7 @@ pub enum Command {
     Authorize(#[command(flatten)] crate::authorize::AuthorizeArgs),
     /// Validate a policy store against schema and semantic rules
     Validate {
-        /// Treat skipped validations as errors
+        /// Treat skipped validations and unknown fields as errors
         #[arg(long)]
         strict: bool,
     },

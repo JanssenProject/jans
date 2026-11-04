@@ -18,15 +18,13 @@ use crate::common::policy_store::formats::file_id::id_from_filename;
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 
-/// A custom issuer file body; unknown fields fail the load.
+/// A custom issuer file body; unknown fields are ignored.
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct CustomIssuerDoc {
     pub(crate) tokens_mappings: HashMap<String, CustomTokenDoc>,
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct CustomTokenDoc {
     /// Still accepted, but ignored: every custom token is optional.
     #[serde(default)]
@@ -85,9 +83,7 @@ impl CustomIssuerParser {
             });
         }
 
-        // Drop the out-of-band `id` (consumed above) before deserializing:
-        // `CustomIssuerDoc` denies unknown fields so a misspelled enforcement
-        // knob fails the load, and `id` is the one legitimately-extra key.
+        // Drop the out-of-band `id` (consumed above) before deserializing.
         let mut body = obj.clone();
         body.remove("id");
         let meta: CustomIssuerDoc =
@@ -258,31 +254,19 @@ mod tests {
     }
 
     #[test]
-    fn parse_rejects_misspelled_required_knob() {
+    fn parse_ignores_unknown_fields() {
         let content = r#"{
-            "tokens_mappings": { "Acme::CustomToken": { "requiredd": true } }
+            "tokens_mappings": { "Acme::CustomToken": { "vendor": true } },
+            "extra": true
         }"#;
-        let err = CustomIssuerParser::parse(content, "acme.json")
-            .expect_err("a typo in an enforcement knob should fail the load");
+        let parsed = CustomIssuerParser::parse(content, "acme.json")
+            .expect("unknown fields must not fail the load");
         assert!(
-            matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
-                if file == "acme.json" && source.to_string().contains("requiredd")),
-            "expected InvalidBody naming the misspelled knob, got: {err:?}"
-        );
-    }
-
-    #[test]
-    fn parse_rejects_unknown_issuer_field() {
-        let content = r#"{
-            "tokens_mappings": { "Acme::CustomToken": {} },
-            "requireddd": true
-        }"#;
-        let err = CustomIssuerParser::parse(content, "acme.json")
-            .expect_err("an unknown top-level issuer field should fail the load");
-        assert!(
-            matches!(&err, CustomIssuerParseError::InvalidBody { file, source, .. }
-                if file == "acme.json" && source.to_string().contains("requireddd")),
-            "expected InvalidBody naming the unknown field, got: {err:?}"
+            parsed
+                .meta
+                .tokens_mappings
+                .contains_key("Acme::CustomToken"),
+            "known fields should still be read"
         );
     }
 

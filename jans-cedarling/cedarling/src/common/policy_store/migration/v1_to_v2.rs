@@ -107,6 +107,7 @@ impl Upgrade for v1::PolicyStoreDoc {
             metadata: migrate_metadata(self.metadata),
             trusted_issuers: TrustedIssuersDoc {
                 entries: entries.entries,
+                unknown_fields: Vec::new(),
             },
             content: self.content,
         })

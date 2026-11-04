@@ -40,6 +40,15 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         );
     }
 
+    for unknown in &report.unknown_fields {
+        println!(
+            "  {} {}: {}",
+            "warning:".yellow(),
+            unknown.file,
+            unknown.message
+        );
+    }
+
     let skips = [&report.parse, &report.schema, &report.metadata]
         .iter()
         .filter(|r| matches!(r, LevelResult::Skipped { .. }))
@@ -47,7 +56,8 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         
     let skip_msg = if skips > 0 { format!(" ({skips} level(s) skipped)") } else { String::new() };
 
-    let passed = report.is_ok() && !(strict && skips > 0);
+    let unknown = report.unknown_fields.len();
+    let passed = report.is_ok() && !(strict && (skips > 0 || unknown > 0));
 
     if passed {
         println!("validation passed{skip_msg}");
@@ -57,7 +67,10 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         if n > 0 {
             println!("validation failed: {n} error(s){skip_msg}");
         } else {
-            println!("validation failed: {skips} skipped level(s) with --strict");
+            println!(
+                "validation failed: {skips} skipped level(s), {unknown} unknown field(s) with \
+                 --strict"
+            );
         }
         Ok(1)
     }

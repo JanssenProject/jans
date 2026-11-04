@@ -70,6 +70,8 @@
 - Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.
 - `pub` items must always be exported in the root `lib.rs` to be truly public.
 - Be extremely careful about what you make public; prefer to expose minimal API surface.
+- Shared code must not depend on one version or variant: never import a version-specific constant or type into a shared module, and do not widen its visibility for that. The version that produces the data puts the specific values (such as a file name) into what it returns, and the shared type only reads them.
+- Place a type at the lowest level shared by all its users, not in the version that first needed it.
 
 **Documentation:**
 - Use standard Rust docstrings without Python-style sections
