@@ -13,92 +13,59 @@
         <mxCell id="external-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#11152d;strokeColor=#514078;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#a987ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=20;spacingTop=16;" value="EXTERNAL SERVICES" vertex="1">
           <mxGeometry height="623" width="262" x="1049" y="87" as="geometry" />
         </mxCell>
-        <mxCell id="init-to-manager" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="282" y="173" as="sourcePoint" />
-            <mxPoint x="369" y="173" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="init-to-manager" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="policy-manager">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="source-to-manager" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1069" y="173" as="sourcePoint" />
-            <mxPoint x="944" y="173" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="source-to-manager" edge="1" parent="1" source="policy-source" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="policy-manager">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="manager-to-jwt" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="821" y="210" as="sourcePoint" />
-            <mxPoint x="821" y="291" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="manager-to-jwt" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.786;exitY=0.999;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="authorize-to-jwt" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="282" y="329" as="sourcePoint" />
-            <mxPoint x="699" y="329" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="authorize-to-jwt" edge="1" parent="1" source="authorize" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.41605839416058393;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="authorize-to-builder" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+        <mxCell id="authorize-to-builder" edge="1" parent="1" source="authorize" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.8540145985401459;exitDx=0;exitDy=0;entryX=0.16326530612244897;entryY=0;entryDx=0;entryDy=0;" target="entity-builder">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="739" y="389" />
             </Array>
-            <mxPoint x="282" y="389" as="sourcePoint" />
-            <mxPoint x="739" y="456" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="data-api-to-store" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="282" y="503" as="sourcePoint" />
-            <mxPoint x="369" y="503" as="targetPoint" />
+        <mxCell id="data-api-to-store" edge="1" parent="1" source="data-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="context-store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="store-to-builder" edge="1" parent="1" source="context-store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jwt-to-builder" edge="1" parent="1" source="jwt-service" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.8367346938775511;exitY=1;exitDx=0;exitDy=0;entryX=0.8367346938775511;entryY=0;entryDx=0;entryDy=0;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="builder-to-engine" edge="1" parent="1" source="entity-builder" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cedar-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="engine-to-observability" edge="1" parent="1" source="cedar-engine" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.008;exitY=0.627;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" target="observability">
+          <mxGeometry relative="1" x="-0.0837" as="geometry">
+            <Array as="points">
+              <mxPoint x="699" y="650" />
+            </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="store-to-builder" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="593" y="503" as="sourcePoint" />
-            <mxPoint x="699" y="503" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="observability-to-inspect" edge="1" parent="1" source="observability" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.389;exitDx=0;exitDy=0;entryX=1;entryY=0.389;entryDx=0;entryDy=0;" target="inspect-observe">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="jwt-to-builder" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="904" y="366" as="sourcePoint" />
-            <mxPoint x="904" y="456" as="targetPoint" />
-          </mxGeometry>
+        <mxCell id="trusted-issuers-to-jwt" edge="1" parent="1" source="trusted-issuers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="builder-to-engine" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="821" y="550" as="sourcePoint" />
-            <mxPoint x="821" y="602" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="engine-to-observability" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="699" y="639" as="sourcePoint" />
-            <mxPoint x="593" y="639" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="observability-to-inspect" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="369" y="639" as="sourcePoint" />
-            <mxPoint x="282" y="639" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="trusted-issuers-to-jwt" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1069" y="328" as="sourcePoint" />
-            <mxPoint x="944" y="328" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="policies-to-engine" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;">
+        <mxCell id="policies-to-engine" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cedar-engine">
           <mxGeometry relative="1" x="0.6716" as="geometry">
             <Array as="points">
               <mxPoint x="980" y="191.5" />
               <mxPoint x="980" y="639" />
             </Array>
-            <mxPoint x="976" y="503" as="sourcePoint" />
-            <mxPoint x="944" y="639" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="lock-policy-store" edge="1" parent="1" source="lock-server" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;exitX=1.013;exitY=0.307;exitDx=0;exitDy=0;exitPerimeter=0;">
+        <mxCell id="lock-policy-store" edge="1" parent="1" source="lock-server" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;exitX=1;exitY=0.307;exitDx=0;exitDy=0;entryX=0.88;entryY=0;entryDx=0;entryDy=0;" target="policy-manager">
           <mxGeometry relative="1" x="-0.0589" as="geometry">
             <Array as="points">
               <mxPoint x="1295.9" y="610" />
@@ -106,29 +73,23 @@
               <mxPoint x="1340" y="60" />
               <mxPoint x="875" y="60" />
             </Array>
-            <mxPoint x="1340" y="640" as="sourcePoint" />
-            <mxPoint x="875" y="136" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="observability-evidence" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;" target="external-zone">
+        <mxCell id="observability-evidence" edge="1" parent="1" source="observability" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;exitX=0.674;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="lock-server">
           <mxGeometry relative="1" x="-0.0333" as="geometry">
             <Array as="points">
               <mxPoint x="520" y="740" />
               <mxPoint x="1180" y="740" />
             </Array>
-            <mxPoint x="520" y="710" as="sourcePoint" />
-            <mxPoint x="1185" y="719" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="annotations-to-inspect" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;dashed=1;dashPattern=2 5;endArrow=block;endFill=1;">
+        <mxCell id="annotations-to-inspect" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;dashed=1;dashPattern=2 5;endArrow=block;endFill=1;exitX=0.304;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.495;entryDx=0;entryDy=0;" target="inspect-observe">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="544" y="48" />
               <mxPoint x="20" y="48" />
               <mxPoint x="20" y="649" />
             </Array>
-            <mxPoint x="544" y="136" as="sourcePoint" />
-            <mxPoint x="58" y="649" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="init" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Init&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;bootstrap config&lt;/font&gt;" vertex="1">
@@ -203,13 +164,11 @@
         <mxCell id="label-evidence" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="logs, telemetry, TRACE evidence" vertex="1">
           <mxGeometry height="24" width="238" x="716" y="726" as="geometry" />
         </mxCell>
-        <mxCell id="J7p1Yg1fhFAC08MwctwQ-5" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
-          <mxGeometry relative="1" x="-0.4419" as="geometry">
-            <Array as="points">
-              <mxPoint x="980" y="505" />
-            </Array>
-            <mxPoint x="980" y="512" as="sourcePoint" />
-            <mxPoint x="944" y="505" as="targetPoint" />
+        <mxCell id="cARylTLaUMteeXJc--jf-2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="980" y="503" as="sourcePoint" />
+            <mxPoint x="1067" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
