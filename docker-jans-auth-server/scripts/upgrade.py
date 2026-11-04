@@ -24,8 +24,8 @@ logger = logging.getLogger("jans-auth")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
-# mirrors LOCK_TEST_CLIENT_ID in docker-jans-persistence-loader/scripts/test_data_setup.py
-LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+# mirrors LOCK_TEST_CLIENT_IDS["lock_trace_test_client_id"] in docker-jans-persistence-loader/scripts/test_data_setup.py
+LOCK_TRACE_TEST_CLIENT_ID = "2202.A7C3-5E19"
 
 
 def _transform_lock_dynamic_config(conf, manager):
@@ -111,9 +111,9 @@ def _transform_lock_dynamic_config(conf, manager):
     # lock config is created after persistence-loader imports test data, so bind the test client here
     if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
         bindings = conf["traceConfiguration"].setdefault("clientDomainBindings", [])
-        if not any(binding.get("clientId") == LOCK_TEST_CLIENT_ID for binding in bindings):
+        if not any(binding.get("clientId") == LOCK_TRACE_TEST_CLIENT_ID for binding in bindings):
             bindings.append({
-                "clientId": LOCK_TEST_CLIENT_ID,
+                "clientId": LOCK_TRACE_TEST_CLIENT_ID,
                 "evidenceDomainId": "default",
                 "allowedProducerIds": ["*"],
             })
