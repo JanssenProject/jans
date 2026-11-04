@@ -25,6 +25,7 @@ public class SearchRequest {
     private List<String> filterAssertionValue;
     private Map<String, String> fieldValueMap;
     private List<FieldFilterData> fieldFilterData;
+    private int page;
 
     @JsonIgnore
     private String attributesStr;
@@ -167,6 +168,14 @@ public class SearchRequest {
     public void setFieldFilterData(List<FieldFilterData> fieldFilterData) {
         this.fieldFilterData = fieldFilterData;
     }
+    
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
 
     @Override
     public String toString() {
@@ -177,6 +186,7 @@ public class SearchRequest {
                 + filterAssertionValue + ", fieldFilterData=" + fieldFilterData + ", attributesStr=" + attributesStr
                 + ", excludedAttributesStr=" + excludedAttributesStr 
                 + ",fieldValueMap=" + fieldValueMap
+                + ",page=" + page
                 + "]";
     }
     

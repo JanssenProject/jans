@@ -1,0 +1,24 @@
+{
+    "start": 0,
+    "totalEntriesCount": 1,
+    "entriesCount": 1,
+    "entries": [
+        {
+            "dn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans",
+            "inum": "3d197836-38d1-4020-873b-1e3c920a69cc",
+            "displayName": "TR-1",
+            "description": "Trust-relationship 1",
+            "entityType": "individual",
+            "metadataSource": {
+                "metadataSourceType": "file"
+            },
+            "releasedAttributes": [
+                "inum=C4F7,ou=scopes,o=jans",
+                "inum=10B2,ou=scopes,o=jans"
+            ],
+            "status": "draft",
+            "version": 0,
+            "baseDn": "inum=3d197836-38d1-4020-873b-1e3c920a69cc,ou=trustRelationship,o=jans"
+        }
+    ]
+}
