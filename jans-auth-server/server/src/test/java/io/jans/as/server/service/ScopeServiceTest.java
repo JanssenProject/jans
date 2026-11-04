@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.never;
@@ -88,7 +89,7 @@ public class ScopeServiceTest {
         assertNotNull(result);
         assertEquals(result.size(), 0);
 
-        verify(log).trace(startsWith("No claims set for scope:"), (Object) isNull());
+        verify(log).debug(startsWith("No claims set for scope:"), (Object) isNull());
         verifyNoMoreInteractions(log);
         verifyNoMoreInteractions(attributeService);
     }
@@ -233,6 +234,7 @@ public class ScopeServiceTest {
         assertEquals(result.get("metadata"), "{}");
 
 
+        verify(log).debug(startsWith("Claim '{}' is not returned: user"), eq("tmp"), eq(userId), eq("tmp"));
         verifyNoMoreInteractions(log);
         verifyNoMoreInteractions(attributeService);
     }

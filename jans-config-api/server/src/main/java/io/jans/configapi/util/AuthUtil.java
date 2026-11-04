@@ -772,8 +772,8 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
-        return AuthClientFactory.getIntrospectionResponse(token,
-                token.substring("Bearer".length()).trim(), this.getIssuer());
+        return AuthClientFactory.getIntrospectionResponse(this.getIntrospectionEndpoint(), token,
+                token.substring("Bearer".length()).trim());
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {

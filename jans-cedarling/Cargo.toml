@@ -12,7 +12,6 @@ exclude = [
     "bindings/benchmarks",
     "bindings/cedarling-java",
     "bindings/jans-trace-java",
-    "custom-lints",
 ]
 
 [workspace.dependencies]

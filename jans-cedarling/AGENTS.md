@@ -70,6 +70,8 @@
 - Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.
 - `pub` items must always be exported in the root `lib.rs` to be truly public.
 - Be extremely careful about what you make public; prefer to expose minimal API surface.
+- Shared code must not depend on one version or variant: never import a version-specific constant or type into a shared module, and do not widen its visibility for that. The version that produces the data puts the specific values (such as a file name) into what it returns, and the shared type only reads them.
+- Place a type at the lowest level shared by all its users, not in the version that first needed it.
 
 **Documentation:**
 - Use standard Rust docstrings without Python-style sections
@@ -100,6 +102,7 @@
 - Blocking I/O and CPU-heavy work (signing, hashing large inputs) inside async code run through `tokio::task::spawn_blocking`, never directly on the runtime
 - Where `spawn_blocking` is not available (WASM runs on one thread) and the work must stay on the runtime, split it into bounded steps and yield between them (for example `tokio::task::yield_now().await` every N items), so authorization and other tasks keep running while it completes
 - Data read by many items, records, or retries is shared, not copied: `Arc<T>`, `Arc<[T]>`, or `bytes::Bytes`, created once and only when the feature that needs it is enabled
+- Do not build Cedar identifiers by parsing formatted strings such as `EntityUid::from_str(&format!(...))`: the Cedar documentation warns against this for performance reasons. Use `EntityUid::from_type_name_and_id` instead
 - The authorization path never waits on side work such as logging or telemetry export: hand it off without blocking (for example `try_send`) and report what was dropped
 
 **File Headers:**

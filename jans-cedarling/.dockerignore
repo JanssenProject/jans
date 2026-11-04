@@ -23,7 +23,6 @@ cedarling_opa/
 cedarling-krakend/
 flask-sidecar/
 lock-server-script/
-custom-lints/
 schema/
 sql/
 
