@@ -492,7 +492,7 @@ def test_sql_client_create_index_retries_on_lock_timeout(monkeypatch, sql_client
         calls.append(drop_first)
         if len(calls) < 3:
             exc = OperationalError("stmt", {}, Exception())
-            exc.orig = MSException(1205)
+            exc.orig = MSException(1205).orig
             raise exc
 
     monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
@@ -552,3 +552,159 @@ def test_sql_client_create_index_stops_retry_when_index_became_valid(monkeypatch
 
     sql_client.create_index('CREATE INDEX "x" ON "t" ("a")', "t", "x")
     assert calls == [False]
+
+
+def test_sql_client_create_index_gives_up_after_retries(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(drop_first)
+        exc = OperationalError("stmt", {}, Exception())
+        exc.orig = MSException(1205).orig
+        raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    # must not raise
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x", retries=2)
+    assert len(calls) == 2
+
+
+def test_sql_client_create_index_runs_at_least_once(monkeypatch, sql_client):
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+    ran = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: ran.append(a))
+
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x", retries=0)
+    assert len(ran) == 1
+
+
+@pytest.mark.parametrize("row, expected", [
+    (None, None),
+    ((False,), False),
+    ((True,), True),
+])
+def test_sql_client_get_index_state(monkeypatch, sql_client, row, expected):
+    from unittest.mock import MagicMock
+
+    conn = MagicMock()
+    conn.execute.return_value.fetchone.return_value = row
+    engine = MagicMock()
+    engine.connect.return_value.__enter__.return_value = conn
+    monkeypatch.setattr(type(sql_client), "engine", engine, raising=False)
+
+    assert sql_client.get_index_state("t", "x") is expected
+
+
+def _fake_engine(conn):
+    from unittest.mock import MagicMock
+
+    conn.execution_options.return_value = conn
+    engine = MagicMock()
+    engine.connect.return_value.__enter__.return_value = conn
+    return engine
+
+
+def _executed(conn):
+    return [str(c.args[0]) for c in conn.execute.call_args_list]
+
+
+def test_sql_client_run_index_ddl_postgresql_autocommit(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=True)
+
+    conn.execution_options.assert_called_once_with(isolation_level="AUTOCOMMIT")
+    conn.begin.assert_not_called()
+    assert _executed(conn) == [
+        "SET lock_timeout = '10s'",
+        'DROP INDEX CONCURRENTLY IF EXISTS "x"',
+        "CREATE INDEX CONCURRENTLY x",
+        "RESET lock_timeout",
+    ]
+
+
+def test_sql_client_run_index_ddl_mysql_transaction(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    conn = MagicMock()
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    sql_client._run_index_ddl("CREATE INDEX x ON t (a)", "t", "x", 10, drop_first=False)
+
+    conn.begin.assert_called_once()
+    conn.execution_options.assert_not_called()
+    assert _executed(conn) == [
+        "SET SESSION lock_wait_timeout = 10",
+        "CREATE INDEX x ON t (a)",
+        "SET SESSION lock_wait_timeout = DEFAULT",
+    ]
+
+
+def test_sql_client_run_index_ddl_resets_timeout_after_failure(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+    err = OperationalError("stmt", {}, Exception())
+
+    def execute(stmt, *a, **kw):
+        if str(stmt).startswith("CREATE"):
+            raise err
+        return MagicMock()
+
+    conn.execute.side_effect = execute
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    with pytest.raises(OperationalError):
+        sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
+
+    assert _executed(conn)[-1] == "RESET lock_timeout"
+    conn.invalidate.assert_not_called()
+
+
+def test_sql_client_run_index_ddl_invalidates_connection_when_reset_fails(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+
+    def execute(stmt, *a, **kw):
+        if str(stmt).startswith("RESET"):
+            raise OperationalError("stmt", {}, Exception())
+        return MagicMock()
+
+    conn.execute.side_effect = execute
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
+
+    conn.invalidate.assert_called_once()
