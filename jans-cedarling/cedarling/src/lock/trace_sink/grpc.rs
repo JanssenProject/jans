@@ -7,8 +7,6 @@
 //! `POST /audit/trace/bulk` and answers with the gRPC status matching the HTTP
 //! one, the REST error body being the status description.
 
-use std::fmt;
-
 use bytes::Bytes;
 use tonic::codegen::http::uri::InvalidUri;
 use tonic::metadata::MetadataValue;
@@ -25,14 +23,6 @@ use crate::lock::trace_proto::{
 /// Lock's `TraceService`, reached on the origin of the TRACE endpoint.
 pub(in crate::lock) struct GrpcTraceClient {
     client: TraceServiceClient<Channel>,
-    /// Scheme, host and port: no path, query or credentials, so it can be logged.
-    origin: String,
-}
-
-impl fmt::Debug for GrpcTraceClient {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.origin)
-    }
 }
 
 /// Why no gRPC client could be built for the TRACE endpoint.
@@ -79,7 +69,6 @@ impl GrpcTraceClient {
             .map_or(usize::MAX, |cap| usize::try_from(cap).unwrap_or(usize::MAX));
         Ok(Self {
             client: TraceServiceClient::new(channel).max_decoding_message_size(max_response),
-            origin,
         })
     }
 

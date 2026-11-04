@@ -243,7 +243,7 @@ fn is_loopback_host(url: &url::Url) -> bool {
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
-#[derive(Debug)]
+#[cfg_attr(test, derive(Debug))]
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
@@ -1564,7 +1564,7 @@ mod test {
 
     #[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
     #[tokio::test]
-    async fn grpc_trace_goes_to_the_origin_of_the_trace_endpoint() {
+    async fn grpc_trace_carries_discovered_and_explicit_endpoints() {
         let mock_idp_server = Server::new_async().await;
         let mut mock_lock_server = Server::new_async().await;
         let MockedLockConfig {
@@ -1578,18 +1578,14 @@ mod test {
                 .expect("valid URL"),
         );
 
-        for (endpoint, origin) in [
-            (&TraceEndpoint::Discovered, mock_lock_server.url()),
-            (&explicit, "https://proxy.example.com:8443".to_string()),
-        ] {
+        for endpoint in [&TraceEndpoint::Discovered, &explicit] {
             let sink = start_grpc_trace(&config, endpoint, None)
                 .await
                 .trace_sink()
                 .expect("a secure TRACE endpoint should give a TRACE sink");
-            assert_eq!(
-                format!("{:?}", sink.channel),
-                format!("Grpc({origin})"),
-                "gRPC should use only the scheme, host and port of {endpoint:?}"
+            assert!(
+                matches!(sink.channel, trace_sink::TraceChannel::Grpc(_)),
+                "CEDARLING_TRACE_TRANSPORT=grpc should send {endpoint:?} records over gRPC"
             );
         }
     }

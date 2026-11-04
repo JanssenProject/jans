@@ -208,15 +208,14 @@ pub(super) enum TraceChannel {
     Grpc(grpc::GrpcTraceClient),
 }
 
+/// Test failures name the transport only, so no endpoint is printed.
+#[cfg(test)]
 impl fmt::Debug for TraceChannel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Rest(client) => f
-                .debug_tuple("Rest")
-                .field(&client.endpoint.as_str())
-                .finish(),
+            Self::Rest(_) => f.write_str("Rest"),
             #[cfg(feature = "grpc")]
-            Self::Grpc(client) => f.debug_tuple("Grpc").field(client).finish(),
+            Self::Grpc(_) => f.write_str("Grpc"),
         }
     }
 }
@@ -250,6 +249,7 @@ pub(crate) struct TraceSink {
     pub(super) source: Option<TokenSource>,
 }
 
+#[cfg(test)]
 impl fmt::Debug for TraceSink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TraceSink")
