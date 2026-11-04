@@ -55,7 +55,10 @@ TEST_AUTH_CLIENT_INUMS = {
     "jans_auth_test_client_4_inum": "FF81-2D39",
 }
 
-LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+LOCK_TEST_CLIENT_IDS = {
+    "lock_trace_test_client_id": "2202.A7C3-5E19",
+    "lock_audit_test_client_id": "2203.B8D4-6F2A",
+}
 
 TEST_SCHEMA_JSON = f"{TEST_TEMPLATE_BASE}/jans_test_schema.json"
 
@@ -277,10 +280,12 @@ class TestDataLoader:
             ctx[f"{prefix}_pw"] = pw
             ctx[f"{prefix}_encoded_pw"] = encode_text(pw, salt).decode()
 
-        lock_pw = f"{LOCK_TEST_CLIENT_ID}-{host_label}"
-        ctx["lock_test_client_id"] = LOCK_TEST_CLIENT_ID
-        ctx["lock_test_client_pw"] = lock_pw
-        ctx["lock_test_client_encoded_pw"] = encode_text(lock_pw, salt).decode()
+        for id_var, client_id in LOCK_TEST_CLIENT_IDS.items():
+            prefix = id_var[:-len("_id")]
+            pw = f"{client_id}-{host_label}"
+            ctx[id_var] = client_id
+            ctx[f"{prefix}_pw"] = pw
+            ctx[f"{prefix}_encoded_pw"] = encode_text(pw, salt).decode()
         return ctx
 
     def import_test_data(self, ctx):
