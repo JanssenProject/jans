@@ -9,7 +9,7 @@ publish = true
 [features]
 default = ["grpc"]
 # exposes extra introspection and validation methods for CLI/tooling
-tools = []
+tools = ["dep:strsim"]
 # blocking feature allows to use blocking cedarling client
 blocking = ["tokio/rt-multi-thread"]
 # gRPC transport for Lock Server communication (enabled by default)
@@ -24,6 +24,8 @@ grpc = [
 
 [dependencies]
 serde = { workspace = true }
+serde_ignored = "0.1"
+strsim = { version = "0.11.1", optional = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde-saphyr = "1.3.0"
 thiserror = { workspace = true }
