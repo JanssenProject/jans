@@ -6,6 +6,7 @@
 
 package io.jans.configapi.core.service;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.service.net.BaseHttpService;
 import io.jans.model.net.HttpServiceResponse;
@@ -213,7 +214,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
 
-        log.info("\n\n requestUri{}, headers:{}, parameters:{}", requestUri, headers, parameters);
+        // header values are not logged: Authorization carries the caller's bearer token
+        log.info("\n\n requestUri{}, headerNames:{}, parameters:{}", escapeLog(requestUri),
+                escapeLog(headers == null ? null : headers.keySet()), escapeLog(parameters));
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
@@ -229,7 +232,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.info("\n\n\n Final requestUri:{}", requestUri);
+            log.info("\n\n\n Final requestUri:{}", escapeLog(requestUri));
         }
 
         HttpGet httpGet = new HttpGet(requestUri);
