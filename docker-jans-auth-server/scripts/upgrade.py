@@ -24,7 +24,7 @@ logger = logging.getLogger("jans-auth")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
 
-# mirrors LOCK_TRACE_TEST_CLIENT_ID in docker-jans-persistence-loader/scripts/test_data_setup.py
+# mirrors LOCK_TEST_CLIENT_IDS["lock_trace_test_client_id"] in docker-jans-persistence-loader/scripts/test_data_setup.py
 LOCK_TRACE_TEST_CLIENT_ID = "2202.A7C3-5E19"
 
 
