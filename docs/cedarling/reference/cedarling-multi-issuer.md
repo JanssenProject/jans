@@ -1072,12 +1072,14 @@ tokens = [
 ]
 ```
 
-A mapping names one token type of one issuer, so only one token per mapping is
-used. The first one that is accepted wins; later ones for the same mapping are
-dropped as `duplicate_token` and logged, without being validated. A token that
-fails validation does not count, so a later token for its mapping is still
-checked. A token that validates but fails entity building (`entity_build_failed`)
-does count, so later tokens for its mapping are still dropped.
+A mapping names one token type of one issuer, so at most one token per mapping
+is used. The first token that passes validation takes the mapping; later ones for
+the same mapping are dropped as `duplicate_token` and logged, without being
+validated. A token that fails validation does not take the mapping, so a later
+token for it is still checked. A token that passes validation but cannot become a
+Cedar entity (`entity_build_failed`) does take it: it is genuine, and two genuine
+tokens for one mapping are ambiguous, so Cedarling does not fall back to a later
+one.
 
 ### Trusted Issuer Validation
 

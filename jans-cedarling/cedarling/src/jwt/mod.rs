@@ -217,8 +217,11 @@ pub(crate) struct CheckedToken<'a> {
 /// request order, so the caller can act on each token (e.g. build its entity)
 /// as soon as it validates.
 ///
-/// Custom-token dispatch stays in `JwtService` because the custom path memoizes
-/// through the `JwtService`-owned `token_cache`.
+/// DEBT: custom-token dispatch belongs in `Authz::multi_issuer_setup`, which
+/// would split the input into custom and JWT tokens and leave `JwtService`
+/// JWT-only. It is not a pure move: `token_cache` is owned by `JwtService` and
+/// used by the custom path for `process` memoization, so it has to be shared or
+/// split. Worth its own PR with that covered by tests, not a drive-by.
 pub(crate) struct MultiIssuerTokenValidator<'a> {
     service: &'a JwtService,
     /// The request inputs not yet validated, with their request indexes.
@@ -292,7 +295,8 @@ impl<'a> MultiIssuerTokenValidator<'a> {
                 logger.log_any(JwtLogEntry::new_opt_request_id(
                     format!(
                         "Non-deterministic token detected: '{entity_type}' at index {index} \
-                         duplicates the one accepted at index {accepted_index}, skipping"
+                         duplicates the token at index {accepted_index}, which already took \
+                         this mapping; skipping"
                     ),
                     LogLevel::WARN,
                     self.request_id,
@@ -654,8 +658,9 @@ impl JwtService {
     /// Enforces required claims, and caches the result
     /// unless the processor opts out. Serves a still-valid cached result on hit.
     ///
-    /// Lives in `JwtService` because it memoizes through `token_cache`; see
-    /// [`MultiIssuerTokenValidator`].
+    /// DEBT: lives in `JwtService` for a minimal v1 diff; see the note on
+    /// [`MultiIssuerTokenValidator`] for what moving this seam up to `Authz`
+    /// would take.
     async fn process_custom_token(
         &self,
         processor: &Arc<dyn CustomTokenProcessor>,

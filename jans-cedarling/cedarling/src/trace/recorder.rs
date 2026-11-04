@@ -256,9 +256,10 @@ fn signed_at() -> u64 {
     u64::try_from(Utc::now().timestamp()).unwrap_or_default()
 }
 
-/// References to the tokens a multi-issuer decision used, in request order. The
-/// `jti` comes from the token claims; the `mapping` and the raw text come from
-/// the request input at the token's index.
+/// References to the tokens a multi-issuer decision used. `validated` is in
+/// request order, as multi-issuer setup records it, and the references keep
+/// that order. The `jti` comes from the token claims; the `mapping` and the raw
+/// text come from the request input at the token's index.
 ///
 /// A JWT is named by its `iss` claim, so an issuer Lock rejects stops the
 /// record. A custom (non-JWT) token has no issuer URI: it is named by the URN of
@@ -268,11 +269,8 @@ pub(crate) fn token_facts(
     validated: &[ValidatedToken],
     inputs: &[TokenInput],
 ) -> Result<Vec<TokenRef>, DraftError> {
-    let mut ordered: Vec<&ValidatedToken> = validated.iter().collect();
-    ordered.sort_by_key(|validated| validated.index);
-
-    let mut refs = Vec::with_capacity(ordered.len());
-    for validated in ordered {
+    let mut refs = Vec::with_capacity(validated.len());
+    for validated in validated {
         let position = refs.len();
         // The index comes from validating these same inputs, so this does not
         // happen; if it does, no record is better than one missing a token.
@@ -385,12 +383,6 @@ mod tests {
             index,
             token_type,
         }
-    }
-
-    /// Validated tokens keyed by their entity type, as multi-issuer validation
-    /// returns them.
-    fn used_tokens(tokens: impl IntoIterator<Item = ValidatedToken>) -> Vec<ValidatedToken> {
-        tokens.into_iter().collect()
     }
 
     /// A JWT of the default `Jans` issuer, validated as the token type `mapping`.
@@ -727,14 +719,14 @@ mod tests {
                 input("Jans::Access_Token", "header.payload.sig"),
                 input("Acme::DolphinToken", raw),
             ];
-            let tokens = used_tokens([
+            let tokens = vec![
                 jwt(
                     "Jans::Access_Token",
                     json!({"iss": ISSUER, "jti": "jti-1"}),
                     0,
                 ),
                 custom("Acme::DolphinToken", claims.clone(), 1),
-            ]);
+            ];
 
             let refs = token_facts(&tokens, &inputs).expect("token facts build");
             assert_eq!(
@@ -779,7 +771,7 @@ mod tests {
     #[test]
     fn custom_token_keeps_its_jti() {
         let inputs = [input("Acme::DolphinToken", "dolphin-opaque")];
-        let tokens = used_tokens([custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)]);
+        let tokens = vec![custom("Acme::DolphinToken", json!({"jti": "d-1"}), 0)];
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -791,7 +783,7 @@ mod tests {
     #[test]
     fn jwt_without_lock_issuer_is_invalid_field() {
         let inputs = [input("Jans::Access_Token", "header.payload.sig")];
-        let tokens = used_tokens([jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)]);
+        let tokens = vec![jwt("Jans::Access_Token", json!({"jti": "jti-1"}), 0)];
         let log = memory_log();
         let tokens =
             token_facts(&tokens, &inputs).expect("a JWT stays in the list even without an issuer");
@@ -818,7 +810,7 @@ mod tests {
     fn token_without_jti_uses_fingerprint() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = used_tokens([jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)]);
+        let tokens = vec![jwt("Jans::Access_Token", json!({"iss": ISSUER}), 0)];
         let refs = token_facts(&tokens, &inputs).expect("token facts build");
         assert_eq!(
             refs[0].id,
@@ -833,35 +825,14 @@ mod tests {
     }
 
     #[test]
-    fn tokens_follow_request_order() {
-        let inputs = [
-            input("A::T", "raw-a"),
-            input("B::T", "raw-b"),
-            input("C::T", "raw-c"),
-        ];
-        let tokens = used_tokens([
-            jwt("C::T", json!({"iss": ISSUER, "jti": "c"}), 2),
-            jwt("A::T", json!({"iss": ISSUER, "jti": "a"}), 0),
-            jwt("B::T", json!({"iss": ISSUER, "jti": "b"}), 1),
-        ]);
-        let refs = token_facts(&tokens, &inputs).expect("token facts build");
-        let types: Vec<_> = refs.iter().map(|token| token.token_type.as_str()).collect();
-        assert_eq!(
-            types,
-            ["A::T", "B::T", "C::T"],
-            "tokens keep the request order"
-        );
-    }
-
-    #[test]
     fn raw_token_in_jti_is_invalid_field() {
         let raw = "header.payload.sig";
         let inputs = [input("Jans::Access_Token", raw)];
-        let tokens = used_tokens([jwt(
+        let tokens = vec![jwt(
             "Jans::Access_Token",
             json!({"iss": ISSUER, "jti": raw}),
             0,
-        )]);
+        )];
         let err = token_facts(&tokens, &inputs)
             .expect_err("a jti that holds the token must not be signed");
         assert!(
