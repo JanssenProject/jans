@@ -90,8 +90,8 @@ class DomainVerifierTest {
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> domainVerifier.verifyDomain(domain, clientDataNode));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
+        assertEquals(400, ex.getResponse().getStatus());
+        assertEquals("test exception", ex.getResponse().getEntity());
 
         verify(log).debug("Domains comparison {} {}", domain, originValue);
         verify(log).warn(anyString(), eq(domain), eq("test1.url"));
