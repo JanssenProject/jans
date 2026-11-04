@@ -94,6 +94,7 @@ class DomainVerifierTest {
         assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(log).debug("Domains comparison {} {}", domain, originValue);
+        verify(log).warn(anyString(), eq(domain), eq("test1.url"));
         verifyNoMoreInteractions(log);
     }
 }

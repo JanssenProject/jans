@@ -74,6 +74,9 @@ public class DomainVerifier {
         if (!domain.equals(effectiveDomain)) {
             //Check registrable domain suffix rule
             if (!effectiveDomain.endsWith("." + domain)) {
+                // Server log only: the response stays the generic message, so the reason is recorded here.
+                log.warn("Domain '{}' rejected: client data origin host '{}' is neither that domain nor a subdomain of it",
+                        domain, effectiveDomain);
                 throw errorResponseFactory.badRequestException(CommonErrorResponseType.INVALID_DOMAIN, "Domains don't match");
             }
         }
