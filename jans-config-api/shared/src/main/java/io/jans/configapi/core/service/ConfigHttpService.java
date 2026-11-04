@@ -270,7 +270,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
      * sent to whatever host a redirect points at.
      */
     public HttpServiceResponse executeGetWithoutRedirects(String requestUri, Map<String, String> headers) {
-        if (!requestUri.startsWith("https://")) {
+        if (!requestUri.regionMatches(true, 0, "https://", 0, "https://".length())) {
             throw new WebApplicationException("Credentials are only sent over HTTPS", Status.INTERNAL_SERVER_ERROR);
         }
         HttpGet httpGet = new HttpGet(requestUri);
