@@ -774,3 +774,113 @@ async fn token_drop_logs_carry_the_request_id() {
         "the unknown-mapping drop must be logged under the request id, got {messages:?}"
     );
 }
+
+/// Accepts the admin API key like [`ApiKeyProcessor`], and also
+/// `"broken-with-department"`, whose claims carry the `department` that
+/// `Custom::Broken` requires, so a `Custom::Broken` entity built from it succeeds.
+struct DepartmentProcessor;
+
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
+impl CustomTokenProcessor for DepartmentProcessor {
+    async fn process(
+        &self,
+        mapping: &str,
+        payload: &str,
+    ) -> Result<ProcessedTokenClaims, CustomTokenError> {
+        if payload != "broken-with-department" {
+            return ApiKeyProcessor.process(mapping, payload).await;
+        }
+        let mut claims = HashMap::new();
+        claims.insert("sub".to_string(), json!("department-user"));
+        claims.insert("department".to_string(), json!("engineering"));
+        Ok(ProcessedTokenClaims::new(claims, "broken-1"))
+    }
+}
+
+/// A Cedarling on [`ENTITY_BUILD_FAILURE_STORE_RAW`] with [`DepartmentProcessor`].
+async fn department_cedarling() -> crate::Cedarling {
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(ENTITY_BUILD_FAILURE_STORE_RAW.to_string()),
+        |_| {},
+    )
+    .await;
+    cedarling.set_custom_token_processor(Some(Arc::new(DepartmentProcessor)));
+    cedarling
+}
+
+/// Two `Custom::Broken` tokens: index 0 validates but has no `department`, so
+/// its entity cannot be built; index 1 would build. `extra` follows them.
+fn genuine_first_token_request(extra: Vec<TokenInput>) -> AuthorizeMultiIssuerRequest {
+    let mut tokens = vec![
+        TokenInput::new("Custom::Broken".to_string(), "secret-admin-key".to_string()),
+        TokenInput::new(
+            "Custom::Broken".to_string(),
+            "broken-with-department".to_string(),
+        ),
+    ];
+    tokens.extend(extra);
+    AuthorizeMultiIssuerRequest::new_with_fields(
+        tokens,
+        EntityData::from_json(
+            &json!({
+                "cedar_entity_mapping": { "entity_type": "Custom::Resource", "id": "Doc" },
+                "name": "A protected document"
+            })
+            .to_string(),
+        )
+        .expect("resource entity should build"),
+        "Custom::Action::\"Read\"".to_string(),
+        None,
+    )
+}
+
+/// A token that validates but cannot become an entity still takes its mapping:
+/// a later token for the same mapping is dropped as a duplicate, even though it
+/// would build.
+#[tokio::test]
+async fn entity_build_failure_still_takes_the_mapping() {
+    let cedarling = department_cedarling().await;
+    let request = genuine_first_token_request(vec![TokenInput::new(
+        "Custom::ApiKey".to_string(),
+        "secret-admin-key".to_string(),
+    )]);
+
+    let result = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect("the API key should authorize the request");
+
+    assert_eq!(
+        result.dropped_tokens,
+        vec![
+            crate::DroppedToken::new("Custom::Broken", 0, crate::DropReason::EntityBuildFailed),
+            crate::DroppedToken::new("Custom::Broken", 1, crate::DropReason::DuplicateToken),
+        ],
+        "the first genuine token must take the mapping, so the buildable second one \
+         must be dropped as a duplicate"
+    );
+}
+
+/// With no other token, the request fails rather than falling back to the later
+/// token for the mapping.
+#[tokio::test]
+async fn entity_build_failure_does_not_fall_back_to_later_token() {
+    let cedarling = department_cedarling().await;
+    let request = genuine_first_token_request(Vec::new());
+
+    let err = cedarling
+        .authorize_multi_issuer(request)
+        .await
+        .expect_err("no token entity is built, so the request must fail");
+
+    assert!(
+        matches!(
+            err,
+            AuthorizeError::MultiIssuerEntity(
+                crate::entity_builder::MultiIssuerEntityError::NoValidTokens
+            )
+        ),
+        "the request must fail with NoValidTokens, got {err:?}"
+    );
+}
