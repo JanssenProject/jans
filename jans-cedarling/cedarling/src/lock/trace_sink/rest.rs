@@ -309,6 +309,37 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn refusal_over_the_response_cap_is_final() {
+        let mut server = Server::new_async().await;
+        let _bulk = bulk(
+            &mut server,
+            "old-token",
+            413,
+            &json!({"error": "invalid_request", "reason": "bulk_body_too_large"}).to_string(),
+        );
+        let http = HttpClient::new(crate::HttpClientConfig {
+            max_response_size_bytes: Some(4),
+            ..crate::HttpClientConfig::default()
+        })
+        .expect("HTTP client");
+        let client = RestTraceClient::new(client(&server).endpoint, http);
+
+        let err = test_support::sink(TraceChannel::Rest(client), None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a refusal with a body over the cap should be an error");
+        assert_eq!(
+            err,
+            PostBulkError::Rejected {
+                status: RejectedStatus::Http(StatusCode::PAYLOAD_TOO_LARGE),
+                error: None,
+                reason: None,
+            },
+            "a refusal stays final when its body is over the cap; only the error body is lost"
+        );
+    }
+
+    #[tokio::test]
     async fn server_error_is_retryable() {
         let mut server = Server::new_async().await;
         let _bulk = bulk(&mut server, "old-token", 503, "");
