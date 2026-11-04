@@ -1712,6 +1712,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/JsonNode"
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "403":
@@ -1755,6 +1757,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/JsonNode"
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "403":

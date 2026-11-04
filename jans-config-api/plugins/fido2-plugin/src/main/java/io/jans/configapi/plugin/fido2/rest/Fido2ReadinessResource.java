@@ -125,6 +125,7 @@ public class Fido2ReadinessResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "array", implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "No relying party is configured with this id, or it has no Android app"),
@@ -152,6 +153,7 @@ public class Fido2ReadinessResource extends BaseResource {
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "No relying party is configured with this id, or it has no iOS app"),
@@ -171,12 +173,13 @@ public class Fido2ReadinessResource extends BaseResource {
         try {
             Outcome outcome = fido2ReadinessService.export(rpConfigId, file, token);
             int status = outcome.getStatus();
-            if (status != Response.Status.OK.getStatusCode() && status != Response.Status.NOT_FOUND.getStatusCode()) {
+            boolean ok = status == Response.Status.OK.getStatusCode();
+            if (ok && outcome.getBody() == null || !ok && status != Response.Status.NOT_FOUND.getStatusCode()) {
                 logger.error("Fido2 association file export failed upstream with status:{}", status);
                 throwInternalServerException("The FIDO2 server could not export the association file");
             }
             Response.ResponseBuilder builder = Response.status(status);
-            if (status == Response.Status.OK.getStatusCode() && outcome.getBody() != null) {
+            if (ok) {
                 builder.entity(outcome.getBody()).header("Content-Disposition",
                         "attachment; filename=\"" + file.getFileName() + "\"");
             }
