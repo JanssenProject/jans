@@ -226,7 +226,19 @@ import multiIssuerArchive from "./multi-issuer-archive.mjs";
 import wasmUrl from "${sdkName}/wasm";
 let cedarling;
 try {
-  await initWasm(wasmUrl);
+  try {
+    await initWasm();
+    throw new Error("Manual initializer accepted missing WASM input");
+  } catch (error) {
+    if (
+      !(error instanceof TypeError) ||
+      error.message !==
+        "Manual WASM initialization requires an explicit module_or_path"
+    ) {
+      throw error;
+    }
+  }
+  await initWasm({ module_or_path: wasmUrl });
   cedarling = await init({
     CEDARLING_APPLICATION_NAME: "manual-browser-consumer",
     CEDARLING_POLICY_STORE_URI: new URL("/policy.cjar", location.href).href,
@@ -488,6 +500,9 @@ declare const dataEntry: DataEntry;
 declare const dataStoreStats: DataStoreStats;
 declare const input: InitInput;
 declare const output: InitOutput;
+generatedInitWasm({ module_or_path: input });
+// @ts-expect-error Manual initialization requires explicit WASM input.
+generatedInitWasm();
 cedarling.free();
 cedarling[Symbol.dispose]();
 result.free();
