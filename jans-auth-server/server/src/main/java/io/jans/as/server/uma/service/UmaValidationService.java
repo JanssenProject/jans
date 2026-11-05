@@ -34,7 +34,6 @@ import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ClientIdMetadataService;
-import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.uma.authorization.UmaPCT;
@@ -122,9 +121,6 @@ public class UmaValidationService {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
-
-    @Inject
-    private ClientService clientService;
 
     @Inject
     private ClientIdMetadataService clientIdMetadataService;
@@ -304,7 +300,7 @@ public class UmaValidationService {
                 }
                 // a claim_token naming this server as issuer is always checked, so policies can trust local-issuer claims
                 if (!isTrue(appConfiguration.getUmaValidateClaimToken()) && isClaimedLocalIssuer(idToken) && !isSignedByServer(idToken)) {
-                    log.error("claim_token claims local issuer but its signature is invalid.");
+                    log.error("claim_token claims local issuer but is expired or not signed by this server.");
                     throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
                 }
                 return idToken;
@@ -367,20 +363,18 @@ public class UmaValidationService {
     private boolean isSignedByServer(Jwt idToken) {
         try {
             final SignatureAlgorithm alg = idToken.getHeader().getSignatureAlgorithm();
-            if (alg == null || alg == SignatureAlgorithm.NONE || StringUtils.isBlank(idToken.getEncodedSignature())) {
+            // HMAC keys are client secrets, so only an asymmetric signature proves the server issued the token
+            if (alg == null || alg == SignatureAlgorithm.NONE || alg.getFamily() == AlgorithmFamily.HMAC
+                    || StringUtils.isBlank(idToken.getEncodedSignature())) {
                 return false;
             }
-            String sharedSecret = null;
-            if (AlgorithmFamily.HMAC.equals(alg.getFamily())) {
-                final List<String> audience = idToken.getClaims().getClaimAsStringList(JwtClaimName.AUDIENCE);
-                final Client audienceClient = audience == null || audience.isEmpty() ? null : clientService.getClient(audience.get(0));
-                if (audienceClient == null) {
-                    return false;
-                }
-                sharedSecret = clientService.decryptSecret(audienceClient.getClientSecret());
+            final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            if (expiresAt == null || new Date().after(expiresAt)) {
+                log.error("claim_token is expired or has no exp.");
+                return false;
             }
             return cryptoProvider.verifySignature(idToken.getSigningInput(), idToken.getEncodedSignature(),
-                    idToken.getHeader().getKeyId(), null, sharedSecret, alg);
+                    idToken.getHeader().getKeyId(), null, null, alg);
         } catch (Exception e) {
             log.error("Failed to verify claim_token signature.", e);
             return false;
