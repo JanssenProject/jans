@@ -52,13 +52,6 @@ impl HttpRequestError {
         matches!(self.reason, HttpRequestReasonError::DecodeResponseBytes(_))
     }
 
-    /// `true` when the body was over the response size cap, which the same
-    /// request would exceed again.
-    #[must_use]
-    pub fn is_response_too_large(&self) -> bool {
-        matches!(self.reason, HttpRequestReasonError::ResponseTooLarge { .. })
-    }
-
     /// `true` when the error indicates an upstream rejected the request with
     /// a non-success HTTP status (4xx / 5xx) outside of any retry path.
     /// Distinguishes "we got a response but it was an error status" from

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,9 @@ import io.jans.orm.util.StringHelper;
 public class CouchbaseOperationServiceImpl implements CouchbaseOperationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseOperationServiceImpl.class);
+
+    private static final String SCOPE_KEY_PARAMETER = "__jans_scope_key";
+    private static final Pattern SORT_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]+(\\.[A-Za-z0-9_]+)*$");
 
     private Properties props;
     private CouchbaseConnectionProvider connectionProvider;
@@ -182,7 +186,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         boolean result = addEntryImpl(bucketMapping, key, jsonObject, expiration);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, json: {}", duration, bucketMapping.getBucketName(), key, jsonObject);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, attributes: {}", duration, bucketMapping.getBucketName(), key, (jsonObject == null) ? null : jsonObject.getNames());
         
         return result;
     }
@@ -234,7 +238,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         boolean result = updateEntryImpl(bucketMapping, key, mods, expiration);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, bucket: {}, key: {}, mods: {}", duration, bucketMapping.getBucketName(), key, mods);
+        OperationDurationUtil.instance().logDebug("Couchbase operation: modify, duration: {}, bucket: {}, key: {}, modifications count: {}", duration, bucketMapping.getBucketName(), key, (mods == null) ? 0 : mods.size());
 
         return result;
     }
@@ -244,6 +248,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 			MutateInOptions options = MutateInOptions.mutateInOptions();
             if (expiration != null) {
 				options.expiry(Duration.ofSeconds(expiration));
+			} else {
+				options.preserveExpiry(true);
 			}
 
             MutateInResult result = bucketMapping.getBucket().defaultCollection().mutateIn(key, mods, options);
@@ -297,7 +303,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
     private int deleteImpl(BucketMapping bucketMapping, String key, QueryScanConsistency queryScanConsistency, ConvertedExpression expression, int count) throws DeleteException {
         StringBuilder query = new StringBuilder("DELETE FROM `").append(bucketMapping.getBucketName()).append("` WHERE ").append(expression.expression());
         if (enableScopeSupport) { 
-        	query.append("AND META().id LIKE ").append(key).append("%");
+        	query.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
+        	expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
         }
 
         query.append(" LIMIT ").append(count).append(" RETURNING default.*");
@@ -325,15 +332,24 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         return result;
     }
 
+	private static String scopeKeyPrefix(String key) {
+		// "_" is the key of the whole DB tree
+		return "_".equals(key) ? "" : escapeLikePattern(key);
+	}
+
+	private static String escapeLikePattern(String value) {
+		return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+	}
+
 	private boolean deleteRecursivelyImpl(BucketMapping bucketMapping, String key) throws EntryNotFoundException, DeleteException {
 		try {
 	        if (enableScopeSupport) {
 	            StringBuilder query = new StringBuilder("DELETE FROM `").append(bucketMapping.getBucketName()).append("` WHERE ").
-	            		append("META().id LIKE $1%");
+	            		append("META().id LIKE $1");
 	
 	            LOG.debug("Execution query: '" + query + "'");
 
-	            QueryOptions queryOptions = QueryOptions.queryOptions().scanConsistency(queryScanConsistency).parameters(JsonArray.from(key));
+	            QueryOptions queryOptions = QueryOptions.queryOptions().scanConsistency(queryScanConsistency).parameters(JsonArray.from(scopeKeyPrefix(key) + "%"));
 	            QueryResult result = connectionProvider.getCluster().query(query.toString(), queryOptions);
 	            if (QueryStatus.SUCCESS != result.metaData().status()) {
 	                throw new DeleteException(String.format("Failed to delete entries. Query: '%s'. Warnings: '%s'", query, result.metaData().warnings()));
@@ -470,9 +486,11 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         StringBuilder finalExpression = new StringBuilder(expression.expression());
         if (enableScopeSupport) { 
 			if (SearchScope.BASE == scope) {
-				finalExpression.append(" AND META().id NOT LIKE ").append(key).append("\\\\_%\\\\_");
+				finalExpression.append(" AND META().id = $").append(SCOPE_KEY_PARAMETER);
+				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, key);
 			} else {
-				finalExpression.append(" AND META().id LIKE ").append(key).append("%");
+				finalExpression.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
+				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
 			}
         } else {
             if (scope != null) {
@@ -504,6 +522,9 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         			baseQueryWithOrder.append(", ");
         		}
         		Sort order = orderBy[i];
+        		if ((order.getName() == null) || !SORT_NAME_PATTERN.matcher(order.getName()).matches()) {
+        			throw new SearchException(String.format("Invalid sort attribute name '%s'", order.getName()));
+        		}
         		baseQueryWithOrder.append(order.getName());
             	if ((order.getSortOrder() != null) && (SortOrder.DEFAULT != order.getSortOrder())) {
             		baseQueryWithOrder.append(" ").append(order.getSortOrder().getShortValue());
@@ -648,7 +669,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+			if (isSkipHashed && isPreHashedPassword(passwords[i])) {
 				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
 				results[i] = passwords[i];
 				continue;
@@ -662,6 +683,16 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         }
 
         return results;
+    }
+
+    private boolean isPreHashedPassword(String password) {
+        if (persistenceExtension != null) {
+            // Extension may use its own hash format
+            return PasswordEncryptionHelper.findAlgorithmString(password) != null;
+        }
+
+        // Unknown {prefix} would be stored and later compared as plaintext
+        return PasswordEncryptionHelper.findAlgorithm(password) != null;
     }
 
     @Override

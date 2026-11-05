@@ -626,7 +626,6 @@ nav:
     - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
     - Entities: cedarling/reference/cedarling-entities.md
     - Logs: cedarling/reference/cedarling-logs.md
-    - TRACE: cedarling/reference/cedarling-trace.md
     - Lock Server: cedarling/reference/cedarling-lock-server.md
     - Benchmarks: cedarling/reference/benchmarks.md
   - Developer:

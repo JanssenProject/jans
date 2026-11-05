@@ -55,8 +55,7 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_APPLICATION_NAME")]
     pub application_name: String,
 
-    /// URL of the policy store archive, used if the policy store is not local or retrieved
-    /// from Lock Server.
+    /// Location of policy store JSON, used if policy store is not local, or retreived from Lock Master.
     #[serde(
         rename = "CEDARLING_POLICY_STORE_URI",
         default,
@@ -233,23 +232,24 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
-    /// If enabled, the Cedarling will connect to the Lock Server for policies.
+    /// If Enabled, the Cedarling will connect to the Lock Master for policies,
+    /// and subscribe for SSE events.
     #[serde(rename = "CEDARLING_LOCK", default)]
     pub lock: FeatureToggle,
 
     /// URI where Cedarling can get JSON file with all required metadata about
-    /// Lock Server, i.e. .well-known/lock-server-configuration.
+    /// Lock Master, i.e. .well-known/lock-master-configuration.
     ///
     /// ***Required*** if `LOCK == enabled`.
     #[serde(rename = "CEDARLING_LOCK_SERVER_CONFIGURATION_URI", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub lock_server_configuration_uri: Option<String>,
 
-    /// Accepted but not used: Cedarling does not listen for Lock Server events.
+    /// Controls whether Cedarling should listen for SSE config updates.
     #[serde(rename = "CEDARLING_LOCK_DYNAMIC_CONFIGURATION", default)]
     pub dynamic_configuration: FeatureToggle,
 
-    /// SSA for DCR in a Lock Server deployment. The Cedarling will validate this
+    /// SSA for DCR in a Lock Master deployment. The Cedarling will validate this
     /// SSA JWT prior to DCR.
     #[serde(
         rename = "CEDARLING_LOCK_SSA_JWT",
@@ -259,11 +259,11 @@ pub struct BootstrapConfigRaw {
     pub lock_ssa_jwt: Option<String>,
 
     /// Pre-issued access token to use for Lock Server authentication, bypassing
-    /// the SSA, DCR and `access_token` flow entirely.
+    /// the SSA → DCR → `access_token` flow entirely.
     ///
     /// When this property is set, Cedarling will skip Dynamic Client Registration
     /// and use this access token directly to authenticate with Lock Server endpoints
-    /// (log, health, telemetry, TRACE). Primarily intended for testing and local development
+    /// (log, health, telemetry). Primarily intended for testing and local development
     /// to simplify the bootstrap flow; may also be used in environments where the
     /// DCR flow is not available or access tokens are provisioned externally.
     ///
@@ -280,23 +280,22 @@ pub struct BootstrapConfigRaw {
     )]
     pub lock_access_token_jwt: Option<String>,
 
-    /// How often, in seconds, to send log messages to Lock Server (0 to turn off transmission).
+    /// How often to send log messages to Lock Master (0 to turn off trasmission).
     #[serde(rename = "CEDARLING_LOCK_LOG_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_log_interval: u64,
 
-    /// How often, in seconds, to send health messages to Lock Server (0 to turn off transmission).
+    /// How often to send health messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_LOCK_HEALTH_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_health_interval: u64,
 
-    /// How often, in seconds, to send telemetry messages to Lock Server (0 to turn off
-    /// transmission).
+    /// How often to send telemetry messages to Lock Master (0 to turn off transmission).
     #[serde(rename = "CEDARLING_LOCK_TELEMETRY_INTERVAL", default)]
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub audit_telemetry_interval: u64,
 
-    /// Accepted but not used: Cedarling does not listen for Lock Server events.
+    /// Controls whether Cedarling should listen for updates from the Lock Server.
     #[serde(rename = "CEDARLING_LOCK_LISTEN_SSE", default)]
     pub listen_sse: FeatureToggle,
 
@@ -622,15 +621,6 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "parse_option_string"
     )]
     pub trace_endpoint: Option<String>,
-
-    /// Transport for TRACE bulk requests ("rest" or "grpc"). Separate from
-    /// `CEDARLING_LOCK_TRANSPORT`, so audit over gRPC does not move TRACE with it.
-    #[serde(
-        rename = "CEDARLING_TRACE_TRANSPORT",
-        deserialize_with = "deserialize_or_parse_string_as_json",
-        default
-    )]
-    pub trace_transport: LockTransport,
 
     /// Maximum number of records in one TRACE bulk request. Default: 100, as in Lock.
     #[serde(

@@ -249,13 +249,7 @@ impl Cedarling {
             config.lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
-            config
-                .trace_config
-                .as_ref()
-                .map(|trace| crate::lock::TraceRoute {
-                    endpoint: &trace.endpoint,
-                    transport: trace.transport,
-                }),
+            config.trace_config.as_ref().map(|trace| &trace.endpoint),
         )
         .await?;
         let log = initialized.log;
