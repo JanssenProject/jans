@@ -1,6 +1,7 @@
 from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredentialsType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.util import ServerUtil
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def __init__(self, currentTimeMillis):
@@ -47,7 +48,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         password = context.getHttpRequest().getParameter(self.passwordParamName)
         result = authService.authenticate(username, password)
         if not result:
-            print "ROPC script. Authenticate. Could not authenticate user '%s' " % username
+            print "ROPC script. Authenticate. Could not authenticate user '%s' " % ServerUtil.sanitizeUsernameForLog(username)
             return False
 
         context.setUser(authService.getAuthenticatedUser())
