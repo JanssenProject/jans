@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Optional;
 import java.util.function.Function;
 
-@JsonIgnoreProperties( { "cause", "localizedMessage", "stackTrace", "suppressed" } )
+@JsonIgnoreProperties({ "cause", "localizedMessage", "stackTrace", "suppressed" })
 public class SyntaxException extends Exception {
 
     private String error;
