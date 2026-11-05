@@ -32,6 +32,11 @@ public class SAXUtils  {
         if(parserfactory == null) {
             parserfactory = SAXParserFactory.newInstance();
             parserfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false);
+            parserfactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            parserfactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            parserfactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            parserfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            parserfactory.setXIncludeAware(false);
             parserfactory.setSchema(newSchemaFactory().newSchema(schemasources))    ;
             parserfactory.setNamespaceAware(true);
         }
@@ -43,7 +48,10 @@ public class SAXUtils  {
         if(parserfactory == null) {
             throw new ParserCreateError("Please call SAXParser.init() first");
         }
-        return parserfactory.newSAXParser();
+        final SAXParser parser = parserfactory.newSAXParser();
+        parser.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        parser.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        return parser;
     }
 
     private static final SchemaFactory newSchemaFactory() throws SAXException {

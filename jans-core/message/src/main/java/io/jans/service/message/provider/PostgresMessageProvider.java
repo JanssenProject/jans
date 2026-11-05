@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
@@ -44,6 +45,8 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectionProviderPool> {
+
+	private static final Pattern CHANNEL_NAME_PATTERN = Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,62}");
 
 	@Inject
 	private Logger log;
@@ -161,7 +164,13 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 	@Override
 	public void subscribe(PubSubInterface pubSub, String... channels) {
-		log.info("Starting new thread(s) for subscribing to Postgres channels {}", Arrays.asList(channels));
+		log.info("Starting new thread(s) for subscribing to Postgres channels {}", Arrays.toString(channels).replaceAll("[\\r\\n]", "_"));
+
+		for (String channel : channels) {
+			if (!isValidChannel(channel)) {
+				throw new IllegalArgumentException("Invalid Postgres channel name");
+			}
+		}
 
 		List<PostgresMessageListener> listeners = new ArrayList<>();
 		int countChannels = 0;
@@ -225,6 +234,11 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 
 	@Override
 	public boolean publish(String channel, String message) {
+		if (!isValidChannel(channel)) {
+			log.error("Invalid Postgres channel name");
+			return false;
+		}
+
 		CompletableFuture.runAsync(() -> {
 			try (Connection conn = сonnectionProviderPool.getConnection()) {
 				try (Statement stmt = conn.createStatement()) {
@@ -237,6 +251,11 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 		});
 
 		return true;
+	}
+
+	// Channel names are embedded as SQL identifiers in LISTEN/NOTIFY
+	private static boolean isValidChannel(String channel) {
+		return channel != null && CHANNEL_NAME_PATTERN.matcher(channel).matches();
 	}
 
 	@Override
@@ -272,6 +291,9 @@ public class PostgresMessageProvider extends AbstractMessageProvider<SqConnectio
 		}
 
 		public void subscribe(String channel) throws SQLException {
+			if (!isValidChannel(channel)) {
+				throw new IllegalArgumentException("Invalid Postgres channel name");
+			}
 			this.channel = channel;
 			try (Statement stmt = conn.createStatement()) {
 				stmt.execute("LISTEN " + channel);

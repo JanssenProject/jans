@@ -126,17 +126,20 @@ public class CedarlingAuthorizationService {
 		return authorize(tokens, action, resourceObject, contextObject);
 	}
 
+	/**
+	 * Tokens are evaluated without signature validation; callers must verify them before calling this method.
+	 */
 	public boolean authorize(Map<String, String> tokens, String action, JSONObject resource, JSONObject context) {
 		if (!initialized || cedarlingAdapter == null) {
 			log.error("Cedarling is not initialized. Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}",
-					tokens, action, resource, context);
+					tokenNames(tokens), action, resource, context);
 			return false;
 		}
 
 		try {
 			if (log.isDebugEnabled()) {
 				log.debug("Before executing authorization request. tokens: {}, action: {}, resource: {}, context: {}",
-						tokens, action, resource, context);
+						tokenNames(tokens), action, resource, context);
 			}
 
 			if (!tokens.containsKey(CEDARLING_JANS_ACCESS_TOKEN)) {
@@ -147,25 +150,29 @@ public class CedarlingAuthorizationService {
 			MultiIssuerAuthorizeResult res = cedarlingAdapter.authorizeMultiIssuer(tokens, action, resource, context);
 			if (res == null) {
 				log.error("Authorization response is empty for request with tokens: {}, action: {}, resource: {}, context: {}",
-						tokens, action, resource, context);
+						tokenNames(tokens), action, resource, context);
 				return false;
 			}
 
 			String requestId = res.getRequestId();
 			if (res.getDecision()) {
 				log.debug("Authorization decision is PERMIT for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
-						requestId, tokens, action, resource, context);
+						requestId, tokenNames(tokens), action, resource, context);
 			} else {
 				log.debug("Authorization decision is DENY for requestId {}, tokens: {}, action: {}, resource: {}, context: {}",
-						requestId, tokens, action, resource, context);
+						requestId, tokenNames(tokens), action, resource, context);
 			}
 
 			return res.getDecision();
 		} catch (Exception ex) {
-			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokens, action, resource, context, ex);
+			log.error("Failed to execute Cedarling authorize: tokens: {}, action: {}, resource: {}, context: {}", tokenNames(tokens), action, resource, context, ex);
 		}
 		
 		return false;
+	}
+
+	private static Object tokenNames(Map<String, String> tokens) {
+		return tokens == null ? null : tokens.keySet();
 	}
 
 }
