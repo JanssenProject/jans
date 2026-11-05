@@ -2,6 +2,8 @@ package provider
 
 import (
         "context"
+        "crypto/sha256"
+        "encoding/hex"
         "fmt"
 
         "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -64,6 +66,7 @@ for non-existent tokens.
                 Schema: map[string]*schema.Schema{
                         "token_code": {
                                 Type:        schema.TypeString,
+                                Sensitive:   true,
                                 Required:    true,
                                 ForceNew:    true,
                                 Description: "Token code to revoke",
@@ -90,7 +93,9 @@ func resourceTokenRevocationCreate(ctx context.Context, d *schema.ResourceData, 
                 return diag.FromErr(err)
         }
         
-        d.SetId(fmt.Sprintf("token_revocation_%s", tokenCode))
+        // ID is shown in plans and state, so it must not carry the token itself
+        sum := sha256.Sum256([]byte(tokenCode))
+        d.SetId(fmt.Sprintf("token_revocation_%s", hex.EncodeToString(sum[:8])))
         
         return nil
 }

@@ -121,7 +121,7 @@ resource "jans_app_configuration" "global" {
 - `dcr_signature_validation_enabled` (Boolean) Boolean value enables DCR signature validation. Default is false.
 - `dcr_signature_validation_jwks` (String) Specifies JWKS for all DCR's validations.
 - `dcr_signature_validation_jwks_uri` (String) Specifies JWKS URI for all DCR's validations.
-- `dcr_signature_validation_shared_secret` (String) Specifies shared secret for Dynamic Client Registration.
+- `dcr_signature_validation_shared_secret` (String, Sensitive) Specifies shared secret for Dynamic Client Registration.
 - `dcr_signature_validation_software_statement_jwks_claim` (String) Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
 - `dcr_signature_validation_software_statement_jwks_uri_claim` (String) Specifies claim name inside software statement. Value of claim should point to JWKS URI.
 - `dcr_ssa_validation_configs` (Block List) List of DCR SSA Validation Configs. (see [below for nested schema](#nestedblock--dcr_ssa_validation_configs))
@@ -226,7 +226,7 @@ resource "jans_app_configuration" "global" {
 - `jans_id` (String) URL for the Inum generator Service. Example: https://server.example.com/oxid/service/jans/inum
 - `jans_open_id_connect_version` (String) OpenID Connect Version. Example: openidconnect-1.0
 - `jms_broker_uri_set` (List of String) JMS Broker URI Set.
-- `jms_password` (String) JMS Password.
+- `jms_password` (String, Sensitive) JMS Password.
 - `jms_user_name` (String) JMS UserName.
 - `js_location` (String) The location for JavaScript files.
 - `jwks_algorithms_supported` (List of String) A list of algorithms that will be used in JWKS endpoint. One of 'RS256', 'RS384', 'RS512', 
@@ -240,7 +240,7 @@ resource "jans_app_configuration" "global" {
 - `key_selection_strategy` (String) Key Selection Strategy.
 - `key_sign_with_same_key_but_diff_alg` (Boolean) Specifies if signing to be done with same key but apply different algorithms.
 - `key_store_file` (String) The Key Store File (JKS). Example: /etc/certs/jans-auth-keys.jks
-- `key_store_secret` (String) The password of the Key Store.
+- `key_store_secret` (String, Sensitive) The password of the Key Store.
 - `legacy_id_token_claims` (Boolean) Include Claims in ID Token.
 - `lock_message_config` (Block List, Max: 1) Lock message configuration. (see [below for nested schema](#nestedblock--lock_message_config))
 - `log_client_id_on_client_authentication` (Boolean) Boolean value to specify if application should log the Client ID on client authentication.
@@ -277,8 +277,8 @@ resource "jans_app_configuration" "global" {
 - `openid_discovery_endpoint` (String) URL of the OpenID Discovery Endpoint. Example: https://server.example.com/.well-known/webfinger
 - `openid_scope_backward_compatibility` (Boolean) Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
 - `openid_sub_attribute` (String) Specifies which LDAP attribute is used for the subject identifier claim. Example: inum
-- `pairwise_calculation_key` (String) Key to calculate algorithmic pairwise IDs.
-- `pairwise_calculation_salt` (String) Salt to calculate algorithmic pairwise IDs.
+- `pairwise_calculation_key` (String, Sensitive) Key to calculate algorithmic pairwise IDs.
+- `pairwise_calculation_salt` (String, Sensitive) Salt to calculate algorithmic pairwise IDs.
 - `pairwise_id_type` (String) The pairwise ID type.
 - `par_endpoint` (String) URL for Pushed Authorisation Request (PAR) Endpoint. Example: https://server.example.com/jans-auth/restv1/par
 - `par_forbid_public_client` (Boolean) Boolean value to indicate if PAR is forbidden for public clients
@@ -462,12 +462,12 @@ Required:
 
 Optional:
 
-- `api_key` (String)
+- `api_key` (String, Sensitive)
 - `app_id` (String)
 - `auth_domain` (String)
 - `database_url` (String)
 - `messaging_sender_id` (String)
-- `notification_key` (String)
+- `notification_key` (String, Sensitive)
 - `notification_url` (String)
 - `project_id` (String)
 - `public_vapid_key` (String)
@@ -535,7 +535,7 @@ Optional:
 - `jwks` (String)
 - `jwks_uri` (String)
 - `scopes` (List of String)
-- `shared_secret` (String)
+- `shared_secret` (String, Sensitive)
 - `type` (String)
 
 

@@ -145,6 +145,7 @@ func resourceRedisCacheConfiguration() *schema.Resource {
 			},
 			"password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Redis password.",
 			},
@@ -170,6 +171,7 @@ func resourceRedisCacheConfiguration() *schema.Resource {
 			},
 			"ssl_trust_store_password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Password for accessing the Trust Store.",
 			},

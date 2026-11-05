@@ -34,6 +34,7 @@ output "user_sessions" {
     for session in data.jans_sessions.active_sessions.sessions :
     session if can(regex("inum=admin", session.user_dn))
   ]
+  sensitive = true
 }
 ` + "```" + `
 
@@ -110,6 +111,7 @@ output "user_sessions" {
                                                 "device_secrets": {
                                                         Type:        schema.TypeList,
                                                         Computed:    true,
+							Sensitive:   true,
                                                         Description: "List of device secrets",
                                                         Elem: &schema.Schema{
                                                                 Type: schema.TypeString,

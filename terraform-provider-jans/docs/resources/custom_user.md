@@ -61,7 +61,7 @@ variable "user_password" {
 - `external_uid` (List of String) External UID.
 - `ox_auth_persistent_jwt` (List of String) Persistent JWT.
 - `status` (String) User status
-- `user_password` (String) User password
+- `user_password` (String, Sensitive) User password
 
 ### Read-Only
 
