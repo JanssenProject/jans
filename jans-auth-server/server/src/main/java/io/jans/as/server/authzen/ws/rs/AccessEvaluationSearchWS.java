@@ -185,7 +185,8 @@ public class AccessEvaluationSearchWS {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchSubjectRequest.class);
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse search subject request json.", e);
+            log.error("Failed to parse search subject request json.");
+            log.trace("Failed to parse search subject request json.", e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity("Failed to parse search subject request")
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
@@ -197,7 +198,8 @@ public class AccessEvaluationSearchWS {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchResourceRequest.class);
         } catch (JsonProcessingException e) {
             String msg = "Failed to parse search resource request json.";
-            log.error(msg, e);
+            log.error(msg);
+            log.trace(msg, e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(msg)
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
@@ -209,7 +211,8 @@ public class AccessEvaluationSearchWS {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchActionRequest.class);
         } catch (JsonProcessingException e) {
             String msg = "Failed to parse search action request json.";
-            log.error(msg, e);
+            log.error(msg);
+            log.trace(msg, e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(msg)
                     .type(MediaType.APPLICATION_JSON_TYPE).build());

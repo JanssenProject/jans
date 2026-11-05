@@ -125,8 +125,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sid, String clientId,
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         try {
-            log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}, clientId = {}",
-                    escapeLog(idTokenHint), escapeLog(postLogoutRedirectUri), escapeLog(sid), sec.isSecure(), escapeLog(clientId));
+            log.debug("Attempting to end session, idTokenHint present: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}, clientId = {}",
+                    StringUtils.isNotBlank(idTokenHint), escapeLog(postLogoutRedirectUri), escapeLog(sid), sec.isSecure(), escapeLog(clientId));
 
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.END_SESSION);
 

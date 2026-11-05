@@ -136,7 +136,8 @@ public class AccessEvaluationRestWebServiceImplV1 {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, AccessEvaluationRequest.class);
         } catch (JsonProcessingException e) {
-            log.error("Failed to parse evaluation request json.", e);
+            log.error("Failed to parse evaluation request json.");
+            log.trace("Failed to parse evaluation request json.", e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity("Failed to parse evaluation request.")
                     .type(MediaType.APPLICATION_JSON_TYPE).build());

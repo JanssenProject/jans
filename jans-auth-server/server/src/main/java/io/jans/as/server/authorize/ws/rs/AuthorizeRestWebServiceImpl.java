@@ -562,7 +562,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             Map<String, String> customResponseHeaders = Util.jsonObjectArrayStringAsMap(authzRequest.getCustomResponseHeaders());
             for (Entry<String, String> entry : customResponseHeaders.entrySet()) {
                 if (isProtectedResponseHeader(entry.getKey())) {
-                    log.debug("Skipped protected custom response header: {}", entry.getKey());
+                    log.debug("Skipped protected custom response header: {}", Util.escapeLog(entry.getKey()));
                     continue;
                 }
                 builder.header(entry.getKey(), entry.getValue());

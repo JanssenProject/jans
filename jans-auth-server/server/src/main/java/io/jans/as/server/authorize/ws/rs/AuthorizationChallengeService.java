@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl.getGenericRequestMap;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
@@ -172,7 +173,7 @@ public class AuthorizationChallengeService {
 
         if (StringUtils.isNotBlank(authzRequest.getCodeChallenge())
                 && CodeVerifier.CodeChallengeMethod.fromString(authzRequest.getCodeChallengeMethod()) != CodeVerifier.CodeChallengeMethod.S256) {
-            log.debug("PKCE code_challenge_method is invalid: {} (only S256 is allowed).", authzRequest.getCodeChallengeMethod());
+            log.debug("PKCE code_challenge_method is invalid: {} (only S256 is allowed).", escapeLog(authzRequest.getCodeChallengeMethod()));
             throw new WebApplicationException(errorResponseFactory
                     .newErrorResponse(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "PKCE code_challenge_method must be S256"))

@@ -675,7 +675,7 @@ public class AuthenticationFilter implements Filter {
             throw e;
         } catch (Exception ex) {
             log.error("Invalid DPoP.", ex);
-            sendInvalidDPoPError(servletResponse, ex.getMessage());
+            sendInvalidDPoPError(servletResponse, ex instanceof InvalidJwtException ? ex.getMessage() : "Invalid DPoP proof.");
             return;
         }
 
