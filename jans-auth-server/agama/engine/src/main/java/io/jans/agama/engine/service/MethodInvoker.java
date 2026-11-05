@@ -63,7 +63,7 @@ public class MethodInvoker {
         
     }
     
-    public Object callConstructor(Class cls, Object args[]) throws Exception {
+    public Object callConstructor(Class cls, Object[] args) throws Exception {
 
         int arity = args.length;
         
@@ -104,7 +104,7 @@ public class MethodInvoker {
       
     }
     
-    public Object call(Class cls, Object instance, String methodName, Object args[]) throws Exception {
+    public Object call(Class cls, Object instance, String methodName, Object[] args) throws Exception {
 
         boolean noInst = instance == null;      //true if it's a static method call
         int arity = args.length;
@@ -193,7 +193,7 @@ public class MethodInvoker {
                 
     }
     
-    private Object[] applyArgsTransformations(Parameter[] parameters, Object arguments[],
+    private Object[] applyArgsTransformations(Parameter[] parameters, Object[] arguments,
             List<paramTransformation> trs) throws IllegalArgumentException {
 
         if (parameters.length > 0) {
@@ -268,7 +268,7 @@ public class MethodInvoker {
 
     }
     
-    private List<paramTransformation> argsTransformations(Executable javaExec, Object arguments[]) {
+    private List<paramTransformation> argsTransformations(Executable javaExec, Object[] arguments) {
 
         List<paramTransformation> trans = new ArrayList<>();
         int i = -1;
