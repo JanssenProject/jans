@@ -1176,6 +1176,17 @@ async fn test_validation_non_deterministic_tokens() {
         )],
         "the duplicate token must be reported as DuplicateToken at index 1"
     );
+
+    let logs = cedarling.pop_logs();
+    let decision_log = logs
+        .iter()
+        .find(|log| log.get("dropped_tokens").is_some())
+        .expect("a decision-log entry must carry dropped_tokens");
+    assert_eq!(
+        decision_log.get("tokens"),
+        Some(&json!({ "Acme::Access_Token": { "jti": "acme_token_1" } })),
+        "only the first token must be logged as used; the duplicate must not appear"
+    );
 }
 
 /// Test validation - Valid multiple tokens with same type from different issuers

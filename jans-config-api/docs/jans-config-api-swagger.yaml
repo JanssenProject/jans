@@ -15705,9 +15705,9 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -15905,6 +15905,12 @@ components:
           enum:
           - SAMEORIGIN
           - DENY
+        securityHeadersEnabled:
+          type: boolean
+        applySecurityHeadersIfUriContainsAny:
+          type: array
+          items:
+            type: string
         responseTypesSupported:
           uniqueItems: true
           type: array
@@ -17615,10 +17621,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17689,6 +17695,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -18727,10 +18737,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18741,6 +18747,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        logoutStatusJwt:
+          type: boolean
+        accessToken:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

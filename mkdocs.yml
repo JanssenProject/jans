@@ -637,8 +637,10 @@ nav:
       - iOS: cedarling/developer/mobile-apps/cedarling-ios.md
     - Interface Reference:
       - Rust: https://janssenproject.github.io/developer-docs/cedarling/cedarling/index.html
-      - JavaScript/WASM: https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html
-      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/cedarling_python.html
+      - C: https://janssenproject.github.io/developer-docs/cedarling-c/index.html
+      - Java/Kotlin: https://janssenproject.github.io/developer-docs/cedarling-java/index.html
+      - JavaScript/TypeScript: https://janssenproject.github.io/developer-docs/cedarling-js/index.html
+      - Python: https://janssenproject.github.io/developer-docs/cedarling-python/index.html
   - Integrations:
     - KrakenD: cedarling/integrations/cedarling-krakend.md
     - OPA: cedarling/integrations/cedarling-opa.md

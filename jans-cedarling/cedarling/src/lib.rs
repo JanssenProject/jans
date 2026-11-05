@@ -1072,6 +1072,7 @@ impl Cedarling {
                             },
                             metadata: LevelResult::Failed { errors: vec![diag] },
                             warnings: Vec::new(),
+                            unknown_fields: Vec::new(),
                         })
                     },
                     _ if is_parse => {
@@ -1090,6 +1091,7 @@ impl Cedarling {
                                 reason: "parse failed".into(),
                             },
                             warnings: Vec::new(),
+                            unknown_fields: Vec::new(),
                         })
                     },
                     _ => Err(ValidateInfraError::Io(std::io::Error::other(err_str))),
@@ -1175,6 +1177,12 @@ impl Cedarling {
                     schema: schema_res,
                     metadata: metadata_res,
                     warnings,
+                    unknown_fields: loaded
+                        .format
+                        .unknown_fields
+                        .into_iter()
+                        .map(Diagnostic::from)
+                        .collect(),
                 })
             },
         }

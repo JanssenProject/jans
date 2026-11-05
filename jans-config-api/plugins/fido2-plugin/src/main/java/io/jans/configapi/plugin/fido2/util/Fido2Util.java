@@ -72,6 +72,11 @@ public class Fido2Util {
         return configHttpService.executeGet(requestUri, headers, data);
     }
 
+    public HttpServiceResponse executeGetWithoutRedirects(String requestUri, Map<String, String> headers) {
+        validateFido2Url(requestUri);
+        return configHttpService.executeGetWithoutRedirects(requestUri, headers);
+    }
+
     public HttpServiceResponse executePost(String requestUri, Map<String, String> headers, String body) {
         validateFido2Url(requestUri);
         return configHttpService.executePost(configHttpService.getHttpsClient(), requestUri, null, headers, body,

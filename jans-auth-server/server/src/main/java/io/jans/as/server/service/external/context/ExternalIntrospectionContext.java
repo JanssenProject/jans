@@ -82,6 +82,13 @@ public class ExternalIntrospectionContext extends ExternalScriptContext {
         this.grantOfIntrospectionToken = grantOfIntrospectionToken;
     }
 
+    public String getTokenAttribute(String key) {
+        if (grantOfIntrospectionToken == null || grantOfIntrospectionToken.getTokenEntity() == null) {
+            return null;
+        }
+        return grantOfIntrospectionToken.getTokenEntity().getAttributes().getAttributes().get(key);
+    }
+
     public User getUser() {
         return grantOfIntrospectionToken != null ? grantOfIntrospectionToken.getUser() : null;
     }

@@ -33,7 +33,8 @@ FIXED_CLIENT_INUMS = {
     "jans_fido2_test_client_2_inum": "FF81-2D39",
 }
 
-LOCK_TEST_CLIENT_ID = "2202.A7C3-5E19"
+LOCK_TRACE_TEST_CLIENT_ID = "2202.A7C3-5E19"
+LOCK_AUDIT_TEST_CLIENT_ID = "2203.B8D4-6F2A"
 
 
 def _env(name, required=True, default=None):
@@ -86,8 +87,10 @@ def build_ctx():
         ctx[inum_var] = inum
         ctx[f"{prefix}_pw"] = f"{inum}-{host_label}"
 
-    ctx["lock_test_client_id"] = LOCK_TEST_CLIENT_ID
-    ctx["lock_test_client_pw"] = f"{LOCK_TEST_CLIENT_ID}-{host_label}"
+    ctx["lock_trace_test_client_id"] = LOCK_TRACE_TEST_CLIENT_ID
+    ctx["lock_trace_test_client_pw"] = f"{LOCK_TRACE_TEST_CLIENT_ID}-{host_label}"
+    ctx["lock_audit_test_client_id"] = LOCK_AUDIT_TEST_CLIENT_ID
+    ctx["lock_audit_test_client_pw"] = f"{LOCK_AUDIT_TEST_CLIENT_ID}-{host_label}"
     return ctx
 
 

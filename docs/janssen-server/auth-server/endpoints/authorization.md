@@ -7,11 +7,22 @@ tags:
 ---
 # Authorization Endpoint
 
+Janssen Server exposes an authorization endpoint defined in
+[OAuth 2.0 (RFC 6749)](https://www.rfc-editor.org/rfc/rfc6749#section-3.1),
+with security behavior aligned with the
+[OAuth 2.1 draft](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/).
 
-Janssen Server exposes authorization endpoint compliant with [OAuth2 framework](https://www.rfc-editor.org/rfc/rfc6749#section-3.1).
-A client uses authorization endpoint to obtain an authorization grant. Based on response type requested by the client,
-the authorization endpoint issues an authorization code or an access token. Authorization endpoint is a protected endpoint
-which will require end-user authentication before issuing authorization code or access token.
+A client uses this endpoint to initiate an authorization request and
+obtain an authorization grant.
+
+For new integrations, use the Authorization Code Flow with PKCE
+(`code_challenge_method=S256`). The authorization endpoint returns an
+authorization code, which the client exchanges for tokens at the token
+endpoint after successful end-user authentication and authorization.
+
+Janssen Server may also support legacy implicit and hybrid response
+types, depending on server and client configuration. These response
+types are not recommended for new integrations.
 
 URL to access authorization endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.
@@ -57,19 +68,28 @@ navigate via `Auth Server`->`Properties`.
 
 ## Required Client Configuration
 
-Clients must be registered with Janssen Server as using [code](https://www.rfc-editor.org/rfc/rfc6749#section-4.1)
-and/or [implicit](https://www.rfc-editor.org/rfc/rfc6749#section-4.2) grant types in order to use authorization endpoint.
+Clients must be registered for an authorization flow supported by the running server.
+Authorization Code is the recommended flow. The Implicit Grant is a legacy option and is
+not included in the default supported grant types.
 
 Using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md), client can be registered for appropriate grant type by
 navigating to `Auth-Server`->`Clients`->`Add Client`
 
 ## Using PKCE
 
-Janssen Server [supports PKCE](../oauth-features/pkce.md), which recommended and more secure method for using `code`
-grant.
+Janssen Server [supports PKCE](../oauth-features/pkce.md) for the
+Authorization Code Flow. PKCE is required by default, and new integrations
+should use the `S256` code challenge method.
 
-PKCE can be enabled/disable by setting [requirePkce](../../reference/json/properties/janssenauthserver-properties.md#requirepkce)
-property. Janssen server supports `plain` as well as `s256` code challenge methods.
+PKCE enforcement is controlled by the
+[requirePkce](../../reference/json/properties/janssenauthserver-properties.md#requirepkce)
+property, which defaults to `true`. If the global property is set to
+`false`, PKCE is still required for clients that have `requirePkce`
+enabled individually.
+
+When PKCE is required, the client must send a `code_challenge` with
+`code_challenge_method=S256` in the authorization request and provide
+the corresponding `code_verifier` at the token endpoint.
 
 ## Using Request Objects
 
