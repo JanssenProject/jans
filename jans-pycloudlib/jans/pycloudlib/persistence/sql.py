@@ -352,8 +352,8 @@ class MysqlAdapter(CloudSqlConnectorMixin):
                 opts["ssl"]["ca"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
                 opts["ssl"]["cert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
                 opts["ssl"]["key"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
-            else:
-                # a non-empty mapping is required, otherwise PyMySQL skips TLS entirely
+            elif ssl_mode != "PREFERRED":
+                # a non-empty mapping makes PyMySQL require TLS; an empty one keeps its plaintext fallback
                 opts["ssl"]["check_hostname"] = False
         return opts
 

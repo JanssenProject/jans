@@ -38,6 +38,13 @@ if ! [[ $EXT_IP =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
   echo "[E] Invalid external IP address: $EXT_IP"
   exit 1
 fi
+IFS=. read -r -a EXT_IP_OCTETS <<< "$EXT_IP"
+for octet in "${EXT_IP_OCTETS[@]}"; do
+  if (( 10#$octet > 255 )); then
+    echo "[E] Invalid external IP address: $EXT_IP"
+    exit 1
+  fi
+done
 
 sudo apt-get update
 sudo snap install microk8s --classic

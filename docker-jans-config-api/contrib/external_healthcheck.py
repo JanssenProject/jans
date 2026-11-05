@@ -27,6 +27,10 @@ class _TLSAdapter(HTTPAdapter):
         kwargs["ssl_context"] = self._ssl_context
         return super().init_poolmanager(*args, **kwargs)
 
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        proxy_kwargs["ssl_context"] = self._ssl_context
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
+
 
 def _build_session():
     ctx = ssl.create_default_context()

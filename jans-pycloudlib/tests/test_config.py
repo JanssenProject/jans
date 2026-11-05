@@ -39,7 +39,7 @@ def test_consul_config_merge_path(gconsul_config):
 
 @pytest.mark.parametrize("key", ["../secret", "foo/../../bar", "/abs", "a/./b"])
 def test_consul_config_merge_path_invalid(gconsul_config, key):
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Invalid config key"):
         gconsul_config._merge_path(key)
 
 

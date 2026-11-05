@@ -15,9 +15,10 @@ def open_private(path: str, mode: str = "w", **kwargs: _t.Any) -> _t.IO[_t.Any]:
         mode: Write mode, i.e. `w` or `wb`.
         **kwargs: Extra keyword arguments passed to `os.fdopen`.
     """
-    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT, 0o600)
     try:
         os.fchmod(fd, 0o600)
+        os.ftruncate(fd, 0)
         return os.fdopen(fd, mode, **kwargs)
     except BaseException:
         os.close(fd)
