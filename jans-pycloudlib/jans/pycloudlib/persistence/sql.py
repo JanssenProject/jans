@@ -362,8 +362,9 @@ class MysqlAdapter(CloudSqlConnectorMixin):
         """Whether the connection must be encrypted (TLS enabled and mode is not `PREFERRED`)."""
         if self.cloudsql_connector_enabled:
             return False
-        return as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")) and \
-            os.environ.get("CN_SQL_SSL_MODE", "REQUIRED") != "PREFERRED"
+        ssl_enabled = as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))
+        ssl_mode = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+        return ssl_enabled and ssl_mode != "PREFERRED"
 
     def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
