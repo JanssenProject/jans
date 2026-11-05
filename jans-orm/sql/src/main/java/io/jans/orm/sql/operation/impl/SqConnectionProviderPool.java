@@ -20,6 +20,7 @@ import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.util.PropertiesHelper;
+import io.jans.orm.util.SensitiveDataMasker;
 import io.jans.orm.util.StringHelper;
 
 public class SqConnectionProviderPool {
@@ -50,12 +51,8 @@ public class SqConnectionProviderPool {
 		} catch (Exception ex) {
 			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
-			Properties clonedProperties = (Properties) props.clone();
-			if (clonedProperties.getProperty("auth.userPassword") != null) {
-				clonedProperties.setProperty("auth.userPassword", "REDACTED");
-			}
-
-			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
+			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}",
+					SensitiveDataMasker.allowlistProperties(props, SqlConnectionProvider.LOGGABLE_PROPERTIES), ex);
 		}
 	}
 

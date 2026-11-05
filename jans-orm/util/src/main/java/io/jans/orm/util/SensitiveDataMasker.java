@@ -13,8 +13,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +27,7 @@ public final class SensitiveDataMasker {
 
     public static final String MASKED = "******";
 
-    private static final Pattern SENSITIVE_KEY_PATTERN = Pattern.compile("(?i)password|pwd");
+    private static final Pattern SENSITIVE_KEY_PATTERN = Pattern.compile("(?i)password|pwd|secret|token");
 
     /**
      * Matches a raw {@code "key":value} pair. Group 1 is the {@code "key":} prefix (verbatim, escapes untouched),
@@ -34,12 +39,14 @@ public final class SensitiveDataMasker {
      * (and therefore the masking) to stop partway through the value. Absent any valid terminator, the match runs
      * through the end of input, so a truncated or malformed sensitive value is fully masked instead of partially
      * leaked.
-     * A bare scalar never starts with an object or array opener; an opener matches on its own, so a nonsensitive
+     * A bare scalar never contains a quote or an object/array delimiter; an opener matches on its own, so a nonsensitive
      * key's nested container is still scanned member by member, while a sensitive key's container is masked whole.
+     * Because a scalar stops at a quote, malformed input such as {@code {"cfg":null{"password":"x"}}} still leaves the
+     * nested pair available for masking.
      */
     private static final Pattern RAW_JSON_KEY_VALUE_PATTERN = Pattern.compile(
             "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)"
-                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,{}\\[\\]\\s\"][^,}\\]\\s]*|[\\[{])");
+                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,{}\\[\\]\\s\"]+|[\\[{])");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -47,7 +54,59 @@ public final class SensitiveDataMasker {
     }
 
     /**
-     * Replaces the value of any JSON key containing "password" or "pwd" (case-insensitive) with {@link #MASKED}.
+     * Tells whether a key or attribute name denotes a credential: contains "password", "pwd", "secret" or "token"
+     * (case-insensitive).
+     */
+    public static boolean isSensitiveName(String name) {
+        return name != null && SENSITIVE_KEY_PATTERN.matcher(name).find();
+    }
+
+    /**
+     * Returns a printable form of the value with sensitive data masked. Native maps, collections and arrays are
+     * inspected structurally (their {@code toString()} output is not JSON); any other value is treated as text.
+     * If a container cannot be inspected, the whole value is masked.
+     */
+    public static String maskValue(Object value) {
+        if (value == null) {
+            return null;
+        }
+
+        if (value instanceof Map || value instanceof Collection
+                || (value.getClass().isArray() && !(value instanceof byte[]))) {
+            try {
+                JsonNode node = MAPPER.valueToTree(value);
+                maskNode(node);
+                return MAPPER.writeValueAsString(node);
+            } catch (IllegalArgumentException | JsonProcessingException e) {
+                return MASKED;
+            }
+        }
+
+        return maskJsonValues(value.toString());
+    }
+
+    /**
+     * Returns the entries of {@code props} whose keys are in {@code allowedKeys}; everything else is dropped.
+     * Use it to log configuration without leaking credentials embedded in non-allowlisted values.
+     */
+    public static Map<String, String> allowlistProperties(Properties props, String... allowedKeys) {
+        Map<String, String> result = new TreeMap<>();
+        if (props == null) {
+            return result;
+        }
+
+        for (String key : allowedKeys) {
+            String value = props.getProperty(key);
+            if (value != null) {
+                result.put(key, isSensitiveName(key) ? MASKED : value);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Replaces the value of any JSON key containing "password", "pwd", "secret" or "token" (case-insensitive) with {@link #MASKED}.
      * The value is parsed as JSON and traversed recursively (objects and arrays), so keys are matched against
      * their decoded form (e.g. a key serialized as {@code password} is still recognized as "password"),
      * and non-string scalar values (numbers, booleans) are masked as well. If the value is not valid JSON,
@@ -81,7 +140,7 @@ public final class SensitiveDataMasker {
         int from = 0;
 
         while (from < value.length() && matcher.find(from)) {
-            if (SENSITIVE_KEY_PATTERN.matcher(unescapeJson(matcher.group(2))).find()) {
+            if (isSensitiveName(unescapeJson(matcher.group(2)))) {
                 String token = matcher.group(3);
                 boolean opener = "[".equals(token) || "{".equals(token);
                 int end = opener ? findContainerEnd(value, matcher.start(3)) : matcher.end();
@@ -99,7 +158,7 @@ public final class SensitiveDataMasker {
     }
 
     private static int findContainerEnd(String value, int start) {
-        int depth = 0;
+        Deque<Character> openers = new ArrayDeque<>();
         boolean inString = false;
 
         for (int i = start; i < value.length(); i++) {
@@ -113,9 +172,16 @@ public final class SensitiveDataMasker {
             } else if (c == '"') {
                 inString = true;
             } else if (c == '[' || c == '{') {
-                depth++;
-            } else if ((c == ']' || c == '}') && --depth == 0) {
-                return i + 1;
+                openers.push(c);
+            } else if (c == ']' || c == '}') {
+                char expected = (c == ']') ? '[' : '{';
+                if (openers.isEmpty() || openers.pop() != expected) {
+                    // mismatched closer: structure is untrustworthy, mask through the end of input
+                    return value.length();
+                }
+                if (openers.isEmpty()) {
+                    return i + 1;
+                }
             }
         }
 
@@ -154,7 +220,7 @@ public final class SensitiveDataMasker {
             Iterator<Map.Entry<String, JsonNode>> fields = ((ObjectNode) node).fields();
             while (fields.hasNext()) {
                 Map.Entry<String, JsonNode> field = fields.next();
-                if (SENSITIVE_KEY_PATTERN.matcher(field.getKey()).find()) {
+                if (isSensitiveName(field.getKey())) {
                     field.setValue(TextNode.valueOf(MASKED));
                 } else {
                     maskNode(field.getValue());

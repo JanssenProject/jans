@@ -486,8 +486,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         StringBuilder finalExpression = new StringBuilder(expression.expression());
         if (enableScopeSupport) { 
 			if (SearchScope.BASE == scope) {
-				finalExpression.append(" AND META().id NOT LIKE $").append(SCOPE_KEY_PARAMETER);
-				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "\\_%\\_");
+				finalExpression.append(" AND META().id = $").append(SCOPE_KEY_PARAMETER);
+				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, key);
 			} else {
 				finalExpression.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
 				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
@@ -669,7 +669,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+			if (isSkipHashed && isPreHashedPassword(passwords[i])) {
 				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
 				results[i] = passwords[i];
 				continue;
@@ -683,6 +683,16 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         }
 
         return results;
+    }
+
+    private boolean isPreHashedPassword(String password) {
+        if (persistenceExtension != null) {
+            // Extension may use its own hash format
+            return PasswordEncryptionHelper.findAlgorithmString(password) != null;
+        }
+
+        // Unknown {prefix} would be stored and later compared as plaintext
+        return PasswordEncryptionHelper.findAlgorithm(password) != null;
     }
 
     @Override
