@@ -104,11 +104,6 @@ class ConfigApiInstaller(JettyInstaller):
         with open(self.scope_ldif_fn, 'wb') as scope_ldif_fd:
             ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
             scopes = {}
-            jansUmaScopes_all = [ 'inum=C4F7,ou=scopes,o=jans' ]
-
-            if hasattr(base.current_app, 'ScimInstaller'):
-                scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
-                jansUmaScopes_all += scim_scopes
 
             scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
 
@@ -140,24 +135,6 @@ class ConfigApiInstaller(JettyInstaller):
                                             'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
                                         }
                                 ldif_scopes_writer.unparse(scope_dn, ldif_dict)
-                                jansUmaScopes_all.append(scope_dn)
-
-        create_client = True
-        if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
-            create_client = False
-
-        if create_client:
-            create_client_ldif(
-                ldif_fn=self.clients_ldif_fn,
-                client_id=Config.jca_client_id,
-                encoded_pw=Config.jca_client_encoded_pw,
-                scopes=jansUmaScopes_all,
-                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
-                display_name="Jans Config Api Client"
-                )
-
-            self.load_ldif_files.append(self.clients_ldif_fn)
-
 
     def render_import_templates(self):
 
@@ -180,38 +157,11 @@ class ConfigApiInstaller(JettyInstaller):
         self.dbUtils.import_ldif(self.load_ldif_files)
 
 
-    def prepare_scope_list(self):
-
-        scopes = []
-        scopes_id_list = []
-        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(inum=1800.*)(objectClass=jansScope))', fetchmany=True)
-
-        for scope in result:
-            if isinstance(scope, dict):
-                if 'jansScope' in scope.get('objectClass', scope.get('objectclass',[])):
-                    scopes.append('jansScope: ' + scope['dn'])
-                    scopes_id_list.append(scope['jansId'])
-            else:
-                if 'jansScope' in scope[1]['objectClass']:
-                    scopes.append('jansScope: ' +  scope[1]['dn'])
-                    scopes_id_list.append(scope[1]['jansId'])
-
-        stat_scope = 'jansScope: inum=C4F7,ou=scopes,o=jans'
-
-        if not stat_scope in scopes:
-            scopes.append(stat_scope)
-
-        Config.template_rendering_dict['config_api_scopes'] = '\n'.join(scopes)
-        Config.template_rendering_dict['config_api_scopes_list'] = ' '.join(scopes_id_list)
-
-
     def app_test_data_loader(self):
         if not self.installed():
             return
 
         check_result = self.check_clients([('jca_test_client_id', '1802.')])
-
-        self.prepare_scope_list()
 
         if check_result.get('1802.') == 1:
             warning = "Test data for Config Api was allready loaded."
@@ -220,6 +170,9 @@ class ConfigApiInstaller(JettyInstaller):
                 print(warning)
             return
 
+        super_admin_scopes = self.get_super_admin_scopes()
+        Config.template_rendering_dict['config_api_scopes_list'] = ' '.join(super_admin_scopes)
+        Config.template_rendering_dict['config_api_scopes'] = '\n'.join([f'jansScope: {scope}' for scope in super_admin_scopes])
 
         self.logIt("Loding Jans Config Api test data")
         self.update_rendering_dict()
@@ -227,14 +180,30 @@ class ConfigApiInstaller(JettyInstaller):
         ldif_fn = os.path.join(Config.output_dir, 'test', self.service_name, 'data/jans-config-api.ldif')
         self.dbUtils.import_ldif([ldif_fn])
 
+    def get_configuration_dn(self):
+        # find configuration dn
+        jans_config = base.read_properties_file(Config.jans_properties_fn)
+        if not jans_config:
+            self.logIt("Can't find Jans properties file", errorLog=True, fatal=True)
+        config_api_config_dn = jans_config.get('configApi_ConfigurationEntryDN')
+        if not config_api_config_dn:
+            self.logIt("Can't find configApi_ConfigurationEntryDN", errorLog=True, fatal=True)
+        return config_api_config_dn
+
+    def get_dynamic_configuration(self):
+        config_api_config_dn = self.get_configuration_dn()
+        configuration = self.dbUtils.dn_exists(config_api_config_dn)
+        if configuration and 'jansConfDyn' in configuration:
+            dynamic_configuration = json.loads(configuration['jansConfDyn'])
+            return dynamic_configuration
+        self.logIt("Can't load config api dynamic configuration from DB", errorLog=True, fatal=True)
+
     def update_jansservicemodule(self):
         # this function is called by jans.py: JansInstaller.post_install_tasks()
         self.logIt("Updating jansServiceModule for Config Api")
 
-        # find configuration dn
-        jans_config = base.read_properties_file(Config.jans_properties_fn)
-        config_api_config_dn = jans_config['configApi_ConfigurationEntryDN']
-
+        config_api_config_dn = self.get_configuration_dn()
+        dynamic_configuration = self.get_dynamic_configuration()
 
         jans_service_modules = []
 
@@ -244,9 +213,45 @@ class ConfigApiInstaller(JettyInstaller):
 
         self.logIt(f"Config Api jansConfDyn.assetMgtConfiguration.jansServiceModule list: {jans_service_modules}")
 
-        configuration = self.dbUtils.dn_exists(config_api_config_dn)
-        dynamic_configuration = json.loads(configuration['jansConfDyn'])
         dynamic_configuration['assetMgtConfiguration']['jansServiceModule'] = sorted(jans_service_modules)
         self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_configuration, indent=2), config_api_config_dn)
 
 
+    def get_super_admin_scopes(self):
+        super_admin_scopes = []
+        dynamic_configuration = self.get_dynamic_configuration()
+        scopes = dynamic_configuration.get('superAdminScopes') or []
+        for scope in scopes:
+            search_result = self.dbUtils.search('ou=scopes,o=jans', search_filter=f'(&(jansId={scope})(objectClass=jansScope))')
+            if search_result and search_result.get('dn'):
+                super_admin_scopes.append(search_result['dn'])
+
+        return super_admin_scopes
+
+    def service_post_setup(self):
+        dynamic_configuration = self.get_dynamic_configuration()
+        jca_client_id = dynamic_configuration.get('apiClientId')
+        jca_client_encoded_pw = dynamic_configuration.get('apiClientPassword')
+
+        if not (jca_client_id and jca_client_encoded_pw):
+            self.logIt("Can't find client id in config api dynamic configuration", errorLog=True, fatal=True)
+
+        super_admin_scopes = self.get_super_admin_scopes()
+
+        create_client = True
+        if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter=f'(&(inum={jca_client_id})(objectClass=jansClnt))'):
+            create_client = False
+
+        if create_client:
+            Config.jca_client_id = jca_client_id
+            Config.jca_client_encoded_pw = jca_client_encoded_pw
+            create_client_ldif(
+                ldif_fn=self.clients_ldif_fn,
+                client_id=jca_client_id,
+                encoded_pw=jca_client_encoded_pw,
+                scopes=super_admin_scopes,
+                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
+                display_name="Jans Config Api Client"
+                )
+
+            self.dbUtils.import_ldif([self.clients_ldif_fn])
