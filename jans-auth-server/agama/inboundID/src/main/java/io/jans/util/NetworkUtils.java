@@ -4,14 +4,13 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.service.cdi.util.CdiUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -84,15 +83,9 @@ public class NetworkUtils {
 
     }
     
-    // derived from the configured issuer: the request Host header is caller-controlled
     public static String urlBeforeContextPath() {
-        String issuer = CdiUtil.bean(AppConfiguration.class).getIssuer();
-        try {
-            URL url = new URL(issuer);
-            return url.getProtocol() + "://" + url.getAuthority();
-        } catch (MalformedURLException e) {
-            throw new IllegalStateException("Invalid issuer: " + issuer, e);
-        }
+        HttpServletRequest req = CdiUtil.bean(HttpServletRequest.class);
+        return req.getScheme() + "://" + req.getServerName();
     }
     
     private NetworkUtils() { }

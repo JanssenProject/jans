@@ -58,8 +58,7 @@ public final class Mappings {
         GITHUB = profile -> {
             Map<String, Object> map = new HashMap<>();
             
-            //login is mutable and can be reassigned to another account; id is immutable
-            map.put(Attrs.UID, "github-" + profile.get("id").toString());
+            map.put(Attrs.UID, "github-" + profile.getOrDefault("login", profile.get("id")));
             map.put(Attrs.MAIL, profile.get("email"));
             map.put(Attrs.DISPLAY_NAME, profile.get("name"));
             map.put(Attrs.GIVEN_NAME, profile.get("name"));

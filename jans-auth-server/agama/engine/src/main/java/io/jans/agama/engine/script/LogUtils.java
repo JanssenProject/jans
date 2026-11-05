@@ -80,8 +80,7 @@ public class LogUtils {
 
         Object[] args = new String[nargs + dummyArgs];
         for (int i = 0; i < nargs; i++) {
-            Object arg = rest[i + 1];
-            args[i] = arg instanceof Throwable ? foldMessageLines(asString(arg)) : escapeLineBreaks(asString(arg));
+            args[i] = asString(rest[i + 1]);
         }
         Arrays.fill(args, nargs, args.length, "");
         String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
@@ -109,24 +108,6 @@ public class LogUtils {
         
     }
     
-    private static String escapeLineBreaks(String str) {
-        return str.replace("\r", "\\r").replace("\n", "\\n");
-    }
-
-    // Keeps stack frames on their own lines but escapes line breaks coming from exception messages
-    private static String foldMessageLines(String stackTrace) {
-
-        String[] lines = stackTrace.split("\r\n|\r|\n");
-        StringBuilder sb = new StringBuilder(lines[0]);
-        for (int i = 1; i < lines.length; i++) {
-            String line = lines[i];
-            boolean structural = line.startsWith("\t") || line.startsWith("Caused by: ") || line.isEmpty();
-            sb.append(structural ? "\n" : "\\n").append(line);
-        }
-        return sb.toString();
-
-    }
-
     private static boolean ignoreLogStatement(LogLevel logLevel) {
         
         switch (logLevel) {
