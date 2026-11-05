@@ -12,7 +12,6 @@ use crate::EntityData;
 use crate::TrustedIssuerLoadingInfo;
 use crate::bootstrap_config::AuthorizationConfig;
 use crate::common::default_entities::DefaultEntities;
-use crate::common::policy_store::token_types::EntityTypeName;
 use crate::common::policy_store::{ContextKey, PolicyStoreWithID, TokenTypes};
 use crate::context_data_api::DataStore;
 use crate::entity_builder::{
@@ -31,6 +30,7 @@ use build_ctx::{build_context, build_multi_issuer_context};
 use cedar_policy::{Entities, Entity, EntityUid, PolicyId};
 use chrono::Utc;
 use metrics::MetricsCollector;
+use multi_issuer_setup::MultiIssuerSetup;
 use request::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest, BatchAuthorizeResponse,
     BatchAuthorizeUnsignedRequest, BatchItem, RequestUnsigned,
@@ -49,6 +49,7 @@ mod dropped_token;
 mod error_metrics;
 mod errors;
 pub(crate) mod metrics;
+mod multi_issuer_setup;
 mod options;
 
 pub(crate) mod request;
@@ -225,19 +226,18 @@ impl Authz {
         let request_id = gen_uuid7();
 
         // Validate the request structure
-        request.validate().inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        request
+            .validate()
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let schema = &self.config.policy_store.schema;
 
         let MultiIssuerSetup {
-            validated_tokens,
             entities: setup_entities,
-            dropped_tokens,
+            used_tokens,
+            dropped: dropped_tokens,
         } = self
-            .multi_issuer_setup(&request.tokens, custom_processor)
+            .multi_issuer_setup(request_id, &request.tokens, custom_processor)
             .await?;
 
         let resource = self
@@ -261,17 +261,13 @@ impl Authz {
                 let wrapped = crate::entity_builder::MultiIssuerEntityError::EntityCreationFailed(
                     e.to_string(),
                 );
-                self.config.metrics.record_error(&wrapped);
-                self.config.metrics.record_authz_error();
+                self.config.metrics.record_authz_error(&wrapped);
                 AuthorizeError::MultiIssuerEntity(wrapped)
             })?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::from)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         // Capture pushed data info for logging before context is built
         let (pushed_data, pushed_data_info) = self.get_pushed_data();
@@ -285,10 +281,7 @@ impl Authz {
             &action,
             &pushed_data,
         )
-        .inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let entities_data = AuthorizeEntitiesData {
             issuers: setup_entities.issuers,
@@ -301,10 +294,7 @@ impl Authz {
         let entities = entities_data
             .entities(schema_ref)
             .map_err(AuthorizeError::ValidateEntities)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         // Multi-issuer authorization does not use a principal
         // Authorization is based solely on the context (tokens)
@@ -317,10 +307,7 @@ impl Authz {
                 context,
             })
             .map_err(AuthorizeError::RequestValidation)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let authz_info = AuthorizeInfo {
             principal: "None (multi-issuer)".to_string(),
@@ -348,7 +335,7 @@ impl Authz {
         );
 
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens,
+            &used_tokens,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
@@ -363,7 +350,7 @@ impl Authz {
             &request.action,
             &resource_uid,
             result.decision,
-            || token_facts(&validated_tokens, &request.tokens).map(Arc::from),
+            || token_facts(&used_tokens, &request.tokens).map(Arc::from),
         );
 
         // Decision log
@@ -455,17 +442,16 @@ impl Authz {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
-        request.validate().inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        request
+            .validate()
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let MultiIssuerSetup {
-            validated_tokens,
             entities: setup_entities,
-            dropped_tokens,
+            used_tokens,
+            dropped: dropped_tokens,
         } = self
-            .multi_issuer_setup(&request.tokens, custom_processor)
+            .multi_issuer_setup(batch_id, &request.tokens, custom_processor)
             .await?;
 
         // Atomic snapshot: pushed data captured once for the whole batch.
@@ -475,7 +461,7 @@ impl Authz {
         let schema_ref = schema.as_ref().map(|s| &s.schema);
 
         let tokens_logging_info = LogTokensInfo::new(
-            &validated_tokens,
+            &used_tokens,
             self.config
                 .authorization
                 .decision_log_default_jwt_id
@@ -486,7 +472,7 @@ impl Authz {
         let trace_tokens = OnceCell::new();
         let trace_token_facts = || {
             trace_tokens
-                .get_or_init(|| token_facts(&validated_tokens, &request.tokens).map(Arc::from))
+                .get_or_init(|| token_facts(&used_tokens, &request.tokens).map(Arc::from))
                 .clone()
         };
         let trace_context = self.trace_context(&request.options);
@@ -505,8 +491,7 @@ impl Authz {
                 Ok(decided) => decided,
                 Err(e) => {
                     let item_err = classify_batch_item_error(&e, item_index);
-                    self.config.metrics.record_error(&e);
-                    self.config.metrics.record_authz_error();
+                    self.config.metrics.record_authz_error(&e);
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
                         .set_batch_id(batch_id)
                         .set_message(format!(
@@ -671,10 +656,7 @@ impl Authz {
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::from)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let UnsignedSetup {
             principal,
@@ -687,8 +669,7 @@ impl Authz {
             .build_resource_entity(&request.resource)
             .map_err(|e| {
                 let err = AuthorizeError::BuildEntity(e);
-                self.config.metrics.record_error(&err);
-                self.config.metrics.record_authz_error();
+                self.config.metrics.record_authz_error(&err);
                 err
             })?;
         let principal_uid = principal.as_ref().map(cedar_policy::Entity::uid);
@@ -704,17 +685,11 @@ impl Authz {
             &action,
             &pushed_data,
         )
-        .inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let entities = Entities::from_entities(principal.into_iter().chain([resource]), schema_ref)
             .map_err(|e| AuthorizeError::ValidateEntities(Box::new(e)))
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let response = self
             .execute_authorize(ExecuteAuthorizeParameters {
@@ -725,10 +700,7 @@ impl Authz {
                 context,
             })
             .map_err(AuthorizeError::RequestValidation)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         // measure time how long request executes, before the result clone so the
         // clone cost is excluded from the latency measurement
@@ -850,10 +822,9 @@ impl Authz {
         let batch_start_time = Utc::now();
         let batch_id = gen_uuid7();
 
-        request.validate().inspect_err(|e| {
-            self.config.metrics.record_error(e);
-            self.config.metrics.record_authz_error();
-        })?;
+        request
+            .validate()
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
 
         let UnsignedSetup {
             principal,
@@ -885,8 +856,7 @@ impl Authz {
                 Ok(decided) => decided,
                 Err(e) => {
                     let item_err = classify_batch_item_error(&e, item_index);
-                    self.config.metrics.record_error(&e);
-                    self.config.metrics.record_authz_error();
+                    self.config.metrics.record_authz_error(&e);
                     let log_entry = LogEntry::new(BaseLogEntry::new_decision(item_request_id))
                         .set_batch_id(batch_id)
                         .set_message(format!(
@@ -1034,10 +1004,7 @@ impl Authz {
             .config
             .entity_builder
             .build_unsigned_principal(principal)
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))?;
         Ok(UnsignedSetup {
             principal,
             built_entities,
@@ -1049,63 +1016,33 @@ impl Authz {
     /// Validates tokens once and builds token/issuer entities once so they can
     /// be reused across every item in a batch. Callers combine the result
     /// with a per-item resource entity + per-item multi-issuer context to
-    /// complete each authorization decision.
+    /// complete each authorization decision. Log entries carry `request_id`:
+    /// the request id of a single call, or the batch id of a batch.
     async fn multi_issuer_setup(
         &self,
+        request_id: Uuid,
         tokens: &[crate::TokenInput],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<MultiIssuerSetup, AuthorizeError> {
-        let custom_timeout = self.custom_token_timeout();
-        let validated = self
-            .config
-            .jwt_service
-            .validate_multi_issuer_tokens(
+        let setup = async {
+            let validator = self.config.jwt_service.multi_issuer_validator(
+                Some(request_id),
                 tokens,
                 custom_processor,
                 &self.config.policy_store.token_types,
-                custom_timeout,
+                self.custom_token_timeout(),
+            )?;
+            MultiIssuerSetup::validate_and_build(
+                validator,
+                self.config.entity_builder.multi_issuer_entities_builder(),
+                self.config.log_service.as_ref(),
             )
             .await
-            .inspect_err(|e| {
-                self.config.metrics.record_error(e);
-                self.config.metrics.record_authz_error();
-            })?;
-
-        let mut setup_entities = self
-            .config
-            .entity_builder
-            .build_multi_issuer_setup_entities(&validated.tokens, self.config.log_service.as_ref())
-            .map_err(|e| {
-                self.config.metrics.record_error(&e);
-                self.config.metrics.record_authz_error();
-                AuthorizeError::MultiIssuerEntity(e)
-            })?;
-
-        let crate::jwt::ValidatedMultiIssuerTokens {
-            tokens: mut validated_tokens,
-            dropped: mut dropped_tokens,
-        } = validated;
-
-        // A token that failed entity building must not also be reported as
-        // used: drop it from the validated map so `LogTokensInfo` (built from
-        // this map for both single and batch paths) never logs the same
-        // mapping under both `tokens` and `dropped_tokens`.
-        let entity_build_drops = std::mem::take(&mut setup_entities.dropped);
-        validated_tokens.retain(|name, _| {
-            !entity_build_drops
-                .iter()
-                .any(|d| d.mapping == name.as_str())
-        });
-
-        // Order is not guaranteed: entity-build drops append after validation
-        // drops; callers correlate entries by `index`.
-        dropped_tokens.extend(entity_build_drops);
-
-        Ok(MultiIssuerSetup {
-            validated_tokens,
-            entities: setup_entities,
-            dropped_tokens,
-        })
+        };
+        setup
+            .await
+            .map_err(AuthorizeError::from)
+            .inspect_err(|e| self.config.metrics.record_authz_error(e))
     }
 
     /// Execute cedar policy `is_authorized` method to check
@@ -1342,23 +1279,24 @@ impl Authz {
         resources: &[crate::EntityData],
         custom_processor: Option<&Arc<dyn crate::jwt::CustomTokenProcessor>>,
     ) -> Result<Vec<crate::PolicyMetadata>, AuthorizeError> {
-        let custom_timeout = self.custom_token_timeout();
-        let validated_tokens = self
-            .config
-            .jwt_service
-            .validate_multi_issuer_tokens(
-                tokens,
-                custom_processor,
-                &self.config.policy_store.token_types,
-                custom_timeout,
-            )
-            .await?;
-
-        let principal_types: HashSet<cedar_policy::EntityTypeName> = validated_tokens
-            .tokens
-            .keys()
-            .map(|entity_type| entity_type.cedar().clone())
-            .collect();
+        // The result has no request id, so the token logs carry none either.
+        let mut validator = self.config.jwt_service.multi_issuer_validator(
+            None,
+            tokens,
+            custom_processor,
+            &self.config.policy_store.token_types,
+            self.custom_token_timeout(),
+        )?;
+        let mut principal_types: HashSet<cedar_policy::EntityTypeName> = HashSet::new();
+        while let Some(jwt::CheckedToken { outcome, .. }) = validator.next().await? {
+            match outcome {
+                jwt::TokenValidation::Accepted(validated) => {
+                    principal_types.insert(validated.token_type.entity_type().cedar().clone());
+                },
+                jwt::TokenValidation::Dropped(_) => {},
+            }
+        }
+        validator.ensure_any_validated()?;
 
         let action_uids = parse_action_uids(actions)?;
         let resource_types = entity_data_to_type_names(resources)?;
@@ -1522,21 +1460,6 @@ struct ExecuteAuthorizeParameters<'a> {
 struct UnsignedSetup {
     principal: Option<Entity>,
     built_entities: BuiltEntities,
-}
-
-/// Resource-independent setup shared across all items in a multi-issuer batch.
-///
-/// Built once via [`Authz::multi_issuer_setup`] and combined with a per-item
-/// resource entity + context by the caller. `validated_tokens` is retained so
-/// that [`LogTokensInfo`] can be produced from the same snapshot the entities
-/// were built from.
-struct MultiIssuerSetup {
-    validated_tokens: HashMap<EntityTypeName, crate::jwt::ValidatedToken>,
-    entities: MultiIssuerSetupEntities,
-    /// Tokens dropped across validation and entity building. Order is not
-    /// guaranteed; use each entry's `index` to correlate with the request
-    /// `tokens` array. Shared by every item in a batch.
-    dropped_tokens: Vec<DroppedToken>,
 }
 
 /// Structure to hold entites created from tokens

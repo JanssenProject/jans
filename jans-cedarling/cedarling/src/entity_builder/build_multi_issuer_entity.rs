@@ -5,14 +5,11 @@
 
 use super::entity_id_getters::{EntityIdSrc, get_first_valid_entity_id};
 use super::{BuiltEntities, EntityBuilder};
-use crate::authz::{DropReason, DroppedToken};
 use crate::common::default_entities::DefaultEntities;
 use crate::common::policy_store::token_types::{EntityTypeName, TokenType};
 use crate::common::policy_store::{ContextKey, TokenTypeKind};
 use crate::entity_builder::{BuildAttrsErrorVec, schema};
 use crate::jwt::{Token, TokenIssuer, ValidatedToken};
-use crate::log::interface::LogWriter;
-use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 use cedar_policy::{Entity, EntityId, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
@@ -181,85 +178,70 @@ fn convert_claim_to_string_set(value: &Value) -> RestrictedExpression {
     }
 }
 
-/// Resource-independent multi-issuer entities produced by
-/// [`EntityBuilder::build_multi_issuer_setup_entities`]. Built once per
-/// authorization call (single-item or batch) and combined with a per-item
-/// resource entity by the caller.
+/// Resource-independent multi-issuer entities. Built once per authorization
+/// call (single-item or batch) and combined with a per-item resource entity by
+/// the caller.
 #[derive(Debug, Clone)]
 pub(crate) struct MultiIssuerSetupEntities {
     pub tokens: HashMap<ContextKey, Entity>,
     pub issuers: HashSet<Entity>,
     pub default_entities: DefaultEntities,
-    /// Validated tokens that could not be turned into a Cedar entity, each
-    /// with its original request index and
-    /// [`DropReason::EntityBuildFailed`](crate::DropReason::EntityBuildFailed).
-    pub dropped: Vec<DroppedToken>,
+}
+
+/// Builds the token entities of one multi-issuer request, one validated token
+/// at a time.
+pub(crate) struct MultiIssuerEntitiesBuilder<'a> {
+    builder: &'a EntityBuilder,
+    built_entities: BuiltEntities,
+    tokens: HashMap<ContextKey, Entity>,
 }
 
 impl EntityBuilder {
-    /// Build the resource-independent multi-issuer entities (tokens + issuers +
-    /// default entities). Used by both single-item and batch multi-issuer
-    /// authorization paths — the caller pairs the result with a per-item
-    /// [`Self::build_resource_entity`] call to complete each decision.
-    pub(crate) fn build_multi_issuer_setup_entities(
-        &self,
-        tokens: &HashMap<EntityTypeName, ValidatedToken>,
-        log_service: &impl LogWriter,
-    ) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
-        let mut built_entities = BuiltEntities::from(&self.iss_entities);
-
-        let mut token_entities = HashMap::new();
-        let mut dropped = Vec::new();
-        for (token_name, entry) in tokens {
-            match self.build_single_token_entity(&entry.token, &entry.token_type, &built_entities) {
-                // Keys cannot collide: each mapping names one token type, and
-                // `TokenTypes` gives every token type its own key.
-                Ok(entity) => {
-                    built_entities.insert(&entity.uid());
-                    token_entities.insert(entry.token_type.context_key().clone(), entity);
-                },
-                Err(e) => {
-                    log_service.log_any(
-                        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                            LogLevel::ERROR,
-                            None,
-                        ))
-                        .set_message(format!(
-                            "Failed to build token entity for token '{token_name}'"
-                        ))
-                        .set_error(e.to_string()),
-                    );
-                    dropped.push(DroppedToken::new(
-                        token_name.as_str(),
-                        entry.index,
-                        DropReason::EntityBuildFailed,
-                    ));
-                },
-            }
+    /// Start building the resource-independent multi-issuer entities (tokens +
+    /// issuers + default entities) of one request. Used by both single-item and
+    /// batch multi-issuer authorization paths — the caller pairs the result with
+    /// a per-item [`Self::build_resource_entity`] call to complete each decision.
+    pub(crate) fn multi_issuer_entities_builder(&self) -> MultiIssuerEntitiesBuilder<'_> {
+        MultiIssuerEntitiesBuilder {
+            builder: self,
+            built_entities: BuiltEntities::from(&self.iss_entities),
+            tokens: HashMap::new(),
         }
+    }
+}
 
-        if token_entities.is_empty() {
-            log_service.log_any(
-                LogEntry::new(BaseLogEntry::new_system_opt_request_id(
-                    LogLevel::ERROR,
-                    None,
-                ))
-                .set_message("No valid tokens found for multi-issuer authorization".to_string())
-                .set_error("All tokens failed validation or entity building".to_string()),
-            );
+impl MultiIssuerEntitiesBuilder<'_> {
+    /// Builds the entity of a validated token and keeps it.
+    pub(crate) fn add(&mut self, validated: &ValidatedToken) -> Result<(), MultiIssuerEntityError> {
+        let entity = self.builder.build_single_token_entity(
+            &validated.token,
+            &validated.token_type,
+            &self.built_entities,
+        )?;
+        self.built_entities.insert(&entity.uid());
+        // Keys cannot collide: each mapping names one token type, and
+        // `TokenTypes` gives every token type its own key.
+        self.tokens
+            .insert(validated.token_type.context_key().clone(), entity);
+        Ok(())
+    }
+
+    /// Finish the token entities of the request. Fails when no token produced
+    /// an entity.
+    pub(crate) fn finish(self) -> Result<MultiIssuerSetupEntities, MultiIssuerEntityError> {
+        if self.tokens.is_empty() {
             return Err(MultiIssuerEntityError::NoValidTokens);
         }
 
-        let issuers = self.iss_entities.values().cloned().collect();
-
         Ok(MultiIssuerSetupEntities {
-            tokens: token_entities,
-            issuers,
-            default_entities: self.default_entities.clone(),
-            dropped,
+            tokens: self.tokens,
+            issuers: self.builder.iss_entities.values().cloned().collect(),
+            default_entities: self.builder.default_entities.clone(),
         })
     }
+}
 
+impl EntityBuilder {
     /// Build a single token entity from a validated JWT
     fn build_single_token_entity(
         &self,
@@ -417,7 +399,6 @@ mod tests {
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
     use crate::common::policy_store::{CustomIssuerMetadata, CustomTokenMetadata, TokenTypes};
     use crate::jwt::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
-    use crate::log::NopLogger;
     use cedar_policy::EvalResult;
     use cedar_policy_core::validator::ValidatorSchema;
     use serde_json::json;
@@ -480,24 +461,39 @@ mod tests {
         }
     }
 
-    /// Wrap test tokens, keyed by mapping, as validated entries with arbitrary
-    /// distinct indexes.
-    fn into_validated(
-        builder: &TestBuilder,
-        tokens: HashMap<String, Token>,
-    ) -> HashMap<EntityTypeName, ValidatedToken> {
-        tokens
+    /// A test token paired with the token type mapping it is validated as.
+    struct SetupToken {
+        mapping: String,
+        token: Token,
+    }
+
+    /// What the entities builder did with each test token, and its result.
+    struct BuiltSetup {
+        /// The result of [`MultiIssuerEntitiesBuilder::add`] for each token, in
+        /// input order.
+        added: Vec<Result<(), MultiIssuerEntityError>>,
+        entities: Result<MultiIssuerSetupEntities, MultiIssuerEntityError>,
+    }
+
+    /// Feed validated test tokens through the entities builder; each token's
+    /// request index is its position in `tokens`.
+    fn build_setup(builder: &TestBuilder, tokens: Vec<SetupToken>) -> BuiltSetup {
+        let mut setup = builder.multi_issuer_entities_builder();
+        let added = tokens
             .into_iter()
             .enumerate()
-            .map(|(index, (mapping, token))| {
-                let validated = ValidatedToken {
+            .map(|(index, SetupToken { mapping, token })| {
+                setup.add(&ValidatedToken {
                     token: Arc::new(token),
                     index,
                     token_type: builder.token_type_of(&mapping),
-                };
-                (EntityTypeName::for_test(&mapping), validated)
+                })
             })
-            .collect()
+            .collect();
+        BuiltSetup {
+            added,
+            entities: setup.finish(),
+        }
     }
 
     /// Token metadata declaring each of `entity_types`.
@@ -805,65 +801,89 @@ mod tests {
     fn test_multiple_tokens_same_issuer_different_names() {
         let builder = create_test_entity_builder();
 
-        let mut tokens = HashMap::new();
+        let mut tokens = Vec::new();
 
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.insert("Jans::Access_Token".to_string(), token_one);
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_two = create_test_token("https://idp.acme.com/auth", "token2", claims2, &builder);
-        tokens.insert("Jans::Access_Token2".to_string(), token_two);
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token2".to_string(),
+            token: token_two,
+        });
 
-        let tokens = into_validated(&builder, tokens);
-
-        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
-        assert!(result.is_ok());
-
-        let entities_data = result.unwrap();
-        assert_eq!(entities_data.tokens.len(), 2);
-        assert!(entities_data.tokens.contains_key("acme_access_token"));
-        assert!(entities_data.tokens.contains_key("acme_access_token2"));
+        let entities = build_setup(&builder, tokens)
+            .entities
+            .expect("both tokens should build their entities");
+        assert_eq!(entities.tokens.len(), 2, "one entity per token");
+        assert!(
+            entities.tokens.contains_key("acme_access_token"),
+            "the first token should be keyed by its own context key"
+        );
+        assert!(
+            entities.tokens.contains_key("acme_access_token2"),
+            "the second token should be keyed by its own context key"
+        );
     }
 
     #[test]
     fn test_multiple_tokens_different_issuers_and_types() {
         let builder = create_test_entity_builder();
 
-        let mut tokens = HashMap::new();
+        let mut tokens = Vec::new();
 
         // Token from Acme issuer
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.insert("Jans::Access_Token".to_string(), token_one);
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Token from Dolphin issuer
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_two =
             create_test_token("https://idp.dolphin.sea/auth", "token2", claims2, &builder);
-        tokens.insert("Acme::DolphinToken".to_string(), token_two);
+        tokens.push(SetupToken {
+            mapping: "Acme::DolphinToken".to_string(),
+            token: token_two,
+        });
 
         // Token from same issuer but different type
         let mut claims3 = HashMap::new();
         claims3.insert("sub".to_string(), json!("user3"));
         let token_three =
             create_test_token("https://idp.acme.com/auth", "token3", claims3, &builder);
-        tokens.insert("Jans::Id_Token".to_string(), token_three);
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_three,
+        });
 
-        let tokens = into_validated(&builder, tokens);
-
-        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
-        assert!(result.is_ok());
-
-        let entities_data = result.unwrap();
-        assert_eq!(entities_data.tokens.len(), 3);
-        assert!(entities_data.tokens.contains_key("acme_access_token"));
-        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
-        assert!(entities_data.tokens.contains_key("acme_id_token"));
+        let entities = build_setup(&builder, tokens)
+            .entities
+            .expect("all three tokens should build their entities");
+        assert_eq!(entities.tokens.len(), 3, "one entity per token");
+        assert!(
+            entities.tokens.contains_key("acme_access_token"),
+            "the Acme access token should be keyed by its context key"
+        );
+        assert!(
+            entities.tokens.contains_key("dolphin_dolphintoken"),
+            "the Dolphin token should be keyed by its context key"
+        );
+        assert!(
+            entities.tokens.contains_key("acme_id_token"),
+            "the Acme ID token should be keyed by its context key"
+        );
     }
 
     #[test]
@@ -1024,49 +1044,64 @@ mod tests {
     fn test_invalid_tokens_are_skipped() {
         let builder = create_test_entity_builder();
 
-        let mut tokens = HashMap::new();
+        let mut tokens = Vec::new();
 
         // Valid token
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_one = create_test_token("https://idp.acme.com/auth", "token1", claims1, &builder);
-        tokens.insert("Jans::Access_Token".to_string(), token_one);
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Invalid token (missing jti, so it has no entity id)
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
         let token_two = Token::new(token_claims2, acme_issuer(&builder));
-        tokens.insert("Jans::Id_Token".to_string(), token_two);
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_two,
+        });
 
         // Another valid token
         let mut claims3 = HashMap::new();
         claims3.insert("sub".to_string(), json!("user3"));
         let token_three =
             create_test_token("https://idp.dolphin.sea/auth", "token3", claims3, &builder);
-        tokens.insert("Acme::DolphinToken".to_string(), token_three);
+        tokens.push(SetupToken {
+            mapping: "Acme::DolphinToken".to_string(),
+            token: token_three,
+        });
 
-        let tokens = into_validated(&builder, tokens);
+        let setup = build_setup(&builder, tokens);
 
-        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
-        assert!(result.is_ok());
+        // The token without jti validated but has no entity id.
+        assert!(
+            matches!(
+                setup.added[1],
+                Err(MultiIssuerEntityError::InvalidEntityUid(_))
+            ),
+            "the token without jti must fail with InvalidEntityUid, got {:?}",
+            setup.added[1]
+        );
 
-        let entities_data = result.unwrap();
-        // Only 2 valid tokens should be processed
-        assert_eq!(entities_data.tokens.len(), 2);
-        assert!(entities_data.tokens.contains_key("acme_access_token"));
-        assert!(entities_data.tokens.contains_key("dolphin_dolphintoken"));
-
-        // The token that validated but failed entity building (missing jti)
-        // is reported with its own request index.
+        let entities = setup
+            .entities
+            .expect("the two buildable tokens should build their entities");
         assert_eq!(
-            entities_data.dropped,
-            vec![DroppedToken::new(
-                "Jans::Id_Token",
-                tokens["Jans::Id_Token"].index,
-                DropReason::EntityBuildFailed,
-            )],
-            "the token that failed entity building must be reported as EntityBuildFailed"
+            entities.tokens.len(),
+            2,
+            "only the two buildable tokens should have entities"
+        );
+        assert!(
+            entities.tokens.contains_key("acme_access_token"),
+            "the Acme access token should have an entity"
+        );
+        assert!(
+            entities.tokens.contains_key("dolphin_dolphintoken"),
+            "the Dolphin token should have an entity"
         );
     }
 
@@ -1074,29 +1109,35 @@ mod tests {
     fn test_all_invalid_tokens_returns_error() {
         let builder = create_test_entity_builder();
 
-        let mut tokens = HashMap::new();
+        let mut tokens = Vec::new();
 
         // Invalid token 1 (missing jti)
         let mut claims1 = HashMap::new();
         claims1.insert("sub".to_string(), json!("user1"));
         let token_claims1 = TokenClaims::from(claims1);
         let token_one = Token::new(token_claims1, acme_issuer(&builder));
-        tokens.insert("Jans::Access_Token".to_string(), token_one);
+        tokens.push(SetupToken {
+            mapping: "Jans::Access_Token".to_string(),
+            token: token_one,
+        });
 
         // Invalid token 2 (missing jti)
         let mut claims2 = HashMap::new();
         claims2.insert("sub".to_string(), json!("user2"));
         let token_claims2 = TokenClaims::from(claims2);
         let token_two = Token::new(token_claims2, acme_issuer(&builder));
-        tokens.insert("Jans::Id_Token".to_string(), token_two);
+        tokens.push(SetupToken {
+            mapping: "Jans::Id_Token".to_string(),
+            token: token_two,
+        });
 
-        let tokens = into_validated(&builder, tokens);
-
-        let result = builder.build_multi_issuer_setup_entities(&tokens, &NopLogger);
+        let err = build_setup(&builder, tokens)
+            .entities
+            .expect_err("no token builds an entity, so the setup must fail");
 
         assert!(
-            matches!(result.unwrap_err(), MultiIssuerEntityError::NoValidTokens),
-            "Should return NoValidTokens error when all tokens are invalid"
+            matches!(err, MultiIssuerEntityError::NoValidTokens),
+            "Should return NoValidTokens error when all tokens are invalid, got {err:?}"
         );
     }
 

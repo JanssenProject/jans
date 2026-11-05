@@ -6,6 +6,7 @@
 
 package io.jans.configapi.core.service;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.service.net.BaseHttpService;
 import io.jans.model.net.HttpServiceResponse;
@@ -46,7 +47,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static io.jans.as.model.util.Util.escapeLog;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -99,6 +99,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         }
         return output.toString(StandardCharsets.UTF_8);
     }
+
+    // ponytail: one fixed bound for credential-bearing GETs, make configurable if exports ever run slow
+    private static final int CREDENTIAL_GET_TIMEOUT_MILLIS = 10_000;
 
     public static String getOpenidConfigurationUrl() {
         return OPENID_CONFIGURATION_URL;
@@ -241,7 +244,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
     public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri, Map<String, String> headers,
             Map<String, String> parameters) {
 
-        log.info("requestUri:{}, parameters:{}", escapeLog(requestUri),
+        // header values are not logged: Authorization carries the caller's bearer token
+        log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(requestUri),
+                headers != null ? escapeLog(headers.keySet()) : null,
                 parameters != null ? escapeLog(parameters.keySet()) : null);
 
         if (parameters != null && !parameters.isEmpty()) {
@@ -286,6 +291,33 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
     public HttpServiceResponse executeGet(String requestUri, Map<String, String> headers) {
         HttpClient httpClient = this.getHttpsClient();
         return executeGet(httpClient, requestUri, headers, null);
+    }
+
+    /**
+     * A GET that hands a redirect back unfollowed. Used where the request carries credentials, so they are never
+     * sent to whatever host a redirect points at.
+     */
+    public HttpServiceResponse executeGetWithoutRedirects(String requestUri, Map<String, String> headers) {
+        if (!requestUri.regionMatches(true, 0, "https://", 0, "https://".length())) {
+            throw new WebApplicationException("Credentials are only sent over HTTPS", Status.INTERNAL_SERVER_ERROR);
+        }
+        HttpGet httpGet = new HttpGet(requestUri);
+        httpGet.setConfig(RequestConfig.custom().setRedirectsEnabled(false)
+                .setConnectionRequestTimeout(CREDENTIAL_GET_TIMEOUT_MILLIS)
+                .setConnectTimeout(CREDENTIAL_GET_TIMEOUT_MILLIS)
+                .setSocketTimeout(CREDENTIAL_GET_TIMEOUT_MILLIS).build());
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                httpGet.setHeader(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        try {
+            HttpResponse httpResponse = this.getHttpsClient().execute(httpGet);
+            return new HttpServiceResponse(httpGet, httpResponse);
+        } catch (IOException ex) {
+            log.error("Failed to execute get request", ex);
+        }
+        return null;
     }
 
     @Override
