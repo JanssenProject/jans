@@ -163,24 +163,41 @@ public class TraceCorrelationService {
 	 * propagate.
 	 */
 	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan) {
-		for (RecordIdentity peerId : plan.getEquivocationPeers()) {
-			updatePeer(inserted.getIdentity(), peerId);
-		}
 		for (StoredTraceRecord successor : plan.getSuccessors()) {
 			updateSuccessor(inserted, successor.getIdentity());
 		}
 
-		Set<RecordIdentity> knownPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
+		// equivocation is never cleared, so rows already flagged need no per-row re-read; this keeps
+		// the work for one insert from growing with the number of records already at the position
+		Set<RecordIdentity> unseenPlanPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
+		List<StoredTraceRecord> rowsAtPosition;
+		try {
+			rowsAtPosition = store.findRecordsByChainPosition(plan.getPosition());
+		} catch (RuntimeException ex) {
+			log.error("TRACE correlation afterInsert failed to re-query chain position: inserted={}",
+					inserted.getIdentity(), ex);
+			rowsAtPosition = Collections.emptyList();
+		}
 		boolean newPeerFound = false;
-		for (StoredTraceRecord row : store.findRecordsByChainPosition(plan.getPosition())) {
+		boolean insertedFlagged = inserted.getFlags() != null && inserted.getFlags().isEquivocation();
+		for (StoredTraceRecord row : rowsAtPosition) {
 			RecordIdentity rowId = row.getIdentity();
-			if (rowId.equals(inserted.getIdentity()) || knownPeers.contains(rowId)) {
+			boolean rowFlagged = row.getFlags() != null && row.getFlags().isEquivocation();
+			if (rowId.equals(inserted.getIdentity())) {
+				insertedFlagged = rowFlagged;
 				continue;
 			}
-			newPeerFound = true;
-			updatePeer(inserted.getIdentity(), rowId);
+			if (!unseenPlanPeers.remove(rowId)) {
+				newPeerFound = true;
+			}
+			if (!rowFlagged) {
+				updatePeer(inserted.getIdentity(), rowId);
+			}
 		}
-		if (newPeerFound) {
+		for (RecordIdentity peerId : unseenPlanPeers) {
+			updatePeer(inserted.getIdentity(), peerId);
+		}
+		if (newPeerFound && !insertedFlagged) {
 			// inserted's own equivocation flag was computed against the same stale snapshot that
 			// missed this peer, so it needs the same correction, via the same CAS path.
 			updatePeer(inserted.getIdentity(), inserted.getIdentity());
