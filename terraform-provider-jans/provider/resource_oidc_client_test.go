@@ -128,7 +128,7 @@ resource "jans_oidc_client" "test" {
 	token_endpoint_auth_method						= "client_secret_basic"
 	application_type 											= "web"
 	display_name 													= "SCIM client"
-	client_secret 												= "SEw7VOX8m9ah"
+	client_secret 												= "SEw7VOX8m9ah" // # gitleaks:allow
 	front_channel_logout_uri 							= "https://jans.io/logout"
 	front_channel_logout_session_required = false
 	redirect_uris 												= ["https://jans.io/.well-known/scim-configuration"]

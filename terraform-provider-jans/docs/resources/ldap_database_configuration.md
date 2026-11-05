@@ -21,7 +21,7 @@ resource "jans_ldap_database_configuration" "example" {
   servers           = ["ldap.example.com:1636"]
   use_ssl           = true
   bind_dn           = "cn=directory manager"
-  bind_password     = "your-secure-password"
+  bind_password     = var.ldap_bind_password
   base_dns          = ["ou=people,o=jans"]
 
   lifecycle {
