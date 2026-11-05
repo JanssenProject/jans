@@ -57,6 +57,7 @@ public class LogUtils {
 
         LogLevel level;
         int dummyArgs = 0;
+        int offset = 0;
         String sfirst;
         int nargs = rest.length - 1;
         
@@ -78,15 +79,20 @@ public class LogUtils {
             
             if (ignoreLogStatement(level)) return;
             
-            sfirst = logSafe(first) + getFormatString("", nargs).getFirst();
+            // passed as an argument, not as format text, so % sequences in the value are not interpreted
+            sfirst = "%s" + getFormatString("", nargs).getFirst();
+            offset = 1;
         }
 
-        Object[] args = new String[nargs + dummyArgs];
+        Object[] args = new String[offset + nargs + dummyArgs];
+        if (offset == 1) {
+            args[0] = logSafe(first);
+        }
         for (int i = 0; i < nargs; i++) {
             Object arg = rest[i + 1];
-            args[i] = logSafe(arg);
+            args[offset + i] = logSafe(arg);
         }
-        Arrays.fill(args, nargs, args.length, "");
+        Arrays.fill(args, offset + nargs, args.length, "");
         String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
         String result = pref + String.format(sfirst, args);
 
@@ -124,20 +130,33 @@ public class LogUtils {
     private static String throwableAsString(Throwable t) {
 
         StringBuilder sb = new StringBuilder();
-        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
-        for (Throwable c = t; c != null && seen.add(c); c = c.getCause()) {
-            if (c != t) {
-                sb.append("\nCaused by: ");
-            }
-            sb.append(c.getClass().getName());
-            if (c.getMessage() != null) {
-                sb.append(": ").append(escapeLineBreaks(c.getMessage()));
-            }
-            for (StackTraceElement e : c.getStackTrace()) {
-                sb.append("\n\tat ").append(e);
-            }
-        }
+        appendThrowable(sb, t, null, "", Collections.newSetFromMap(new IdentityHashMap<>()));
         return sb.toString();
+
+    }
+
+    private static void appendThrowable(StringBuilder sb, Throwable t, String caption, String indent, Set<Throwable> seen) {
+
+        if (caption != null) {
+            sb.append('\n').append(indent).append(caption);
+        }
+        if (!seen.add(t)) {
+            sb.append("[CIRCULAR REFERENCE: ").append(t.getClass().getName()).append(']');
+            return;
+        }
+        sb.append(t.getClass().getName());
+        if (t.getMessage() != null) {
+            sb.append(": ").append(escapeLineBreaks(t.getMessage()));
+        }
+        for (StackTraceElement e : t.getStackTrace()) {
+            sb.append('\n').append(indent).append("\tat ").append(escapeLineBreaks(e.toString()));
+        }
+        for (Throwable suppressed : t.getSuppressed()) {
+            appendThrowable(sb, suppressed, "Suppressed: ", indent + "\t", seen);
+        }
+        if (t.getCause() != null) {
+            appendThrowable(sb, t.getCause(), "Caused by: ", indent, seen);
+        }
 
     }
 
