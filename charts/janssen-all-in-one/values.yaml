@@ -666,7 +666,7 @@ gateway-api:
     labels: {}
     # -- Specific annotations for the HTTPRoute resource
     annotations: {}
-    # The endpoint flags below supersede the matching <service>.ingress.* flags for Gateway API routes. Those ingress flags are still honoured as a deprecated fallback during the transition and will stop affecting HTTPRoutes in a future release.
+    # The endpoint flags below supersede the matching <service>.ingress.* flags for Gateway API routes. For routes that are off by default, those ingress flags are still honoured as a deprecated fallback during the transition and will stop affecting HTTPRoutes in a future release; routes that are on by default follow only these flags.
     # -- Enable Auth server endpoints /jans-auth
     authServerEnabled: true
     # -- Enable endpoint /.well-known/openid-configuration
