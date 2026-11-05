@@ -277,7 +277,7 @@ public class SessionRestWebService {
         if (tokenService.isBearerAuthToken(authorization)) {
             return tokenService.getBearerToken(authorization);
         }
-        if (StringUtils.startsWithIgnoreCase(authorization, DPOP_AUTH_SCHEME)) {
+        if (authorization != null && StringUtils.startsWithIgnoreCase(authorization, DPOP_AUTH_SCHEME)) {
             return authorization.substring(DPOP_AUTH_SCHEME.length()).trim();
         }
         return null;
