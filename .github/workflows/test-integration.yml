@@ -323,7 +323,11 @@ jobs:
           new_hostkey=$(ssh -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -o ConnectTimeout=10 "root@$ip" \
             'set -e; rm -f /etc/ssh/ssh_host_*; ssh-keygen -q -t ed25519 -N "" -C "" -f /etc/ssh/ssh_host_ed25519_key; systemctl reload ssh 2>/dev/null || systemctl reload sshd; cut -d" " -f1,2 /etc/ssh/ssh_host_ed25519_key.pub')
           echo "$ip $new_hostkey" > ci_known_hosts
-          ssh -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -o ConnectTimeout=10 "root@$ip" true
+          for attempt in $(seq 1 6); do
+            ssh -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -o ConnectTimeout=10 "root@$ip" true && break
+            [ "$attempt" -eq 6 ] && { echo "::error::droplet unreachable with the rotated host key"; exit 1; }
+            sleep 5
+          done
           echo "ip=$ip" >> "$GITHUB_OUTPUT"
 
       - name: Resolve test modules
