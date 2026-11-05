@@ -9,6 +9,7 @@ package io.jans.as.server.register.ws.rs.action;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -232,6 +233,14 @@ public class RegisterUpdateAction {
         // partial updates may omit subject_type, so fall back to the stored one
         effective.setSubjectType(request.getSubjectType() != null ? request.getSubjectType() : client.getSubjectType());
         registerValidator.validateSubjectIdentifierAttribute(effective);
+
+        // a stored attribute is kept when the request omits it, so it must stay paired with a public subject type
+        if (StringUtils.isBlank(request.getSubjectIdentifierAttribute())
+                && StringUtils.isNotBlank(client.getAttributes().getPublicSubjectIdentifierAttribute())
+                && effective.getSubjectType() != SubjectType.PUBLIC) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE, "The custom subject identifier requires public subject type.");
+        }
     }
 
     private void validateSubjectType(RegisterRequest request) {
