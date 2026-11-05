@@ -73,6 +73,34 @@ public class BaseEntryManagerLanguageTagTest {
 		assertTrue(names.contains("jansurilocalized"));
 	}
 
+	@Test
+	public void ldapStyleLoadKeepsRegularAttributeAndHidesLocalizedOnes() {
+		FakeLdapStyleEntryManager entryManager = new FakeLdapStyleEntryManager();
+		entryManager.storage.put(DN, List.of(
+				new AttributeData("displayName", "Default name"),
+				new AttributeData("displayName;lang-en", "English name"),
+				new AttributeData("jansUri", "https://example.org"),
+				new AttributeData("jansUri;lang-fr", "https://example.org/fr"),
+				new AttributeData("jansUriLocalized", "unrelated schema attribute"),
+				new AttributeData("custom", "value")));
+
+		LdapStyleLocalizedEntry loaded = entryManager.find(DN, LdapStyleLocalizedEntry.class, null);
+
+		// Regular property keeps its value regardless of properties order
+		assertEquals("Default name", loaded.getDisplayName());
+		assertEquals("Default name", loaded.getDisplayNameLocalized().getValue());
+		assertEquals("English name", loaded.getDisplayNameLocalized().getValue(Locale.ENGLISH));
+		assertEquals("https://example.org", loaded.getUriLocalized().getValue());
+		assertEquals("https://example.org/fr", loaded.getUriLocalized().getValue(Locale.FRENCH));
+
+		List<String> names = new ArrayList<>();
+		for (CustomObjectAttribute attribute : loaded.getCustomAttributes()) {
+			names.add(attribute.getName());
+		}
+		// jansUri (no regular property) and jansUri;lang-fr are consumed, jansUriLocalized is a distinct attribute
+		assertEquals(List.of("custom", "jansUriLocalized"), names);
+	}
+
 	private static CustomObjectAttribute customAttribute(String name, String value) {
 		CustomObjectAttribute attribute = new CustomObjectAttribute(name, value);
 		return attribute;

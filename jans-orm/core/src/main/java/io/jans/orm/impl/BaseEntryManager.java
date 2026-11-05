@@ -1258,6 +1258,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] typeObjectClasses = getTypeObjectClasses(entryClass);
 		Arrays.sort(typeObjectClasses);
 
+		boolean hasLanguageTag = hasPropertyAnnotation(propertiesAnnotations, LanguageTag.class);
+		Set<String> regularAttributeNames = getRegularAttributeNames(propertiesAnnotations);
+
 		List<T> results = new ArrayList<T>(entriesAttributes.size());
 		for (Entry<String, List<AttributeData>> entryAttributes : entriesAttributes.entrySet()) {
 			String dn = entryAttributes.getKey();
@@ -1282,6 +1285,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 			// Remove processed DN attribute
 			attributesMap.remove(dnProperty);
+
+			// Localized strings are loaded from the snapshot, so result doesn't depend on properties order
+			Map<String, AttributeData> sourceAttributesMap = hasLanguageTag ? new HashMap<String, AttributeData>(attributesMap) : attributesMap;
 
 			// Set loaded properties to entry
 
@@ -1315,10 +1321,16 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         }
 
                         LocalizedString localizedString = (LocalizedString) propertyValue;
-                        Map<String, AttributeData> filteredAttrs = filterLocalizedStringAttributes(attributesMap, ldapAttributeName);
+                        Map<String, AttributeData> filteredAttrs = filterLocalizedStringAttributes(sourceAttributesMap, ldapAttributeName);
 
-                        loadLocalizedString(attributesMap, localizedString, filteredAttrs);
-                        removeLocalizedStringAttributes(attributesMap, filteredAttrs);
+                        loadLocalizedString(sourceAttributesMap, localizedString, filteredAttrs);
+
+                        // Don't expose consumed attributes via @AttributesList, keep ones mapped to regular properties
+                        for (String key : filteredAttrs.keySet()) {
+                            if (!regularAttributeNames.contains(key)) {
+                                attributesMap.remove(key);
+                            }
+                        }
 
                         continue;
                     }
@@ -1500,8 +1512,33 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    protected void removeLocalizedStringAttributes(Map<String, AttributeData> attributesMap, Map<String, AttributeData> filteredAttrs) {
-        attributesMap.keySet().removeAll(filteredAttrs.keySet());
+    private boolean hasPropertyAnnotation(List<PropertyAnnotation> propertiesAnnotations, Class<? extends Annotation> annotationType) {
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            if (ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), annotationType) != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Set<String> getRegularAttributeNames(List<PropertyAnnotation> propertiesAnnotations) {
+        Set<String> result = new HashSet<String>();
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributeName.class);
+            if ((ldapAttribute == null)
+                    || (ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LanguageTag.class) != null)) {
+                continue;
+            }
+
+            String ldapAttributeName = ((AttributeName) ldapAttribute).name();
+            if (StringHelper.isEmpty(ldapAttributeName)) {
+                ldapAttributeName = propertiesAnnotation.getPropertyName();
+            }
+            result.add(ldapAttributeName.toLowerCase());
+        }
+
+        return result;
     }
 
     protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {

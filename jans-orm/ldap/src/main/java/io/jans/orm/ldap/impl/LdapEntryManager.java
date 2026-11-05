@@ -637,16 +637,11 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
     @Override
     protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
-        final String prefix = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG).toLowerCase();
+        final String name = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG).toLowerCase();
+        final String namePrefix = name + LANG_SEPARATOR;
         return attributesMap.entrySet().stream()
-                .filter(x -> x.getKey().toLowerCase().startsWith(prefix))
+                .filter(x -> x.getKey().toLowerCase().equals(name) || x.getKey().toLowerCase().startsWith(namePrefix))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    @Override
-    protected void removeLocalizedStringAttributes(Map<String, AttributeData> attributesMap, Map<String, AttributeData> filteredAttrs) {
-        // Attribute without language tag may be mapped to regular property as well, keep it
-        filteredAttrs.keySet().stream().filter(x -> x.contains(LANG_SEPARATOR)).forEach(attributesMap::remove);
     }
 
     @Override

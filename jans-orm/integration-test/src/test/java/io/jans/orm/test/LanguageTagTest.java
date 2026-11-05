@@ -40,6 +40,7 @@ import io.jans.orm.test.model.SimpleLocalizedEntry;
  */
 public class LanguageTagTest extends BaseOrmTest {
 
+	private static final String TABLE = "jansTestLocalized";
 	private static final String CUSTOM_ATTRIBUTE = "jansDataStr";
 	private static final String URI = "https://example.org";
 	private static final String URI_EN = "https://example.org/en";
@@ -67,6 +68,7 @@ public class LanguageTagTest extends BaseOrmTest {
 	@Test
 	public void createEntryWithLocalizedAttributes() {
 		requirePersistenceType(SQL);
+		requireTable();
 
 		SimpleLocalizedEntry newEntry = new SimpleLocalizedEntry();
 		newEntry.setDn(newDn());
@@ -77,7 +79,7 @@ public class LanguageTagTest extends BaseOrmTest {
 		newEntry.getClientUriLocalized().setValue(URI_FR, Locale.FRENCH);
 		newEntry.getCustomAttributes().add(new CustomObjectAttribute(CUSTOM_ATTRIBUTE, "custom value"));
 
-		persistOrSkip(newEntry);
+		entryManager.persist(newEntry);
 
 		persistedEntry = newEntry;
 	}
@@ -112,7 +114,7 @@ public class LanguageTagTest extends BaseOrmTest {
 		foundEntry.setDn(newDn());
 
 		// Failed with: column "jansClntURILocalized" specified more than once
-		persistOrSkip(foundEntry);
+		entryManager.persist(foundEntry);
 
 		SimpleLocalizedEntry copy = entryManager.find(SimpleLocalizedEntry.class, foundEntry.getDn());
 		assertNotNull(copy);
@@ -143,7 +145,7 @@ public class LanguageTagTest extends BaseOrmTest {
 		newEntry.setDn(newDn());
 		newEntry.setDisplayName("Empty localized test");
 
-		persistOrSkip(newEntry);
+		entryManager.persist(newEntry);
 
 		SimpleLocalizedEntry foundEntry = entryManager.find(SimpleLocalizedEntry.class, newEntry.getDn());
 		assertNotNull(foundEntry);
@@ -155,7 +157,7 @@ public class LanguageTagTest extends BaseOrmTest {
 
 		// Loaded entry with empty localized values should be persistable as well
 		foundEntry.setDn(newDn());
-		persistOrSkip(foundEntry);
+		entryManager.persist(foundEntry);
 	}
 
 	private String newDn() {
@@ -164,14 +166,9 @@ public class LanguageTagTest extends BaseOrmTest {
 		return dn;
 	}
 
-	private void persistOrSkip(SimpleLocalizedEntry entry) {
-		try {
-			entryManager.persist(entry);
-		} catch (Exception ex) {
-			if (persistedEntry == null) {
-				throw new SkipException("DB has no jansTestLocalized table/objectClass. See test javadoc for DDL: " + ex.getMessage());
-			}
-			throw ex;
+	private void requireTable() {
+		if (!entryManager.getTableColumnsMap().containsKey(TABLE.toLowerCase())) {
+			throw new SkipException("DB has no " + TABLE + " table. See test javadoc for DDL");
 		}
 	}
 
