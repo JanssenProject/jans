@@ -45,7 +45,7 @@
 //! On initialization, [`LockService`] fetches the Lock Server's well-known configuration
 //! and then acquires an access token using **one of two mechanisms**:
 //!
-//! #### Path A – Direct access token (`CEDARLING_LOCK_ACCESS_TOKEN_JWT`)
+//! #### Path A - Direct access token (`CEDARLING_LOCK_ACCESS_TOKEN_JWT`)
 //!
 //! If a pre-issued access token is supplied in `LockServiceConfig::access_token_jwt`,
 //! Cedarling uses it directly. The SSA validation and DCR steps are skipped entirely.
@@ -59,7 +59,7 @@
 //! 4. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
 //! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
 //!
-//! #### Path B – SSA → DCR flow (`CEDARLING_LOCK_SSA_JWT`, default)
+//! #### Path B - SSA and DCR flow (`CEDARLING_LOCK_SSA_JWT`, default)
 //!
 //! 1. **Initialization**: [`LockService`] is created with configuration
 //! 2. **Lock Config**: Fetch `.well-known/lock-server-configuration`
@@ -434,7 +434,7 @@ impl LockService {
     ///    validation and Dynamic Client Registration (DCR) entirely. Useful when the
     ///    token is provisioned externally.
     ///
-    /// 2. **SSA → DCR flow** (default): optionally validate the SSA JWT, then perform
+    /// 2. **SSA and DCR flow** (default): optionally validate the SSA JWT, then perform
     ///    DCR to obtain credentials, and exchange them for an access token via the
     ///    client credentials grant.
     ///
@@ -454,7 +454,7 @@ impl LockService {
             if bootstrap_conf.ssa_jwt.is_some() {
                 logger.cloned().log_any(LockLogEntry::warn(
                     "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
-                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
+                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA and DCR flow will \
                      be skipped."
                         .to_string(),
                 ));
@@ -1038,7 +1038,7 @@ mod test {
         ));
     }
 
-    /// Tests that when `access_token_jwt` is set the SSA → DCR flow is entirely bypassed:
+    /// Tests that when `access_token_jwt` is set the SSA and DCR flow is entirely bypassed:
     /// the IDP's JWKS, OIDC, DCR, and token endpoints must NOT be called.
     #[cfg(not(target_arch = "wasm32"))]
     #[tokio::test]
