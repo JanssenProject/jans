@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -125,7 +126,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
                                       HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext sec) {
         try {
             log.debug("Attempting to end session, idTokenHint: {}, postLogoutRedirectUri: {}, sid: {}, Is Secure = {}, clientId = {}",
-                    idTokenHint, postLogoutRedirectUri, sid, sec.isSecure(), clientId);
+                    escapeLog(idTokenHint), escapeLog(postLogoutRedirectUri), escapeLog(sid), sec.isSecure(), escapeLog(clientId));
 
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.END_SESSION);
 

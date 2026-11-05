@@ -134,7 +134,6 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             String clientCertAsPem = CoreCertUtil.getClientCert(servletRequest).getCert();
             if (clientCertAsPem != null) {
                 log.info("FAPI: clientCertAsPem found*****************************************");
-                log.info("FAPI: clientCertAsPem found*****************************************" + clientCertAsPem);
             } else
                 log.info("FAPI: No clientCertAsPem *****************************************");
 

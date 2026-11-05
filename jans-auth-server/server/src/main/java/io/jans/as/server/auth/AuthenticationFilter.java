@@ -216,7 +216,8 @@ public class AuthenticationFilter implements Filter {
 
                 // Transaction Tokens
                 final String requestedTokenType = httpRequest.getParameter("requested_token_type");
-                if (ExchangeTokenType.fromString(requestedTokenType) == ExchangeTokenType.TX_TOKEN) {
+                if (tokenEndpoint && ExchangeTokenType.fromString(requestedTokenType) == ExchangeTokenType.TX_TOKEN
+                        && GrantType.fromString(httpRequest.getParameter("grant_type")) == GrantType.TOKEN_EXCHANGE) {
                     processTxToken(httpRequest, httpResponse, filterChain);
                     return;
                 }
@@ -631,29 +632,26 @@ public class AuthenticationFilter implements Filter {
     }
 
     private void processDPoP(HttpServletRequest servletRequest, HttpServletResponse servletResponse,
-                             FilterChain filterChain) {
-        boolean validDPoPProof = false;
-        boolean authorized = false;
-        String errorReason = null;
+                             FilterChain filterChain) throws ServletException, IOException {
+        Client client = null;
 
         try {
             dPoPService.validateDpopValuesCount(servletRequest);
 
             String dpopStr = servletRequest.getHeader(TokenRequestParam.DPOP);
-            validDPoPProof = dPoPService.validateDpop(dpopStr);
+            if (!dPoPService.validateDpop(dpopStr)) {
+                sendInvalidDPoPError(servletResponse, null);
+                return;
+            }
+            servletRequest.setAttribute(DpopService.DPOP_PROOF_VALIDATED_ATTRIBUTE, Boolean.TRUE);
             GrantType grantType = GrantType.fromString(servletRequest.getParameter("grant_type"));
 
             if (grantType == GrantType.AUTHORIZATION_CODE) {
                 final String code = servletRequest.getParameter("code");
                 final AuthorizationCodeGrant authorizationCodeGrant = authorizationGrantList.getAuthorizationCodeGrant(code);
-
-                identity.logout();
-
-                identity.getCredentials().setUsername(authorizationCodeGrant.getClient().getClientId());
-                identity.getCredentials().setPassword(null);
-                authorized = authenticator.authenticateClient(servletRequest, true);
-
-                filterChain.doFilter(servletRequest, servletResponse);
+                if (authorizationCodeGrant != null) {
+                    client = authorizationCodeGrant.getClient();
+                }
             } else if (grantType == GrantType.REFRESH_TOKEN) {
                 final String refreshTokenCode = servletRequest.getParameter("refresh_token");
                 TokenEntity tokenEntity;
@@ -664,35 +662,38 @@ public class AuthenticationFilter implements Filter {
                 }
 
                 String dpopJwkThumbprint = dPoPService.getDpopJwkThumbprint(dpopStr);
-                if (!dpopJwkThumbprint.equals(tokenEntity.getDpop())) {
+                if (tokenEntity == null || !dpopJwkThumbprint.equals(tokenEntity.getDpop())) {
                     throw new InvalidJwtException("Invalid DPoP Proof Header. The jwk header is not valid.");
                 }
 
                 AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByRefreshToken(tokenEntity.getClientId(), refreshTokenCode);
-
-                identity.logout();
-
-                identity.getCredentials().setUsername(authorizationGrant.getClient().getClientId());
-                identity.getCredentials().setPassword(null);
-                authorized = authenticator.authenticateClient(servletRequest, true);
-
-                filterChain.doFilter(servletRequest, servletResponse);
+                if (authorizationGrant != null) {
+                    client = authorizationGrant.getClient();
+                }
             }
-
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception ex) {
             log.error("Invalid DPoP.", ex);
-            errorReason = ex.getMessage();
+            sendInvalidDPoPError(servletResponse, ex.getMessage());
+            return;
         }
 
-        if (!validDPoPProof) {
-            sendInvalidDPoPError(servletResponse, errorReason);
+        // DPoP proves key possession only; confidential clients must still present their registered credentials
+        if (client == null || !client.hasAuthenticationMethod(AuthenticationMethod.NONE)) {
+            processPostAuth(clientFilterService, servletRequest, servletResponse, filterChain, true);
+            return;
         }
 
-        if (!authorized) {
+        identity.logout();
+        identity.getCredentials().setUsername(client.getClientId());
+        identity.getCredentials().setPassword(null);
+        if (!authenticator.authenticateClient(servletRequest, true)) {
             sendError(servletResponse);
+            return;
         }
+
+        filterChain.doFilter(servletRequest, servletResponse);
     }
 
     private void sendInvalidDPoPError(HttpServletResponse servletResponse, String reason) {

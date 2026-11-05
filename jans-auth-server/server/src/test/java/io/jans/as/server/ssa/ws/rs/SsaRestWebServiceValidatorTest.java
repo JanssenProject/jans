@@ -11,7 +11,12 @@ import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.token.HttpAuthTokenType;
+import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ScopeService;
+import io.jans.as.server.service.token.TokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -53,6 +58,15 @@ public class SsaRestWebServiceValidatorTest {
 
     @Mock
     private SsaService ssaService;
+
+    @Mock
+    private HttpServletRequest httpRequest;
+
+    @Mock
+    private TokenService tokenService;
+
+    @Mock
+    private AuthorizationGrantList authorizationGrantList;
 
     @Test
     public void getClientFromSession_sessionClient_validClient() {
@@ -120,6 +134,23 @@ public class SsaRestWebServiceValidatorTest {
         }
         assertNotNull(wae, "WebApplicationException is null");
         assertNotNull(wae.getResponse(), "WebApplicationException Response is null");
+    }
+
+    @Test
+    public void checkScopesPolicySingleScope_bearerTokenWithoutScope_unauthorizedResponse() {
+        Client client = new Client();
+        client.setClientId("test_client");
+        AuthorizationGrant grant = mock(AuthorizationGrant.class);
+        when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
+        when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
+        when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
+        when(grant.getScopes()).thenReturn(Collections.singleton("openid"));
+        when(grant.getClientId()).thenReturn("test_client");
+        WebApplicationException error = new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue()));
+        verifyNoInteractions(scopeService);
     }
 
     @Test

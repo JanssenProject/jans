@@ -27,12 +27,18 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 /**
@@ -54,11 +60,11 @@ public class RateLimitService {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    private final Cache<String, Bucket> buckets = CacheBuilder.newBuilder()
-            .expireAfterWrite(2, TimeUnit.MINUTES)
-            //.weakKeys()
-            .build();
-    private RateLimitConfig rateLimitConfiguration;
+    private static final int MIN_BUCKET_RETENTION_IN_SECONDS = 120;
+
+    private final AtomicReference<Cache<String, Bucket>> buckets = new AtomicReference<>(newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS));
+    private final AtomicReference<RateLimitConfig> rateLimitConfiguration = new AtomicReference<>();
+    private volatile int bucketRetentionInSeconds = MIN_BUCKET_RETENTION_IN_SECONDS;
 
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
         // if rate_limit flag is disabled immediately return
@@ -66,42 +72,51 @@ public class RateLimitService {
             return httpRequest;
         }
 
+        // snapshot so a concurrent configuration reload cannot change rules mid-request
+        final RateLimitConfig config = rateLimitConfiguration.get();
+
         // no rate limit configuration -> return
-        if (rateLimitConfiguration == null || isEmpty(rateLimitConfiguration.getRateLimitRules())) {
+        if (config == null || isEmpty(config.getRateLimitRules())) {
             return httpRequest;
         }
 
-        String requestPath = httpRequest.getRequestURI();
+        String requestPath = canonicalPath(httpRequest.getRequestURI());
         String method = httpRequest.getMethod();
 
-        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(requestPath, method);
+        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(config, requestPath, method);
 
         // no matching rules
         if (matchedRules.isEmpty()) {
             return httpRequest;
         }
 
-        RateLimitContext rateLimitContext = new RateLimitContext(httpRequest, rateLimitConfiguration.isRateLoggingEnabled());
+        RateLimitContext rateLimitContext = new RateLimitContext(httpRequest, config.isRateLoggingEnabled());
         final List<Pair<String, RateLimitRule>> keyWithRules = buildKeyPerRule(rateLimitContext, matchedRules);
+        final Cache<String, Bucket> currentBuckets = buckets.get();
 
         for (Pair<String, RateLimitRule> keyWithRule : keyWithRules) {
-            String key = keyWithRule.getFirst();
             RateLimitRule rule = keyWithRule.getSecond();
 
             int requestLimit = getRequestLimit(rule.getRequestCount());
             int periodLimit = getPeriodLimit(rule.getPeriodInSeconds());
 
+            // namespace by rule and its limits so overlapping rules do not share a bucket and edited limits take effect
             // if key is too long -> hash it to reduce amount of space it takes in memory
-            key = saveSpaceIfNeeded(key);
+            String key = saveSpaceIfNeeded(ruleIndex(config, rule) + "_" + requestLimit + "_" + periodLimit + "_" + keyWithRule.getFirst());
+            Bucket bucket;
             try {
-                Bucket bucket = buckets.get(key, () -> newBucket(requestLimit, periodLimit));
-                if (!bucket.tryConsume(1)) {
-                    String msg = String.format("Rate limited '%s'. Exceeds limit %s requests per %s seconds. Key: %s", requestPath, requestLimit, periodLimit, key);
-                    log.debug(msg);
-                    throw new RateLimitedException(msg);
-                }
+                bucket = currentBuckets.get(key, () -> newBucket(requestLimit, periodLimit));
             } catch (ExecutionException e) {
-                log.error(e.getMessage(), e);
+                throw new IOException("Failed to evaluate rate limit rule", e);
+            }
+            if (!bucket.tryConsume(1)) {
+                String msg = String.format("Rate limited '%s'. Exceeds limit %s requests per %s seconds.", escapeLog(requestPath), requestLimit, periodLimit);
+                if (rateLimitContext.isRateLoggingEnabled()) {
+                    log.debug("{} Key: {}", msg, escapeLog(key));
+                } else {
+                    log.debug(msg);
+                }
+                throw new RateLimitedException(msg);
             }
         }
 
@@ -119,20 +134,53 @@ public class RateLimitService {
         return key;
     }
 
-    private List<Pair<String, RateLimitRule>> buildKeyPerRule(RateLimitContext rateLimitContext, List<RateLimitRule> matchedRules) {
+    private List<Pair<String, RateLimitRule>> buildKeyPerRule(RateLimitContext rateLimitContext, List<RateLimitRule> matchedRules) throws IOException {
         List<Pair<String, RateLimitRule>> keyWithRules = new ArrayList<>();
         for (RateLimitRule rule : matchedRules) {
-            try {
-                keyWithRules.add(new Pair<>(buildKey(rateLimitContext, rule), rule));
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-            }
+            keyWithRules.add(new Pair<>(buildKey(rateLimitContext, rule), rule));
         }
         return keyWithRules;
     }
 
+    private static int ruleIndex(RateLimitConfig config, RateLimitRule rule) {
+        final List<RateLimitRule> rules = config.getRateLimitRules();
+        for (int i = 0; i < rules.size(); i++) {
+            if (rules.get(i) == rule) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Normalizes request URI the way routing sees it: strips path parameters (;...), collapses empty
+     * segments and percent-decodes, so alternate encodings of one endpoint match the same rule.
+     */
+    public static String canonicalPath(String requestUri) {
+        if (StringUtils.isBlank(requestUri)) {
+            return "/";
+        }
+        StringBuilder path = new StringBuilder();
+        for (String segment : requestUri.split("/")) {
+            int paramIndex = segment.indexOf(';');
+            if (paramIndex >= 0) {
+                segment = segment.substring(0, paramIndex);
+            }
+            if (segment.isEmpty()) {
+                continue;
+            }
+            try {
+                segment = URLDecoder.decode(segment.replace("+", "%2B"), StandardCharsets.UTF_8);
+            } catch (IllegalArgumentException e) {
+                // keep raw segment if it is not valid percent-encoding
+            }
+            path.append('/').append(segment);
+        }
+        return path.length() == 0 ? "/" : path.toString();
+    }
+
     public String buildKey(RateLimitContext rateLimitContext, RateLimitRule rule) throws IOException {
-        String requestPath = rateLimitContext.getRequest().getRequestURI();
+        String requestPath = canonicalPath(rateLimitContext.getRequest().getRequestURI());
         StringBuilder key = new StringBuilder(requestPath + "_");
 
         for (KeyExtractor keyExtractor : rule.getKeyExtractors()) {
@@ -141,7 +189,7 @@ public class RateLimitService {
 
         String keyString = key.toString();
         if (rateLimitContext.isRateLoggingEnabled() && log.isTraceEnabled()) {
-            log.trace("Rate limit key: {}", keyString);
+            log.trace("Rate limit key: {}", escapeLog(keyString));
         }
         return keyString;
     }
@@ -172,11 +220,23 @@ public class RateLimitService {
                             }
                         }
                     }
-                } else {
+                } else if (contentType != null && contentType.contains("application/x-www-form-urlencoded")) {
+                    // read form fields from the entity only, getParameter() would also mix in query parameters
+                    Map<String, List<String>> form = parseFormBody(rateLimitContext.getCachedRequest().getCachedBodyAsString());
                     for (String name : keyExtractor.getParameterNames()) {
-                        String value = rateLimitContext.getRequest().getParameter(name);
-                        if (StringUtils.isNotBlank(value)) {
-                            key.append(value).append("_");
+                        List<String> values = form.get(name);
+                        if (values != null && !values.isEmpty() && StringUtils.isNotBlank(values.get(0))) {
+                            key.append(values.get(0)).append("_");
+                        }
+                    }
+                } else {
+                    JSONObject jsonObject = parseBody(rateLimitContext.getCachedRequest().getCachedBodyAsString());
+                    if (jsonObject != null) {
+                        for (String name : keyExtractor.getParameterNames()) {
+                            List<String> values = ClientUtil.extractListByKey(jsonObject, name);
+                            if (!values.isEmpty()) {
+                                key.append(values).append("_");
+                            }
                         }
                     }
                 }
@@ -197,15 +257,19 @@ public class RateLimitService {
     }
 
     public List<RateLimitRule> matchRulesByPathAndMethod(String requestPath, String method) {
+        return matchRulesByPathAndMethod(rateLimitConfiguration.get(), requestPath, method);
+    }
+
+    private List<RateLimitRule> matchRulesByPathAndMethod(RateLimitConfig config, String requestPath, String method) {
         List<RateLimitRule> result = new ArrayList<>();
 
-        for (RateLimitRule rule : rateLimitConfiguration.getRateLimitRules()) {
+        for (RateLimitRule rule : config.getRateLimitRules()) {
             if (!rule.isWellFormed()) {
                 log.error("Invalid rate limit rule: {}", rule);
                 continue;
             }
 
-            if (rule.getPath().equals(requestPath) && rule.getMethods().contains(method)) {
+            if (canonicalPath(rule.getPath()).equals(requestPath) && rule.getMethods().contains(method)) {
                 result.add(rule);
             }
         }
@@ -235,6 +299,44 @@ public class RateLimitService {
                 .build();
     }
 
+    private static Map<String, List<String>> parseFormBody(String body) {
+        Map<String, List<String>> result = new HashMap<>();
+        if (StringUtils.isBlank(body)) {
+            return result;
+        }
+        for (String pair : body.split("&")) {
+            if (pair.isEmpty()) {
+                continue;
+            }
+            int eq = pair.indexOf('=');
+            try {
+                String name = URLDecoder.decode(eq >= 0 ? pair.substring(0, eq) : pair, StandardCharsets.UTF_8);
+                String value = eq >= 0 ? URLDecoder.decode(pair.substring(eq + 1), StandardCharsets.UTF_8) : "";
+                result.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
+            } catch (IllegalArgumentException e) {
+                // skip malformed pair
+            }
+        }
+        return result;
+    }
+
+    private static Cache<String, Bucket> newBucketCache(int retentionInSeconds) {
+        // expire only after a full refill period without access, otherwise a recreated bucket would reset a deficit
+        return CacheBuilder.newBuilder()
+                .expireAfterAccess(retentionInSeconds, TimeUnit.SECONDS)
+                .build();
+    }
+
+    private int maxPeriodInSeconds(RateLimitConfig config) {
+        int max = MIN_BUCKET_RETENTION_IN_SECONDS;
+        if (config != null && config.getRateLimitRules() != null) {
+            for (RateLimitRule rule : config.getRateLimitRules()) {
+                max = Math.max(max, getPeriodLimit(rule.getPeriodInSeconds()));
+            }
+        }
+        return max;
+    }
+
     public JSONObject parseBody(String body) {
         try {
             return new JSONObject(body);
@@ -254,9 +356,16 @@ public class RateLimitService {
 
     public void updateConfiguration(@Observes @ConfigurationUpdate AppConfiguration appConfiguration) {
         try {
-            rateLimitConfiguration = appConfiguration.getRateLimitConfiguration();
+            final RateLimitConfig config = appConfiguration.getRateLimitConfiguration();
+            // keep counters across unrelated config reloads; rebuild only when retention must change
+            final int retention = maxPeriodInSeconds(config);
+            if (retention != bucketRetentionInSeconds) {
+                buckets.set(newBucketCache(retention));
+                bucketRetentionInSeconds = retention;
+            }
+            rateLimitConfiguration.set(config);
 
-            if (rateLimitConfiguration == null) {
+            if (config == null) {
                 log.info("Rate limiting is not configured.");
             }
         } catch (Exception e) {

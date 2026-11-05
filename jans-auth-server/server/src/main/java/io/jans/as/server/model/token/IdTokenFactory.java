@@ -510,7 +510,7 @@ public class IdTokenFactory {
 
             if (scope != null && scope.getClaims() != null) {
                 for (String claimDn : scope.getClaims()) {
-                    if (jansAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                    if (jansAttribute.getDn().equalsIgnoreCase(claimDn)) {
                         return true;
                     }
                 }

@@ -42,16 +42,21 @@ public class RateLimitFilter implements Filter {
 
         try {
             httpRequest = rateLimitService.validateRateLimit(httpRequest);
-            chain.doFilter(httpRequest, httpResponse);
         } catch (RateLimitedException e) {
             sendTooManyRequestsError(httpResponse);
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-            chain.doFilter(httpRequest, httpResponse);
+            return;
+        } catch (RequestBodyTooLargeException e) {
+            log.debug(e.getMessage());
+            sendResponse(httpResponse, Response.Status.REQUEST_ENTITY_TOO_LARGE, "");
+            return;
         } catch (Exception e) {
+            // fail closed: a request whose applicable limits could not be evaluated is not forwarded
             log.error(e.getMessage(), e);
             sendResponse(httpResponse, Response.Status.INTERNAL_SERVER_ERROR, "");
+            return;
         }
+
+        chain.doFilter(httpRequest, httpResponse);
     }
 
     private void sendTooManyRequestsError(HttpServletResponse servletResponse) {

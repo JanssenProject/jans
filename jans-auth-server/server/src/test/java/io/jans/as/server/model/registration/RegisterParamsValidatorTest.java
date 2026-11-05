@@ -224,10 +224,7 @@ public class RegisterParamsValidatorTest {
     }
 
     @Test
-    public void validateRedirectUris_nativeApp_javascript_shouldReturnTrue() {
-        when(appConfiguration.getClientWhiteList()).thenReturn(Collections.singletonList("*"));
-        when(appConfiguration.getClientBlackList()).thenReturn(Collections.emptyList());
-
+    public void validateRedirectUris_nativeApp_javascript_shouldReturnFalse() {
         boolean result = registerParamsValidator.validateRedirectUris(
                 Collections.singletonList(GrantType.AUTHORIZATION_CODE),
                 Collections.singletonList(ResponseType.CODE),
@@ -235,7 +232,7 @@ public class RegisterParamsValidatorTest {
                 SubjectType.PUBLIC,
                 Collections.singletonList("javascript://example.com/callback"),
                 null);
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test

@@ -33,11 +33,13 @@ import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
+import java.util.List;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -85,6 +87,16 @@ public class IntrospectionService {
 
         KeyEncryptionAlgorithm keyAlgorithm = KeyEncryptionAlgorithm.fromName(client.getAttributes().getIntrospectionEncryptedResponseAlg());
         BlockEncryptionAlgorithm blockAlgorithm = BlockEncryptionAlgorithm.fromName(client.getAttributes().getIntrospectionEncryptedResponseEnc());
+        // RFC 9701: enc defaults to A128CBC-HS256 when only alg is registered
+        if (keyAlgorithm != null && StringUtils.isBlank(client.getAttributes().getIntrospectionEncryptedResponseEnc())) {
+            blockAlgorithm = BlockEncryptionAlgorithm.A128CBC_PLUS_HS256;
+        }
+
+        final boolean encryptionRequested = StringUtils.isNotBlank(client.getAttributes().getIntrospectionEncryptedResponseAlg())
+                || StringUtils.isNotBlank(client.getAttributes().getIntrospectionEncryptedResponseEnc());
+        if (encryptionRequested && (keyAlgorithm == null || blockAlgorithm == null)) {
+            throw new InvalidJweException("Introspection response encryption is configured for client but algorithm/encryption method is incomplete or not supported.");
+        }
 
         if (keyAlgorithm != null && blockAlgorithm != null) {
             log.trace("Preparing encrypted introspection response with keyEncryptionAlgorithm {}, blockEncryptionAlgorithm: {}", keyAlgorithm, blockAlgorithm);
@@ -125,6 +137,7 @@ public class IntrospectionService {
                 JweEncrypter jweEncrypter = new JweEncrypterImpl(keyAlgorithm, blockAlgorithm, sharedSymmetricKey);
                 return jweEncrypter.encrypt(jwe).toString();
             }
+            throw new InvalidJweException("Unsupported introspection response key encryption algorithm: " + keyAlgorithm);
         }
 
         log.trace("Preparing signed introspection response, client {}", client.getClientId());
@@ -135,10 +148,15 @@ public class IntrospectionService {
         return jwtSigner.sign().toString();
     }
 
-    private JwtSigner newJwtSigner(Client client) throws StringEncrypter.EncryptionException {
+    private JwtSigner newJwtSigner(Client client) throws StringEncrypter.EncryptionException, InvalidJwtException {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getDefaultSignatureAlgorithm());
-        if (client.getAttributes().getIntrospectionSignedResponseAlg() != null) {
-            signatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getIntrospectionSignedResponseAlg());
+        final String clientAlg = client.getAttributes().getIntrospectionSignedResponseAlg();
+        if (clientAlg != null) {
+            final List<String> supported = appConfiguration.getIntrospectionSigningAlgValuesSupported();
+            if (supported != null && !supported.isEmpty() && !supported.contains(clientAlg)) {
+                throw new InvalidJwtException("Client introspection_signed_response_alg is not supported by server: " + clientAlg);
+            }
+            signatureAlgorithm = SignatureAlgorithm.fromString(clientAlg);
         }
 
         return new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
