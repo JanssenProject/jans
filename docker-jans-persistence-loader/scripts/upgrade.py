@@ -249,7 +249,9 @@ class Upgrade:
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            updated, _ = self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            if not updated:
+                return
         mark_auth_feature_flags_seeded(self.manager)
 
     def update_attributes_entries(self):
@@ -433,7 +435,9 @@ class Upgrade:
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            updated, _ = self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            if not updated:
+                return
 
         # recorded only after the merge is persisted, so a failed save re-seeds on the next run
         def _names(items, key):
