@@ -38,6 +38,7 @@ func resourceOidcClient() *schema.Resource {
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "The client secret.  The client MAY omit the parameter if the client secret is an empty string.",
 			},
@@ -52,9 +53,12 @@ func resourceOidcClient() *schema.Resource {
 				Description: "",
 			},
 			"registration_access_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+				// Config API never returns or overwrites the stored token, so only the create value matters.
+				DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool { return d.Id() != "" },
+				Description:      "Write-only; sent on creation, never returned or updated afterwards.",
 			},
 			"client_id_issued_at": {
 				Type:        schema.TypeString,
@@ -681,6 +685,7 @@ func resourceOidcClient() *schema.Resource {
 						"require_pkce": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.",
 						},
 						"minimum_acr_level": {
@@ -940,6 +945,13 @@ func resourceOidcClientUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	var client jans.OidcClient
 	if err := fromSchemaResource(d, &client); err != nil {
 		return diag.FromErr(err)
+	}
+	// computed attributes.require_pkce keeps its state value, so a top-level change to false must override it
+	if d.HasChange("require_pkce") && !d.HasChange("attributes.0.require_pkce") {
+		if client.Attributes == nil {
+			client.Attributes = &jans.OidcClientAttribute{}
+		}
+		client.Attributes.RequirePkce = client.RequirePkce
 	}
 	tflog.Debug(ctx, "Updating OidcClient", map[string]interface{}{"inum": client.Inum})
 	if _, err := c.UpdateOidcClient(ctx, &client); err != nil {

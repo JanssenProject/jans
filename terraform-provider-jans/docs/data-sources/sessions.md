@@ -23,6 +23,7 @@ description: |-
       for session in data.jans_sessions.active_sessions.sessions :
       session if can(regex("inum=admin", session.user_dn))
     ]
+    sensitive = true
   }
   
   OAuth Scopes Required
@@ -54,6 +55,7 @@ output "user_sessions" {
     for session in data.jans_sessions.active_sessions.sessions :
     session if can(regex("inum=admin", session.user_dn))
   ]
+  sensitive = true
 }
 ```
 

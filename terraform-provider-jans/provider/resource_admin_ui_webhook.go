@@ -48,6 +48,7 @@ func resourceAdminUIWebhook() *schema.Resource {
 			},
 			"http_request_body_string": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Request body sent by the webhook, as a raw string.",
 			},
@@ -74,6 +75,7 @@ func resourceAdminUIWebhook() *schema.Resource {
 						},
 						"value": {
 							Type:        schema.TypeString,
+							Sensitive:   true,
 							Optional:    true,
 							Description: "Header value.",
 						},
@@ -90,6 +92,7 @@ func resourceAdminUIWebhook() *schema.Resource {
 			},
 			"http_request_body": {
 				Type:        schema.TypeMap,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Request body sent by the webhook, as key/value pairs.",
 				Elem: &schema.Schema{
