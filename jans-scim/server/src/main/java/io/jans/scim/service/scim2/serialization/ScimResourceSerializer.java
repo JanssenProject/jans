@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -98,6 +99,8 @@ public class ScimResourceSerializer {
             extendedSet.addAll(IntrospectUtil.allAttrs.get(resourceClass));
             tempSet = expandAttributesPaths(attributes, defaultSchema, schemas, extendedSet);
             tempSet.removeAll(neverSet);
+            //A requested sub-path would otherwise make containsProperty select its never-returned parent
+            tempSet.removeIf(path -> neverSet.stream().anyMatch(never -> path.startsWith(never + ".")));
             include.addAll(tempSet);
 
         } else if (exclussions != null) {
@@ -189,6 +192,7 @@ public class ScimResourceSerializer {
 
     public String serialize(BaseScimResource resource, String attributes, String exclusions) throws Exception {
 
+        Objects.requireNonNull(resource, "resource");
         SortedSet<String> include = new TreeSet<>();
         Class<? extends BaseScimResource> resourceClass = resource.getClass();
         buildIncludeSet(include, resourceClass, new ArrayList<>(resource.getSchemas()), attributes, exclusions);
