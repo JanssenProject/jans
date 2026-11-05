@@ -99,7 +99,7 @@ A counter appears only after it is first incremented.
 
 ## Tokens in a record
 
-A record lists the tokens an `authorize_multi_issuer` decision used, by issuer, token type and `jti`. A token reported in [`dropped_tokens`](./cedarling-logs.md) is not listed.
+A record lists the tokens an `authorize_multi_issuer` decision used, by issuer, token type and `jti`. A token reported in [`dropped_tokens`](./cedarling-logs.md) is not listed. A decision that used more than 32 tokens gets no record (`not_emitted_over_limit`).
 
 - A JWT is listed with its `iss`. Lock Server accepts only an `https` issuer, or `http` with host `localhost`, so a decision that uses a JWT with another issuer gets no record (`not_emitted_invalid_field`).
 - A token from a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed with the issuer `urn:jans:cedarling:custom-issuer:<issuer_id>`, where `<issuer_id>` is the lowercased [`issuer`](./cedarling-policy-store.md#trusted-issuersjson) of its token type in the policy store.
