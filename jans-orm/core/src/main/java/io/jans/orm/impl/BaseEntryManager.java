@@ -6,8 +6,6 @@
 
 package io.jans.orm.impl;
 
-import static io.jans.orm.model.base.LocalizedString.EMPTY_LANG_TAG;
-import static io.jans.orm.model.base.LocalizedString.LOCALIZED;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -1317,12 +1315,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         }
 
                         LocalizedString localizedString = (LocalizedString) propertyValue;
-                        final String finalLdapAttributeName = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
-                        Map<String, AttributeData> filteredAttrs = attributesMap.entrySet().stream()
-                                .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
-                                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                        Map<String, AttributeData> filteredAttrs = filterLocalizedStringAttributes(attributesMap, ldapAttributeName);
 
                         loadLocalizedString(attributesMap, localizedString, filteredAttrs);
+                        removeLocalizedStringAttributes(attributesMap, filteredAttrs);
 
                         continue;
                     }
@@ -1496,6 +1492,17 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		return ReflectHelper.getListType(setter);
 	}
+
+    protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
+        final String key = ldapAttributeName.toLowerCase();
+        return attributesMap.entrySet().stream()
+                .filter(x -> x.getKey().equals(key))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
+
+    protected void removeLocalizedStringAttributes(Map<String, AttributeData> attributesMap, Map<String, AttributeData> filteredAttrs) {
+        attributesMap.keySet().removeAll(filteredAttrs.keySet());
+    }
 
     protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
         filteredAttrs.forEach((key, value) -> {
