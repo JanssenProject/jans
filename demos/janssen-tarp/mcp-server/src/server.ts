@@ -152,8 +152,9 @@ function isLocalHostname(rawHostname: string): boolean {
 
 /**
  * Accepts endpoints on the issuer's origin. Providers may host endpoints elsewhere
- * (e.g. Google), so other origins are allowed only as public HTTPS host names, which
- * keeps provider metadata from steering requests to loopback or internal addresses.
+ * (e.g. Google), so other origins are allowed only as HTTPS host names that are not
+ * localhost or IP literals. This checks the hostname text only, without DNS resolution,
+ * so a public name resolving to a private address is not blocked.
  */
 function requireIssuerOrigin(issuer: string, endpoint: string | undefined, name: string): string {
   if (!endpoint) {

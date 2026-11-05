@@ -116,11 +116,11 @@ class PersonAuthentication(PersonAuthenticationType):
                 isVerified = foundUser.getAttribute("phoneNumberVerified")
                 if isVerified:
                     mobile_number = foundUser.getAttribute("employeeNumber")
-                if  mobile_number is None:
+                if not mobile_number:
                     mobile_number = foundUser.getAttribute("mobile")
-                if  mobile_number is None:
+                if not mobile_number:
                     mobile_number = foundUser.getAttribute("telephoneNumber")
-                if  mobile_number is None:
+                if not mobile_number:
                     print "TwilioSMS, Error finding mobile number for user '%s'" % user_name    
                     facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
                     return False
