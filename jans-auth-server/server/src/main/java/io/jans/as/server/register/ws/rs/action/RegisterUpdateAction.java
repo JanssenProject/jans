@@ -43,6 +43,7 @@ import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -218,8 +219,13 @@ public class RegisterUpdateAction {
     private void validateBackchannelLogoutUri(RegisterRequest request, Client client) {
         try {
             final String[] redirectUris = client.getRedirectUris();
-            registerParamsValidator.validateLogoutUri(request.getBackchannelLogoutUri(),
-                    redirectUris != null ? Arrays.asList(redirectUris) : new ArrayList<>(), errorResponseFactory);
+            final List<String> redirectUriList = redirectUris != null ? Arrays.asList(redirectUris) : new ArrayList<>();
+            if (StringUtils.isNotBlank(request.getBackchannelLogoutUri())) {
+                registerParamsValidator.validateLogoutUri(request.getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
+            } else if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
+                // stored logout uri is kept, so it must still fit the new redirect_uris
+                registerParamsValidator.validateLogoutUri(client.getAttributes().getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
+            }
         } catch (WebApplicationException e) {
             clientService.removeFromCache(client); // discard in-memory changes
             throw e;
