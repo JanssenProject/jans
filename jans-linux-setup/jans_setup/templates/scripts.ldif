@@ -756,5 +756,17 @@ jansScr::%(identity_assertion_identityassertion)s
 jansScrTyp: identity_assertion
 jansProgLng: python
 
-
+dn: inum=1DAF-1A90,ou=scripts,o=jans
+description: Role Based Scopes Introspection Script
+displayName: introspection_role_based_scope
+inum: 1DAF-1A90
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansRevision: 1
+jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
+jansScrTyp: introspection
+objectClass: top
+objectClass: jansCustomScr
+jansEnabled: true
+jansProgLng: python
 
