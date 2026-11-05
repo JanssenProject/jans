@@ -40,7 +40,7 @@ if ! [[ $EXT_IP =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
 fi
 IFS=. read -r -a EXT_IP_OCTETS <<< "$EXT_IP"
 for octet in "${EXT_IP_OCTETS[@]}"; do
-  if (( 10#$octet > 255 )); then
+  if [[ $octet =~ ^0[0-9] ]] || (( 10#$octet > 255 )); then
     echo "[E] Invalid external IP address: $EXT_IP"
     exit 1
   fi

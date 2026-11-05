@@ -74,7 +74,7 @@ deprecated.
 *********************************************************************************
 {{- end }}
 {{- end }}
-{{- if and .Release.IsInstall (not .Values.global.cnConfiguratorCustomSchema.secretName) (not .Values.config.adminPassword) }}
+{{- if and .Release.IsInstall .Values.global.config.enabled (not .Values.global.cnConfiguratorCustomSchema.secretName) (not .Values.config.adminPassword) }}
 
 A random admin password was generated. Retrieve it with:
 

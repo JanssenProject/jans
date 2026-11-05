@@ -320,7 +320,8 @@ class Upgrade:
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            if not self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
+                return
 
         with open("/tmp/config-api.dynamic-conf.json") as f:  # nosec: B108
             shipped_dirs = {

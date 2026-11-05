@@ -83,7 +83,8 @@ class ConsulConfig(BaseConfig):
         self.prefix = f"{self.settings['CN_CONFIG_CONSUL_NAMESPACE']}/config/"
         cert, verify = self._verify_cert(
             self.settings["CN_CONFIG_CONSUL_SCHEME"],
-            as_boolean(self.settings["CN_CONFIG_CONSUL_VERIFY"]),
+            # only an explicit false disables verification; unrecognized values keep it on
+            self.settings["CN_CONFIG_CONSUL_VERIFY"] not in ("f", "F", "false", "False", "FALSE", "0"),
             self.settings["CN_CONFIG_CONSUL_CACERT_FILE"],
             self.settings["CN_CONFIG_CONSUL_CERT_FILE"],
             self.settings["CN_CONFIG_CONSUL_KEY_FILE"],
