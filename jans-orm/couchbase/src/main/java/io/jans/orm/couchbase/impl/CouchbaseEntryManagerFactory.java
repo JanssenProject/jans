@@ -43,6 +43,9 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
     public static final String PERSISTENCE_TYPE = PersistenceEntryManager.PERSITENCE_TYPES.couchbase.name();
     public static final String PROPERTIES_FILE = "jans-couchbase%s.properties";
 
+    private static final String[] SECURITY_PROPERTY_KEYS = { "ssl.trustStore.enable", "ssl.trustStore.file",
+            "ssl.trustStore.pin", "ssl.trustStore.type", "tls.enable" };
+
     private ClusterEnvironment clusterEnvironment;
 
 	private Properties couchbaseConnectionProperties;
@@ -149,6 +152,13 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 		// Allow proper initialization
 		if (this.couchbaseConnectionProperties == null) {
 			this.couchbaseConnectionProperties = entryManagerConf;
+		} else {
+			// The cluster environment is shared, so a later manager cannot change its TLS settings
+			for (String key : SECURITY_PROPERTY_KEYS) {
+				if (!StringHelper.equals(this.couchbaseConnectionProperties.getProperty(key), entryManagerConf.getProperty(key))) {
+					throw new ConfigurationException(String.format("Couchbase property '%s' differs from the one used to create the shared environment", key));
+				}
+			}
 		}
 
     	init();

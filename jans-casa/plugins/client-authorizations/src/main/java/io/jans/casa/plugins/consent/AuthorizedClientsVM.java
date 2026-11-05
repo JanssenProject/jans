@@ -14,6 +14,7 @@ import org.zkoss.util.resource.Labels;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zul.Messagebox;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,19 @@ public class AuthorizedClientsVM {
 
     public String getContactEmailsAsCSV(Client client) {
         return client.getContacts().stream().collect(Collectors.joining(", "));
+    }
+
+    public String safeUri(String uri) {
+        if (uri == null) {
+            return null;
+        }
+        String trimmed = uri.trim();
+        try {
+            String scheme = URI.create(trimmed).getScheme();
+            return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme) ? trimmed : null;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     public void revokeAll() {
@@ -97,7 +111,7 @@ public class AuthorizedClientsVM {
     private void reloadClients() {
         logger.info("Recomputing client list associated to current user");
         //Get the clients associated to the current logged user and sort them by name
-        clients = new TreeMap<>(Comparator.comparing(Client::getDisplayName));
+        clients = new TreeMap<>(Comparator.comparing(Client::getDisplayName).thenComparing(Client::getInum));
         clients.putAll(caService.getUserClientPermissions(user.getId()));
     }
 

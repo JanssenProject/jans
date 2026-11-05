@@ -12,6 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import jakarta.enterprise.util.Nonbinding;
 import jakarta.interceptor.InterceptorBinding;
 
 /**
@@ -30,5 +31,6 @@ public @interface UmaSecure {
     /**
      * UMA scopes as single string
      */
+    @Nonbinding
     String scope() default "";
 }

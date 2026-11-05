@@ -5975,7 +5975,7 @@
 
 	        // Unpad
 	        var i = data.sigBytes - 1;
-	        while (!((dataWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff)) {
+	        while (i >= 0 && !((dataWords[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff)) {
 	            i--;
 	        }
 	        data.sigBytes = i + 1;

@@ -23,6 +23,12 @@
 			"value2": "cedarling",
 			"hide": false,
 			"description": "the scope that must be present for the script to run"
+		},
+		{
+			"value1": "ssa_issuer",
+			"value2": "",
+			"hide": false,
+			"description": "optional; when set, only SSAs with this 'iss' get the scopes"
 		}
 	],
 	"level": 100,

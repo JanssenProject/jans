@@ -12,7 +12,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.Principal;
+import java.security.PublicKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -28,7 +30,10 @@ import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
 import org.bouncycastle.asn1.x509.X509ObjectIdentifiers;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.cert.ocsp.BasicOCSPResp;
 import org.bouncycastle.cert.ocsp.CertificateID;
@@ -42,6 +47,7 @@ import org.bouncycastle.cert.ocsp.RevokedStatus;
 import org.bouncycastle.cert.ocsp.SingleResp;
 import org.bouncycastle.operator.DigestCalculator;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
 import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +67,7 @@ import io.jans.util.security.SecurityProviderUtility;
 public class OCSPCertificateVerifier implements CertificateVerifier {
 
 	private static final Logger log = LoggerFactory.getLogger(OCSPCertificateVerifier.class);
+	private static final long OCSP_CLOCK_SKEW_MS = 5L * 60 * 1000;
 
 	public OCSPCertificateVerifier() {
 		SecurityProviderUtility.installBCProvider(true);
@@ -75,9 +82,18 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 		try {
 			Principal subjectX500Principal = certificate.getSubjectX500Principal();
 
+			if (!isIssuedByTrustedIssuer(certificate, issuer, issuers)) {
+				status.setValidity(CertificateValidity.INVALID);
+				return status;
+			}
+
 			String ocspUrl = getOCSPUrl(certificate);
 			if (ocspUrl == null) {
 				log.error("OCSP URL for '" + subjectX500Principal + "' is empty");
+				return status;
+			}
+			if (!(ocspUrl.startsWith("http://") || ocspUrl.startsWith("https://"))) {
+				log.error("It's possible to send OCSP request via HTTP and HTTPS only");
 				return status;
 			}
 
@@ -99,10 +115,21 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 			boolean foundResponse = false;
 			BasicOCSPResp basicOCSPResp = (BasicOCSPResp) ocspResp.getResponseObject();
+			if (!isResponseSignatureValid(basicOCSPResp, issuer, validationDate)) {
+				log.error("OCSP response signature is invalid or responder is not authorized!");
+				status.setValidity(CertificateValidity.INVALID);
+				return status;
+			}
+
 			SingleResp[] singleResps = basicOCSPResp.getResponses();
 			for (SingleResp singleResp : singleResps) {
 				CertificateID responseCertificateId = singleResp.getCertID();
 				if (!certificateId.equals(responseCertificateId)) {
+					continue;
+				}
+
+				if (!isResponseFresh(singleResp, validationDate)) {
+					log.error("OCSP response for '" + subjectX500Principal + "' is not current");
 					continue;
 				}
 
@@ -143,6 +170,61 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 		}
 
 		return status;
+	}
+
+	// Certificate-supplied network locations are used only once the certificate is proven to be issued by a trusted issuer
+	private static boolean isIssuedByTrustedIssuer(X509Certificate certificate, X509Certificate issuer, List<X509Certificate> issuers) {
+		if (issuer == null || issuers == null || !issuers.contains(issuer)) {
+			return false;
+		}
+		try {
+			certificate.verify(issuer.getPublicKey());
+			return true;
+		} catch (Exception ex) {
+			log.error("Certificate '" + certificate.getSubjectX500Principal() + "' is not signed by trusted issuer", ex);
+			return false;
+		}
+	}
+
+	private boolean isResponseSignatureValid(BasicOCSPResp basicOCSPResp, X509Certificate issuer, Date validationDate) {
+		if (isSignedBy(basicOCSPResp, issuer.getPublicKey())) {
+			return true;
+		}
+
+		// Delegated responder must be issued by the CA and carry id-kp-OCSPSigning
+		for (X509CertificateHolder certHolder : basicOCSPResp.getCerts()) {
+			try {
+				X509Certificate responderCert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
+				responderCert.verify(issuer.getPublicKey());
+				responderCert.checkValidity(validationDate);
+				List<String> extendedKeyUsage = responderCert.getExtendedKeyUsage();
+				if (extendedKeyUsage != null && extendedKeyUsage.contains(KeyPurposeId.id_kp_OCSPSigning.getId())
+						&& isSignedBy(basicOCSPResp, responderCert.getPublicKey())) {
+					return true;
+				}
+			} catch (GeneralSecurityException ex) {
+				log.debug("OCSP responder certificate is not valid", ex);
+			}
+		}
+		return false;
+	}
+
+	private boolean isSignedBy(BasicOCSPResp basicOCSPResp, PublicKey publicKey) {
+		try {
+			return basicOCSPResp.isSignatureValid(new JcaContentVerifierProviderBuilder().setProvider(SecurityProviderUtility.getBCProvider()).build(publicKey));
+		} catch (OCSPException | OperatorCreationException ex) {
+			log.debug("Failed to verify OCSP response signature", ex);
+			return false;
+		}
+	}
+
+	private boolean isResponseFresh(SingleResp singleResp, Date validationDate) {
+		Date thisUpdate = singleResp.getThisUpdate();
+		Date nextUpdate = singleResp.getNextUpdate();
+		if (thisUpdate == null || thisUpdate.getTime() - OCSP_CLOCK_SKEW_MS > validationDate.getTime()) {
+			return false;
+		}
+		return nextUpdate == null || nextUpdate.getTime() + OCSP_CLOCK_SKEW_MS >= validationDate.getTime();
 	}
 
 	private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
@@ -201,6 +283,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 			con.setDoInput(true);
 			con.setDoOutput(true);
 			con.setUseCaches(false);
+			con.setInstanceFollowRedirects(false);
 
 			OutputStream out = con.getOutputStream();
 			try {
@@ -208,6 +291,11 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 				out.flush();
 			} finally {
 				IOUtils.closeQuietly(out);
+			}
+
+			int status = con.getResponseCode();
+			if (status != HttpURLConnection.HTTP_OK) {
+				throw new IOException("Failed to get OCSP response from '" + url + "', status: " + status + ", location: " + con.getHeaderField("Location") + " (redirects are not followed)");
 			}
 
 			byte[] responseBytes = IOUtils.toByteArray(con.getInputStream());

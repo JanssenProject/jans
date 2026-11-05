@@ -308,6 +308,8 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         client.setClientId(existingClient.getClientId());
+        // GET responses omit the registration access token, so a GET-then-PUT must not clear it
+        client.setRegistrationAccessToken(existingClient.getRegistrationAccessToken());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
         if (StringUtils.isNotBlank(client.getClientSecret())) {
@@ -364,18 +366,29 @@ public class ClientsResource extends ConfigBaseResource {
         }
         Client existingClient = clientService.getClientByInum(inum);
         checkResourceNotNull(existingClient, OPENID_CONNECT_CLIENT);
+        final String clientId = existingClient.getClientId();
+        final String storedSecret = existingClient.getClientSecret();
+        final String registrationAccessToken = existingClient.getRegistrationAccessToken();
 
+        // stored credentials and identity must not be readable or re-targetable through patch operations
+        existingClient.setClientSecret("");
+        existingClient.setRegistrationAccessToken("");
         existingClient = Jackson.applyPatch(jsonPatchString, existingClient);
+        existingClient.setClientId(clientId);
+        existingClient.setRegistrationAccessToken(registrationAccessToken);
 
         // ClientSecret encryption check
         boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
         logger.debug(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
 
-        if (isClientSecretPresent && StringUtils.isNotBlank(existingClient.getClientSecret())) {
+        if (!isClientSecretPresent) {
+            existingClient.setClientSecret(storedSecret);
+        } else if (StringUtils.isNotBlank(existingClient.getClientSecret())) {
             existingClient.setClientSecret(
                     this.encryptPassword(existingClient.getClientName(), existingClient.getClientSecret()));
         }
 
+        ignoreCustomObjectClassesForNonLDAP(existingClient);
         clientService.updateClient(existingClient);
 
         applyResponsePolicy(existingClient);
@@ -438,6 +451,7 @@ public class ClientsResource extends ConfigBaseResource {
             return client;
         }
 
+        client.setRegistrationAccessToken(null);
         if (isReturnClientSecretInResponse()) {
             if (!isReturnEncryptedClientSecretInResponse()) {
                 getDecryptedClientSecret(client);

@@ -25,6 +25,7 @@ use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
@@ -253,6 +254,12 @@ impl PolicyStoreManager {
                 })?;
             all_parsed_entities.extend(parsed);
         }
+
+        // Cedar computes transitive ancestry while building the store, so the count limit that
+        // default entities enforce later must already hold here
+        DefaultEntitiesLimits::default()
+            .validate_entities_count(all_parsed_entities.len())
+            .map_err(|e| ConversionError::EntityConversion(e.to_string()))?;
 
         // Step 2: Detect duplicate entity UIDs (warns but doesn't fail on duplicates)
         // Note: We clone all_parsed_entities here because EntityParser::detect_duplicates

@@ -202,7 +202,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
             self.claims_container.remove_label(claim[0])
 
         dialog = self.myparent.get_confirm_dialog(
-            message=HTML(_("Are you sure want to delete claim <b>{}</b>?").format(claim[1])),
+            message=HTML(_("Are you sure want to delete claim <b>{}</b>?")).format(claim[1]),
             confirm_handler=do_delete_claim
         )
 

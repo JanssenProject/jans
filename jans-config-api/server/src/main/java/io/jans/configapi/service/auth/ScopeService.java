@@ -261,6 +261,10 @@ public class ScopeService {
         logger.debug("Getting associated-clients for scope - customScope:{}", customScope);
 
         List<Client> clients = clientService.getAllClients();
+        clients.forEach(client -> {
+            client.setClientSecret(null);
+            client.setRegistrationAccessToken(null);
+        });
         List<UmaResource> umaResources = umaResourceService.getAllResources();
         logger.debug("Verifying associated-clients using clients:{}, umaResources:{}", clients, umaResources);
         customScope.setClients(Lists.newArrayList());

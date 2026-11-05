@@ -41,6 +41,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -130,11 +131,15 @@ public class RegisterUpdateAction {
                 registerValidator.validateRequestObject(requestParams, softwareStatement, httpRequest);
             }
 
-            final RegisterRequest request = RegisterRequest.fromJson(requestParams);
+            // use merged object so software_statement values take precedence over outer metadata
+            final RegisterRequest request = RegisterRequest.fromJson(requestObject);
 
             validateRedirectUris(request);
             validateCiba(request);
             validateSubjectType(request);
+            registerValidator.validatePasswordGrantType(request);
+            registerParamsValidator.validateAlgorithms(request);
+            validateSubjectIdentifierAttribute(request);
 
             final Client client = clientService.getClient(clientId, accessToken);
             validateClientNotNull(client);
@@ -147,6 +152,7 @@ public class RegisterUpdateAction {
             }
 
             validateEphemeralSubjectTypeBackchannelLogout(client);
+            validateBackchannelLogoutUri(request, client);
 
             boolean updateClient = true;
             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -205,6 +211,29 @@ public class RegisterUpdateAction {
         } catch (WebApplicationException e) {
             clientService.removeFromCache(client); // discard in-memory changes
             throw e;
+        }
+    }
+
+    private void validateBackchannelLogoutUri(RegisterRequest request, Client client) {
+        try {
+            final String[] redirectUris = client.getRedirectUris();
+            registerParamsValidator.validateLogoutUri(request.getBackchannelLogoutUri(),
+                    redirectUris != null ? Arrays.asList(redirectUris) : new ArrayList<>(), errorResponseFactory);
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
+    }
+
+    private void validateSubjectIdentifierAttribute(RegisterRequest request) {
+        final String attribute = request.getSubjectIdentifierAttribute();
+        if (StringUtils.isBlank(attribute)) {
+            return;
+        }
+        if (Boolean.FALSE.equals(appConfiguration.getPublicSubjectIdentifierPerClientEnabled())
+                || !appConfiguration.getSubjectIdentifiersPerClientSupported().contains(attribute)) {
+            log.debug("Failed to perform client action, reason: subject identifier attribute is not allowed.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE, "Invalid subject identifier attribute.");
         }
     }
 

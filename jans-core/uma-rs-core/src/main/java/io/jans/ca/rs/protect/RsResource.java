@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -25,7 +26,7 @@ public class RsResource implements Serializable {
     @JsonProperty(value = "exp")
     private Integer exp;
 
-    private Map<String, Condition> httpMethodToCondition = null;
+    private final AtomicReference<Map<String, Condition>> httpMethodToCondition = new AtomicReference<>();
 
     public String getPath() {
         return path;
@@ -41,6 +42,7 @@ public class RsResource implements Serializable {
 
     public void setConditions(List<Condition> conditions) {
         this.conditions = conditions;
+        this.httpMethodToCondition.set(null);
     }
 
     public List<String> scopes(String httpMethod) {
@@ -88,23 +90,26 @@ public class RsResource implements Serializable {
     }
 
     public Map<String, Condition> getConditionMap() {
-        if (httpMethodToCondition == null) {
-            initMap();
+        Map<String, Condition> map = httpMethodToCondition.get();
+        if (map == null) {
+            map = buildMap();
+            httpMethodToCondition.set(map);
         }
-        return httpMethodToCondition;
+        return map;
     }
 
-    private void initMap() {
-        httpMethodToCondition = Maps.newHashMap();
+    private Map<String, Condition> buildMap() {
+        Map<String, Condition> map = Maps.newHashMap();
         if (conditions != null) {
             for (Condition condition : conditions) {
                 if (condition.getHttpMethods() != null) {
                     for (String httpMethod : condition.getHttpMethods()) {
-                        httpMethodToCondition.put(httpMethod, condition);
+                        map.put(httpMethod, condition);
                     }
                 }
             }
         }
+        return map;
     }
 
     @Override

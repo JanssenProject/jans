@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -98,7 +99,7 @@ public class TokenExchangeService {
     private IdJagService idJagService;
 
     public void rotateDeviceSecretOnRefreshToken(HttpServletRequest httpRequest, AuthorizationGrant refreshGrant, String scope) {
-        if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
+        if (StringUtils.isBlank(scope) || !ArrayUtils.contains(StringUtils.split(scope), ScopeConstants.DEVICE_SSO)) {
             log.debug("Skip rotate device secret on refresh token. No device_sso scope.");
             return;
         }
@@ -150,6 +151,11 @@ public class TokenExchangeService {
         }
 
         final ScriptTokenExchangeControl scriptControl = externalTokenExchangeService.externalValidate(executionContext);
+        if (scriptControl == null || !scriptControl.isOk()) {
+            final String msg = "Token exchange is rejected by token-exchange script.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
 
         String rotatedDeviceSecret = null;
         SessionId sessionId = null;
@@ -169,6 +175,7 @@ public class TokenExchangeService {
             sessionId = sessionIdService.getSessionByDeviceSecret(deviceSecret);
             tokenRestWebServiceValidator.validateSessionForTokenExchange(sessionId, deviceSecret, auditLog);
             checkNotNull(sessionId); // it checked by validator, added it only to relax static bugs checker
+            validateSessionNotExpired(sessionId, auditLog);
 
             tokenRestWebServiceValidator.validateSubjectToken(deviceSecret, subjectToken, sessionId, auditLog);
 
@@ -232,6 +239,16 @@ public class TokenExchangeService {
         return jsonObj;
     }
 
+    private void validateSessionNotExpired(SessionId sessionId, OAuth2AuditLog auditLog) {
+        final boolean idleExpired = sessionId.getLastUsedAt() != null && !sessionIdService.isSessionValid(sessionId);
+        final boolean expired = sessionId.getExpirationDate() != null && sessionId.getExpirationDate().before(new Date());
+        if (idleExpired || expired) {
+            final String msg = "Session found by device_secret (actor_token) is expired.";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
+    }
+
     private void checkUserType(SimpleUser user, ExecutionContext context) {
         if (user == null) {
             return;
@@ -287,7 +304,7 @@ public class TokenExchangeService {
     }
 
     public String createNewDeviceSecret(String sessionDn, Client client, String scope) {
-        if (StringUtils.isBlank(scope) || !scope.contains(ScopeConstants.DEVICE_SSO)) {
+        if (StringUtils.isBlank(scope) || !ArrayUtils.contains(StringUtils.split(scope), ScopeConstants.DEVICE_SSO)) {
             log.debug("Skip device secret. No device_sso scope.");
             return null;
         }

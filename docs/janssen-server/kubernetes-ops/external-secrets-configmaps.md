@@ -190,7 +190,7 @@ done < "versions_to_destroy.txt"
         # -- Base URL of Vault.
         cnVaultAddr: http://localhost:8200
         # -- Verify connection to Vault.
-        cnVaultVerify: false
+        cnVaultVerify: true
         # -- Path to file contains Vault AppRole role ID.
         cnVaultRoleIdFile: /etc/certs/vault_role_id
         # -- Path to file contains Vault AppRole secret ID.

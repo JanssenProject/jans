@@ -14,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -104,14 +105,15 @@ public class ReverseLineReader {
     }
 
     public List<String> readLastLines(int countLines) throws IOException {
-        List<String> lastLines = new ArrayList<String>(countLines);
+        List<String> lastLines = new ArrayList<String>();
         for (int i = 0; i < countLines; i++) {
             String line = readLastLine();
             if (line == null) {
                 break;
             }
-            lastLines.add(0, line);
+            lastLines.add(line);
         }
+        Collections.reverse(lastLines);
 
         return lastLines;
     }

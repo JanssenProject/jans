@@ -1,15 +1,15 @@
 package io.jans.saml.metadata.util;
  
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
-import java.text.ParsePosition;
 import java.time.format.DateTimeParseException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -376,15 +376,18 @@ public class XPathUtils {
 
     private static Date dateAttributeValue(final XPath xpath, final String selector, final Node node) throws XPathExpressionException {
 
-        try {
-            String strvalue = stringAttributeValue(xpath, selector, node);
-            if(strvalue == null) {
-                return null;
-            }
-            DateFormat df = createDateTimeFormat();
-            return df.parse(strvalue);
-        }catch(ParseException e) {
+        String strvalue = stringAttributeValue(xpath, selector, node);
+        if(strvalue == null) {
             return null;
+        }
+        try {
+            XMLGregorianCalendar calendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(strvalue.trim());
+            if(calendar.getTimezone() == DatatypeConstants.FIELD_UNDEFINED) {
+                calendar.setTimezone(0);
+            }
+            return calendar.toGregorianCalendar().getTime();
+        }catch(DatatypeConfigurationException | IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid dateTime value: " + strvalue, e);
         }
     }
 
@@ -407,7 +410,8 @@ public class XPathUtils {
         if(strvalue == null) {
             return false;
         }
-        return Boolean.parseBoolean(strvalue);
+        strvalue = strvalue.trim();
+        return "true".equals(strvalue) || "1".equals(strvalue);
     }
 
     public static Integer intAttributeValue(final XPath xpath, final String selector, final Node node) throws XPathExpressionException {
@@ -417,16 +421,6 @@ public class XPathUtils {
             return null;
         }
         return Integer.parseInt(strvalue);
-    }
-
-    private static DateFormat createDateTimeFormat() {
-
-        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'") {
-            @Override
-            public Date parse(String source, ParsePosition pos) {
-                return super.parse(source.replaceFirst(":(?=[0-9]{2}$)",""),pos);
-            }
-        };
     }
 
     private static String nodeValueAsString(final Node node) {

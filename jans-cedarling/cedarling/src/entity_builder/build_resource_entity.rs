@@ -16,12 +16,10 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildEntityError> {
         let resource_type_name = &resource_data.cedar_mapping.entity_type;
 
-        // Check for default entity first when attributes are empty
-        if resource_data.attributes.is_empty() {
-            let uid = build_cedar_uid(resource_type_name, &resource_data.cedar_mapping.id)?;
-            if let Some(resource_default_entity) = self.default_entities.get(&uid) {
-                return Ok(resource_default_entity.clone());
-            }
+        // Default (policy-store) entities take precedence over request-supplied attributes
+        let uid = build_cedar_uid(resource_type_name, &resource_data.cedar_mapping.id)?;
+        if let Some(resource_default_entity) = self.default_entities.get(&uid) {
+            return Ok(resource_default_entity.clone());
         }
 
         let attrs_shape = self

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
@@ -41,6 +42,8 @@ import io.jans.orm.couchbase.operation.CouchbaseOperationService;
 public class CouchbaseFilterConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseFilterConverter.class);
+
+    private static final Pattern ATTRIBUTE_NAME_PATTERN = Pattern.compile("^[A-Za-z0-9_]+$");
     
     private LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 	private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
@@ -298,7 +301,7 @@ public class CouchbaseFilterConverter {
 		return null;
 	}
 
-	private String toInternalAttribute(Filter filter) {
+	private String toInternalAttribute(Filter filter) throws SearchException {
 		String attributeName = filter.getAttributeName();
 
 		if (StringHelper.isEmpty(attributeName)) {
@@ -309,6 +312,11 @@ public class CouchbaseFilterConverter {
 					break;
 				}
 			}
+		}
+
+		// Attribute names are placed into N1QL text and parameter names, so they must be plain identifiers
+		if ((attributeName != null) && !ATTRIBUTE_NAME_PATTERN.matcher(attributeName).matches()) {
+			throw new SearchException(String.format("Invalid attribute name in filter: '%s'", attributeName));
 		}
 
 		if (operationService == null) {

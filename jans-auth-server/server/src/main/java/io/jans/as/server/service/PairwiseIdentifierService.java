@@ -103,10 +103,10 @@ public class PairwiseIdentifierService {
         } else { // PairwiseIdType.ALGORITHMIC
             String key = appConfiguration.getPairwiseCalculationKey();
             String salt = appConfiguration.getPairwiseCalculationSalt();
-            String localAccountId = isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) ?
-                    userInum : userInum + clientId;
-            if (isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId())) {
-                localAccountId = openidSubValue;
+            String localAccountId = isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId()) ?
+                    openidSubValue : userInum;
+            if (!isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId())) {
+                localAccountId = localAccountId + clientId;
             }
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(

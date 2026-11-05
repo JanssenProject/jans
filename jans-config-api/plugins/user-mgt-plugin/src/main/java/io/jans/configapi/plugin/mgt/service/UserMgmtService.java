@@ -81,6 +81,7 @@ public class UserMgmtService {
 
     private static final String BIRTH_DATE = "birthdate";
     private static final String MOBILE = "mobile";
+    public static final String ADMIN_UI_ROLE = "jansAdminUIRole";
 
     /**
      * Obtain the base Distinguished Name (DN) under which people (user) entries are stored.
@@ -105,9 +106,27 @@ public class UserMgmtService {
      * @return a paged result of User objects whose custom attributes have been filtered to exclude inactive attributes
      */
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
+        return searchUsers(searchRequest, null);
+    }
+
+    /**
+     * Search users, optionally limited to the single entry identified by {@code restrictToInum}.
+     *
+     * @param searchRequest  the search parameters
+     * @param restrictToInum when not blank, only the user with this inum can match
+     * @return a paged result of matching users
+     */
+    public PagedResult<User> searchUsers(SearchRequest searchRequest, String restrictToInum) {
         if (logger.isInfoEnabled()) {
             logger.info("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
                     getPeopleBaseDn());
+        }
+
+        // Persistence backends treat a zero count as unlimited.
+        if (searchRequest.getCount() != null && searchRequest.getCount() <= 0) {
+            PagedResult<User> emptyResult = new PagedResult<>();
+            emptyResult.setEntries(new ArrayList<>());
+            return emptyResult;
         }
 
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
@@ -164,6 +183,12 @@ public class UserMgmtService {
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
+        }
+
+        if (StringUtils.isNotBlank(restrictToInum)) {
+            Filter inumEqualityFilter = Filter.createEqualityFilter(AttributeConstants.INUM, restrictToInum);
+            searchFilter = searchFilter == null ? inumEqualityFilter
+                    : Filter.createANDFilter(searchFilter, inumEqualityFilter);
         }
 
         logger.info("Users searchFilter:{}", searchFilter);
@@ -223,6 +248,11 @@ public class UserMgmtService {
     }
 
     public User patchUser(String inum, UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
+        return patchUser(inum, userPatchRequest, true);
+    }
+
+    public User patchUser(String inum, UserPatchRequest userPatchRequest, boolean allowRoleChange)
+            throws JsonPatchException, IOException {
         if (logger.isInfoEnabled()) {
             logger.info("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum),
                     escapeLog(userPatchRequest));
@@ -237,6 +267,9 @@ public class UserMgmtService {
         }
 
         logger.debug("User to be patched- user:{}", user);
+        Set<String> rolesBeforePatch = getAdminUIRoles(user);
+        final String dnBeforePatch = user.getDn();
+        final String inumBeforePatch = user.getAttribute("inum");
         // apply direct patch for basic attributes
         if (StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())) {
             logger.debug("Patch basic attributes");
@@ -251,6 +284,16 @@ public class UserMgmtService {
         }
 
         logger.debug("User before patch user:{}", user);
+
+        // patch must not retarget the write to another entry
+        if (!StringUtils.equals(dnBeforePatch, user.getDn())
+                || !StringUtils.equals(inumBeforePatch, user.getAttribute("inum"))) {
+            throw new InvalidAttributeException("Changing 'dn' or 'inum' is not allowed");
+        }
+
+        if (!allowRoleChange && !rolesBeforePatch.equals(getAdminUIRoles(user))) {
+            throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
+        }
 
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
@@ -267,6 +310,20 @@ public class UserMgmtService {
         logger.info("User after patch user:{}", user);
         return user;
 
+    }
+
+    public Set<String> getAdminUIRoles(User user) {
+        Set<String> roles = new HashSet<>();
+        if (user == null || user.getCustomAttributes() == null) {
+            return roles;
+        }
+        for (CustomObjectAttribute attribute : user.getCustomAttributes()) {
+            if (attribute != null && ADMIN_UI_ROLE.equalsIgnoreCase(attribute.getName())
+                    && attribute.getValues() != null) {
+                attribute.getValues().stream().filter(Objects::nonNull).map(String::valueOf).forEach(roles::add);
+            }
+        }
+        return roles;
     }
 
     public User getUserBasedOnInum(String inum) {
@@ -690,8 +747,8 @@ public class UserMgmtService {
                 sb.append(",must be less than " + maxValue + " characters");
             }
 
-            // regexpValue
-            if (StringUtils.isNotBlank(regexpValue)) {
+            // regexpValue; skipped for values already rejected so oversized input never reaches the regex engine
+            if (sb.length() == 0 && StringUtils.isNotBlank(regexpValue)) {
                 Pattern pattern = Pattern.compile(regexpValue);
                 Matcher matcher = pattern.matcher(attributeValue);
                 if (!matcher.matches()) {

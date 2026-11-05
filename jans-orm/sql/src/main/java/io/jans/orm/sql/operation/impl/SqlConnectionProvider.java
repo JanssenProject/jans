@@ -122,7 +122,7 @@ public class SqlConnectionProvider {
 			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
 			Properties clonedProperties = (Properties) props.clone();
-			if (clonedProperties.getProperty("auth.userName") != null) {
+			if (clonedProperties.getProperty("auth.userPassword") != null) {
 				clonedProperties.setProperty("auth.userPassword", "REDACTED");
 			}
 
@@ -250,7 +250,7 @@ public class SqlConnectionProvider {
 			this.passwordEncryptionMethod = PasswordEncryptionMethod
 					.getMethod(props.getProperty("password.encryption.method"));
 		} else {
-			this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
+			this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SSHA256;
 		}
 
 		this.binaryAttributes = new ArrayList<String>();

@@ -95,6 +95,14 @@ public class TokenExchangeServiceTest {
     }
 
     @Test
+    public void createNewDeviceSecret_whenScopeOnlyContainsDeviceSSOSubstring_shouldNotGenerateDeviceSecret() {
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
+        assertEmpty(tokenExchangeService.createNewDeviceSecret("sessionDn", client, "openid my_device_sso"));
+    }
+
+    @Test
     public void createNewDeviceSecret_whenTokenExchangeGrantIsNotPresent_shouldNotGenerateDeviceSecret() {
         SessionId sessionId = new SessionId();
         Client client = new Client();

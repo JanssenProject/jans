@@ -1,4 +1,5 @@
 import contextlib
+import copy
 import json
 import logging.config
 import os
@@ -16,6 +17,7 @@ from jans.pycloudlib.utils import encode_text
 
 from settings import LOGGING_CONFIG
 from utils import get_role_scope_mappings
+from hooks import mark_auth_feature_flags_seeded
 from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -248,6 +250,7 @@ class Upgrade:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+        mark_auth_feature_flags_seeded(self.manager)
 
     def update_attributes_entries(self):
         def _update_claim_names():
@@ -413,11 +416,14 @@ class Upgrade:
         except TypeError:
             conf = entry.attrs["jansConfDyn"]
 
-        should_update = False
+        try:
+            seeded = json.loads(self.manager.config.get("admin_ui_seeded_role_mapping") or "{}")
+        except (TypeError, ValueError):
+            seeded = {}
+        if not isinstance(seeded, dict):
+            seeded = {}
 
-        if conf != role_mapping:
-            conf = role_mapping
-            should_update = True
+        conf, should_update = _merge_role_mapping(conf, role_mapping, seeded)
 
         # licenseSpringCredentials must be removed in favor of SCAN license credentials
         if "licenseSpringCredentials" in conf:
@@ -428,6 +434,16 @@ class Upgrade:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+        # recorded only after the merge is persisted, so a failed save re-seeds on the next run
+        def _names(items, key):
+            return {item.get(key) for item in items or [] if isinstance(item, dict) and isinstance(item.get(key), str)}
+
+        self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps({
+            "roles": sorted(_names(role_mapping.get("roles"), "role") | _seeded_names(seeded, "roles")),
+            "permissions": sorted(_names(role_mapping.get("permissions"), "permission") | _seeded_names(seeded, "permissions")),
+            "grants": sorted(list(grant) for grant in _default_grants(role_mapping) | _seeded_grants(seeded)),
+        }))
 
     def update_auth_errors_config(self):
         kwargs = {"table_name": "jansAppConf"}
@@ -553,7 +569,8 @@ class Upgrade:
         with contextlib.suppress(TypeError):
             message_conf = json.loads(message_conf)
 
-        entry.attrs["jansMessageConf"], should_update = _transform_message_config(message_conf)
+        entry.attrs["jansMessageConf"], message_conf_updated = _transform_message_config(message_conf)
+        should_update = should_update or message_conf_updated
 
         # set document store
         doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
@@ -571,6 +588,81 @@ class Upgrade:
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+
+def _seeded_names(seeded, key):
+    names = seeded.get(key)
+    return {name for name in names if isinstance(name, str)} if isinstance(names, list) else set()
+
+
+def _seeded_grants(seeded):
+    grants = seeded.get("grants")
+    if not isinstance(grants, list):
+        return set()
+    return {
+        tuple(grant) for grant in grants
+        if isinstance(grant, list) and len(grant) == 2 and all(isinstance(part, str) for part in grant)
+    }
+
+
+def _default_grants(defaults):
+    return {
+        (mapping.get("role"), perm)
+        for mapping in defaults.get("rolePermissionMapping") or []
+        if isinstance(mapping.get("role"), str)
+        for perm in mapping.get("permissions") or []
+        if isinstance(perm, str)
+    }
+
+
+def _merge_role_mapping(conf, defaults, seeded=None):
+    """Add new default roles/permissions/grants without restoring ones removed by admins."""
+    if not isinstance(conf, dict):
+        return copy.deepcopy(defaults), True
+
+    seeded = seeded if isinstance(seeded, dict) else {}
+    seeded_roles = _seeded_names(seeded, "roles")
+    seeded_perms = _seeded_names(seeded, "permissions")
+    seeded_grants = _seeded_grants(seeded)
+
+    should_update = False
+
+    for key in ("roles", "permissions", "rolePermissionMapping"):
+        if not isinstance(conf.get(key), list):
+            conf[key] = []
+            should_update = True
+
+    known_roles = {role.get("role") for role in conf["roles"]} | seeded_roles
+    for role in defaults.get("roles", []):
+        if role.get("role") not in known_roles:
+            conf["roles"].append(role)
+            should_update = True
+
+    known_perms = {perm.get("permission") for perm in conf["permissions"]} | seeded_perms
+    for perm in defaults.get("permissions", []):
+        if perm.get("permission") not in known_perms:
+            conf["permissions"].append(perm)
+            should_update = True
+
+    mappings = {mapping.get("role"): mapping for mapping in conf["rolePermissionMapping"]}
+    for default_mapping in defaults.get("rolePermissionMapping", []):
+        role = default_mapping.get("role")
+        mapping = mappings.get(role)
+
+        if mapping is None:
+            if role not in seeded_roles:
+                conf["rolePermissionMapping"].append(copy.deepcopy(default_mapping))
+                should_update = True
+            continue
+
+        if not isinstance(mapping.get("permissions"), list):
+            mapping["permissions"] = []
+        for perm in default_mapping.get("permissions", []):
+            # a seeded pair missing from the stored mapping was revoked by an admin
+            if perm not in mapping["permissions"] and (role, perm) not in seeded_grants:
+                mapping["permissions"].append(perm)
+                should_update = True
+    return conf, should_update
 
 
 def _transform_message_config(conf):
@@ -607,7 +699,9 @@ def _transform_message_config(conf):
             "messageWaitMillis": msg_wait_millis,
             "messageSleepThreadTime": msg_sleep_thread,
         },
+        # keep existing TLS/auth settings; only the server address is env-driven
         "redisConfiguration": {
+            **(conf.get("redisConfiguration") or {}),
             "servers": os.environ.get("CN_REDIS_URL", "localhost:6379"),
         },
     }

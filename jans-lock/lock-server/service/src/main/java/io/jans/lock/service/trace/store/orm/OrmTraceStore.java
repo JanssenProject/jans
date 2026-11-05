@@ -141,10 +141,6 @@ public class OrmTraceStore implements TraceStore {
 		return "ou=policyReleases," + baseDn();
 	}
 
-	private String policyReleaseDn(String policyStoreId, String bundleHash) {
-		return TraceKeys.policyReleaseDn(baseDn(), traceKeys.policyReleaseKey(policyStoreId, bundleHash));
-	}
-
 	// -- duplicate-safe insert -------------------------------------------
 
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
@@ -232,7 +228,7 @@ public class OrmTraceStore implements TraceStore {
 	public List<StoredTraceRecord> findRecordsByBareRecordId(String domainId, String recordId) {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_RECORD_ID, recordId));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(domainId, persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -246,7 +242,7 @@ public class OrmTraceStore implements TraceStore {
 		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
 				TraceRecordEntry.class, filter, null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING, Math.max(0, start), count,
 				count);
-		return toStoredList(paged.getEntries());
+		return toStoredList(exec.getDomainId(), paged.getEntries());
 	}
 
 	@Override
@@ -254,10 +250,10 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_EXEC_ID, traceExecutionId));
 		List<TraceRecordEntry> entities = persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class,
-				filter, new String[] { ATTR_EXEC_AUTHORITY });
+				filter, new String[] { ATTR_EXEC_AUTHORITY, ATTR_DOMAIN_ID });
 		Set<String> distinct = new LinkedHashSet<>();
 		for (TraceRecordEntry entity : entities) {
-			if (entity.getExecAuthority() != null) {
+			if (entity.getExecAuthority() != null && domainId.equals(entity.getDomainId())) {
 				distinct.add(entity.getExecAuthority());
 			}
 		}
@@ -270,7 +266,7 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(position.getChainIdentity().getDomainId(), persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -278,7 +274,7 @@ public class OrmTraceStore implements TraceStore {
 		String key = traceKeys.tokenKey(domainId, token);
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_TOKEN_KEYS, key).multiValued());
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(domainId, persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -306,7 +302,7 @@ public class OrmTraceStore implements TraceStore {
 		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
 				TraceRecordEntry.class, Filter.createANDFilter(filters), null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
 				Math.max(0, start), count, count);
-		return toStoredList(paged.getEntries());
+		return toStoredList(domainId, paged.getEntries());
 	}
 
 	@Override
@@ -315,8 +311,12 @@ public class OrmTraceStore implements TraceStore {
 		return persistenceEntryManager.countEntries(recordsBase(), TraceRecordEntry.class, filter);
 	}
 
-	private static List<StoredTraceRecord> toStoredList(List<TraceRecordEntry> entities) {
-		return entities.stream().map(TraceEntityMapper::toStoredTraceRecord).collect(Collectors.toList());
+	/**
+	 * Drops rows of another domain: a case-insensitive collation can match a domain id spelled differently.
+	 */
+	private static List<StoredTraceRecord> toStoredList(String domainId, List<TraceRecordEntry> entities) {
+		return entities.stream().filter(entity -> domainId.equals(entity.getDomainId()))
+				.map(TraceEntityMapper::toStoredTraceRecord).collect(Collectors.toList());
 	}
 
 	// -- receipts -------------------------------------------------------------------------------

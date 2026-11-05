@@ -94,7 +94,7 @@ impl Default for BootstrapConfig {
                 ),
                 ..Default::default()
             },
-            jwt_config: JwtConfig::new_without_validation(),
+            jwt_config: JwtConfig::default(),
             authorization_config: AuthorizationConfig::default(),
             lock_config: None,
             max_default_entities: None,

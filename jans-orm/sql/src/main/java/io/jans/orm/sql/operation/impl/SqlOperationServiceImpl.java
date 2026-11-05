@@ -186,7 +186,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = addEntryImpl(tableMapping, key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, attributes);
+        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, getAttributeNames(attributes));
         
         return result;
     }
@@ -231,7 +231,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = updateEntryImpl(tableMapping, key, mods);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, describeModifications(mods));
 
         return result;
     }
@@ -261,7 +261,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = updateEntryWithVersionImpl(tableMapping, key, mods, versionAttributeName, expectedVersionValue);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, describeModifications(mods));
 
         return result;
 	}
@@ -442,6 +442,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 			Predicate whereExp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
 					Expressions.constant(key));
+			validateSelectAttributes(tableMapping, attributes);
 			Expression<?> attributesExp = buildSelectAttributes(attributes);
 
 			SQLQuery<?> sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath)
@@ -485,6 +486,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
         RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 
+		validateSelectAttributes(tableMapping, attributes);
+		validateOrderBy(tableMapping, orderBy);
 		Expression<?> attributesExp = buildSelectAttributes(attributes);
 
         List<EntryData> searchResultList = new LinkedList<EntryData>();
@@ -718,7 +721,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+			if (isSkipHashed && isPreHashedPassword(passwords[i])) {
 				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
 				results[i] = passwords[i];
 				continue;
@@ -922,6 +925,37 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	@Override
 	public boolean isSupportObjectClass(String objectClass) {
 		return true;
+	}
+
+	private void validateSelectAttributes(TableMapping tableMapping, String ... attributes) throws SearchException {
+		if (ArrayHelper.isEmpty(attributes) || ((attributes.length == 1) && StringHelper.isEmpty(attributes[0]))) {
+			return;
+		}
+
+		for (String attribute : attributes) {
+			validateColumnName(tableMapping, attribute);
+		}
+	}
+
+	private void validateOrderBy(TableMapping tableMapping, OrderSpecifier<?>[] orderBy) throws SearchException {
+		if (orderBy == null) {
+			return;
+		}
+
+		for (OrderSpecifier<?> orderSpecifier : orderBy) {
+			Expression<?> target = orderSpecifier.getTarget();
+			if (!(target instanceof Path)) {
+				throw new SearchException(String.format("Unsupported order by expression '%s'", target));
+			}
+			validateColumnName(tableMapping, ((Path<?>) target).getMetadata().getName());
+		}
+	}
+
+	private void validateColumnName(TableMapping tableMapping, String columnName) throws SearchException {
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+		if ((columnName == null) || (columTypes == null) || !columTypes.containsKey(columnName.toLowerCase())) {
+			throw new SearchException(String.format("Column '%s' is undefined", columnName));
+		}
 	}
 
 	private Expression<?> buildSelectAttributes(String ... attributes) {
@@ -1316,6 +1350,37 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	@Override
 	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
 		return connectionProvider.getTableColumnsMap();
+	}
+
+	private boolean isPreHashedPassword(String password) {
+		if (persistenceExtension != null) {
+			// Extension may use its own hash format
+			return PasswordEncryptionHelper.findAlgorithmString(password) != null;
+		}
+
+		// Unknown {prefix} would be stored and later compared as plaintext
+		return PasswordEncryptionHelper.findAlgorithm(password) != null;
+	}
+
+	private static List<String> getAttributeNames(Collection<AttributeData> attributes) {
+		List<String> names = new ArrayList<String>();
+		if (attributes != null) {
+			for (AttributeData attribute : attributes) {
+				names.add(attribute.getName());
+			}
+		}
+		return names;
+	}
+
+	private static List<String> describeModifications(List<AttributeDataModification> mods) {
+		List<String> descriptions = new ArrayList<String>();
+		if (mods != null) {
+			for (AttributeDataModification mod : mods) {
+				AttributeData attribute = mod.getAttribute() != null ? mod.getAttribute() : mod.getOldAttribute();
+				descriptions.add(mod.getModificationType() + ":" + (attribute == null ? null : attribute.getName()));
+			}
+		}
+		return descriptions;
 	}
 
 }

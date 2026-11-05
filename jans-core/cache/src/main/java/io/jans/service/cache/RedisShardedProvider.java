@@ -9,15 +9,15 @@ package io.jans.service.cache;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.Protocol;
 import redis.clients.jedis.ShardedJedis;
 import redis.clients.jedis.ShardedJedisPool;
 
-import javax.net.ssl.SSLParameters;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,14 +69,9 @@ public class RedisShardedProvider extends AbstractRedisProvider {
                 try {
                     final JedisShardInfo shardInfo;
                     if (configuration.getUseSSL()) {
-                        if (StringUtils.isNotBlank(configuration.getSslTrustStoreFilePath())
-                                && StringUtils.isNotBlank(configuration.getSslKeyStoreFilePath())) {
-                            shardInfo = new JedisShardInfo(host, port, true,
-                                    RedisProviderFactory.createSslSocketFactory(configuration),
-                                    new SSLParameters(), new DefaultHostnameVerifier());
-                        } else {
-                            shardInfo = new JedisShardInfo(host, port, true);
-                        }
+                        shardInfo = new JedisShardInfo(host, port, true,
+                                RedisProviderFactory.createSslSocketFactory(configuration),
+                                RedisProviderFactory.createSslParameters(), RedisProviderFactory.createHostnameVerifier());
                     } else {
                         shardInfo = new JedisShardInfo(host, port);
                     }
@@ -84,11 +79,41 @@ public class RedisShardedProvider extends AbstractRedisProvider {
                 } catch (Exception e) {
                     LOG.error("Failed to create shard info.", e);
                 }
+            } else if (configuration.getUseSSL()) {
+                shards.add(sslShard(serverWithPort, configuration));
             } else {
                 shards.add(new JedisShardInfo(serverWithPort));
             }
         }
         return shards;
+    }
+
+    private static JedisShardInfo sslShard(String server, RedisConfiguration configuration) {
+        try {
+            if (server.contains("://")) {
+                URI uri = URI.create(server);
+                if (!"rediss".equalsIgnoreCase(uri.getScheme())) {
+                    throw new IllegalArgumentException("Only rediss:// URIs are allowed when useSSL is enabled");
+                }
+                return new JedisShardInfo(uri, RedisProviderFactory.createSslSocketFactory(configuration),
+                        RedisProviderFactory.createSslParameters(), RedisProviderFactory.createHostnameVerifier());
+            }
+            if (server.contains("@")) {
+                throw new IllegalArgumentException("Use a rediss:// URI to pass credentials when useSSL is enabled");
+            }
+            String host = server;
+            int port = Protocol.DEFAULT_PORT;
+            if (server.contains(":")) {
+                host = StringUtils.substringBefore(server, ":");
+                port = Integer.parseInt(StringUtils.substringAfter(server, ":").trim());
+            }
+            return new JedisShardInfo(host, port, true, RedisProviderFactory.createSslSocketFactory(configuration),
+                    RedisProviderFactory.createSslParameters(), RedisProviderFactory.createHostnameVerifier());
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to create SSL shard info", e);
+        }
     }
 
     public void destroy() {

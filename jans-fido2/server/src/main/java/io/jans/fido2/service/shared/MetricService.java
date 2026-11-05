@@ -31,6 +31,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -565,14 +568,28 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 if (SESSION_ID_COOKIE.equals(cookie.getName())) {
                     String value = cookie.getValue();
                     if (value != null && !value.trim().isEmpty()) {
-                        return value;
+                        return pseudonymizeSessionId(value);
                     }
                 }
             }
         }
 
         HttpSession session = request.getSession(false);
-        return session == null ? null : session.getId();
+        return session == null ? null : pseudonymizeSessionId(session.getId());
+    }
+
+    // Session ids are bearer credentials; telemetry only needs a stable correlation key
+    static String pseudonymizeSessionId(String sessionId) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(sessionId.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========

@@ -86,7 +86,7 @@ public class Fido2DeviceService implements Serializable {
 			}
 		} catch (Exception e) {
 		    if (!SearchException.class.isInstance(e.getCause())) {
-                log.error(e.getMessage(), e.getCause());
+                log.error("Failed to look up Fido 2 device: {}", e.getClass().getName());
                 throw e;
             }
             log.debug("Failed to find Fido 2 device with id {}", id);

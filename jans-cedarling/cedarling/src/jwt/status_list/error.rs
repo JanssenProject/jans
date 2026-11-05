@@ -60,4 +60,6 @@ pub(crate) enum UpdateStatusListError {
     ParseStatusList(#[from] ParseStatusListError),
     #[error("failed to get status list JWT: {0}")]
     GetStatusListJwt(#[source] HttpError),
+    #[error("the status list JWT from '{0}' is not bound to that endpoint and its issuer")]
+    UnboundStatusList(String),
 }

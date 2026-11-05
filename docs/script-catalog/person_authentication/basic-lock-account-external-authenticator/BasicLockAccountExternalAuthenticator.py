@@ -80,6 +80,9 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             cacheService = CdiUtil.bean(CacheService)
 
+            # user names are logged below; reject line breaks to keep log records intact
+            if user_name is not None and ("\r" in user_name or "\n" in user_name):
+                return False
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
@@ -229,14 +232,14 @@ class PersonAuthentication(PersonAuthenticationType):
         if (find_user_by_uid is None):
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
+        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "jansStatus")
         if status_attribute_value != None:
             user_status = status_attribute_value.getValue()
             if StringHelper.equals(user_status, "inactive"):
                 print "Basic (lock account). Lock user. User '%s' locked already" % user_name
                 return
         
-        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
+        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
         userService.updateUser(find_user_by_uid)
 
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))

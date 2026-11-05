@@ -27,7 +27,7 @@ from email.mime.text import MIMEText
 from java.util import Arrays
 
 # to generate string token
-import random
+from java.security import SecureRandom
 import string
 
 # regex
@@ -39,7 +39,8 @@ class EmailValidator():
     '''
     Class to check e-mail format
     '''
-    regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
+    # no nested quantifiers (avoids catastrophic backtracking); \Z rejects a trailing newline
+    regex = r'^[\w.+-]+@[\w-]+(\.[\w-]+)*\.[A-Za-z]{2,}\Z'
 
     def check(self, email):
         '''
@@ -47,11 +48,11 @@ class EmailValidator():
         returns: boolean
         '''
 
-        if(re.search(self.regex,email)):
+        if email and re.search(self.regex,email):
             print "Forgot Password - %s is a valid email format" % email
             return True
         else:
-            print "Forgot Password - %s is an invalid email format" % email
+            print "Forgot Password - invalid email format"
             return False
 
 class Token:
@@ -67,7 +68,8 @@ class Token:
         lenght = 20
 
         #generate token
-        token = ''.join(random.choice(letters) for i in range(lenght))
+        rng = SecureRandom()
+        token = ''.join(letters[rng.nextInt(len(letters))] for i in range(lenght))
         print "Forgot Password - Generating token"
 
         return token
@@ -241,12 +243,10 @@ class PersonAuthentication(PersonAuthenticationType):
                             token = new_token.generateToken()                
                             sender = EmailSender()
                             print "Email: " + email
-                            print "Token: " + token
                             sender.sendEmail(email,token)
 
                         
                             identity.setWorkingParameter("token", token)
-                            print identity.getWorkingParameter("token")
                         
      
                             
@@ -288,7 +288,6 @@ class PersonAuthentication(PersonAuthenticationType):
                         token = new_token.generateToken()                
                         sender = EmailSender()
                         print "Email: " + email
-                        print "Token: " + token
                         sender.sendEmail(email,token)
 
                         identity.setWorkingParameter("token", token)
@@ -314,7 +313,6 @@ class PersonAuthentication(PersonAuthenticationType):
             # retrieves token typed by user
             input_token = ServerUtil.getFirstValue(requestParameters, "ResetTokenForm:inputToken")
 
-            print "Forgot Password - Token inputed by user is %s" % input_token
 
             token = identity.getWorkingParameter("token")
             print "Forgot Password - Retrieved token"

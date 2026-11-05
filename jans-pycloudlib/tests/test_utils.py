@@ -174,6 +174,29 @@ def test_get_server_certificate(tmpdir, httpsserver):
     assert cert == filepath.read()
 
 
+@pytest.mark.skipif(
+    distro.id() == "ubuntu" and distro.version().startswith("20"),
+    reason="need to lower security level on current OS",
+)
+def test_get_server_certificate_fingerprint(tmpdir, httpsserver):
+    import hashlib
+    import ssl
+    from jans.pycloudlib.utils import get_server_certificate
+
+    host, port = httpsserver.server_address
+    filepath = tmpdir.mkdir("jans").join("jans.crt")
+
+    cert = get_server_certificate(host, port, str(filepath))
+    fp = hashlib.sha256(ssl.PEM_cert_to_DER_cert(cert)).hexdigest()
+    filepath.remove()
+
+    assert get_server_certificate(host, port, str(filepath), fingerprint=fp.upper()) == cert
+
+    with pytest.raises(ssl.SSLCertVerificationError):
+        get_server_certificate(host, port, str(filepath) + ".bad", fingerprint="00" * 32)
+    assert not tmpdir.join("jans", "jans.crt.bad").exists()
+
+
 def test_ldap_encode():
     from jans.pycloudlib.utils import ldap_encode
 

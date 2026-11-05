@@ -322,7 +322,7 @@ class MetricServiceTest {
                 System.currentTimeMillis(), "platform", null);
 
         // Then
-        assertEquals("cookie-session-id", captureStoredMetrics().getSessionId());
+        assertEquals(MetricService.pseudonymizeSessionId("cookie-session-id"), captureStoredMetrics().getSessionId());
     }
 
     /**
@@ -342,7 +342,7 @@ class MetricServiceTest {
                 System.currentTimeMillis(), "platform", null);
 
         // Then
-        assertEquals("servlet-session-id", captureStoredMetrics().getSessionId());
+        assertEquals(MetricService.pseudonymizeSessionId("servlet-session-id"), captureStoredMetrics().getSessionId());
     }
 
     @Test

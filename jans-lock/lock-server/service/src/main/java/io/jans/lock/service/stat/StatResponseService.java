@@ -22,6 +22,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import net.agkn.hll.HLL;
 
 /**
@@ -29,6 +30,8 @@ import net.agkn.hll.HLL;
  */
 @ApplicationScoped
 public class StatResponseService {
+
+    public static final int MAX_MONTHS = 240;
 
 	@Inject
     private Logger log;
@@ -45,6 +48,10 @@ public class StatResponseService {
             .build();
 
     public StatResponse buildResponse(Set<String> months) {
+        if (months.size() > MAX_MONTHS) {
+            throw new BadRequestException("Too many months requested, maximum is " + MAX_MONTHS);
+        }
+
         final String cacheKey = months.toString();
         final StatResponse cachedResponse = responseCache.getIfPresent(cacheKey);
         if (cachedResponse != null) {

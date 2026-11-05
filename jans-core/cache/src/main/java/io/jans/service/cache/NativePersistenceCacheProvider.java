@@ -112,10 +112,11 @@ public class NativePersistenceCacheProvider extends AbstractCacheProvider<Persis
 	public boolean hasKey(String key) {
         try {
             key = hashKey(key);
-            boolean hasKey = entryManager.contains(createDn(key), NativePersistenceCacheEntity.class);
-            
-//            log.trace("Contains key in cache, key: " + key + ", dn: " + createDn(key)) + ", contains: " + hasKey);
-            return hasKey;
+            NativePersistenceCacheEntity entity = entryManager.find(NativePersistenceCacheEntity.class, createDn(key));
+            if (entity == null) {
+                return false;
+            }
+            return !(isExpired(entity.getExpirationDate()) && entity.isDeletable());
         } catch (Exception e) {
             // ignore, we call cache first which is empty and then fill it in
             // log.trace("No entry with key: " + originalKey + ", message: " + e.getMessage() + ", hashedKey: " + key);

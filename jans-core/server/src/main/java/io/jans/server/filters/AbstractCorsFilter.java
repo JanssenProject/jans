@@ -756,7 +756,7 @@ public abstract class AbstractCorsFilter implements Filter {
 
     protected void setContextClientAllowedOrigins(ServletRequest servletRequest, Collection<String> clientAllowedOrigins) {
     	if (log.isTraceEnabled()) {
-    		log.trace("setContextClientAllowedOrigins: {}", clientAllowedOrigins);
+    		log.trace("setContextClientAllowedOrigins: {}", escapeLog(clientAllowedOrigins));
     	}
     	servletRequest.setAttribute(PARAM_CLIENT_ALLOWED_ORIGINS, clientAllowedOrigins);
     }
@@ -788,7 +788,7 @@ public abstract class AbstractCorsFilter implements Filter {
     			allAttributes.append(",");
     		}
 			String attributeName = (String) it.next();
-			allAttributes.append(attributeName).append(" = ").append(request.getAttribute(attributeName));
+			allAttributes.append(escapeLog(attributeName)).append(" = ").append(escapeLog(request.getAttribute(attributeName)));
 		}
     	allAttributes.append("]");
     	
@@ -798,11 +798,16 @@ public abstract class AbstractCorsFilter implements Filter {
     			allHeaders.append(",");
     		}
 			String HeaderName = (String) it.next();
-			allHeaders.append(HeaderName).append(" = ").append(request.getHeader(HeaderName));
+			String headerValue = SENSITIVE_HEADERS.contains(HeaderName.toLowerCase(Locale.ROOT)) ? "[REDACTED]" : request.getHeader(HeaderName);
+			allHeaders.append(escapeLog(HeaderName)).append(" = ").append(escapeLog(headerValue));
 		}
     	allHeaders.append("]");
     	
-    	log.trace("{}: request method {} to URI {}, corsType {}, attributes {}, headers {}", prefix, request.getMethod(), request.getRequestURI(), corsRequestType, allAttributes, allHeaders);
+    	log.trace("{}: request method {} to URI {}, corsType {}, attributes {}, headers {}", prefix, escapeLog(request.getMethod()), escapeLog(request.getRequestURI()), corsRequestType, allAttributes, allHeaders);
+	}
+
+	private static String escapeLog(Object value) {
+		return value == null ? null : value.toString().replaceAll("[\\r\\n\\t]", "_");
 	}
 
     /**
@@ -1056,6 +1061,9 @@ public abstract class AbstractCorsFilter implements Filter {
             new HashSet<String>(Arrays.asList(
                     "application/x-www-form-urlencoded",
                     "multipart/form-data", "text/plain"));
+
+    private static final Set<String> SENSITIVE_HEADERS = Set.of("authorization", "proxy-authorization", "cookie",
+            "set-cookie", "dpop", "x-api-key");
 
     // ------------------------------------------------ Configuration Defaults
     /**

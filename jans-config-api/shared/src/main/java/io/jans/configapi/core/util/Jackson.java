@@ -21,6 +21,8 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import com.google.common.base.Preconditions;
 
+import io.jans.orm.model.base.Entry;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -100,7 +102,12 @@ public class Jackson {
         ObjectMapper objectMapper = JacksonUtils.newMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         JsonNode patched = jsonPatch.apply(objectMapper.convertValue(obj, JsonNode.class));
-        return (T) objectMapper.treeToValue(patched, obj.getClass());
+        T result = (T) objectMapper.treeToValue(patched, obj.getClass());
+        // A patch must never retarget the persisted entry
+        if (obj instanceof Entry && result instanceof Entry) {
+            ((Entry) result).setDn(((Entry) obj).getDn());
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")

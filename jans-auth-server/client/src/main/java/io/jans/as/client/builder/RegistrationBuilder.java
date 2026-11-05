@@ -1,6 +1,5 @@
 package io.jans.as.client.builder;
 
-import io.jans.as.client.ClientUtils;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -236,9 +235,7 @@ public class RegistrationBuilder implements Builder {
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
-        RegisterResponse response = registerClient.exec();
-        ClientUtils.showClient(registerClient);
-        return response;
+        return registerClient.exec();
     }
 
 }

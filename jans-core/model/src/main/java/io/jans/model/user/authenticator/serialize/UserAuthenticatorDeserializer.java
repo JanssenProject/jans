@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import io.jans.model.user.authenticator.UserAuthenticator;
@@ -34,11 +35,19 @@ public class UserAuthenticatorDeserializer extends StdDeserializer<UserAuthentic
 
 		UserAuthenticatorList userAuthenticatorList = new UserAuthenticatorList();
 
+		if (p.getCurrentToken() != JsonToken.START_OBJECT) {
+			throw JsonMappingException.from(p, "Expected JSON object for user authenticators");
+		}
+
 		String id = null;
 		while (p.nextToken() != JsonToken.END_OBJECT) {
 			JsonToken token = p.getCurrentToken();
 
-			if (token == JsonToken.FIELD_NAME) {
+			if (token == null) {
+				throw JsonMappingException.from(p, "Unexpected end of input in user authenticators");
+			} else if (token == JsonToken.START_ARRAY) {
+				p.skipChildren();
+			} else if (token == JsonToken.FIELD_NAME) {
 				id = p.getCurrentName();
 			} else if (token == JsonToken.START_OBJECT) {
 				UserAuthenticator userAuthenticator = ctxt.readValue(p, UserAuthenticator.class);

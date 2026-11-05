@@ -18,6 +18,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 /**
  * AuthZEN Search API v1.
  * Implements search endpoints per AuthZEN spec:
@@ -53,7 +55,7 @@ public class AccessEvaluationSearchWS {
     @Produces({MediaType.APPLICATION_JSON})
     public Response searchSubject(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
 
-        log.trace("/search/subject - request params: {}", requestParams);
+        log.trace("/search/subject - request params: {}", escapeLog(requestParams));
 
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -98,7 +100,7 @@ public class AccessEvaluationSearchWS {
     @Produces({MediaType.APPLICATION_JSON})
     public Response searchResource(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
 
-        log.trace("/search/resource - request params: {}", requestParams);
+        log.trace("/search/resource - request params: {}", escapeLog(requestParams));
 
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -143,7 +145,7 @@ public class AccessEvaluationSearchWS {
     @Produces({MediaType.APPLICATION_JSON})
     public Response searchAction(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
 
-        log.trace("/search/action - request params: {}", requestParams);
+        log.trace("/search/action - request params: {}", escapeLog(requestParams));
 
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -183,7 +185,7 @@ public class AccessEvaluationSearchWS {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchSubjectRequest.class);
         } catch (JsonProcessingException e) {
-            log.error(String.format("Failed to parse search subject request json: %s", requestParams), e);
+            log.error("Failed to parse search subject request json.", e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity("Failed to parse search subject request")
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
@@ -194,7 +196,7 @@ public class AccessEvaluationSearchWS {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchResourceRequest.class);
         } catch (JsonProcessingException e) {
-            String msg = String.format("Failed to parse search resource request json: %s", requestParams);
+            String msg = "Failed to parse search resource request json.";
             log.error(msg, e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(msg)
@@ -206,7 +208,7 @@ public class AccessEvaluationSearchWS {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, SearchActionRequest.class);
         } catch (JsonProcessingException e) {
-            String msg = String.format("Failed to parse search action request json: %s", requestParams);
+            String msg = "Failed to parse search action request json.";
             log.error(msg, e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity(msg)

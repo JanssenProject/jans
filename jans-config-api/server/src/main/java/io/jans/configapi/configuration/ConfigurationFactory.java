@@ -99,6 +99,9 @@ public class ConfigurationFactory {
     @Inject
     private Instance<Configuration> configurationInstance;
 
+    @Inject
+    private Instance<CorsConfiguration> corsConfigurationInstance;
+
     // timer events
     public static final String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
     public static final String BASE_CONFIGURATION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
@@ -177,7 +180,8 @@ public class ConfigurationFactory {
         } catch (Exception ex) {
             throw new ConfigurationException("Failed to initialize  CorsConfiguration" + corsConfigurationFilter);
         }
-        return null;
+        // An absent filter config disables CORS rather than keeping a stale policy.
+        return new CorsConfiguration();
     }
 
     @Produces
@@ -367,6 +371,8 @@ public class ConfigurationFactory {
                 // Destroy old configuration
                 if (this.apiConfigloaded) {
                     destroy(ApiAppConfiguration.class);
+                    // re-produced on next use so CorsFilter sees the reloaded policy
+                    corsConfigurationInstance.destroy(corsConfigurationInstance.get());
                 }
 
                 this.apiConfigloaded = true;
@@ -414,6 +420,7 @@ public class ConfigurationFactory {
         this.apiClientPassword = this.apiAppConfiguration.getApiClientPassword();
         this.configOauthEnabled = this.apiAppConfiguration.isConfigOauthEnabled();
 
+        this.corsConfigurationFilter = null;
         if (this.apiAppConfiguration.getCorsConfigurationFilters() != null
                 && !this.apiAppConfiguration.getCorsConfigurationFilters().isEmpty()) {
             this.corsConfigurationFilter = this.apiAppConfiguration.getCorsConfigurationFilters().stream()

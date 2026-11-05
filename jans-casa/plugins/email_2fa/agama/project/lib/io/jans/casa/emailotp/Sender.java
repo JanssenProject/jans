@@ -50,7 +50,6 @@ public class Sender {
         otp = digits.mapToObj(i -> "" + i).collect(Collectors.joining());
         
         otpIssuedAt = System.currentTimeMillis();
-        logger.debug("OTP is {}", otp);
       
         String msg = String.format(message, otp);
         MailService ms = CdiUtil.bean(MailService.class);
@@ -78,8 +77,10 @@ public class Sender {
                     try {
                         int val = Integer.class.cast(obj);
                         if (val <= 0) throw new IllegalArgumentException();
+                        return val;
                     } catch (Exception e) {
                         logger.error("Error converting {} to a positive number. Using a default value", obj.toString());
+                        return defValue;
                     }
             }).orElse(defValue);
             

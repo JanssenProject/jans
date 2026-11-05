@@ -3,6 +3,8 @@ package jans
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strconv"
 )
 
 type ProjectMetadata struct {
@@ -98,12 +100,10 @@ func (c *Client) CreateAgamaDeployment(ctx context.Context, name string, autocon
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	url := "/jans-config-api/api/v1/agama-deployment/" + name
-	if autoconfig {
-		url += "?autoconfigure=true"
-	}
+	path := "/jans-config-api/api/v1/agama-deployment/" + url.PathEscape(name) +
+		"?autoconfigure=" + strconv.FormatBool(autoconfig)
 
-	if err := c.postZipFile(ctx, url, token, scope, data, nil); err != nil {
+	if err := c.postZipFile(ctx, path, token, scope, data, nil); err != nil {
 		return fmt.Errorf("post request failed: %w", err)
 	}
 
@@ -123,7 +123,7 @@ func (c *Client) DeleteAgamaDeployment(ctx context.Context, qname string) error 
 		return fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.delete(ctx, "/jans-config-api/api/v1/agama-deployment/"+qname, token, scope); err != nil {
+	if err := c.delete(ctx, "/jans-config-api/api/v1/agama-deployment/"+url.PathEscape(qname), token, scope); err != nil {
 		return fmt.Errorf("delete request failed: %w", err)
 	}
 

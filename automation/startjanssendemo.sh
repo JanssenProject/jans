@@ -32,7 +32,11 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP ]]; then
-  EXT_IP=$(curl ipinfo.io/ip)
+  EXT_IP=$(curl -fsS --proto '=https' https://ipinfo.io/ip)
+fi
+if ! [[ $EXT_IP =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+  echo "[E] Invalid external IP address: $EXT_IP"
+  exit 1
 fi
 
 sudo apt-get update
@@ -179,8 +183,6 @@ sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
 sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" --version="$JANS_VERSION"
 cat << EOF > testendpoints.sh
-sudo microk8s config > config
-KUBECONFIG="$PWD"/config
 echo -e "Testing openid-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/openid-configuration
 echo -e "Testing scim-configuration endpoint.. \n"

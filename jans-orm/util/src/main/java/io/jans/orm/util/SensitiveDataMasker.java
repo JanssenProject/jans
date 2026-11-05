@@ -34,10 +34,12 @@ public final class SensitiveDataMasker {
      * (and therefore the masking) to stop partway through the value. Absent any valid terminator, the match runs
      * through the end of input, so a truncated or malformed sensitive value is fully masked instead of partially
      * leaked.
+     * A bare scalar never starts with an object or array opener; an opener matches on its own, so a nonsensitive
+     * key's nested container is still scanned member by member, while a sensitive key's container is masked whole.
      */
     private static final Pattern RAW_JSON_KEY_VALUE_PATTERN = Pattern.compile(
             "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)"
-                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,}\\]\\s]+)");
+                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,{}\\[\\]\\s\"][^,}\\]\\s]*|[\\[{])");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -75,15 +77,49 @@ public final class SensitiveDataMasker {
     private static String maskRawText(String value) {
         Matcher matcher = RAW_JSON_KEY_VALUE_PATTERN.matcher(value);
         StringBuilder result = new StringBuilder();
+        int last = 0;
+        int from = 0;
 
-        while (matcher.find()) {
+        while (from < value.length() && matcher.find(from)) {
             if (SENSITIVE_KEY_PATTERN.matcher(unescapeJson(matcher.group(2))).find()) {
-                matcher.appendReplacement(result, Matcher.quoteReplacement(matcher.group(1) + "\"" + MASKED + "\""));
+                String token = matcher.group(3);
+                boolean opener = "[".equals(token) || "{".equals(token);
+                int end = opener ? findContainerEnd(value, matcher.start(3)) : matcher.end();
+                result.append(value, last, matcher.start()).append(matcher.group(1))
+                        .append('"').append(MASKED).append('"');
+                last = end;
+                from = end;
+            } else {
+                from = matcher.end();
             }
         }
-        matcher.appendTail(result);
+        result.append(value, last, value.length());
 
         return result.toString();
+    }
+
+    private static int findContainerEnd(String value, int start) {
+        int depth = 0;
+        boolean inString = false;
+
+        for (int i = start; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (inString) {
+                if (c == '\\') {
+                    i++;
+                } else if (c == '"') {
+                    inString = false;
+                }
+            } else if (c == '"') {
+                inString = true;
+            } else if (c == '[' || c == '{') {
+                depth++;
+            } else if ((c == ']' || c == '}') && --depth == 0) {
+                return i + 1;
+            }
+        }
+
+        return value.length();
     }
 
     private static String unescapeJson(String rawEscapedText) {

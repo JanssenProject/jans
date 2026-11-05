@@ -169,12 +169,18 @@ skip() { SKIP=$((SKIP + 1)); echo "⚠️  skipped: $1"; }
 
 # Credentials go to curl through a config on stdin, tokens through a config
 # file inside the private temp directory: neither shows up in the process list.
+# The token is checked against the RFC 6750 b64token grammar before it reaches a curl config.
 get_token() {
-  local id="$1" secret="$2" scope="$3"
-  printf 'user = "%s:%s"\n' "$id" "$secret" \
+  local id="$1" secret="$2" scope="$3" token
+  token=$(printf 'user = "%s:%s"\n' "$id" "$secret" \
     | curl "${CURL_BASE[@]}" -K - "$TOKEN_URL" \
         -d "grant_type=client_credentials" -d "scope=${scope}" \
-    | jq -r '.access_token // empty'
+    | jq -r '.access_token // empty')
+  if [[ -n "$token" && ! "$token" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; then
+    echo "❌ access_token is not a valid bearer token, ignoring it" >&2
+    return 0
+  fi
+  printf '%s' "$token"
 }
 
 # http METHOD URL TOKEN [extra curl args...]  -> sets HTTP_STATUS, HTTP_BODY
@@ -406,14 +412,14 @@ expect_status "write → AUTHORIZATION_DECISION (producer seq 1)" 202
 expect_jq "write → acceptance is not a replay" '.accepted == true and .idempotent_replay == false'
 expect_jq "write → received_at is RFC 3339 UTC with milliseconds" \
   '.received_at | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$")'
-RECEIPT_AUTH="$(jq -r '.receipt_sequence // empty' <<<"$HTTP_BODY")"
-DIGEST_AUTH="$(jq -r '.content_digest // empty' <<<"$HTTP_BODY")"
+RECEIPT_AUTH="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
+DIGEST_AUTH="$(jq -r '.content_digest | tostring | select(test("^sha256:[0-9a-f]{64}$"))' <<<"$HTTP_BODY")"
 [[ -n "$RECEIPT_AUTH" ]] && echo "    receipt_sequence=${RECEIPT_AUTH}"
 
 INVOKE_JSON="$(build_capability_invoked "$RID_INVOKE" 1 "$ZERO_HASH" "$NOW" "$RID_AUTH")"
 post_json "$API" "$WRITE_TOKEN" "$INVOKE_JSON"
 expect_status "write → CAPABILITY_INVOKED (second producer and chain, genesis)" 202
-RECEIPT_INVOKE="$(jq -r '.receipt_sequence // empty' <<<"$HTTP_BODY")"
+RECEIPT_INVOKE="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
 if [[ -n "$RECEIPT_AUTH" && -n "$RECEIPT_INVOKE" && "$RECEIPT_INVOKE" -gt "$RECEIPT_AUTH" ]]; then
   pass "write → second record received a later receipt_sequence (${RECEIPT_INVOKE} > ${RECEIPT_AUTH})"
 else
@@ -529,7 +535,7 @@ C2_1_JSON="$(build_authorization_decision "$RID_C2_1" 1 "$ZERO_HASH" "$NOW" "$CH
 post_json "$API" "$WRITE_TOKEN" "$C2_1_JSON"
 expect_status "chains → genesis on the second chain" 202
 expect_jq "chains → second chain starts without a coverage gap" '.coverage_gap_flag == false'
-RECEIPT_C2_1="$(jq -r '.receipt_sequence // empty' <<<"$HTTP_BODY")"
+RECEIPT_C2_1="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
 DIGEST_C2_1="$(py digest <<<"$C2_1_JSON")"
 
 RID_C1_2="$(py uuid)"
@@ -538,7 +544,7 @@ post_json "$API" "$WRITE_TOKEN" "$C1_2_JSON"
 expect_status "chains → next record on the first chain, interleaved" 202
 expect_jq "chains → first chain flags are independent of the second chain" \
   '.coverage_gap_flag == false and .chain_link_failure_flag == false and .equivocation_flag == false'
-RECEIPT_C1_2="$(jq -r '.receipt_sequence // empty' <<<"$HTTP_BODY")"
+RECEIPT_C1_2="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
 if [[ -n "$RECEIPT_C2_1" && -n "$RECEIPT_C1_2" && "$RECEIPT_C1_2" -gt "$RECEIPT_C2_1" ]]; then
   pass "chains → receipt_sequence keeps increasing across chains (${RECEIPT_C1_2} > ${RECEIPT_C2_1})"
 else

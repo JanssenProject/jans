@@ -37,6 +37,12 @@ def test_consul_config_merge_path(gconsul_config):
     assert gconsul_config._merge_path("foo") == gconsul_config.prefix + "foo"
 
 
+@pytest.mark.parametrize("key", ["../secret", "foo/../../bar", "/abs", "a/./b"])
+def test_consul_config_merge_path_invalid(gconsul_config, key):
+    with pytest.raises(ValueError):
+        gconsul_config._merge_path(key)
+
+
 def test_consul_config_unmerge_path(gconsul_config):
     assert gconsul_config._unmerge_path(gconsul_config.prefix + "foo") == "foo"
 

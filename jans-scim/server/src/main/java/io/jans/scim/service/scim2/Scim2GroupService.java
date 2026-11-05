@@ -387,7 +387,7 @@ public class Scim2GroupService implements Serializable {
 
 		Filter ldapFilter = scimFilterParserService.createFilter(filter, Filter.createPresenceFilter("inum"), GroupResource.class);
 		log.info("Executing search for groups using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}'",
-				ldapFilter.toString(), sortBy, sortOrder.getValue(), startIndex, count);
+				ldapFilter.toString().replaceAll("[\\r\\n\\t]", "_"), sortBy == null ? null : sortBy.replaceAll("[\\r\\n\\t]", "_"), sortOrder.getValue(), startIndex, count);
 
 		PagedResult<JansGroup> list = ldapEntryManager.findPagedEntries(groupService.getDnForGroup(null),
 				JansGroup.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, maxCount);

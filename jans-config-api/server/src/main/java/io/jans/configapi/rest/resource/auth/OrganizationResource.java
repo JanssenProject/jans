@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
@@ -91,10 +93,9 @@ public class OrganizationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ORG_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.ORG_CONFIG_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchOrganization(@NotNull String pathString) throws JsonPatchException, IOException {
-        logger.trace("Organization patch request - pathString:{} ", pathString);
+        logger.trace("Organization patch request - pathString:{} ", escapeLog(pathString));
         GluuOrganization organization = organizationService.getOrganization();
         try {
-
             organization = Jackson.applyPatch(pathString, organization);
             organizationService.updateOrganization(organization);
 

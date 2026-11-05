@@ -49,6 +49,9 @@ const OID_SCT_LIST: &str = "1.3.6.1.4.1.11129.2.4.2";
 /// OID for Extended Key Usage: code signing.
 const OID_EKU_CODE_SIGNING: &str = "1.3.6.1.5.5.7.3.3";
 
+/// id-ce-nameConstraints (RFC 5280 §4.2.1.10).
+const OID_NAME_CONSTRAINTS: &str = "2.5.29.30";
+
 /// OID for id-ecPublicKey (RFC 5480).
 const OID_EC_PUBLIC_KEY: &str = "1.2.840.10045.2.1";
 /// OID for the secp256r1 / prime256v1 named curve.
@@ -124,6 +127,10 @@ pub(crate) struct Cert {
     /// certificate's purpose to signing, not general-purpose key use.
     pub has_digital_signature: bool,
 
+    /// Whether the certificate carries a `NameConstraints` extension, which
+    /// path validation does not enforce.
+    pub has_name_constraints: bool,
+
     /// The TBS certificate DER bytes (for chain validation).
     pub tbs_der: Vec<u8>,
 
@@ -186,6 +193,10 @@ impl Cert {
 
         let has_key_cert_sign = extract_key_usage_key_cert_sign(tbs);
         let has_digital_signature = extract_key_usage_digital_signature(tbs);
+        let has_name_constraints = tbs
+            .extensions()
+            .iter()
+            .any(|ext| ext.oid.to_id_string() == OID_NAME_CONSTRAINTS);
 
         let issuer_dn = cert.issuer().to_string();
         let subject_dn = cert.subject().to_string();
@@ -213,6 +224,7 @@ impl Cert {
             has_code_signing_eku,
             has_key_cert_sign,
             has_digital_signature,
+            has_name_constraints,
             tbs_der,
             signature_value,
             signature_algorithm,
@@ -409,6 +421,14 @@ impl Cert {
         if !self.has_key_cert_sign {
             return Err(SigstoreVerificationError::CertificateChain {
                 reason: "CA certificate must have KeyUsage keyCertSign".into(),
+            });
+        }
+
+        // Not enforced during path validation, so a name-constrained CA could
+        // otherwise vouch for identities outside its permitted subtrees.
+        if self.has_name_constraints {
+            return Err(SigstoreVerificationError::CertificateChain {
+                reason: "CA certificates with NameConstraints are not supported".into(),
             });
         }
 

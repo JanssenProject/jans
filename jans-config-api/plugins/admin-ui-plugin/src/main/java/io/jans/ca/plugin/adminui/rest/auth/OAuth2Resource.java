@@ -20,6 +20,8 @@ import jakarta.ws.rs.core.*;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 
 import java.security.KeyStoreException;
 import java.util.UUID;
@@ -91,7 +93,11 @@ public class OAuth2Resource {
 
 
             Jwt userInfoJwt = Jwt.parse(apiTokenRequest.getUjwt());
-            boolean isValidJWTSignature = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), new JSONObject(configurationFactory.getJwks()), null, userInfoJwt.getHeader().getSignatureAlgorithm());
+            SignatureAlgorithm signatureAlgorithm = userInfoJwt.getHeader().getSignatureAlgorithm();
+            if (!isAsymmetricAlgorithm(signatureAlgorithm)) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.SIGNATURE_NOT_VALID.getDescription());
+            }
+            boolean isValidJWTSignature = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), new JSONObject(configurationFactory.getJwks()), null, signatureAlgorithm);
             if (!isValidJWTSignature) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.SIGNATURE_NOT_VALID.getDescription());
             }
@@ -120,6 +126,14 @@ public class OAuth2Resource {
                     .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ADMINUI_SESSION_CREATE_ERROR.getDescription()))
                     .build();
         }
+    }
+
+    private static boolean isAsymmetricAlgorithm(SignatureAlgorithm signatureAlgorithm) {
+        if (signatureAlgorithm == null) {
+            return false;
+        }
+        AlgorithmFamily family = signatureAlgorithm.getFamily();
+        return family == AlgorithmFamily.RSA || family == AlgorithmFamily.EC || family == AlgorithmFamily.ED;
     }
 
     /**

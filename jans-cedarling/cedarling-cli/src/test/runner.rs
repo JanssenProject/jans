@@ -46,7 +46,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
     let mut reason_ids_seen = HashSet::new();
 
     for test in test_file.tests {
-        print!("  test {} ... ", test.name);
+        print!("  test {} ... ", crate::validate::escape_controls(&test.name));
 
         let req = RequestUnsigned {
             principal: test.request.principal.map(std::convert::Into::into),

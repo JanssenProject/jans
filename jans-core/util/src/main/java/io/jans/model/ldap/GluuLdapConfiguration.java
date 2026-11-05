@@ -327,7 +327,7 @@ public class GluuLdapConfiguration implements Serializable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("GluuLdapConfiguration [configId=").append(configId).append(", bindDN=").append(bindDN)
-                .append(", bindPassword=").append(bindPassword).append(", servers=").append(servers)
+                .append(", servers=").append(servers)
                 .append(", maxConnections=").append(maxConnections).append(", useSSL=").append(useSSL)
                 .append(", baseDNs=").append(baseDNs).append(", primaryKey=").append(primaryKey)
                 .append(", localPrimaryKey=").append(localPrimaryKey).append(", useAnonymousBind=")

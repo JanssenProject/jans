@@ -32,6 +32,9 @@ from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseTyp
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
 
+# project.json is a small metadata file; cap it so a crafted archive cannot inflate it
+PROJECT_METADATA_MAX_BYTES = 1024 * 1024
+
 
 class Agama(DialogUtils):
     def __init__(
@@ -396,7 +399,11 @@ class Agama(DialogUtils):
                 return
 
             try:
-                project_json = json.loads(project_zip.read('project.json'))
+                with project_zip.open('project.json') as metadata_fh:
+                    metadata = metadata_fh.read(PROJECT_METADATA_MAX_BYTES + 1)
+                if len(metadata) > PROJECT_METADATA_MAX_BYTES:
+                    raise ValueError("project.json is too large")
+                project_json = json.loads(metadata)
                 project_name = project_json['projectName']
                 project_uploader(path, project_name)
             except Exception:

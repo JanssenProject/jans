@@ -7,6 +7,7 @@
 from io.jans.as.model.jwt import Jwt
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
+from io.jans.as.model.crypto.signature import AlgorithmFamily
 from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
@@ -65,7 +66,13 @@ class Introspection(IntrospectionType):
             jwksObj = configObj.getWebKeysConfiguration()
             jwks = JSONObject(jwksObj)
 
-            # Validate JWT
+            # Validate JWT; only asymmetric algorithms verifiable against server JWKS are accepted
+            signatureAlgorithm = userInfoJwt.getHeader().getSignatureAlgorithm()
+            if signatureAlgorithm is None or signatureAlgorithm.getFamily() not in (AlgorithmFamily.RSA, AlgorithmFamily.EC, AlgorithmFamily.ED):
+                print "Unsigned or unsupported User-Info JWT algorithm. No scopes will be added to the token."
+                responseAsJsonObject.accumulate("scope", scopes)
+                return True
+
             authCryptoProvider = AuthCryptoProvider()
             validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
 

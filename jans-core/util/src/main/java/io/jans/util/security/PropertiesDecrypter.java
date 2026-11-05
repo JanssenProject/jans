@@ -114,7 +114,7 @@ public final class PropertiesDecrypter {
             resultValue = StringEncrypter.defaultInstance().decrypt(encryptedValue, encryptionKey);
         } catch (Exception ex) {
             if (!returnSource) {
-                LOG.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));
+                LOG.error("Failed to decrypt value", ex);
             }
         }
 

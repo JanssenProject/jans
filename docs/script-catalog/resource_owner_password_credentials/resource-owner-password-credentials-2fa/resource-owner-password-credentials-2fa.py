@@ -19,7 +19,7 @@ from com.twilio.rest.api.v2010.account import Message
 from com.twilio.type import PhoneNumber
 # import org.codehaus.jettison.json.JSONArray as JSONArray
 
-import random
+from java.security import SecureRandom
 
 class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     def __init__(self, currentTimeMillis):
@@ -281,7 +281,7 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
     
     def generateOtpCode(self, context):
         #For now we just generate a six digit random number
-        return random.randint(100000,999999)
+        return 100000 + SecureRandom().nextInt(900000)
     
     def updateCurrentStep(self, session , current_step):
         session_attrs = session.getSessionAttributes()

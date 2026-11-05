@@ -2,7 +2,11 @@ Flow io.jans.casa.cert.enroll
     Basepath ""
     Inputs uidRef
 
-uid = Call io.jans.casa.certauthn.CertAuthnHelper#decryptValue uidRef
+uid = Call io.jans.casa.certauthn.CertAuthnHelper#lookupUid uidRef
+When uid is null
+    obj = { success: false, error: "Invalid or expired enrollment reference" }
+    Finish obj
+
 obj = Trigger io.jans.casa.cert.promptAndValidate
 validated = obj.success
 
