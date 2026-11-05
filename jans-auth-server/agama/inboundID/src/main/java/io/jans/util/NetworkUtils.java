@@ -89,7 +89,10 @@ public class NetworkUtils {
         String issuer = CdiUtil.bean(AppConfiguration.class).getIssuer();
         try {
             URL url = new URL(issuer);
-            return url.getProtocol() + "://" + url.getAuthority();
+            // default ports omitted, as the old request-based URL did, so registered callbacks still match
+            int port = url.getPort();
+            String hostPort = port == -1 || port == url.getDefaultPort() ? url.getHost() : url.getHost() + ":" + port;
+            return url.getProtocol() + "://" + hostPort;
         } catch (MalformedURLException e) {
             throw new IllegalStateException("Invalid issuer: " + issuer, e);
         }

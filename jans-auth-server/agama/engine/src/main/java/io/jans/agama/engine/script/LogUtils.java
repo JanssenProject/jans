@@ -8,9 +8,12 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import io.jans.agama.model.EngineConfig;
@@ -66,7 +69,7 @@ public class LogUtils {
 
             if (ignoreLogStatement(level)) return;
             
-            Pair<String, Integer> q = getFormatString(p.getSecond(), nargs);
+            Pair<String, Integer> q = getFormatString(escapeLineBreaks(p.getSecond()), nargs);
             sfirst = q.getFirst();
             dummyArgs = q.getSecond();
             
@@ -75,13 +78,13 @@ public class LogUtils {
             
             if (ignoreLogStatement(level)) return;
             
-            sfirst = asString(first) + getFormatString("", nargs).getFirst();
+            sfirst = logSafe(first) + getFormatString("", nargs).getFirst();
         }
 
         Object[] args = new String[nargs + dummyArgs];
         for (int i = 0; i < nargs; i++) {
             Object arg = rest[i + 1];
-            args[i] = arg instanceof Throwable ? foldMessageLines(asString(arg)) : escapeLineBreaks(asString(arg));
+            args[i] = logSafe(arg);
         }
         Arrays.fill(args, nargs, args.length, "");
         String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
@@ -113,15 +116,26 @@ public class LogUtils {
         return str.replace("\r", "\\r").replace("\n", "\\n");
     }
 
-    // Keeps stack frames on their own lines but escapes line breaks coming from exception messages
-    private static String foldMessageLines(String stackTrace) {
+    private static String logSafe(Object obj) {
+        return obj instanceof Throwable ? throwableAsString((Throwable) obj) : escapeLineBreaks(asString(obj));
+    }
 
-        String[] lines = stackTrace.split("\r\n|\r|\n");
-        StringBuilder sb = new StringBuilder(lines[0]);
-        for (int i = 1; i < lines.length; i++) {
-            String line = lines[i];
-            boolean structural = line.startsWith("\t") || line.startsWith("Caused by: ") || line.isEmpty();
-            sb.append(structural ? "\n" : "\\n").append(line);
+    // Built from the throwable's structure so message text cannot forge frames or causes
+    private static String throwableAsString(Throwable t) {
+
+        StringBuilder sb = new StringBuilder();
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable c = t; c != null && seen.add(c); c = c.getCause()) {
+            if (c != t) {
+                sb.append("\nCaused by: ");
+            }
+            sb.append(c.getClass().getName());
+            if (c.getMessage() != null) {
+                sb.append(": ").append(escapeLineBreaks(c.getMessage()));
+            }
+            for (StackTraceElement e : c.getStackTrace()) {
+                sb.append("\n\tat ").append(e);
+            }
         }
         return sb.toString();
 
