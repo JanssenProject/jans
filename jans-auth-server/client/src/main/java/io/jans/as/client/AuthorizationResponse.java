@@ -159,7 +159,7 @@ public class AuthorizationResponse extends BaseResponse {
                 if (params != null) {
                     if (params.containsKey(RESPONSE)) {
                         response = params.remove(RESPONSE);
-                        // only JARM claims are loaded; outer parameters are discarded (bare JWE still accepted for encryption-only clients)
+                        // only JARM claims are loaded; outer parameters are discarded (bare JWE accepted only for shared-key encryption)
                         params = getJarmClaims(response);
                     }
 
@@ -193,8 +193,11 @@ public class AuthorizationResponse extends BaseResponse {
                 return claims;
             }
             putFirstValues(claims, jwt.getClaims().toMap());
-        } else {
+        } else if (privateKey == null && sharedKey != null) {
+            // Jwe.parse used the shared key; anyone can encrypt to the client's public key, so that needs a signed payload
             putFirstValues(claims, jwe.getClaims().toMap());
+        } else {
+            LOG.error("Unsigned JARM response is accepted only when encrypted with the shared key.");
         }
         return claims;
     }
