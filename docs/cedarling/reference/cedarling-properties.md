@@ -29,9 +29,9 @@ These properties are effective regardless of which authorization method is in us
 To load the policy store, one of the following properties must be set:
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
-      - Directories → loads as directory-based policy store
-      - `.cjar` files → loads as Cedar Archive
-      - `.yaml`/`.yml` files → loads as YAML (supported for test suites)
+      - Directories --> loads as directory-based policy store
+      - `.cjar` files --> loads as Cedar Archive
+      - `.yaml`/`.yml` files --> loads as YAML (supported for test suites)
       *(Note: Legacy `.json` files are no longer supported. Please migrate to the folder-based format or `.cjar` archive.)*
 
 - **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store archive from. The URL must point to a Cedar Archive (`.cjar` or zip archive). Legacy JSON endpoints are no longer supported.
@@ -120,7 +120,7 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies. Default is `disabled`.
 - **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`.
 - **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
-- **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server authentication. When set, Cedarling skips the SSA → DCR → access token flow entirely and uses this token directly to authenticate with Lock Server endpoints (log, health, telemetry, TRACE). With TRACE enabled, the token must carry the `trace.write` scope, see [Cedarling TRACE](./cedarling-trace.md#auth-server-and-lock-server-setup). **Primarily intended for testing and local development** to simplify the bootstrap flow when a full Auth Server / DCR setup is not desired. This token may also be used when token issuance is managed externally or DCR is not available. If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and a warning is emitted. **Not available on WASM builds.**
+- **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server. When set, Cedarling skips DCR and uses this token for every Lock Server request. Intended for testing and local development, or when DCR is not available. Cedarling cannot renew it: once it expires, Lock Server refuses the requests until Cedarling restarts with a new token. With TRACE enabled, the token must carry the `trace.write` scope, see [Cedarling TRACE](./cedarling-trace.md#auth-server-and-lock-server-setup). Takes precedence over `CEDARLING_LOCK_SSA_JWT`; Cedarling logs a `WARN` when both are set. Not available on WASM builds.
 - **`CEDARLING_LOCK_LOG_INTERVAL`** : How often, in seconds, to send log messages to Lock Server. `0` turns transmission off. Default is `0`.
 - **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often, in seconds, to send health messages to Lock Server. `0` turns transmission off. Default is `0`.
 - **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often, in seconds, to send telemetry messages to Lock Server. `0` turns transmission off. Default is `0`.
