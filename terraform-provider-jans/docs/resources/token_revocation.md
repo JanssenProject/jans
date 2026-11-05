@@ -105,7 +105,7 @@ for non-existent tokens.
 
 ### Required
 
-- `token_code` (String) Token code to revoke
+- `token_code` (String, Sensitive) Token code to revoke
 
 ### Optional
 
