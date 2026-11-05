@@ -20,7 +20,7 @@ import com.twilio.type.PhoneNumber as PhoneNumber
 
 
 from java.lang import Throwable
-import random
+from java.security import SecureRandom
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -110,16 +110,20 @@ class PersonAuthentication(PersonAuthenticationType):
                 print 'TwilioSMS, Error retrieving user %s from LDAP' % (user_name)
                 return False
 
+            # per-request: the script instance is shared across users
+            mobile_number = None
             try:
                 isVerified = foundUser.getAttribute("phoneNumberVerified")
                 if isVerified:
-                    self.mobile_number = foundUser.getAttribute("employeeNumber")
-                if  self.mobile_number is None:
-                    self.mobile_number = foundUser.getAttribute("mobile")
-                if  self.mobile_number is None:
-                    self.mobile_number = foundUser.getAttribute("telephoneNumber")
-                if  self.mobile_number is None:
+                    mobile_number = foundUser.getAttribute("employeeNumber")
+                if  mobile_number is None:
+                    mobile_number = foundUser.getAttribute("mobile")
+                if  mobile_number is None:
+                    mobile_number = foundUser.getAttribute("telephoneNumber")
+                if  mobile_number is None:
                     print "TwilioSMS, Error finding mobile number for user '%s'" % user_name    
+                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
+                    return False
                     
             except (Exception, Throwable):
                 facesMessages.add(FacesMessage.SEVERITY_ERROR, "Failed to determine mobile phone number")
@@ -127,7 +131,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Generate Random six digit code and store it in array
-            code = random.randint(100000, 999999)
+            code = 100000 + SecureRandom().nextInt(900000)
 
             # Get code and save it in LDAP temporarily with special session entry
             self.identity.setWorkingParameter("code", code)
@@ -136,18 +140,18 @@ class PersonAuthentication(PersonAuthenticationType):
 
             try:
                 Twilio.init(self.ACCOUNT_SID, self.AUTH_TOKEN);
-                message = Message.creator(PhoneNumber(self.mobile_number), PhoneNumber(self.FROM_NUMBER), str(code)).create();
+                message = Message.creator(PhoneNumber(mobile_number), PhoneNumber(self.FROM_NUMBER), str(code)).create();
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
                 print 'TwilioSMs, Message Sid: %s' % (message.getSid())
-                print 'TwilioSMs, User phone: %s' % (self.mobile_number)
+                print 'TwilioSMs, User phone: %s' % (mobile_number)
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
-                sessionId.getSessionAttributes().put("mobile_number", self.mobile_number)
-                sessionId.getSessionAttributes().put("mobile", self.mobile_number)
+                sessionId.getSessionAttributes().put("mobile_number", mobile_number)
+                sessionId.getSessionAttributes().put("mobile", mobile_number)
                 sessionIdService.updateSessionId(sessionId)
-                self.identity.setWorkingParameter("mobile_number", self.mobile_number)
-                self.identity.getSessionId().getSessionAttributes().put("mobile_number",self.mobile_number)
-                self.identity.setWorkingParameter("mobile", self.mobile_number)
-                self.identity.getSessionId().getSessionAttributes().put("mobile",self.mobile_number)
+                self.identity.setWorkingParameter("mobile_number", mobile_number)
+                self.identity.getSessionId().getSessionAttributes().put("mobile_number",mobile_number)
+                self.identity.setWorkingParameter("mobile", mobile_number)
+                self.identity.getSessionId().getSessionAttributes().put("mobile",mobile_number)
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
                 print "Number: %s" % (self.identity.getWorkingParameter("mobile_number"))
                 print "Mobile: %s" % (self.identity.getWorkingParameter("mobile"))

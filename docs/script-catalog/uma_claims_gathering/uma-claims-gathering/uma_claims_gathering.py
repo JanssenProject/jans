@@ -35,7 +35,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         if step == 1:
             if (context.getPageClaims().containsKey("country")):
                 country = context.getPageClaims().get("country")
-                print "Country: " + country
+                print "Country: " + country.replace("\r", "\\r").replace("\n", "\\n")
 
                 context.putClaim("country", country)
                 return True
@@ -46,7 +46,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         elif step == 2:
             if (context.getPageClaims().containsKey("city")):
                 city = context.getPageClaims().get("city")
-                print "City: " + city
+                print "City: " + city.replace("\r", "\\r").replace("\n", "\\n")
 
                 context.putClaim("city", city)
                 print "Claims-Gathering. 'city' is not provided on step 2."

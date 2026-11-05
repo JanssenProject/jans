@@ -22,6 +22,7 @@ from io.jans.as.model.jwt import Jwt;
 from io.jans.as.client import JwkClient;
 from io.jans.as.model.crypto.signature import AlgorithmFamily;
 from java.util import ArrayList, Arrays
+from java.lang import System
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -74,6 +75,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 apple_id = self.verifyIDToken(id_token)
                 print apple_id
+                if apple_id is None:
+                    return False
                 # if user doesnt exist in persistence, add
                 foundUser = self.findUserByAppleId(apple_id)
                 print foundUser
@@ -124,6 +127,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 validSignature = ecdsaSigner.validate(jwt);
 
             if(validSignature is True):
+                if not self.validateClaims(jwt.getClaims()):
+                    return None
                 return userId
             else:
                 print "Apple. Failed to validate signature of ID_token"
@@ -132,6 +137,29 @@ class PersonAuthentication(PersonAuthenticationType):
         else :
             print "Invalid ID token."
             return None
+
+    def validateClaims(self, claims):
+        if claims.getClaimAsString("iss") != "https://appleid.apple.com":
+            print "Apple. Invalid issuer of ID_token"
+            return False
+
+        audience = claims.getClaimAsStringList("aud")
+        if audience is None or self.apple_client_id not in audience:
+            print "Apple. ID_token was not issued for this client"
+            return False
+
+        exp = claims.getClaimAsLong("exp")
+        if exp is None or System.currentTimeMillis() / 1000 >= exp:
+            print "Apple. ID_token is expired"
+            return False
+
+        nonce = claims.getClaimAsString("nonce")
+        expected_nonce = CdiUtil.bean(Identity).getWorkingParameter("anonce")
+        if nonce is not None and nonce != expected_nonce:
+            print "Apple. ID_token nonce does not match the login request"
+            return False
+
+        return True
 
     def findUserByAppleId(self, apple_id):
         userService = CdiUtil.bean(UserService)

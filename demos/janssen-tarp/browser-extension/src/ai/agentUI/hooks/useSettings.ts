@@ -10,6 +10,7 @@ import {
 } from '../types';
 import { LLM_PROVIDERS, DEFAULT_MODEL, DEFAULT_PROVIDER, DEFAULT_MCP_URL } from '../constants';
 import { mcpApiService } from '../../service/MCPAPIService';
+import { isSecureOrLoopbackUrl } from '../../../shared/urlSecurity';
 
 // Local providers (e.g. Ollama) need no API key — only model/endpoint config.
 const providerRequiresApiKey = (providerName: string): boolean =>
@@ -191,9 +192,9 @@ export const useSettings = () => {
   // Validate MCP Server URL
   const validateMcpUrl = useCallback((url: string) => {
     try {
-      const urlObj = new URL(url);
-      const isValid = urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
-      setMcpUrlError(isValid ? "" : "URL must use http:// or https:// protocol");
+      new URL(url);
+      const isValid = isSecureOrLoopbackUrl(url);
+      setMcpUrlError(isValid ? "" : "URL must use https:// (http:// is allowed only for localhost)");
       return isValid;
     } catch (e) {
       setMcpUrlError("Please enter a valid URL (e.g., http://localhost:3001)");

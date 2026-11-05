@@ -1,5 +1,6 @@
 // services/mcpApi.ts
 import { MCP_API_BASE_URL, MCP_KEYS_ENDPOINT } from '../agentUI/types';
+import { isSecureOrLoopbackUrl } from '../../shared/urlSecurity';
 
 interface ApiKeyData {
   id?: string;
@@ -22,6 +23,13 @@ class MCPApiService {
     this.baseUrl = url;
   }
 
+  private keysUrl(path: string = ''): string {
+    if (!isSecureOrLoopbackUrl(this.baseUrl)) {
+      throw new Error('MCP server URL must use https:// unless it is on localhost');
+    }
+    return `${this.baseUrl}${MCP_KEYS_ENDPOINT}${path}`;
+  }
+
   setCurrentApiKeyId(id: string | null) {
     this.currentApiKeyId = id;
   }
@@ -32,7 +40,7 @@ class MCPApiService {
 
   // Get all API keys (without full key values)
   async getApiKeys(): Promise<{ count: number; keys: Array<Omit<ApiKeyData, 'key'>> }> {
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}`);
+    const response = await fetch(this.keysUrl(), { redirect: 'error' });
     if (!response.ok) {
       throw new Error(`Failed to fetch API keys: ${response.statusText}`);
     }
@@ -41,7 +49,7 @@ class MCPApiService {
 
   // Get a specific API key by ID (returns full key)
   async getApiKey(id: string): Promise<ApiKeyData> {
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}/${id}`);
+    const response = await fetch(this.keysUrl(`/${id}`), { redirect: 'error' });
     if (!response.ok) {
       throw new Error(`Failed to fetch API key: ${response.statusText}`);
     }
@@ -56,8 +64,9 @@ class MCPApiService {
     if (key.length < 10) {
       throw new Error('API key appears to be too short');
     }
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}`, {
+    const response = await fetch(this.keysUrl(), {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -85,8 +94,9 @@ class MCPApiService {
     if (key.length < 10) {
       throw new Error('API key appears to be too short');
     }
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}`, {
+    const response = await fetch(this.keysUrl(), {
       method: 'PUT',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
       },
@@ -105,8 +115,9 @@ class MCPApiService {
 
   // Delete an API key by ID
   async deleteApiKey(id: string): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}/${id}`, {
+    const response = await fetch(this.keysUrl(`/${id}`), {
       method: 'DELETE',
+      redirect: 'error',
     });
 
     if (!response.ok) {
@@ -125,8 +136,9 @@ class MCPApiService {
 
   // Delete all API keys for a provider
   async deleteApiKeysByProvider(provider: string): Promise<{ success: boolean; message: string; deletedCount: number }> {
-    const response = await fetch(`${this.baseUrl}${MCP_KEYS_ENDPOINT}/provider/${provider}`, {
+    const response = await fetch(this.keysUrl(`/provider/${encodeURIComponent(provider)}`), {
       method: 'DELETE',
+      redirect: 'error',
     });
 
     if (!response.ok) {
