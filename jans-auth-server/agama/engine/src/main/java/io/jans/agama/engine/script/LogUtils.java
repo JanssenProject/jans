@@ -20,6 +20,8 @@ import io.jans.agama.model.EngineConfig;
 import io.jans.util.Pair;
 import io.jans.service.cdi.util.CdiUtil;
 
+import org.mozilla.javascript.RhinoException;
+import org.mozilla.javascript.ScriptStackElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -147,6 +149,12 @@ public class LogUtils {
         sb.append(t.getClass().getName());
         if (t.getMessage() != null) {
             sb.append(": ").append(escapeLineBreaks(t.getMessage()));
+        }
+        if (t instanceof RhinoException) {
+            // script frames are only added by Rhino's printStackTrace override
+            for (ScriptStackElement e : ((RhinoException) t).getScriptStack()) {
+                sb.append('\n').append(indent).append("\tat ").append(escapeLineBreaks(e.toString()));
+            }
         }
         for (StackTraceElement e : t.getStackTrace()) {
             sb.append('\n').append(indent).append("\tat ").append(escapeLineBreaks(e.toString()));
