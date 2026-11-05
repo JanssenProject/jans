@@ -230,6 +230,7 @@ func (c *Client) CreateOidcClient(ctx context.Context, client *OidcClient) (*Oid
 	if err := c.post(ctx, "/jans-config-api/api/v1/openid/clients", token, scope, client, ret); err != nil {
 		return nil, fmt.Errorf("post request failed: %w", err)
 	}
+	client.pullRequirePkce()
 	ret.pullRequirePkce()
 
 	return ret, nil
@@ -256,6 +257,8 @@ func (c *Client) UpdateOidcClient(ctx context.Context, client *OidcClient) (*Oid
 	if err := c.put(ctx, "/jans-config-api/api/v1/openid/clients", token, scope, client, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
+	// rebase on what was sent so a later update on the same struct sees the right baseline
+	client.pullRequirePkce()
 	ret.pullRequirePkce()
 
 	return ret, nil
