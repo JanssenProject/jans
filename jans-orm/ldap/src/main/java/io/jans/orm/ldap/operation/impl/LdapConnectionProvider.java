@@ -23,6 +23,8 @@ import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SimpleBindRequest;
+import com.unboundid.util.ssl.HostNameSSLSocketVerifier;
+import com.unboundid.util.ssl.JVMDefaultTrustManager;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustAllTrustManager;
 import com.unboundid.util.ssl.TrustStoreTrustManager;
@@ -149,12 +151,21 @@ public class LdapConnectionProvider {
                 sslUtil = new SSLUtil(CertUtils.getTrustManagers(trustStoreFile, trustStorePin, trustStoreType));
             } else {
 	            if (StringHelper.isEmpty(trustStoreFile) && StringHelper.isEmpty(trustStorePin)) {
-                sslUtil = new SSLUtil(new TrustAllTrustManager());
+	                if (StringHelper.toBoolean(props.getProperty("ssl.trustAll"), false)) {
+	                    LOG.warn("LDAP server certificate validation is disabled by 'ssl.trustAll'");
+	                    sslUtil = new SSLUtil(new TrustAllTrustManager());
+	                } else {
+	                    sslUtil = new SSLUtil(JVMDefaultTrustManager.getInstance());
+	                }
             } else {
 	                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(trustStoreFile, trustStorePin.toCharArray(),
 	                        trustStoreType, true);
                 sslUtil = new SSLUtil(trustStoreTrustManager);
             }
+            }
+
+            if (StringHelper.toBoolean(props.getProperty("ssl.verifyHostname"), true)) {
+                connectionOptions.setSSLSocketVerifier(new HostNameSSLSocketVerifier(true));
             }
 
             failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);

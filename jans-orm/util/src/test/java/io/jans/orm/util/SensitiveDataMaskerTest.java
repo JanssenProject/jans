@@ -160,4 +160,14 @@ public class SensitiveDataMaskerTest {
         assertTrue(masked.contains(SensitiveDataMasker.MASKED));
     }
 
+    @Test
+    public void maskJsonValues_forMalformedJsonWithNestedPassword_shouldMaskNestedValue() {
+        String value = "{\"cfg\":{\"password\":\"secret\"},";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("secret"));
+        assertTrue(masked.contains("\"password\":\"" + SensitiveDataMasker.MASKED + "\""));
+    }
+
 }
