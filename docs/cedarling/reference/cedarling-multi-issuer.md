@@ -1055,12 +1055,12 @@ The reason is deliberately claim-free: it never contains token payloads or claim
 values, so it is safe to log and surface to callers. `reason.message` is
 non-empty for every slug (e.g. `a token with the same mapping was already accepted`),
 while `reason.detail` is set only for `invalid_input` and is absent (`None` /
-`null` / `nil`) otherwise. Order is not
-guaranteed; use each entry's `index` to correlate with the request `tokens`
-array. When no token is dropped
-the list is empty and the field is omitted from the serialized result. For a
-batch request the list is produced once (tokens are validated once for the whole
-batch) and repeats on every item's result.
+`null` / `nil`) otherwise. Entries are in ascending `index` order, matching
+the request `tokens` array. A token is reported in either the decision log's
+`tokens` or `dropped_tokens`, never both. When no token is dropped the list is
+empty and the field is omitted from the serialized result. For a batch request
+the list is produced once (tokens are validated once for the whole batch) and
+repeats on every item's result.
 
 ### Non-Deterministic Tokens
 
@@ -1072,11 +1072,14 @@ tokens = [
 ]
 ```
 
-A mapping names one token type of one issuer, so only one token per mapping is
-used. The first one that is accepted wins; later ones for the same mapping are
-dropped as `duplicate_token` and logged, without being validated. A token that
-fails validation does not count, so a later token for its mapping is still
-checked.
+A mapping names one token type of one issuer, so at most one token per mapping
+is used. The first token that passes validation takes the mapping; later ones for
+the same mapping are dropped as `duplicate_token` and logged, without being
+validated. A token that fails validation does not take the mapping, so a later
+token for it is still checked. A token that passes validation but cannot become a
+Cedar entity (`entity_build_failed`) does take it: it is genuine, and two genuine
+tokens for one mapping are ambiguous, so Cedarling does not fall back to a later
+one.
 
 ### Trusted Issuer Validation
 

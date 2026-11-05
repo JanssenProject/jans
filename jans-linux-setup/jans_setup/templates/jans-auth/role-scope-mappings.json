@@ -923,6 +923,20 @@
       "essentialPermissionInAdminUI": false
     },
     {
+      "tag": "lock",
+      "permission": "https://jans.io/oauth/config/lock.admin",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
+      "tag": "lock_stat",
+      "permission": "https://jans.io/oauth/lock/stat.readonly",
+      "description": "",
+      "defaultPermissionInToken": false,
+      "essentialPermissionInAdminUI": false
+    },
+    {
       "tag": "security",
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/security.readonly",
       "description": "",
@@ -1146,7 +1160,9 @@
         "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write",
         "https://jans.io/oauth/config/logging.write",
         "https://jans.io/oauth/config/attributes.write",
-        "https://jans.io/oauth/config/scopes.write"
+        "https://jans.io/oauth/config/scopes.write",
+        "https://jans.io/oauth/config/lock.admin",
+        "https://jans.io/oauth/lock/stat.readonly"
       ]
     }
   ]

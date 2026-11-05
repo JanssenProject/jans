@@ -804,8 +804,8 @@ impl MetricsCollector {
         }
     }
 
-    /// Increments `authz.errors_total` counter.
-    pub(crate) fn record_authz_error(&self) {
+    /// Increments `authz.errors_total` and the classified counter of `err`.
+    pub(crate) fn record_authz_error(&self, err: &impl ErrorMetricKey) {
         if !self.mode.collects() {
             return;
         }
@@ -815,6 +815,7 @@ impl MetricsCollector {
             .expect(INTERVAL_LOCK_POISONED)
             .authz_errors_total
             .fetch_add(1, Ordering::Relaxed);
+        self.increment_error(err.metric_key());
     }
 
     /// Increments a classified error counter using a typed error that implements [`ErrorMetricKey`]
@@ -1187,6 +1188,25 @@ mod tests {
             snap.policy_stats.get("policy_b.deny"),
             Some(&2),
             "policy_b deny count must be 2"
+        );
+    }
+
+    #[test]
+    fn record_authz_error_counts_total_and_class() {
+        let collector = MetricsCollector::new(MetricsMode::Local);
+
+        collector.record_authz_error(&TestError("authz.test_error"));
+
+        let snap = collector.snapshot_and_reset();
+        assert_eq!(
+            snap.operational_stats.get("authz.errors_total"),
+            Some(&1),
+            "an authorization error must increment authz.errors_total"
+        );
+        assert_eq!(
+            snap.error_counters.get("authz.test_error"),
+            Some(&1),
+            "an authorization error must increment its classified counter"
         );
     }
 
@@ -1736,7 +1756,7 @@ mod tests {
         let collector = MetricsCollector::new(MetricsMode::Disabled);
 
         collector.record_evaluation(100, Decision::Allow, false, std::iter::empty());
-        collector.record_authz_error();
+        collector.record_authz_error(&TestError("authz.test_error"));
         collector.record_cache_hit();
         collector.record_cache_miss();
         collector.record_cache_eviction(5);

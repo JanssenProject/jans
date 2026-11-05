@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -24,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.AssociationFile;
 import io.jans.configapi.plugin.fido2.service.Fido2ReadinessService.Outcome;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
@@ -176,6 +178,39 @@ public class Fido2ReadinessServiceTest {
         assertNull(service.principalOf("Bearer abc"));
         assertNull(service.principalOf(null));
         assertEquals(Fido2ReadinessService.sanitize(service.principalOf("Bearer abc")), "unknown");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void associationFile_isFetchedFromTheEncodedRpSegment_withTheCallerToken() throws Exception {
+        when(fido2Util.executeGetWithoutRedirects(anyString(), anyMap()))
+                .thenReturn(upstream(200, "[{\"relation\":[]}]", null));
+
+        Outcome outcome = service.export("https://jans.io", AssociationFile.ASSETLINKS, "Bearer abc");
+
+        ArgumentCaptor<Map<String, String>> headers = ArgumentCaptor.forClass(Map.class);
+        verify(fido2Util).executeGetWithoutRedirects(eq(BASE + "https%3A%2F%2Fjans.io/association/assetlinks.json"),
+                headers.capture());
+        assertEquals(headers.getValue().get("Authorization"), "Bearer abc");
+        assertEquals(headers.getValue().get(Constants.REQUESTED_BY_HEADER), "inum-1234");
+        assertEquals(outcome.getStatus(), 200);
+        assertTrue(outcome.getBody().isArray());
+        assertEquals(service.getAssociationFileUrl("a.com", AssociationFile.APPLE_APP_SITE_ASSOCIATION),
+                BASE + "a.com/association/apple-app-site-association");
+    }
+
+    @Test
+    public void associationFile_notFound_isReturnedUnchanged_andInvalidIdIsRejectedWithoutCalling() throws Exception {
+        when(fido2Util.executeGetWithoutRedirects(anyString(), anyMap())).thenReturn(upstream(404, null, null));
+
+        assertEquals(service.export("nope.example", AssociationFile.ASSETLINKS, "Bearer abc").getStatus(), 404);
+        clearInvocations(fido2Util);
+        for (String id : new String[] { " ", ".", ".." }) {
+            WebApplicationException e = expectThrows(WebApplicationException.class,
+                    () -> service.export(id, AssociationFile.ASSETLINKS, "Bearer abc"));
+            assertEquals(e.getResponse().getStatus(), 400);
+        }
+        verify(fido2Util, never()).executeGetWithoutRedirects(anyString(), anyMap());
     }
 
     @Test

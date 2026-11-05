@@ -33,7 +33,9 @@ use serde_json::Value;
 use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-pub(crate) use build_multi_issuer_entity::{MultiIssuerEntityError, MultiIssuerSetupEntities};
+pub(crate) use build_multi_issuer_entity::{
+    MultiIssuerEntitiesBuilder, MultiIssuerEntityError, MultiIssuerSetupEntities,
+};
 pub(crate) use built_entities::BuiltEntities;
 
 pub(crate) use error::*;
