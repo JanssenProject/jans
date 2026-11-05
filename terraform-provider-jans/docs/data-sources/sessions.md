@@ -79,7 +79,6 @@ provider "jans" {
   url           = "https://moabu-noble-sawfish.gluu.info"
   client_id     = var.client_id
   client_secret = var.client_secret
-  insecure_client = true  # Only for development/testing
 }
 
 # Data source to list all active user sessions
@@ -87,7 +86,8 @@ data "jans_sessions" "active_sessions" {}
 
 # Output the sessions
 output "active_sessions" {
-  value = data.jans_sessions.active_sessions.sessions
+  value     = data.jans_sessions.active_sessions.sessions
+  sensitive = true
 }
 
 # Output session count
@@ -102,6 +102,7 @@ output "user_sessions" {
     session if can(regex("inum=admin", session.user_dn))
   ]
   description = "Sessions for admin user"
+  sensitive   = true
 }
 ```
 

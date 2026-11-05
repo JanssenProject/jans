@@ -56,9 +56,9 @@ func resourceOidcClient() *schema.Resource {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Optional:  true,
-				// Config API never returns or overwrites the stored token, so only the create value matters.
-				DiffSuppressFunc: func(_, _, _ string, d *schema.ResourceData) bool { return d.Id() != "" },
-				Description:      "Write-only; sent on creation, never returned or updated afterwards.",
+				// unset keeps the server-issued token, which the server may rotate
+				DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool { return newValue == "" },
+				Description:      "Sent on create and update when set; leave unset to keep the server-issued token.",
 			},
 			"client_id_issued_at": {
 				Type:        schema.TypeString,
@@ -946,12 +946,15 @@ func resourceOidcClientUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	if err := fromSchemaResource(d, &client); err != nil {
 		return diag.FromErr(err)
 	}
-	// computed attributes.require_pkce keeps its state value, so a top-level change to false must override it
-	if d.HasChange("require_pkce") && !d.HasChange("attributes.0.require_pkce") {
+	// both flags are computed and keep their state value, so the one the config changed must win
+	topChanged, nestedChanged := d.HasChange("require_pkce"), d.HasChange("attributes.0.require_pkce")
+	if topChanged && !nestedChanged {
 		if client.Attributes == nil {
 			client.Attributes = &jans.OidcClientAttribute{}
 		}
 		client.Attributes.RequirePkce = client.RequirePkce
+	} else if nestedChanged && !topChanged {
+		client.RequirePkce = client.Attributes != nil && client.Attributes.RequirePkce
 	}
 	tflog.Debug(ctx, "Updating OidcClient", map[string]interface{}{"inum": client.Inum})
 	if _, err := c.UpdateOidcClient(ctx, &client); err != nil {

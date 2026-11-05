@@ -41,11 +41,11 @@ resource "jans_smtp_configuration" "global" {
 - `host` (String) Hostname of the SMTP server.
 - `key_store` (String)
 - `key_store_alias` (String)
-- `key_store_password` (String)
+- `key_store_password` (String, Sensitive)
 - `port` (Number) Port number of the SMTP server.
 - `requires_authentication` (Boolean) Boolean value with default value false. It true it will enable sender authentication.
 - `signing_algorithm` (String)
-- `smtp_authentication_account_password` (String)
+- `smtp_authentication_account_password` (String, Sensitive)
 - `smtp_authentication_account_username` (String)
 - `trust_host` (Boolean) Boolean value with default value false.
 - `valid` (Boolean) Boolean value with default value false.

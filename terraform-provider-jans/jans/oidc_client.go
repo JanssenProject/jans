@@ -136,21 +136,33 @@ type OidcClient struct {
 	Inum                                       string               `schema:"inum" json:"inum,omitempty"`
 	ClientName                                 string               `schema:"client_name" json:"clientName,omitempty"`
 	RequirePkce                                bool                 `schema:"require_pkce" json:"-"`
+	fetchedRequirePkce                         *bool
 }
 
 // Config API only honours attributes.requirePkce, so the top-level flag mirrors it.
 func (o *OidcClient) pushRequirePkce() {
-	if !o.RequirePkce {
+	nested := o.Attributes != nil && o.Attributes.RequirePkce
+	if o.RequirePkce == nested {
+		return
+	}
+	// a fetched client knows which flag the caller edited; a fresh one lets true win
+	if o.fetchedRequirePkce != nil && *o.fetchedRequirePkce == o.RequirePkce {
+		o.RequirePkce = nested
+		return
+	}
+	if o.fetchedRequirePkce == nil && !o.RequirePkce {
 		return
 	}
 	if o.Attributes == nil {
 		o.Attributes = &OidcClientAttribute{}
 	}
-	o.Attributes.RequirePkce = true
+	o.Attributes.RequirePkce = o.RequirePkce
 }
 
 func (o *OidcClient) pullRequirePkce() {
 	o.RequirePkce = o.Attributes != nil && o.Attributes.RequirePkce
+	fetched := o.RequirePkce
+	o.fetchedRequirePkce = &fetched
 }
 
 // GetOidcClients returns all currently configured OIDC clients.
