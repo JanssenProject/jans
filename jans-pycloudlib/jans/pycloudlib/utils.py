@@ -272,7 +272,8 @@ def get_server_certificate(
             # getpeercert may returns `None` if there's no certificate
             der = sock.getpeercert(True)
 
-    if expected_fp and (not der or hashlib.sha256(der).hexdigest() != expected_fp):
+    fingerprint_matches = bool(der) and hashlib.sha256(der).hexdigest() == expected_fp
+    if expected_fp and not fingerprint_matches:
         raise ssl.SSLCertVerificationError(
             f"Certificate presented by {host}:{port} does not match the expected SHA-256 fingerprint"
         )
