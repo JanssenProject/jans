@@ -242,7 +242,7 @@ The following methods are called on the result obtained from the authorization c
 
 - `dropped_tokens`
 
-    The supplied tokens that were not used in this decision (empty when every token contributed). See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
+    The supplied tokens that were not used in this decision, in request order (empty when every token contributed). See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
 
 ## Logs
 

@@ -3798,12 +3798,12 @@ shape as the JSON form:</p>
 values, so it is safe to log and surface to callers. <code>reason.message</code> is
 non-empty for every slug (e.g. <code>a token with the same mapping was already accepted</code>),
 while <code>reason.detail</code> is set only for <code>invalid_input</code> and is absent (<code>None</code> /
-<code>null</code> / <code>nil</code>) otherwise. Order is not
-guaranteed; use each entry's <code>index</code> to correlate with the request <code>tokens</code>
-array. When no token is dropped
-the list is empty and the field is omitted from the serialized result. For a
-batch request the list is produced once (tokens are validated once for the whole
-batch) and repeats on every item's result.</p>
+<code>null</code> / <code>nil</code>) otherwise. Entries are in ascending <code>index</code> order, matching
+the request <code>tokens</code> array. A token is reported in either the decision log's
+<code>tokens</code> or <code>dropped_tokens</code>, never both. When no token is dropped the list is
+empty and the field is omitted from the serialized result. For a batch request
+the list is produced once (tokens are validated once for the whole batch) and
+repeats on every item's result.</p>
 <h3 id="non-deterministic-tokens">Non-Deterministic Tokens<a class="headerlink" href="#non-deterministic-tokens" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># Two tokens for the same mapping: policies could not tell which one to use</span>
 <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
@@ -3811,11 +3811,14 @@ batch) and repeats on every item's result.</p>
     <span class="n">TokenInput</span><span class="p">(</span><span class="n">mapping</span><span class="o">=</span><span class="s2">&quot;Jans::Access_Token&quot;</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="s2">&quot;token2&quot;</span><span class="p">),</span>  <span class="c1"># dropped: duplicate_token</span>
 <span class="p">]</span>
 </code></pre></div>
-<p>A mapping names one token type of one issuer, so only one token per mapping is
-used. The first one that is accepted wins; later ones for the same mapping are
-dropped as <code>duplicate_token</code> and logged, without being validated. A token that
-fails validation does not count, so a later token for its mapping is still
-checked.</p>
+<p>A mapping names one token type of one issuer, so at most one token per mapping
+is used. The first token that passes validation takes the mapping; later ones for
+the same mapping are dropped as <code>duplicate_token</code> and logged, without being
+validated. A token that fails validation does not take the mapping, so a later
+token for it is still checked. A token that passes validation but cannot become a
+Cedar entity (<code>entity_build_failed</code>) does take it: it is genuine, and two genuine
+tokens for one mapping are ambiguous, so Cedarling does not fall back to a later
+one.</p>
 <h3 id="trusted-issuer-validation">Trusted Issuer Validation<a class="headerlink" href="#trusted-issuer-validation" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code><span class="c1"># A JWT is accepted only from the issuer its mapping names</span>
 <span class="n">tokens</span> <span class="o">=</span> <span class="p">[</span>
@@ -3967,7 +3970,7 @@ permit(
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 04, 2026
   </span>
 
     
