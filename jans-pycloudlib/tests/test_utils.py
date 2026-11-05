@@ -30,6 +30,18 @@ def test_as_boolean(val, expected):
     assert as_boolean(val) == expected
 
 
+@pytest.mark.parametrize("val, expected", [
+    ("tru", True),
+    ("", True),
+    ("false", False),
+    (0, False),
+    (True, True),
+])
+def test_as_boolean_custom_default(val, expected):
+    from jans.pycloudlib.utils import as_boolean
+    assert as_boolean(val, default=True) == expected
+
+
 @pytest.mark.parametrize("value, expected", [
     ("a", "a"),
     (1, "1"),

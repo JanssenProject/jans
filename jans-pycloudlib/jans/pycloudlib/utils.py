@@ -56,18 +56,18 @@ logger = logging.getLogger(__name__)
 open_private = _fs.open_private
 
 
-def as_boolean(val: _t.Any) -> bool:
+def as_boolean(val: _t.Any, default: bool = False) -> bool:
     """Convert value as boolean.
 
-    If the value cannot be converted as boolean, return `False` instead.
+    If the value cannot be converted as boolean, return `default` instead.
 
     Args:
         val: Given value with any type, though only a subset of types that supported.
+        default: Value returned when `val` is not recognized as boolean.
 
     Returns:
         `True` or `False`.
     """
-    default = False
     truthy = {"t", "T", "true", "True", "TRUE", "1", 1, True}
     falsy = {"f", "F", "false", "False", "FALSE", "0", 0, False}
 
