@@ -43,6 +43,7 @@ import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
@@ -145,6 +146,7 @@ public class RegisterUpdateAction {
             final Client client = clientService.getClient(clientId, accessToken);
             validateClientNotNull(client);
             validateSubjectIdentifierAttribute(request, client);
+            final boolean redirectUrisChanged = isRedirectUrisChanged(request, client);
 
             registerService.updateClientFromRequestObject(client, request, true);
 
@@ -154,7 +156,7 @@ public class RegisterUpdateAction {
             }
 
             validateEphemeralSubjectTypeBackchannelLogout(client);
-            validateBackchannelLogoutUri(request, client);
+            validateBackchannelLogoutUri(request, client, redirectUrisChanged);
 
             boolean updateClient = true;
             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -216,13 +218,22 @@ public class RegisterUpdateAction {
         }
     }
 
-    private void validateBackchannelLogoutUri(RegisterRequest request, Client client) {
+    private static boolean isRedirectUrisChanged(RegisterRequest request, Client client) {
+        final List<String> requested = request.getRedirectUris();
+        if (requested == null || requested.isEmpty()) {
+            return false;
+        }
+        final String[] stored = client.getRedirectUris();
+        return !new HashSet<>(requested).equals(stored != null ? new HashSet<>(Arrays.asList(stored)) : new HashSet<>());
+    }
+
+    private void validateBackchannelLogoutUri(RegisterRequest request, Client client, boolean redirectUrisChanged) {
         try {
             final String[] redirectUris = client.getRedirectUris();
             final List<String> redirectUriList = redirectUris != null ? Arrays.asList(redirectUris) : new ArrayList<>();
             if (StringUtils.isNotBlank(request.getBackchannelLogoutUri())) {
                 registerParamsValidator.validateLogoutUri(request.getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
-            } else if (request.getRedirectUris() != null && !request.getRedirectUris().isEmpty()) {
+            } else if (redirectUrisChanged) {
                 // stored logout uri is kept, so it must still fit the new redirect_uris
                 registerParamsValidator.validateLogoutUri(client.getAttributes().getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
             }
