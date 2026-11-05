@@ -86,7 +86,7 @@ public class Introspection implements IntrospectionType {
         }
 
         // Return the public sid, never the session DN/id which equals the browser SSO cookie
-        response.accumulate("sid", session.getOutsideSid());
+        response.put("sid", session.getOutsideSid());
 
         Map<String, String> sessionAttributes = session.getSessionAttributes();
         if(sessionAttributes == null) {

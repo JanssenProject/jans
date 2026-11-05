@@ -188,8 +188,8 @@ done < "versions_to_destroy.txt"
         # -- Vault AppRole SecretID.
         cnVaultSecretId: ""
         # -- Base URL of Vault.
-        cnVaultAddr: http://localhost:8200
-        # -- Verify connection to Vault.
+        cnVaultAddr: https://localhost:8200
+        # -- Verify connection to Vault. The CA cert is read from /etc/certs/vault_ca.crt (CN_SECRET_VAULT_CACERT_FILE).
         cnVaultVerify: true
         # -- Path to file contains Vault AppRole role ID.
         cnVaultRoleIdFile: /etc/certs/vault_role_id

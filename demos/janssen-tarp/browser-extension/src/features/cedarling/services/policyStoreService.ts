@@ -96,6 +96,7 @@ export async function downloadAndExtractPolicyStore(uri: string): Promise<Policy
     // Reject oversized archives up front via the advertised length, before buffering.
     const declaredLength = Number(response.headers.get('content-length'));
     if (Number.isFinite(declaredLength) && declaredLength > MAX_ARCHIVE_BYTES) {
+      await response.body?.cancel().catch(() => {});
       throw new Error(
         `Policy store archive is too large (${formatBytesLimit(declaredLength)}); the limit is ${formatBytesLimit(MAX_ARCHIVE_BYTES)}.`,
       );

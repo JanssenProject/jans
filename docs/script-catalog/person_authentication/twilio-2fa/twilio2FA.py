@@ -143,7 +143,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 message = Message.creator(PhoneNumber(mobile_number), PhoneNumber(self.FROM_NUMBER), str(code)).create();
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
                 print 'TwilioSMs, Message Sid: %s' % (message.getSid())
-                print 'TwilioSMs, User phone: %s' % (mobile_number)
                 print "++++++++++++++++++++++++++++++++++++++++++++++"
                 sessionId.getSessionAttributes().put("mobile_number", mobile_number)
                 sessionId.getSessionAttributes().put("mobile", mobile_number)
@@ -152,10 +151,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.identity.getSessionId().getSessionAttributes().put("mobile_number",mobile_number)
                 self.identity.setWorkingParameter("mobile", mobile_number)
                 self.identity.getSessionId().getSessionAttributes().put("mobile",mobile_number)
-                print "++++++++++++++++++++++++++++++++++++++++++++++"
-                print "Number: %s" % (self.identity.getWorkingParameter("mobile_number"))
-                print "Mobile: %s" % (self.identity.getWorkingParameter("mobile"))
-                print "++++++++++++++++++++++++++++++++++++++++++++++"
                 print "========================================"
                 print "===TWILIO SMS FIRST STEP DONE PROPERLY=="
                 print "========================================"

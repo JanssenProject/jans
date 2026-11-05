@@ -95,6 +95,8 @@ class WWPassConnection(object):
         else:
             self.context.load_verify_locations(cafile=cafile)
         self.spfe_addr = 'https://%s' % spfe_addr if spfe_addr.find('://') == -1 else spfe_addr
+        if not self.spfe_addr.startswith('https://'):
+            raise ValueError('SPFE address must use https: %s' % self.spfe_addr)
         self.timeout = timeout
 
     def makeRequest(self, method, command, attempts=3,**paramsDict):
@@ -104,6 +106,8 @@ class WWPassConnection(object):
                 res = urlopen(self.spfe_addr +'/'+command+'?'+urlencode(params), context=self.context, timeout=self.timeout)
             else:
                 res = urlopen(self.spfe_addr +'/'+command, data=urlencode(params).encode('UTF-8'), context=self.context, timeout=self.timeout)
+            if not res.geturl().startswith('https://'):
+                raise WWPassException('SPFE redirected to a non-HTTPS URL')
             res = pickle.loads(res.read())
             if not res['result']:
                 if 'code'in res:

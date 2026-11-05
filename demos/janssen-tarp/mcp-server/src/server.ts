@@ -139,6 +139,8 @@ function normalizeIssuer(value: string): string {
   }
 }
 
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
 function isLocalHostname(rawHostname: string): boolean {
   // a trailing dot ("localhost.") resolves the same as without it
   const hostname = rawHostname.replace(/\.+$/, "");
@@ -198,8 +200,9 @@ function validateIssuerUrl(issuer: string): void {
   } catch {
     throw new Error(`Invalid issuer URL: ${issuer}`);
   }
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error(`Invalid issuer URL: ${issuer}`);
+  // client_secret, auth codes and tokens are sent to the issuer origin, so plain HTTP is loopback-only
+  if (url.protocol !== "https:" && !(url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname))) {
+    throw new Error(`Invalid issuer URL (https required; http allowed only for localhost): ${issuer}`);
   }
 }
 

@@ -62,7 +62,7 @@ class Introspection(IntrospectionType):
                 return False
 
             # Return the public sid, never the session DN/id which equals the browser SSO cookie
-            responseAsJsonObject.accumulate("sid", session.getOutsideSid())
+            responseAsJsonObject.put("sid", session.getOutsideSid())
 
             sessionAttributes = session.getSessionAttributes()
             if sessionAttributes is None:

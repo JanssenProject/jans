@@ -58,7 +58,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
 
    You need to use Salt File `/etc/jans/conf/salt` as a secret key. You will get this salt file after Jans intallation. Jans [interception script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) uses this same file for decryption.
 
-1. Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like `/google/:token`. `google` is provider id in [providers_json_file](#add-passport-social-script). `token` is the same token which we created in above step.
+1. Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like `/google/:token`. `google` is provider id in [providers_json_file](#add-passport-social-script). `token` is the same token which we created in above step. Verify it and store its `jwt` claim in `req.session.passportRequestId` for the `request_id` claim below.
 
 1. After authentication Passport Project has to send encoded userinfo data to Jans `https://<your.jans.server.com>/jans-auth/postlogin.htm`. Below is the Node JS code sample to send POST request with data to Jans Post Login Endpoint.
 

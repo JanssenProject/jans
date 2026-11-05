@@ -239,12 +239,13 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Basic (lock account). Lock user. User '%s' locked already" % user_name
                 return
         
-        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
-        userService.updateUser(find_user_by_uid)
-
+        # Write the lock record first: an inactive user without it is treated as an expired lock and unlocked
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
 
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+
+        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "inactive")
+        userService.updateUser(find_user_by_uid)
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
 
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
