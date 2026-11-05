@@ -1,6 +1,7 @@
 import json
 import logging.config
 import os
+import subprocess
 import sys
 import time
 from collections import Counter
@@ -37,14 +38,32 @@ KEY_STRATEGIES = ("OLDER", "NEWER", "FIRST")
 DEFAULT_ARCHIVED_JWK_LIFETIME = 60 * 60 * 24 * 365
 
 
+def _exec_keytool(args, password):
+    # keytool reads ``:env`` passwords from the environment, keeping them out of process arguments
+    env = {**os.environ, "KEYTOOL_STOREPASS": password}
+    popen = subprocess.Popen(  # nosec: B603
+        ["keytool", *args], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
+    )
+    stdout, stderr = popen.communicate()
+    return stdout.strip(), stderr.strip(), popen.returncode
+
+
 def keytool_import_key(src_jks_fn, dest_jks_fn, alias, password):
-    cmd = f"keytool -importkeystore -srckeystore {src_jks_fn} -srcstorepass {password} -srcalias {alias} -destkeystore {dest_jks_fn} -deststorepass {password} -destalias {alias}"
-    return exec_cmd(cmd)
+    return _exec_keytool(
+        [
+            "-importkeystore", "-srckeystore", src_jks_fn, "-srcstorepass:env", "KEYTOOL_STOREPASS",
+            "-srcalias", alias, "-destkeystore", dest_jks_fn, "-deststorepass:env", "KEYTOOL_STOREPASS",
+            "-destalias", alias,
+        ],
+        password,
+    )
 
 
 def keytool_delete_key(jks_fn, alias, password):
-    cmd = f"keytool -delete -alias {alias} -keystore {jks_fn} -storepass {password}"
-    return exec_cmd(cmd)
+    return _exec_keytool(
+        ["-delete", "-alias", alias, "-keystore", jks_fn, "-storepass:env", "KEYTOOL_STOREPASS"],
+        password,
+    )
 
 
 def encode_jks(manager, jks="/etc/certs/auth-keys.jks"):

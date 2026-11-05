@@ -8,6 +8,8 @@ import re
 import typing as _t
 from collections import defaultdict
 
+from jans.pycloudlib._fs import open_private
+
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
     # these won't be executed in runtime
@@ -33,7 +35,7 @@ def render_salt(manager: Manager, src: str, dest: str) -> None:
     with open(src) as f:
         txt = f.read()
 
-    with open(dest, "w") as f:
+    with open_private(dest) as f:
         rendered_txt = txt % {"encode_salt": encode_salt}
         f.write(rendered_txt)
 

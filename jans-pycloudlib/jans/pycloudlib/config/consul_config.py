@@ -27,7 +27,7 @@ class ConsulConfig(BaseConfig):
     - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
     - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
     - `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
-    - `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
+    - `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not when using `https` scheme (default to `true`; set to `false` only for development).
     - `CN_CONFIG_CONSUL_CACERT_FILE`: path to Consul CA cert file (default to `/etc/certs/consul_ca.crt`). This file will be used if it exists and `CN_CONFIG_CONSUL_VERIFY` set to `true`.
     - `CN_CONFIG_CONSUL_CERT_FILE`: path to Consul cert file (default to `/etc/certs/consul_client.crt`).
     - `CN_CONFIG_CONSUL_KEY_FILE`: path to Consul key file (default to `/etc/certs/consul_client.key`).
@@ -59,7 +59,7 @@ class ConsulConfig(BaseConfig):
         )
 
         self.settings.setdefault(
-            "CN_CONFIG_CONSUL_VERIFY", "false",
+            "CN_CONFIG_CONSUL_VERIFY", "true",
         )
 
         self.settings.setdefault(
@@ -112,7 +112,12 @@ class ConsulConfig(BaseConfig):
 
         Returns:
             Absolute path to prefixed key.
+
+        Raises:
+            ValueError: If key escapes the config tree.
         """
+        if key.startswith("/") or any(part in (".", "..") for part in key.replace("\\", "/").split("/")):
+            raise ValueError(f"Invalid config key {key!r}")
         return "".join([self.prefix, key])
 
     def _unmerge_path(self, key: str) -> str:
