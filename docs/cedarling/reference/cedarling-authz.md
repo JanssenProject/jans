@@ -595,7 +595,7 @@ Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer 
 
 Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
 
-The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [Cedarling TRACE](./cedarling-trace.md)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
 
 | Field | Required | Meaning |
 |---|---|---|
@@ -636,7 +636,7 @@ With TRACE enabled, the decision log entry of every decision says what happened 
 }
 ```
 
-`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-trace.md#record-status-and-metrics) for every status.
 
 In Rust, attach options with `with_options`:
 
