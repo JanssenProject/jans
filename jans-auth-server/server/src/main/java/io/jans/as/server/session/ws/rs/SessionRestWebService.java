@@ -248,7 +248,7 @@ public class SessionRestWebService {
             return false;
         }
         // scheme/authority come from the configured public endpoint, not the request, because of TLS-terminating proxies
-        return StringUtils.isBlank(baseEndpoint) || isSameOrigin(htuUri, URI.create(baseEndpoint));
+        return StringUtils.isNotBlank(baseEndpoint) && isSameOrigin(htuUri, URI.create(baseEndpoint));
     }
 
     private static boolean isSameOrigin(URI a, URI b) {
