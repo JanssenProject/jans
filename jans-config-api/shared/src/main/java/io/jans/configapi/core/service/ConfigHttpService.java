@@ -13,9 +13,8 @@ import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
 import java.io.File;
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -27,9 +26,11 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.SSLContext;
 
@@ -46,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -60,6 +62,9 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -71,7 +76,6 @@ import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
-import org.apache.http.util.EntityUtils;
 
 @ApplicationScoped
 public class ConfigHttpService extends BaseHttpService implements Serializable {
@@ -79,7 +83,22 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
     private static final String OPENID_CONFIGURATION_URL = "/.well-known/openid-configuration";
     private static final long serialVersionUID = -2398422090669045605L;
     private static final String CON_STATS_STR = "Connection manager stats: {}";
+    private static final int MAX_RESPONSE_SIZE = 5 * 1024 * 1024;
     protected transient Logger log = LogManager.getLogger(getClass());
+    private final transient Map<String, PoolingHttpClientConnectionManager> tlsPolicyConnectionManagers = new ConcurrentHashMap<>();
+
+    private static String readBounded(InputStream inputStream) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        while ((read = inputStream.read(buffer)) != -1) {
+            if (output.size() + read > MAX_RESPONSE_SIZE) {
+                throw new IOException("Response exceeds maximum allowed size of " + MAX_RESPONSE_SIZE + " bytes");
+            }
+            output.write(buffer, 0, read);
+        }
+        return output.toString(StandardCharsets.UTF_8);
+    }
 
     // ponytail: one fixed bound for credential-bearing GETs, make configurable if exports ever run slow
     private static final int CREDENTIAL_GET_TIMEOUT_MILLIS = 10_000;
@@ -124,9 +143,17 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext, enabledProtocols,
                 allowedCipherSuites, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 
+        // the socket factory of the connection manager is the one used, so each TLS policy needs its own pool
+        String policyKey = Arrays.toString(enabledProtocols) + "|" + Arrays.toString(allowedCipherSuites);
+        PoolingHttpClientConnectionManager policyConnectionManager = tlsPolicyConnectionManagers
+                .computeIfAbsent(policyKey, key -> new PoolingHttpClientConnectionManager(
+                        RegistryBuilder.<ConnectionSocketFactory>create()
+                                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                                .register("https", sslsf).build()));
+
         return HttpClients.custom().setSSLSocketFactory(sslsf)
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
-                .setConnectionManager(connectionManager).build();
+                .setConnectionManager(policyConnectionManager).setConnectionManagerShared(true).build();
     }
 
     /**
@@ -218,8 +245,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
             Map<String, String> parameters) {
 
         // header values are not logged: Authorization carries the caller's bearer token
-        log.info("\n\n requestUri{}, headerNames:{}, parameters:{}", escapeLog(requestUri),
-                escapeLog(headers == null ? null : headers.keySet()), escapeLog(parameters));
+        log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(requestUri),
+                headers != null ? escapeLog(headers.keySet()) : null,
+                parameters != null ? escapeLog(parameters.keySet()) : null);
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
@@ -235,7 +263,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.info("\n\n\n Final requestUri:{}", escapeLog(requestUri));
+            log.debug("Final requestUri:{}", escapeLog(requestUri));
         }
 
         HttpGet httpGet = new HttpGet(requestUri);
@@ -345,7 +373,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.info("\n\n\n Final Delete requestUri:{}", requestUri);
+            log.debug("Final Delete requestUri:{}", escapeLog(requestUri));
         }
 
         HttpDelete httpDelete = new HttpDelete(requestUri);
@@ -413,8 +441,8 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
             if (entity == null) {
                 return jsonString;
             }
-            try {
-                jsonString = EntityUtils.toString(entity, "UTF-8");
+            try (InputStream inputStream = entity.getContent()) {
+                jsonString = readBounded(inputStream);
             } catch (Exception ex) {
                 log.error("Error while getting entity using EntityUtils is ", ex);
             }
@@ -484,13 +512,8 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         if (httpEntity == null) {
             return result;
         }
-        try (InputStream inputStream = httpEntity.getContent();
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                result.append(line);
-            }
+        try (InputStream inputStream = httpEntity.getContent()) {
+            result.append(readBounded(inputStream).replace("\r", "").replace("\n", ""));
             log.error("Response:{}", result);
         }
 
@@ -518,7 +541,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
             log.trace("  httpEntity.getContentLength():{}, httpEntity.getContent():{}", httpEntity.getContentLength(),
                     httpEntity.getContent());
 
-            jsonString = IOUtils.toString(httpEntity.getContent(), StandardCharsets.UTF_8);
+            jsonString = readBounded(inputStream);
             log.debug("Data jsonString:{}", jsonString);
 
         } catch (Exception ex) {

@@ -1990,6 +1990,10 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
         period:
           type: string
         metricsData:
@@ -2020,13 +2024,7 @@ components:
         registrationSuccessRate:
           type: number
           format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
         registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
           type: number
           format: double
         deviceTypes:
@@ -2039,10 +2037,12 @@ components:
           additionalProperties:
             type: integer
             format: int64
-        performanceMetrics:
-          type: object
-          additionalProperties:
-            type: object
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

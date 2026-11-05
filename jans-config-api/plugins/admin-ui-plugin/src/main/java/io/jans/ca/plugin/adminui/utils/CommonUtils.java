@@ -179,7 +179,7 @@ public class CommonUtils {
             String placeholderKey = matcher.group(1);
             Object replacement = placeholderValues.get(placeholderKey);
             if (replacement != null) {
-                matcher.appendReplacement(sb, replacement.toString()); // Efficient replacement using appendReplacement
+                matcher.appendReplacement(sb, Matcher.quoteReplacement(replacement.toString()));
             }
         }
 
