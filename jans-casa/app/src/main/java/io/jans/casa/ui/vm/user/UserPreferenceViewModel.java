@@ -113,6 +113,11 @@ public class UserPreferenceViewModel extends UserViewModel {
     }
 
     public void change() {
+        if (!isEnableDisableAllowed()) {
+            logger.warn("User {} attempted to change 2FA status but self enable/disable is not allowed", user.getUserName());
+            UIUtils.showMessageUI(false);
+            return;
+        }
         //If 2FA has been turned on, try to restore the preferred method if there was any set previously 
         boolean outcome = mfaEnabled ? userService.turn2faOn(user, selectedMethod) : userService.turn2faOff(user);
         UIUtils.showMessageUI(outcome);

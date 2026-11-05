@@ -9,10 +9,12 @@ import io.jans.casa.plugins.certauthn.service.CertService;
 import io.jans.casa.service.*;
 import io.jans.casa.ui.UIUtils;
 import io.jans.inbound.oauth2.*;
+import io.jans.service.cache.CacheProvider;
 import io.jans.util.security.StringEncrypter;
 
 import java.util.*;
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
 
 import org.json.JSONObject;
 import org.slf4j.*;
@@ -37,7 +39,9 @@ public class CertAuthenticationSummaryVM {
     private ISessionContext sessionContext;
     
     private IPersistenceService ips;
-    private StringEncrypter encrypter;
+    private static final int UID_REF_EXPIRATION = 600;
+    private static final SecureRandom RAND = new SecureRandom();
+
 
     private String serverUrl;
     private String certDetailUrl;
@@ -62,7 +66,6 @@ public class CertAuthenticationSummaryVM {
 
         ips = Utils.managedBean(IPersistenceService.class);
         sndFactorUtils = Utils.managedBean(SndFactorAuthenticationUtils.class);
-        encrypter = Utils.stringEncrypter();
                     
         serverUrl = ips.getIssuerUrl();
         certDetailUrl = WebUtils.getServletRequest().getRequestURL().toString();
@@ -84,7 +87,13 @@ public class CertAuthenticationSummaryVM {
         String casaClientId = ips.get(ApplicationConfiguration.class, "ou=casa,ou=configuration,o=jans")
                 .getSettings().getOidcSettings().getClient().getClientId();         
         
-        Map<String, String> map = Map.of("uidRef", encrypter.encrypt(user.getUserName()));
+        //Opaque single-use reference to the logged user, resolved by the enrollment flow
+        byte[] rnd = new byte[32];
+        RAND.nextBytes(rnd);
+        String uidRef = Base64Util.base64urlencode(rnd);
+        Utils.managedBean(CacheProvider.class).put(UID_REF_EXPIRATION, uidRef, user.getUserName());
+
+        Map<String, String> map = Map.of("uidRef", uidRef);
         String inputs = new JSONObject(map).toString();                    
         inputs = Base64Util.base64urlencode(inputs.getBytes(UTF_8));
                     

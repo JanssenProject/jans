@@ -12,6 +12,7 @@ import io.jans.util.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 
 import org.slf4j.Logger;

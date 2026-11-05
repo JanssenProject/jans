@@ -13,10 +13,10 @@
                 ${labels.general.wait}
             </z:div>
             <div class="pa4" unless="${empty pageScope.error}">
-                <h4>${pageScope.error}</h4>
+                <h4><z:label value="${pageScope.error}" /></h4>
             </div>
             <div class="pa2 mb2" unless="${empty pageScope.error}">
-                <p>${pageScope.description}</p>
+                <p><z:label value="${pageScope.description}" /></p>
             </div>
         </div>
     

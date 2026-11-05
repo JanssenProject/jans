@@ -17,6 +17,7 @@ import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -100,7 +101,15 @@ public class OTPService extends BaseService {
 
         boolean success = false;
         try {
-            List<OTPDevice> vdevices = new ArrayList<>(devices);
+            PersonOTP person = persistenceService.get(PersonOTP.class, persistenceService.getPersonDn(userId));
+            //Use persisted uids so stale lists can neither restore removed devices nor roll back HOTP counters
+            Map<Integer, String> current = Utils.nonNullList(person.getExternalUids()).stream()
+                    .filter(uid -> uid.startsWith(TOTP_PREFIX) || uid.startsWith(HOTP_PREFIX))
+                    .collect(Collectors.toMap(uid -> new OTPDevice(uid).getId(), uid -> uid, (a, b) -> a));
+
+            List<OTPDevice> vdevices = devices.stream().filter(dev -> current.containsKey(dev.getId()))
+                    .collect(Collectors.toList());
+            vdevices.forEach(dev -> dev.setUid(current.get(dev.getId())));
             if (newDevice != null) {
                 vdevices.add(newDevice);
             }
@@ -108,12 +117,11 @@ public class OTPService extends BaseService {
             String json = uids.size() > 0 ? mapper.writeValueAsString(Collections.singletonMap("devices", vdevices)) : null;
 
             logger.debug("Updating otp devices for user '{}'", userId);
-            PersonOTP person = persistenceService.get(PersonOTP.class, persistenceService.getPersonDn(userId));
             person.setOTPDevices(json);
 
             //This helps prevent "losing" data (e.g. entries prefixed with passport)
             List<String> alluids = new ArrayList<>(
-                    person.getExternalUids().stream().filter(uid -> !uid.startsWith(TOTP_PREFIX) && !uid.startsWith(HOTP_PREFIX))
+                    Utils.nonNullList(person.getExternalUids()).stream().filter(uid -> !uid.startsWith(TOTP_PREFIX) && !uid.startsWith(HOTP_PREFIX))
                             .collect(Collectors.toList()));
             alluids.addAll(uids);
             person.setExternalUids(alluids);
@@ -134,16 +142,17 @@ public class OTPService extends BaseService {
         return updateDevicesAdd(userId, getDevices(userId), newDevice);
     }
     
-    public void updateMovingFactor(String userId, OTPDevice device, int movingFactor) {
+    public boolean updateMovingFactor(String userId, OTPDevice device, int movingFactor) {
     
         int cmf = device.currentMovingFactor();
-        if (cmf == -1) return;
+        if (cmf == -1) return false;
         
         logger.debug("Updating hotp device for user '{}'", userId);
         String uid = device.getUid();
         PersonOTP person = persistenceService.get(PersonOTP.class, persistenceService.getPersonDn(userId));
         
-        List<String> uids = person.getExternalUids();//new ArrayList<>(); 
+        List<String> uids = person.getExternalUids();
+        //Missing uid means the counter was already consumed (or device removed) since it was read
         int i = uids.indexOf(uid);
         if (i == -1) {
             logger.warn("Device {} not found", uid);
@@ -152,13 +161,14 @@ public class OTPService extends BaseService {
 
             if (j != -1) {
                 uids.set(i, uid.substring(0, j) + movingFactor);
-                //person.setExternalUids(uids);
 
-                if (!persistenceService.modify(person)) {                
-                    logger.error("Unable to update moving factor for device {}", uid);
+                if (persistenceService.modify(person)) {
+                    return true;
                 }
+                logger.error("Unable to update moving factor for device {}", uid);
             }
         }
+        return false;
             
     }
 

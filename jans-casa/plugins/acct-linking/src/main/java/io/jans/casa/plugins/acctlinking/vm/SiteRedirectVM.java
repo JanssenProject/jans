@@ -15,6 +15,7 @@ import io.jans.inbound.oauth2.CodeGrantUtil;
 import io.jans.service.cache.*;
 import io.jans.util.Pair;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.net.*;
@@ -36,6 +37,7 @@ public class SiteRedirectVM {
     private Logger logger = LoggerFactory.getLogger(getClass());
     
     private static final String STATE_ATTR = "st";
+    private static final SecureRandom RAND = new SecureRandom();
 
     @WireVariable
     private ISessionContext sessionContext;
@@ -117,7 +119,9 @@ public class SiteRedirectVM {
     
         } catch (Exception e) {
             text = e.getMessage();
-            logger.error(text, e);
+            //message may carry callback-supplied data
+            logger.error("{}: {}", e.getClass().getName(),
+                    Optional.ofNullable(text).map(t -> t.replaceAll("[\\r\\n]", "_")).orElse(null));
         }
 
     }
@@ -159,7 +163,9 @@ public class SiteRedirectVM {
     
     private String buildFlowParams(String provider) {
         
-        String key = "" + Math.random();
+        byte[] rnd = new byte[32];
+        RAND.nextBytes(rnd);
+        String key = Base64Util.base64urlencode(rnd);
         int sec = Long.valueOf(AccountsLinkingVM.ENROLL_TIME_MS).intValue() / 1000;
         
         logger.debug("Writing uid ref to cache");

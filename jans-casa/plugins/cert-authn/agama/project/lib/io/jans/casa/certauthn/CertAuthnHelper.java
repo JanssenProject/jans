@@ -70,8 +70,16 @@ public class CertAuthnHelper {
         
     }
 
-    public static String decryptValue(String val) throws StringEncrypter.EncryptionException {
-        return encrypter.decrypt(val);
+    public static String lookupUid(String uidRef) {
+
+        if (uidRef == null) return null;
+        //See class io.jans.casa.plugins.certauthn.vm.CertAuthenticationSummaryVM
+        String uid = Optional.ofNullable(cs.get(uidRef)).map(Object::toString).orElse(null);
+        if (uid != null) {
+            cs.remove(uidRef);
+        }
+        return uid;
+
     }
     
 }

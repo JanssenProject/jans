@@ -168,7 +168,8 @@ public class PasskeysViewModel extends UserViewModel {
 		String msg = Optional.ofNullable(jsonObject.get("message")).map(Object::toString).orElse("");
 
 		String message;
-		logger.error("An error occurred when enrolling fido2 cred for user {}. {}: {}", user.getUserName(), name, msg);
+		logger.error("An error occurred when enrolling fido2 cred for user {}. {}: {}", user.getUserName(),
+				name.replaceAll("[\\r\\n]", "_"), msg.replaceAll("[\\r\\n]", "_"));
 
 		if (name.equals("NotAllowedError")) {
 			message = Labels.getLabel(excludedCredentials ? "usr.fido2.error_exclude" : "general.error.general");

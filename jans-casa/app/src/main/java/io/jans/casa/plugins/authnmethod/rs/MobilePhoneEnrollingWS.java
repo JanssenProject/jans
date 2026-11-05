@@ -2,6 +2,7 @@ package io.jans.casa.plugins.authnmethod.rs;
 
 import io.jans.service.cache.CacheProvider;
 
+import java.security.SecureRandom;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ public class MobilePhoneEnrollingWS {
     private static final String SEPARATOR = ",";
     private static final String RECENT_CODES_PREFIX = "casa_reccode_";
     private static final int EXPIRATION = (int) TimeUnit.MINUTES.toSeconds(2);
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     @Inject
     private Logger logger;
@@ -65,7 +67,7 @@ public class MobilePhoneEnrollingWS {
             result = SendCode.NUMBER_ALREADY_ENROLLED;
         } else {
             try {
-                String aCode = Integer.toString(new Double(100000 + Math.random() * 899999).intValue());
+                String aCode = Integer.toString(100000 + RANDOM.nextInt(900000));
                 //Compose SMS body
                 String body = Labels.getLabel("usr.mobile_sms_body", new String[]{ aCode });
                 //Numbers are stored without the prepending plus in database
@@ -149,7 +151,7 @@ public class MobilePhoneEnrollingWS {
 
                 if (mobilePhoneService.addPhone(userId, phone)) {
                     result = FinishCode.SUCCESS;
-                    cacheProvider.remove(RECENT_CODES_PREFIX + key);
+                    cacheProvider.remove(key);
                 } else {
                     result = FinishCode.FAILED;
                     phone = null;

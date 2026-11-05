@@ -75,5 +75,10 @@ Repeat 3 times max
     obj = RRF "selector.ftlh" obj
     method = obj.selection
 
+    allowed = Call reinutil isMethodAllowed method
+    When allowed is false
+        Log "@w Rejected authentication method % for user %" method userData.inum
+        method = methods[0]
+
 obj = { success: false, error: "Those were too many attempts. Try again later" }
 Finish obj
