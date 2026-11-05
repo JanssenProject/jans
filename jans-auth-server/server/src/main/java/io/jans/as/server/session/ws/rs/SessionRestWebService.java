@@ -55,6 +55,8 @@ import static io.jans.as.model.userinfo.UserInfoErrorResponseType.INVALID_TOKEN;
 @Path("/session")
 public class SessionRestWebService {
 
+    private static final String DPOP_AUTH_SCHEME = "DPoP ";
+
     @Inject
     private Logger log;
 
@@ -220,7 +222,7 @@ public class SessionRestWebService {
         boolean valid = false;
         try {
             valid = StringUtils.isNotBlank(dpop) && dpopService.validateDpop(dpop) && jkt.equals(DpopService.getDpopJwkThumbprint(dpop))
-                    && isDpopProofForRequest(Jwt.parseOrThrow(dpop), accessToken, request);
+                    && isDpopProofForRequest(Jwt.parseOrThrow(dpop), accessToken, request, appConfiguration.getBaseEndpoint());
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -233,7 +235,7 @@ public class SessionRestWebService {
     }
 
     // RFC 9449 section 7.1: the proof must be for this method, this endpoint and this access token
-    private static boolean isDpopProofForRequest(Jwt dpop, String accessToken, HttpServletRequest request) {
+    static boolean isDpopProofForRequest(Jwt dpop, String accessToken, HttpServletRequest request, String baseEndpoint) {
         final String htm = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM);
         final String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
         final String ath = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.ATH);
@@ -241,8 +243,25 @@ public class SessionRestWebService {
                 || !Base64Util.base64urlencode(DigestUtils.sha256(accessToken)).equals(ath)) {
             return false;
         }
-        // path only: scheme/host differ behind a TLS-terminating proxy
-        return request.getRequestURI().equals(URI.create(htu).getRawPath());
+        final URI htuUri = URI.create(htu);
+        if (!request.getRequestURI().equals(htuUri.getRawPath())) {
+            return false;
+        }
+        // scheme/authority come from the configured public endpoint, not the request, because of TLS-terminating proxies
+        return StringUtils.isBlank(baseEndpoint) || isSameOrigin(htuUri, URI.create(baseEndpoint));
+    }
+
+    private static boolean isSameOrigin(URI a, URI b) {
+        return StringUtils.equalsIgnoreCase(a.getScheme(), b.getScheme())
+                && StringUtils.equalsIgnoreCase(a.getHost(), b.getHost())
+                && effectivePort(a) == effectivePort(b);
+    }
+
+    private static int effectivePort(URI uri) {
+        if (uri.getPort() != -1) {
+            return uri.getPort();
+        }
+        return "http".equalsIgnoreCase(uri.getScheme()) ? 80 : 443;
     }
 
     private Response response(Response.Status status, UserInfoErrorResponseType errorResponseType) {
@@ -257,6 +276,9 @@ public class SessionRestWebService {
     private String getToken(String authorization) {
         if (tokenService.isBearerAuthToken(authorization)) {
             return tokenService.getBearerToken(authorization);
+        }
+        if (StringUtils.startsWithIgnoreCase(authorization, DPOP_AUTH_SCHEME)) {
+            return authorization.substring(DPOP_AUTH_SCHEME.length()).trim();
         }
         return null;
     }
