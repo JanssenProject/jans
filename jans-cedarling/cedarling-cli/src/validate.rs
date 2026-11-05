@@ -35,8 +35,8 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         println!(
             "  {} {}: {}",
             "warning:".yellow(),
-            warning.file,
-            warning.message
+            escape_controls(&warning.file),
+            escape_controls(&warning.message)
         );
     }
 
@@ -80,19 +80,36 @@ fn print_level(name: &str, result: &LevelResult) {
     let dots = ".".repeat(24usize.saturating_sub(name.len()));
     match result {
         LevelResult::Ok => println!("  {name} {dots} {}", "OK".green()),
-        LevelResult::Skipped { reason } => println!("  {name} {dots} skipped ({reason})"),
+        LevelResult::Skipped { reason } => {
+            println!("  {name} {dots} skipped ({})", escape_controls(reason));
+        },
         LevelResult::Failed { errors } => {
             println!("  {name} {dots} {}", "FAIL".red());
             for e in errors {
+                let file = escape_controls(&e.file);
                 let loc = match (e.line, e.column) {
-                    (Some(l), Some(c)) => format!("{}:{l}:{c}", e.file),
-                    (Some(l), None) => format!("{}:{l}", e.file),
-                    _ => e.file.clone(),
+                    (Some(l), Some(c)) => format!("{file}:{l}:{c}"),
+                    (Some(l), None) => format!("{file}:{l}"),
+                    _ => file,
                 };
-                println!("    {loc}: {}", e.message);
+                println!("    {loc}: {}", escape_controls(&e.message));
             }
         },
     }
+}
+
+/// Makes control characters (line breaks, terminal escapes) from policy-store content visible
+/// instead of letting them alter the report or the terminal.
+pub(crate) fn escape_controls(s: &str) -> String {
+    s.chars()
+        .map(|c| {
+            if c.is_control() {
+                c.escape_default().to_string()
+            } else {
+                c.to_string()
+            }
+        })
+        .collect()
 }
 
 fn describe_source(cfg: &PolicyStoreConfig) -> String {

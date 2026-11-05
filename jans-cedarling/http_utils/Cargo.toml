@@ -13,6 +13,11 @@ thiserror = { workspace = true }
 reqwest = { workspace = true }
 tokio = { workspace = true }
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# bounded incremental body reads in the browser
+reqwest = { workspace = true, features = ["stream"] }
+futures = "0.3.32"
+
 [dev-dependencies]
 mockito = { workspace = true }
 tokio = { workspace = true, features = ["macros", "rt"] }
