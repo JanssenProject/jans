@@ -5,7 +5,7 @@
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 
 class Introspection(IntrospectionType):
-    def init(self, currentTimeMillis):
+    def __init__(self, currentTimeMillis):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
