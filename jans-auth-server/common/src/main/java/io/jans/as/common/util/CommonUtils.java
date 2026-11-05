@@ -31,7 +31,14 @@ public class CommonUtils {
         if (Strings.isNullOrEmpty(jwksUri)) {
             return null;
         }
-        if (!isExternalUriWhitelisted(jwksUri, getExternalUriWhiteList())) {
+        final List<String> externalUriWhiteList;
+        try {
+            externalUriWhiteList = getExternalUriWhiteList();
+        } catch (RuntimeException e) {
+            log.error("Unable to read externalUriWhiteList, refusing to call client jwks_uri", e);
+            return null;
+        }
+        if (!isExternalUriWhitelisted(jwksUri, externalUriWhiteList)) {
             log.debug("Unable to call client jwks_uri: {}, it is not allowed by externalUriWhiteList", jwksUri);
             return null;
         }
@@ -52,8 +59,8 @@ public class CommonUtils {
     private static List<String> getExternalUriWhiteList() {
         try {
             return CdiUtil.bean(AppConfiguration.class).getExternalUriWhiteList();
-        } catch (RuntimeException e) {
-            // outside of CDI container (e.g. standalone usage) there is no configured whitelist
+        } catch (IllegalStateException e) {
+            // no CDI container (standalone usage), so there is no configured whitelist
             return null;
         }
     }

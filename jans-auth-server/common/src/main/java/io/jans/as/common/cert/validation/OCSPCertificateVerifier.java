@@ -68,6 +68,8 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
 	private static final Logger log = LoggerFactory.getLogger(OCSPCertificateVerifier.class);
 	private static final long OCSP_CLOCK_SKEW_MS = 5L * 60 * 1000;
+	// RFC 6960: no nextUpdate means newer status is always available, so cap the age instead of trusting it forever
+	private static final long OCSP_MAX_AGE_WITHOUT_NEXT_UPDATE_MS = 60L * 60 * 1000;
 
 	public OCSPCertificateVerifier() {
 		SecurityProviderUtility.installBCProvider(true);
@@ -224,7 +226,10 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 		if (thisUpdate == null || thisUpdate.getTime() - OCSP_CLOCK_SKEW_MS > validationDate.getTime()) {
 			return false;
 		}
-		return nextUpdate == null || nextUpdate.getTime() + OCSP_CLOCK_SKEW_MS >= validationDate.getTime();
+		if (nextUpdate == null) {
+			return thisUpdate.getTime() + OCSP_MAX_AGE_WITHOUT_NEXT_UPDATE_MS >= validationDate.getTime();
+		}
+		return nextUpdate.getTime() + OCSP_CLOCK_SKEW_MS >= validationDate.getTime();
 	}
 
 	private OCSPReq generateOCSPRequest(CertificateID certificateId) throws OCSPException, OperatorCreationException, CertificateEncodingException {
