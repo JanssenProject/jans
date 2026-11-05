@@ -297,6 +297,8 @@ class Upgrade:
         seeded_dirs = None
         with contextlib.suppress(TypeError, ValueError):
             seeded_dirs = json.loads(self.manager.config.get("config_api_seeded_asset_dirs") or "null")
+        if not isinstance(seeded_dirs, list) or not all(isinstance(dir_, str) for dir_ in seeded_dirs):
+            seeded_dirs = None
 
         conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"], seeded_dirs)
 
@@ -329,10 +331,11 @@ class Upgrade:
                 for dir_ in json.loads(f.read())["assetMgtConfiguration"]["assetDirMapping"]
             }
         if not shipped_dirs.issubset(seeded_dirs or []):
-            self.manager.config.set(
+            if not self.manager.config.set(
                 "config_api_seeded_asset_dirs",
                 json.dumps(sorted(shipped_dirs | set(seeded_dirs or []))),
-            )
+            ):
+                logger.warning("Unable to record seeded config-api asset directories; they will be offered again on the next run")
 
     def update_client_scopes(self):
         kwargs = {"table_name": "jansClnt"}
