@@ -16,7 +16,7 @@
         <link rel="canonical" href="https://docs.jans.io/head/cedarling/reference/cedarling-lock-server/">
       
       
-        <link rel="prev" href="../cedarling-logs/">
+        <link rel="prev" href="../cedarling-trace/">
       
       
         <link rel="next" href="../benchmarks/">
@@ -893,6 +893,8 @@
       
         
       
+        
+      
     
     
     
@@ -1140,6 +1142,33 @@
     
   
   Logs
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cedarling-trace/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  TRACE
 
     
   </span>
@@ -1715,6 +1744,8 @@
       
         
       
+        
+      
     
     
     
@@ -1749,7 +1780,7 @@
 <p>For a Cedarling client to communicate with the Lock Server, it has to perform <a href="https://datatracker.ietf.org/doc/html/rfc7591">Dynamic Client Registration <strong>(DCR)</strong></a> with the Jans Auth Server.</p>
 <p>By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.</p>
 <blockquote>
-<p><strong>Alternative (native targets only, primarily for testing):</strong> If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting <a href=".././cedarling-properties/#lock-server-integration-properties"><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></a>. This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is <strong>not available on WASM builds</strong> — WASM targets must use the SSA → DCR flow.</p>
+<p><strong>Alternative (native targets only, primarily for testing):</strong> If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting <a href=".././cedarling-properties/#lock-server-integration-properties"><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></a>. This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is <strong>not available on WASM builds</strong>: WASM targets must use the SSA and DCR flow.</p>
 </blockquote>
 <p>This guide will walk you through the following setup processes:</p>
 <ul>
@@ -1961,98 +1992,7 @@
 </blockquote>
 <hr />
 <h2 id="client-setup">Client Setup<a class="headerlink" href="#client-setup" title="Permanent link">#</a></h2>
-<p>To enable Lock Server integration in the Cedarling client, configure the appropriate <a href=".././cedarling-properties/">bootstrap properties</a>.</p>
-<p>Here's a table of the available properties:</p>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Description</th>
-<th>Allowed Values</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>CEDARLING_LOCK</code></td>
-<td>Toggles the all the Lock Server integration features.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></td>
-<td>URI to fetch Lock Server metadata (<code>.well-known/lock-server-configuration</code>). Required if <code>CEDARLING_LOCK</code> is <code>enabled</code>.</td>
-<td>String</td>
-<td><code>""</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_DYNAMIC_CONFIGURATION</code> (WIP)</td>
-<td>Toggles listening for Server-Sent Events (SSE) config updates.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_SSA_JWT</code></td>
-<td>SSA JWT used for DCR. This is required if you followed the <a href="#auth-server-setup">auth server setup</a>.</td>
-<td>String</td>
-<td><code>""</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></td>
-<td>Pre-issued access token for Lock Server authentication. When set, <strong>bypasses the SSA → DCR → access token flow entirely</strong>. <strong>Primarily intended for testing / local development</strong> to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and <code>CEDARLING_LOCK_SSA_JWT</code> are set, this property takes precedence. <strong>Not available on WASM builds.</strong></td>
-<td>String</td>
-<td><code>""</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_LOG_INTERVAL</code></td>
-<td>Frequency (in seconds) of sending log messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_HEALTH_INTERVAL</code> (WIP)</td>
-<td>Frequency (in seconds) of sending health messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code> (WIP)</td>
-<td>Frequency (in seconds) of sending telemetry messages to the Lock Server. <code>0</code> disables transmission.</td>
-<td>uint</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_LISTEN_SSE</code> (WIP)</td>
-<td>Toggles listening for updates from the Lock Server via SSE.</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_ACCEPT_INVALID_CERTS</code></td>
-<td>Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).</td>
-<td><code>enabled</code>, <code>disabled</code></td>
-<td><code>disabled</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_TRANSPORT</code></td>
-<td>The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the <code>grpc</code> feature enabled.</td>
-<td><code>rest</code>, <code>grpc</code></td>
-<td><code>rest</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_LOG_CHANNEL_CAPACITY</code></td>
-<td>Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage.</td>
-<td>uint</td>
-<td><code>100</code></td>
-</tr>
-<tr>
-<td><code>CEDARLING_LOCK_LOG_MAX_RETRIES</code></td>
-<td>Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff.</td>
-<td>uint</td>
-<td><code>5</code></td>
-</tr>
-</tbody>
-</table>
+<p>To enable Lock Server integration in the Cedarling client, set <code>CEDARLING_LOCK</code> to <code>enabled</code>, <code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code> to the Lock Server <code>.well-known/lock-server-configuration</code>, and <code>CEDARLING_LOCK_SSA_JWT</code> to the SSA created in <a href="#auth-server-setup">Auth Server Setup</a>. All Lock properties are described in <a href=".././cedarling-properties/#lock-server-integration-properties">Lock Server integration properties</a>.</p>
 <h2 id="loading-policy-stores-from-lock-server">Loading Policy Stores from Lock Server<a class="headerlink" href="#loading-policy-stores-from-lock-server" title="Permanent link">#</a></h2>
 <p>Lock Server can serve <code>.cjar</code> policy stores registered as policy sources, for example through the Config API <code>POST /jans-config-api/lock/policy-stores</code>. Lock serves each store at <code>/jans-lock/api/v1/policy/{policy_store_id}</code>.</p>
 <p>Point Cedarling at that URL with <code>CEDARLING_POLICY_STORE_URI</code> and enable Lock integration. When the URL has the same origin (scheme, host and port) as <code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code>, Cedarling sends its Lock access token with policy store requests, including periodic refresh. The URL must use <code>https</code> (plain <code>http</code> is accepted only for <code>localhost</code> and loopback addresses). The token needs the <code>https://jans.io/oauth/lock/policy.readonly</code> scope. Requests to other hosts never carry the token.</p>
@@ -2098,7 +2038,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 12, 2026
+    November 05, 2026
   </span>
 
     
