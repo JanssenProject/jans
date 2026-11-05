@@ -192,7 +192,7 @@ public class LabelsService implements TemplateMethodModelEx {
     
     private Properties propertiesFromSection(List<String> section) {
         
-        String cat = section.stream().reduce("", (a, b) -> a + "\n" + b );
+        String cat = section.stream().reduce("", (a, b) -> a + "\n" + b);
         Properties p = new Properties();
         
         try (StringReader sr = new StringReader(cat)) {
