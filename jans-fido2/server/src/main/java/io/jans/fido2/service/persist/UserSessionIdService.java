@@ -73,7 +73,7 @@ public class UserSessionIdService {
 
     public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll) {
         SessionId entity = getSessionId(sessionId);
-        if (entity == null) {
+        if (entity == null || !isSessionUsableForUser(entity, userInum, registrationEntry)) {
             return;
         }
 
@@ -88,7 +88,7 @@ public class UserSessionIdService {
 
     public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry, boolean enroll) {
         SessionId entity = getSessionId(sessionId);
-        if (entity == null) {
+        if (entity == null || !isSessionUsableForUser(entity, userInum, registrationEntry)) {
             return;
         }
 
@@ -103,6 +103,40 @@ public class UserSessionIdService {
         updateSessionId(entity);
     }
 
+
+    /**
+     * A ceremony may only approve or refresh a live session bound to the verified credential owner,
+     * or a session not yet bound to any user.
+     */
+    private boolean isSessionUsableForUser(SessionId entity, String userInum, Fido2RegistrationEntry registrationEntry) {
+        Date expirationDate = entity.getExpirationDate();
+        if ((expirationDate != null) && expirationDate.before(new Date())) {
+            log.warn("Session '{}' has expired, it will not be updated", entity.getId());
+            return false;
+        }
+
+        String sessionUserDn = entity.getUserDn();
+        if (StringHelper.isNotEmpty(sessionUserDn)) {
+            if (StringHelper.isEmpty(userInum)
+                    || !StringHelper.toLowerCase(sessionUserDn).startsWith("inum=" + userInum.toLowerCase() + ",")) {
+                log.warn("Session '{}' belongs to another user, it will not be updated", entity.getId());
+                return false;
+            }
+            return true;
+        }
+
+        String sessionUser = entity.getSessionAttributes().get(AUTHENTICATED_USER);
+        if (StringHelper.isNotEmpty(sessionUser)) {
+            String userName = registrationEntry.getRegistrationData() == null ? null
+                    : registrationEntry.getRegistrationData().getUsername();
+            if (!StringHelper.equalsIgnoreCase(sessionUser, userName)) {
+                log.warn("Session '{}' is bound to another user, it will not be updated", entity.getId());
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     public void updateUserSessionIdOnError(String sessionId) {
         SessionId entity = getSessionId(sessionId);

@@ -62,6 +62,8 @@ public class ContentChecker {
     private static final String ID_IOS_APP = "content.ios.app";
     private static final String ID_DRIFT = "content.drift";
     private static final String PACKAGE = "package ";
+    /** Every derived fact copies the package name, so an oversized one would multiply memory per fingerprint. */
+    static final int MAX_PACKAGE_NAME_LENGTH = 255;
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
@@ -210,6 +212,10 @@ public class ContentChecker {
                 continue;
             }
             String pkg = target.path("package_name").asText();
+            if (pkg.length() > MAX_PACKAGE_NAME_LENGTH) {
+                facts.add("X|oversized package_name");
+                continue;
+            }
             boolean hasRelation = hasLoginCredsRelation(statement);
             facts.add("P|" + pkg);
             if (hasRelation) {
