@@ -277,6 +277,31 @@ def get_bool(val):
         return True
     return False
 
+SENSITIVE_KEY_SUFFIXES = ('password', 'secret', 'token', 'pwd', 'devicecode')
+REDACTED_VALUE = '*****'
+
+
+def is_sensitive_key(key):
+    return isinstance(key, str) and key.lower().replace('_', '').replace('-', '').endswith(SENSITIVE_KEY_SUFFIXES)
+
+
+def redact_secrets(data):
+    """Returns a copy of data with credential values masked, at any nesting depth."""
+    if isinstance(data, dict):
+        redacted = {}
+        sensitive_entry = is_sensitive_key(data.get('name')) or (
+            isinstance(data.get('path'), str) and is_sensitive_key(data['path'].rstrip('/').split('/')[-1]))
+        for key, val in data.items():
+            if is_sensitive_key(key) or (sensitive_entry and key in ('value', 'values')):
+                redacted[key] = REDACTED_VALUE
+            else:
+                redacted[key] = redact_secrets(val)
+        return redacted
+    if isinstance(data, list):
+        return [redact_secrets(item) for item in data]
+    return data
+
+
 def write_config():
     with open(config_ini_fn, 'w') as w:
         config.write(w)
@@ -416,45 +441,29 @@ class JCA_CLI:
                         self.cli_logger.debug("Error while parsing json string: %s", e)
 
                     else:
-                        hidden_password_str = '*****'
-
-                        if log_data:
-
-                            if 'customAttributes' in log_data:
-                                for prop in log_data['customAttributes']:
-                                    if prop['name'] == 'userPassword':
-                                        prop['value'] = hidden_password_str
-
-                            for prop in log_data:
-                                if prop in ('userPassword', 'clientSecret'):
-                                    log_data[prop] = hidden_password_str
-
-                        log_args[1] = str(log_data)
+                        log_args[1] = str(redact_secrets(log_data))
                         self.cli_logger.debug(" ".join(log_args))
 
             http.client.print = print_to_log
 
 
-    def log_response(self, response):
+    def log_response(self, response, log_body=True):
         if debug:
             self.cli_logger.debug('requests response status: %s', str(response.status_code))
             self.cli_logger.debug('requests response headers: %s', str(response.headers))
-            self.cli_logger.debug('requests response text: %s', str(response.text))
+            if not log_body:
+                # authentication responses carry tokens and user claims
+                self.cli_logger.debug('requests response text: <%d bytes, not logged>', len(response.content or b''))
+                return
+            try:
+                response_text = json.dumps(redact_secrets(response.json()))
+            except ValueError:
+                response_text = response.text
+            self.cli_logger.debug('requests response text: %s', response_text)
 
     def log_cmd(self, operation_id, url_suffix, endpoint_args, data):
 
-        log_data = copy.deepcopy(data)
-        # don't log passwords
-        hpass = '*****'
-        if log_data:
-            for prop in log_data:
-                if prop in ('userPassword', 'clientSecret'):
-                    log_data[prop] = hpass
-
-        if isinstance(log_data, dict):
-            for cad in log_data.get('customAttributes', []):
-                if cad.get('name') == 'userPassword':
-                    cad['value'] = hpass
+        log_data = redact_secrets(data)
 
         cmdl = [sys.executable, __file__, '--operation-id', operation_id]
         if url_suffix:
@@ -561,7 +570,7 @@ class JCA_CLI:
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
 
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         if response.status_code != 200:
             if self.wrapped:
                 return response.text
@@ -608,7 +617,7 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
-        self.log_response(response)
+        self.log_response(response, log_body=False)
 
         if self.wrapped:
             return response
@@ -667,7 +676,7 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
         )
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         try:
             result = response.json()
             if 'access_token' in result:
@@ -694,7 +703,7 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
         )
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         if response.status_code != 200:
             raise ValueError(
                 self.colored_text("Unable to get device authorization user code: {}".format(response.reason), error_color))
@@ -711,7 +720,7 @@ class JCA_CLI:
             cert=self.mtls_client_cert
         )
 
-        self.log_response(response)
+        self.log_response(response, log_body=False)
 
         return response
 
@@ -774,7 +783,7 @@ class JCA_CLI:
              verify=self.verify_ssl,
              cert=self.mtls_client_cert
             )
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         if response.status_code != 200:
             self.raise_error("Unable to get access token")
 
@@ -793,7 +802,7 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         if response.status_code != 200:
             self.raise_error("Unable to get user info")
 
@@ -820,7 +829,7 @@ class JCA_CLI:
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
-        self.log_response(response)
+        self.log_response(response, log_body=False)
         if response.status_code != 200:
             self.raise_error("Unable to get access token")
 
@@ -989,14 +998,43 @@ class JCA_CLI:
         return next(iter(content), None)
 
 
+    def user_file_roots(self):
+        return [os.path.realpath(root) for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir())]
+
     def resolve_user_file(self, path):
         resolved = os.path.realpath(path)
-        for root in (os.getcwd(), str(Path.home()), tempfile.gettempdir()):
-            root = os.path.realpath(root)
+        for root in self.user_file_roots():
             if resolved.startswith(os.path.join(root, '')):
                 return resolved
         self.raise_error("{} must be under the working, home or temp directory".format(path))
         return None
+
+    def read_user_file(self, path):
+        """Returns (name, bytes) of a file checked by resolve_user_file, refusing symlinks
+        on the way so a path component swapped after the check cannot redirect the read."""
+        resolved = self.resolve_user_file(path)
+        if not (os.open in os.supports_dir_fd and hasattr(os, 'O_NOFOLLOW')):
+            with open(resolved, 'rb') as upload_fh:
+                return os.path.basename(resolved), upload_fh.read()
+
+        root = next(root for root in self.user_file_roots() if resolved.startswith(os.path.join(root, '')))
+        parts = Path(os.path.relpath(resolved, root)).parts
+        # search-only fds so traverse-only (x without r) directories still work
+        search_flag = getattr(os, 'O_PATH', getattr(os, 'O_SEARCH', os.O_RDONLY))
+        dir_flags = search_flag | os.O_NOFOLLOW | getattr(os, 'O_DIRECTORY', 0)
+        fd = os.open(root, search_flag | getattr(os, 'O_DIRECTORY', 0))
+        try:
+            for part in parts[:-1]:
+                next_fd = os.open(part, dir_flags, dir_fd=fd)
+                os.close(fd)
+                fd = next_fd
+            file_fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW, dir_fd=fd)
+        finally:
+            os.close(fd)
+        with os.fdopen(file_fd, 'rb') as upload_fh:
+            if not stat.S_ISREG(os.fstat(upload_fh.fileno()).st_mode):
+                self.raise_error("{} is not a regular file".format(path))
+            return os.path.basename(resolved), upload_fh.read()
 
     def post_requests(self, endpoint, data, params=None, method='post'):
 
@@ -1044,9 +1082,8 @@ class JCA_CLI:
             for prop in schema['properties']:
                 if schema['properties'][prop].get('type') == 'string' and schema['properties'][prop].get('format') == 'binary':
                     if prop in data_js:
-                        upload_path = self.resolve_user_file(data_js[prop])
-                        with open(upload_path, 'rb') as upload_fh:
-                            multi_part_fields[prop] = (os.path.basename(upload_path), upload_fh.read(), 'application/octet-stream')
+                        upload_name, upload_data = self.read_user_file(data_js[prop])
+                        multi_part_fields[prop] = (upload_name, upload_data, 'application/octet-stream')
                 else:
                     multi_part_fields[prop] = (None, json.dumps(data_js[prop]), 'application/json')
             data = MultipartEncoder(fields=multi_part_fields)
