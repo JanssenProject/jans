@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentMap;
 @Named
 public class SsaValidateAction {
 
+    // JVM-local guard: closes races within one node only, cross-replica atomicity needs a shared compare-and-set
     private static final ConcurrentMap<String, Boolean> jtiClaims = new ConcurrentHashMap<>();
 
     @Inject

@@ -33,6 +33,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -206,7 +207,7 @@ public class RateLimitService {
                 }
                 return key.toString();
             case BODY:
-                String contentType = rateLimitContext.getRequest().getContentType();
+                String contentType = StringUtils.lowerCase(rateLimitContext.getRequest().getContentType(), Locale.ROOT);
 
                 // Note: Use .contains() rather than .equals() because the header often includes character encoding (e.g., application/json; charset=UTF-8).
                 if (contentType != null && contentType.contains("application/json")) {

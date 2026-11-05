@@ -159,7 +159,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private JwtGrantService jwtGrantService;
 
-    // static: the resource is instantiated per request, so instance-level locks would not serialize anything
+    // static: the resource is instantiated per request; JVM-local only, cross-replica atomicity needs a shared compare-and-set
     private static final ConcurrentMap<String, String> refreshTokenLock = Maps.newConcurrentMap();
     private static final ConcurrentMap<String, Boolean> oneTimeCodeClaims = Maps.newConcurrentMap();
 

@@ -139,10 +139,10 @@ public class RegisterUpdateAction {
             validateSubjectType(request);
             registerValidator.validatePasswordGrantType(request);
             registerParamsValidator.validateAlgorithms(request);
-            validateSubjectIdentifierAttribute(request);
 
             final Client client = clientService.getClient(clientId, accessToken);
             validateClientNotNull(client);
+            validateSubjectIdentifierAttribute(request, client);
 
             registerService.updateClientFromRequestObject(client, request, true);
 
@@ -225,16 +225,13 @@ public class RegisterUpdateAction {
         }
     }
 
-    private void validateSubjectIdentifierAttribute(RegisterRequest request) {
-        final String attribute = request.getSubjectIdentifierAttribute();
-        if (StringUtils.isBlank(attribute)) {
-            return;
-        }
-        if (Boolean.FALSE.equals(appConfiguration.getPublicSubjectIdentifierPerClientEnabled())
-                || !appConfiguration.getSubjectIdentifiersPerClientSupported().contains(attribute)) {
-            log.debug("Failed to perform client action, reason: subject identifier attribute is not allowed.");
-            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE, "Invalid subject identifier attribute.");
-        }
+    private void validateSubjectIdentifierAttribute(RegisterRequest request, Client client) {
+        final RegisterRequest effective = new RegisterRequest();
+        effective.setSubjectIdentifierAttribute(request.getSubjectIdentifierAttribute());
+        effective.setRedirectUrisRegex(request.getRedirectUrisRegex());
+        // partial updates may omit subject_type, so fall back to the stored one
+        effective.setSubjectType(request.getSubjectType() != null ? request.getSubjectType() : client.getSubjectType());
+        registerValidator.validateSubjectIdentifierAttribute(effective);
     }
 
     private void validateSubjectType(RegisterRequest request) {

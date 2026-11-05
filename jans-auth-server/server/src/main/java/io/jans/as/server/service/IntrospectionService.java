@@ -70,7 +70,7 @@ public class IntrospectionService {
 
     public void validateIntrospectionScopePresence(AuthorizationGrant authorizationGrant) {
         if (isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope()) &&
-                !authorizationGrant.getScopesAsString().contains(ScopeConstants.INTROSPECTION)) {
+                !authorizationGrant.getScopes().contains(ScopeConstants.INTROSPECTION)) {
             final String reason = "access_token used to access introspection endpoint does not have 'introspection' scope, however in AS configuration 'introspectionAccessTokenMustHaveIntrospectionScope' is true";
             log.trace(reason);
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build());

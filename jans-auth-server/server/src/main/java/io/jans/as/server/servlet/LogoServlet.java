@@ -35,7 +35,7 @@ public class LogoServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LogoServlet.class);
 
     public static final String BASE_OXAUTH_LOGO_PATH = "/opt/gluu/jetty/jans-auth/custom/static/logo/";
-    private static final Set<String> IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "gif", "svg", "ico", "webp", "bmp");
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "jpe", "jfif", "pjpeg", "pjp", "gif", "svg", "ico", "webp", "bmp");
 
     @Inject
     private OrganizationService organizationService;

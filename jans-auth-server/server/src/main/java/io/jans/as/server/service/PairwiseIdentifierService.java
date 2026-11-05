@@ -18,6 +18,7 @@ import io.jans.util.StringHelper;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -105,6 +106,9 @@ public class PairwiseIdentifierService {
             String salt = appConfiguration.getPairwiseCalculationSalt();
             String localAccountId = isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId()) ?
                     openidSubValue : userInum;
+            if (StringUtils.isBlank(localAccountId)) {
+                throw new IllegalStateException("Unable to calculate pairwise identifier: local account id is blank");
+            }
             if (!isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId())) {
                 localAccountId = localAccountId + clientId;
             }
