@@ -129,7 +129,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
+          TAG_NAME="${EVENT_REF#refs/tags/}"
         fi
         if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
           echo "Invalid release tag" >&2; exit 1
@@ -250,7 +250,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
+          TAG_NAME="${EVENT_REF#refs/tags/}"
         fi
         if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
           echo "Invalid release tag" >&2; exit 1
@@ -465,7 +465,7 @@ jobs:
         if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
           TAG_NAME="$INPUT_TAG"
         else
-          TAG_NAME=$(echo "$EVENT_REF" | cut -d '/' -f 3)
+          TAG_NAME="${EVENT_REF#refs/tags/}"
         fi
         if [[ ! "$TAG_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
           echo "Invalid release tag" >&2; exit 1
