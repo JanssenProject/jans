@@ -63,6 +63,7 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .disableContentCompression()
                 .setConnectionManager(cm).build();
 
         ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();

@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 
 //import io.jans.scim.ldap.service.IGroupService;
@@ -23,14 +24,19 @@ import org.apache.commons.lang3.StringUtils;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.scim.model.scim.ScimCustomPerson;
 //import io.jans.scim.model.scim2.group.GroupResource;
+import io.jans.scim.model.scim2.SearchRequest;
+import io.jans.scim.model.scim2.user.UserResource;
 import io.jans.scim.model.scim2.util.DateUtil;
 import io.jans.scim.model.scim2.util.IntrospectUtil;
+import io.jans.scim.model.scim2.util.ScimResourceUtil;
 import io.jans.scim.service.AttributeService;
 import io.jans.scim.service.antlr.scimFilter.ScimFilterParserService;
+import io.jans.scim.service.external.ExternalScimService;
 //import io.jans.scim.service.scim2.Scim2GroupService;
 import io.jans.scim.service.filter.ProtectedApi;
 import io.jans.scim.util.ServiceUtil;
@@ -39,6 +45,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
@@ -58,6 +65,14 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @Inject
     private AttributeService attributeService;
+
+    @Inject
+    private ExternalScimService externalScimService;
+
+    //Authentication secrets (e.g. Casa OTP keys) must never leave the server
+    private static final Set<String> EXCLUDED_ATTRIBUTES = Set.of("userpassword", "jansotpdevices", "jansotpcache");
+    private static final String EXT_UID_ATTRIBUTE = "jansExtUid";
+    private static final List<String> SECRET_EXT_UID_PREFIXES = List.of("totp:", "hotp:");
 
     private boolean ldapBackend;
 
@@ -90,6 +105,14 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
                 return getErrorResponse(Response.Status.BAD_REQUEST, "No suitable value for 'start' or 'pageSize' params");
             }
 
+            //Apply the same search policy hooks as regular user searches
+            SearchRequest searchReq = new SearchRequest();
+            response = externalConstraintsService.applySearchCheck(searchReq, httpHeaders, uriInfo, HttpMethod.GET,
+                    ScimResourceUtil.getType(UserResource.class));
+            if (response != null) {
+                return response;
+            }
+
             String date = ldapBackend ? DateUtil.ISOToGeneralizedStringDate(isoDate) : DateUtil.gluuCouchbaseISODate(isoDate);
             if (date == null) {
                 response = getErrorResponse(Response.Status.BAD_REQUEST, "Unparsable date: " + isoDate);
@@ -98,12 +121,20 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
                 Filter filter = Filter.createORFilter(
                         Filter.createGreaterOrEqualFilter("jansCreationTimestamp", date),
                         Filter.createGreaterOrEqualFilter("updatedAt", date));
+                if (StringUtils.isNotEmpty(searchReq.getFilter())) {
+                    Filter restriction = scimFilterParserService.createFilter(searchReq.getFilter(), null, UserResource.class);
+                    filter = Filter.createANDFilter(restriction, filter);
+                }
                 log.trace("Using filter {}", filter.toString());
 
-                List<ScimCustomPerson> list = entryManager.findPagedEntries(personService.getDnForPerson(null), ScimCustomPerson.class,
-                        filter, null,  "uid", SortOrder.ASCENDING, start, itemsPerPage, getMaxCount()).getEntries();
+                PagedResult<ScimCustomPerson> result = entryManager.findPagedEntries(personService.getDnForPerson(null), ScimCustomPerson.class,
+                        filter, null,  "uid", SortOrder.ASCENDING, start, itemsPerPage, getMaxCount());
 
-                response = Response.ok(getUserResultsAsJson(list)).build();
+                if (externalScimService.isEnabled() && !externalScimService.executeScimPostSearchUsersMethods(result)) {
+                    return getErrorResponse(Response.Status.PRECONDITION_FAILED, "Failed to execute SCIM script successfully");
+                }
+
+                response = Response.ok(getUserResultsAsJson(result.getEntries())).build();
             }
         } catch (Exception e1) {
             log.error("Failure at usersChangedAfter method", e1);
@@ -127,6 +158,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             Map<String, List<Object>> map = new TreeMap<>();
             person.getTypedCustomAttributes().forEach(attr -> map.put(attr.getName(), new ArrayList<>(attr.getValues())));
             map.putAll(getNonCustomAttributes(person));
+            removeSecretAttributes(map);
 
             //Do a best effort to supply output in proper data types
             for (String key : map.keySet()) {
@@ -175,6 +207,21 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             resources.add(map);
         }
         return getResultsAsJson(resources, fresher);
+
+    }
+
+    private void removeSecretAttributes(Map<String, List<Object>> map) {
+
+        map.keySet().removeIf(name -> EXCLUDED_ATTRIBUTES.contains(name.toLowerCase()));
+        map.entrySet().removeIf(entry -> {
+            if (!EXT_UID_ATTRIBUTE.equalsIgnoreCase(entry.getKey())) {
+                return false;
+            }
+            List<Object> values = entry.getValue();
+            values.removeIf(v -> v != null && SECRET_EXT_UID_PREFIXES.stream()
+                    .anyMatch(prefix -> v.toString().toLowerCase().startsWith(prefix)));
+            return values.isEmpty();
+        });
 
     }
 
