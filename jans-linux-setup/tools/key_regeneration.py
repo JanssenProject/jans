@@ -74,14 +74,10 @@ def backup_file(fn):
         print("Backing up file", fn, "as", target_fn)
         shutil.move(fn, target_fn)
 
-def run_command(args):
-    if type(args) == type([]):
-        cmd = ' '.join(args)
-        display_cmd = ' '.join('***' if i and args[i-1] in ('-keypasswd', '-storepass') else arg for i, arg in enumerate(args))
-    else:
-        cmd = display_cmd = args
+def run_command(args, stdout=subprocess.PIPE):
+    display_cmd = ' '.join('***' if i and args[i-1] in ('-keypasswd', '-storepass') else arg for i, arg in enumerate(args))
     print("Executing command", display_cmd)
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(args, stdout=stdout, stderr=subprocess.PIPE)
     result = p.communicate()
     return result
 
@@ -380,9 +376,9 @@ class KeyRegenerator:
                 '-cp', self.client_jar_fn, self.key_gen_path,
                 '-keystore', self.tmp_keystore_fn,
                 '-keypasswd', self.key_store_secret,
-                '-sig_keys', ' '.join(self.sig_enc['sig']),
-                '-enc_keys', ' '.join(self.sig_enc['enc']),
-                '-dnname', '"{}"'.format(self.dnname)
+                '-sig_keys', *self.sig_enc['sig'],
+                '-enc_keys', *self.sig_enc['enc'],
+                '-dnname', self.dnname
                 ]
 
         if _VENDOR_ == 'jans':
@@ -396,9 +392,8 @@ class KeyRegenerator:
         else:
             args += ['-expiration', str(argsp.expiration)]
             
-        args += ['>', self.keys_json_fn]
-
-        run_command(args)
+        with open(self.keys_json_fn, 'wb') as keys_json_fd:
+            run_command(args, stdout=keys_json_fd)
 
 
     def validate_keys(self):
@@ -414,13 +409,13 @@ class KeyRegenerator:
         elif self.keystore_fn.lower().endswith('jks'):
             key_tool_cmd += ['-storetype', 'JKS']
 
-        key_tool_cmd += ['|', 'grep', '"Alias name:"']
-
         output = run_command(key_tool_cmd)
 
         jsk_aliases = []
         for l in output[0].splitlines():
             ls = l.decode().strip()
+            if not ls.startswith('Alias name:'):
+                continue
             n = ls.find(':')
             alias_name = ls[n+1:].strip()
             jsk_aliases.append(alias_name)
@@ -454,9 +449,9 @@ class KeyRegenerator:
         # validation passed, we can copy keystore to /etc/certs
         backup_file(self.keystore_fn)
         backup_file(os.path.join(self.data_dir, os.path.basename(self.keys_json_fn)))
-        run_command(['mv', '-f', self.tmp_keystore_fn, '/etc/certs'])
-        run_command(['mv', '-f', self.keys_json_fn, self.data_dir])
-        run_command(['rm', '-r', '-f', self.temp_dir])
+        shutil.move(self.tmp_keystore_fn, os.path.join('/etc/certs', os.path.basename(self.tmp_keystore_fn)))
+        shutil.move(self.keys_json_fn, os.path.join(self.data_dir, os.path.basename(self.keys_json_fn)))
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
     def update_spanner(self):
