@@ -149,7 +149,7 @@ mod proto {
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
-use crate::http::{HttpClient, InitializeHttpClientError};
+use crate::http::{HttpClient, InitializeHttpClientError, is_secure_transport};
 use crate::lock::health_registry::HealthRegistry;
 use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
@@ -203,16 +203,6 @@ fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -
         .then(|| token.0.clone())
 }
 
-/// `https`, or `http` only to a loopback host: anything the Lock access token
-/// is sent to, or that decides where it is sent.
-fn is_secure_transport(url: &url::Url) -> bool {
-    match url.scheme() {
-        "https" => true,
-        "http" => is_loopback_host(url),
-        _ => false,
-    }
-}
-
 /// Drops discovered audit endpoints the Lock access token must not be sent to.
 fn drop_insecure_audit_endpoints(endpoints: &mut AuditEndpoints, logger: Option<&LoggerWeak>) {
     for (name, endpoint) in [
@@ -250,15 +240,6 @@ async fn fetch_lock_config(
     let mut lock_config = LockConfig::get(config_uri, http_client).await?;
     drop_insecure_audit_endpoints(&mut lock_config.audit_endpoints, logger);
     Ok(lock_config)
-}
-
-fn is_loopback_host(url: &url::Url) -> bool {
-    match url.host() {
-        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
-        Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
-        Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
-        None => false,
-    }
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background

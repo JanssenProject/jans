@@ -353,12 +353,7 @@ pub(super) fn resolve_trace_endpoint(
         TraceEndpoint::Url(url) => url,
         TraceEndpoint::Discovered => discovered.ok_or(NoTraceEndpoint::NotPublished)?,
     };
-    let secure = match url.scheme() {
-        "https" => true,
-        "http" => super::is_loopback_host(url),
-        _ => false,
-    };
-    if secure {
+    if crate::http::is_secure_transport(url) {
         return Ok(url.clone());
     }
     // The warning names only where the endpoint points: credentials, a path or a
