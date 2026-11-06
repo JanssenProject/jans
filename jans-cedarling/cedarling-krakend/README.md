@@ -124,7 +124,7 @@ The `namespace` field in the configuration needs to be the cedar namespace you u
 | path      | String | /protected | KrakenD endpoint to protect                    |
 | namespace | String | Jans       | Cedar namespace being used by the policy store |
 
-A parameter in `path` (`{id}` or `:id`) must fill a whole segment, and a catch-all (`*` or `*name`) must be the last segment. For a path such as `/file.{ext}` the plugin cannot tell which requests reach the endpoint, so it logs an error and rejects every request with `503 Service Unavailable`.
+A parameter in `path` (`{id}` or `:id`) must have a name and fill a whole segment, and a catch-all (`*` or `*name`) must be the last segment. For a path such as `/file.{ext}` the plugin cannot tell which requests reach the endpoint, so it logs an error and rejects every request with `503 Service Unavailable`.
 
 ## Running
 

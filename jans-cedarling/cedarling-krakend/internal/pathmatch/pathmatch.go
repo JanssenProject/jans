@@ -24,8 +24,8 @@ type Pattern struct {
 	segments []string
 }
 
-// Parse accepts KrakenD-style parameters ({id} or :id) that fill a whole segment
-// and a trailing catch-all (* or *name).
+// Parse accepts named KrakenD-style parameters ({id} or :id) that fill a whole
+// segment and a trailing catch-all (* or *name).
 func Parse(pattern string) (Pattern, error) {
 	segments := strings.Split(strings.Trim(pattern, "/"), "/")
 	for i, seg := range segments {
@@ -39,12 +39,13 @@ func Parse(pattern string) (Pattern, error) {
 func isSupported(seg string, last bool) bool {
 	switch {
 	case isBraceParam(seg):
-		return !strings.ContainsAny(seg[1:len(seg)-1], "{}")
+		name := seg[1 : len(seg)-1]
+		return name != "" && !strings.ContainsAny(name, "{}")
 	case strings.HasPrefix(seg, "*"):
 		return last
 	default:
 		// The router reads ':' or '*' anywhere in a segment as the start of a parameter.
-		return !strings.ContainsAny(seg, "{}*") && !strings.Contains(strings.TrimPrefix(seg, ":"), ":")
+		return seg != ":" && !strings.ContainsAny(seg, "{}*") && !strings.Contains(strings.TrimPrefix(seg, ":"), ":")
 	}
 }
 

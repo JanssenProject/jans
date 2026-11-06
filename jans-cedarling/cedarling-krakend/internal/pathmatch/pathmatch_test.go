@@ -76,6 +76,8 @@ func TestParseRejectsSegmentsTheRouterReadsDifferently(t *testing.T) {
 		{"second colon in a colon parameter", "/api/:id:x"},
 		{"catch-all inside a segment", "/api/file*"},
 		{"catch-all before the last segment", "/api/*/items"},
+		{"brace parameter without a name", "/api/{}"},
+		{"colon parameter without a name", "/api/:"},
 	}
 
 	for _, tt := range tests {
