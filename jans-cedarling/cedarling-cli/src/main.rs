@@ -32,7 +32,9 @@ async fn main() {
             exit_on_error(test::runner::run(bootstrap_config, test_file).await)
         },
         Command::Authorize(args) => exit_on_error(authorize::run(bootstrap_config, args).await),
-        Command::Validate { strict } => exit_on_error(validate::run(bootstrap_config, strict).await),
+        Command::Validate { strict } => {
+            exit_on_error(validate::run(bootstrap_config, strict).await)
+        },
     };
 
     std::process::exit(code);

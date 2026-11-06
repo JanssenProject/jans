@@ -35,7 +35,10 @@ trait PanicResult {
 
 impl PanicResult for CedarlingResult {
     fn panic_result() -> Self {
-        CedarlingResult::error(CedarlingErrorCode::Internal, "internal panic caught at FFI boundary")
+        CedarlingResult::error(
+            CedarlingErrorCode::Internal,
+            "internal panic caught at FFI boundary",
+        )
     }
 }
 

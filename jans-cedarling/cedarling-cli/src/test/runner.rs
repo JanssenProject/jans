@@ -46,7 +46,10 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
     let mut reason_ids_seen = HashSet::new();
 
     for test in test_file.tests {
-        print!("  test {} ... ", crate::validate::escape_controls(&test.name));
+        print!(
+            "  test {} ... ",
+            crate::validate::escape_controls(&test.name)
+        );
 
         let req = RequestUnsigned {
             principal: test.request.principal.map(std::convert::Into::into),
@@ -88,7 +91,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
                         .iter()
                         .filter(|id| !actual_ids.contains(*id))
                         .collect();
-                        
+
                     if !missing_ids.is_empty() {
                         test_passed = false;
                         fail_reasons.push(format!(

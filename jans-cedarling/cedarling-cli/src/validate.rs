@@ -50,8 +50,12 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         .iter()
         .filter(|r| matches!(r, LevelResult::Skipped { .. }))
         .count();
-        
-    let skip_msg = if skips > 0 { format!(" ({skips} level(s) skipped)") } else { String::new() };
+
+    let skip_msg = if skips > 0 {
+        format!(" ({skips} level(s) skipped)")
+    } else {
+        String::new()
+    };
 
     let unknown = report.unknown_fields.len();
     let passed = report.is_ok() && !(strict && (skips > 0 || unknown > 0));
@@ -112,8 +116,9 @@ pub(crate) fn escape_controls(s: &str) -> String {
 fn describe_source(cfg: &PolicyStoreConfig) -> String {
     use cedarling::PolicyStoreSource;
     match &cfg.source {
-        PolicyStoreSource::FileYaml(path)
-        | PolicyStoreSource::CjarFile(path) => path.display().to_string(),
+        PolicyStoreSource::FileYaml(path) | PolicyStoreSource::CjarFile(path) => {
+            path.display().to_string()
+        },
         PolicyStoreSource::Directory(path) => format!("{}/", path.display()),
         PolicyStoreSource::Uri(url)
         | PolicyStoreSource::CjarUrl(url)
