@@ -302,26 +302,80 @@ public class OrmTraceStore implements TraceStore {
 			filters.add(Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedToMs()));
 		}
 		Filter filter = Filter.createANDFilter(filters);
+		// Freeze the upper sequence so concurrent ingestion cannot extend this scan indefinitely.
+		List<TraceRecordEntry> head = policyBatch(filter, ATTR_RECEIPT_SEQ, SortOrder.DESCENDING, 1);
+		if (head.isEmpty()) {
+			return Collections.emptyList();
+		}
+		long upper = head.get(0).getReceiptSeq();
+		long lower = Long.MIN_VALUE;
 		int skip = Math.max(0, start);
-		int wanted = skip + count;
-		int chunk = Math.max(count, POLICY_SCAN_BATCH);
-		// A case-insensitive collation can match another domain's rows, so the exact-domain filter
-		// has to run before start/count apply: scan chunks until enough exact rows are seen.
-		List<TraceRecordEntry> exact = new ArrayList<>();
-		for (int offset = 0; exact.size() < wanted; offset += chunk) {
-			List<TraceRecordEntry> entries = persistenceEntryManager.findPagedEntries(recordsBase(),
-					TraceRecordEntry.class, filter, null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING, offset, chunk, chunk)
-					.getEntries();
-			for (TraceRecordEntry entity : entries) {
-				if (domainId.equals(entity.getDomainId())) {
-					exact.add(entity);
-				}
-			}
-			if (entries.size() < chunk) {
+		List<StoredTraceRecord> result = new ArrayList<>();
+		while (result.size() < count) {
+			Filter range = Filter.createANDFilter(filter,
+					Filter.createGreaterOrEqualFilter(ATTR_RECEIPT_SEQ, lower),
+					Filter.createLessOrEqualFilter(ATTR_RECEIPT_SEQ, upper));
+			List<TraceRecordEntry> entries = policyBatch(range, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
+					POLICY_SCAN_BATCH);
+			if (entries.isEmpty()) {
 				break;
 			}
+			long boundary = entries.get(entries.size() - 1).getReceiptSeq();
+			// The final sequence may straddle a batch (collated domains can share a sequence).
+			// Read that entire group with a unique ID cursor rather than dropping ties.
+			for (TraceRecordEntry entity : entries) {
+				if (entity.getReceiptSeq() < boundary && domainId.equals(entity.getDomainId())) {
+					if (skip > 0) {
+						skip--;
+					} else {
+						result.add(TraceEntityMapper.toStoredTraceRecord(entity));
+						if (result.size() == count) {
+							return result;
+						}
+					}
+				}
+			}
+			Filter group = Filter.createANDFilter(filter, Filter.createEqualityFilter(ATTR_RECEIPT_SEQ, boundary));
+			String lastId = policyBatch(group, ATTR_ID, SortOrder.DESCENDING, 1).stream()
+					.map(TraceRecordEntry::getId).findFirst().orElse(null);
+			if (lastId != null) {
+				group = Filter.createANDFilter(group, Filter.createLessOrEqualFilter(ATTR_ID, lastId));
+			}
+			String afterId = null;
+			while (lastId != null && result.size() < count) {
+				Filter continuation = afterId == null ? group : Filter.createANDFilter(group,
+						Filter.createGreaterOrEqualFilter(ATTR_ID, afterId),
+						Filter.createNOTFilter(Filter.createEqualityFilter(ATTR_ID, afterId)));
+				List<TraceRecordEntry> ties = policyBatch(continuation, ATTR_ID, SortOrder.ASCENDING,
+						POLICY_SCAN_BATCH);
+				if (ties.isEmpty()) {
+					break;
+				}
+				for (TraceRecordEntry entity : ties) {
+					if (domainId.equals(entity.getDomainId())) {
+						if (skip > 0) {
+							skip--;
+						} else {
+							result.add(TraceEntityMapper.toStoredTraceRecord(entity));
+							if (result.size() == count) {
+								return result;
+							}
+						}
+					}
+				}
+				afterId = ties.get(ties.size() - 1).getId();
+			}
+			if (boundary == upper) {
+				break;
+			}
+			lower = boundary + 1;
 		}
-		return toStoredList(domainId, exact.stream().skip(skip).limit(count).collect(Collectors.toList()));
+		return result;
+	}
+
+	private List<TraceRecordEntry> policyBatch(Filter filter, String sortBy, SortOrder order, int limit) {
+		return persistenceEntryManager.findPagedEntries(recordsBase(), TraceRecordEntry.class, filter, null,
+				sortBy, order, 0, limit, limit).getEntries();
 	}
 
 	@Override

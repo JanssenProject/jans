@@ -73,6 +73,12 @@ final class FakeEntryManagerBehavior {
 
 	private boolean caseInsensitiveDomain;
 
+	private Runnable afterPolicyBatch;
+
+	static void afterNextPolicyBatch(PersistenceEntryManager manager, Runnable action) {
+		BY_MOCK.get(manager).afterPolicyBatch = action;
+	}
+
 	private Consumer<Object> concurrentWriter;
 
 	private FakeEntryManagerBehavior() {
@@ -296,6 +302,11 @@ final class FakeEntryManagerBehavior {
 		result.setTotalEntriesCount(total);
 		result.setEntriesCount(page.size());
 		result.setEntries(new ArrayList<>(page));
+		if (count == 100 && afterPolicyBatch != null) {
+			Runnable action = afterPolicyBatch;
+			afterPolicyBatch = null;
+			action.run();
+		}
 		return result;
 	}
 
@@ -309,6 +320,8 @@ final class FakeEntryManagerBehavior {
 
 	private boolean matches(Filter filter, Object entity) {
 		switch (filter.getType()) {
+		case NOT:
+			return !matches(filter.getFilters()[0], entity);
 		case AND:
 			for (Filter sub : filter.getFilters()) {
 				if (!matches(sub, entity)) {

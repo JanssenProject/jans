@@ -131,6 +131,56 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 		assertTrue(collated.findRecordsByPolicy(DOMAIN, query, 3, 1).isEmpty());
 	}
 
+	@Test
+	void testPolicyScan_delayedInsertDoesNotRepeatRowsAndLargeStartDoesNotOverflow() throws Exception {
+		io.jans.orm.PersistenceEntryManager manager = FakeEntryManagerBehavior.createCaseInsensitiveDomain();
+		TraceStore store = OrmTraceStores.create(manager);
+		for (int i = 1; i <= 350; i++) {
+			store.insertRecord(policyRecord(i, i % 2 == 0 ? DOMAIN : DOMAIN.toUpperCase()));
+		}
+		FakeEntryManagerBehavior.afterNextPolicyBatch(manager, () -> {
+			try {
+				store.insertRecord(policyRecord(0, DOMAIN));
+			} catch (Exception e) {
+				throw new AssertionError(e);
+			}
+		});
+		PolicyRecordQuery query = new PolicyRecordQuery("store-1", null, null, null, null);
+		List<StoredTraceRecord> page = store.findRecordsByPolicy(DOMAIN, query, 145, 20);
+		assertEquals(20, page.size());
+		for (int i = 0; i < page.size(); i++) {
+			assertEquals("record-" + (292 + 2 * i), page.get(i).getIdentity().getRecordId());
+		}
+		assertTrue(store.findRecordsByPolicy(DOMAIN, query, Integer.MAX_VALUE, 10).isEmpty());
+		assertEquals(176, store.findRecordsByPolicy(DOMAIN, query, 0, 500).size());
+	}
+
+	@Test
+	void testPolicyScan_sequenceTiesAcrossBatchesKeepExactDomainRow() throws Exception {
+		TraceStore store = OrmTraceStores.create(FakeEntryManagerBehavior.createCaseInsensitiveDomain());
+		for (int i = 1; i <= 150; i++) {
+			StoredTraceRecord row = policyRecord(i, DOMAIN.toUpperCase());
+			ReceiptEntry receipt = new ReceiptEntry(1L, 2001L, TraceConstants.ZERO_HASH,
+					"sha256:" + String.format("%064d", i));
+			store.insertRecord(new StoredTraceRecord(row.getIdentity(), row.getAssertionRaw(), row.getContentDigest(),
+					row.getVerification(), receipt, row.getFlags(), row.getExecution(), row.getChainPosition(),
+					row.getPrevRecordHash(), row.getTokenRefs(), row.getEventKind(), row.getSignedAt(), row.getNodeId(),
+					row.getCreatedAtMs(), row.getVersion(), row.getPolicy()));
+		}
+		store.insertRecord(policyRecord(1, DOMAIN));
+		store.insertRecord(policyRecord(2, DOMAIN));
+		assertEquals(Arrays.asList("record-1", "record-2"), recordIds(store.findRecordsByPolicy(DOMAIN,
+				new PolicyRecordQuery("store-1", null, null, null, null), 0, 3)));
+	}
+
+	private StoredTraceRecord policyRecord(int sequence, String domain) {
+		StoredTraceRecord row = newRecord("producer-1", "record-" + sequence, "authority-1", "exec-1", 1L, sequence);
+		return inDomain(new StoredTraceRecord(row.getIdentity(), row.getAssertionRaw(), row.getContentDigest(),
+				row.getVerification(), row.getReceipt(), row.getFlags(), row.getExecution(), row.getChainPosition(),
+				row.getPrevRecordHash(), row.getTokenRefs(), row.getEventKind(), row.getSignedAt(), row.getNodeId(),
+				row.getCreatedAtMs(), row.getVersion(), new PolicyRef("store-1", "1.0.0", "sha256:" + "1".repeat(64))), domain);
+	}
+
 	private static List<String> recordIds(List<StoredTraceRecord> records) {
 		return records.stream().map(r -> r.getIdentity().getRecordId()).collect(java.util.stream.Collectors.toList());
 	}
