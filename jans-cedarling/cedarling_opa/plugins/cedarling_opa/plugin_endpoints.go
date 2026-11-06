@@ -49,16 +49,24 @@ func (p *CedarPlugin) MetaDataHandler(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusServiceUnavailable, "Plugin unavailable")
 		return
 	}
+	host := p.host()
 	metadata := PDPMetadata{
-		PolicyDecisionPoint:       p.config.Host,
-		AccessEvaluationEndpoint:  fmt.Sprintf("%s/access/v1/evaluation", p.config.Host),
-		AccessEvaluationsEndpoint: fmt.Sprintf("%s/access/v1/evaluations", p.config.Host),
+		PolicyDecisionPoint:       host,
+		AccessEvaluationEndpoint:  fmt.Sprintf("%s/access/v1/evaluation", host),
+		AccessEvaluationsEndpoint: fmt.Sprintf("%s/access/v1/evaluations", host),
 	}
 	if err := json.NewEncoder(w).Encode(metadata); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]any{"error": err.Error()})
 		return
 	}
+}
+
+// host reads the configured host under the read lock, since Reconfigure replaces the config.
+func (p *CedarPlugin) host() string {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+	return p.config.Host
 }
 
 func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Request) {

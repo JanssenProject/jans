@@ -528,3 +528,30 @@ func TestResponsesAreWrittenWithoutTheLock(t *testing.T) {
 		})
 	}
 }
+
+// Reconfigure replaces the config while requests are served, so the metadata
+// handler must read it under the lock. Run with -race.
+func TestMetaDataReadsConfigUnderLock(t *testing.T) {
+	plugin := mockPlugin(t)
+	setGlobalInstance(plugin)
+	t.Cleanup(func() {
+		clearGlobalInstance(plugin)
+	})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < 100; i++ {
+			plugin.mtx.Lock()
+			plugin.config = Config{Host: fmt.Sprintf("https://host%d.test.org", i)}
+			plugin.mtx.Unlock()
+		}
+	}()
+	for i := 0; i < 100; i++ {
+		w := httptest.NewRecorder()
+		plugin.MetaDataHandler(w, httptest.NewRequest(http.MethodGet, "/.well-known/authzen-configuration", nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+	}
+	<-done
+}
