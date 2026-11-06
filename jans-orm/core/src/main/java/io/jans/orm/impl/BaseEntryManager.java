@@ -6,8 +6,6 @@
 
 package io.jans.orm.impl;
 
-import static io.jans.orm.model.base.LocalizedString.EMPTY_LANG_TAG;
-import static io.jans.orm.model.base.LocalizedString.LOCALIZED;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -1269,6 +1267,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] typeObjectClasses = getTypeObjectClasses(entryClass);
 		Arrays.sort(typeObjectClasses);
 
+		boolean hasLanguageTag = hasPropertyAnnotation(propertiesAnnotations, LanguageTag.class);
+		Set<String> regularAttributeNames = getRegularAttributeNames(propertiesAnnotations);
+
 		List<T> results = new ArrayList<T>(entriesAttributes.size());
 		for (Entry<String, List<AttributeData>> entryAttributes : entriesAttributes.entrySet()) {
 			String dn = entryAttributes.getKey();
@@ -1293,6 +1294,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 			// Remove processed DN attribute
 			attributesMap.remove(dnProperty);
+
+			// Localized strings are loaded from the snapshot, so result doesn't depend on properties order
+			Map<String, AttributeData> sourceAttributesMap = hasLanguageTag ? new HashMap<String, AttributeData>(attributesMap) : attributesMap;
 
 			// Set loaded properties to entry
 
@@ -1326,12 +1330,16 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         }
 
                         LocalizedString localizedString = (LocalizedString) propertyValue;
-                        final String finalLdapAttributeName = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG);
-                        Map<String, AttributeData> filteredAttrs = attributesMap.entrySet().stream()
-                                .filter(x -> x.getKey().toLowerCase().startsWith(finalLdapAttributeName.toLowerCase()))
-                                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                        Map<String, AttributeData> filteredAttrs = filterLocalizedStringAttributes(sourceAttributesMap, ldapAttributeName);
 
-                        loadLocalizedString(attributesMap, localizedString, filteredAttrs);
+                        loadLocalizedString(sourceAttributesMap, localizedString, filteredAttrs);
+
+                        // Don't expose consumed attributes via @AttributesList, keep ones mapped to regular properties
+                        for (String key : filteredAttrs.keySet()) {
+                            if (!regularAttributeNames.contains(key)) {
+                                attributesMap.remove(key);
+                            }
+                        }
 
                         continue;
                     }
@@ -1505,6 +1513,42 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		return ReflectHelper.getListType(setter);
 	}
+
+    protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
+        final String key = ldapAttributeName.toLowerCase();
+        return attributesMap.entrySet().stream()
+                .filter(x -> x.getKey().equals(key))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private boolean hasPropertyAnnotation(List<PropertyAnnotation> propertiesAnnotations, Class<? extends Annotation> annotationType) {
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            if (ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), annotationType) != null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Set<String> getRegularAttributeNames(List<PropertyAnnotation> propertiesAnnotations) {
+        Set<String> result = new HashSet<String>();
+        for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+            Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), AttributeName.class);
+            if ((ldapAttribute == null)
+                    || (ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(), LanguageTag.class) != null)) {
+                continue;
+            }
+
+            String ldapAttributeName = ((AttributeName) ldapAttribute).name();
+            if (StringHelper.isEmpty(ldapAttributeName)) {
+                ldapAttributeName = propertiesAnnotation.getPropertyName();
+            }
+            result.add(ldapAttributeName.toLowerCase());
+        }
+
+        return result;
+    }
 
     protected void loadLocalizedString(Map<String, AttributeData> attributesMap, LocalizedString localizedString, Map<String, AttributeData> filteredAttrs) {
         filteredAttrs.forEach((key, value) -> {
