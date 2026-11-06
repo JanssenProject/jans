@@ -14,6 +14,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import jakarta.ws.rs.BadRequestException;
 import java.beans.Introspector;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -27,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -36,12 +38,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 @ApplicationScoped
 @Named("dataUtil")
 public class DataUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(DataUtil.class);
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final Pattern FILTER_FIELD_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_.-]*$");
     private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_TIME_FRACTION_OF_SECOND_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
@@ -274,7 +279,7 @@ public class DataUtil {
     public static List<Filter> createFilter(List<FieldFilterData> fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
         logger.info("Create ORM Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
-                fieldFilterData, primaryKey, persistenceEntryManager);
+                escapeLog(fieldFilterData), primaryKey, persistenceEntryManager);
         List<Filter> filters = new ArrayList<>();
 
         if (fieldFilterData == null || fieldFilterData.isEmpty()) {
@@ -282,7 +287,11 @@ public class DataUtil {
         }
 
         for (FieldFilterData entry : fieldFilterData) {
-            logger.info("FieldFilterData entry:{}", entry);
+            logger.info("FieldFilterData entry:{}", escapeLog(entry));
+            if (entry == null || entry.getField() == null
+                    || !FILTER_FIELD_PATTERN.matcher(entry.getField()).matches()) {
+                throw new BadRequestException("Invalid search field");
+            }
             String dataType = AttributeDataType.STRING.getValue();
 
             if (StringUtils.isNotBlank(entry.getType())) {
@@ -306,10 +315,10 @@ public class DataUtil {
                 dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
             }
             filters.add(dataFilter);
-            logger.info("dataFilter:{}", dataFilter);
+            logger.info("dataFilter:{}", escapeLog(dataFilter));
 
         }
-        logger.info("Final Filters for  fieldFilterData - filters:{}", filters);
+        logger.info("Final Filters for  fieldFilterData - filters:{}", escapeLog(filters));
         return filters;
     }
 

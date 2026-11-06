@@ -7,6 +7,7 @@
 from io.jans.as.model.jwt import Jwt
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.model.crypto import AuthCryptoProvider
+from io.jans.as.model.crypto.signature import AlgorithmFamily
 from io.jans.orm import PersistenceEntryManager
 from io.jans.model.custom.script.type.introspection import IntrospectionType
 from io.jans.as.server.model.config import ConfigurationFactory
@@ -42,7 +43,6 @@ class Introspection(IntrospectionType):
         try:
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
-            print ujwt
             if not ujwt:
                 print "UJWT is empty or null"
                 return True
@@ -54,9 +54,14 @@ class Introspection(IntrospectionType):
             jwksObj = configObj.getWebKeysConfiguration()
             jwks = JSONObject(jwksObj)
 
-            # Validate JWT
+            # Validate JWT: only asymmetric algorithms verifiable against server keys are accepted
+            signatureAlgorithm = userInfoJwt.getHeader().getSignatureAlgorithm()
+            if signatureAlgorithm is None or signatureAlgorithm.getFamily() not in [AlgorithmFamily.RSA, AlgorithmFamily.EC, AlgorithmFamily.ED]:
+                print "user-info jwt rejected: unsupported signature algorithm"
+                return True
+
             authCryptoProvider = AuthCryptoProvider()
-            validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, userInfoJwt.getHeader().getSignatureAlgorithm())
+            validJwt = authCryptoProvider.verifySignature(userInfoJwt.getSigningInput(), userInfoJwt.getEncodedSignature(), userInfoJwt.getHeader().getKeyId(), jwks, None, signatureAlgorithm)
 
 
             if validJwt == True:

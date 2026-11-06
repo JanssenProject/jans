@@ -44,7 +44,12 @@ import io.swagger.v3.oas.annotations.security.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.Util.escapeLog;
@@ -65,6 +70,7 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
+    private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -132,8 +138,17 @@ public class UserResource extends BaseResource {
         SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
                 startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount(),
                 fieldValuePair, CustomUser.class);
+        validateSearchAttributes(searchReq);
 
-        return Response.ok(this.doSearch(searchReq, true)).build();
+        UserPagedResult result = null;
+        try {
+            result = this.doSearch(searchReq, true, getSelfOnlyInum());
+        } catch (IllegalAccessException | InvocationTargetException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            handleException(ex, "FETCH_DATA_ERROR");
+        }
+        return Response.ok(result).build();
     }
 
     /**
@@ -242,6 +257,7 @@ public class UserResource extends BaseResource {
             ignoreCustomAttributes(user, removeNonLDAPAttributes);
             validateUser(user, false);
             validateAttributes(user);
+            validateRoleChange(Collections.emptySet(), userMgmtSrv.getAdminUIRoles(user));
 
             logger.info("Service call to create user:{}", user);
 
@@ -306,8 +322,15 @@ public class UserResource extends BaseResource {
             // get User object
             User user = setUserAttributes(customUser);
 
+            // persistence target is the stored record of the submitted inum, never a caller-supplied DN
+            String userInum = user.getAttribute(INUM);
+            User existingUser = StringUtils.isBlank(userInum) ? null : userMgmtSrv.getUserBasedOnInum(userInum);
+            checkResourceNotNull(existingUser, USER);
+            user.setDn(existingUser.getDn());
+
             // validate user role-permission
             validateUserPermission(null, user);
+            validateRoleChange(userMgmtSrv.getAdminUIRoles(existingUser), userMgmtSrv.getAdminUIRoles(user));
 
             // parse birthdate if present
             userMgmtSrv.parseBirthDateAttribute(user);
@@ -400,7 +423,7 @@ public class UserResource extends BaseResource {
             ignoreCustomAttributes(existingUser, removeNonLDAPAttributes);
 
             // patch user
-            existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
+            existingUser = userMgmtSrv.patchUser(inum, userPatchRequest, canChangeAdminUIRole());
             logger.debug("Patched user:{}", existingUser);
 
             // excludedAttributes
@@ -440,6 +463,9 @@ public class UserResource extends BaseResource {
             logger.info("User to be deleted - inum:{} ", escapeLog(inum));
         }
         try {
+            // validate user role-permission
+            validateUserPermission(inum, null);
+
             User user = userMgmtSrv.getUserBasedOnInum(inum);
 
             checkResourceNotNull(user, USER);
@@ -450,14 +476,14 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private UserPagedResult doSearch(SearchRequest searchReq, boolean removeNonLDAPAttributes)
+    private UserPagedResult doSearch(SearchRequest searchReq, boolean removeNonLDAPAttributes, String restrictToInum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User search params - searchReq:{}, removeNonLDAPAttributes:{} ", escapeLog(searchReq),
-                    removeNonLDAPAttributes);
+            logger.info("User search params - searchReq:{}, removeNonLDAPAttributes:{}, restrictToInum:{} ",
+                    escapeLog(searchReq), removeNonLDAPAttributes, escapeLog(restrictToInum));
         }
 
-        PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq);
+        PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq, restrictToInum);
         if (logger.isTraceEnabled()) {
             logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         }
@@ -786,6 +812,29 @@ public class UserResource extends BaseResource {
         }
     }
 
+    /**
+     * Applies the direct-read policy to listing: a non-admin logged-in user may only list their own entry.
+     *
+     * @return the logged-in user's inum when the listing must be limited to it, otherwise {@code null}
+     */
+    private String getSelfOnlyInum() throws ApiApplicationException {
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            return null;
+        }
+        HttpHeaders httpHeaders = getHttpHeaders();
+        String loggedInUserInum = httpHeaders == null ? null : authUtil.getUserInum(httpHeaders);
+        if (StringUtils.isBlank(loggedInUserInum)) {
+            return null;
+        }
+        User loggedInUser = authUtil.getUserByInum(loggedInUserInum);
+        if (loggedInUser == null) {
+            throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
+                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
+        }
+        return isAdminUser(loggedInUserInum, loggedInUser) ? null : loggedInUserInum;
+    }
+
     private boolean isAdminUser(String loggedInUserInum, User loggedInUser) throws ApiApplicationException {
         logger.info("isAdminUser - loggedInUserInum:{}, loggedInUser:{}", loggedInUserInum, loggedInUser);
         boolean isAdmin = false;
@@ -811,11 +860,61 @@ public class UserResource extends BaseResource {
 
         }
 
-        isAdmin = loggedInUserRoleList.stream().anyMatch((ele -> ele.equalsIgnoreCase("api-admin")));
+        isAdmin = loggedInUserRoleList.stream().anyMatch(ele -> ele.equalsIgnoreCase("admin") || ele.equalsIgnoreCase("api-admin"));
         if (logger.isInfoEnabled()) {
             logger.info("isAdminUser - loggedInUserInum:{}, isAdmin:{}", escapeLog(loggedInUserInum), isAdmin);
         }
         return isAdmin;
+    }
+
+    private void validateSearchAttributes(SearchRequest searchReq) {
+        Set<String> restricted = new HashSet<>();
+        restricted.add(USER_PWD.toLowerCase());
+        List<String> exclusionAttributes = authUtil.getUserExclusionAttributes();
+        if (exclusionAttributes != null) {
+            exclusionAttributes.stream().filter(Objects::nonNull).map(String::toLowerCase).forEach(restricted::add);
+        }
+
+        String sortBy = searchReq.getSortBy();
+        if (StringUtils.isNotBlank(sortBy)
+                && (!SEARCH_ATTRIBUTE_PATTERN.matcher(sortBy).matches() || restricted.contains(sortBy.toLowerCase()))) {
+            throwBadRequestException("Invalid sortBy attribute.");
+        }
+
+        if (searchReq.getFieldValueMap() != null) {
+            for (String field : searchReq.getFieldValueMap().keySet()) {
+                if (field == null || !SEARCH_ATTRIBUTE_PATTERN.matcher(field).matches()
+                        || restricted.contains(field.toLowerCase())) {
+                    throwBadRequestException("Search on attribute '" + escapeLog(field) + "' is not allowed.");
+                }
+            }
+        }
+    }
+
+    private void validateRoleChange(Set<String> currentRoles, Set<String> requestedRoles)
+            throws ApiApplicationException {
+        if (currentRoles.equals(requestedRoles) || canChangeAdminUIRole()) {
+            return;
+        }
+        throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
+                        "Not authorized to change '" + UserMgmtService.ADMIN_UI_ROLE + "'"));
+    }
+
+    private boolean canChangeAdminUIRole() {
+        if (!authUtil.isUserRolePermissionValidationEnabled()) {
+            return true;
+        }
+        HttpHeaders httpHeaders = getHttpHeaders();
+        String loggedInUserInum = httpHeaders == null ? null : authUtil.getUserInum(httpHeaders);
+        if (StringUtils.isBlank(loggedInUserInum)) {
+            return true;
+        }
+        try {
+            return isAdminUser(loggedInUserInum, authUtil.getUserByInum(loggedInUserInum));
+        } catch (ApiApplicationException e) {
+            return false;
+        }
     }
 
     private void handleException(Exception ex, String errorCode) {

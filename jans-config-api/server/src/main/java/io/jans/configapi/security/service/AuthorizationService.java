@@ -34,8 +34,24 @@ public abstract class AuthorizationService implements Serializable {
     @Inject
     transient AuthUtil authUtil;
 
+    // Filter and authorization service run on the same request thread; the filter consumes this right after
+    private static final ThreadLocal<String[]> AUTHENTICATED_PRINCIPAL = new ThreadLocal<>();
+
     public abstract String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path, HttpHeaders httpHeaders) throws WebApplicationException;
+
+    protected void setAuthenticatedPrincipal(String subject, String clientId) {
+        AUTHENTICATED_PRINCIPAL.set(new String[] { subject, clientId });
+    }
+
+    /**
+     * @return validated {subject, clientId} of the current request's token, or {@code null}; clears it
+     */
+    public String[] consumeAuthenticatedPrincipal() {
+        String[] principal = AUTHENTICATED_PRINCIPAL.get();
+        AUTHENTICATED_PRINCIPAL.remove();
+        return principal;
+    }
 
     protected Response getErrorResponse(Response.Status status, String detail) {
         return Response.status(status).entity(detail).build();

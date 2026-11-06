@@ -158,6 +158,13 @@ paths:
                     }
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/data.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/health.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /api/v1/health/service-status:
     get:
       tags:
@@ -15693,7 +15700,13 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        selected:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -15701,13 +15714,7 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        selected:
           type: boolean
         baseDn:
           type: string

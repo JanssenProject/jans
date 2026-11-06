@@ -325,12 +325,14 @@ public class ScopesResource extends ConfigBaseResource {
     public Response patchScope(@Parameter(description = "Scope identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
         if (log.isDebugEnabled()) {
-            log.debug("SCOPES patch details - inum:{}, pathString:{}", inum, pathString);
+            log.debug("SCOPES patch details - inum:{}, pathString:{}", escapeLog(inum), escapeLog(pathString));
         }
         
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
+        final String existingInum = existingScope.getInum();
         existingScope = Jackson.applyPatch(pathString, existingScope);
+        existingScope.setInum(existingInum);
         scopeService.updateScope(existingScope);
 
         existingScope = scopeService.getScopeByInum(inum);

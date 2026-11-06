@@ -178,6 +178,9 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ORG_ID_CLAIM_NOT_FOUND.getDescription());
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
+            if (!issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER) && !issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "SSA issuer is not a trusted licensing server");
+            }
             String hardwareId = claims.get("org_id").toString();
 
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,

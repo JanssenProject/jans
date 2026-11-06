@@ -272,6 +272,35 @@ public class AdminUISecurityServiceTest {
         assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
         }
 
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsMismatchedRootIssuersFile() throws Exception {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/GluuFlexAdminUI.json"));
+            zipOutput.write("{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers.json"));
+            zipOutput.write(("{\"Acme::Access_token\":{\"type\":\"jwt\",\"issuer\":\"Acme\",\"configuration_endpoints\":"
+                + "{\"jwks\":\"https://issuer.example.invalid/keys\",\"iss\":\"https://issuer.example.invalid\"}}}")
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+            "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+            java.lang.reflect.InvocationTargetException.class,
+            () -> validateTrustedIssuerDomains.invoke(
+                adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
     // ---------------------------------------------------------------------
     // editPolicyStore
     // ---------------------------------------------------------------------

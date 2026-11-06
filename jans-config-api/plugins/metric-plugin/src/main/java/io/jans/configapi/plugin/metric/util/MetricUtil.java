@@ -82,14 +82,15 @@ public class MetricUtil {
 	}
 
     /**
-     * Rejects negative paging inputs before they reach the persistence layer, where a negative
+     * Rejects invalid paging inputs before they reach the persistence layer, where a negative
      * startIndex/count would otherwise surface as an internal error instead of a 400. limit is also
      * clamped to the configured max record count rather than rejected, since an oversized value is a
      * request for "as much as allowed", not a malformed one.
      */
     public int validatePagination(int limit, int startIndex) {
-        if (limit < 0 || startIndex < 0) {
-            throwBadRequestException("limit and startIndex must not be negative.", "INVALID_PAGINATION");
+        // Persistence backends treat a zero count as unlimited.
+        if (limit <= 0 || startIndex < 0) {
+            throwBadRequestException("limit must be positive and startIndex must not be negative.", "INVALID_PAGINATION");
         }
         int maxCount = getRecordMaxCount();
         return limit > maxCount ? maxCount : limit;
