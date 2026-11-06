@@ -6,6 +6,7 @@
 use thiserror::Error;
 use url::Url;
 
+use crate::common::issuer_utils::IssClaim;
 use crate::jwt::{decode::DecodeJwtError, http_utils::HttpError, validation::ValidateJwtError};
 
 #[derive(Debug, Error)]
@@ -60,4 +61,17 @@ pub(crate) enum UpdateStatusListError {
     ParseStatusList(#[from] ParseStatusListError),
     #[error("failed to get status list JWT: {0}")]
     GetStatusListJwt(#[source] HttpError),
+    #[error(
+        "the status list JWT from '{url}' is not bound to that endpoint and its issuer: {reason}"
+    )]
+    UnboundStatusList { url: String, reason: UnboundReason },
+}
+
+/// Which claim ties a status list JWT to another list or issuer.
+#[derive(Debug, PartialEq, derive_more::Display)]
+pub(crate) enum UnboundReason {
+    #[display("its `sub` is '{found}'")]
+    Sub { found: String },
+    #[display("its `iss` is '{found}'")]
+    Iss { found: IssClaim },
 }

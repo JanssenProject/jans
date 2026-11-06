@@ -38,8 +38,9 @@
 #       TF_WORKSPACE: production
 #     run: ./demo/terraform-jwt/tf_authz_jwt.sh apply -auto-approve
 #
-# For commands other than plan / apply / destroy, the auth check is skipped and
-# terraform is called directly (e.g. terraform init, terraform fmt, etc.).
+# init, fmt, validate, version, output, show, providers and graph skip the auth
+# check and call terraform directly; any other sub-command is rejected.
+# `-destroy` on plan / apply is authorized as Destroy.
 #
 set -euo pipefail
 
@@ -84,10 +85,21 @@ fi
 # Also capture -chdir= so we can honour it for auto-init and arg reordering.
 TF_SUBCOMMAND=""
 CHDIR_ARG=""
+DESTROY_FLAG=""
 for arg in "$@"; do
     case "${arg}" in
         -chdir=*)
             CHDIR_ARG="${arg}"
+            ;;
+        -destroy|--destroy)
+            DESTROY_FLAG="yes"
+            ;;
+        -destroy=*|--destroy=*)
+            # Terraform parses booleans with Go's strconv.ParseBool, so fail closed on anything but false
+            case "${arg#*=}" in
+                0|f|F|false|FALSE|False) ;;
+                *) DESTROY_FLAG="yes" ;;
+            esac
             ;;
         -*)
             ;;
@@ -105,11 +117,29 @@ case "${TF_SUBCOMMAND}" in
     plan)    CEDAR_ACTION="Plan" ;;
     apply)   CEDAR_ACTION="Apply" ;;
     destroy) CEDAR_ACTION="Destroy" ;;
-    *)
-        # No authorization check for init, fmt, validate, output, etc.
+    init|fmt|validate|version|output|show|providers|graph)
+        # Read-only or local-only commands: no authorization check.
         exec "${TERRAFORM_BIN}" "$@"
         ;;
+    *)
+        echo "tf_authz_jwt: ERROR — 'terraform ${TF_SUBCOMMAND}' is not supported by this wrapper." >&2
+        echo "              Gated: plan, apply, destroy. Ungated: init, fmt, validate, version," >&2
+        echo "              output, show, providers, graph." >&2
+        exit 1
+        ;;
 esac
+# `plan -destroy` / `apply -destroy` destroy infrastructure, so they need Destroy.
+if [[ -n "${DESTROY_FLAG}" ]]; then
+    CEDAR_ACTION="Destroy"
+fi
+# Terraform appends TF_CLI_ARGS and TF_CLI_ARGS_<command> to the arguments, so
+# they could add -destroy after authorization. Refuse them instead of parsing them.
+for var in TF_CLI_ARGS TF_CLI_ARGS_plan TF_CLI_ARGS_apply TF_CLI_ARGS_destroy; do
+    if [[ -n "${!var:-}" ]]; then
+        echo "tf_authz_jwt: ERROR — ${var} is set; unset it and pass the arguments directly." >&2
+        exit 1
+    fi
+done
 
 # ─── Require the JWT (only for plan / apply / destroy) ───────────────────────
 if [[ -z "${TF_JWT:-}" ]]; then

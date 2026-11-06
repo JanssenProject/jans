@@ -159,13 +159,6 @@ pub struct BootstrapConfigRaw {
     #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
     pub max_default_entities: Option<usize>,
 
-    /// Maximum size of base64-encoded default entity strings in bytes.
-    /// This prevents memory exhaustion attacks from extremely large base64 strings.
-    /// If value is 0, there is no limit. But if None, default value is applied.
-    #[serde(rename = "CEDARLING_MAX_BASE64_SIZE", default)]
-    #[serde(deserialize_with = "deserialize_or_parse_string_as_json")]
-    pub max_base64_size: Option<usize>,
-
     /// Whether to check the signature of all JWT tokens.
     ///
     /// When enabled, this requires the `iss` (Issuer) claim to be present in

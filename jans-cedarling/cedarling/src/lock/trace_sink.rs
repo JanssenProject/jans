@@ -365,12 +365,7 @@ pub(super) fn resolve_trace_endpoint(
         TraceEndpoint::Url(url) => url,
         TraceEndpoint::Discovered => discovered.ok_or(NoTraceEndpoint::NotPublished)?,
     };
-    let secure = match url.scheme() {
-        "https" => true,
-        "http" => super::is_loopback_host(url),
-        _ => false,
-    };
-    if secure {
+    if crate::http::is_secure_transport(url) {
         return Ok(url.clone());
     }
     // The warning names only where the endpoint points: credentials, a path or a
@@ -397,7 +392,7 @@ mod test_support {
     use crate::HttpClientConfig;
     use crate::http::HttpClient;
     use crate::lock::LockAccessToken;
-    use crate::lock::register_client::TokenSource;
+    use crate::lock::register_client::{CredentialEndpoint, TokenSource};
 
     pub(super) fn http() -> HttpClient {
         HttpClient::new(HttpClientConfig::default()).expect("HTTP client")
@@ -416,7 +411,13 @@ mod test_support {
     /// Reissues `new-token` from `server`'s `/token`.
     pub(super) fn source(server: &ServerGuard) -> TokenSource {
         TokenSource {
-            token_endpoint: format!("{}/token", server.url()),
+            token_endpoint: CredentialEndpoint::new(
+                "token_endpoint",
+                format!("{}/token", server.url())
+                    .parse()
+                    .expect("valid URL"),
+            )
+            .expect("mockito serves on a loopback host"),
             client_id: "cedarling-client".to_string(),
             client_secret: "secret".to_string(),
             scope: "https://jans.io/oauth/lock/trace.write".to_string(),

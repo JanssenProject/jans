@@ -313,7 +313,7 @@ permit(
 
     /// Creates a policy store with multiple entities.
     pub(crate) fn with_multiple_entities(count: usize) -> PolicyStoreTestBuilder {
-        let mut builder = PolicyStoreTestBuilder::new("multientity123").with_policy(
+        let mut builder = PolicyStoreTestBuilder::new("e7717e5123abcd").with_policy(
             "allow-all",
             r#"@id("allow-all") permit(principal, action, resource);"#,
         );

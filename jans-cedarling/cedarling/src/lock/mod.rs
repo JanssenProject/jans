@@ -160,14 +160,14 @@ mod trace_proto {
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
-use crate::http::{HttpClient, InitializeHttpClientError};
+use crate::http::{HttpClient, InitializeHttpClientError, is_secure_transport};
 use crate::lock::health_registry::HealthRegistry;
 use crate::lock::health_ticker::{HealthTicker, HealthTickerParams};
 use crate::lock::lock_config::GetLockConfigError;
 use crate::lock::telemetry_ticker::TelemetryTicker;
 use crate::log::{LogWriter, LoggerWeak};
 use crate::{HttpClientConfig, LockServiceConfig, LockTransport, TraceEndpoint};
-use lock_config::LockConfig;
+use lock_config::{AuditEndpoints, LockConfig};
 use log_entry::LockLogEntry;
 use log_worker::AuditWorker;
 use register_client::{ClientRegistrationError, TokenSource, access_token_scope, register_client};
@@ -225,21 +225,47 @@ impl std::fmt::Debug for LockAccessToken {
 
 fn bearer_for_origin(origin: &url::Origin, token: &LockAccessToken, uri: &str) -> Option<String> {
     let url = url::Url::parse(uri).ok()?;
-    let secure = match url.scheme() {
-        "https" => true,
-        "http" => is_loopback_host(&url),
-        _ => false,
-    };
-    (secure && origin.is_tuple() && url.origin() == *origin).then(|| token.0.clone())
+    (is_secure_transport(&url) && origin.is_tuple() && url.origin() == *origin)
+        .then(|| token.0.clone())
 }
 
-fn is_loopback_host(url: &url::Url) -> bool {
-    match url.host() {
-        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
-        Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
-        Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
-        None => false,
+/// Drops discovered audit endpoints the Lock access token must not be sent to.
+fn drop_insecure_audit_endpoints(endpoints: &mut AuditEndpoints, logger: Option<&LoggerWeak>) {
+    for (name, endpoint) in [
+        ("log_endpoint", &mut endpoints.log),
+        ("health_endpoint", &mut endpoints.health),
+        ("telemetry_endpoint", &mut endpoints.telemetry),
+    ] {
+        if endpoint
+            .as_ref()
+            .is_some_and(|url| !is_secure_transport(&url.0))
+        {
+            *endpoint = None;
+            logger.cloned().log_any(LockLogEntry::warn(format!(
+                "ignoring the discovered Lock {name}: it must use https, or http only to a \
+                 loopback host, because the Lock access token is sent to it"
+            )));
+        }
     }
+}
+
+/// Get lock config from the config uri endpoint, keeping only audit endpoints
+/// the access token may be sent to.
+async fn fetch_lock_config(
+    bootstrap_conf: &LockServiceConfig,
+    http_client: &HttpClient,
+    logger: Option<&LoggerWeak>,
+) -> Result<LockConfig, InitLockServiceError> {
+    let config_uri = &bootstrap_conf.config_uri;
+    // Discovery decides where the access token goes, so it must not be spoofable.
+    if !is_secure_transport(config_uri) {
+        return Err(InitLockServiceError::InsecureConfigUri(
+            config_uri.origin().ascii_serialization(),
+        ));
+    }
+    let mut lock_config = LockConfig::get(config_uri, http_client).await?;
+    drop_insecure_audit_endpoints(&mut lock_config.audit_endpoints, logger);
+    Ok(lock_config)
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
@@ -315,8 +341,7 @@ impl LockService {
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
 
-        // Get lock config from the config uri endpoint first
-        let lock_config = LockConfig::get(&bootstrap_conf.config_uri, &http_client).await?;
+        let lock_config = fetch_lock_config(bootstrap_conf, &http_client, logger.as_ref()).await?;
 
         let token = Self::acquire_access_token(
             pdp_id,
@@ -679,6 +704,8 @@ pub enum InitLockServiceError {
     TransportError(#[from] transport::TransportError),
     #[error("failed to parse access token: {0}")]
     InvalidAccessToken(String),
+    #[error("the Lock config URI on '{0}' must use https, or http only to a loopback host")]
+    InsecureConfigUri(String),
 }
 
 /// The TRACE sink; `None` when TRACE is off, or with a warning when there is no
@@ -948,6 +975,75 @@ mod test {
             bearer_for_origin(&origin, &token, "not a url"),
             None,
             "unparsable URIs must not receive the token"
+        );
+    }
+
+    #[tokio::test]
+    async fn plain_http_lock_config_uri_is_rejected_before_fetching() {
+        let config = LockServiceConfig {
+            config_uri: url::Url::parse(
+                "http://lock.invalid/.well-known/lock-server-configuration",
+            )
+            .expect("valid URL"),
+            ..Default::default()
+        };
+        let http_client =
+            HttpClient::new(HttpClientConfig::default()).expect("http client should be built");
+
+        let err = fetch_lock_config(&config, &http_client, None)
+            .await
+            .expect_err("plain http to a non-loopback host must be rejected");
+
+        assert!(
+            matches!(&err, InitLockServiceError::InsecureConfigUri(origin) if origin == "http://lock.invalid"),
+            "discovery over plain http must fail with InsecureConfigUri naming the origin, got: {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn discovered_insecure_audit_endpoints_are_dropped() {
+        let mut lock_server = Server::new_async().await;
+        let config_mock = lock_server
+            .mock("GET", "/.well-known/lock-server-configuration")
+            .with_body(
+                json!({
+                    "version": "1.0",
+                    "issuer": lock_server.url(),
+                    "audit": {
+                        "log_endpoint": "http://lock.example.com/log",
+                        "health_endpoint": "https://lock.example.com/health",
+                        "telemetry_endpoint": format!("{}/telemetry", lock_server.url()),
+                    },
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
+        let config = LockServiceConfig {
+            config_uri: url::Url::parse(&format!(
+                "{}/.well-known/lock-server-configuration",
+                lock_server.url()
+            ))
+            .expect("valid URL"),
+            ..Default::default()
+        };
+        let http_client =
+            HttpClient::new(HttpClientConfig::default()).expect("http client should be built");
+
+        let lock_config = fetch_lock_config(&config, &http_client, None)
+            .await
+            .expect("a loopback http config URI must be fetched");
+
+        config_mock.assert_async().await;
+        let endpoints = lock_config.audit_endpoints;
+        assert!(
+            endpoints.log.is_none(),
+            "a plain http endpoint on a non-loopback host must not receive the access token"
+        );
+        assert!(endpoints.health.is_some(), "an https endpoint must be kept");
+        assert!(
+            endpoints.telemetry.is_some(),
+            "a plain http endpoint on a loopback host must be kept for local development"
         );
     }
 

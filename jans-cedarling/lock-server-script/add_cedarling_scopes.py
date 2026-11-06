@@ -3,6 +3,9 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.orm.util import ArrayHelper
 from io.jans.as.server.service import ScopeService
 from io.jans.as.model.util import JwtUtil
+from io.jans.as.model.configuration import AppConfiguration
+from io.jans.as.server.ssa.ws.rs import SsaService
+from io.jans.as.common.model.ssa import SsaState
 
 class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
@@ -28,6 +31,10 @@ class ClientRegistration(ClientRegistrationType):
             return False
         else:
             self.trigger_scope = configurationAttributes.get("trigger_scope").getValue2()
+
+        self.ssa_issuer = None
+        if configurationAttributes.containsKey("ssa_issuer"):
+            self.ssa_issuer = configurationAttributes.get("ssa_issuer").getValue2()
         
         # used to check if the scopes we're adding exists in the AS
         self.scopeService = CdiUtil.bean(ScopeService)
@@ -59,6 +66,11 @@ class ClientRegistration(ClientRegistrationType):
             print "Cedarling Client registration. the scope '%s' was not included in the request, defaulting" % self.trigger_scope
             return True
 
+        # jwks_uri is usually the AS JWKS, which also signs id_tokens, so make sure this is really an SSA
+        if not self.isSoftwareStatement(context.getSoftwareStatement()):
+            print "Cedarling Client registration. software_statement is not an SSA, defaulting"
+            return True
+
         # add cedarling scopes
         client = context.getClient()
         scopes = client.getScopes()
@@ -75,6 +87,27 @@ class ClientRegistration(ClientRegistrationType):
         client.setScopes(scopes)
 
         print "Cedarling Client registration. added Cedarling scopes"
+        return True
+
+    def isSoftwareStatement(self, softwareStatement):
+        if softwareStatement is None:
+            return False
+        claims = softwareStatement.getClaims()
+        jti = claims.getClaimAsString("jti")
+        issuer = claims.getClaimAsString("iss")
+        if not jti or not issuer or not claims.hasClaim("software_id"):
+            return False
+        for idTokenClaim in ["nonce", "at_hash", "c_hash", "auth_time", "sid"]:
+            if claims.hasClaim(idTokenClaim):
+                return False
+        if self.ssa_issuer and issuer != self.ssa_issuer:
+            return False
+
+        # a JWT signed by this AS is accepted only if it was issued by the SSA endpoint
+        if issuer == CdiUtil.bean(AppConfiguration).getIssuer():
+            ssa = CdiUtil.bean(SsaService).findSsaByJti(jti)
+            if ssa is None or ssa.getState() in [SsaState.REVOKED, SsaState.EXPIRED]:
+                return False
         return True
 
     def updateClient(self, context):

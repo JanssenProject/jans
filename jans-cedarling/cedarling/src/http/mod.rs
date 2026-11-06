@@ -36,6 +36,7 @@ pub(crate) struct HttpClient {
     #[allow(unused)]
     max_retries: u32,
     max_response_size_bytes: Option<u64>,
+    conf: HttpClientConfig,
 }
 
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
@@ -98,6 +99,63 @@ impl Default for HttpClientConfig {
 #[error(transparent)]
 pub struct InitializeHttpClientError(#[from] reqwest::Error);
 
+#[cfg(not(target_arch = "wasm32"))]
+const MAX_REDIRECTS: usize = 10;
+
+/// `https`, or `http` only to a loopback host (`localhost`, `127.0.0.1`, `::1`):
+/// the only places Cedarling sends credentials to or fetches data it trusts from.
+pub(crate) fn is_secure_transport(url: &url::Url) -> bool {
+    match url.scheme() {
+        "https" => true,
+        "http" => is_loopback_host(url),
+        _ => false,
+    }
+}
+
+fn is_loopback_host(url: &url::Url) -> bool {
+    match url.host() {
+        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
+        Some(url::Host::Ipv4(ip)) => ip.is_loopback(),
+        Some(url::Host::Ipv6(ip)) => ip.is_loopback(),
+        None => false,
+    }
+}
+
+/// A redirect never leads somewhere less secure than the configured URL: from
+/// `https` only to `https`, and from loopback `http` only to a secure transport.
+/// Otherwise a response forged on the wire, or served by a local service, would
+/// be trusted as if it came from the configured URL.
+#[cfg(not(target_arch = "wasm32"))]
+fn redirect_allowed(configured: &url::Url, target: &url::Url) -> bool {
+    match configured.scheme() {
+        "https" => target.scheme() == "https",
+        _ if is_secure_transport(configured) => is_secure_transport(target),
+        _ => true,
+    }
+}
+
+/// Follows redirects like reqwest's default policy, but only where
+/// [`redirect_allowed`] permits.
+#[cfg(not(target_arch = "wasm32"))]
+fn no_downgrade_redirect_policy() -> reqwest::redirect::Policy {
+    reqwest::redirect::Policy::custom(|attempt| {
+        if attempt.previous().len() > MAX_REDIRECTS {
+            return attempt.error("too many redirects");
+        }
+        let allowed = attempt
+            .previous()
+            .first()
+            .is_none_or(|configured| redirect_allowed(configured, attempt.url()));
+        if !allowed {
+            let scheme = attempt.url().scheme().to_string();
+            return attempt.error(format!(
+                "refusing redirect from a secure URL to a less secure '{scheme}' URL"
+            ));
+        }
+        attempt.follow()
+    })
+}
+
 impl HttpClient {
     pub(crate) fn new(conf: HttpClientConfig) -> Result<Self, InitializeHttpClientError> {
         Self::new_with_builder(Client::builder(), conf)
@@ -107,10 +165,15 @@ impl HttpClient {
         builder: ClientBuilder,
         conf: HttpClientConfig,
     ) -> Result<Self, InitializeHttpClientError> {
+        // On WASM the browser's fetch follows redirects and reqwest offers no redirect
+        // policy, so `no_downgrade_redirect_policy` does not apply there: the browser's
+        // mixed-content blocking keeps a page served over https from following a
+        // redirect to plain http.
         #[cfg(not(target_arch = "wasm32"))]
         let builder = builder
             .timeout(conf.request_timeout)
-            .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT);
+            .connect_timeout(HttpClientConfig::DEFAULT_HTTP_CONNECT_TIMEOUT)
+            .redirect(no_downgrade_redirect_policy());
 
         let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
@@ -119,7 +182,18 @@ impl HttpClient {
             retry_delay: conf.retry_delay,
             max_retries: conf.max_retries,
             max_response_size_bytes: conf.max_response_size_bytes,
+            conf,
         })
+    }
+
+    /// A client with the same limits but without this client's default headers,
+    /// for requests that must not carry its credentials.
+    ///
+    /// Rebuilt from [`HttpClientConfig`] alone: any other setting of the builder
+    /// passed to [`HttpClient::new_with_builder`] (proxy, root certificates,
+    /// accepting invalid certificates) is not carried over.
+    pub(crate) fn without_default_headers(&self) -> Result<Self, InitializeHttpClientError> {
+        Self::new(self.conf)
     }
 
     /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
@@ -406,6 +480,99 @@ mod test {
         retry_delay: Duration::from_secs(5),
         max_response_size_bytes: None,
     };
+
+    #[test]
+    fn secure_url_allows_https_and_loopback_http_only() {
+        for (raw, expected) in [
+            ("https://example.org/jwks", true),
+            ("http://localhost:8080/jwks", true),
+            ("http://127.0.0.1/jwks", true),
+            ("http://[::1]/jwks", true),
+            ("http://example.org/jwks", false),
+            ("ftp://example.org/jwks", false),
+        ] {
+            let url = url::Url::parse(raw).expect("valid url");
+            assert_eq!(super::is_secure_transport(&url), expected, "{raw}");
+        }
+    }
+
+    #[test]
+    fn redirect_never_leads_to_a_less_secure_url() {
+        for (configured, target, expected) in [
+            (
+                "https://idp.example.org/jwks",
+                "https://cdn.example.org/jwks",
+                true,
+            ),
+            (
+                "https://idp.example.org/jwks",
+                "http://idp.example.org/jwks",
+                false,
+            ),
+            (
+                "https://idp.example.org/jwks",
+                "http://127.0.0.1:8080/jwks",
+                false,
+            ),
+            (
+                "https://idp.example.org/jwks",
+                "http://localhost/jwks",
+                false,
+            ),
+            ("http://localhost/jwks", "http://127.0.0.1:8080/jwks", true),
+            (
+                "http://localhost/jwks",
+                "https://idp.example.org/jwks",
+                true,
+            ),
+            (
+                "http://localhost/jwks",
+                "http://idp.example.org/jwks",
+                false,
+            ),
+            (
+                "http://idp.example.org/jwks",
+                "http://other.example.org/jwks",
+                true,
+            ),
+        ] {
+            let configured = url::Url::parse(configured).expect("valid url");
+            let target = url::Url::parse(target).expect("valid url");
+            assert_eq!(
+                super::redirect_allowed(&configured, &target),
+                expected,
+                "redirect from {configured} to {target}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn client_refuses_redirect_from_loopback_to_remote_http() {
+        let mut server = Server::new_async().await;
+        let redirect = server
+            .mock("GET", "/jwks")
+            .with_status(302)
+            .with_header("location", "http://idp.invalid/jwks")
+            .expect(1)
+            .create_async()
+            .await;
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+
+        let err = client
+            .get(&format!("{}/jwks", server.url()))
+            .await
+            .expect_err("a redirect to plain http on another host must not be followed");
+
+        redirect.assert_async().await;
+        assert!(
+            format!("{err:?}").contains("error following redirect"),
+            "the request must fail on the refused redirect, got: {err:?}"
+        );
+    }
 
     #[tokio::test]
     async fn can_fetch() {
