@@ -12,6 +12,7 @@ name = "jans-pycloudlib"
 dynamic = ["version"]
 description = "Utilities for Janssen cloud-native deployment"
 readme = "README.md"
+license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
     {name = "JanssenProject"}
