@@ -165,6 +165,10 @@ impl HttpClient {
         builder: ClientBuilder,
         conf: HttpClientConfig,
     ) -> Result<Self, InitializeHttpClientError> {
+        // On WASM the browser's fetch follows redirects and reqwest offers no redirect
+        // policy, so `no_downgrade_redirect_policy` does not apply there: the browser's
+        // mixed-content blocking keeps a page served over https from following a
+        // redirect to plain http.
         #[cfg(not(target_arch = "wasm32"))]
         let builder = builder
             .timeout(conf.request_timeout)
