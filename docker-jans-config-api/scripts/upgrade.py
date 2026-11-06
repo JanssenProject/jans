@@ -25,7 +25,12 @@ logger = logging.getLogger("jans-config-api")
 Entry = namedtuple("Entry", ["id", "attrs"])
 
 
-def _transform_api_dynamic_config(conf):
+def _transform_api_dynamic_config(conf, seeded_dir_mappings=None):
+    """Migrate config-api dynamic config.
+
+    Asset directories in `seeded_dir_mappings` were offered by an earlier run and are not re-added,
+    so a mapping the administrator removed stays removed. `None` means no record exists yet.
+    """
     should_update = False
 
     # top-level config that need to be added (if missing)
@@ -132,6 +137,8 @@ def _transform_api_dynamic_config(conf):
     dir_mapping_names = tuple(dir_["directory"] for dir_ in conf["assetMgtConfiguration"]["assetDirMapping"])
 
     for supported_dir_mapping in fmt_dynamic_conf["assetMgtConfiguration"]["assetDirMapping"]:
+        if seeded_dir_mappings is not None and supported_dir_mapping["directory"] in seeded_dir_mappings:
+            continue
         if supported_dir_mapping["directory"] not in dir_mapping_names:
             conf["assetMgtConfiguration"]["assetDirMapping"].append(supported_dir_mapping)
             should_update = True
@@ -287,7 +294,13 @@ class Upgrade:
         with contextlib.suppress(json.decoder.JSONDecodeError):
             entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
-        conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"])
+        seeded_dirs = None
+        with contextlib.suppress(TypeError, ValueError):
+            seeded_dirs = json.loads(self.manager.config.get("config_api_seeded_asset_dirs") or "null")
+        if not isinstance(seeded_dirs, list) or not all(isinstance(dir_, str) for dir_ in seeded_dirs):
+            seeded_dirs = None
+
+        conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"], seeded_dirs)
 
         injected_urls = URLModifier(self.backend.client).get_injected_urls()
 
@@ -309,7 +322,25 @@ class Upgrade:
         if should_update:
             entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+            if not self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
+                return
+
+        with open("/tmp/config-api.dynamic-conf.json") as f:  # nosec: B108
+            shipped_dirs = {
+                dir_["directory"]
+                for dir_ in json.loads(f.read())["assetMgtConfiguration"]["assetDirMapping"]
+            }
+        if not shipped_dirs.issubset(seeded_dirs or []):
+            try:
+                recorded = self.manager.config.set(
+                    "config_api_seeded_asset_dirs",
+                    json.dumps(sorted(shipped_dirs | set(seeded_dirs or []))),
+                )
+            except Exception as exc:
+                logger.warning("Error recording seeded config-api asset directories: %s", exc)
+                recorded = False
+            if not recorded:
+                logger.warning("Unable to record seeded config-api asset directories; they will be offered again on the next run")
 
     def update_client_scopes(self):
         kwargs = {"table_name": "jansClnt"}
