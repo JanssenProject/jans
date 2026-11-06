@@ -37,13 +37,15 @@
 //! - **gRPC**: Protocol Buffers-based transport (requires `grpc` feature)
 //!
 //! The transport is selected via [`LockServiceConfig.transport`](crate::LockServiceConfig::transport).
+//! TRACE bulk requests have their own, [`TraceConfig.transport`](crate::TraceConfig::transport),
+//! so moving audit data to gRPC does not move TRACE with it.
 //!
 //! ### Flow
 //!
 //! On initialization, [`LockService`] fetches the Lock Server's well-known configuration
 //! and then acquires an access token using **one of two mechanisms**:
 //!
-//! #### Path A – Direct access token (`CEDARLING_LOCK_ACCESS_TOKEN_JWT`)
+//! #### Path A - Direct access token (`CEDARLING_LOCK_ACCESS_TOKEN_JWT`)
 //!
 //! If a pre-issued access token is supplied in `LockServiceConfig::access_token_jwt`,
 //! Cedarling uses it directly. The SSA validation and DCR steps are skipped entirely.
@@ -57,7 +59,7 @@
 //! 4. **Transport Selection**: Based on `LockTransport` config, either REST or gRPC transport is created
 //! 5. **Logging**: Authorization decisions are sent to the Lock Server's audit endpoint
 //!
-//! #### Path B – SSA → DCR flow (`CEDARLING_LOCK_SSA_JWT`, default)
+//! #### Path B - SSA and DCR flow (`CEDARLING_LOCK_SSA_JWT`, default)
 //!
 //! 1. **Initialization**: [`LockService`] is created with configuration
 //! 2. **Lock Config**: Fetch `.well-known/lock-server-configuration`
@@ -146,6 +148,15 @@ mod proto {
     tonic::include_proto!("io.jans.lock.audit");
 }
 
+/// Client for Lock's `TraceService`. TRACE is native only, like the sink using it.
+#[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+mod trace_proto {
+    // These lints are disabled because they are triggered by the generated code
+    #![allow(unreachable_pub)]
+    #![allow(clippy::pedantic)]
+    tonic::include_proto!("io.jans.lock.trace");
+}
+
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::common::issuer_utils::IssClaim;
@@ -167,9 +178,24 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
+#[cfg(all(test, not(target_arch = "wasm32")))]
+pub(crate) use trace_sink::RejectedStatus;
+#[cfg(not(target_arch = "wasm32"))]
+use trace_sink::rest::RestTraceClient;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
+
+/// Where TRACE bulk requests go and the transport that carries them.
+#[derive(Debug, Clone, Copy)]
+#[cfg_attr(
+    target_arch = "wasm32",
+    expect(dead_code, reason = "TRACE is refused on WASM before Lock starts")
+)]
+pub(crate) struct TraceRoute<'a> {
+    pub(crate) endpoint: &'a TraceEndpoint,
+    pub(crate) transport: LockTransport,
+}
 
 /// The Lock access token Cedarling starts with.
 struct AcquiredToken {
@@ -243,7 +269,7 @@ async fn fetch_lock_config(
 }
 
 /// Stores logs in a buffer then sends them to the lock server in the background
-#[derive(Debug)]
+#[cfg_attr(test, derive(Debug))]
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
@@ -311,7 +337,7 @@ impl LockService {
         metrics: Arc<MetricsCollector>,
         app_name: Option<ApplicationName>,
         http_conf: HttpClientConfig,
-        trace: Option<&TraceEndpoint>,
+        trace: Option<TraceRoute<'_>>,
     ) -> Result<Self, InitLockServiceError> {
         let http_client = init_http_client(None, bootstrap_conf.accept_invalid_certs, http_conf)?;
 
@@ -433,7 +459,7 @@ impl LockService {
     ///    validation and Dynamic Client Registration (DCR) entirely. Useful when the
     ///    token is provisioned externally.
     ///
-    /// 2. **SSA → DCR flow** (default): optionally validate the SSA JWT, then perform
+    /// 2. **SSA and DCR flow** (default): optionally validate the SSA JWT, then perform
     ///    DCR to obtain credentials, and exchange them for an access token via the
     ///    client credentials grant.
     ///
@@ -453,7 +479,7 @@ impl LockService {
             if bootstrap_conf.ssa_jwt.is_some() {
                 logger.cloned().log_any(LockLogEntry::warn(
                     "Both CEDARLING_LOCK_ACCESS_TOKEN_JWT and CEDARLING_LOCK_SSA_JWT are set. \
-                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA → DCR flow will \
+                     CEDARLING_LOCK_ACCESS_TOKEN_JWT takes precedence; the SSA and DCR flow will \
                      be skipped."
                         .to_string(),
                 ));
@@ -687,7 +713,7 @@ pub enum InitLockServiceError {
 /// reports that no record was sent.
 #[cfg(not(target_arch = "wasm32"))]
 fn create_trace_sink(
-    trace: Option<&TraceEndpoint>,
+    trace: Option<TraceRoute<'_>>,
     lock_config: &LockConfig,
     access_token: &str,
     source: Option<TokenSource>,
@@ -695,7 +721,11 @@ fn create_trace_sink(
     http_conf: HttpClientConfig,
     logger: Option<&LoggerWeak>,
 ) -> Result<Option<Arc<TraceSink>>, InitLockServiceError> {
-    let Some(endpoint) = trace else {
+    let Some(TraceRoute {
+        endpoint,
+        transport,
+    }) = trace
+    else {
         return Ok(None);
     };
     let discovered = lock_config
@@ -712,9 +742,37 @@ fn create_trace_sink(
             return Ok(None);
         },
     };
+    // One client, so REST bulk requests and token reissues share a pool.
+    let http = init_http_client(None, accept_invalid_certs, http_conf)?;
+    let channel = match transport {
+        LockTransport::Rest => {
+            trace_sink::TraceChannel::Rest(RestTraceClient::new(endpoint, http.clone()))
+        },
+        #[cfg(feature = "grpc")]
+        LockTransport::Grpc => {
+            let warn = |message: String| logger.cloned().log_any(LockLogEntry::warn(message));
+            if accept_invalid_certs {
+                warn(
+                    "CEDARLING_LOCK_ACCEPT_INVALID_CERTS does not apply to TRACE over gRPC: \
+                     the Lock Server certificate is verified"
+                        .to_string(),
+                );
+            }
+            match trace_sink::grpc::GrpcTraceClient::new(&endpoint, &http_conf) {
+                Ok(client) => trace_sink::TraceChannel::Grpc(client),
+                Err(err) => {
+                    let cause = std::error::Error::source(&err)
+                        .map(|source| format!(": {source}"))
+                        .unwrap_or_default();
+                    warn(format!("{err}{cause}: TRACE records will not be sent"));
+                    return Ok(None);
+                },
+            }
+        },
+    };
     Ok(Some(Arc::new(TraceSink {
-        endpoint,
-        http: init_http_client(None, accept_invalid_certs, http_conf)?,
+        channel,
+        http,
         token: tokio::sync::RwLock::new(LockAccessToken(access_token.to_string())),
         source,
     })))
@@ -1076,7 +1134,7 @@ mod test {
         ));
     }
 
-    /// Tests that when `access_token_jwt` is set the SSA → DCR flow is entirely bypassed:
+    /// Tests that when `access_token_jwt` is set the SSA and DCR flow is entirely bypassed:
     /// the IDP's JWKS, OIDC, DCR, and token endpoints must NOT be called.
     #[cfg(not(target_arch = "wasm32"))]
     #[tokio::test]
@@ -1307,6 +1365,15 @@ mod test {
         }
     }
 
+    /// TRACE over REST to `endpoint`, as it is by default.
+    #[cfg(not(target_arch = "wasm32"))]
+    fn rest(endpoint: &TraceEndpoint) -> TraceRoute<'_> {
+        TraceRoute {
+            endpoint,
+            transport: LockTransport::Rest,
+        }
+    }
+
     /// Mocks the `/token` endpoint, matching the requested scope exactly.
     fn mock_token_endpoint_with_scope(server: &mut ServerGuard, scope: &str) -> Mock {
         server
@@ -1321,7 +1388,7 @@ mod test {
     }
 
     async fn start_with_dcr(
-        trace: Option<&TraceEndpoint>,
+        trace: Option<TraceRoute<'_>>,
         scope: &str,
     ) -> Result<LockService, InitLockServiceError> {
         let pdp_id = PdpID::new();
@@ -1363,16 +1430,17 @@ mod test {
             "{} https://jans.io/oauth/lock/trace.write",
             register_client::ACCESS_TKN_SCOPE
         );
-        let service = start_with_dcr(Some(&TraceEndpoint::Discovered), &scope)
+        let service = start_with_dcr(Some(rest(&TraceEndpoint::Discovered)), &scope)
             .await
             .expect("Lock service with TRACE should start");
         let sink = service
             .trace_sink()
             .expect("a discovered trace_bulk_endpoint should give a TRACE sink");
         assert!(
-            sink.endpoint.path().ends_with("/audit/trace/bulk"),
-            "the sink should post to the discovered bulk endpoint, got {}",
-            sink.endpoint
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(client)
+                if client.endpoint.path().ends_with("/audit/trace/bulk")),
+            "the sink should post to the discovered bulk endpoint, got {:?}",
+            sink.channel
         );
         assert!(
             sink.source.is_some(),
@@ -1430,7 +1498,7 @@ mod test {
             Arc::new(MetricsCollector::new(MetricsMode::Local)),
             None,
             HttpClientConfig::default(),
-            Some(&endpoint),
+            Some(rest(&endpoint)),
         )
         .await
         .expect("a misconfigured TRACE endpoint should not stop Cedarling");
@@ -1471,16 +1539,17 @@ mod test {
             Arc::new(MetricsCollector::new(MetricsMode::Local)),
             None,
             HttpClientConfig::default(),
-            Some(&TraceEndpoint::Url(url.clone())),
+            Some(rest(&TraceEndpoint::Url(url.clone()))),
         )
         .await
         .expect("Lock service with an explicit TRACE endpoint should start");
         let sink = service
             .trace_sink()
             .expect("an explicit endpoint should give a TRACE sink");
-        assert_eq!(
-            sink.endpoint, url,
-            "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint"
+        assert!(
+            matches!(&sink.channel, trace_sink::TraceChannel::Rest(client) if client.endpoint == url),
+            "CEDARLING_TRACE_ENDPOINT should override the discovered endpoint, got {:?}",
+            sink.channel
         );
     }
 
@@ -1516,7 +1585,7 @@ mod test {
             Arc::new(MetricsCollector::new(MetricsMode::Local)),
             None,
             HttpClientConfig::default(),
-            Some(&TraceEndpoint::Discovered),
+            Some(rest(&TraceEndpoint::Discovered)),
         )
         .await
         .expect("a Lock without TRACE should not stop Cedarling");
@@ -1554,7 +1623,7 @@ mod test {
             Arc::new(MetricsCollector::new(MetricsMode::Local)),
             None,
             HttpClientConfig::default(),
-            Some(&TraceEndpoint::Discovered),
+            Some(rest(&TraceEndpoint::Discovered)),
         )
         .await
         .expect("Lock service with a direct token should start");
@@ -1564,6 +1633,131 @@ mod test {
         assert!(
             sink.source.is_none(),
             "a pre-issued token cannot be reissued, so there is no token source"
+        );
+    }
+
+    #[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+    async fn start_grpc_trace(
+        config: &LockServiceConfig,
+        endpoint: &TraceEndpoint,
+        log: Option<LoggerWeak>,
+    ) -> LockService {
+        LockService::new(
+            PdpID::new(),
+            config,
+            log,
+            Arc::new(MetricsCollector::new(MetricsMode::Local)),
+            None,
+            HttpClientConfig::default(),
+            Some(TraceRoute {
+                endpoint,
+                transport: LockTransport::Grpc,
+            }),
+        )
+        .await
+        .expect("Lock service with TRACE over gRPC should start")
+    }
+
+    #[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+    #[tokio::test]
+    async fn grpc_trace_carries_discovered_and_explicit_endpoints() {
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let config = direct_token_config(config_uri);
+        let explicit = TraceEndpoint::Url(
+            "https://proxy.example.com:8443/trace/bulk?key=1"
+                .parse()
+                .expect("valid URL"),
+        );
+
+        for endpoint in [&TraceEndpoint::Discovered, &explicit] {
+            let sink = start_grpc_trace(&config, endpoint, None)
+                .await
+                .trace_sink()
+                .expect("a secure TRACE endpoint should give a TRACE sink");
+            assert!(
+                matches!(sink.channel, trace_sink::TraceChannel::Grpc(_)),
+                "CEDARLING_TRACE_TRANSPORT=grpc should send {endpoint:?} records over gRPC"
+            );
+        }
+    }
+
+    #[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+    #[tokio::test]
+    async fn grpc_trace_refuses_an_insecure_endpoint() {
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let endpoint = TraceEndpoint::Url(
+            "http://lock.example.com/audit/trace/bulk"
+                .parse()
+                .expect("valid URL"),
+        );
+
+        let service = start_grpc_trace(&direct_token_config(config_uri), &endpoint, None).await;
+
+        assert!(
+            service.trace_sink().is_none(),
+            "the Lock token must not go over plaintext gRPC to a remote host"
+        );
+    }
+
+    #[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+    #[tokio::test]
+    async fn grpc_trace_warns_that_invalid_certificates_are_not_accepted() {
+        use crate::log::LogStrategy;
+        use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
+
+        let mock_idp_server = Server::new_async().await;
+        let mut mock_lock_server = Server::new_async().await;
+        let MockedLockConfig {
+            uri: config_uri,
+            mock: _config_endpoint,
+        } = mock_lock_config_endpoint_with(&mut mock_lock_server, &mock_idp_server, true);
+        let log = Arc::new(LogStrategy::new(
+            &LogConfig {
+                log_type: LogTypeConfig::Memory(MemoryLogConfig {
+                    log_ttl: 60,
+                    max_item_size: None,
+                    max_items: None,
+                }),
+                log_level: LogLevel::DEBUG,
+            },
+            PdpID::new(),
+            None,
+        ));
+        let config = LockServiceConfig {
+            accept_invalid_certs: true,
+            ..direct_token_config(config_uri)
+        };
+
+        let service = start_grpc_trace(
+            &config,
+            &TraceEndpoint::Discovered,
+            Some(Arc::downgrade(&log)),
+        )
+        .await;
+
+        assert!(
+            service.trace_sink().is_some(),
+            "the setting only warns; TRACE still goes, with the certificate verified"
+        );
+        let warned = log.pop_logs().iter().any(|entry| {
+            entry["level"] == "WARN"
+                && entry["message"]
+                    .as_str()
+                    .is_some_and(|msg| msg.contains("CEDARLING_LOCK_ACCEPT_INVALID_CERTS"))
+        });
+        assert!(
+            warned,
+            "startup should warn that invalid certificates are not accepted over gRPC"
         );
     }
 

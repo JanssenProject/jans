@@ -3,17 +3,16 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Where TRACE records go and the token they go with. TRACE always uses REST:
-//! Lock has no TRACE endpoint over gRPC.
+//! Where TRACE records go and the token they go with. Bulk requests go over REST
+//! (`POST /audit/trace/bulk`) or, with `CEDARLING_TRACE_TRANSPORT=grpc`, over
+//! gRPC (`TraceService/SubmitBulkRecords`), which runs the same Lock pipeline.
 
 use std::fmt;
 use std::time::Duration;
 
 use async_trait::async_trait;
 use bytes::Bytes;
-use chrono::{DateTime, Utc};
 use reqwest::StatusCode;
-use reqwest::header::{CONTENT_TYPE, HeaderMap, RETRY_AFTER};
 use serde::{Deserialize, Deserializer};
 use tokio::sync::RwLock;
 
@@ -21,16 +20,39 @@ use super::LockAccessToken;
 use super::register_client::{TokenSource, request_access_token};
 use crate::TraceEndpoint;
 use crate::http::HttpClient;
-use crate::http_utils::MAX_EXPONENTIAL_DELAY;
+
+#[cfg(feature = "grpc")]
+pub(super) mod grpc;
+pub(super) mod rest;
 
 /// Acceptance flags that point at a problem on the producer's side. Coverage
 /// gaps and lateness are expected after a loss or a retry, so they are not kept.
-const PROBLEM_FLAGS: [&str; 4] = [
-    "chain_link_failure_flag",
-    "equivocation_flag",
-    "policy_mismatch_flag",
-    "reserved_member_flag",
-];
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum ProblemFlag {
+    ChainLinkFailure,
+    Equivocation,
+    PolicyMismatch,
+    ReservedMember,
+}
+
+impl ProblemFlag {
+    const ALL: [Self; 4] = [
+        Self::ChainLinkFailure,
+        Self::Equivocation,
+        Self::PolicyMismatch,
+        Self::ReservedMember,
+    ];
+
+    /// The member of Lock's REST answer, which is also the name logged.
+    fn name(self) -> &'static str {
+        match self {
+            Self::ChainLinkFailure => "chain_link_failure_flag",
+            Self::Equivocation => "equivocation_flag",
+            Self::PolicyMismatch => "policy_mismatch_flag",
+            Self::ReservedMember => "reserved_member_flag",
+        }
+    }
+}
 
 /// Sends one bulk body to Lock. A trait so the emitter is tested without HTTP.
 #[async_trait]
@@ -47,7 +69,7 @@ pub(crate) struct BulkItemResult {
     /// Error id from the Lock error catalog when the record was rejected.
     pub(crate) error: Option<String>,
     pub(crate) reason: Option<String>,
-    /// Names of the [`PROBLEM_FLAGS`] Lock set on an accepted record.
+    /// Names of the [`ProblemFlag`]s Lock set on an accepted record.
     pub(crate) flags: Vec<&'static str>,
 }
 
@@ -64,16 +86,66 @@ pub(crate) enum PostBulkError {
     },
     /// Lock refused the whole request; the same bytes get the same answer.
     #[error(
-        "Lock Server rejected the TRACE bulk request with HTTP {status} (error: {}, reason: {})",
+        "Lock Server rejected the TRACE bulk request with {status} (error: {}, reason: {})",
         error.as_deref().unwrap_or("none"),
         reason.as_deref().unwrap_or("none")
     )]
     Rejected {
-        status: u16,
+        status: RejectedStatus,
         /// Error id from the Lock error catalog.
         error: Option<String>,
         reason: Option<String>,
     },
+    /// Lock answered that it processed the request, but the per-record results
+    /// cannot be read. Lock may have kept the records, so they are not sent again.
+    #[error("Lock Server's answer to the TRACE bulk request cannot be read: {reason}")]
+    UnreadableResponse { reason: String },
+}
+
+/// The status a whole bulk request was refused with, in the terms of the
+/// transport that carried it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum RejectedStatus {
+    Http(StatusCode),
+    /// Lock sends the gRPC status matching the HTTP status of the REST answer.
+    #[cfg(feature = "grpc")]
+    Grpc(tonic::Code),
+}
+
+impl RejectedStatus {
+    /// Lock's answer to a request it could not accept as sent (`invalid_request`).
+    fn is_bad_request(self) -> bool {
+        match self {
+            Self::Http(status) => status == StatusCode::BAD_REQUEST,
+            #[cfg(feature = "grpc")]
+            Self::Grpc(code) => code == tonic::Code::InvalidArgument,
+        }
+    }
+
+    /// gRPC refused the message before Lock read it, so no Lock error comes with
+    /// it: over the direct gRPC port's limit, or a server or proxy slowing the
+    /// client down (`ENHANCE_YOUR_CALM`).
+    #[cfg(feature = "grpc")]
+    fn is_over_grpc_limit(self) -> bool {
+        self == Self::Grpc(tonic::Code::ResourceExhausted)
+    }
+
+    /// No `TraceService` behind the address: Lock answers `UNIMPLEMENTED`, and a
+    /// proxy's `404` reaches tonic as `UNIMPLEMENTED` too.
+    #[cfg(feature = "grpc")]
+    fn is_missing_route(self) -> bool {
+        self == Self::Grpc(tonic::Code::Unimplemented)
+    }
+}
+
+impl fmt::Display for RejectedStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Http(status) => write!(f, "HTTP {}", status.as_u16()),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(code) => write!(f, "gRPC {code:?}"),
+        }
+    }
 }
 
 /// Why Lock refused a whole bulk request Cedarling built, when the fix is in
@@ -87,20 +159,36 @@ pub(crate) enum RequestRefusal {
     /// `invalid_request` without a reason: Lock hides it unless its
     /// `errorReasonEnabled` is on, the default being off.
     Unexplained,
+    /// No TRACE gRPC route: a Lock Server older than its TRACE gRPC services,
+    /// or a proxy without the `io.jans.lock.trace.TraceService` route.
+    #[cfg(feature = "grpc")]
+    NoGrpcRoute,
+    /// gRPC `RESOURCE_EXHAUSTED`: the body may be over a gRPC message limit,
+    /// or a server or proxy is slowing Cedarling down.
+    #[cfg(feature = "grpc")]
+    GrpcLimit,
 }
 
 impl PostBulkError {
     /// `None` for a refusal whose error and reason already say what is wrong.
     pub(crate) fn refusal(&self) -> Option<RequestRefusal> {
         let Self::Rejected {
-            status: 400,
-            error: Some(error),
+            status,
+            error,
             reason,
         } = self
         else {
             return None;
         };
-        if error != "invalid_request" {
+        #[cfg(feature = "grpc")]
+        if status.is_over_grpc_limit() {
+            return Some(RequestRefusal::GrpcLimit);
+        }
+        #[cfg(feature = "grpc")]
+        if status.is_missing_route() {
+            return Some(RequestRefusal::NoGrpcRoute);
+        }
+        if !status.is_bad_request() || error.as_deref() != Some("invalid_request") {
             return None;
         }
         match reason.as_deref() {
@@ -112,10 +200,50 @@ impl PostBulkError {
     }
 }
 
-/// The Lock TRACE bulk endpoint and the client that posts to it. Holds its own
-/// copy of the token, so a `401` can swap in a reissued one.
+/// How bulk requests reach Lock: one adapter per transport, each turning its
+/// transport's answer into an [`Attempt`] or a [`PostBulkError`].
+pub(super) enum TraceChannel {
+    /// `POST` of the body to the TRACE bulk endpoint.
+    Rest(rest::RestTraceClient),
+    /// `TraceService/SubmitBulkRecords` on the origin of the TRACE endpoint,
+    /// where the Lock proxy routes it, as for the audit gRPC transport.
+    #[cfg(feature = "grpc")]
+    Grpc(grpc::GrpcTraceClient),
+}
+
+/// Test failures name the transport only, so no endpoint is printed.
+#[cfg(test)]
+impl fmt::Debug for TraceChannel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Rest(_) => f.write_str("Rest"),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(_) => f.write_str("Grpc"),
+        }
+    }
+}
+
+impl TraceChannel {
+    /// A token Lock refused again after it was reissued, or that cannot be reissued.
+    fn unauthorized(&self) -> PostBulkError {
+        let status = match self {
+            Self::Rest(_) => RejectedStatus::Http(StatusCode::UNAUTHORIZED),
+            #[cfg(feature = "grpc")]
+            Self::Grpc(_) => RejectedStatus::Grpc(tonic::Code::Unauthenticated),
+        };
+        PostBulkError::Rejected {
+            status,
+            error: None,
+            reason: None,
+        }
+    }
+}
+
+/// What the emitter sends TRACE bulk requests through. It owns the token and
+/// reissues it after a `401`, whatever the transport; the channel only sends.
 pub(crate) struct TraceSink {
-    pub(super) endpoint: url::Url,
+    pub(super) channel: TraceChannel,
+    /// Reissues the token.
     pub(super) http: HttpClient,
     /// Shared by every bulk request until Lock answers `401`; then replaced by
     /// the reissued token, which the following requests use in turn.
@@ -124,16 +252,17 @@ pub(crate) struct TraceSink {
     pub(super) source: Option<TokenSource>,
 }
 
+#[cfg(test)]
 impl fmt::Debug for TraceSink {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("TraceSink")
-            .field("endpoint", &self.endpoint.as_str())
+            .field("channel", &self.channel)
             .field("source", &self.source)
             .finish_non_exhaustive()
     }
 }
 
-/// Answer to one attempt, before a `401` is handled.
+/// Answer to one attempt, before a `401` (gRPC `UNAUTHENTICATED`) is handled.
 enum Attempt {
     Results(Vec<BulkItemResult>),
     Unauthorized,
@@ -152,7 +281,7 @@ impl BulkSink for TraceSink {
             return Ok(results);
         }
         let Some(source) = &self.source else {
-            return Err(unauthorized());
+            return Err(self.channel.unauthorized());
         };
         // Stored for the following calls, so they do not hit `401` again.
         let token = request_access_token(&self.http, source)
@@ -164,59 +293,19 @@ impl BulkSink for TraceSink {
         *self.token.write().await = LockAccessToken(token);
         match self.post_once(body).await? {
             Attempt::Results(results) => Ok(results),
-            Attempt::Unauthorized => Err(unauthorized()),
+            Attempt::Unauthorized => Err(self.channel.unauthorized()),
         }
     }
 }
 
 impl TraceSink {
-    /// The bulk request carrying `body`. `Bytes` clones share the buffer, so a
-    /// retry or a resend after `401` does not copy the batch.
-    fn bulk_request(&self, token: String, body: &Bytes) -> reqwest::RequestBuilder {
-        self.http
-            .raw_client
-            .post(self.endpoint.clone())
-            .bearer_auth(token)
-            .header(CONTENT_TYPE, "application/json")
-            .body(body.clone())
-    }
-
     async fn post_once(&self, body: &Bytes) -> Result<Attempt, PostBulkError> {
         let token = self.token.read().await.0.clone();
-        let response = self
-            .bulk_request(token, body)
-            .send()
-            .await
-            .map_err(|err| retryable(err.to_string()))?;
-        let status = response.status();
-        if status == StatusCode::UNAUTHORIZED {
-            return Ok(Attempt::Unauthorized);
+        match &self.channel {
+            TraceChannel::Rest(client) => client.submit(&token, body).await,
+            #[cfg(feature = "grpc")]
+            TraceChannel::Grpc(client) => client.submit(&token, body).await,
         }
-        // `429` and `408` come from a proxy before Lock as often as from Lock:
-        // both ask to repeat the request later, not to drop it.
-        if status.is_server_error()
-            || status == StatusCode::TOO_MANY_REQUESTS
-            || status == StatusCode::REQUEST_TIMEOUT
-        {
-            return Err(PostBulkError::Retryable {
-                reason: format!("HTTP {status}"),
-                retry_after: retry_after(response.headers(), Utc::now()),
-            });
-        }
-        let bytes = self
-            .http
-            .read_response_capped(response)
-            .await
-            .map_err(|err| retryable(err.to_string()))?;
-        if status == StatusCode::MULTI_STATUS {
-            return parse_results(&bytes).map(Attempt::Results);
-        }
-        let error = serde_json::from_slice::<ErrorBody>(&bytes).ok();
-        Err(PostBulkError::Rejected {
-            status: status.as_u16(),
-            error: error.as_ref().map(|body| body.error.clone()),
-            reason: error.and_then(|body| body.reason),
-        })
     }
 }
 
@@ -225,63 +314,6 @@ fn retryable(reason: String) -> PostBulkError {
         reason,
         retry_after: None,
     }
-}
-
-/// How long `Retry-After` (RFC 9110, section 10.2.3) asks to wait: delay
-/// seconds or an IMF-fixdate. The value comes from Lock or from any proxy
-/// before it, so a missing, unreadable or past one leaves the wait to the
-/// backoff, and a longer one is cut to the longest backoff delay: a
-/// misconfigured proxy cannot stop TRACE for hours.
-fn retry_after(headers: &HeaderMap, now: DateTime<Utc>) -> Option<Duration> {
-    let value = headers.get(RETRY_AFTER)?.to_str().ok()?.trim();
-    let delay = match value.parse::<u64>() {
-        Ok(seconds) => Duration::from_secs(seconds),
-        Err(_) => DateTime::parse_from_rfc2822(value)
-            .ok()?
-            .with_timezone(&Utc)
-            .signed_duration_since(now)
-            .to_std()
-            .ok()?,
-    };
-    Some(delay.min(MAX_EXPONENTIAL_DELAY))
-}
-
-fn unauthorized() -> PostBulkError {
-    PostBulkError::Rejected {
-        status: StatusCode::UNAUTHORIZED.as_u16(),
-        error: None,
-        reason: None,
-    }
-}
-
-fn parse_results(bytes: &[u8]) -> Result<Vec<BulkItemResult>, PostBulkError> {
-    let response: BulkResponse =
-        serde_json::from_slice(bytes).map_err(|err| PostBulkError::Rejected {
-            status: StatusCode::MULTI_STATUS.as_u16(),
-            error: None,
-            reason: Some(format!("unreadable bulk response: {err}")),
-        })?;
-    Ok(response
-        .results
-        .into_iter()
-        .map(BulkItemResult::from)
-        .collect())
-}
-
-/// Lock's `207` body.
-#[derive(Deserialize)]
-struct BulkResponse {
-    results: Vec<RawItem>,
-}
-
-#[derive(Deserialize)]
-struct RawItem {
-    index: usize,
-    accepted: bool,
-    #[serde(default)]
-    error: Option<ErrorBody>,
-    #[serde(flatten)]
-    members: serde_json::Map<String, serde_json::Value>,
 }
 
 /// Lock's structured error, for a rejected record or a rejected request.
@@ -296,26 +328,6 @@ struct ErrorBody {
 /// no reason.
 fn non_empty<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<String>, D::Error> {
     Ok(Option::<String>::deserialize(deserializer)?.filter(|reason| !reason.is_empty()))
-}
-
-impl From<RawItem> for BulkItemResult {
-    fn from(item: RawItem) -> Self {
-        let flags = PROBLEM_FLAGS
-            .into_iter()
-            .filter(|flag| item.members.get(*flag) == Some(&serde_json::Value::Bool(true)))
-            .collect();
-        let (error, reason) = match item.error {
-            Some(body) => (Some(body.error), body.reason),
-            None => (None, None),
-        };
-        Self {
-            index: item.index,
-            accepted: item.accepted,
-            error,
-            reason,
-            flags,
-        }
-    }
 }
 
 /// Why Cedarling has no endpoint to send TRACE records to. TRACE is not needed
@@ -369,33 +381,35 @@ pub(super) fn resolve_trace_endpoint(
     })
 }
 
+/// Helpers the facade's and both adapters' tests share.
 #[cfg(test)]
-mod tests {
-    use mockito::{Matcher, Mock, Server, ServerGuard};
+mod test_support {
+    use mockito::{Mock, ServerGuard};
     use serde_json::json;
+    use tokio::sync::RwLock;
 
-    use super::*;
+    use super::{TraceChannel, TraceSink};
     use crate::HttpClientConfig;
+    use crate::http::HttpClient;
+    use crate::lock::LockAccessToken;
+    use crate::lock::register_client::TokenSource;
 
-    const BODY: &str = r#"[{"producer":"cedarling-fleet-1"},{"producer":"cedarling-fleet-1"}]"#;
-    const BULK_PATH: &str = "/jans-lock/api/v1/audit/trace/bulk";
-
-    fn bulk_body() -> Bytes {
-        Bytes::from_static(BODY.as_bytes())
+    pub(super) fn http() -> HttpClient {
+        HttpClient::new(HttpClientConfig::default()).expect("HTTP client")
     }
 
-    fn sink(server: &ServerGuard, source: Option<TokenSource>) -> TraceSink {
+    /// A sink holding `old-token`, which a test's Lock may refuse.
+    pub(super) fn sink(channel: TraceChannel, source: Option<TokenSource>) -> TraceSink {
         TraceSink {
-            endpoint: format!("{}{BULK_PATH}", server.url())
-                .parse()
-                .expect("valid URL"),
-            http: HttpClient::new(HttpClientConfig::default()).expect("HTTP client"),
+            channel,
+            http: http(),
             token: RwLock::new(LockAccessToken("old-token".to_string())),
             source,
         }
     }
 
-    fn source(server: &ServerGuard) -> TokenSource {
+    /// Reissues `new-token` from `server`'s `/token`.
+    pub(super) fn source(server: &ServerGuard) -> TokenSource {
         TokenSource {
             token_endpoint: format!("{}/token", server.url()),
             client_id: "cedarling-client".to_string(),
@@ -404,285 +418,18 @@ mod tests {
         }
     }
 
-    fn bulk(server: &mut ServerGuard, token: &str, status: usize, body: &str) -> Mock {
-        server
-            .mock("POST", BULK_PATH)
-            .match_header("authorization", format!("Bearer {token}").as_str())
-            .match_body(Matcher::Exact(BODY.to_string()))
-            .with_status(status)
-            .with_body(body)
-            .create()
-    }
-
-    fn token_endpoint(server: &mut ServerGuard, expected_calls: usize) -> Mock {
+    pub(super) fn token_endpoint(server: &mut ServerGuard, expected_calls: usize) -> Mock {
         server
             .mock("POST", "/token")
             .with_body(json!({"access_token": "new-token"}).to_string())
             .expect(expected_calls)
             .create()
     }
+}
 
-    #[tokio::test]
-    async fn every_attempt_sends_the_body_without_copying_it() {
-        let server = Server::new_async().await;
-        let sink = sink(&server, None);
-        let body = bulk_body();
-
-        for attempt in ["first", "repeated"] {
-            let request = sink
-                .bulk_request("token".to_string(), &body)
-                .build()
-                .expect("the bulk request builds");
-            let sent = request
-                .body()
-                .and_then(reqwest::Body::as_bytes)
-                .expect("the bulk body is in memory");
-            assert_eq!(
-                sent.as_ptr(),
-                body.as_ptr(),
-                "the {attempt} attempt should send the batch's bytes, not a copy"
-            );
-        }
-    }
-
-    #[tokio::test]
-    async fn multi_status_maps_results_in_order() {
-        let mut server = Server::new_async().await;
-        let results = json!({"results": [
-            {"index": 0, "accepted": true, "policy_mismatch_flag": true,
-             "chain_link_failure_flag": false, "coverage_gap_flag": true},
-            {"index": 1, "accepted": false,
-             "error": {"error": "invalid_signature", "reason": "signature_mismatch"}},
-        ]});
-        let _bulk = bulk(&mut server, "old-token", 207, &results.to_string());
-
-        let items = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect("a 207 response should be read per record");
-
-        assert_eq!(
-            items,
-            vec![
-                BulkItemResult {
-                    index: 0,
-                    accepted: true,
-                    error: None,
-                    reason: None,
-                    flags: vec!["policy_mismatch_flag"],
-                },
-                BulkItemResult {
-                    index: 1,
-                    accepted: false,
-                    error: Some("invalid_signature".to_string()),
-                    reason: Some("signature_mismatch".to_string()),
-                    flags: vec![],
-                },
-            ],
-            "results keep request order; only flags that point at a problem are kept"
-        );
-    }
-
-    #[tokio::test]
-    async fn multi_status_with_bad_body_is_rejected() {
-        let mut server = Server::new_async().await;
-        let _bulk = bulk(&mut server, "old-token", 207, "not json");
-
-        let err = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("an unreadable 207 body should be an error");
-        assert!(
-            matches!(err, PostBulkError::Rejected { status: 207, .. }),
-            "expected Rejected {{ status: 207 }}, got {err:?}"
-        );
-    }
-
-    #[tokio::test]
-    async fn server_error_is_retryable() {
-        let mut server = Server::new_async().await;
-        let _bulk = bulk(&mut server, "old-token", 503, "");
-
-        let err = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a 5xx response should be an error");
-        assert!(
-            matches!(
-                err,
-                PostBulkError::Retryable {
-                    retry_after: None,
-                    ..
-                }
-            ),
-            "expected Retryable without Retry-After, got {err:?}"
-        );
-    }
-
-    #[tokio::test]
-    async fn too_many_requests_and_timeout_are_retryable_with_retry_after() {
-        for (status, header, expected) in [
-            (429, Some("7"), Some(Duration::from_secs(7))),
-            (408, None, None),
-            (503, Some("120"), Some(Duration::from_secs(120))),
-        ] {
-            let mut server = Server::new_async().await;
-            let mut mock = server.mock("POST", BULK_PATH).with_status(status);
-            if let Some(header) = header {
-                mock = mock.with_header("retry-after", header);
-            }
-            let _bulk = mock.create();
-
-            let err = sink(&server, None)
-                .post_bulk(&bulk_body())
-                .await
-                .expect_err("a request Lock or a proxy asks to repeat should be an error");
-            assert!(
-                matches!(
-                    err,
-                    PostBulkError::Retryable { retry_after, .. } if retry_after == expected
-                ),
-                "HTTP {status} with Retry-After {header:?} should be Retryable after {expected:?}, \
-                 got {err:?}"
-            );
-        }
-    }
-
-    #[test]
-    fn retry_after_reads_seconds_and_dates_and_ignores_the_rest() {
-        let now = DateTime::parse_from_rfc2822("Mon, 26 Oct 2026 12:00:00 GMT")
-            .expect("test date parses")
-            .with_timezone(&Utc);
-        for (value, expected) in [
-            ("120", Some(120)),
-            (" 5 ", Some(5)),
-            ("0", Some(0)),
-            ("Mon, 26 Oct 2026 12:01:30 GMT", Some(90)),
-            ("Mon, 26 Oct 2026 11:59:00 GMT", None),
-            ("999999", Some(MAX_EXPONENTIAL_DELAY.as_secs())),
-            ("-5", None),
-            ("1.5", None),
-            ("soon", None),
-            ("", None),
-        ] {
-            let mut headers = HeaderMap::new();
-            headers.insert(
-                RETRY_AFTER,
-                value.parse().expect("test header value is valid"),
-            );
-            assert_eq!(
-                retry_after(&headers, now),
-                expected.map(Duration::from_secs),
-                "Retry-After {value:?}"
-            );
-        }
-        assert_eq!(
-            retry_after(&HeaderMap::new(), now),
-            None,
-            "no Retry-After leaves the wait to the backoff"
-        );
-    }
-
-    #[tokio::test]
-    async fn unreachable_endpoint_is_retryable() {
-        let server = Server::new_async().await;
-        let mut sink = sink(&server, None);
-        sink.endpoint = "http://127.0.0.1:1/bulk".parse().expect("valid URL");
-
-        let err = sink
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a connection failure should be an error");
-        assert!(
-            matches!(
-                err,
-                PostBulkError::Retryable {
-                    retry_after: None,
-                    ..
-                }
-            ),
-            "expected Retryable without Retry-After, got {err:?}"
-        );
-    }
-
-    #[tokio::test]
-    async fn bad_request_is_rejected_with_error_id() {
-        let mut server = Server::new_async().await;
-        let body = json!({"error": "invalid_request", "reason": "bulk_body_too_large"});
-        let _bulk = bulk(&mut server, "old-token", 400, &body.to_string());
-
-        let err = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a 4xx response should be an error");
-        assert!(
-            matches!(
-                err,
-                PostBulkError::Rejected { status: 400, ref error, ref reason }
-                    if error.as_deref() == Some("invalid_request")
-                        && reason.as_deref() == Some("bulk_body_too_large")
-            ),
-            "expected Rejected {{ 400, invalid_request, bulk_body_too_large }}, got {err:?}"
-        );
-    }
-
-    #[tokio::test]
-    async fn unauthorized_reissues_token_and_resends_same_body() {
-        let mut server = Server::new_async().await;
-        let old = bulk(&mut server, "old-token", 401, "").expect(1);
-        let new = bulk(&mut server, "new-token", 207, r#"{"results": []}"#).expect(1);
-        let token = token_endpoint(&mut server, 1);
-        let source = source(&server);
-
-        sink(&server, Some(source))
-            .post_bulk(&bulk_body())
-            .await
-            .expect("a reissued token should get the same body through");
-
-        old.assert_async().await;
-        new.assert_async().await;
-        token.assert_async().await;
-    }
-
-    #[tokio::test]
-    async fn unauthorized_twice_is_rejected() {
-        let mut server = Server::new_async().await;
-        let old = bulk(&mut server, "old-token", 401, "").expect(1);
-        let new = bulk(&mut server, "new-token", 401, "").expect(1);
-        let token = token_endpoint(&mut server, 1);
-        let source = source(&server);
-
-        let err = sink(&server, Some(source))
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a 401 after reissue should be an error");
-
-        assert!(
-            matches!(err, PostBulkError::Rejected { status: 401, .. }),
-            "expected Rejected {{ status: 401 }}, got {err:?}"
-        );
-        old.assert_async().await;
-        new.assert_async().await;
-        token.assert_async().await;
-    }
-
-    #[tokio::test]
-    async fn unauthorized_without_token_source_is_rejected() {
-        let mut server = Server::new_async().await;
-        let _bulk = bulk(&mut server, "old-token", 401, "").expect(1);
-        let token = token_endpoint(&mut server, 0);
-
-        let err = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a pre-issued token cannot be reissued");
-
-        assert!(
-            matches!(err, PostBulkError::Rejected { status: 401, .. }),
-            "expected Rejected {{ status: 401 }}, got {err:?}"
-        );
-        token.assert_async().await;
-    }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
     fn url(raw: &str) -> url::Url {
         raw.parse().expect("valid URL")
@@ -769,9 +516,9 @@ mod tests {
         );
     }
 
-    fn refused(status: u16, error: Option<&str>, reason: Option<&str>) -> PostBulkError {
+    fn refused(status: StatusCode, error: Option<&str>, reason: Option<&str>) -> PostBulkError {
         PostBulkError::Rejected {
-            status,
+            status: RejectedStatus::Http(status),
             error: error.map(str::to_string),
             reason: reason.map(str::to_string),
         }
@@ -781,37 +528,47 @@ mod tests {
     fn refusal_tells_limits_and_a_hidden_reason_from_the_rest() {
         let invalid = Some("invalid_request");
         assert_eq!(
-            refused(400, invalid, Some("max_bulk_records_exceeded")).refusal(),
+            refused(
+                StatusCode::BAD_REQUEST,
+                invalid,
+                Some("max_bulk_records_exceeded")
+            )
+            .refusal(),
             Some(RequestRefusal::TooManyRecords),
             "too many records"
         );
         assert_eq!(
-            refused(400, invalid, Some("bulk_body_too_large")).refusal(),
+            refused(
+                StatusCode::BAD_REQUEST,
+                invalid,
+                Some("bulk_body_too_large")
+            )
+            .refusal(),
             Some(RequestRefusal::BodyTooLarge),
             "a body too large"
         );
         assert_eq!(
-            refused(400, invalid, None).refusal(),
+            refused(StatusCode::BAD_REQUEST, invalid, None).refusal(),
             Some(RequestRefusal::Unexplained),
             "invalid_request without a reason"
         );
         assert_eq!(
-            refused(400, invalid, Some("trace_disabled")).refusal(),
+            refused(StatusCode::BAD_REQUEST, invalid, Some("trace_disabled")).refusal(),
             None,
             "a reason that explains itself"
         );
         assert_eq!(
-            refused(400, Some("invalid_signature"), None).refusal(),
+            refused(StatusCode::BAD_REQUEST, Some("invalid_signature"), None).refusal(),
             None,
             "another error id"
         );
         assert_eq!(
-            refused(403, invalid, None).refusal(),
+            refused(StatusCode::FORBIDDEN, invalid, None).refusal(),
             None,
             "another status"
         );
         assert_eq!(
-            refused(400, None, None).refusal(),
+            refused(StatusCode::BAD_REQUEST, None, None).refusal(),
             None,
             "a body that is not a Lock error"
         );
@@ -822,23 +579,14 @@ mod tests {
         );
     }
 
-    #[tokio::test]
-    async fn hidden_reason_is_no_reason() {
-        let mut server = Server::new_async().await;
-        let body = json!({"error": "invalid_request", "reason": ""});
-        let _bulk = bulk(&mut server, "old-token", 400, &body.to_string());
-
-        let err = sink(&server, None)
-            .post_bulk(&bulk_body())
-            .await
-            .expect_err("a 4xx response should be an error");
-        assert!(
-            matches!(
-                err,
-                PostBulkError::Rejected { status: 400, ref error, reason: None }
-                    if error.as_deref() == Some("invalid_request")
-            ),
-            "expected Rejected {{ 400, invalid_request, no reason }}, got {err:?}"
+    #[test]
+    fn rejection_message_names_the_http_status() {
+        let message = refused(StatusCode::FORBIDDEN, Some("access_denied"), None).to_string();
+        assert_eq!(
+            message,
+            "Lock Server rejected the TRACE bulk request with HTTP 403 (error: access_denied, \
+             reason: none)",
+            "the logged rejection should name the transport and its status"
         );
     }
 }
