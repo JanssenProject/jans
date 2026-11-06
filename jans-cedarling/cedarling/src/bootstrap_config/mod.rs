@@ -28,6 +28,7 @@ use config::{Config, File};
 use std::{io, path::Path};
 
 use crate::common::default_entities_limits::DefaultEntitiesLimits;
+use crate::common::policy_store::formats::ReadOptions;
 use crate::trace::{ParseProducerIdError, ParseTraceSigningKidError};
 use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
@@ -110,6 +111,14 @@ impl BootstrapConfig {
     /// bootstrap, refresh and validation cannot disagree.
     pub(crate) fn default_entities_limits(&self) -> DefaultEntitiesLimits {
         DefaultEntitiesLimits::from_config(self.max_default_entities)
+    }
+
+    /// How bootstrap and refresh read the policy store.
+    pub(crate) fn read_options(&self) -> ReadOptions {
+        ReadOptions {
+            strict_schema_validation: self.authorization_config.strict_schema_validation,
+            entity_limits: self.default_entities_limits(),
+        }
     }
 
     /// Loads a `BootstrapConfig` from a file.

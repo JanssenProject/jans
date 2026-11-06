@@ -76,7 +76,7 @@ pub use common::policy_store::validate::{
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
-use init::policy_store::{LoadedPolicyStore, load_policy_store};
+use init::policy_store::{LoadOptions, LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
     AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
     spawn_refresh_worker,
@@ -627,8 +627,7 @@ async fn perform_bootstrap_load(
         let loaded = load_policy_store(
             &config.policy_store_config,
             policy_store_http_client.as_ref().unwrap_or(&http_client),
-            config.authorization_config.strict_schema_validation,
-            config.default_entities_limits(),
+            config.read_options(),
         )
         .await?;
         Ok((http_client, policy_store_http_client, loaded))
@@ -774,9 +773,7 @@ fn maybe_spawn_refresh_worker(
         initial_body_hash: seed.body_hash,
         initial_validators: seed.validators,
         initial_format: seed.format,
-        strict_schema_validation: config.authorization_config.strict_schema_validation,
-        archive_limits: config.policy_store_config.archive_limits(),
-        default_entities_limits: config.default_entities_limits(),
+        load_options: LoadOptions::new(&config.policy_store_config, config.read_options()),
         verifier: ArchiveVerifier::from_config(&config.policy_store_config.signature),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
@@ -1044,8 +1041,10 @@ impl Cedarling {
         let load_result = crate::init::policy_store::load_policy_store(
             config,
             &http_client,
-            false,
-            bootstrap.default_entities_limits(),
+            crate::common::policy_store::formats::ReadOptions {
+                strict_schema_validation: false,
+                entity_limits: bootstrap.default_entities_limits(),
+            },
         )
         .await;
 

@@ -34,6 +34,7 @@ use tokio::test;
 #[cfg(not(target_arch = "wasm32"))]
 use zip::read::ZipArchive;
 
+use crate::common::policy_store::formats::ReadOptions;
 use crate::common::policy_store::test_utils::PolicyStoreTestBuilder;
 
 use crate::log::interface::LogStorage;
@@ -1000,8 +1001,7 @@ permit(
             ..Default::default()
         },
         &http_client,
-        true,
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(true),
     )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
@@ -1417,8 +1417,7 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
             ..Default::default()
         },
         &http_client,
-        true,
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(true),
     )
     .await
     .expect("The archive must load at the default 10 MB cap");
@@ -1431,8 +1430,7 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
             ..Default::default()
         },
         &http_client,
-        true,
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(true),
     )
     .await;
 
@@ -1459,9 +1457,8 @@ async fn test_read_policy_store_archive_bytes_directly() {
     // Read directly using the bytes reader
     let parsed = read_policy_store_archive_bytes(
         archive_bytes,
-        true,
         ArchiveLimits::default(),
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(true),
     )
     .expect("Should read policy store from bytes");
 
@@ -1509,9 +1506,8 @@ async fn test_read_policy_store_archive_bytes_invalid() {
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
     let err = read_policy_store_archive_bytes(
         invalid_bytes,
-        true,
         ArchiveLimits::default(),
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(true),
     )
     .expect_err("Should fail to read invalid archive bytes");
 

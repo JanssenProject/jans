@@ -404,6 +404,27 @@ pub(crate) struct FormatReport {
     pub(crate) unknown_fields: Vec<UnknownField>,
 }
 
+/// Bootstrap settings that decide how a store's content is read. Every load
+/// path, refresh and validation take one value, so they cannot apply different
+/// rules to the same store.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct ReadOptions {
+    /// Whether a store without a schema is rejected.
+    pub(crate) strict_schema_validation: bool,
+    pub(crate) entity_limits: DefaultEntitiesLimits,
+}
+
+#[cfg(test)]
+impl ReadOptions {
+    /// Built-in entity limits with the given schema strictness.
+    pub(crate) fn for_test(strict_schema_validation: bool) -> Self {
+        Self {
+            strict_schema_validation,
+            entity_limits: DefaultEntitiesLimits::default(),
+        }
+    }
+}
+
 /// A parsed store and what its format reported. Only `store` reaches the runtime.
 #[cfg_attr(test, derive(Debug))]
 pub(crate) struct ParsedPolicyStore {
@@ -421,12 +442,11 @@ pub(crate) struct ParsedPolicyStore {
 /// `bundle_hash` is `Some` exactly when `fs` is a `.cjar`, and comes from its bytes.
 pub(super) fn read_policy_store(
     fs: &StoreFs<'_>,
-    strict_schema_validation: bool,
     bundle_hash: Option<Digest>,
-    entity_limits: DefaultEntitiesLimits,
+    options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
-    let strict = strict_schema_validation;
+    let strict = options.strict_schema_validation;
 
     let mut warnings = warnings_for(selected.declared);
     let mut unknown_fields = Vec::new();
@@ -442,7 +462,7 @@ pub(super) fn read_policy_store(
         },
     };
 
-    let (store, metadata) = current::into_runtime(doc, entity_limits)?;
+    let (store, metadata) = current::into_runtime(doc, options.entity_limits)?;
 
     let trace_policy = PolicyFacts::from_archive(bundle_hash, Some(&metadata)).map(Arc::new);
     Ok(ParsedPolicyStore {
@@ -533,7 +553,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false, None, DefaultEntitiesLimits::default())
+        read_policy_store(&fs, None, ReadOptions::for_test(false))
     }
 
     /// Reads a store in the v2 layout, describing the same token types as the
@@ -576,7 +596,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false, None, DefaultEntitiesLimits::default())
+        read_policy_store(&fs, None, ReadOptions::for_test(false))
     }
 
     #[test]
@@ -650,7 +670,7 @@ mod tests {
             .expect("in-memory metadata should be created");
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
 
-        let err = read_policy_store(&fs, true, None, DefaultEntitiesLimits::default())
+        let err = read_policy_store(&fs, None, ReadOptions::for_test(true))
             .expect_err("an unsupported version must be rejected");
         assert!(
             matches!(

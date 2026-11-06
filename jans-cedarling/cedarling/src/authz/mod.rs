@@ -1536,9 +1536,10 @@ mod bundle_hash_tests {
         let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
         let store = parse_cjar_bytes(
             bytes,
-            false,
-            ArchiveLimits::default(),
-            crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+            crate::init::policy_store::LoadOptions {
+                archive_limits: ArchiveLimits::default(),
+                read: crate::common::policy_store::formats::ReadOptions::for_test(false),
+            },
         )
         .await
         .expect("test archive parses")

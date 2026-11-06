@@ -265,9 +265,8 @@ mod input_validation {
         let result = read_from_vfs(
             &vfs,
             ".",
-            true,
             None,
-            crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+            crate::common::policy_store::formats::ReadOptions::for_test(true),
         );
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");

@@ -24,9 +24,8 @@ pub(crate) fn cjar_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
     let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
     let store = read_policy_store_archive_bytes(
         bytes,
-        false,
         ArchiveLimits::default(),
-        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+        crate::common::policy_store::formats::ReadOptions::for_test(false),
     )
     .expect("test archive parses")
     .store;

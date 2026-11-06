@@ -33,9 +33,7 @@ use crate::async_sleep::sleep;
 use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
-use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::common::policy_store::PolicyStoreWithID;
-use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, PolicyStoreWarning};
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
@@ -46,7 +44,7 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 
 use super::authz_builder::{BuildAuthzError, build_authz};
 
-use super::policy_store::{PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
+use super::policy_store::{LoadOptions, PolicyStoreLoadError, ZIP_MAGIC, parse_cjar_bytes};
 use super::policy_store_signature::{
     ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
 };
@@ -418,15 +416,12 @@ impl RefreshSource {
         bytes: Vec<u8>,
         http_client: &HttpClient,
         verifier: Option<&ArchiveVerifier>,
-        strict_schema_validation: bool,
-        limits: ArchiveLimits,
-        entity_limits: DefaultEntitiesLimits,
+        options: LoadOptions,
     ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
             let signed_by =
                 check_if_enabled(verifier, http_client, Some(self.url()), &bytes).await?;
-            let parsed =
-                parse_cjar_bytes(bytes, strict_schema_validation, limits, entity_limits).await?;
+            let parsed = parse_cjar_bytes(bytes, options).await?;
             return Ok((parsed, signed_by));
         }
         if crate::common::policy_store::is_json_bytes(&bytes) {
@@ -493,18 +488,10 @@ pub(crate) struct WorkerContext {
     /// What the bootstrap store's format reported. Bootstrap already logged it,
     /// so it seeds the dedup set and is not repeated on the first refresh.
     pub(crate) initial_format: FormatReport,
-    /// Forwarded from `BootstrapConfig.authorization_config` so each refresh
-    /// tick enforces the same "schema must be present" invariant the
-    /// bootstrap load did. Without this, a refresh against a store that
-    /// dropped its schema could install a configuration the startup path
-    /// would have rejected.
-    pub(crate) strict_schema_validation: bool,
-    /// Forwarded from `BootstrapConfig.policy_store_config` so a refreshed
-    /// `.cjar` is held to the same size limits as the bootstrap load.
-    pub(crate) archive_limits: ArchiveLimits,
-    /// Forwarded from `BootstrapConfig` so a refreshed store is held to the
-    /// same default-entity limits as the bootstrap load.
-    pub(crate) default_entities_limits: DefaultEntitiesLimits,
+    /// The options the bootstrap load used, so a refresh cannot install a store
+    /// that startup would have rejected: one without a required schema, over
+    /// the archive size caps or over the default entity limit.
+    pub(crate) load_options: LoadOptions,
     /// Checks each refreshed archive's signature before it is parsed; `None` when disabled.
     pub(crate) verifier: Option<ArchiveVerifier>,
 }
@@ -731,9 +718,7 @@ async fn parse_swap_and_record(
             bytes,
             &ctx.http_client,
             ctx.verifier.as_ref(),
-            ctx.strict_schema_validation,
-            ctx.archive_limits,
-            ctx.default_entities_limits,
+            ctx.load_options,
         )
         .await
     {
@@ -2005,6 +1990,9 @@ mod signature_tests {
 
     use super::*;
     use crate::bootstrap_config::SigstoreSigner;
+    use crate::common::default_entities_limits::DefaultEntitiesLimits;
+    use crate::common::policy_store::archive_handler::ArchiveLimits;
+    use crate::common::policy_store::formats::ReadOptions;
     use crate::common::policy_store::test_utils::fixtures;
     use crate::http::HttpClientConfig;
     use crate::init::policy_store_signature::SignatureError;
@@ -2051,9 +2039,10 @@ mod signature_tests {
                 archive,
                 &http_client(),
                 verifier,
-                false,
-                ArchiveLimits::default(),
-                DefaultEntitiesLimits::default(),
+                LoadOptions {
+                    archive_limits: ArchiveLimits::default(),
+                    read: ReadOptions::for_test(false),
+                },
             )
             .await
     }
@@ -2192,9 +2181,13 @@ mod signature_tests {
                 archive.clone(),
                 &http_client,
                 None,
-                false,
-                ArchiveLimits::default(),
-                DefaultEntitiesLimits::from_config(Some(max_entities)),
+                LoadOptions {
+                    archive_limits: ArchiveLimits::default(),
+                    read: ReadOptions {
+                        strict_schema_validation: false,
+                        entity_limits: DefaultEntitiesLimits::from_config(Some(max_entities)),
+                    },
+                },
             )
         };
 

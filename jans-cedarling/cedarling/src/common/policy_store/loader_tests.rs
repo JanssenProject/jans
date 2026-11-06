@@ -10,8 +10,8 @@
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
 use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
-use super::super::formats::ReadStoreError;
 use super::super::formats::v1::trusted_issuer::IssuerParser;
+use super::super::formats::{ReadOptions, ReadStoreError};
 use super::super::migration::MigrationError;
 use super::super::migration::v1_to_v2::V1ToV2Error;
 use super::super::policy_parser;
@@ -863,9 +863,8 @@ fn test_load_and_parse_trusted_issuers_end_to_end() {
     let store = read_from_vfs(
         &store_vfs,
         dir.to_str().expect("temp dir should be UTF-8"),
-        false,
         None,
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect("store with two issuers should parse")
     .store;
@@ -920,9 +919,8 @@ fn test_load_custom_issuers_end_to_end() {
     let store = read_from_vfs(
         &store_vfs,
         dir.to_str().unwrap(),
-        false,
         None,
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect("conversion should succeed")
     .store;
@@ -1006,22 +1004,15 @@ fn test_load_custom_issuers_archive_vfs_end_to_end() {
         "ArchiveVfs: should discover 1 custom issuer file"
     );
 
-    let store = read_from_vfs(
-        &archive_vfs,
-        ".",
-        false,
-        None,
-        DefaultEntitiesLimits::default(),
-    )
-    .expect("reading the archive should succeed")
-    .store;
+    let store = read_from_vfs(&archive_vfs, ".", None, ReadOptions::for_test(false))
+        .expect("reading the archive should succeed")
+        .store;
     assert_acme_custom_token(&store);
 
     let store2 = read_policy_store_archive_bytes(
         archive_bytes,
-        false,
         ArchiveLimits::default(),
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect("read_policy_store_archive_bytes should succeed")
     .store;
@@ -1047,9 +1038,8 @@ fn test_load_custom_issuers_archive_vfs_duplicate_entity_type_errors() {
 
     let err = read_policy_store_archive_bytes(
         archive_bytes,
-        false,
         ArchiveLimits::default(),
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect_err("an entity type declared in two files should fail migration");
     assert!(
@@ -1110,9 +1100,8 @@ fn test_load_custom_issuers_shared_id_merges() {
     let store = read_from_vfs(
         &store_vfs,
         dir.to_str().unwrap(),
-        false,
         None,
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect("custom issuers sharing an id should load")
     .store;
@@ -1277,7 +1266,7 @@ action "read" appliesTo {
     )
     .unwrap();
 
-    let store = read_from_vfs(&vfs, "/", false, None, DefaultEntitiesLimits::default())
+    let store = read_from_vfs(&vfs, "/", None, ReadOptions::for_test(false))
         .expect("issuers sharing a v1 id should load")
         .store;
     let issuers = store.token_types.jwt_issuers();
@@ -1449,9 +1438,8 @@ fn test_complete_policy_store_with_issuers() {
     let store = read_from_vfs(
         &store_vfs,
         dir.to_str().unwrap(),
-        false,
         None,
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect("complete store should parse")
     .store;
@@ -2349,7 +2337,7 @@ fn test_load_schema_from_schemas_dir_shared_namespace_full_pipeline() {
     )
     .expect("Should create test.cedar");
 
-    let policy_store = read_from_vfs(&vfs, ".", false, None, DefaultEntitiesLimits::default())
+    let policy_store = read_from_vfs(&vfs, ".", None, ReadOptions::for_test(false))
         .expect("the store should read with shared namespaces across files")
         .store;
 
@@ -2420,15 +2408,9 @@ fn test_archive_shared_namespace_full_pipeline() {
     let archive_vfs = ArchiveVfs::from_buffer(archive_bytes, ArchiveLimits::default())
         .expect("Should create ArchiveVfs from bytes");
 
-    let policy_store = read_from_vfs(
-        &archive_vfs,
-        ".",
-        false,
-        None,
-        DefaultEntitiesLimits::default(),
-    )
-    .expect("the archive should read with shared namespaces")
-    .store;
+    let policy_store = read_from_vfs(&archive_vfs, ".", None, ReadOptions::for_test(false))
+        .expect("the archive should read with shared namespaces")
+        .store;
 
     let cedar_schema = policy_store
         .schema
@@ -2512,9 +2494,8 @@ fn test_entity_count_limit_uses_configured_value() {
 
     let err = read_policy_store_archive_bytes(
         archive_bytes.clone(),
-        false,
         ArchiveLimits::default(),
-        DefaultEntitiesLimits::default(),
+        ReadOptions::for_test(false),
     )
     .expect_err("1200 entities must exceed the built-in limit of 1000");
     assert!(
@@ -2532,9 +2513,11 @@ fn test_entity_count_limit_uses_configured_value() {
 
     let parsed = read_policy_store_archive_bytes(
         archive_bytes.clone(),
-        false,
         ArchiveLimits::default(),
-        DefaultEntitiesLimits::from_config(Some(1500)),
+        ReadOptions {
+            strict_schema_validation: false,
+            entity_limits: DefaultEntitiesLimits::from_config(Some(1500)),
+        },
     )
     .expect("a configured limit of 1500 must admit 1200 entities");
     assert_eq!(
@@ -2545,9 +2528,11 @@ fn test_entity_count_limit_uses_configured_value() {
 
     read_policy_store_archive_bytes(
         archive_bytes,
-        false,
         ArchiveLimits::default(),
-        DefaultEntitiesLimits::from_config(Some(0)),
+        ReadOptions {
+            strict_schema_validation: false,
+            entity_limits: DefaultEntitiesLimits::from_config(Some(0)),
+        },
     )
     .expect("a zero (unlimited) entity limit must admit the store");
 }
