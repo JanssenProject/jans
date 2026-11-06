@@ -477,7 +477,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				versionAttributeName = versionPropertyName;
 			}
 
-			return versionAttributeName.toLowerCase();
+			return versionAttributeName.toLowerCase(Locale.ROOT);
 		}
 
 		throw new MappingException(String.format(
@@ -566,7 +566,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				if (StringHelper.isEmpty(ldapAttributeName)) {
 					ldapAttributeName = propertyName;
 				}
-				ldapAttributeName = ldapAttributeName.toLowerCase();
+				ldapAttributeName = ldapAttributeName.toLowerCase(Locale.ROOT);
 
 				AttributeData attributeToPersist = attributesToPersistMap.get(ldapAttributeName);
 				AttributeData attributeFromLdap = attributesFromLdapMap.get(ldapAttributeName);
@@ -644,7 +644,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				Map<String, AttributeName> ldapAttributesConfiguration = new HashMap<String, AttributeName>();
 				for (AttributeName ldapAttributeConfiguration : ((AttributesList) ldapAttribute)
 						.attributesConfiguration()) {
-					ldapAttributesConfiguration.put(ldapAttributeConfiguration.name().toLowerCase(), ldapAttributeConfiguration);
+					ldapAttributesConfiguration.put(ldapAttributeConfiguration.name().toLowerCase(Locale.ROOT), ldapAttributeConfiguration);
 				}
 
 				// Prepare attributes for removal
@@ -654,13 +654,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 						continue;
 					}
 
-					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName.toLowerCase());
+					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName.toLowerCase(Locale.ROOT));
 					if ((ldapAttributeConfiguration != null) && (ldapAttributeConfiguration.ignoreDuringUpdate()
 							|| ldapAttributeConfiguration.updateOnly())) {
 						continue;
 					}
 
-					if (!attributesToPersistMap.containsKey(attributeName.toLowerCase())) {
+					if (!attributesToPersistMap.containsKey(attributeName.toLowerCase(Locale.ROOT))) {
 						// Remove if attribute not marked as ignoreDuringRead = true
 						if ((ldapAttributeConfiguration == null) || ((ldapAttributeConfiguration != null)
 								&& !ldapAttributeConfiguration.ignoreDuringRead())) {
@@ -674,12 +674,12 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				for (AttributeData attributeToPersist : attributesToPersistMap.values()) {
 					String attributeName = attributeToPersist.getName();
 
-					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName.toLowerCase());
+					AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration.get(attributeName.toLowerCase(Locale.ROOT));
 					if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringUpdate()) {
 						continue;
 					}
 
-					AttributeData attributeFromLdap = attributesFromLdapMap.get(attributeName.toLowerCase());
+					AttributeData attributeFromLdap = attributesFromLdapMap.get(attributeName.toLowerCase(Locale.ROOT));
 					if (attributeFromLdap == null) {
 						// Add entry attribute or change schema
 						AttributeModificationType modType = isSchemaUpdate ? schemaModificationType
@@ -1344,7 +1344,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
                         continue;
                     }
 
-					ldapAttributeName = ldapAttributeName.toLowerCase();
+					ldapAttributeName = ldapAttributeName.toLowerCase(Locale.ROOT);
 
 					AttributeData attributeData = attributesMap.get(ldapAttributeName);
 
@@ -1379,7 +1379,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 					Map<String, AttributeName> ldapAttributesConfiguration = new HashMap<String, AttributeName>();
 					for (AttributeName ldapAttributeConfiguration : ((AttributesList) ldapAttribute)
 							.attributesConfiguration()) {
-						ldapAttributesConfiguration.put(ldapAttributeConfiguration.name().toLowerCase(), ldapAttributeConfiguration);
+						ldapAttributesConfiguration.put(ldapAttributeConfiguration.name().toLowerCase(Locale.ROOT), ldapAttributeConfiguration);
 					}
 
 					// Process objectClass first
@@ -1488,7 +1488,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		for (AttributeData entryAttribute : attributes) {
 			if (ldapAttributesConfiguration != null) {
 				AttributeName ldapAttributeConfiguration = ldapAttributesConfiguration
-						.get(StringHelper.toLowerCase(entryAttribute.getName()));
+						.get(entryAttribute.getName().toLowerCase(Locale.ROOT));
 				if ((ldapAttributeConfiguration != null) && ldapAttributeConfiguration.ignoreDuringRead()) {
 					continue;
 				}
@@ -1515,7 +1515,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	}
 
     protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
-        final String key = ldapAttributeName.toLowerCase();
+        final String key = ldapAttributeName.toLowerCase(Locale.ROOT);
         return attributesMap.entrySet().stream()
                 .filter(x -> x.getKey().equals(key))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
@@ -1544,7 +1544,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
             if (StringHelper.isEmpty(ldapAttributeName)) {
                 ldapAttributeName = propertiesAnnotation.getPropertyName();
             }
-            result.add(ldapAttributeName.toLowerCase());
+            result.add(ldapAttributeName.toLowerCase(Locale.ROOT));
         }
 
         return result;
@@ -1806,7 +1806,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	private Map<String, AttributeData> getAttributesMap(List<AttributeData> attributes) {
 		Map<String, AttributeData> attributesMap = new HashMap<String, AttributeData>(attributes.size());
 		for (AttributeData attribute : attributes) {
-			attributesMap.put(attribute.getName().toLowerCase(), attribute);
+			attributesMap.put(attribute.getName().toLowerCase(Locale.ROOT), attribute);
 		}
 
 		return attributesMap;
@@ -2651,7 +2651,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				if (StringHelper.isEmpty(ldapAttributeName)) {
 					ldapAttributeName = propertyName;
 				}
-				ldapAttributeName = ldapAttributeName.toLowerCase();
+				ldapAttributeName = ldapAttributeName.toLowerCase(Locale.ROOT);
 				if (StringHelper.equalsIgnoreCase(attributeName, ldapAttributeName)) {
 					return propertiesAnnotation.getPropertyName();
 				}
@@ -2983,19 +2983,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] maskedValues = new String[values.length];
 		for (int i = 0; i < values.length; i++) {
 			Object value = values[i];
-			maskedValues[i] = (value == null) ? null : SensitiveDataMasker.maskJsonValues(value.toString());
+			maskedValues[i] = SensitiveDataMasker.maskValue(value);
 		}
 
 		return Arrays.toString(maskedValues);
 	}
 
 	private static boolean isSensitiveAttributeName(String name) {
-		if (name == null) {
-			return false;
-		}
-		String lowerName = name.toLowerCase(Locale.ROOT);
-
-		return lowerName.contains("password") || lowerName.contains("secret") || lowerName.contains("pwd");
+		return SensitiveDataMasker.isSensitiveName(name);
 	}
 
 	protected boolean isValidateAfterUpdate() {

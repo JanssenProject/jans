@@ -154,7 +154,7 @@ public class Fido2AuthenticationData extends Fido2Data {
 				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
 				+ ", status=" + status + ", rpId=" + rpId + ", errorReason=" + errorReason + ", errorCategory="
 				+ errorCategory + "]";
-		// Fields carry client-supplied data; neutralize control chars to keep log lines intact
-		return value.replaceAll("\\p{Cntrl}", " ");
+		// Fields carry client-supplied data; neutralize control chars and Unicode line/paragraph separators to keep log lines intact
+		return value.replaceAll("[\\p{Cc}\\p{Zl}\\p{Zp}]", " ");
 	}
 }
