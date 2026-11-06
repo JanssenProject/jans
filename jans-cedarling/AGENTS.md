@@ -66,6 +66,22 @@
 - Do not add `#[non_exhaustive]` to new public types: a new variant or field should break the bindings' build, so they are updated, rather than fall into a wildcard arm
 - Keep derived data with its source: compute it once where the source is built and store it next to it (as `PolicyStoreWithID` holds `bundle_hash`), so the two are replaced together and cannot disagree
 
+**Design Principles:**
+
+These principles are mandatory. Apply them to every new or changed type, function and module, not only to the kind of code an example mentions. Check a design against them before writing it and the result before finishing; when existing code you touch breaks one, say so and fix it or name it as a follow-up. Do not leave a violation in new code silently.
+
+- Single Responsibility: each type or function has one reason to change. If describing it needs "and" (validates and logs, builds and records), split it
+- Separation of Concerns: computing a result and acting on it (logging, metrics, I/O, storing outcomes) are separate steps, usually in separate functions
+- High cohesion, low coupling: a module depends only on what it uses. A lower layer never imports types from a layer that calls it; it returns its own result and the caller maps it to the caller's types
+- Dependency Inversion: depend on a trait, not a concrete service, so the lower layer does not know the implementation and tests can pass a test double
+- Law of Demeter (least knowledge): pass a function the values it uses, not the object that holds them; avoid call chains that reach through several objects or modules (`a.b.c.d`)
+- Information Expert: the code that has the information does the work. A side effect that needs context (request id, input position, caller-facing name) happens where that context already is, instead of threading the context into a helper that only uses it for the side effect
+- Functional core, imperative shell: keep transformations pure (input in, `Result` out) and do side effects at the edge that calls them, so the core is tested without loggers, mocks or I/O
+- Encapsulated invariants: when correctness depends on how a caller uses a type (call order, matching an index with its item, calling `finish` once), the type owns that data and enforces it, instead of a documented precondition every caller must keep
+- Parse, don't validate (correct by construction): check a condition once where the value is created, and return a type that carries the guarantee, so later code never checks it again
+- Hard to misuse: the obvious call is the correct one. If a caller can pass arguments in the wrong order, skip a step or call methods out of sequence, change the API (owning iterator, single entry function, typestate) instead of adding a doc warning
+- DRY: a check or rule repeated at every call site moves into the callee. Do not merge code that only looks alike but changes for different reasons
+
 **Visibility:**
 - Use the most restrictive visibility level possible: private (no modifier) better than `pub(super)`, `pub(super)` better than `pub(crate)`, `pub(crate)` better than `pub`.
 - `pub` items must always be exported in the root `lib.rs` to be truly public.

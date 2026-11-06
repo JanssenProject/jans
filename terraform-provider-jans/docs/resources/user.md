@@ -26,7 +26,7 @@ resource jans_user "user" {
   locale              = "en_US"
   timezone            = "UTC"
   active              = true
-  password            = "password"
+  password            = var.user_password
   
   name {
     family_name     = "Doe"
@@ -115,7 +115,7 @@ resource jans_user "user" {
 - `locale` (String) Used for purposes of localizing items such as currency and dates Example: en-US
 - `name` (Block List, Max: 1) (see [below for nested schema](#nestedblock--name))
 - `nick_name` (String) Casual way to address the user in real life
-- `password` (String)
+- `password` (String, Sensitive)
 - `phone_numbers` (Block List) (see [below for nested schema](#nestedblock--phone_numbers))
 - `photos` (Block List) (see [below for nested schema](#nestedblock--photos))
 - `preferred_language` (String) Preferred language as used in the Accept-Language HTTP header Example: en
