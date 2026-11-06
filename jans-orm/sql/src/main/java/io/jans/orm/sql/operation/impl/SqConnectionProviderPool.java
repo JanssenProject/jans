@@ -203,7 +203,8 @@ public class SqConnectionProviderPool {
 		try (Connection con = this.poolingDataSource.getConnection()) {
 			return con.isValid(30);
 		} catch (Exception ex) {
-			LOG.error("Failed to check connection", ex);
+			// Driver messages may echo connection.uri, which can embed credentials
+			LOG.error("Failed to check connection. Exception: {}", ex.getClass().getName());
 			isConnected = false;
 		}
 

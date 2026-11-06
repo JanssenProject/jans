@@ -13,9 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -28,25 +26,6 @@ public final class SensitiveDataMasker {
     public static final String MASKED = "******";
 
     private static final Pattern SENSITIVE_KEY_PATTERN = Pattern.compile("(?i)password|pwd|secret|token");
-
-    /**
-     * Matches a raw {@code "key":value} pair. Group 1 is the {@code "key":} prefix (verbatim, escapes untouched),
-     * group 2 is the raw (still-escaped) key content used only to test for sensitivity, group 3 is the value token
-     * (a quoted string with escapes, or a bare scalar such as a number/boolean/null) to be replaced when sensitive.
-     * The quoted-string branch only treats a {@code "} as the closing quote when it is followed by a valid JSON
-     * delimiter (comma, {@code }}, {@code ]}, whitespace) or end of input; an unescaped {@code "} that is not
-     * followed by such a delimiter is treated as content rather than a terminator, so it does not cause the match
-     * (and therefore the masking) to stop partway through the value. Absent any valid terminator, the match runs
-     * through the end of input, so a truncated or malformed sensitive value is fully masked instead of partially
-     * leaked.
-     * A bare scalar never contains a quote or an object/array delimiter; an opener matches on its own, so a nonsensitive
-     * key's nested container is still scanned member by member, while a sensitive key's container is masked whole.
-     * Because a scalar stops at a quote, malformed input such as {@code {"cfg":null{"password":"x"}}} still leaves the
-     * nested pair available for masking.
-     */
-    private static final Pattern RAW_JSON_KEY_VALUE_PATTERN = Pattern.compile(
-            "(\"((?:\\\\.|[^\"\\\\])*)\"\\s*:\\s*)"
-                    + "(\"(?:\\\\.|[^\"\\\\]|\"(?!\\s*(?:[,}\\]]|$)))*(?:\"(?=\\s*(?:[,}\\]]|$))|$)|[^,{}\\[\\]\\s\"]+|[\\[{])");
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -109,10 +88,9 @@ public final class SensitiveDataMasker {
      * Replaces the value of any JSON key containing "password", "pwd", "secret" or "token" (case-insensitive) with {@link #MASKED}.
      * The value is parsed as JSON and traversed recursively (objects and arrays), so keys are matched against
      * their decoded form (e.g. a key serialized as {@code password} is still recognized as "password"),
-     * and non-string scalar values (numbers, booleans) are masked as well. If the value is not valid JSON,
-     * falls back to scanning the raw text for {@code "key":value} pairs, decoding JSON escape sequences in the
-     * key (e.g. an escaped {@code w} in "password") before testing for sensitivity, so a malformed/truncated
-     * document still has its sensitive values masked. Used to prevent secrets nested inside serialized JSON configuration
+     * and non-string scalar values (numbers, booleans) are masked as well. Input that is not a JSON object or
+     * array is masked fail-closed: everything after the first sensitive name is replaced (the whole value when
+     * the name only appears after decoding JSON escapes), so malformed or truncated documents cannot leak. Used to prevent secrets nested inside serialized JSON configuration
      * (e.g. redis/postgres credentials) from leaking into debug logs.
      */
     public static String maskJsonValues(String value) {
@@ -134,58 +112,17 @@ public final class SensitiveDataMasker {
     }
 
     private static String maskRawText(String value) {
-        Matcher matcher = RAW_JSON_KEY_VALUE_PATTERN.matcher(value);
-        StringBuilder result = new StringBuilder();
-        int last = 0;
-        int from = 0;
-
-        while (from < value.length() && matcher.find(from)) {
-            if (isSensitiveName(unescapeJson(matcher.group(2)))) {
-                String token = matcher.group(3);
-                boolean opener = "[".equals(token) || "{".equals(token);
-                int end = opener ? findContainerEnd(value, matcher.start(3)) : matcher.end();
-                result.append(value, last, matcher.start()).append(matcher.group(1))
-                        .append('"').append(MASKED).append('"');
-                last = end;
-                from = end;
-            } else {
-                from = matcher.end();
-            }
-        }
-        result.append(value, last, value.length());
-
-        return result.toString();
-    }
-
-    private static int findContainerEnd(String value, int start) {
-        Deque<Character> openers = new ArrayDeque<>();
-        boolean inString = false;
-
-        for (int i = start; i < value.length(); i++) {
-            char c = value.charAt(i);
-            if (inString) {
-                if (c == '\\') {
-                    i++;
-                } else if (c == '"') {
-                    inString = false;
-                }
-            } else if (c == '"') {
-                inString = true;
-            } else if (c == '[' || c == '{') {
-                openers.push(c);
-            } else if (c == ']' || c == '}') {
-                char expected = (c == ']') ? '[' : '{';
-                if (openers.isEmpty() || openers.pop() != expected) {
-                    // mismatched closer: structure is untrustworthy, mask through the end of input
-                    return value.length();
-                }
-                if (openers.isEmpty()) {
-                    return i + 1;
-                }
-            }
+        Matcher matcher = SENSITIVE_KEY_PATTERN.matcher(value);
+        if (!matcher.find()) {
+            return isSensitiveName(unescapeJson(value)) ? MASKED : value;
         }
 
-        return value.length();
+        // A key that is only sensitive once JSON escapes are decoded may precede the literal match
+        if (isSensitiveName(unescapeJson(value.substring(0, matcher.start())))) {
+            return MASKED;
+        }
+
+        return value.substring(0, matcher.end()) + MASKED;
     }
 
     private static String unescapeJson(String rawEscapedText) {

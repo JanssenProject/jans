@@ -168,10 +168,33 @@ public class SensitiveDataMaskerTest {
     public void maskJsonValues_forMalformedJsonWithNestedPassword_shouldMaskNestedValue() {
         String value = "{\"cfg\":{\"password\":\"secret\"},";
 
-        String masked = SensitiveDataMasker.maskJsonValues(value);
+        assertEquals(SensitiveDataMasker.maskJsonValues(value), "{\"cfg\":{\"password" + SensitiveDataMasker.MASKED);
+    }
 
-        assertFalse(masked.contains("secret"));
-        assertTrue(masked.contains("\"password\":\"" + SensitiveDataMasker.MASKED + "\""));
+    @Test
+    public void maskJsonValues_forMalformedQuotedValueBeforeSensitiveKey_shouldMaskRest() {
+        String value = "{\"cfg\":\"oops \"password\":\"secret\"}";
+
+        assertFalse(SensitiveDataMasker.maskJsonValues(value).contains("secret"));
+    }
+
+    @Test
+    public void maskJsonValues_forMalformedJsonWithEscapedKeyBeforeLiteralKey_shouldMaskWholeValue() {
+        String value = "{\"p\\u0077d\":\"first\",\"password\":\"second\",}";
+
+        assertEquals(SensitiveDataMasker.maskJsonValues(value), SensitiveDataMasker.MASKED);
+    }
+
+    @Test
+    public void maskJsonValues_forMalformedJsonWithoutSensitiveKey_shouldReturnUnchanged() {
+        String value = "{\"cfg\":\"value\",}";
+
+        assertEquals(SensitiveDataMasker.maskJsonValues(value), value);
+    }
+
+    @Test
+    public void maskJsonValues_forMapToStringOutput_shouldMaskValue() {
+        assertFalse(SensitiveDataMasker.maskJsonValues("{host=db1, password=secret}").contains("secret"));
     }
 
     @Test
