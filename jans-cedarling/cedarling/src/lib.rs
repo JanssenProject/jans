@@ -607,6 +607,20 @@ async fn perform_bootstrap_load(
         Option<http::HttpClient>,
         LoadedPolicyStore,
     );
+    if config.default_entities_limits().is_count_unlimited() {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(
+                "CEDARLING_MAX_DEFAULT_ENTITIES=0 turns the default entities limit off; \
+                     the policy store is not bounded by it"
+                    .to_string(),
+            ),
+        );
+    }
+
     let raw_load: Result<RawLoad, ServiceConfigError> = async {
         let http_client = http::HttpClient::new(config.http_client_config)?;
         let policy_store_http_client = policy_store_http_client(config, log)?;
@@ -614,6 +628,7 @@ async fn perform_bootstrap_load(
             &config.policy_store_config,
             policy_store_http_client.as_ref().unwrap_or(&http_client),
             config.authorization_config.strict_schema_validation,
+            config.default_entities_limits(),
         )
         .await?;
         Ok((http_client, policy_store_http_client, loaded))
@@ -761,6 +776,7 @@ fn maybe_spawn_refresh_worker(
         initial_format: seed.format,
         strict_schema_validation: config.authorization_config.strict_schema_validation,
         archive_limits: config.policy_store_config.archive_limits(),
+        default_entities_limits: config.default_entities_limits(),
         verifier: ArchiveVerifier::from_config(&config.policy_store_config.signature),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
@@ -1012,17 +1028,26 @@ impl Cedarling {
     /// without initializing the authorization engine. Never returns Err for
     /// validation failures — those land in the returned report; only
     /// returns Err for underlying I/O or network failures.
+    ///
+    /// Takes the whole bootstrap config so the store is held to the same
+    /// default-entity limits as `Cedarling::new` would apply.
     #[allow(clippy::too_many_lines)]
     pub async fn validate_policy_store(
-        config: &PolicyStoreConfig,
-        http_config: &crate::http::HttpClientConfig,
+        bootstrap: &BootstrapConfig,
     ) -> Result<ValidationReport, ValidateInfraError> {
+        let config = &bootstrap.policy_store_config;
+
         // 1. Build a fresh HttpClient
-        let http_client = crate::http::HttpClient::new(*http_config)?;
+        let http_client = crate::http::HttpClient::new(bootstrap.http_client_config)?;
 
         // 2. Call load_policy_store
-        let load_result =
-            crate::init::policy_store::load_policy_store(config, &http_client, false).await;
+        let load_result = crate::init::policy_store::load_policy_store(
+            config,
+            &http_client,
+            false,
+            bootstrap.default_entities_limits(),
+        )
+        .await;
 
         match load_result {
             Err(e) => {

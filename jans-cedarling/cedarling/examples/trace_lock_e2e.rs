@@ -158,7 +158,6 @@ fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
         },
         lock_config: Some(lock_config),
         max_default_entities: None,
-        max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
         trace_config: Some(TraceConfig {

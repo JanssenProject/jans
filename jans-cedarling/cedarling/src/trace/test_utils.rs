@@ -22,9 +22,14 @@ pub(crate) struct CjarStore {
 pub(crate) fn cjar_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
     let bytes = builder.build_archive().expect("test archive builds");
     let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
-    let store = read_policy_store_archive_bytes(bytes, false, ArchiveLimits::default())
-        .expect("test archive parses")
-        .store;
+    let store = read_policy_store_archive_bytes(
+        bytes,
+        false,
+        ArchiveLimits::default(),
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+    )
+    .expect("test archive parses")
+    .store;
     CjarStore { store, bundle_hash }
 }
 

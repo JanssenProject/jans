@@ -33,6 +33,7 @@ use crate::async_sleep::sleep;
 use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::common::policy_store::archive_handler::ArchiveLimits;
 use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, PolicyStoreWarning};
@@ -419,11 +420,13 @@ impl RefreshSource {
         verifier: Option<&ArchiveVerifier>,
         strict_schema_validation: bool,
         limits: ArchiveLimits,
+        entity_limits: DefaultEntitiesLimits,
     ) -> Result<(ParsedPolicyStore, Option<VerifiedArchive>), PolicyStoreLoadError> {
         if bytes.starts_with(&ZIP_MAGIC) {
             let signed_by =
                 check_if_enabled(verifier, http_client, Some(self.url()), &bytes).await?;
-            let parsed = parse_cjar_bytes(bytes, strict_schema_validation, limits).await?;
+            let parsed =
+                parse_cjar_bytes(bytes, strict_schema_validation, limits, entity_limits).await?;
             return Ok((parsed, signed_by));
         }
         if crate::common::policy_store::is_json_bytes(&bytes) {
@@ -499,6 +502,9 @@ pub(crate) struct WorkerContext {
     /// Forwarded from `BootstrapConfig.policy_store_config` so a refreshed
     /// `.cjar` is held to the same size limits as the bootstrap load.
     pub(crate) archive_limits: ArchiveLimits,
+    /// Forwarded from `BootstrapConfig` so a refreshed store is held to the
+    /// same default-entity limits as the bootstrap load.
+    pub(crate) default_entities_limits: DefaultEntitiesLimits,
     /// Checks each refreshed archive's signature before it is parsed; `None` when disabled.
     pub(crate) verifier: Option<ArchiveVerifier>,
 }
@@ -727,6 +733,7 @@ async fn parse_swap_and_record(
             ctx.verifier.as_ref(),
             ctx.strict_schema_validation,
             ctx.archive_limits,
+            ctx.default_entities_limits,
         )
         .await
     {
@@ -2046,6 +2053,7 @@ mod signature_tests {
                 verifier,
                 false,
                 ArchiveLimits::default(),
+                DefaultEntitiesLimits::default(),
             )
             .await
     }
@@ -2163,5 +2171,51 @@ mod signature_tests {
             RefreshOutcome::VerificationError,
             "any signature error is a verification error"
         );
+    }
+
+    /// A refresh must be held to the configured default-entity limit, so it
+    /// cannot swap in a store that bootstrap would reject.
+    #[tokio::test]
+    async fn refresh_applies_configured_entity_limit() {
+        use crate::common::default_entities_limits::DefaultEntitiesLimitsError;
+        use crate::common::policy_store::manager::ConversionError;
+
+        let source = RefreshSource::CjarUrl {
+            url: "http://127.0.0.1:9/store.cjar".to_string(),
+        };
+        let archive = fixtures::with_multiple_entities(5)
+            .build_archive()
+            .expect("test archive builds");
+        let http_client = http_client();
+        let parse = |max_entities| {
+            source.parse(
+                archive.clone(),
+                &http_client,
+                None,
+                false,
+                ArchiveLimits::default(),
+                DefaultEntitiesLimits::from_config(Some(max_entities)),
+            )
+        };
+
+        let err = parse(3)
+            .await
+            .expect_err("5 entities must exceed a configured limit of 3");
+        assert!(
+            matches!(
+                err,
+                PolicyStoreLoadError::Conversion(ConversionError::DefaultEntitiesLimits(
+                    DefaultEntitiesLimitsError::CountExceeded {
+                        max_entities: 3,
+                        found: 5,
+                    }
+                ))
+            ),
+            "the refresh must reject the store with CountExceeded, got: {err:?}"
+        );
+
+        parse(10)
+            .await
+            .expect("5 entities must pass a configured limit of 10");
     }
 }

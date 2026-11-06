@@ -27,6 +27,7 @@ use config::{Config, File};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{io, path::Path};
 
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::trace::{ParseProducerIdError, ParseTraceSigningKidError};
 use crate::{context_data_api::DataStoreConfig, http::HttpClientConfig};
 
@@ -64,9 +65,6 @@ pub struct BootstrapConfig {
     /// Maximum number of default entities allowed in a policy store.
     /// This prevents `DoS` attacks by limiting the number of entities that can be loaded.
     pub max_default_entities: Option<usize>,
-    /// Maximum size of base64-encoded default entity strings in bytes.
-    /// This prevents memory exhaustion attacks from extremely large base64 strings.
-    pub max_base64_size: Option<usize>,
     /// Data store configuration for the pushed data API.
     pub data_store_config: DataStoreConfig,
     /// HTTP client settings shared across all outbound requests (timeouts, retries).
@@ -98,7 +96,6 @@ impl Default for BootstrapConfig {
             authorization_config: AuthorizationConfig::default(),
             lock_config: None,
             max_default_entities: None,
-            max_base64_size: None,
             data_store_config: DataStoreConfig::default(),
             http_client_config: HttpClientConfig::default(),
             trace_config: None,
@@ -107,6 +104,14 @@ impl Default for BootstrapConfig {
 }
 
 impl BootstrapConfig {
+    /// Default-entity limits applied while reading a policy store.
+    ///
+    /// The one place the bootstrap properties become loader limits, so
+    /// bootstrap, refresh and validation cannot disagree.
+    pub(crate) fn default_entities_limits(&self) -> DefaultEntitiesLimits {
+        DefaultEntitiesLimits::from_config(self.max_default_entities)
+    }
+
     /// Loads a `BootstrapConfig` from a file.
     ///
     /// The file format is determined based on its extension:

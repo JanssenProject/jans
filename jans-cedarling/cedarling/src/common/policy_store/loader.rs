@@ -34,6 +34,7 @@ use super::errors::{PolicyStoreError, ValidationError};
 use super::formats::{self, ParsedPolicyStore, ReadStoreError};
 use super::schema_parser::{ParsedSchema, SchemaFile};
 use super::vfs_adapter::VfsFileSystem;
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 
 /// Read a policy store from a directory path.
 ///
@@ -43,6 +44,7 @@ use super::vfs_adapter::VfsFileSystem;
 pub(crate) fn read_policy_store_directory(
     path: &Path,
     strict: bool,
+    entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let path_str = path
         .to_str()
@@ -51,7 +53,7 @@ pub(crate) fn read_policy_store_directory(
         })?;
 
     let vfs = super::vfs_adapter::PhysicalVfs::new();
-    read_from_vfs(&vfs, path_str, strict, None)
+    read_from_vfs(&vfs, path_str, strict, None, entity_limits)
 }
 
 /// Read a policy store from a directory path (WASM stub).
@@ -62,6 +64,7 @@ pub(crate) fn read_policy_store_directory(
 pub(crate) fn read_policy_store_directory(
     _path: &Path,
     _strict: bool,
+    _entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
@@ -75,6 +78,7 @@ pub(crate) fn read_policy_store_archive(
     _path: &Path,
     _strict: bool,
     _limits: ArchiveLimits,
+    _entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
@@ -90,12 +94,13 @@ pub(crate) fn read_policy_store_archive_bytes(
     bytes: Vec<u8>,
     strict: bool,
     limits: ArchiveLimits,
+    entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     // Hashed here, the one place `.cjar` bytes become a store, so no archive
     // store exists without its `bundle_hash`.
     let bundle_hash = compute_bundle_hash(&bytes);
     let archive_vfs = ArchiveVfs::from_buffer(bytes, limits).map_err(PolicyStoreError::from)?;
-    read_from_vfs(&archive_vfs, ".", strict, Some(bundle_hash))
+    read_from_vfs(&archive_vfs, ".", strict, Some(bundle_hash), entity_limits)
 }
 
 /// Read a policy store rooted at `dir` from any VFS backend into its runtime
@@ -106,8 +111,14 @@ pub(super) fn read_from_vfs(
     dir: &str,
     strict: bool,
     bundle_hash: Option<Digest>,
+    entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
-    formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict, bundle_hash)
+    formats::read_policy_store(
+        &StoreFs::open(vfs, dir)?,
+        strict,
+        bundle_hash,
+        entity_limits,
+    )
 }
 
 /// One file read from a store: a policy, template, entity or issuer file.

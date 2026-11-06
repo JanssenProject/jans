@@ -45,4 +45,3 @@ CEDARLING_TRACE: "disabled"
 # At least 262146: one record of the Lock Server default maxRequestBytes plus brackets.
 # CEDARLING_TRACE_BULK_MAX_BYTES: 4194304
 CEDARLING_MAX_DEFAULT_ENTITIES: 1000
-CEDARLING_MAX_BASE64_SIZE: 1048576

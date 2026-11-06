@@ -29,6 +29,7 @@ use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
 };
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::common::policy_store::migration::v1_to_v2::sanitize_issuer_name;
 use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 
@@ -532,7 +533,11 @@ impl<'de> Deserialize<'de> for LegacyDefaultEntitiesWithWarns {
         let option_raw_data: Option<HashMap<String, serde_json::Value>> =
             Deserialize::deserialize(deserializer)
                 .map_err(|err| D::Error::custom(format!("expect to be JSON object: {err}")))?;
-        let inner = parse_default_entities_with_warns(option_raw_data).map_err(D::Error::custom)?;
+        // `Deserialize` cannot receive the bootstrap config, so legacy stores always
+        // get the built-in limits and ignore `CEDARLING_MAX_DEFAULT_ENTITIES`.
+        let inner =
+            parse_default_entities_with_warns(option_raw_data, DefaultEntitiesLimits::default())
+                .map_err(D::Error::custom)?;
         Ok(LegacyDefaultEntitiesWithWarns(inner))
     }
 }

@@ -252,7 +252,6 @@ fn create_jwt_cedarling_config_with_loader(
         },
         lock_config: None,
         max_default_entities: None,
-        max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: crate::HttpClientConfig::default(),
         trace_config: None,
@@ -1002,6 +1001,7 @@ permit(
         },
         &http_client,
         true,
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
     )
     .await
     .expect("Loading .cjar with a multi-template file should succeed");
@@ -1418,6 +1418,7 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
         },
         &http_client,
         true,
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
     )
     .await
     .expect("The archive must load at the default 10 MB cap");
@@ -1431,6 +1432,7 @@ async fn test_configured_max_file_size_reaches_archive_loader() {
         },
         &http_client,
         true,
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
     )
     .await;
 
@@ -1455,8 +1457,13 @@ async fn test_read_policy_store_archive_bytes_directly() {
         .expect("Failed to build test archive");
 
     // Read directly using the bytes reader
-    let parsed = read_policy_store_archive_bytes(archive_bytes, true, ArchiveLimits::default())
-        .expect("Should read policy store from bytes");
+    let parsed = read_policy_store_archive_bytes(
+        archive_bytes,
+        true,
+        ArchiveLimits::default(),
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+    )
+    .expect("Should read policy store from bytes");
 
     // Verify the parsed policy store
     assert_eq!(
@@ -1500,8 +1507,13 @@ async fn test_read_policy_store_archive_bytes_invalid() {
 
     // Try to read invalid bytes
     let invalid_bytes = vec![0x00, 0x01, 0x02, 0x03];
-    let err = read_policy_store_archive_bytes(invalid_bytes, true, ArchiveLimits::default())
-        .expect_err("Should fail to read invalid archive bytes");
+    let err = read_policy_store_archive_bytes(
+        invalid_bytes,
+        true,
+        ArchiveLimits::default(),
+        crate::common::default_entities_limits::DefaultEntitiesLimits::default(),
+    )
+    .expect_err("Should fail to read invalid archive bytes");
 
     // Verify the error is an Archive error (invalid zip format)
     assert!(
@@ -1735,5 +1747,72 @@ async fn test_current_spec_version_logs_no_warning() {
     assert!(
         warnings.is_empty(),
         "a current-version store should not log a format warning, got: {warnings:?}"
+    );
+}
+
+fn store_with_five_entities() -> PolicyStoreSource {
+    PolicyStoreSource::ArchiveBytes(
+        crate::common::policy_store::test_utils::fixtures::with_multiple_entities(5)
+            .build_archive()
+            .expect("Failed to build test archive"),
+    )
+}
+
+/// `CEDARLING_MAX_DEFAULT_ENTITIES` must reach the loader through `Cedarling::new`,
+/// not only through direct loader calls.
+#[test]
+async fn test_configured_max_default_entities_reaches_bootstrap() {
+    use crate::InitCedarlingError;
+    use crate::common::default_entities_limits::DefaultEntitiesLimitsError;
+    use crate::common::policy_store::manager::ConversionError;
+    use crate::init::policy_store::PolicyStoreLoadError;
+    use crate::init::service_config::ServiceConfigError;
+
+    let mut config = get_config(store_with_five_entities());
+    config.max_default_entities = Some(3);
+    let err = Cedarling::new(&config)
+        .await
+        .err()
+        .expect("5 entities must exceed a configured limit of 3");
+    assert!(
+        matches!(
+            err,
+            InitCedarlingError::ServiceConfig(ServiceConfigError::PolicyStore(
+                PolicyStoreLoadError::Conversion(ConversionError::DefaultEntitiesLimits(
+                    DefaultEntitiesLimitsError::CountExceeded {
+                        max_entities: 3,
+                        found: 5,
+                    }
+                ))
+            ))
+        ),
+        "the configured limit must reject the store with CountExceeded, got: {err:?}"
+    );
+
+    config.max_default_entities = Some(10);
+    Cedarling::new(&config)
+        .await
+        .expect("5 entities must pass a configured limit of 10");
+}
+
+/// A turned-off limit leaves the store unbounded, so startup must say so.
+#[test]
+async fn test_zero_max_default_entities_warns_at_bootstrap() {
+    let cedarling = get_cedarling_with_callback(store_with_five_entities(), |config| {
+        config.max_default_entities = Some(0);
+    })
+    .await;
+
+    let warnings: Vec<String> = cedarling
+        .pop_logs()
+        .iter()
+        .filter(|log| log["level"] == "WARN")
+        .filter_map(|log| log["msg"].as_str().map(str::to_string))
+        .collect();
+    assert!(
+        warnings
+            .iter()
+            .any(|msg| msg.starts_with("CEDARLING_MAX_DEFAULT_ENTITIES=0 ")),
+        "startup must warn that CEDARLING_MAX_DEFAULT_ENTITIES=0 turns the limit off, got: {warnings:?}"
     );
 }

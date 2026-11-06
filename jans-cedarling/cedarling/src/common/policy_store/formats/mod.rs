@@ -44,6 +44,7 @@ use super::manager::ConversionError;
 use super::migration::v1_to_v2::V1ToV2Warning;
 use super::migration::{IntoCurrent, MigrationError};
 use super::schema_parser::ParsedSchema;
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::trace::PolicyFacts;
 
 /// Where every spec version keeps its metadata.
@@ -422,6 +423,7 @@ pub(super) fn read_policy_store(
     fs: &StoreFs<'_>,
     strict_schema_validation: bool,
     bundle_hash: Option<Digest>,
+    entity_limits: DefaultEntitiesLimits,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let (metadata_json, selected) = read_metadata(fs)?;
     let strict = strict_schema_validation;
@@ -440,7 +442,7 @@ pub(super) fn read_policy_store(
         },
     };
 
-    let (store, metadata) = current::into_runtime(doc)?;
+    let (store, metadata) = current::into_runtime(doc, entity_limits)?;
 
     let trace_policy = PolicyFacts::from_archive(bundle_hash, Some(&metadata)).map(Arc::new);
     Ok(ParsedPolicyStore {
@@ -531,7 +533,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false, None)
+        read_policy_store(&fs, false, None, DefaultEntitiesLimits::default())
     }
 
     /// Reads a store in the v2 layout, describing the same token types as the
@@ -574,7 +576,7 @@ mod tests {
                 .expect("in-memory test file should be created");
         }
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
-        read_policy_store(&fs, false, None)
+        read_policy_store(&fs, false, None, DefaultEntitiesLimits::default())
     }
 
     #[test]
@@ -648,7 +650,7 @@ mod tests {
             .expect("in-memory metadata should be created");
         let fs = StoreFs::open(&vfs, ".").expect("in-memory root should open");
 
-        let err = read_policy_store(&fs, true, None)
+        let err = read_policy_store(&fs, true, None, DefaultEntitiesLimits::default())
             .expect_err("an unsupported version must be rejected");
         assert!(
             matches!(

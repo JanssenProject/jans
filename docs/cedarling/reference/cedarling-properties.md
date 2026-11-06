@@ -110,8 +110,7 @@ the Cedarling will use the default value as specified in the property definition
 
 **Advanced configuration:**
 
-- **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
-- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
+- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store, counted before duplicate entities are merged. A store over the limit fails to load, at startup and on refresh. Set to `0` to disable; Cedarling then logs a warning at startup. Default is `1000`.
 
 ### Lock Server integration properties
 

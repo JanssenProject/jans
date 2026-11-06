@@ -25,7 +25,7 @@ use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
 use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
-use crate::common::default_entities_limits::DefaultEntitiesLimits;
+use crate::common::default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError};
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
@@ -80,6 +80,10 @@ pub enum ConversionError {
     #[error("Failed to convert entities: {0}")]
     EntityConversion(String),
 
+    /// A default entities limit was exceeded
+    #[error(transparent)]
+    DefaultEntitiesLimits(#[from] DefaultEntitiesLimitsError),
+
     /// Policy set creation failed
     #[error("Failed to create policy set: {0}")]
     PolicySetCreation(String),
@@ -98,6 +102,7 @@ impl PolicyStoreManager {
         content: &StoreContent,
         version: String,
         token_types: TokenTypes,
+        entity_limits: DefaultEntitiesLimits,
     ) -> Result<PolicyStore, ConversionError> {
         let cedar_schema = content
             .schema
@@ -110,12 +115,13 @@ impl PolicyStoreManager {
             Self::convert_policies_and_templates(&content.policies, &content.templates)?;
 
         // 3. Convert entities
-        let raw_entities = Self::convert_entities(&content.entities, None)?;
+        let raw_entities = Self::convert_entities(&content.entities, None, entity_limits)?;
 
         // Convert raw entities to DefaultEntitiesWithWarns
-        let default_entities = parse_default_entities_with_warns(raw_entities).map_err(|e| {
-            ConversionError::EntityConversion(format!("Failed to parse default entities: {e}"))
-        })?;
+        let default_entities = parse_default_entities_with_warns(raw_entities, entity_limits)
+            .map_err(|e| {
+                ConversionError::EntityConversion(format!("Failed to parse default entities: {e}"))
+            })?;
 
         Ok(PolicyStore {
             version: Some(version),
@@ -229,14 +235,10 @@ impl PolicyStoreManager {
     /// 2. Detects duplicate entity UIDs (returns error if found)
     /// 3. Optionally validates entity hierarchy (parent references - logs warnings if logger provided)
     /// 4. Converts to the required `HashMap` format
-    ///
-    /// # Arguments
-    ///
-    /// * `entity_files` - The entity files to convert
-    /// * `logger` - Optional logger for hierarchy warnings
     fn convert_entities(
         entity_files: &[super::loader::StoreFile],
         logger: Option<&Logger>,
+        entity_limits: DefaultEntitiesLimits,
     ) -> Result<Option<HashMap<String, serde_json::Value>>, ConversionError> {
         if entity_files.is_empty() {
             return Ok(None);
@@ -257,9 +259,7 @@ impl PolicyStoreManager {
 
         // Cedar computes transitive ancestry while building the store, so the count limit that
         // default entities enforce later must already hold here
-        DefaultEntitiesLimits::default()
-            .validate_entities_count(all_parsed_entities.len())
-            .map_err(|e| ConversionError::EntityConversion(e.to_string()))?;
+        entity_limits.validate_entities_count(all_parsed_entities.len())?;
 
         // Step 2: Detect duplicate entity UIDs (warns but doesn't fail on duplicates)
         // Note: We clone all_parsed_entities here because EntityParser::detect_duplicates
@@ -485,7 +485,11 @@ mod tests {
             .to_string(),
         }];
 
-        let result = PolicyStoreManager::convert_entities(&entity_files, None);
+        let result = PolicyStoreManager::convert_entities(
+            &entity_files,
+            None,
+            DefaultEntitiesLimits::default(),
+        );
         assert!(
             result.is_ok(),
             "Entity conversion failed: {:?}",
@@ -501,9 +505,45 @@ mod tests {
     #[test]
     fn test_convert_entities_empty() {
         let entity_files: Vec<StoreFile> = vec![];
-        let result = PolicyStoreManager::convert_entities(&entity_files, None);
+        let result = PolicyStoreManager::convert_entities(
+            &entity_files,
+            None,
+            DefaultEntitiesLimits::default(),
+        );
         assert!(result.is_ok());
         assert!(result.unwrap().is_none());
+    }
+
+    #[test]
+    fn test_convert_entities_reports_structured_count_exceeded() {
+        let entities: Vec<_> = (0..3)
+            .map(|i| {
+                serde_json::json!({
+                    "uid": {"type": "User", "id": format!("user{i}")},
+                    "attrs": {},
+                    "parents": []
+                })
+            })
+            .collect();
+        let entity_files = vec![StoreFile {
+            name: "users.json".to_string(),
+            content: serde_json::to_string(&entities).expect("entities should serialize"),
+        }];
+        let limits = DefaultEntitiesLimits::from_config(Some(2));
+
+        let err = PolicyStoreManager::convert_entities(&entity_files, None, limits)
+            .expect_err("3 entities must exceed the configured limit of 2");
+
+        assert!(
+            matches!(
+                err,
+                ConversionError::DefaultEntitiesLimits(DefaultEntitiesLimitsError::CountExceeded {
+                    max_entities: 2,
+                    found: 3,
+                })
+            ),
+            "the count limit must surface as a structured error, got: {err:?}"
+        );
     }
 
     #[test]
@@ -519,8 +559,12 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
+        let result = PolicyStoreManager::build(
+            &content,
+            "1.0.0".to_string(),
+            TokenTypes::default(),
+            DefaultEntitiesLimits::default(),
+        );
         let store =
             result.expect("a schemaless store should build; strictness is checked when reading");
         assert!(
@@ -553,8 +597,12 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
+        let result = PolicyStoreManager::build(
+            &content,
+            "1.0.0".to_string(),
+            TokenTypes::default(),
+            DefaultEntitiesLimits::default(),
+        );
         let store = result.expect("a store with a schema should build");
         assert!(
             store.schema.is_some(),
@@ -586,8 +634,12 @@ mod tests {
             entities: vec![],
         };
 
-        let result =
-            PolicyStoreManager::build(&content, "1.0.0".to_string(), TokenTypes::default());
+        let result = PolicyStoreManager::build(
+            &content,
+            "1.0.0".to_string(),
+            TokenTypes::default(),
+            DefaultEntitiesLimits::default(),
+        );
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
@@ -632,7 +684,12 @@ mod tests {
         let token_types =
             TokenTypes::build([crate::common::policy_store::TestJwtIssuer::default()], [])
                 .expect("the default issuer should be valid");
-        let result = PolicyStoreManager::build(&content, "1.0.0".to_string(), token_types);
+        let result = PolicyStoreManager::build(
+            &content,
+            "1.0.0".to_string(),
+            token_types,
+            DefaultEntitiesLimits::default(),
+        );
         assert!(result.is_ok(), "Conversion failed: {:?}", result.err());
 
         let store = result.unwrap();
