@@ -29,7 +29,7 @@ use crate::{
     log::Logger,
 };
 
-use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
+use super::{StatusList, StatusListJwt, StatusListJwtStr, UnboundReason, UpdateStatusListError};
 
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
@@ -76,9 +76,26 @@ fn effective_refresh_interval(jwt_ttl_secs: Option<u64>, max: Duration) -> Durat
 
 /// Per the status list spec, `sub` is the status list's own URI; `iss`, when
 /// present, must be the issuer whose endpoint served it.
-fn is_bound_to(jwt: &StatusListJwt, iss: &IssClaim, status_list_url: &Url) -> bool {
-    let sub_matches = Url::parse(&jwt.sub).is_ok_and(|sub| sub == *status_list_url);
-    sub_matches && jwt.iss.as_ref().is_none_or(|jwt_iss| jwt_iss == iss)
+///
+/// `sub` must equal the URI exactly, as the spec requires: parsing already
+/// ignores host case and a default port, and a trailing slash or a query names
+/// another URI.
+fn check_bound_to(
+    jwt: &StatusListJwt,
+    iss: &IssClaim,
+    status_list_url: &Url,
+) -> Result<(), UnboundReason> {
+    if !Url::parse(&jwt.sub).is_ok_and(|sub| sub == *status_list_url) {
+        return Err(UnboundReason::Sub {
+            found: jwt.sub.clone(),
+        });
+    }
+    match &jwt.iss {
+        Some(jwt_iss) if jwt_iss != iss => Err(UnboundReason::Iss {
+            found: jwt_iss.clone(),
+        }),
+        _ => Ok(()),
+    }
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -141,13 +158,13 @@ impl StatusListCache {
 
         let decoded_jwt_iss = decoded_jwt.iss();
         // The response must not pick another trusted issuer's validator.
-        if decoded_jwt_iss
-            .as_ref()
-            .is_some_and(|decoded| *decoded != iss)
-        {
-            return Err(UpdateStatusListError::UnboundStatusList(
-                status_list_url.to_string(),
-            ));
+        if let Some(decoded) = decoded_jwt_iss.as_ref().filter(|decoded| **decoded != iss) {
+            return Err(UpdateStatusListError::UnboundStatusList {
+                url: status_list_url.to_string(),
+                reason: UnboundReason::Iss {
+                    found: decoded.clone(),
+                },
+            });
         }
         // get validator
         let validator_key = ValidatorInfo {
@@ -166,11 +183,12 @@ impl StatusListCache {
             .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
             .try_into()
             .map_err(DecodeJwtError::DeserializeClaims)?;
-        if !is_bound_to(&status_list_jwt, &iss, status_list_url) {
-            return Err(UpdateStatusListError::UnboundStatusList(
-                status_list_url.to_string(),
-            ));
-        }
+        check_bound_to(&status_list_jwt, &iss, status_list_url).map_err(|reason| {
+            UpdateStatusListError::UnboundStatusList {
+                url: status_list_url.to_string(),
+                reason,
+            }
+        })?;
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -292,10 +310,13 @@ where
                 continue;
             },
         };
-        if !is_bound_to(&status_list_jwt, &iss, &status_list_url) {
+        if let Err(reason) = check_bound_to(&status_list_jwt, &iss, &status_list_url) {
             handle_err(
                 "bind the updated status list JWT",
-                &UpdateStatusListError::UnboundStatusList(status_list_url.to_string()),
+                &UpdateStatusListError::UnboundStatusList {
+                    url: status_list_url.to_string(),
+                    reason,
+                },
             );
             continue;
         }
@@ -364,13 +385,36 @@ mod test {
             Some("https://idp.example.com"),
         );
 
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err("a status list whose sub names another list must not be used for this URI");
         assert!(
-            !is_bound_to(
-                &jwt,
-                &IssClaim::new("https://idp.example.com"),
-                &bound_url()
-            ),
-            "a status list whose sub names another list must not be used for this URI"
+            matches!(&reason, UnboundReason::Sub { found } if found == "https://idp.example.com/statuslist/2"),
+            "the mismatch must name the received sub, got: {reason:?}"
+        );
+    }
+
+    #[test]
+    fn trailing_slash_sub_is_not_bound() {
+        let jwt = status_list_jwt(
+            "https://idp.example.com/statuslist/1/",
+            Some("https://idp.example.com"),
+        );
+
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err(
+            "the spec requires sub to equal the list URI, so a trailing slash is another URI",
+        );
+        assert!(
+            matches!(reason, UnboundReason::Sub { .. }),
+            "the mismatch must be reported on sub, got: {reason:?}"
         );
     }
 
@@ -378,13 +422,15 @@ mod test {
     fn status_list_from_another_issuer_is_not_bound() {
         let jwt = status_list_jwt(BOUND_LIST_URL, Some("https://attacker.example.com"));
 
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err("a status list issued by another issuer must not be used for this issuer");
         assert!(
-            !is_bound_to(
-                &jwt,
-                &IssClaim::new("https://idp.example.com"),
-                &bound_url()
-            ),
-            "a status list issued by another issuer must not be used for this issuer"
+            matches!(&reason, UnboundReason::Iss { found } if found.as_str() == "https://attacker.example.com"),
+            "the mismatch must name the received iss, got: {reason:?}"
         );
     }
 
@@ -392,14 +438,12 @@ mod test {
     fn status_list_without_iss_is_bound_by_sub() {
         let jwt = status_list_jwt(BOUND_LIST_URL, None);
 
-        assert!(
-            is_bound_to(
-                &jwt,
-                &IssClaim::new("https://idp.example.com"),
-                &bound_url()
-            ),
-            "iss is optional in a status list JWT, so a matching sub alone must bind it"
-        );
+        check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect("iss is optional in a status list JWT, so a matching sub alone must bind it");
     }
 
     #[test]
