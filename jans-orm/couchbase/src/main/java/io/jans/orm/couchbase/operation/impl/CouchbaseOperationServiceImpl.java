@@ -303,8 +303,9 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
     private int deleteImpl(BucketMapping bucketMapping, String key, QueryScanConsistency queryScanConsistency, ConvertedExpression expression, int count) throws DeleteException {
         StringBuilder query = new StringBuilder("DELETE FROM `").append(bucketMapping.getBucketName()).append("` WHERE ").append(expression.expression());
         if (enableScopeSupport) { 
-        	query.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
-        	expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
+        	String scopeParameter = scopeParameterName(expression);
+        	query.append(" AND META().id LIKE $").append(scopeParameter);
+        	expression.getQueryParameters().put(scopeParameter, scopeKeyPrefix(key) + "%");
         }
 
         query.append(" LIMIT ").append(count).append(" RETURNING default.*");
@@ -331,6 +332,19 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         return result;
     }
+
+	/*
+	 * A filter on an attribute with the same name as the scope parameter would share its query parameter,
+	 * so pick a name that is not used by the filter
+	 */
+	private static String scopeParameterName(ConvertedExpression expression) {
+		String name = SCOPE_KEY_PARAMETER;
+		for (int i = 1; expression.getQueryParameters().containsKey(name); i++) {
+			name = SCOPE_KEY_PARAMETER + "_" + i;
+		}
+
+		return name;
+	}
 
 	private static String scopeKeyPrefix(String key) {
 		// "_" is the key of the whole DB tree
@@ -485,12 +499,13 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         StringBuilder finalExpression = new StringBuilder(expression.expression());
         if (enableScopeSupport) { 
+			String scopeParameter = scopeParameterName(expression);
 			if (SearchScope.BASE == scope) {
-				finalExpression.append(" AND META().id = $").append(SCOPE_KEY_PARAMETER);
-				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, key);
+				finalExpression.append(" AND META().id = $").append(scopeParameter);
+				expression.getQueryParameters().put(scopeParameter, key);
 			} else {
-				finalExpression.append(" AND META().id LIKE $").append(SCOPE_KEY_PARAMETER);
-				expression.getQueryParameters().put(SCOPE_KEY_PARAMETER, scopeKeyPrefix(key) + "%");
+				finalExpression.append(" AND META().id LIKE $").append(scopeParameter);
+				expression.getQueryParameters().put(scopeParameter, scopeKeyPrefix(key) + "%");
 			}
         } else {
             if (scope != null) {

@@ -154,8 +154,15 @@ public final class SensitiveDataMasker {
         StringBuilder result = new StringBuilder();
         int last = 0;
         int from = 0;
+        // Resuming after a key rescans swallowed text; bound the total work so crafted input cannot cause quadratic time
+        long workBudget = 8L * value.length() + 1024;
 
         while (from < value.length() && matcher.find(from)) {
+            workBudget -= matcher.end() - matcher.start();
+            if (workBudget < 0) {
+                return MASKED;
+            }
+
             if (isSensitiveName(unescapeJson(matcher.group(2)))) {
                 String token = matcher.group(3);
                 boolean opener = "[".equals(token) || "{".equals(token);
@@ -165,7 +172,8 @@ public final class SensitiveDataMasker {
                 last = end;
                 from = end;
             } else {
-                from = matcher.end();
+                // Resume right after the key: a malformed nonsensitive value may swallow a later sensitive pair
+                from = matcher.end(1);
             }
         }
         result.append(value, last, value.length());

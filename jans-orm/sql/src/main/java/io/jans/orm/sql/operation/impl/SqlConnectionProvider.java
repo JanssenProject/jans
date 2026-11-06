@@ -132,7 +132,7 @@ public class SqlConnectionProvider {
 			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
 			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}",
-					SensitiveDataMasker.allowlistProperties(props, LOGGABLE_PROPERTIES), ex);
+					SensitiveDataMasker.allowlistProperties(props, LOGGABLE_PROPERTIES), ex.getClass().getName());
 		}
 	}
 
@@ -511,7 +511,8 @@ public class SqlConnectionProvider {
 		try (Connection con = this.poolingDataSource.getConnection()) {
 			return con.isValid(30);
 		} catch (Exception ex) {
-			LOG.error("Failed to check connection", ex);
+			// Driver exceptions may echo the JDBC URL (and credentials embedded in it), so the message is not logged
+			LOG.error("Failed to check connection: {}", ex.getClass().getName());
 			isConnected = false;
 		}
 

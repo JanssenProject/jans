@@ -298,4 +298,20 @@ public class SensitiveDataMaskerTest {
         assertEquals(SensitiveDataMasker.maskValue(map), SensitiveDataMasker.MASKED);
     }
 
+    @Test
+    public void maskJsonValues_forMalformedNonsensitiveValueSwallowingPasswordPair_shouldMaskPassword() {
+        String value = "{\"cfg\":\"oops \"password\":\"secret\"}";
+
+        String masked = SensitiveDataMasker.maskJsonValues(value);
+
+        assertFalse(masked.contains("secret"));
+    }
+
+    @Test(timeOut = 10_000)
+    public void maskJsonValues_forManyNonsensitiveMalformedPairs_shouldFinishQuickly() {
+        String value = "{" + "\"a\":\"b\":".repeat(20_000);
+
+        SensitiveDataMasker.maskJsonValues(value);
+    }
+
 }
