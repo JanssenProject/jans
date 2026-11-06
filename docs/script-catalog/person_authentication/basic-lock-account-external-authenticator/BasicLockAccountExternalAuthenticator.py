@@ -12,6 +12,7 @@ from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
 from io.jans.service import CacheService
 from io.jans.util import StringHelper
+from io.jans.model import GluuStatus
 from io.jans.orm.exception import AuthenticationException
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
@@ -80,6 +81,9 @@ class PersonAuthentication(PersonAuthenticationType):
             user_password = credentials.getPassword()
             cacheService = CdiUtil.bean(CacheService)
 
+            # user names are logged below; reject line breaks to keep log records intact
+            if user_name is not None and ("\r" in user_name or "\n" in user_name):
+                return False
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
@@ -92,7 +96,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
             else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
-                userSatus = self.getUserAttributeValue(user_name, "jansStatus")
+                userSatus = self.getUserStatus(user_name)
                 print "Current user '%s' status is '%s'" % ( user_name, userSatus )
 
                 countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
@@ -179,6 +183,13 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
+    # jansStatus is the mapped status field, not a custom attribute
+    def getUserStatus(self, user_name):
+        find_user_by_uid = CdiUtil.bean(UserService).getUser(user_name)
+        if find_user_by_uid is None or find_user_by_uid.getStatus() is None:
+            return None
+        return find_user_by_uid.getStatus().getValue()
+
     def getUserAttributeValue(self, user_name, attribute_name):
         if StringHelper.isEmpty(user_name):
             return None
@@ -229,19 +240,17 @@ class PersonAuthentication(PersonAuthenticationType):
         if (find_user_by_uid is None):
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
-        if status_attribute_value != None:
-            user_status = status_attribute_value.getValue()
-            if StringHelper.equals(user_status, "inactive"):
-                print "Basic (lock account). Lock user. User '%s' locked already" % user_name
-                return
+        if find_user_by_uid.getStatus() == GluuStatus.INACTIVE:
+            print "Basic (lock account). Lock user. User '%s' locked already" % user_name
+            return
         
-        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
-        userService.updateUser(find_user_by_uid)
-
+        # Write the lock record first: an inactive user without it is treated as an expired lock and unlocked
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
 
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+
+        find_user_by_uid.setStatus(GluuStatus.INACTIVE)
+        userService.updateUser(find_user_by_uid)
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
 
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
@@ -260,7 +269,7 @@ class PersonAuthentication(PersonAuthenticationType):
         object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
         cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
 
-        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
+        find_user_by_uid.setStatus(GluuStatus.ACTIVE)
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
         userService.updateUser(find_user_by_uid)
 

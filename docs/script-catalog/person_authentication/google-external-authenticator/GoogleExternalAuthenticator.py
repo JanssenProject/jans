@@ -10,6 +10,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.util import StringHelper
 from io.jans.as.server.util import ServerUtil
+from jakarta.faces.context import FacesContext
 
 from io.jans.as.common.model.common import User
 from io.jans.orm import PersistenceEntryManager
@@ -40,9 +41,7 @@ class PersonAuthentication(PersonAuthenticationType):
         f = open(google_creds_file, 'r')
         try:
             data = json.loads(f.read())
-            print data
             creds = data["web"]
-            print creds
         except (Exception, Throwable):
             print "Google. Initialization. Failed to load creds from file:", google_creds_file
             print "Exception: ", sys.exc_info()[1]
@@ -88,8 +87,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
             googleCred = ServerUtil.getFirstValue(requestParameters, "credential")
             if googleCred is not None:
+                if not self.isValidCsrfToken(requestParameters):
+                    print "Google. Authenticate. g_csrf_token mismatch"
+                    return False
+
                 googleIdToken = ServerUtil.getFirstValue(requestParameters, "credential")
                 google_Id = self.verifyIDToken(googleIdToken)
+                if google_Id is None:
+                    return False
                 # if user doesnt exist in persistence, add
                 foundUser = self.findUserByGoogleId(google_Id)
                 if foundUser is None:
@@ -117,6 +122,22 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             print "Google. Authenticate Error"
             return False
+
+    # Google's double-submit cookie check, so a credential posted cross-site cannot log this browser in
+    def isValidCsrfToken(self, requestParameters):
+        body_token = ServerUtil.getFirstValue(requestParameters, "g_csrf_token")
+        if StringHelper.isEmpty(body_token):
+            return False
+
+        request = CdiUtil.bean(FacesContext).getExternalContext().getRequest()
+        cookies = request.getCookies()
+        if cookies is None:
+            return False
+
+        for cookie in cookies:
+            if cookie.getName() == "g_csrf_token":
+                return cookie.getValue() == body_token
+        return False
 
     def verifyIDToken(self, googleIdToken):
         verifier = GoogleIdTokenVerifier.Builder(NetHttpTransport(), JacksonFactory()).setAudience(Collections.singletonList(self.client_id)).build()
