@@ -6,6 +6,8 @@ import requests
 
 def main():
     host = os.environ.get("CN_LINK_JETTY_HOST", "0.0.0.0")  # nosec: B104
+    if host == "0.0.0.0":  # nosec: B104
+        host = "127.0.0.1"
     port = os.environ.get("CN_LINK_JETTY_PORT", "9091")
     req = requests.get(f"http://{host}:{port}/jans-link/sys/health-check", timeout=5)
     if not req.ok:

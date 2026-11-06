@@ -17,6 +17,8 @@ def watch_jans_auth():
 
     try:
         host = os.environ.get("CN_AUTH_JETTY_HOST", "127.0.0.1")  # nosec: B104
+        if host == "0.0.0.0":  # nosec: B104
+            host = "127.0.0.1"
         port = os.environ.get("CN_AUTH_JETTY_PORT", "8081")
         req = requests.get(f"http://{host}:{port}/sys/health-check", timeout=15)
 
