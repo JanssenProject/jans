@@ -199,7 +199,7 @@ mod tests {
     use super::*;
     use crate::test_support::{
         LeafOpts, make_intermediate, make_intermediate_p384, make_leaf, make_root,
-        make_root_constrained, make_root_p384,
+        make_root_constrained, make_root_p384, with_name_constraints,
     };
 
     /// A timestamp inside every synthetic cert's validity window.
@@ -506,6 +506,59 @@ mod tests {
         assert!(
             matches!(err, SigstoreVerificationError::CertificateChain { .. }),
             "must be CertificateChain from leaf validation, got {err:?}"
+        );
+    }
+
+    /// Path validation does not enforce `NameConstraints`, so a constrained CA could
+    /// vouch for identities outside its permitted subtrees.
+    #[test]
+    fn name_constrained_root_rejected() {
+        let root = with_name_constraints(make_root("fulcio-root"), None);
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        assert!(
+            root_cert.has_name_constraints,
+            "fixture root must carry NameConstraints"
+        );
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect_err("a root with NameConstraints must be rejected");
+        assert!(
+            matches!(
+                &err,
+                SigstoreVerificationError::CertificateChain { reason }
+                    if reason.contains("NameConstraints")
+            ),
+            "must be CertificateChain from the NameConstraints check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn name_constrained_intermediate_rejected() {
+        let root = make_root("fulcio-root");
+        let inter = with_name_constraints(
+            make_intermediate("fulcio-intermediate", None, &root),
+            Some(&root),
+        );
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let inter_cert = Cert::from_der(&inter.der).expect("parse intermediate");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        assert!(
+            inter_cert.has_name_constraints,
+            "fixture intermediate must carry NameConstraints"
+        );
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect_err("an intermediate with NameConstraints must be rejected");
+        assert!(
+            matches!(
+                &err,
+                SigstoreVerificationError::CertificateChain { reason }
+                    if reason.contains("NameConstraints")
+            ),
+            "must be CertificateChain from the NameConstraints check, got {err:?}"
         );
     }
 }
