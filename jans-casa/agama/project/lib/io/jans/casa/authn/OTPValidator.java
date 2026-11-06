@@ -24,7 +24,7 @@ public class OTPValidator extends CasaWSBase {
                 new URL(getApiBase() + "/validation/otp/verify-code"));
     
             StringJoiner joiner = new StringJoiner("&");
-            Map.of("code", code, "userid", id).forEach((k, v) -> joiner.add(k + "=" + v));
+            Map.of("code", code, "userid", id).forEach((k, v) -> joiner.add(k + "=" + encode(v)));
             request.setQuery(joiner.toString());
             
             logger.debug("Verifying code supplied is valid against user's OTP credentials");            
