@@ -331,10 +331,15 @@ class Upgrade:
                 for dir_ in json.loads(f.read())["assetMgtConfiguration"]["assetDirMapping"]
             }
         if not shipped_dirs.issubset(seeded_dirs or []):
-            if not self.manager.config.set(
-                "config_api_seeded_asset_dirs",
-                json.dumps(sorted(shipped_dirs | set(seeded_dirs or []))),
-            ):
+            try:
+                recorded = self.manager.config.set(
+                    "config_api_seeded_asset_dirs",
+                    json.dumps(sorted(shipped_dirs | set(seeded_dirs or []))),
+                )
+            except Exception as exc:
+                logger.warning("Error recording seeded config-api asset directories: %s", exc)
+                recorded = False
+            if not recorded:
                 logger.warning("Unable to record seeded config-api asset directories; they will be offered again on the next run")
 
     def update_client_scopes(self):
