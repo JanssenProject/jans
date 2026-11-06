@@ -1422,11 +1422,15 @@ components:
       type: object
       description: Health audit entry
       properties:
+        baseDn:
+          type: string
         creationDate:
           type: string
           format: date-time
           description: Creation date of the entry
           example: 2026-07-24T15:33:06.875Z
+        dn:
+          type: string
         engineStatus:
           type: object
           additionalProperties:
@@ -1472,6 +1476,8 @@ components:
           type: string
           description: Action performed
           example: Jans::Action::"POST"
+        baseDn:
+          type: string
         clientId:
           type: string
           description: Client identifier
@@ -1494,6 +1500,8 @@ components:
           - ALLOW
           - DENY
           example: ALLOW
+        dn:
+          type: string
         eventTime:
           type: string
           format: date-time
@@ -1757,11 +1765,15 @@ components:
       type: object
       description: Telemetry audit entry
       properties:
+        baseDn:
+          type: string
         creationDate:
           type: string
           format: date-time
           description: Creation date of the entry
           example: 2026-07-24T15:33:06.872Z
+        dn:
+          type: string
         errorCounters:
           type: object
           additionalProperties:

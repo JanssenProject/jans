@@ -49,6 +49,8 @@ public class OpenIdProtectionService implements OpenIdProtection {
     /** OAuth {@code client_id} claim; not among the {@link JwtClaimName} constants. */
     static final String CLIENT_ID_CLAIM = "client_id";
 
+    static final String X5T_S256_CLAIM = "x5t#S256";
+
     /** Part of the AS error text when the token used on the introspection endpoint lacks a scope the AS requires. */
     static final String INTROSPECTION_SCOPE_REASON = "used to access introspection endpoint does not have";
 
@@ -139,10 +141,6 @@ public class OpenIdProtectionService implements OpenIdProtection {
                     return AuthorizationOutcome.denied(introspectionFailure);
                 }
 
-                if (iresp.getCnf() != null && !iresp.getCnf().isEmpty()) {
-                    return AuthorizationOutcome.denied(senderConstrainedTokenDenial());
-                }
-
                 return AuthorizationOutcome.allowed(new AuthenticatedClient(iresp.getClientId(), false));
             }
 
@@ -176,7 +174,8 @@ public class OpenIdProtectionService implements OpenIdProtection {
                 return AuthorizationOutcome.denied(BearerChallenge.invalidToken("Invalid token signature", "The access token signature is invalid"));
             }
 
-            if (claims.hasClaim(JwtClaimName.CNF)) {
+            // jans-auth-server puts the mTLS binding in a top-level x5t#S256 claim, not under cnf
+            if (claims.hasClaim(JwtClaimName.CNF) || StringUtils.isNotBlank(claims.getClaimAsString(X5T_S256_CLAIM))) {
                 return AuthorizationOutcome.denied(senderConstrainedTokenDenial());
             }
 
@@ -249,6 +248,10 @@ public class OpenIdProtectionService implements OpenIdProtection {
         if (!iresponse.isActive()) {
             log.error("Inactive token");
             return BearerChallenge.invalidToken("Inactive token", "The access token is expired, revoked or invalid");
+        }
+
+        if (iresponse.getCnf() != null && !iresponse.getCnf().isEmpty()) {
+            return senderConstrainedTokenDenial();
         }
 
         List<String> tokenScopes = iresponse.getScope();

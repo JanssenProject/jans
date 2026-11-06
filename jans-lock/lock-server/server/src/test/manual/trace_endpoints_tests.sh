@@ -175,10 +175,10 @@ get_token() {
   token=$(printf 'user = "%s:%s"\n' "$id" "$secret" \
     | curl "${CURL_BASE[@]}" -K - "$TOKEN_URL" \
         -d "grant_type=client_credentials" -d "scope=${scope}" \
-    | jq -r '.access_token // empty')
+    | jq -r '.access_token // empty') || return 1
   if [[ -n "$token" && ! "$token" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; then
-    echo "❌ access_token is not a valid bearer token, ignoring it" >&2
-    return 0
+    echo "❌ access_token is not a valid bearer token" >&2
+    return 1
   fi
   printf '%s' "$token"
 }
