@@ -939,6 +939,75 @@ mod test {
         );
     }
 
+    #[tokio::test]
+    async fn plain_http_lock_config_uri_is_rejected_before_fetching() {
+        let config = LockServiceConfig {
+            config_uri: url::Url::parse(
+                "http://lock.invalid/.well-known/lock-server-configuration",
+            )
+            .expect("valid URL"),
+            ..Default::default()
+        };
+        let http_client =
+            HttpClient::new(HttpClientConfig::default()).expect("http client should be built");
+
+        let err = fetch_lock_config(&config, &http_client, None)
+            .await
+            .expect_err("plain http to a non-loopback host must be rejected");
+
+        assert!(
+            matches!(&err, InitLockServiceError::InsecureConfigUri(origin) if origin == "http://lock.invalid"),
+            "discovery over plain http must fail with InsecureConfigUri naming the origin, got: {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn discovered_insecure_audit_endpoints_are_dropped() {
+        let mut lock_server = Server::new_async().await;
+        let config_mock = lock_server
+            .mock("GET", "/.well-known/lock-server-configuration")
+            .with_body(
+                json!({
+                    "version": "1.0",
+                    "issuer": lock_server.url(),
+                    "audit": {
+                        "log_endpoint": "http://lock.example.com/log",
+                        "health_endpoint": "https://lock.example.com/health",
+                        "telemetry_endpoint": format!("{}/telemetry", lock_server.url()),
+                    },
+                })
+                .to_string(),
+            )
+            .create_async()
+            .await;
+        let config = LockServiceConfig {
+            config_uri: url::Url::parse(&format!(
+                "{}/.well-known/lock-server-configuration",
+                lock_server.url()
+            ))
+            .expect("valid URL"),
+            ..Default::default()
+        };
+        let http_client =
+            HttpClient::new(HttpClientConfig::default()).expect("http client should be built");
+
+        let lock_config = fetch_lock_config(&config, &http_client, None)
+            .await
+            .expect("a loopback http config URI must be fetched");
+
+        config_mock.assert_async().await;
+        let endpoints = lock_config.audit_endpoints;
+        assert!(
+            endpoints.log.is_none(),
+            "a plain http endpoint on a non-loopback host must not receive the access token"
+        );
+        assert!(endpoints.health.is_some(), "an https endpoint must be kept");
+        assert!(
+            endpoints.telemetry.is_some(),
+            "a plain http endpoint on a loopback host must be kept for local development"
+        );
+    }
+
     #[test]
     fn test_policy_store_bearer_requires_https_except_loopback() {
         let token = LockAccessToken("lock.access.token".to_string());

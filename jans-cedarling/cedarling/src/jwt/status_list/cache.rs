@@ -341,6 +341,67 @@ mod test {
     use std::collections::HashSet;
     use std::time::Duration;
 
+    const BOUND_LIST_URL: &str = "https://idp.example.com/statuslist/1";
+
+    fn status_list_jwt(sub: &str, iss: Option<&str>) -> StatusListJwt {
+        serde_json::from_value(serde_json::json!({
+            "sub": sub,
+            "iss": iss,
+            "iat": 1,
+            "status_list": { "bits": 1, "lst": "eNrbuRgAAhcBXQ" },
+        }))
+        .expect("status list JWT claims should deserialize")
+    }
+
+    fn bound_url() -> Url {
+        Url::parse(BOUND_LIST_URL).expect("valid status list URL")
+    }
+
+    #[test]
+    fn status_list_from_another_uri_is_not_bound() {
+        let jwt = status_list_jwt(
+            "https://idp.example.com/statuslist/2",
+            Some("https://idp.example.com"),
+        );
+
+        assert!(
+            !is_bound_to(
+                &jwt,
+                &IssClaim::new("https://idp.example.com"),
+                &bound_url()
+            ),
+            "a status list whose sub names another list must not be used for this URI"
+        );
+    }
+
+    #[test]
+    fn status_list_from_another_issuer_is_not_bound() {
+        let jwt = status_list_jwt(BOUND_LIST_URL, Some("https://attacker.example.com"));
+
+        assert!(
+            !is_bound_to(
+                &jwt,
+                &IssClaim::new("https://idp.example.com"),
+                &bound_url()
+            ),
+            "a status list issued by another issuer must not be used for this issuer"
+        );
+    }
+
+    #[test]
+    fn status_list_without_iss_is_bound_by_sub() {
+        let jwt = status_list_jwt(BOUND_LIST_URL, None);
+
+        assert!(
+            is_bound_to(
+                &jwt,
+                &IssClaim::new("https://idp.example.com"),
+                &bound_url()
+            ),
+            "iss is optional in a status list JWT, so a matching sub alone must bind it"
+        );
+    }
+
     #[test]
     fn zero_ttl_is_floored() {
         let max = Duration::from_secs(300);

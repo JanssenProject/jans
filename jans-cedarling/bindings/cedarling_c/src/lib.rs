@@ -1346,3 +1346,78 @@ pub extern "C" fn cedarling_cleanup() {
         clear_last_error();
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::CStr;
+    use std::mem::MaybeUninit;
+
+    use super::*;
+
+    const PANIC_MESSAGE: &str = "internal panic caught at FFI boundary";
+
+    fn panicking_call(result: *mut CedarlingResult) -> c_int {
+        ffi_guard_out!(result, { panic!("injected panic") })
+    }
+
+    #[test]
+    fn panic_fills_result_output_that_caller_can_free() {
+        cedarling_clear_last_error();
+        // Zeroed rather than uninit so a guard that skips the write fails the
+        // assertions instead of reading uninitialized memory: all zeroes is a
+        // valid `CedarlingResult` (`Success`, null pointers).
+        let mut result = MaybeUninit::<CedarlingResult>::zeroed();
+
+        let code = panicking_call(result.as_mut_ptr());
+
+        assert_eq!(
+            code,
+            CedarlingErrorCode::Internal as c_int,
+            "a caught panic must be reported as an internal error"
+        );
+        // SAFETY: zeroed is a valid `CedarlingResult`, and the guard overwrites it on panic.
+        let mut result = unsafe { result.assume_init() };
+        assert_eq!(
+            result.error_code,
+            CedarlingErrorCode::Internal,
+            "the output must carry the internal error code"
+        );
+        assert!(result.data.is_null(), "the output must carry no data");
+        assert!(
+            !result.error_message.is_null(),
+            "the output must carry an error message"
+        );
+        // SAFETY: checked non-null above; the library allocated it as a C string.
+        let message = unsafe { CStr::from_ptr(result.error_message) };
+        assert_eq!(
+            message.to_str(),
+            Ok(PANIC_MESSAGE),
+            "the output must describe the caught panic"
+        );
+
+        let last_error = cedarling_get_last_error();
+        assert!(
+            !last_error.is_null(),
+            "a caught panic must set the last error"
+        );
+        // SAFETY: checked non-null above; the library allocated it as a C string.
+        let last_error_text = unsafe { CStr::from_ptr(last_error) }
+            .to_str()
+            .map(str::to_owned);
+        assert_eq!(
+            last_error_text.as_deref(),
+            Ok(PANIC_MESSAGE),
+            "the last error must describe the caught panic"
+        );
+
+        // SAFETY: both were allocated by this library and are freed once.
+        unsafe {
+            cedarling_free_string(last_error);
+            cedarling_free_result(&mut result);
+        }
+        assert!(
+            result.error_message.is_null(),
+            "freeing the output must release its error message"
+        );
+    }
+}
