@@ -71,10 +71,23 @@ final class FakeEntryManagerBehavior {
 
 	private int pendingVersionConflicts;
 
+	private boolean caseInsensitiveDomain;
+
 	private Consumer<Object> concurrentWriter;
 
 	private FakeEntryManagerBehavior() {
 		wire();
+	}
+
+	/**
+	 * Like {@link #create()}, but equality on {@code jansTraceDomainId} ignores case, as a
+	 * case-insensitive database collation does.
+	 */
+	static PersistenceEntryManager createCaseInsensitiveDomain() {
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		behavior.caseInsensitiveDomain = true;
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
 	}
 
 	static PersistenceEntryManager create() {
@@ -294,7 +307,7 @@ final class FakeEntryManagerBehavior {
 		return ((BaseEntry) entity).getDn();
 	}
 
-	private static boolean matches(Filter filter, Object entity) {
+	private boolean matches(Filter filter, Object entity) {
 		switch (filter.getType()) {
 		case AND:
 			for (Filter sub : filter.getFilters()) {
@@ -321,7 +334,7 @@ final class FakeEntryManagerBehavior {
 		}
 	}
 
-	private static boolean matchesEquality(Filter filter, Object entity) {
+	private boolean matchesEquality(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
 		Object expected = filter.getAssertionValue();
 		if (Boolean.TRUE.equals(filter.getMultiValued())) {
@@ -334,6 +347,9 @@ final class FakeEntryManagerBehavior {
 				}
 			}
 			return false;
+		}
+		if (caseInsensitiveDomain && "jansTraceDomainId".equals(filter.getAttributeName())) {
+			return attrValue != null && String.valueOf(attrValue).equalsIgnoreCase(String.valueOf(expected));
 		}
 		return attrValue != null && String.valueOf(attrValue).equals(String.valueOf(expected));
 	}

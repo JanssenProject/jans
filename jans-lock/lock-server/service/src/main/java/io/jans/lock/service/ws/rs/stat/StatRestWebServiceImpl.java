@@ -1,6 +1,6 @@
 package io.jans.lock.service.ws.rs.stat;
 
-import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
 
 import java.io.IOException;
 import java.io.StringWriter;

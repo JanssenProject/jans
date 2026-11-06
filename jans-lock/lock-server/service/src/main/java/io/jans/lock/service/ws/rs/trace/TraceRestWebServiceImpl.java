@@ -6,7 +6,7 @@
 
 package io.jans.lock.service.ws.rs.trace;
 
-import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

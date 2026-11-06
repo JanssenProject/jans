@@ -1,6 +1,6 @@
 package io.jans.lock.service.stat;
 
-import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
 
 import java.util.Base64;
 import java.util.List;

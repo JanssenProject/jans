@@ -56,6 +56,8 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class TraceCorrelationService {
 
+	private static final int POSITION_READ_ATTEMPTS = 3;
+
 	@Inject
 	private Logger log;
 
@@ -153,6 +155,28 @@ public class TraceCorrelationService {
 	}
 
 	/**
+	 * Re-reads the chain position, retrying a transient failure. When every attempt fails the rows
+	 * stay unknown and only the planned peers are updated; a peer that arrived after {@code plan()}
+	 * then goes uncorrelated, which is logged at error level.
+	 */
+	private List<StoredTraceRecord> readPosition(StoredTraceRecord inserted, CorrelationPlan plan) {
+		for (int attempt = 1; attempt <= POSITION_READ_ATTEMPTS; attempt++) {
+			try {
+				return store.findRecordsByChainPosition(plan.getPosition());
+			} catch (RuntimeException ex) {
+				if (attempt == POSITION_READ_ATTEMPTS) {
+					log.error("TRACE correlation afterInsert failed to re-query chain position after {} attempts: inserted={}",
+							attempt, inserted.getIdentity(), ex);
+				} else {
+					log.warn("TRACE correlation afterInsert chain position re-query failed, attempt {}: inserted={}",
+							attempt, inserted.getIdentity(), ex);
+				}
+			}
+		}
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Updates the equivocation peers and the successor at {@code sequence_number + 1} after
 	 * {@code inserted} became visible in the store, then re-queries the
 	 * insert's own chain position: {@link #plan} computed {@code equivocationPeers} from a
@@ -170,14 +194,7 @@ public class TraceCorrelationService {
 		// equivocation is never cleared, so rows already flagged need no per-row re-read; this keeps
 		// the work for one insert from growing with the number of records already at the position
 		Set<RecordIdentity> unseenPlanPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
-		List<StoredTraceRecord> rowsAtPosition;
-		try {
-			rowsAtPosition = store.findRecordsByChainPosition(plan.getPosition());
-		} catch (RuntimeException ex) {
-			log.error("TRACE correlation afterInsert failed to re-query chain position: inserted={}",
-					inserted.getIdentity(), ex);
-			rowsAtPosition = Collections.emptyList();
-		}
+		List<StoredTraceRecord> rowsAtPosition = readPosition(inserted, plan);
 		boolean newPeerFound = false;
 		boolean insertedFlagged = inserted.getFlags() != null && inserted.getFlags().isEquivocation();
 		for (StoredTraceRecord row : rowsAtPosition) {

@@ -16,7 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
 
 import java.util.List;
 

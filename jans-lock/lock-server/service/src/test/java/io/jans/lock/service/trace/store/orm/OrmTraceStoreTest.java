@@ -6,13 +6,21 @@
 
 package io.jans.lock.service.trace.store.orm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Arrays;
 import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.ExecutionIdentity;
 import io.jans.lock.service.trace.model.IngestionFlags;
+import io.jans.lock.service.trace.model.PolicyRecordQuery;
+import io.jans.lock.service.trace.model.PolicyRef;
 import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -85,6 +93,46 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 		return "{\"trace\":{\"event\":{\"tokens\":" + tokensJson
 				+ "}},\"producer_chain\":{\"producer_id\":\"" + chainProducerId + "\",\"producer_instance_id\":\""
 				+ chainInstanceId + "\",\"producer_chain_id\":\"" + chainId + "\",\"sequence_number\":" + seq + "}}";
+	}
+
+	private static StoredTraceRecord inDomain(StoredTraceRecord r, String domain) {
+		RecordIdentity id = new RecordIdentity(domain, r.getIdentity().getProducerId(), r.getIdentity().getRecordId());
+		ExecutionIdentity exec = new ExecutionIdentity(domain, r.getExecution().getExecutionAuthority(),
+				r.getExecution().getTraceExecutionId());
+		ChainIdentity chain = r.getChainPosition().getChainIdentity();
+		ChainPosition position = new ChainPosition(new ChainIdentity(domain, chain.getProducerId(),
+				chain.getProducerInstanceId(), chain.getProducerChainId()), r.getChainPosition().getSequenceNumber());
+		return new StoredTraceRecord(id, r.getAssertionRaw(), r.getContentDigest(), r.getVerification(),
+				r.getReceipt(), r.getFlags(), exec, position, r.getPrevRecordHash(), r.getTokenRefs(),
+				r.getEventKind(), r.getSignedAt(), r.getNodeId(), r.getCreatedAtMs(), r.getVersion(), r.getPolicy());
+	}
+
+	@Test
+	void testFindRecordsByPolicy_caseInsensitiveDomainCollation_pagesOverExactDomainOnly() throws Exception {
+		TraceStore collated = OrmTraceStores.create(FakeEntryManagerBehavior.createCaseInsensitiveDomain());
+		PolicyRef policy = new PolicyRef("store-1", "1.0.0", "sha256:" + "1".repeat(64));
+		// receipt sequences interleave the two spellings, so every raw page mixes both domains
+		for (int i = 1; i <= 6; i++) {
+			String domain = i % 2 == 0 ? DOMAIN : DOMAIN.toUpperCase();
+			StoredTraceRecord base = newRecord("producer-1", "record-" + i, "authority-1", "exec-" + i, 1L, i);
+			StoredTraceRecord withPolicy = new StoredTraceRecord(base.getIdentity(), base.getAssertionRaw(),
+					base.getContentDigest(), base.getVerification(), base.getReceipt(), base.getFlags(),
+					base.getExecution(), base.getChainPosition(), base.getPrevRecordHash(), base.getTokenRefs(),
+					base.getEventKind(), base.getSignedAt(), base.getNodeId(), base.getCreatedAtMs(),
+					base.getVersion(), policy);
+			collated.insertRecord(inDomain(withPolicy, domain));
+		}
+		PolicyRecordQuery query = new PolicyRecordQuery("store-1", null, null, null, null);
+
+		assertEquals(Arrays.asList("record-2"), recordIds(collated.findRecordsByPolicy(DOMAIN, query, 0, 1)));
+		assertEquals(Arrays.asList("record-4"), recordIds(collated.findRecordsByPolicy(DOMAIN, query, 1, 1)));
+		assertEquals(Arrays.asList("record-4", "record-6"),
+				recordIds(collated.findRecordsByPolicy(DOMAIN, query, 1, 5)));
+		assertTrue(collated.findRecordsByPolicy(DOMAIN, query, 3, 1).isEmpty());
+	}
+
+	private static List<String> recordIds(List<StoredTraceRecord> records) {
+		return records.stream().map(r -> r.getIdentity().getRecordId()).collect(java.util.stream.Collectors.toList());
 	}
 
 }

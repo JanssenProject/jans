@@ -74,6 +74,8 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
 
 	private static final int RECEIPT_LOOKUP_BATCH = 100;
+
+	private static final int POLICY_SCAN_BATCH = 100;
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
 	private static final String ATTR_RECEIPT_STATE = "jansTraceReceiptState";
 	private static final String ATTR_RECEIVED_AT_MS = "jansTraceReceivedAtMs";
@@ -299,10 +301,27 @@ public class OrmTraceStore implements TraceStore {
 		if (query.getReceivedToMs() != null) {
 			filters.add(Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedToMs()));
 		}
-		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
-				TraceRecordEntry.class, Filter.createANDFilter(filters), null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
-				Math.max(0, start), count, count);
-		return toStoredList(domainId, paged.getEntries());
+		Filter filter = Filter.createANDFilter(filters);
+		int skip = Math.max(0, start);
+		int wanted = skip + count;
+		int chunk = Math.max(count, POLICY_SCAN_BATCH);
+		// A case-insensitive collation can match another domain's rows, so the exact-domain filter
+		// has to run before start/count apply: scan chunks until enough exact rows are seen.
+		List<TraceRecordEntry> exact = new ArrayList<>();
+		for (int offset = 0; exact.size() < wanted; offset += chunk) {
+			List<TraceRecordEntry> entries = persistenceEntryManager.findPagedEntries(recordsBase(),
+					TraceRecordEntry.class, filter, null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING, offset, chunk, chunk)
+					.getEntries();
+			for (TraceRecordEntry entity : entries) {
+				if (domainId.equals(entity.getDomainId())) {
+					exact.add(entity);
+				}
+			}
+			if (entries.size() < chunk) {
+				break;
+			}
+		}
+		return toStoredList(domainId, exact.stream().skip(skip).limit(count).collect(Collectors.toList()));
 	}
 
 	@Override
