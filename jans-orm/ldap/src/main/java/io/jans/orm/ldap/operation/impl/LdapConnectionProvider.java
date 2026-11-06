@@ -27,6 +27,7 @@ import com.unboundid.util.ssl.HostNameSSLSocketVerifier;
 import com.unboundid.util.ssl.JVMDefaultTrustManager;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustAllTrustManager;
+import com.unboundid.util.ssl.TrustAllSSLSocketVerifier;
 import com.unboundid.util.ssl.TrustStoreTrustManager;
 
 import io.jans.orm.exception.operation.ConfigurationException;
@@ -166,6 +167,9 @@ public class LdapConnectionProvider {
 
             if (StringHelper.toBoolean(props.getProperty("ssl.verifyHostname"), true)) {
                 connectionOptions.setSSLSocketVerifier(new HostNameSSLSocketVerifier(true));
+            } else {
+                // overrides a verifier the SDK may install via defaultVerifyCertificateHostnames
+                connectionOptions.setSSLSocketVerifier(TrustAllSSLSocketVerifier.getInstance());
             }
 
             failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);
