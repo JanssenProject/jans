@@ -369,6 +369,13 @@ public class RateLimitServiceTest {
     }
 
     @Test
+    public void canonicalPath_whenPathHasParamsOrAlternateEncoding_shouldNormalize() {
+        assertEquals("/jans-auth/restv1/register", RateLimitService.canonicalPath("/jans-auth/restv1/register;x=1"));
+        assertEquals("/jans-auth/restv1/register", RateLimitService.canonicalPath("/jans-auth//restv1/regist%65r/"));
+        assertEquals("/jans-auth/restv1/register", RateLimitService.canonicalPath("/jans-auth/restv1/register"));
+    }
+
+    @Test
     public void saveSpaceIfNeeded_whenKeyIsLong_shouldReturnHashedKey() {
         String longKey = StringUtils.repeat("a", RateLimitService.KEY_LENGTH_LIMIT_FOR_DIGEST + 1);
         String hashedKey = RateLimitService.saveSpaceIfNeeded(longKey);

@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
@@ -30,6 +31,7 @@ import static org.apache.commons.lang3.BooleanUtils.isFalse;
 public class SpontaneousScopeService {
 
     private static final int DEFAULT_SPONTANEOUS_SCOPE_LIFETIME_IN_SECONDS = 60 * 60 * 24; // 24h
+    private static final long REGEXP_MATCH_TIMEOUT_MILLIS = 100;
     @Inject
     private Logger log;
     @Inject
@@ -115,16 +117,60 @@ public class SpontaneousScopeService {
             boolean result = spontaneousScope.equals(scopeRequested);
 
             if (!result) {
-                result = Pattern.matches(spontaneousScope, scopeRequested);
+                result = Pattern.matches(spontaneousScope, new DeadlineCharSequence(scopeRequested, System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(REGEXP_MATCH_TIMEOUT_MILLIS)));
             }
 
             if (result) {
                 log.trace("Scope {} allowed by spontaneous scope: {}", scopeRequested, spontaneousScope);
             }
             return result;
+        } catch (RegexpTimeoutException e) {
+            log.error("Spontaneous scope pattern evaluation timed out");
+        } catch (StackOverflowError e) {
+            log.error("Spontaneous scope pattern evaluation overflowed the stack");
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            log.error("Failed to evaluate spontaneous scope pattern");
         }
         return false;
+    }
+
+    private static class RegexpTimeoutException extends RuntimeException {
+        RegexpTimeoutException() {
+            super(null, null, false, false);
+        }
+    }
+
+    // Bounds catastrophic backtracking of client-supplied patterns: the regex engine reads every char through charAt.
+    private static class DeadlineCharSequence implements CharSequence {
+        private final CharSequence inner;
+        private final long deadline;
+
+        DeadlineCharSequence(CharSequence inner, long deadline) {
+            this.inner = inner;
+            this.deadline = deadline;
+        }
+
+        @Override
+        public char charAt(int index) {
+            if (System.nanoTime() - deadline > 0) {
+                throw new RegexpTimeoutException();
+            }
+            return inner.charAt(index);
+        }
+
+        @Override
+        public int length() {
+            return inner.length();
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return new DeadlineCharSequence(inner.subSequence(start, end), deadline);
+        }
+
+        @Override
+        public String toString() {
+            return inner.toString();
+        }
     }
 }

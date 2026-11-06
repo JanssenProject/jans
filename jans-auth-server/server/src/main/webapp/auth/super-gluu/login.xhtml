@@ -40,12 +40,16 @@
                 helper.onSignInCallback(authResult);
             }
 
-            var request = '${identity.getWorkingParameter('super_gluu_request')}';
-            var label = '${identity.getWorkingParameter('super_gluu_label')}';
+            var request = '';
+            var label = '';
             var qr_options = ${identity.getWorkingParameter('super_gluu_qr_options')};
-            var authmethod = '${identity.getWorkingParameter('super_gluu_auth_method')}';
+            var authmethod = '';
             
             $(document).ready(function() {
+            	request = document.getElementById("super_gluu_request").value;
+            	label = document.getElementById("super_gluu_label").value;
+            	authmethod = document.getElementById("super_gluu_auth_method").value;
+
             	if (authmethod == "enroll") {
             		document.getElementById("login").style.display = "none";
             		document.getElementById("subsequent").style.display = "none";
@@ -108,6 +112,9 @@ body {
 				action="#{request.contextPath}/postlogin.htm">
 				<input type="hidden" id="auth_result" name="auth_result" />
 			</form>
+			<input type="hidden" id="super_gluu_request" value="#{identity.getWorkingParameter('super_gluu_request')}" />
+			<input type="hidden" id="super_gluu_label" value="#{identity.getWorkingParameter('super_gluu_label')}" />
+			<input type="hidden" id="super_gluu_auth_method" value="#{identity.getWorkingParameter('super_gluu_auth_method')}" />
 
 			<table border="0" align="center">
 				<tr>

@@ -157,7 +157,7 @@ public class GrantService {
             remove(token);
 
             if (StringUtils.isNotBlank(token.getAuthorizationCode())) {
-                cacheService.remove(CacheGrant.cacheKey(token.getAuthorizationCode(), token.getGrantId()));
+                cacheService.remove(token.getAuthorizationCode()); // already stored hashed, equals cache key
             }
             if (shouldSaveInCache()) {
                 cacheService.remove(token.getTokenCode());
@@ -194,7 +194,7 @@ public class GrantService {
                     remove(t);
 
                     if (StringUtils.isNotBlank(t.getAuthorizationCode())) {
-                        cacheService.remove(CacheGrant.cacheKey(t.getAuthorizationCode(), t.getGrantId()));
+                        cacheService.remove(t.getAuthorizationCode()); // already stored hashed, equals cache key
                     }
                     if (shouldSaveInCache()) {
                         cacheService.remove(t.getTokenCode());
@@ -227,8 +227,11 @@ public class GrantService {
 
     public List<TokenEntity> getGrantsOfClient(String clientId) {
         try {
-            final String baseDn = clientService.buildClientDn(clientId);
-            return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
+            if (StringUtils.isBlank(clientId)) {
+                return Collections.emptyList();
+            }
+            final Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("clnId", clientId), Filter.createPresenceFilter("tknCde"));
+            return persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, filter);
         } catch (Exception e) {
             logException(e);
         }
@@ -376,6 +379,7 @@ public class GrantService {
             removeSilently(t);
         }
         cacheService.remove(CacheGrant.cacheKey(code, null));
+        cacheService.remove(code); // device code grants are cached under the raw device code
     }
 
     // authorization code is saved only in cache

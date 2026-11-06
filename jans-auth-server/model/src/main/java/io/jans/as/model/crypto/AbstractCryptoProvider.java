@@ -115,6 +115,25 @@ public abstract class AbstractCryptoProvider {
         return jsonObject;
     }
 
+    /**
+     * Same as {@link #getPublicKey(String, JSONObject, Algorithm)} but ignores keys explicitly restricted to a use other than signing.
+     */
+    public PublicKey getSignatureVerificationPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws CryptoProviderException {
+        JSONArray signingKeys = new JSONArray();
+        JSONArray webKeys = jwks.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
+        for (int i = 0; i < webKeys.length(); i++) {
+            JSONObject key = webKeys.getJSONObject(i);
+            String use = key.optString(JWKParameter.KEY_USE, null);
+            if (use == null || Use.SIGNATURE.getParamName().equals(use)) {
+                signingKeys.put(key);
+            }
+        }
+
+        JSONObject signingJwks = new JSONObject();
+        signingJwks.put(JWKParameter.JSON_WEB_KEY_SET, signingKeys);
+        return getPublicKey(alias, signingJwks, requestedAlgorithm);
+    }
+
     public PublicKey getPublicKey(String alias, JSONObject jwks, Algorithm requestedAlgorithm) throws CryptoProviderException {
         JSONArray webKeys = jwks.getJSONArray(JWKParameter.JSON_WEB_KEY_SET);
 

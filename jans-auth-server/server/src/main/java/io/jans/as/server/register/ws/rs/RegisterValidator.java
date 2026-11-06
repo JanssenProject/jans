@@ -31,7 +31,9 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
+import io.jans.as.server.service.net.PrivateAddressUtil;
 import io.jans.as.server.service.net.UriService;
+import io.jans.as.server.token.ws.rs.IdJagIssuerJwksService;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -45,6 +47,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.*;
 
 import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
@@ -89,6 +95,9 @@ public class RegisterValidator {
     @Inject
     private UriService uriService;
 
+    @Inject
+    private IdJagIssuerJwksService idJagIssuerJwksService;
+
     public void validateNotBlank(String input, String errorReason) {
         if (StringUtils.isBlank(input)) {
             log.trace("Failed to perform client action, reason: {}", errorReason);
@@ -130,6 +139,9 @@ public class RegisterValidator {
 
             final Jwt jwt = Jwt.parseOrThrow(requestParams);
             final SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
+            if (isUnsigned(jwt)) {
+                throw new InvalidJwtException("Unsigned request object is not allowed.");
+            }
             final SsaValidationConfigContext ssaContext = new SsaValidationConfigContext(jwt, SsaValidationType.DCR);
 
             final boolean isHmac = AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily());
@@ -141,6 +153,9 @@ public class RegisterValidator {
             String jwksUri = null;
             if (StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim())) {
                 jwksUri = softwareStatement.optString(appConfiguration.getDcrSignatureValidationSoftwareStatementJwksURIClaim());
+                if (StringUtils.isNotBlank(jwksUri) && !isAllowedJwksUri(jwksUri)) {
+                    throw new InvalidJwtException("jwks_uri from software statement is not allowed.");
+                }
             }
             if (StringUtils.isBlank(jwksUri) && StringUtils.isNotBlank(appConfiguration.getDcrSignatureValidationJwksUri())) {
                 jwksUri = appConfiguration.getDcrSignatureValidationJwksUri();
@@ -177,7 +192,11 @@ public class RegisterValidator {
 
     private boolean validateRequestObjectSignatureWithSsaValidationConfigs(String requestParams) {
         try {
-            final SsaValidationConfigContext ssaContext = new SsaValidationConfigContext(Jwt.parseOrThrow(requestParams), SsaValidationType.DCR);
+            final Jwt jwt = Jwt.parseOrThrow(requestParams);
+            if (isUnsigned(jwt)) {
+                return false;
+            }
+            final SsaValidationConfigContext ssaContext = new SsaValidationConfigContext(jwt, SsaValidationType.DCR);
             final boolean valid = ssaValidationConfigService.hasValidSignature(ssaContext);
             log.trace("Request object validation result for ssaValidationConfigs: {}", valid);
             if (valid) {
@@ -319,8 +338,16 @@ public class RegisterValidator {
                 return softwareStatement.getClaims().toJsonObject();
             }
 
+            if (isUnsigned(softwareStatement)) {
+                throw new InvalidJwtException("Unsigned software statement is not allowed.");
+            }
+
             if (validationType == SoftwareStatementValidationType.SCRIPT) {
-                return validateSoftwareStatementForScript(httpServletRequest, requestObject, softwareStatement, signatureAlgorithm);
+                final JSONObject claims = validateSoftwareStatementForScript(httpServletRequest, requestObject, softwareStatement, signatureAlgorithm);
+                if (claims != null) {
+                    SsaValidationConfigService.validateSsaTimeClaims(softwareStatement);
+                }
+                return claims;
             }
 
             if (validationType == SoftwareStatementValidationType.BUILTIN) {
@@ -350,11 +377,26 @@ public class RegisterValidator {
                 throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
             }
 
-            JSONObject jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
-                    null :
-                    uriService.loadJson(jwksUriClaim);
-            if (jwks == null && StringUtils.isNotBlank(jwksClaim)) {
-                jwks = new JSONObject(jwksClaim);
+            // keys pinned by admin for the claimed trusted issuer take precedence over keys named by the statement itself
+            final TrustedIssuerConfig trustedIssuerConfig = appConfiguration.getTrustedSsaIssuers()
+                    .get(softwareStatement.getClaims().getClaimAsString(JwtClaimName.ISSUER));
+            JSONObject jwks;
+            if (idJagIssuerJwksService.hasKeySource(trustedIssuerConfig)) {
+                jwks = idJagIssuerJwksService.getJwks(trustedIssuerConfig, softwareStatement.getHeader().getKeyId());
+                if (jwks == null) {
+                    throw new InvalidJwtException("Unable to load jwks of trusted software statement issuer.");
+                }
+            } else {
+                if (StringUtils.isNotBlank(jwksUriClaim) && !isAllowedJwksUri(jwksUriClaim)) {
+                    throw new InvalidJwtException("jwks_uri from software statement is not allowed.");
+                }
+
+                jwks = Strings.isNullOrEmpty(jwksUriClaim) ?
+                        null :
+                        uriService.loadJson(jwksUriClaim);
+                if (jwks == null && StringUtils.isNotBlank(jwksClaim)) {
+                    jwks = new JSONObject(jwksClaim);
+                }
             }
 
             boolean validSignature = cryptoProvider.verifySignature(softwareStatement.getSigningInput(),
@@ -364,12 +406,45 @@ public class RegisterValidator {
             if (!validSignature) {
                 throw new InvalidJwtException("Invalid cryptographic segment in the software statement");
             }
+            SsaValidationConfigService.validateSsaTimeClaims(softwareStatement);
 
             return softwareStatement.getClaims().toJsonObject();
         } catch (Exception e) {
             final String msg = "Invalid software_statement.";
             log.error(msg, e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, msg);
+        }
+    }
+
+    private static boolean isUnsigned(Jwt jwt) {
+        final SignatureAlgorithm alg = jwt.getHeader().getSignatureAlgorithm();
+        return alg == null || alg == SignatureAlgorithm.NONE || StringUtils.isBlank(jwt.getEncodedSignature());
+    }
+
+    /**
+     * jwks_uri taken from a not yet verified software statement must be https and must not point to a
+     * private/loopback address unless it is explicitly whitelisted (SSRF protection).
+     */
+    private boolean isAllowedJwksUri(String jwksUri) {
+        if (uriService.isExplicitlyWhitelisted(jwksUri)) {
+            return true;
+        }
+        try {
+            final URI uri = new URI(jwksUri);
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || StringUtils.isBlank(uri.getHost())) {
+                log.debug("jwks_uri must be https URL with host: {}", jwksUri);
+                return false;
+            }
+            for (InetAddress address : InetAddress.getAllByName(uri.getHost())) {
+                if (PrivateAddressUtil.isPrivateAddress(address)) {
+                    log.debug("jwks_uri resolves to private address: {}", jwksUri);
+                    return false;
+                }
+            }
+            return true;
+        } catch (URISyntaxException | UnknownHostException e) {
+            log.debug("Invalid or unresolvable jwks_uri: {}", jwksUri);
+            return false;
         }
     }
 

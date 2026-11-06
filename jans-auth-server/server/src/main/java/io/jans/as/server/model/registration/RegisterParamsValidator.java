@@ -38,6 +38,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -66,6 +67,7 @@ public class RegisterParamsValidator {
     private static final String HTTPS = "https";
     private static final String LOCALHOST = "localhost";
     private static final String LOOPBACK = "127.0.0.1";
+    private static final Set<String> FORBIDDEN_NATIVE_SCHEMES = Set.of("javascript", "data", "vbscript", "file", "blob");
 
     /**
      * Validates the parameters for a register request.
@@ -381,7 +383,11 @@ public class RegisterParamsValidator {
                 log.debug("Invalid schema for redirect_uri. Only HTTP (localhost) and HTTPS are supported, redirect_uri: '{}'", uri);
                 return false;
             case NATIVE:
-                // Any schemes (including custom) are allowed for native apps per RFC 8252 (OAuth 2.0 for Native Apps).
+                // Custom schemes are allowed for native apps per RFC 8252, but not schemes a browser executes or reads locally.
+                if (StringUtils.isBlank(scheme) || FORBIDDEN_NATIVE_SCHEMES.contains(scheme.toLowerCase(Locale.ROOT))) {
+                    log.debug("Forbidden scheme for native app redirect_uri: '{}'", uri);
+                    return false;
+                }
                 return true;
         }
         log.debug("redirect_uri is not valid, redirect_uri: '{}'", uri);

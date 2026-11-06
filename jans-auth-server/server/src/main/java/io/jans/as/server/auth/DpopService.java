@@ -50,6 +50,8 @@ public class DpopService {
     public static final String PRAGMA = "Pragma";
     public static final String DPOP_NONCE = "DPoP-Nonce";
     public static final String DPOP = "DPoP";
+    public static final String DPOP_PROOF_VALIDATED_ATTRIBUTE = "jans.dpop.proof.validated";
+    private static final String DPOP_NONCE_CACHE_PREFIX = "dpop_nonce_";
 
     @Inject
     private Logger log;
@@ -154,7 +156,9 @@ public class DpopService {
 
         // Validate the token was issued within an acceptable timeframe.
         int seconds = appConfiguration.getDpopTimeframe();
-        long diff = (new Date().getTime() - iat) / 1000;
+        // RFC 9449 iat is NumericDate seconds; legacy jans clients send milliseconds
+        long iatMillis = iat < 100_000_000_000L ? iat * 1000L : iat;
+        long diff = (new Date().getTime() - iatMillis) / 1000;
         if (diff > seconds) {
             throw new InvalidJwtException("The DPoP token has expired.");
         }
@@ -184,8 +188,8 @@ public class DpopService {
                     .header(DPOP_NONCE, generateDpopNonce()).build());
         }
 
-        final Object nonceValue = cacheService.get(nonce);
-        if (nonceValue == null) {
+        final Object nonceValue = cacheService.get(DPOP_NONCE_CACHE_PREFIX + nonce);
+        if (!nonce.equals(nonceValue)) {
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .type(MediaType.APPLICATION_JSON_TYPE)
@@ -198,7 +202,7 @@ public class DpopService {
 
     private String generateDpopNonce() {
         final String nonce = UUID.randomUUID().toString();
-        cacheService.put(appConfiguration.getDpopNonceCacheTime(), nonce, nonce);
+        cacheService.put(appConfiguration.getDpopNonceCacheTime(), DPOP_NONCE_CACHE_PREFIX + nonce, nonce);
         return nonce;
     }
 
@@ -244,6 +248,13 @@ public class DpopService {
             }
 
             if (isDpopBlank) return null;
+
+            if (!Boolean.TRUE.equals(httpRequest.getAttribute(DPOP_PROOF_VALIDATED_ATTRIBUTE))) {
+                if (!validateDpop(dpopStr)) {
+                    throw new InvalidJwtException("Invalid DPoP Proof.");
+                }
+                httpRequest.setAttribute(DPOP_PROOF_VALIDATED_ATTRIBUTE, Boolean.TRUE);
+            }
 
             String dpopJwkThumbprint = getDpopJwkThumbprint(dpopStr);
 
