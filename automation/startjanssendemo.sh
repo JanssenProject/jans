@@ -24,6 +24,7 @@ fi
 if [[ -z $JANS_VERSION ]]; then
   JANS_VERSION="0.0.0-nightly"
 fi
+JANS_ADMIN_PASSWORD="${JANS_ADMIN_PASSWORD:-Test1234#}"
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"
 if [[ -z $JANS_CI_CD_RUN ]]; then
@@ -82,6 +83,7 @@ if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   sudo microk8s.kubectl apply -f mysql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
+  adminPassword: "$JANS_ADMIN_PASSWORD"
   countryCode: US
   email: support@gluu.org
   orgName: Gluu
@@ -101,6 +103,7 @@ else
   sudo microk8s.kubectl apply -f pgsql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
+  adminPassword: "$JANS_ADMIN_PASSWORD"
   countryCode: US
   email: support@gluu.org
   orgName: Gluu

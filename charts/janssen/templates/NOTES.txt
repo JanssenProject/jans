@@ -74,9 +74,3 @@ deprecated.
 *********************************************************************************
 {{- end }}
 {{- end }}
-{{- if and .Release.IsInstall .Values.global.config.enabled (not .Values.global.cnConfiguratorCustomSchema.secretName) (not .Values.config.adminPassword) }}
-
-A random admin password was generated. Retrieve it with:
-
-  kubectl get secret {{ .Release.Name }}-admin-password -n {{ .Release.Namespace }} -o jsonpath='{.data.admin-password}' | base64 -d
-{{- end }}
