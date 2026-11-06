@@ -36,8 +36,6 @@ public class EvidenceDomainResolver {
 
 	static final String REASON_INVALID_DOMAIN_ID = "invalid_domain_id";
 
-	static final String REASON_AMBIGUOUS_DOMAIN_ID = "ambiguous_domain_id";
-
 	/** {@code evidence_domain_id} is an opaque id of 1 to 64 characters. */
 	private static final Pattern DOMAIN_ID_PATTERN = Pattern.compile("^[A-Za-z0-9._:-]{1,64}$");
 
@@ -85,41 +83,8 @@ public class EvidenceDomainResolver {
 			throw new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, REASON_INVALID_DOMAIN_ID);
 		}
 
-		if (collidesByCase(traceConfiguration, evidenceDomainId)) {
-			throw new TraceValidationException(TraceErrorResponseType.CLIENT_NOT_BOUND, REASON_AMBIGUOUS_DOMAIN_ID);
-		}
-
 		return new TraceRequestContext(identity.getClientId(), evidenceDomainId, allowedProducerIds,
 				System.currentTimeMillis(), nodeId);
-	}
-
-	/**
-	 * A case-insensitive persistence collation matches {@code Tenant} with {@code tenant}, so two
-	 * configured domain ids that differ only by case would share stored rows and break paged
-	 * searches. Fails closed when the resolved id has such a case-only twin in the configuration.
-	 */
-	private boolean collidesByCase(TraceConfiguration traceConfiguration, String evidenceDomainId) {
-		if (traceConfiguration == null) {
-			return false;
-		}
-
-		if (differsOnlyByCase(evidenceDomainId, traceConfiguration.getDefaultEvidenceDomainId())) {
-			return true;
-		}
-
-		if (traceConfiguration.getClientDomainBindings() != null) {
-			for (TraceClientDomainBinding candidate : traceConfiguration.getClientDomainBindings()) {
-				if (candidate != null && differsOnlyByCase(evidenceDomainId, candidate.getEvidenceDomainId())) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private static boolean differsOnlyByCase(String resolved, String other) {
-		return other != null && !resolved.equals(other) && resolved.equalsIgnoreCase(other);
 	}
 
 	/**

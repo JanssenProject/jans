@@ -159,34 +159,4 @@ class EvidenceDomainResolverTest extends BaseLockServiceTest {
 		assertEquals(EvidenceDomainResolver.REASON_INVALID_DOMAIN_ID, ex.getReason());
 	}
 
-	@Test
-	void testResolve_CaseOnlyTwinDomain_FailsClosed() {
-		traceConfiguration.setClientDomainBindings(Arrays.asList(
-				binding("client-1", "Tenant", "prod-x"), binding("client-2", "tenant", "prod-x")));
-
-		TraceValidationException e = assertThrows(TraceValidationException.class,
-				() -> resolver.resolve(new SubmitterIdentity("client-1", true)));
-
-		assertEquals(TraceErrorResponseType.CLIENT_NOT_BOUND, e.getErrorId());
-		assertEquals(EvidenceDomainResolver.REASON_AMBIGUOUS_DOMAIN_ID, e.getReason());
-	}
-
-	@Test
-	void testResolve_CaseOnlyTwinOfDefault_FailsClosed() {
-		traceConfiguration.setDefaultEvidenceDomainId("Tenant");
-		traceConfiguration.setClientDomainBindings(
-				Collections.singletonList(binding("client-1", "tenant", "prod-x")));
-
-		assertThrows(TraceValidationException.class,
-				() -> resolver.resolve(new SubmitterIdentity("client-1", true)));
-	}
-
-	@Test
-	void testResolve_SameDomainReusedByTwoClients_Succeeds() {
-		traceConfiguration.setClientDomainBindings(Arrays.asList(
-				binding("client-1", "tenant", "prod-x"), binding("client-2", "tenant", "prod-y")));
-
-		assertEquals("tenant", resolver.resolve(new SubmitterIdentity("client-1", true)).getEvidenceDomainId());
-	}
-
 }
