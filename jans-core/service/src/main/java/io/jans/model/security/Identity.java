@@ -134,11 +134,14 @@ public class Identity implements Serializable {
         }
     }
 
+    /**
+     * Credentials are not verified here; a principal must be supplied via
+     * {@link #acceptExternallyAuthenticatedPrincipal(Principal)} after verification elsewhere.
+     */
     public synchronized void authenticate() throws LoginException {
-        // If we're already authenticated, then don't authenticate again
-        if (!isLoggedIn() && !credentials.isInvalid()) {
-            principal = new SimplePrincipal(credentials.getUsername());
+        if (!isLoggedIn()) {
             credentials.setPassword(null);
+            throw new LoginException();
         }
     }
 

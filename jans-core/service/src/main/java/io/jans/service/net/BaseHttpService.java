@@ -9,6 +9,7 @@ package io.jans.service.net;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -36,6 +38,10 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -139,9 +145,9 @@ public abstract class BaseHttpService implements Serializable {
     	SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new File(trustStorePath), trustStorePassword.toCharArray()).build();
 	    SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(sslContext);
 
-	    return HttpClients.custom().setSSLSocketFactory(sslConSocFactory)
+	    return HttpClients.custom()
 				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-				.setConnectionManager(connectionManager).build();
+				.setConnectionManager(createConnectionManager(sslConSocFactory)).build();
 	}
 
 	public CloseableHttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword,
@@ -152,9 +158,23 @@ public abstract class BaseHttpService implements Serializable {
 				.loadKeyMaterial(new File(keyStorePath), keyStorePassword.toCharArray(), keyStorePassword.toCharArray()).build();
 	    SSLConnectionSocketFactory sslConSocFactory = new SSLConnectionSocketFactory(sslContext);
 
-	    return HttpClients.custom().setSSLSocketFactory(sslConSocFactory)
+	    return HttpClients.custom()
 				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-				.setConnectionManager(connectionManager).build();
+				.setConnectionManager(createConnectionManager(sslConSocFactory)).build();
+	}
+
+	// A client-supplied connection manager overrides setSSLSocketFactory, so custom trust material needs its own pool
+	private PoolingHttpClientConnectionManager createConnectionManager(SSLConnectionSocketFactory sslConSocFactory) {
+		Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+				.register("http", PlainConnectionSocketFactory.getSocketFactory())
+				.register("https", sslConSocFactory).build();
+
+		PoolingHttpClientConnectionManager sslConnectionManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+		sslConnectionManager.setMaxTotal(connectionManager.getMaxTotal());
+		sslConnectionManager.setDefaultMaxPerRoute(connectionManager.getDefaultMaxPerRoute());
+		sslConnectionManager.setValidateAfterInactivity(connectionManager.getValidateAfterInactivity());
+
+		return sslConnectionManager;
 	}
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
@@ -264,7 +284,12 @@ public abstract class BaseHttpService implements Serializable {
         HttpEntity entity = httpResponse.getEntity();
 		byte[] responseBytes = new byte[0];
 		if (entity != null) {
-			responseBytes = EntityUtils.toByteArray(entity);
+			// Avoid EntityUtils.toByteArray: it preallocates from the peer-declared Content-Length
+			try (InputStream is = entity.getContent()) {
+				if (is != null) {
+					responseBytes = IOUtils.toByteArray(is);
+				}
+			}
 		}
 
     	// Consume response content
@@ -276,7 +301,7 @@ public abstract class BaseHttpService implements Serializable {
 	}
 
 	public void consume(HttpResponse httpResponse) throws IOException {
-		if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
+		if (httpResponse == null) {
         	return;
         }
 
