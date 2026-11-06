@@ -35,6 +35,7 @@ fn is_unsafe_to_show(c: char) -> bool {
             '\u{061C}'
                 | '\u{200B}'..='\u{200F}'
                 | '\u{2028}'..='\u{202E}'
+                | '\u{2060}'..='\u{2064}'
                 | '\u{2066}'..='\u{2069}'
                 | '\u{FEFF}'
         )
@@ -56,10 +57,11 @@ mod tests {
     #[test]
     fn escapes_direction_and_invisible_format_characters() {
         assert_eq!(
-            Untrusted("\u{202e}x\u{2066}y\u{2028}z\u{200b}w\u{061c}v\u{feff}").to_string(),
-            r"\u{202e}x\u{2066}y\u{2028}z\u{200b}w\u{61c}v\u{feff}",
-            "bidi overrides, isolates, line separators and zero-width characters must print as \
-             escapes"
+            Untrusted("\u{202e}x\u{2066}y\u{2028}z\u{200b}w\u{061c}v\u{feff}u\u{2060}t\u{2064}")
+                .to_string(),
+            r"\u{202e}x\u{2066}y\u{2028}z\u{200b}w\u{61c}v\u{feff}u\u{2060}t\u{2064}",
+            "bidi overrides, isolates, line separators, zero-width characters, the word joiner \
+             and invisible operators must print as escapes"
         );
     }
 
