@@ -2,7 +2,10 @@
 
 package pathmatch
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestMatches(t *testing.T) {
 	tests := []struct {
@@ -31,7 +34,6 @@ func TestMatches(t *testing.T) {
 		{"named catch-all", "/api/*rest", "/api/a/b", true},
 		{"catch-all matches bare prefix", "/api/*", "/api", true},
 		{"catch-all other prefix", "/api/*", "/other/a", false},
-		{"catch-all only in last segment", "/api/*/items", "/api/x/orders", false},
 
 		{"double slash in request", "/api/users", "/api//users", true},
 		{"leading double slash", "/protected", "//protected", true},
@@ -47,8 +49,40 @@ func TestMatches(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Matches(tt.pattern, tt.reqPath); got != tt.want {
+			pattern, err := Parse(tt.pattern)
+			if err != nil {
+				t.Fatalf("Parse(%q) failed: %v", tt.pattern, err)
+			}
+			if got := pattern.Matches(tt.reqPath); got != tt.want {
 				t.Errorf("Matches(%q, %q) = %v, want %v", tt.pattern, tt.reqPath, got, tt.want)
+			}
+		})
+	}
+}
+
+// A segment the matcher would compare as a literal, while the router reads a parameter
+// in it, never matches, so the plugin would pass such requests on unauthorized.
+func TestParseRejectsSegmentsTheRouterReadsDifferently(t *testing.T) {
+	tests := []struct {
+		name    string
+		pattern string
+	}{
+		{"brace parameter inside a segment", "/file.{ext}"},
+		{"brace parameter after a prefix", "/api/v{version}/users"},
+		{"two brace parameters in a segment", "/api/{a}{b}"},
+		{"unclosed brace", "/api/{id"},
+		{"stray closing brace", "/api/id}"},
+		{"colon parameter inside a segment", "/api/items:batch"},
+		{"second colon in a colon parameter", "/api/:id:x"},
+		{"catch-all inside a segment", "/api/file*"},
+		{"catch-all before the last segment", "/api/*/items"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := Parse(tt.pattern)
+			if !errors.Is(err, ErrUnsupportedSegment) {
+				t.Errorf("Parse(%q) error = %v, want ErrUnsupportedSegment", tt.pattern, err)
 			}
 		})
 	}
