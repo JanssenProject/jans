@@ -2,6 +2,7 @@ package cedarlingopa
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"mime"
 	"net/http"
@@ -85,13 +86,52 @@ func (p *CedarPlugin) AccessEvaluationHandler(w http.ResponseWriter, r *http.Req
 		writeError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	p.writeResponse(w, p.evaluateOne(evaluationInput{
+		subject:  request.Subject,
+		action:   request.Action,
+		resource: request.Resource,
+		context:  request.Context,
+	}))
+}
+
+// evaluationInput is one access evaluation, with the batch defaults applied.
+type evaluationInput struct {
+	subject  *Entity
+	action   *Action
+	resource *Entity
+	context  map[string]any
+}
+
+// evaluateOne returns before the response is written, so the read lock is not
+// held while a client reads it. A slow client would otherwise keep the lock, and
+// once Reconfigure waits for the write lock no new request could take a read lock.
+func (p *CedarPlugin) evaluateOne(input evaluationInput) EvaluationResponse {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
-	response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
+	return *p.buildEvaluationResponse(input.subject, input.action, input.resource, input.context, p.config.Evaluation_Logic)
+}
+
+// evaluateBatch takes one read lock for the whole batch: re-acquiring it per item
+// while a writer waits in Reconfigure would deadlock. Like evaluateOne, it returns
+// before the response is written.
+func (p *CedarPlugin) evaluateBatch(inputs []evaluationInput, semantic EvaluationsSemantic) []EvaluationResponse {
+	p.mtx.RLock()
+	defer p.mtx.RUnlock()
+	responses := []EvaluationResponse{}
+	for _, input := range inputs {
+		response := p.buildEvaluationResponse(input.subject, input.action, input.resource, input.context, p.config.Evaluation_Logic)
+		responses = append(responses, *response)
+		if (semantic == DenyOnFirstDeny && !response.Decision) || (semantic == PermitOnFirstPermit && response.Decision) {
+			break
+		}
+	}
+	return responses
+}
+
+func (p *CedarPlugin) writeResponse(w http.ResponseWriter, response any) {
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		writeError(w, http.StatusInternalServerError, "Something went wrong")
 		p.logger.Info(err.Error())
-		return
 	}
 }
 
@@ -132,63 +172,52 @@ func (p *CedarPlugin) AccessEvaluationsHandler(w http.ResponseWriter, r *http.Re
 			writeError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		p.mtx.RLock()
-		defer p.mtx.RUnlock()
-		response := p.buildEvaluationResponse(request.Subject, request.Action, request.Resource, request.Context, p.config.Evaluation_Logic)
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			writeError(w, http.StatusInternalServerError, "Something went wrong")
-			p.logger.Info(err.Error())
-			return
-		}
+		p.writeResponse(w, p.evaluateOne(evaluationInput{
+			subject:  request.Subject,
+			action:   request.Action,
+			resource: request.Resource,
+			context:  request.Context,
+		}))
 		return
-	} else {
-		responseList := []EvaluationResponse{}
-		if request.Options == nil {
-			request.Options = &Option{
-				EvaluationSemantic: ExecuteAll,
-			}
-		}
-		// One read lock for the whole batch: re-acquiring it per item while a
-		// writer waits in Reconfigure would deadlock.
-		p.mtx.RLock()
-		defer p.mtx.RUnlock()
-		for _, eval := range request.Evaluations {
-			subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
-			if err != nil {
-				writeError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-			resource, err := mergeEntityHelper(eval.Resource, request.Resource, "resource")
-			if err != nil {
-				writeError(w, http.StatusBadRequest, err.Error())
-				return
-			}
-			action := eval.Action
-			if action == nil {
-				if request.Action == nil {
-					writeError(w, http.StatusBadRequest, "Invalid request: missing action")
-					return
-				} else {
-					action = request.Action
-				}
-			}
-			context := eval.Context
-			response := p.buildEvaluationResponse(subject, action, resource, context, p.config.Evaluation_Logic)
-			responseList = append(responseList, *response)
-			if request.Options.EvaluationSemantic == DenyOnFirstDeny {
-				if !response.Decision {
-					break
-				}
-			} else if request.Options.EvaluationSemantic == PermitOnFirstPermit {
-				if response.Decision {
-					break
-				}
-			}
-		}
-		if err := json.NewEncoder(w).Encode(responseList); err != nil {
-			writeError(w, http.StatusInternalServerError, "Something went wrong")
-			p.logger.Info(err.Error())
-			return
-		}
 	}
+	inputs, err := resolveEvaluations(request)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	semantic := ExecuteAll
+	if request.Options != nil {
+		semantic = request.Options.EvaluationSemantic
+	}
+	p.writeResponse(w, p.evaluateBatch(inputs, semantic))
+}
+
+// resolveEvaluations fills each evaluation's missing subject, action and resource
+// from the request, so a batch with an incomplete item is rejected before any is evaluated.
+func resolveEvaluations(request MultipleEvaluationRequest) ([]evaluationInput, error) {
+	inputs := make([]evaluationInput, 0, len(request.Evaluations))
+	for _, eval := range request.Evaluations {
+		subject, err := mergeEntityHelper(eval.Subject, request.Subject, "subject")
+		if err != nil {
+			return nil, err
+		}
+		resource, err := mergeEntityHelper(eval.Resource, request.Resource, "resource")
+		if err != nil {
+			return nil, err
+		}
+		action := eval.Action
+		if action == nil {
+			action = request.Action
+		}
+		if action == nil {
+			return nil, errors.New("Invalid request: missing action")
+		}
+		inputs = append(inputs, evaluationInput{
+			subject:  subject,
+			action:   action,
+			resource: resource,
+			context:  eval.Context,
+		})
+	}
+	return inputs, nil
 }
