@@ -75,6 +75,13 @@ pub struct BootstrapConfig {
 }
 
 impl Default for BootstrapConfig {
+    /// A starting point for building a configuration in code, with an empty
+    /// inline policy store.
+    ///
+    /// JWT signature and status validation are on, as for an empty set of
+    /// bootstrap properties, so token-based authorization needs trusted
+    /// issuers. Tests that pass unsigned tokens set `jwt_config` to
+    /// [`JwtConfig::new_without_validation`].
     fn default() -> Self {
         use crate::log::LogLevel;
         Self {
@@ -362,6 +369,20 @@ mod tests {
     use crate::LogLevel;
 
     use super::*;
+
+    #[test]
+    fn default_validates_jwt() {
+        let config = BootstrapConfig::default();
+
+        assert!(
+            config.jwt_config.jwt_sig_validation,
+            "BootstrapConfig::default must validate JWT signatures"
+        );
+        assert!(
+            config.jwt_config.jwt_status_validation,
+            "BootstrapConfig::default must validate JWT status"
+        );
+    }
 
     #[test]
     fn test_default_config_ships_independent_size_caps() {
