@@ -511,8 +511,8 @@ public class SqlConnectionProvider {
 		try (Connection con = this.poolingDataSource.getConnection()) {
 			return con.isValid(30);
 		} catch (Exception ex) {
-			// Driver exceptions may echo the JDBC URL (and credentials embedded in it), so the message is not logged
-			LOG.error("Failed to check connection: {}", ex.getClass().getName());
+			// Driver messages may echo connection.uri, which can embed credentials
+			LOG.error("Failed to check connection. Exception: {}", ex.getClass().getName());
 			isConnected = false;
 		}
 

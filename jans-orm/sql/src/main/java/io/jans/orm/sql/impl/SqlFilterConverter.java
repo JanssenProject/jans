@@ -66,7 +66,7 @@ public class SqlFilterConverter {
 	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 	
-	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
+	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}", "^", "$" };
 	
 	private Map<String, JDBCType> jdbcEnumTypesMap;
 
@@ -329,8 +329,9 @@ public class SqlFilterConverter {
         if (FilterType.SUBSTRING == type) {
         	String matchChar = multiValued && (SupportedDbType.POSTGRESQL == this.dbType) ? ".*" : "%";
         	StringBuilder like = new StringBuilder();
+            boolean regexMatch = multiValued && (SupportedDbType.POSTGRESQL == this.dbType);
             if (currentGenericFilter.getSubInitial() != null) {
-                like.append(currentGenericFilter.getSubInitial());
+                like.append(regexMatch ? escapeRegex(currentGenericFilter.getSubInitial()) : currentGenericFilter.getSubInitial());
             }
             like.append(matchChar);
 
@@ -351,7 +352,7 @@ public class SqlFilterConverter {
             }
 
             if (currentGenericFilter.getSubFinal() != null) {
-                like.append(currentGenericFilter.getSubFinal());
+                like.append(regexMatch ? escapeRegex(currentGenericFilter.getSubFinal()) : currentGenericFilter.getSubFinal());
             }
 
             Expression expression;

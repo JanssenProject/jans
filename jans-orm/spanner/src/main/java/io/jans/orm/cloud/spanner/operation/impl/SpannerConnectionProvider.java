@@ -437,6 +437,9 @@ public class SpannerConnectionProvider {
 		}
 
 		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
+		if (columTypes == null) {
+			throw new MappingException(String.format("Table '%s' has no column metadata", tableName));
+		}
 
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
