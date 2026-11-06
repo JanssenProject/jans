@@ -74,6 +74,11 @@ public class GrpcServerStarter {
 			return;
 		}
 
+    	if (GrpcServerMode.PLAIN_SERVER == grpcConfiguration.getServerMode() && grpcConfiguration.isUseTls()) {
+    		log.error("gRPC server was not started: useTls=true conflicts with serverMode=plain_server, use tls_server instead");
+    		return;
+    	}
+
     	int maxInboundMessageSize = GrpcLimits.maxInboundMessageSize(appConfiguration.getTraceConfiguration());
 
     	if (GrpcServerMode.TLS_SERVER == grpcConfiguration.getServerMode()) {
