@@ -5,6 +5,7 @@ from prompt_toolkit.widgets import Frame, Button
 from prompt_toolkit.layout.containers import VSplit, HSplit
 from prompt_toolkit.widgets import Button, Label, TextArea, Frame, CheckboxList
 from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
 from utils.utils import common_data
@@ -130,8 +131,7 @@ class JansLabelWidget:
             self.container.remove_label(value[0])
 
         dialog = common_data.app.get_confirm_dialog(
-            message=_(
-                _("Are you sure want to delete \n<b>{}</b> ?").format(value[1])),
+            message=HTML(_("Are you sure want to delete \n<b>{}</b> ?")).format(value[1]),
             confirm_handler=do_delete_value
         )
 
