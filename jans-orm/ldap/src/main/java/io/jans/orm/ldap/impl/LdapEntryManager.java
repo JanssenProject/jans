@@ -637,10 +637,10 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
     @Override
     protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
-        final String name = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG).toLowerCase();
+        final String name = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG).toLowerCase(Locale.ROOT);
         final String namePrefix = name + LANG_SEPARATOR;
         return attributesMap.entrySet().stream()
-                .filter(x -> x.getKey().toLowerCase().equals(name) || x.getKey().toLowerCase().startsWith(namePrefix))
+                .filter(x -> x.getKey().toLowerCase(Locale.ROOT).equals(name) || x.getKey().toLowerCase(Locale.ROOT).startsWith(namePrefix))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
