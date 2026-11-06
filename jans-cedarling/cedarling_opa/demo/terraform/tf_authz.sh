@@ -93,6 +93,14 @@ esac
 if [[ -n "${DESTROY_FLAG}" ]]; then
     CEDAR_ACTION="Destroy"
 fi
+# Terraform appends TF_CLI_ARGS and TF_CLI_ARGS_<command> to the arguments, so
+# they could add -destroy after authorization. Refuse them instead of parsing them.
+for var in TF_CLI_ARGS TF_CLI_ARGS_plan TF_CLI_ARGS_apply TF_CLI_ARGS_destroy; do
+    if [[ -n "${!var:-}" ]]; then
+        echo "tf_authz: ERROR — ${var} is set; unset it and pass the arguments directly." >&2
+        exit 1
+    fi
+done
 
 # ─── Verify dependencies ─────────────────────────────────────────────────────
 for cmd in curl jq; do
