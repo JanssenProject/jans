@@ -95,7 +95,7 @@ class ClientRegistration(ClientRegistrationType):
         claims = softwareStatement.getClaims()
         jti = claims.getClaimAsString("jti")
         issuer = claims.getClaimAsString("iss")
-        if not jti or not claims.hasClaim("software_id"):
+        if not jti or not issuer or not claims.hasClaim("software_id"):
             return False
         for idTokenClaim in ["nonce", "at_hash", "c_hash", "auth_time", "sid"]:
             if claims.hasClaim(idTokenClaim):
