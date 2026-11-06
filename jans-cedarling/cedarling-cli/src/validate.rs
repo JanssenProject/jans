@@ -7,6 +7,8 @@ use anyhow::{Context, Result};
 use cedarling::{Cedarling, LevelResult, PolicyStoreConfig};
 use colored::Colorize;
 
+use crate::output::Untrusted;
+
 /// Validates a policy store according to parse, schema, and metadata rules, outputting diagnostics
 /// to stdout.
 ///
@@ -32,8 +34,8 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         println!(
             "  {} {}: {}",
             "warning:".yellow(),
-            escape_controls(&warning.file),
-            escape_controls(&warning.message)
+            Untrusted(&warning.file),
+            Untrusted(&warning.message)
         );
     }
 
@@ -41,8 +43,8 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         println!(
             "  {} {}: {}",
             "warning:".yellow(),
-            unknown.file,
-            unknown.message
+            Untrusted(&unknown.file),
+            Untrusted(&unknown.message)
         );
     }
 
@@ -82,37 +84,24 @@ fn print_level(name: &str, result: &LevelResult) {
     match result {
         LevelResult::Ok => println!("  {name} {dots} {}", "OK".green()),
         LevelResult::Skipped { reason } => {
-            println!("  {name} {dots} skipped ({})", escape_controls(reason));
+            println!("  {name} {dots} skipped ({})", Untrusted(reason));
         },
         LevelResult::Failed { errors } => {
             println!("  {name} {dots} {}", "FAIL".red());
             for e in errors {
-                let file = escape_controls(&e.file);
+                let file = Untrusted(&e.file).to_string();
                 let loc = match (e.line, e.column) {
                     (Some(l), Some(c)) => format!("{file}:{l}:{c}"),
                     (Some(l), None) => format!("{file}:{l}"),
                     _ => file,
                 };
-                println!("    {loc}: {}", escape_controls(&e.message));
+                println!("    {loc}: {}", Untrusted(&e.message));
             }
         },
     }
 }
 
-/// Makes control characters (line breaks, terminal escapes) from policy-store content visible
-/// instead of letting them alter the report or the terminal.
-pub(crate) fn escape_controls(s: &str) -> String {
-    s.chars()
-        .map(|c| {
-            if c.is_control() {
-                c.escape_default().to_string()
-            } else {
-                c.to_string()
-            }
-        })
-        .collect()
-}
-
+/// Printed as is: the operator set the path or URL in the bootstrap config.
 fn describe_source(cfg: &PolicyStoreConfig) -> String {
     use cedarling::PolicyStoreSource;
     match &cfg.source {
