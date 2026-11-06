@@ -118,6 +118,14 @@ runs:
         if [[ -n "${DESTROY_FLAG}" ]]; then
           CEDAR_ACTION="Destroy"
         fi
+        # Terraform appends TF_CLI_ARGS and TF_CLI_ARGS_<command> to the arguments, so
+        # they could add -destroy after authorization. Refuse them instead of parsing them.
+        for var in TF_CLI_ARGS TF_CLI_ARGS_plan TF_CLI_ARGS_apply TF_CLI_ARGS_destroy; do
+          if [[ -n "${!var:-}" ]]; then
+            echo "::error::${var} is set; unset it and pass the arguments in terraform_command."
+            exit 1
+          fi
+        done
 
         # ── Decode JWT claims for display (Cedarling verifies the signature) ──
         JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)
