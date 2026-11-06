@@ -9,7 +9,7 @@ def main():
     if host == "0.0.0.0":  # nosec: B104
         host = "127.0.0.1"
     port = os.environ.get("CN_LINK_JETTY_PORT", "9091")
-    req = requests.get(f"http://{host}:{port}/jans-link/sys/health-check", timeout=15)
+    req = requests.get(f"http://{host}:{port}/jans-link/sys/health-check", timeout=5)
     if not req.ok:
         sys.exit(1)
 
