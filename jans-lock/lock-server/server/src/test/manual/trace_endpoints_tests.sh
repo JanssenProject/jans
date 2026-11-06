@@ -171,11 +171,18 @@ skip() { SKIP=$((SKIP + 1)); echo "⚠️  skipped: $1"; }
 # file inside the private temp directory: neither shows up in the process list.
 # The token is checked against the RFC 6750 b64token grammar before it reaches a curl config.
 get_token() {
-  local id="$1" secret="$2" scope="$3" token
-  token=$(printf 'user = "%s:%s"\n' "$id" "$secret" \
+  local id="$1" secret="$2" scope="$3" response token error
+  response=$(printf 'user = "%s:%s"\n' "$id" "$secret" \
     | curl "${CURL_BASE[@]}" -K - "$TOKEN_URL" \
-        -d "grant_type=client_credentials" -d "scope=${scope}" \
-    | jq -r '.access_token // empty') || return 1
+        -d "grant_type=client_credentials" -d "scope=${scope}") || return 1
+  token=$(jq -r '.access_token // empty' <<<"$response") || return 1
+  if [[ -z "$token" ]]; then
+    error=$(jq -r '.error // empty' <<<"$response") || return 1
+    if [[ "$error" != "invalid_scope" ]]; then
+      echo "❌ token endpoint error for scope ${scope}: ${error:-no access_token in response}" >&2
+      return 1
+    fi
+  fi
   if [[ -n "$token" && ! "$token" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; then
     echo "❌ access_token is not a valid bearer token" >&2
     return 1

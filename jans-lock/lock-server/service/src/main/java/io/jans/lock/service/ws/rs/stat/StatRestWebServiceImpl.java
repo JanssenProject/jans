@@ -204,7 +204,8 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
         months = ServerUtil.urlDecode(months);
 
         // Months.getMonths expands the whole range, so bound it first
-        if (StringUtils.isBlank(months) && startMonth.length() == 6 && endMonth.length() == 6
+        if (StringUtils.isBlank(months) && startMonth != null && startMonth.length() == 6
+                && endMonth != null && endMonth.length() == 6
                 && ChronoUnit.MONTHS.between(Months.parse(startMonth), Months.parse(endMonth)) >= StatResponseService.MAX_MONTHS) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Too many months requested, maximum is " + StatResponseService.MAX_MONTHS);
         }
