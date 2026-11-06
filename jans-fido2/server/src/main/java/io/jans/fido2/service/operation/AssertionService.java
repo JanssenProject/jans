@@ -131,6 +131,26 @@ public class AssertionService {
 	 * Requires mandatory parameters: username Support non mandatory parameters:
 	 * userVerification, origin, extensions, timeout
 	 */
+	// The start hook may tighten userVerification; it must drive the ceremony rather than the caller's value
+	private void applyStartHookUserVerification(AssertionOptions assertionOptions, JsonNode assertionOptionsNode) {
+		JsonNode userVerificationNode = assertionOptionsNode == null ? null : assertionOptionsNode.get("userVerification");
+		if (userVerificationNode == null || !userVerificationNode.isTextual()) {
+			return;
+		}
+		try {
+			assertionOptions.setUserVerification(UserVerification.valueOf(userVerificationNode.asText()));
+		} catch (IllegalArgumentException e) {
+			throw errorResponseFactory.invalidRequest("Invalid userVerification");
+		}
+	}
+
+	// A failed enabled extension is replaced by a dummy that returns false, so false must block the ceremony
+	private void requireExtensionAllowed(boolean allowed) {
+		if (!allowed) {
+			throw errorResponseFactory.forbiddenException();
+		}
+	}
+
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
 		// Only the payload itself is mandatory here. An absent username is legitimate -
 		// it is how usernameless (discoverable credential) authentication is requested,
@@ -147,10 +167,12 @@ public class AssertionService {
 		long startTime = System.currentTimeMillis();
 
 		// Apply external custom scripts
+		JsonNode assertionOptionsNode = CommonUtilService.toJsonNode(assertionOptions);
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
-				CommonUtilService.toJsonNode(assertionOptions), httpRequest, httpResponse);
-		externalFido2InterceptionService.authenticateAssertionStart(
-				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
+				assertionOptionsNode, httpRequest, httpResponse);
+		requireExtensionAllowed(externalFido2InterceptionService.authenticateAssertionStart(
+				assertionOptionsNode, externalFido2InterceptionContext));
+		applyStartHookUserVerification(assertionOptions, assertionOptionsNode);
 
 		// Verify request parameters
 		String username = assertionOptions.getUsername();
@@ -239,8 +261,8 @@ public class AssertionService {
 		authenticationPersistenceService.save(authenticationEntity);
 
 		externalFido2InterceptionContext.addToContext(null, authenticationEntity);
-		externalFido2InterceptionService.authenticateAssertionFinish(CommonUtilService.toJsonNode(assertionOptions),
-				externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService.authenticateAssertionFinish(
+				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext));
 
 		// Record metrics for authentication attempt
 		try {
@@ -374,8 +396,8 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
-		externalFido2InterceptionService
-				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService
+				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext));
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);
@@ -451,6 +473,13 @@ public class AssertionService {
 		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
 			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
 		}
+
+		// Compromised or canceled credentials must not authenticate, including usernameless ceremonies
+		if (registrationEntry.getRegistrationStatus() != Fido2RegistrationStatus.registered) {
+			throw errorResponseFactory.invalidRequest("Credential is not in registered state");
+		}
+		// The nested status is written back on update; keep it in line with the authoritative one
+		registrationData.setStatus(registrationEntry.getRegistrationStatus());
 
 		// Set username and authenticator type for metrics
 		username = registrationData.getUsername();

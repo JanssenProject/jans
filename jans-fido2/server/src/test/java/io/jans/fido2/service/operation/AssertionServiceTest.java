@@ -29,10 +29,12 @@ import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -97,6 +99,14 @@ class AssertionServiceTest {
     private HttpServletResponse httpResponse;
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeEach
+    void allowInterceptionHooks() {
+        when(externalFido2InterceptionService.authenticateAssertionStart(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.authenticateAssertionFinish(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.verifyAssertionStart(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.verifyAssertionFinish(any(), any())).thenReturn(true);
+    }
 
     /**
      * CONF-09: the clientData challenge must be explicitly compared to the issued challenge.
@@ -578,6 +588,7 @@ class AssertionServiceTest {
         registrationData.setUsername("alice");
         Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
         when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationEntry.getRegistrationStatus()).thenReturn(Fido2RegistrationStatus.registered);
         when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
 
         // Fails after authenticationPersistenceService.update() has already returned successfully.
@@ -621,6 +632,7 @@ class AssertionServiceTest {
         registrationData.setUsername("alice");
         Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
         when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationEntry.getRegistrationStatus()).thenReturn(Fido2RegistrationStatus.registered);
         when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
 
         doThrow(new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match"))

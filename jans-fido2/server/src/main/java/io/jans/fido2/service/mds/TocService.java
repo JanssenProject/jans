@@ -652,7 +652,19 @@ public class TocService {
 			throw new Fido2RuntimeException(
 					"Fido2 MDS cert and TOC properties are not set, the downloaded TOC can't be verified");
 		}
-		parseTOC(mdsTocRootCertsFolder, encodedToc);
+		LocalDate cachedNextUpdate = cachedTocNextUpdate();
+		Pair<LocalDate, Map<String, JsonNode>> parsedToc = parseTOC(mdsTocRootCertsFolder, encodedToc);
+		LocalDate tocNextUpdate = parsedToc.getFirst();
+		if (tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
+			// An expired blob is still better than none (FIDO may publish late), but it must not roll
+			// back a newer cached TOC, e.g. when replayed by a mirror
+			if (cachedNextUpdate != null && tocNextUpdate.isBefore(cachedNextUpdate)) {
+				nextUpdate = cachedNextUpdate;
+				throw new Fido2RuntimeException("The downloaded MDS TOC expired on " + tocNextUpdate
+						+ " and is older than the cached one");
+			}
+			log.warn("The downloaded MDS TOC expired on {}, using it until a newer one is published", tocNextUpdate);
+		}
 	}
 
 	/**
@@ -768,6 +780,24 @@ public class TocService {
 		} catch (Exception e) {
 			log.error("Failed to Save the nextUpdateDate of the MDS into jansDocument ", e);
 			throw new DocumentException(e);
+		}
+	}
+
+	// After a restart nothing is loaded in memory yet, so fall back to the date stored with the cached TOC
+	private LocalDate cachedTocNextUpdate() {
+		if (nextUpdate != null) {
+			return nextUpdate;
+		}
+		try {
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(appConfiguration.getFido2Configuration().getMdsTocsFolder());
+			if (documents == null || documents.isEmpty()) {
+				return null;
+			}
+			String description = documents.get(0).getDescription();
+			return (description == null || "mdsTocsFolder".equals(description)) ? null : stringToLocalDate(description);
+		} catch (Exception e) {
+			log.debug("No persisted MDS TOC date available: {}", e.getMessage());
+			return null;
 		}
 	}
 
