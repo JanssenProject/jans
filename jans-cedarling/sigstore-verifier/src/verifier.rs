@@ -110,8 +110,8 @@ impl SigstoreBlobVerifier {
     /// `build.rs` only guarantees freshness at compile time, and a binary
     /// can keep running long after being built, so a cert can age out after
     /// the fact. If that leaves no valid trusted root at all, `verify()`
-    /// calls fail with the existing "no trusted root found" chain-validation
-    /// error rather than construction itself failing.
+    /// calls fail with [`CertificateChainError::NoTrustedPath`](crate::CertificateChainError::NoTrustedPath) rather than
+    /// construction itself failing.
     ///
     /// # Panics
     ///

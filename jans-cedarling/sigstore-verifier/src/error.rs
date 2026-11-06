@@ -22,8 +22,8 @@ pub enum SigstoreVerificationError {
     CertificateParsing { reason: String },
 
     /// The certificate chain could not be validated to a trusted root.
-    #[error("certificate chain validation failed: {reason}")]
-    CertificateChain { reason: String },
+    #[error("certificate chain validation failed: {0}")]
+    CertificateChain(#[from] CertificateChainError),
 
     /// The SCT (Signed Certificate Timestamp) verification failed.
     #[error("SCT verification failed: {reason}")]
@@ -69,4 +69,46 @@ pub enum SigstoreVerificationError {
     /// The signature or certificate uses an unsupported algorithm.
     #[error("unsupported algorithm: {algorithm}")]
     UnsupportedAlgorithm { algorithm: String },
+}
+
+/// Why a certificate chain was not accepted.
+#[derive(Debug, PartialEq, Eq, thiserror::Error)]
+pub enum CertificateChainError {
+    #[error("too many candidate intermediate certificates: {count} (max {max})")]
+    TooManyCandidates { count: usize, max: usize },
+    #[error("no trusted path: nothing issues certificate with issuer DN '{issuer_dn}'")]
+    NoTrustedPath { issuer_dn: String },
+    #[error(
+        "pathLen constraint violated: root allows {path_len} subordinate CA(s), but {depth} below it"
+    )]
+    RootPathLen { path_len: u32, depth: u32 },
+    #[error(
+        "pathLen constraint violated: intermediate allows {path_len} subordinate CA(s), but {depth} below it"
+    )]
+    IntermediatePathLen { path_len: u32, depth: u32 },
+    #[error("certificate chain has more than {max} intermediates")]
+    TooManyIntermediates { max: u32 },
+    #[error(
+        "issuer/subject mismatch: child issuer '{child_issuer}' != parent subject '{parent_subject}'"
+    )]
+    IssuerMismatch {
+        child_issuer: String,
+        parent_subject: String,
+    },
+    #[error("child certificate has no signature value")]
+    MissingSignature,
+    #[error("certificate signature verification failed")]
+    InvalidSignature,
+    #[error("leaf certificate must not be a CA (BasicConstraints CA:false)")]
+    LeafIsCa,
+    #[error("leaf certificate must have code signing EKU (1.3.6.1.5.5.7.3.3)")]
+    LeafWithoutCodeSigningEku,
+    #[error("leaf certificate must have KeyUsage digitalSignature")]
+    LeafWithoutDigitalSignature,
+    #[error("CA certificate must have BasicConstraints CA:true")]
+    CaWithoutCaFlag,
+    #[error("CA certificate must have KeyUsage keyCertSign")]
+    CaWithoutKeyCertSign,
+    #[error("CA certificates with NameConstraints are not supported")]
+    CaWithNameConstraints,
 }

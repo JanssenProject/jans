@@ -11,7 +11,7 @@
 use x509_parser::certificate::X509Certificate;
 use x509_parser::prelude::*;
 
-use crate::error::SigstoreVerificationError;
+use crate::error::{CertificateChainError, SigstoreVerificationError};
 
 /// OID for the Fulcio OIDC issuer extension (v2).
 const OID_ISSUER_V2: &str = "1.3.6.1.4.1.57264.1.8";
@@ -390,21 +390,15 @@ impl Cert {
     /// Validate that the leaf certificate is not a CA and has the code signing EKU.
     pub fn validate_leaf(&self) -> Result<(), SigstoreVerificationError> {
         if self.is_ca {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "leaf certificate must not be a CA (BasicConstraints CA:false)".into(),
-            });
+            return Err(CertificateChainError::LeafIsCa.into());
         }
 
         if !self.has_code_signing_eku {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "leaf certificate must have code signing EKU (1.3.6.1.5.5.7.3.3)".into(),
-            });
+            return Err(CertificateChainError::LeafWithoutCodeSigningEku.into());
         }
 
         if !self.has_digital_signature {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "leaf certificate must have KeyUsage digitalSignature".into(),
-            });
+            return Err(CertificateChainError::LeafWithoutDigitalSignature.into());
         }
 
         Ok(())
@@ -413,23 +407,17 @@ impl Cert {
     /// Validate that a trust anchor / CA certificate has CA:true and keyCertSign.
     pub fn validate_ca(&self) -> Result<(), SigstoreVerificationError> {
         if !self.is_ca {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "CA certificate must have BasicConstraints CA:true".into(),
-            });
+            return Err(CertificateChainError::CaWithoutCaFlag.into());
         }
 
         if !self.has_key_cert_sign {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "CA certificate must have KeyUsage keyCertSign".into(),
-            });
+            return Err(CertificateChainError::CaWithoutKeyCertSign.into());
         }
 
         // Not enforced during path validation, so a name-constrained CA could
         // otherwise vouch for identities outside its permitted subtrees.
         if self.has_name_constraints {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "CA certificates with NameConstraints are not supported".into(),
-            });
+            return Err(CertificateChainError::CaWithNameConstraints.into());
         }
 
         Ok(())
@@ -578,7 +566,12 @@ mod tests {
             .validate_leaf()
             .expect_err("leaf lacking code-signing EKU must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::LeafWithoutCodeSigningEku
+                )
+            ),
             "must be CertificateChain from EKU check, got {err:?}"
         );
     }
@@ -602,7 +595,12 @@ mod tests {
             .validate_leaf()
             .expect_err("leaf lacking KeyUsage digitalSignature must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::LeafWithoutDigitalSignature
+                )
+            ),
             "must be CertificateChain from KeyUsage check, got {err:?}"
         );
     }
@@ -622,7 +620,10 @@ mod tests {
             .validate_leaf()
             .expect_err("a CA:true leaf must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(CertificateChainError::LeafIsCa)
+            ),
             "must be CertificateChain from CA check, got {err:?}"
         );
     }
