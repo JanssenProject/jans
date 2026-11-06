@@ -59,11 +59,8 @@ pub(crate) fn validate_chain(
     let mut current = leaf;
     // `depth` = number of intermediate CAs already traversed below `current`.
     let mut depth: u32 = 0;
-    let max_depth = u32::try_from(intermediates.len())
-        .unwrap_or(u32::MAX)
-        .saturating_add(1)
-        .min(MAX_PATH_INTERMEDIATES);
-    // An intermediate is used at most once on a path, which also rules out cycles.
+    // An intermediate is used at most once on a path, which also rules out cycles
+    // and bounds the walk by the candidate pool.
     let mut used = vec![false; intermediates.len()];
     // Track the first issuing cert (the leaf's immediate issuer).
     let mut leaf_issuer: Option<Cert> = None;
@@ -132,9 +129,11 @@ pub(crate) fn validate_chain(
 
         current = parent;
         depth += 1;
-        if depth > max_depth {
+        if depth > MAX_PATH_INTERMEDIATES {
             return Err(SigstoreVerificationError::CertificateChain {
-                reason: "certificate chain exceeds maximum depth (possible loop)".into(),
+                reason: format!(
+                    "certificate chain has more than {MAX_PATH_INTERMEDIATES} intermediates"
+                ),
             });
         }
     }
@@ -380,10 +379,10 @@ mod tests {
     }
 
     #[test]
-    fn chain_depth_exceeding_candidate_pool_rejected() {
+    fn self_issued_candidate_is_used_once() {
         // A self-signed CA fed in as a candidate "intermediate" (not a
         // trusted root) is its own issuer/subject match, so the path
-        // builder would loop on it forever if it could revisit a candidate.
+        // builder would loop on it if it could revisit a candidate.
         let looping_ca = make_root("looping-ca");
         let leaf = make_leaf(&looping_ca, &LeafOpts::default());
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
@@ -392,8 +391,12 @@ mod tests {
         let err = validate_chain(&leaf_cert, &[looping_ca_cert], &[], it)
             .expect_err("a self-referential candidate pool must not loop forever");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
-            "must be CertificateChain from the loop guard, got {err:?}"
+            matches!(
+                &err,
+                SigstoreVerificationError::CertificateChain { reason }
+                    if reason.starts_with("no trusted path:")
+            ),
+            "the used candidate is not tried again, so no path is left, got {err:?}"
         );
     }
 
@@ -407,8 +410,73 @@ mod tests {
         let err = validate_chain(&leaf_cert, &decoys, &[root_cert], anchor(&leaf_cert))
             .expect_err("a candidate pool above the cap must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
-            "must be CertificateChain from the candidate cap, got {err:?}"
+            matches!(
+                &err,
+                SigstoreVerificationError::CertificateChain { reason }
+                    if reason.starts_with("too many candidate intermediate certificates")
+            ),
+            "must be rejected by the candidate cap, got {err:?}"
+        );
+    }
+
+    /// A leaf issued through `count` intermediates below one root.
+    struct LongChain {
+        leaf: Cert,
+        intermediates: Vec<Cert>,
+        root: Cert,
+    }
+
+    fn long_chain(count: usize) -> LongChain {
+        let root = make_root("fulcio-root");
+        let mut cas = Vec::with_capacity(count);
+        for i in 0..count {
+            let inter = make_intermediate(
+                &format!("intermediate-{i}"),
+                None,
+                cas.last().unwrap_or(&root),
+            );
+            cas.push(inter);
+        }
+        let leaf = make_leaf(cas.last().unwrap_or(&root), &LeafOpts::default());
+        LongChain {
+            leaf: Cert::from_der(&leaf.der).expect("parse leaf"),
+            intermediates: cas
+                .iter()
+                .map(|ca| Cert::from_der(&ca.der).expect("parse intermediate"))
+                .collect(),
+            root: Cert::from_der(&root.der).expect("parse root"),
+        }
+    }
+
+    #[test]
+    fn path_with_max_intermediates_validates() {
+        let chain = long_chain(MAX_PATH_INTERMEDIATES as usize);
+        validate_chain(
+            &chain.leaf,
+            &chain.intermediates,
+            &[chain.root],
+            anchor(&chain.leaf),
+        )
+        .expect("a path with exactly the maximum number of intermediates must validate");
+    }
+
+    #[test]
+    fn path_with_too_many_intermediates_rejected() {
+        let chain = long_chain(MAX_PATH_INTERMEDIATES as usize + 1);
+        let err = validate_chain(
+            &chain.leaf,
+            &chain.intermediates,
+            &[chain.root],
+            anchor(&chain.leaf),
+        )
+        .expect_err("a path with one intermediate over the maximum must be rejected");
+        assert!(
+            matches!(
+                &err,
+                SigstoreVerificationError::CertificateChain { reason }
+                    if reason.starts_with("certificate chain has more than")
+            ),
+            "must be rejected by the path length limit, got {err:?}"
         );
     }
 
