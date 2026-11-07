@@ -5,7 +5,7 @@ import requests
 
 
 def main():
-    host = os.environ.get("CN_AUTH_JETTY_HOST", "0.0.0.0").strip()  # nosec: B104
+    host = os.environ.get("CN_LINK_JETTY_HOST", "0.0.0.0").strip()  # nosec: B104
     if host in ("0.0.0.0", "::", "[::]", ""):  # nosec: B104
         host = "127.0.0.1"
     port = os.environ.get("CN_LINK_JETTY_PORT", "9091").strip()
