@@ -6,10 +6,40 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/jans/terraform-provider-jans/jans"
 )
+
+func TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes(t *testing.T) {
+	grantTypesSchema := resourceAppConfiguration().Schema["grant_types_supported"]
+	validateGrantType := grantTypesSchema.Elem.(*schema.Schema).ValidateDiagFunc
+
+	grantTypes := []string{
+		"none",
+		"authorization_code",
+		"client_credentials",
+		"implicit",
+		"password",
+		"refresh_token",
+		"urn:ietf:params:oauth:grant-type:device_code",
+		"urn:ietf:params:oauth:grant-type:token-exchange",
+		"urn:ietf:params:oauth:grant-type:uma-ticket",
+		"urn:openid:params:grant-type:ciba",
+		"urn:ietf:params:oauth:grant-type:jwt-bearer",
+	}
+
+	for _, grantType := range grantTypes {
+		t.Run(grantType, func(t *testing.T) {
+			diagnostics := validateGrantType(grantType, cty.Path{})
+			if len(diagnostics) != 0 {
+				t.Errorf("expected grant type %q to be accepted, got %v", grantType, diagnostics)
+			}
+		})
+	}
+}
 
 func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 
