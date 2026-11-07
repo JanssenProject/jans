@@ -13,6 +13,8 @@ import (
 	"github.com/jans/terraform-provider-jans/jans"
 )
 
+// TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes checks
+// that every grant type supported by Jans passes the app configuration validator.
 func TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes(t *testing.T) {
 	grantTypesSchema := resourceAppConfiguration().Schema["grant_types_supported"]
 	validateGrantType := grantTypesSchema.Elem.(*schema.Schema).ValidateDiagFunc
