@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -39,6 +40,7 @@ import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.auth.AuthenticationMode;
+import io.jans.as.server.security.Identity;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -124,6 +126,12 @@ public class AuthzRequestService {
 
     @Inject
     private AuthenticationMode defaultAuthenticationMode;
+
+    @Inject
+    private Identity identity;
+
+    @Inject
+    private SessionIdService sessionIdService;
 
     private final Cache<String, Map<String, Integer>> acrToLevelCache = CacheBuilder.newBuilder()
             .expireAfterWrite(ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES, TimeUnit.MINUTES).build();
@@ -561,7 +569,16 @@ public class AuthzRequestService {
 
     public int getCurrentMinAcrLevel(AuthzRequest authzRequest) {
         if (StringUtils.isBlank(authzRequest.getAcrValues())) {
-            // no acr requested: the server default authentication method will be used
+            // no acr requested: an already authenticated session is reused with its actual acr, otherwise the server default method is used
+            final SessionId session = identity != null ? identity.getSessionId() : null;
+            if (session != null && session.getState() == SessionIdState.AUTHENTICATED) {
+                final String sessionAcr = sessionIdService.getAcr(session);
+                if (StringUtils.isNotBlank(sessionAcr)) {
+                    final Integer sessionLevel = getAcrToLevelMap().get(externalAuthenticationService.scriptName(sessionAcr));
+                    return sessionLevel != null ? sessionLevel : -1;
+                }
+            }
+
             final String defaultAcr = defaultAuthenticationMode != null ? defaultAuthenticationMode.getName() : null;
             final Integer defaultLevel = StringUtils.isNotBlank(defaultAcr) ? getAcrToLevelMap().get(defaultAcr) : null;
             return defaultLevel != null ? defaultLevel : -1;

@@ -323,6 +323,9 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     private Response processClientGredentials(String scope, HttpServletRequest request, OAuth2AuditLog auditLog, Client client, Function<JsonWebResponse, Void> idTokenPreProcessing, ExecutionContext executionContext) {
         ClientCredentialsGrant clientCredentialsGrant = authorizationGrantList.createClientCredentialsGrant(new User(), client);
 
+        if (StringUtils.isBlank(scope)) {
+            executionContext.getAttributes().put(ExecutionContext.ATTR_SCOPE_PARAM_ABSENT, "true");
+        }
         scope = clientCredentialsGrant.checkScopesPolicy(scope);
         AuthzDetails checkedAuthzDetails = authzDetailsService.checkAuthzDetailsAndSave(executionContext.getAuthzDetails(), clientCredentialsGrant);
 

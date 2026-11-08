@@ -15,11 +15,14 @@ import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.security.Identity;
+import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
+import io.jans.model.token.TokenEntity;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -66,6 +69,9 @@ public class SsaRestWebServiceValidator {
 
     @Inject
     private AuthorizationGrantList authorizationGrantList;
+
+    @Inject
+    private GrantService grantService;
 
     /**
      * Get client from session
@@ -129,14 +135,24 @@ public class SsaRestWebServiceValidator {
             if (grant == null || grant.getScopes() == null || !client.getClientId().equals(grant.getClientId())) {
                 return new ArrayList<>();
             }
-            if (grant.getScopes().isEmpty() && grant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
+            if (grant.getScopes().isEmpty() && isClientCredentialsTokenWithoutScopeParam(grant, token)) {
                 // backward compatibility: client_credentials token requested without scope parameter carries no scopes,
-                // before token scopes were enforced the client's registered scopes were used
+                // before token scopes were enforced the client's registered scopes were used.
+                // Tokens whose requested scopes were all rejected do not get the fallback.
                 return scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
             }
             return new ArrayList<>(grant.getScopes());
         }
         return scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
+    }
+
+    private boolean isClientCredentialsTokenWithoutScopeParam(AuthorizationGrant grant, String token) {
+        if (grant.getAuthorizationGrantType() != AuthorizationGrantType.CLIENT_CREDENTIALS) {
+            return false;
+        }
+        final TokenEntity tokenEntity = grantService.getGrantByCode(token);
+        return tokenEntity != null && tokenEntity.getAttributes() != null && tokenEntity.getAttributes().getAttributes() != null
+                && "true".equals(tokenEntity.getAttributes().getAttributes().get(ExecutionContext.ATTR_SCOPE_PARAM_ABSENT));
     }
 
     /**

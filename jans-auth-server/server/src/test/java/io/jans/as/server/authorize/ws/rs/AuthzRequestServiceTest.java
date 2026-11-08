@@ -2,6 +2,7 @@ package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.common.GrantType;
@@ -12,10 +13,12 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtHeader;
+import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.par.ws.rs.ParService;
+import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -79,6 +82,15 @@ public class AuthzRequestServiceTest {
 
     @Mock
     private ExternalAuthenticationService externalAuthenticationService;
+
+    @Mock
+    private AuthenticationMode defaultAuthenticationMode;
+
+    @Mock
+    private Identity identity;
+
+    @Mock
+    private SessionIdService sessionIdService;
 
     @Spy
     private AcrService acrService;
@@ -177,6 +189,69 @@ public class AuthzRequestServiceTest {
         }
 
         fail("Failed to throw error.");
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenNoAcrAndDefaultMethodHasEnoughLevel_shouldRaiseNoError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("passkey", 20);
+        }});
+        when(defaultAuthenticationMode.getName()).thenReturn("passkey");
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+        assertTrue(StringUtils.isBlank(authzRequest.getAcrValues()));
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenNoAcrAndAuthenticatedSessionHasLowerLevelThanMinimum_shouldRaiseError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("passkey", 20);
+        }});
+        when(externalAuthenticationService.scriptName("basic")).thenReturn("basic");
+
+        SessionId session = new SessionId();
+        session.setState(SessionIdState.AUTHENTICATED);
+        when(identity.getSessionId()).thenReturn(session);
+        when(sessionIdService.getAcr(session)).thenReturn("basic");
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setClient(client);
+
+        assertThrows(WebApplicationException.class, () -> authzRequestService.setAcrsIfNeeded(authzRequest));
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenNoAcrAndAuthenticatedSessionHasEnoughLevel_shouldRaiseNoError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("passkey", 20);
+        }});
+        when(externalAuthenticationService.scriptName("passkey")).thenReturn("passkey");
+
+        SessionId session = new SessionId();
+        session.setState(SessionIdState.AUTHENTICATED);
+        when(identity.getSessionId()).thenReturn(session);
+        when(sessionIdService.getAcr(session)).thenReturn("passkey");
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+        assertTrue(StringUtils.isBlank(authzRequest.getAcrValues()));
     }
 
     @Test

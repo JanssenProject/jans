@@ -15,6 +15,10 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.common.AuthorizationGrantType;
+import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.service.GrantService;
+import io.jans.model.token.TokenAttributes;
+import io.jans.model.token.TokenEntity;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,6 +72,9 @@ public class SsaRestWebServiceValidatorTest {
 
     @Mock
     private AuthorizationGrantList authorizationGrantList;
+
+    @Mock
+    private GrantService grantService;
 
     @Test
     public void getClientFromSession_sessionClient_validClient() {
@@ -166,10 +173,32 @@ public class SsaRestWebServiceValidatorTest {
         when(grant.getScopes()).thenReturn(Collections.emptySet());
         when(grant.getClientId()).thenReturn("test_client");
         when(grant.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
+        TokenEntity tokenEntity = tokenEntityWithAttributes(Collections.singletonMap(ExecutionContext.ATTR_SCOPE_PARAM_ABSENT, "true"));
+        when(grantService.getGrantByCode("token")).thenReturn(tokenEntity);
         when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue()));
 
         ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
         verifyNoInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicySingleScope_clientCredentialsTokenWithRejectedScopes_unauthorizedResponse() {
+        Client client = new Client();
+        client.setClientId("test_client");
+        AuthorizationGrant grant = mock(AuthorizationGrant.class);
+        when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
+        when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
+        when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
+        when(grant.getScopes()).thenReturn(Collections.emptySet());
+        when(grant.getClientId()).thenReturn("test_client");
+        when(grant.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
+        TokenEntity tokenEntity = tokenEntityWithAttributes(Collections.emptyMap());
+        when(grantService.getGrantByCode("token")).thenReturn(tokenEntity);
+        WebApplicationException error = new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue()));
+        verifyNoInteractions(scopeService);
     }
 
     @Test
@@ -462,5 +491,13 @@ public class SsaRestWebServiceValidatorTest {
         WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest));
         assertNotNull(ex);
         verify(errorResponseFactory).createBadRequestException(eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true"));
+    }
+
+    private static TokenEntity tokenEntityWithAttributes(java.util.Map<String, String> attributes) {
+        TokenAttributes tokenAttributes = mock(TokenAttributes.class);
+        when(tokenAttributes.getAttributes()).thenReturn(attributes);
+        TokenEntity tokenEntity = mock(TokenEntity.class);
+        when(tokenEntity.getAttributes()).thenReturn(tokenAttributes);
+        return tokenEntity;
     }
 }
