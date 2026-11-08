@@ -38,9 +38,9 @@ public class JansResetService extends ResetService{
     public static final String ACTIVE = "active";
     private static final int OTP_LENGTH = 6;
     private static final String SUBJECT_TEMPLATE = "Here's your verification code: %s";
-    private static final String MSG_TEMPLATE_TEXT = "%s is the code to complete your verification";   
+    private static final String MSG_TEMPLATE_TEXT = "%s is the code to complete your verification";
     private static final SecureRandom RAND = new SecureRandom();
-    
+
     public JansResetService() {
     }
 
@@ -60,7 +60,7 @@ public class JansResetService extends ResetService{
         String headerIp = req.getHeader("X-Forwarded-For");
 
         LogUtils.log("Header ip is  : %", headerIp);
-        
+
         LogUtils.log("Remote address is  : %", req.getRemoteAddr());
 
         ServerUtil serverUtil = CdiUtil.bean(ServerUtil.class);
@@ -71,9 +71,9 @@ public class JansResetService extends ResetService{
 
         User user = getUser(MAIL, email);
         boolean local = user != null;
-        LogUtils.log("There is % local account for %", local ? "a" : "no", email);
-    
-        if (local) {            
+        LogUtils.log("There is % local account for %", local ? "a" : "no", sanitizeForLog(email));
+
+        if (local) {
             String uid = getSingleValuedAttr(user, UID);
             String inum = getSingleValuedAttr(user, INUM_ATTR);
 
@@ -82,13 +82,13 @@ public class JansResetService extends ResetService{
             userMap.put(UID, uid);
             userMap.put(INUM_ATTR, inum);
             userMap.put("email", email);
-            
-    
+
+
             return userMap;
         }
 
         return new HashMap<>();
-    }    
+    }
 
     private String getSingleValuedAttr(User user, String attribute) {
         Object value = null;
@@ -100,20 +100,20 @@ public class JansResetService extends ResetService{
         }
         return value == null ? null : value.toString();
 
-    }    
+    }
 
     @Override
     public boolean passwordPolicyMatch(String userPassword) {
-    // Regex Explanation:
-    // - (?=.*[!-~&&[^ ]]) ensures at least one printable ASCII character except space (also helps exclude space)
-    // - (?=.*[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]) ensures at least one special character
-    // - (?=.*[A-Za-z]) ensures at least one letter
-    // - (?=.*\\d) ensures at least one digit
-    // - [!-~&&[^ ]] limits all characters to printable ASCII excluding space (ASCII 33â126)
-    String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$";
-    Pattern pattern = Pattern.compile(regex);
-    return pattern.matcher(userPassword).matches();
-    }   
+        // Regex Explanation:
+        // - (?=.*[!-~&&[^ ]]) ensures at least one printable ASCII character except space (also helps exclude space)
+        // - (?=.*[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]) ensures at least one special character
+        // - (?=.*[A-Za-z]) ensures at least one letter
+        // - (?=.*\\d) ensures at least one digit
+        // - [!-~&&[^ ]] limits all characters to printable ASCII excluding space (ASCII 33â126)
+        String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$";
+        Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(userPassword).matches();
+    }
 
     @Override
     public String updateUserPassword(String userPassword, String mail) throws Exception {
@@ -122,20 +122,20 @@ public class JansResetService extends ResetService{
 
         UserService userService = CdiUtil.bean(UserService.class);
         user = userService.updateUser(user);
-    
+
         if (user == null) {
             throw new EntryNotFoundException("Updated user not found");
         }
-    
+
         return getSingleValuedAttr(user, INUM_ATTR);
-    }     
-    
+    }
+
     @Override
     public String sendEmail(String to) {
         String userLang = null;
         User user = getUser(MAIL, to);
-        LogUtils.log("User is: %", user.getUserId());
         if (user != null) {
+            LogUtils.log("User is: %", user.getUserId());
             userLang = getSingleValuedAttr(user, LANG);
             if (userLang == null || userLang.isBlank()) {
                 userLang = getSingleValuedAttr(user, LOCALE);
@@ -157,20 +157,29 @@ public class JansResetService extends ResetService{
         String line3 = labels.get("line3");
         String line4 = labels.get("line4");
 
-        String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4); 
+        String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4);
 
-        SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
-        String from = smtpConfiguration.getFromEmailAddress();
+        try {
+            SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
+            String from = smtpConfiguration.getFromEmailAddress();
 
-        MailService mailService = CdiUtil.bean(MailService.class);
-        if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
-            LogUtils.log("E-mail delivery succeeded");
-            return otp;
+            MailService mailService = CdiUtil.bean(MailService.class);
+            if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
+                LogUtils.log("E-mail delivery succeeded");
+                return otp;
+            }
+            LogUtils.log("E-mail delivery failed, check jans-auth logs");
+        } catch (Exception e) {
+            LogUtils.log("E-mail delivery failed: %", e.getMessage());
         }
 
-        LogUtils.log("E-mail delivery failed, check jans-auth logs");
-        return null;
-    } 
+        // Unguessable code, like the unknown-mail path, so failures neither reveal accounts nor match an absent passcode.
+        return UUID.randomUUID().toString();
+    }
+
+    private static String sanitizeForLog(String value) {
+        return value == null ? null : value.replaceAll("[\\r\\n]", "_");
+    }
 
     private SmtpConfiguration getSmtpConfiguration() {
         ConfigurationService configurationService = CdiUtil.bean(ConfigurationService.class);
@@ -180,11 +189,11 @@ public class JansResetService extends ResetService{
         } else {
             LogUtils.log("Your smtp configuration found");
         }
-        
+
         return smtpConfiguration;
 
-    } 
-    
+    }
+
     private String normalizeLanguage(String rawLanguage) {
         if (rawLanguage == null || rawLanguage.isBlank()) {
             return "en";
@@ -210,6 +219,6 @@ public class JansResetService extends ResetService{
     private static User getUser(String attributeName, String value) {
         UserService userService = CdiUtil.bean(UserService.class);
         return userService.getUserByAttribute(attributeName, value, true);
-    }       
-    
+    }
+
 }
