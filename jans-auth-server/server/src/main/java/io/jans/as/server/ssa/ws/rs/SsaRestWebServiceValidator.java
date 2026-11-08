@@ -14,6 +14,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.security.Identity;
@@ -127,6 +128,11 @@ public class SsaRestWebServiceValidator {
             final AuthorizationGrant grant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
             if (grant == null || grant.getScopes() == null || !client.getClientId().equals(grant.getClientId())) {
                 return new ArrayList<>();
+            }
+            if (grant.getScopes().isEmpty() && grant.getAuthorizationGrantType() == AuthorizationGrantType.CLIENT_CREDENTIALS) {
+                // backward compatibility: client_credentials token requested without scope parameter carries no scopes,
+                // before token scopes were enforced the client's registered scopes were used
+                return scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
             }
             return new ArrayList<>(grant.getScopes());
         }

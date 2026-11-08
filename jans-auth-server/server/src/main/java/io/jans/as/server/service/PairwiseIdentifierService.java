@@ -104,13 +104,14 @@ public class PairwiseIdentifierService {
         } else { // PairwiseIdType.ALGORITHMIC
             String key = appConfiguration.getPairwiseCalculationKey();
             String salt = appConfiguration.getPairwiseCalculationSalt();
-            String localAccountId = isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId()) ?
-                    openidSubValue : userInum;
+            // keep the historical calculation (sub values must stay stable for existing users)
+            String localAccountId = isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId()) ?
+                    userInum : userInum + clientId;
+            if (isTrue(appConfiguration.getUseOpenidSubAttributeValueForPairwiseLocalAccountId())) {
+                localAccountId = openidSubValue;
+            }
             if (StringUtils.isBlank(localAccountId)) {
                 throw new IllegalStateException("Unable to calculate pairwise identifier: local account id is blank");
-            }
-            if (!isTrue(appConfiguration.isShareSubjectIdBetweenClientsWithSameSectorId())) {
-                localAccountId = localAccountId + clientId;
             }
 
             String calculatedSub = SubjectIdentifierGenerator.generatePairwiseSubjectIdentifier(

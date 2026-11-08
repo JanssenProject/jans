@@ -31,6 +31,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -222,11 +223,20 @@ public class RateLimitService {
                         }
                     }
                 } else if (contentType != null && contentType.contains("application/x-www-form-urlencoded")) {
-                    // read form fields from the entity only, getParameter() would also mix in query parameters
-                    Map<String, List<String>> form = parseFormBody(rateLimitContext.getCachedRequest().getCachedBodyAsString());
+                    // Use container parameter parsing (do not drain the entity: downstream needs the form parameters).
+                    // Query parameters are mixed in by getParameterValues(), so skip values that came from the query string.
+                    Map<String, List<String>> query = parseFormBody(rateLimitContext.getRequest().getQueryString());
                     for (String name : keyExtractor.getParameterNames()) {
-                        List<String> values = form.get(name);
-                        if (values != null && !values.isEmpty() && StringUtils.isNotBlank(values.get(0))) {
+                        List<String> values = new ArrayList<>();
+                        String[] all = rateLimitContext.getRequest().getParameterValues(name);
+                        if (all != null) {
+                            values.addAll(Arrays.asList(all));
+                        }
+                        List<String> queryValues = query.get(name);
+                        if (queryValues != null) {
+                            queryValues.forEach(values::remove);
+                        }
+                        if (!values.isEmpty() && StringUtils.isNotBlank(values.get(0))) {
                             key.append(values.get(0)).append("_");
                         }
                     }

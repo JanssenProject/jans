@@ -38,6 +38,7 @@ public class ExternalTokenExchangeService extends ExternalScriptService {
         final Client client = context.getClient();
         final List<CustomScriptConfiguration> scripts = getClientScripts(client);
         if (scripts.isEmpty()) {
+            // skip -> ok if no scripts
             return ScriptTokenExchangeControl.ok();
         }
         log.trace("Found {} token-exchange scripts.", scripts.size());

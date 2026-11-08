@@ -297,6 +297,23 @@ public class RateLimitServiceTest {
     }
 
     @Test
+    public void extractKey_whenFormBody_shouldUseContainerParametersAndSkipQueryValues() throws IOException {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(httpServletRequest.getContentType()).thenReturn("Application/X-WWW-Form-Urlencoded; charset=UTF-8");
+        when(httpServletRequest.getQueryString()).thenReturn("client_id=from_query");
+        when(httpServletRequest.getParameterValues("client_id")).thenReturn(new String[]{"from_query", "from_body"});
+
+        RateLimitContext context = new RateLimitContext(httpServletRequest, true);
+
+        KeyExtractor bodyExtractor = new KeyExtractor();
+        bodyExtractor.setSource(KeySource.BODY);
+        bodyExtractor.setParameterNames(List.of("client_id"));
+
+        assertEquals("from_body_", rateLimitService.extractKey(bodyExtractor, context));
+        assertTrue(!context.isCachedRequestAvailable(), "Form body must not be drained, downstream needs the parameters.");
+    }
+
+    @Test
     public void extractKey_whenExtractingHeader_shouldReturnCorrectKey() throws IOException {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         when(httpServletRequest.getHeader("X-ClientCert")).thenReturn("test_cert");

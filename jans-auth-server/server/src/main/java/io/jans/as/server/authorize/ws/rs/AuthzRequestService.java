@@ -38,6 +38,7 @@ import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -120,6 +121,9 @@ public class AuthzRequestService {
 
     @Inject
     private AcrService acrService;
+
+    @Inject
+    private AuthenticationMode defaultAuthenticationMode;
 
     private final Cache<String, Map<String, Integer>> acrToLevelCache = CacheBuilder.newBuilder()
             .expireAfterWrite(ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES, TimeUnit.MINUTES).build();
@@ -447,32 +451,30 @@ public class AuthzRequestService {
             redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
             redirectUriResponse.getRedirectUri().setAudience(clientId);
             redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+            final boolean encryptedResponse = client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
+                    && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null;
+            SignatureAlgorithm responseSignatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+            if (responseSignatureAlgorithm == null && encryptedResponse) {
+                // JARM: the response is signed then encrypted; RS256 is the default signing algorithm
+                responseSignatureAlgorithm = SignatureAlgorithm.RS256;
+            }
+            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(responseSignatureAlgorithm);
             redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
             redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
             redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
 
             String keyId = null;
-            if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
-                    && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
-                if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted
-                    // response
-                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
-                            .fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-
-                    String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
-
-                    JSONObject jsonWebKeys = CommonUtils.getJwks(client);
-                    redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
-
-                    String clientSecret = clientService.decryptSecret(client.getClientSecret());
-                    redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
-                    redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
-                }
+            if (encryptedResponse) {
+                // Signed then Encrypted response
+                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
+                String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+                        Algorithm.fromString(responseSignatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
+                String clientSecret = clientService.decryptSecret(client.getClientSecret());
+                redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
+                redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
+                redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
 
                 // Encrypted response
-                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 if (jsonWebKeys != null) {
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                             Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
@@ -559,7 +561,10 @@ public class AuthzRequestService {
 
     public int getCurrentMinAcrLevel(AuthzRequest authzRequest) {
         if (StringUtils.isBlank(authzRequest.getAcrValues())) {
-            return -1;
+            // no acr requested: the server default authentication method will be used
+            final String defaultAcr = defaultAuthenticationMode != null ? defaultAuthenticationMode.getName() : null;
+            final Integer defaultLevel = StringUtils.isNotBlank(defaultAcr) ? getAcrToLevelMap().get(defaultAcr) : null;
+            return defaultLevel != null ? defaultLevel : -1;
         }
 
         Integer currentLevel = null;

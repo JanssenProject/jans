@@ -14,6 +14,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.model.common.AuthorizationGrantList;
+import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -146,6 +147,42 @@ public class SsaRestWebServiceValidatorTest {
         when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
         when(grant.getScopes()).thenReturn(Collections.singleton("openid"));
         when(grant.getClientId()).thenReturn("test_client");
+        WebApplicationException error = new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue()));
+        verifyNoInteractions(scopeService);
+    }
+
+    @Test
+    public void checkScopesPolicySingleScope_clientCredentialsTokenWithoutScopes_fallsBackToClientScopes() {
+        Client client = new Client();
+        client.setClientId("test_client");
+        client.setScopes(new String[]{});
+        AuthorizationGrant grant = mock(AuthorizationGrant.class);
+        when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
+        when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
+        when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
+        when(grant.getScopes()).thenReturn(Collections.emptySet());
+        when(grant.getClientId()).thenReturn("test_client");
+        when(grant.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
+        when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue()));
+
+        ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
+        verifyNoInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicySingleScope_authorizationCodeTokenWithoutScopes_unauthorizedResponse() {
+        Client client = new Client();
+        client.setClientId("test_client");
+        AuthorizationGrant grant = mock(AuthorizationGrant.class);
+        when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
+        when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
+        when(authorizationGrantList.getAuthorizationGrantByAccessToken("token")).thenReturn(grant);
+        when(grant.getScopes()).thenReturn(Collections.emptySet());
+        when(grant.getClientId()).thenReturn("test_client");
+        when(grant.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.AUTHORIZATION_CODE);
         WebApplicationException error = new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
 

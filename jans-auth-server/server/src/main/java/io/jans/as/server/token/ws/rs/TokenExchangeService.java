@@ -240,9 +240,8 @@ public class TokenExchangeService {
     }
 
     private void validateSessionNotExpired(SessionId sessionId, OAuth2AuditLog auditLog) {
-        final boolean idleExpired = sessionId.getLastUsedAt() != null && !sessionIdService.isSessionValid(sessionId);
         final boolean expired = sessionId.getExpirationDate() != null && sessionId.getExpirationDate().before(new Date());
-        if (idleExpired || expired) {
+        if (expired) {
             final String msg = "Session found by device_secret (actor_token) is expired.";
             log.trace(msg);
             throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));

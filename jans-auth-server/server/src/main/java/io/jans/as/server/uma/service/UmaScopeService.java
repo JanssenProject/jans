@@ -97,6 +97,10 @@ public class UmaScopeService {
         if (scope.getScopeType() != ScopeType.SPONTANEOUS || regExps == null || regExps.isEmpty()) {
             return scope;
         }
+        // never merge policies of another resource template into a scope that already has its own
+        if (scope.getUmaAuthorizationPolicies() != null && !scope.getUmaAuthorizationPolicies().isEmpty()) {
+            return scope;
+        }
         final Pair<Boolean, String> allowed = spontaneousScopeService.isAllowedBySpontaneousScopes(regExps, scope.getId());
         if (isFalse(allowed.getFirst()) || StringUtils.equals(allowed.getSecond(), scope.getId())) {
             return scope;
