@@ -42,7 +42,9 @@ import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
 
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_KID;
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNING_KID;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -140,6 +142,9 @@ public class RegisterUpdateAction {
             validateClientNotNull(client);
 
             registerService.updateClientFromRequestObject(client, request, true);
+
+            registerParamsValidator.validateSigningKid(client.getAttributes().getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
+            registerParamsValidator.validateSigningKid(client.getAttributes().getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
 
             if (requestObject.has(BACKCHANNEL_LOGOUT_URI.toString())
                     && StringUtils.isBlank(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()))) {

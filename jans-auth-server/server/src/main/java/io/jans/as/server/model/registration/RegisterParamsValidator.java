@@ -13,6 +13,8 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.Constants;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -60,6 +62,9 @@ public class RegisterParamsValidator {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
     private SectorIdentifierUriService sectorIdentifierUriService;
 
     private static final String HTTP = "http";
@@ -102,6 +107,26 @@ public class RegisterParamsValidator {
         }
 
         return new Pair<>(true, "");
+    }
+
+    /**
+     * Validates that explicitly configured signing key exists in the keystore. Algorithm and use are not checked,
+     * explicit kid always wins. Blank kid means implicit key lookup and is always valid.
+     *
+     * @param kid       key id configured for the client
+     * @param paramName name of the request parameter, used in error message
+     */
+    public void validateSigningKid(String kid, String paramName) {
+        if (StringUtils.isBlank(kid)) {
+            return;
+        }
+
+        final JSONWebKey key = webKeysConfiguration != null ? webKeysConfiguration.getKey(kid) : null;
+        if (key == null) {
+            log.debug("Parameter {} is not valid, kid: {}. Kid does not exists in key store.", paramName, kid);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter " + paramName + " is not valid.");
+        }
     }
 
     /**
