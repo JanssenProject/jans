@@ -110,15 +110,14 @@ the Cedarling will use the default value as specified in the property definition
 
 **Advanced configuration:**
 
-- **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
-- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
+- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store, counted before duplicate entities are merged. A store over the limit fails to load, at startup and on refresh. Set to `0` to disable; Cedarling then logs a warning at startup. Default is `1000`.
 
 ### Lock Server integration properties
 
 The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.
 
 - **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies. Default is `disabled`.
-- **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`.
+- **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`. The URI must use `https`, or `http` only to a loopback host (`localhost`, `127.0.0.1`, `::1`); otherwise Cedarling fails to start. The Lock access token is sent to the endpoints this file lists, so a discovered log, health or telemetry endpoint that breaks the same rule is ignored with a warning, and Cedarling does not send that data. Unless `CEDARLING_LOCK_ACCESS_TOKEN_JWT` is set, Cedarling registers a client at the IdP this file names and sends the client secret, and the SSA if one is set, to the `registration_endpoint` and `token_endpoint` of the IdP's OpenID configuration; if either breaks the same rule, Cedarling fails to start.
 - **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
 - **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server. When set, Cedarling skips DCR and uses this token for every Lock Server request. Intended for testing and local development, or when DCR is not available. Cedarling cannot renew it: once it expires, Lock Server refuses the requests until Cedarling restarts with a new token. With TRACE enabled, the token must carry the `trace.write` scope, see [Cedarling TRACE](./cedarling-trace.md#auth-server-and-lock-server-setup). Takes precedence over `CEDARLING_LOCK_SSA_JWT`; Cedarling logs a `WARN` when both are set. Not available on WASM builds.
 - **`CEDARLING_LOCK_LOG_INTERVAL`** : How often, in seconds, to send log messages to Lock Server. `0` turns transmission off. Default is `0`.

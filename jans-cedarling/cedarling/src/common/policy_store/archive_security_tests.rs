@@ -262,7 +262,12 @@ mod input_validation {
         let archive = builder.build_archive().unwrap();
 
         let vfs = ArchiveVfs::from_buffer(archive, ArchiveLimits::default()).unwrap();
-        let result = read_from_vfs(&vfs, ".", true, None);
+        let result = read_from_vfs(
+            &vfs,
+            ".",
+            None,
+            crate::common::policy_store::formats::ReadOptions::for_test(true),
+        );
 
         let err = result.expect_err("Expected error for invalid Cedar syntax");
         assert!(

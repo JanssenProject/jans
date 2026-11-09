@@ -14,7 +14,10 @@ use sha2::{Digest, Sha256, Sha384, Sha512};
 
 use crate::cert::{Cert, EcCurve, SignatureAlgorithm};
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
-use crate::error::SigstoreVerificationError;
+use crate::error::{CertificateChainError, SigstoreVerificationError};
+
+/// Upper bound on intermediates on a single path.
+const MAX_PATH_INTERMEDIATES: u32 = 8;
 
 /// Validate a certificate chain from leaf to root, anchored on `integrated_time`.
 ///
@@ -40,12 +43,13 @@ pub(crate) fn validate_chain(
     // issuer/subject DN match + a verified signature. This selects the correct
     // issuer from the candidate pool (bundle-provided + trust-root intermediates)
     // rather than assuming the list is already the exact ordered path.
+    // The caller caps the bundle-provided share of the pool.
     let mut current = leaf;
     // `depth` = number of intermediate CAs already traversed below `current`.
     let mut depth: u32 = 0;
-    let max_depth = u32::try_from(intermediates.len())
-        .unwrap_or(u32::MAX)
-        .saturating_add(1);
+    // An intermediate is used at most once on a path, which also rules out cycles
+    // and bounds the walk by the candidate pool.
+    let mut used = vec![false; intermediates.len()];
     // Track the first issuing cert (the leaf's immediate issuer).
     let mut leaf_issuer: Option<Cert> = None;
 
@@ -66,29 +70,26 @@ pub(crate) fn validate_chain(
             if let Some(path_len) = root.path_len
                 && depth > path_len
             {
-                return Err(SigstoreVerificationError::CertificateChain {
-                    reason: format!(
-                        "pathLen constraint violated: root allows {path_len} subordinate CA(s), but {depth} below it"
-                    ),
-                });
+                return Err(CertificateChainError::RootPathLen { path_len, depth }.into());
             }
 
             return Ok(leaf_issuer.unwrap_or_else(|| root.clone()));
         }
 
         // Otherwise step up through an intermediate that issued `current`.
-        let parent = intermediates.iter().find(|i| {
-            i.subject_dn == current.issuer_dn && verify_cert_signature(current, i).is_ok()
+        let parent = intermediates.iter().enumerate().find(|(idx, i)| {
+            !used[*idx]
+                && i.subject_dn == current.issuer_dn
+                && verify_cert_signature(current, i).is_ok()
         });
-        let Some(parent) = parent else {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: format!(
-                    "no trusted path: nothing issues certificate with issuer DN '{}'",
-                    current.issuer_dn
-                ),
-            });
+        let Some((parent_idx, parent)) = parent else {
+            return Err(CertificateChainError::NoTrustedPath {
+                issuer_dn: current.issuer_dn.clone(),
+            }
+            .into());
         };
 
+        used[parent_idx] = true;
         parent.validate_ca()?;
         parent.check_validity(integrated_time)?;
         if leaf_issuer.is_none() {
@@ -101,19 +102,16 @@ pub(crate) fn validate_chain(
         if let Some(path_len) = parent.path_len
             && depth > path_len
         {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: format!(
-                    "pathLen constraint violated: intermediate allows {path_len} subordinate CA(s), but {depth} below it"
-                ),
-            });
+            return Err(CertificateChainError::IntermediatePathLen { path_len, depth }.into());
         }
 
         current = parent;
         depth += 1;
-        if depth > max_depth {
-            return Err(SigstoreVerificationError::CertificateChain {
-                reason: "certificate chain exceeds maximum depth (possible loop)".into(),
-            });
+        if depth > MAX_PATH_INTERMEDIATES {
+            return Err(CertificateChainError::TooManyIntermediates {
+                max: MAX_PATH_INTERMEDIATES,
+            }
+            .into());
         }
     }
 }
@@ -127,18 +125,15 @@ pub(crate) fn validate_chain(
 fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVerificationError> {
     // Check that the child's issuer DN matches the parent's subject DN
     if child.issuer_dn != parent.subject_dn {
-        return Err(SigstoreVerificationError::CertificateChain {
-            reason: format!(
-                "issuer/subject mismatch: child issuer '{}' != parent subject '{}'",
-                child.issuer_dn, parent.subject_dn
-            ),
-        });
+        return Err(CertificateChainError::IssuerMismatch {
+            child_issuer: child.issuer_dn.clone(),
+            parent_subject: parent.subject_dn.clone(),
+        }
+        .into());
     }
 
     if child.signature_value.is_empty() {
-        return Err(SigstoreVerificationError::CertificateChain {
-            reason: "child certificate has no signature value".into(),
-        });
+        return Err(CertificateChainError::MissingSignature.into());
     }
 
     // The digest is chosen by the child's signatureAlgorithm; the curve is the
@@ -165,11 +160,8 @@ fn verify_cert_signature(child: &Cert, parent: &Cert) -> Result<(), SigstoreVeri
         },
     };
 
-    verify(&parent.pubkey_bytes, &digest, &child.signature_value).map_err(|_| {
-        SigstoreVerificationError::CertificateChain {
-            reason: "certificate signature verification failed".into(),
-        }
-    })
+    verify(&parent.pubkey_bytes, &digest, &child.signature_value)
+        .map_err(|_| CertificateChainError::InvalidSignature.into())
 }
 
 #[cfg(test)]
@@ -177,7 +169,7 @@ mod tests {
     use super::*;
     use crate::test_support::{
         LeafOpts, make_intermediate, make_intermediate_p384, make_leaf, make_root,
-        make_root_constrained, make_root_p384,
+        make_root_constrained, make_root_p384, with_name_constraints,
     };
 
     /// A timestamp inside every synthetic cert's validity window.
@@ -312,7 +304,13 @@ mod tests {
         let err = validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
             .expect_err("root pathLen=0 must reject a chain with an intermediate below it");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(CertificateChainError::RootPathLen {
+                    path_len: 0,
+                    depth: 1
+                })
+            ),
             "must be CertificateChain from root pathLen check, got {err:?}"
         );
     }
@@ -352,18 +350,24 @@ mod tests {
         )
         .expect_err("intermediate pathLen=0 must reject another intermediate below it");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::IntermediatePathLen {
+                        path_len: 0,
+                        depth: 1
+                    }
+                )
+            ),
             "must be CertificateChain from intermediate pathLen check, got {err:?}"
         );
     }
 
     #[test]
-    fn chain_depth_exceeding_candidate_pool_rejected() {
+    fn self_issued_candidate_is_used_once() {
         // A self-signed CA fed in as a candidate "intermediate" (not a
         // trusted root) is its own issuer/subject match, so the path
-        // builder would loop on it forever without the max-depth guard
-        // (chain.rs:113-116). With one candidate, max_depth = 2: the loop
-        // revisits it a 3rd time and must bail out instead of looping.
+        // builder would loop on it if it could revisit a candidate.
         let looping_ca = make_root("looping-ca");
         let leaf = make_leaf(&looping_ca, &LeafOpts::default());
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
@@ -372,8 +376,91 @@ mod tests {
         let err = validate_chain(&leaf_cert, &[looping_ca_cert], &[], it)
             .expect_err("a self-referential candidate pool must not loop forever");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
-            "must be CertificateChain from the max-depth guard, got {err:?}"
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::NoTrustedPath { .. }
+                )
+            ),
+            "the used candidate is not tried again, so no path is left, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn large_trusted_intermediate_pool_validates() {
+        let root = make_root("fulcio-root");
+        let pool: Vec<Cert> = (0..20)
+            .map(|i| {
+                let ca = make_intermediate(&format!("intermediate-{i}"), None, &root);
+                Cert::from_der(&ca.der).expect("parse intermediate")
+            })
+            .collect();
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).unwrap();
+        let root_cert = Cert::from_der(&root.der).unwrap();
+        validate_chain(&leaf_cert, &pool, &[root_cert], anchor(&leaf_cert))
+            .expect("a large trust-root intermediate pool must not block a root-issued leaf");
+    }
+
+    /// A leaf issued through `count` intermediates below one root.
+    struct LongChain {
+        leaf: Cert,
+        intermediates: Vec<Cert>,
+        root: Cert,
+    }
+
+    fn long_chain(count: usize) -> LongChain {
+        let root = make_root("fulcio-root");
+        let mut cas = Vec::with_capacity(count);
+        for i in 0..count {
+            let inter = make_intermediate(
+                &format!("intermediate-{i}"),
+                None,
+                cas.last().unwrap_or(&root),
+            );
+            cas.push(inter);
+        }
+        let leaf = make_leaf(cas.last().unwrap_or(&root), &LeafOpts::default());
+        LongChain {
+            leaf: Cert::from_der(&leaf.der).expect("parse leaf"),
+            intermediates: cas
+                .iter()
+                .map(|ca| Cert::from_der(&ca.der).expect("parse intermediate"))
+                .collect(),
+            root: Cert::from_der(&root.der).expect("parse root"),
+        }
+    }
+
+    #[test]
+    fn path_with_max_intermediates_validates() {
+        let chain = long_chain(MAX_PATH_INTERMEDIATES as usize);
+        validate_chain(
+            &chain.leaf,
+            &chain.intermediates,
+            &[chain.root],
+            anchor(&chain.leaf),
+        )
+        .expect("a path with exactly the maximum number of intermediates must validate");
+    }
+
+    #[test]
+    fn path_with_too_many_intermediates_rejected() {
+        let chain = long_chain(MAX_PATH_INTERMEDIATES as usize + 1);
+        let err = validate_chain(
+            &chain.leaf,
+            &chain.intermediates,
+            &[chain.root],
+            anchor(&chain.leaf),
+        )
+        .expect_err("a path with one intermediate over the maximum must be rejected");
+        assert!(
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::TooManyIntermediates { .. }
+                )
+            ),
+            "must be rejected by the path length limit, got {err:?}"
         );
     }
 
@@ -387,7 +474,12 @@ mod tests {
         let err = verify_cert_signature(&leaf_cert, &root_b_cert)
             .expect_err("issuer DN not matching parent subject DN must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::IssuerMismatch { .. }
+                )
+            ),
             "must be CertificateChain from DN mismatch, got {err:?}"
         );
     }
@@ -402,7 +494,12 @@ mod tests {
         let err = verify_cert_signature(&leaf_cert, &root_cert)
             .expect_err("empty signature value must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::MissingSignature
+                )
+            ),
             "must be CertificateChain from empty signature, got {err:?}"
         );
     }
@@ -448,7 +545,12 @@ mod tests {
         let err = verify_cert_signature(&leaf_cert, &root_cert)
             .expect_err("a tampered signature must fail cryptographic verification");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::InvalidSignature
+                )
+            ),
             "must be CertificateChain from signature verification failure, got {err:?}"
         );
     }
@@ -469,8 +571,68 @@ mod tests {
         let err = validate_chain(&leaf_cert, &[], &[root_cert], it)
             .expect_err("leaf without code-signing EKU must be rejected");
         assert!(
-            matches!(err, SigstoreVerificationError::CertificateChain { .. }),
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::LeafWithoutCodeSigningEku
+                )
+            ),
             "must be CertificateChain from leaf validation, got {err:?}"
+        );
+    }
+
+    /// Path validation does not enforce `NameConstraints`, so a constrained CA could
+    /// vouch for identities outside its permitted subtrees.
+    #[test]
+    fn name_constrained_root_rejected() {
+        let root = with_name_constraints(make_root("fulcio-root"), None);
+        let leaf = make_leaf(&root, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        assert!(
+            root_cert.has_name_constraints,
+            "fixture root must carry NameConstraints"
+        );
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[], &[root_cert], it)
+            .expect_err("a root with NameConstraints must be rejected");
+        assert!(
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::CaWithNameConstraints
+                )
+            ),
+            "must be CertificateChain from the NameConstraints check, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn name_constrained_intermediate_rejected() {
+        let root = make_root("fulcio-root");
+        let inter = with_name_constraints(
+            make_intermediate("fulcio-intermediate", None, &root),
+            Some(&root),
+        );
+        let leaf = make_leaf(&inter, &LeafOpts::default());
+        let leaf_cert = Cert::from_der(&leaf.der).expect("parse leaf");
+        let inter_cert = Cert::from_der(&inter.der).expect("parse intermediate");
+        let root_cert = Cert::from_der(&root.der).expect("parse root");
+        assert!(
+            inter_cert.has_name_constraints,
+            "fixture intermediate must carry NameConstraints"
+        );
+        let it = anchor(&leaf_cert);
+        let err = validate_chain(&leaf_cert, &[inter_cert], &[root_cert], it)
+            .expect_err("an intermediate with NameConstraints must be rejected");
+        assert!(
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::CaWithNameConstraints
+                )
+            ),
+            "must be CertificateChain from the NameConstraints check, got {err:?}"
         );
     }
 }

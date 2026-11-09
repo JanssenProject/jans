@@ -1534,10 +1534,16 @@ mod bundle_hash_tests {
     pub(super) async fn parsed_store(builder: &PolicyStoreTestBuilder) -> CjarStore {
         let bytes = builder.build_archive().expect("test archive builds");
         let bundle_hash = jans_trace_core::inputs::compute_bundle_hash(&bytes);
-        let store = parse_cjar_bytes(bytes, false, ArchiveLimits::default())
-            .await
-            .expect("test archive parses")
-            .store;
+        let store = parse_cjar_bytes(
+            bytes,
+            crate::init::policy_store::LoadOptions {
+                archive_limits: ArchiveLimits::default(),
+                read: crate::common::policy_store::formats::ReadOptions::for_test(false),
+            },
+        )
+        .await
+        .expect("test archive parses")
+        .store;
         CjarStore { store, bundle_hash }
     }
 

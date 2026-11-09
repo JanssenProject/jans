@@ -675,6 +675,7 @@ impl JwtService {
         let token_kind = TokenKind::AuthorizeCustom {
             mapping: Cow::Borrowed(input.mapping.as_str()),
             generation: target.generation,
+            processor: Arc::as_ptr(processor).cast::<()>().addr(),
         };
 
         // Serve a still-valid cached result if present.
@@ -716,7 +717,9 @@ impl JwtService {
             let expiration = processed
                 .expiration
                 .or_else(|| processed.claims.get("exp").and_then(parse_numeric_date));
-            if let Some(exp) = expiration.filter(|exp| *exp <= now.timestamp()) {
+            // Checked against the clock after `process`, which may have taken a while.
+            let checked_at = now.timestamp().max(Utc::now().timestamp());
+            if let Some(exp) = expiration.filter(|exp| *exp <= checked_at) {
                 return Err(CustomTokenError::Expired {
                     mapping: input.mapping.clone(),
                     exp,
