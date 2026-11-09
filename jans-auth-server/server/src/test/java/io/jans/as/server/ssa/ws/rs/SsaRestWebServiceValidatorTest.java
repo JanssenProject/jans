@@ -165,7 +165,7 @@ public class SsaRestWebServiceValidatorTest {
     public void checkScopesPolicySingleScope_clientCredentialsTokenWithoutScopes_fallsBackToClientScopes() {
         Client client = new Client();
         client.setClientId("test_client");
-        client.setScopes(new String[]{});
+        client.setScopes(new String[]{"inum=ssa-admin,ou=scopes,o=jans"});
         AuthorizationGrant grant = mock(AuthorizationGrant.class);
         when(httpRequest.getHeader("Authorization")).thenReturn("Bearer token");
         when(tokenService.getToken("Bearer token", HttpAuthTokenType.Bearer, HttpAuthTokenType.AccessToken)).thenReturn("token");
@@ -175,7 +175,7 @@ public class SsaRestWebServiceValidatorTest {
         when(grant.getAuthorizationGrantType()).thenReturn(AuthorizationGrantType.CLIENT_CREDENTIALS);
         TokenEntity tokenEntity = tokenEntityWithAttributes(Collections.singletonMap(ExecutionContext.ATTR_SCOPE_PARAM_ABSENT, "true"));
         when(grantService.getGrantByCode("token")).thenReturn(tokenEntity);
-        when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue()));
+        when(scopeService.getScopeIdsByDns(Collections.singletonList("inum=ssa-admin,ou=scopes,o=jans"))).thenReturn(Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue()));
 
         ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
         verifyNoInteractions(errorResponseFactory);
