@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import io.jans.agama.model.EngineConfig;
@@ -26,6 +27,8 @@ public class LogUtils {
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
     private static final String PREFIX_FORMAT = "|%s| ";
+    //line breaks and other control chars (tab excepted) in logged values could forge log entries
+    private static final Pattern CONTROL_CHARS = Pattern.compile("[\\p{Cntrl}\\u0080-\\u009F\\u2028\\u2029&&[^\\t]]");
 
     private static int maxIterableItems = 1;
     
@@ -84,7 +87,8 @@ public class LogUtils {
         }
         Arrays.fill(args, nargs, args.length, "");
         String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
-        String result = pref + String.format(sfirst, args);
+        String result = CONTROL_CHARS.matcher(pref + String.format(sfirst, args))
+                .replaceAll(m -> String.format("\\\\u%04X", (int) m.group().charAt(0)));
 
         switch (level) {
             case ERROR:
