@@ -8,20 +8,16 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import io.jans.agama.model.EngineConfig;
 import io.jans.util.Pair;
 import io.jans.service.cdi.util.CdiUtil;
 
-import org.mozilla.javascript.RhinoException;
-import org.mozilla.javascript.ScriptStackElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +27,8 @@ public class LogUtils {
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
     private static final String PREFIX_FORMAT = "|%s| ";
+    //line breaks and other control chars (tab excepted) in logged values could forge log entries
+    private static final Pattern CONTROL_CHARS = Pattern.compile("[\\p{Cntrl}\\u0080-\\u009F\\u2028\\u2029&&[^\\t]]");
 
     private static int maxIterableItems = 1;
     
@@ -59,7 +57,6 @@ public class LogUtils {
 
         LogLevel level;
         int dummyArgs = 0;
-        int offset = 0;
         String sfirst;
         int nargs = rest.length - 1;
         
@@ -72,7 +69,7 @@ public class LogUtils {
 
             if (ignoreLogStatement(level)) return;
             
-            Pair<String, Integer> q = getFormatString(escapeLineBreaks(p.getSecond()), nargs);
+            Pair<String, Integer> q = getFormatString(p.getSecond(), nargs);
             sfirst = q.getFirst();
             dummyArgs = q.getSecond();
             
@@ -81,22 +78,17 @@ public class LogUtils {
             
             if (ignoreLogStatement(level)) return;
             
-            // passed as an argument, not as format text, so % sequences in the value are not interpreted
-            sfirst = "%s" + getFormatString("", nargs).getFirst();
-            offset = 1;
+            sfirst = asString(first) + getFormatString("", nargs).getFirst();
         }
 
-        Object[] args = new String[offset + nargs + dummyArgs];
-        if (offset == 1) {
-            args[0] = logSafe(first);
-        }
+        Object[] args = new String[nargs + dummyArgs];
         for (int i = 0; i < nargs; i++) {
-            Object arg = rest[i + 1];
-            args[offset + i] = logSafe(arg);
+            args[i] = asString(rest[i + 1]);
         }
-        Arrays.fill(args, offset + nargs, args.length, "");
+        Arrays.fill(args, nargs, args.length, "");
         String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
-        String result = pref + String.format(sfirst, args);
+        String result = CONTROL_CHARS.matcher(pref + String.format(sfirst, args))
+                .replaceAll(m -> String.format("\\\\u%04X", (int) m.group().charAt(0)));
 
         switch (level) {
             case ERROR:
@@ -120,54 +112,6 @@ public class LogUtils {
         
     }
     
-    private static String escapeLineBreaks(String str) {
-        return str.replace("\r", "\\r").replace("\n", "\\n");
-    }
-
-    private static String logSafe(Object obj) {
-        return obj instanceof Throwable ? throwableAsString((Throwable) obj) : escapeLineBreaks(asString(obj));
-    }
-
-    // Built from the throwable's structure so message text cannot forge frames or causes
-    private static String throwableAsString(Throwable t) {
-
-        StringBuilder sb = new StringBuilder();
-        appendThrowable(sb, t, null, "", Collections.newSetFromMap(new IdentityHashMap<>()));
-        return sb.toString();
-
-    }
-
-    private static void appendThrowable(StringBuilder sb, Throwable t, String caption, String indent, Set<Throwable> seen) {
-
-        if (caption != null) {
-            sb.append('\n').append(indent).append(caption);
-        }
-        if (!seen.add(t)) {
-            sb.append("[CIRCULAR REFERENCE: ").append(t.getClass().getName()).append(']');
-            return;
-        }
-        sb.append(t.getClass().getName());
-        if (t.getMessage() != null) {
-            sb.append(": ").append(escapeLineBreaks(t.getMessage()));
-        }
-        if (t instanceof RhinoException) {
-            // script frames are only added by Rhino's printStackTrace override
-            for (ScriptStackElement e : ((RhinoException) t).getScriptStack()) {
-                sb.append('\n').append(indent).append("\tat ").append(escapeLineBreaks(e.toString()));
-            }
-        }
-        for (StackTraceElement e : t.getStackTrace()) {
-            sb.append('\n').append(indent).append("\tat ").append(escapeLineBreaks(e.toString()));
-        }
-        for (Throwable suppressed : t.getSuppressed()) {
-            appendThrowable(sb, suppressed, "Suppressed: ", indent + "\t", seen);
-        }
-        if (t.getCause() != null) {
-            appendThrowable(sb, t.getCause(), "Caused by: ", indent, seen);
-        }
-
-    }
-
     private static boolean ignoreLogStatement(LogLevel logLevel) {
         
         switch (logLevel) {
