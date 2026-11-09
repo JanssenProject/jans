@@ -1,12 +1,10 @@
 package io.jans.scim2.client;
 
-import org.apache.http.HttpHeaders;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicHeader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -23,7 +21,6 @@ import io.jans.scim2.client.rest.provider.ScimResourceProvider;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -66,8 +63,6 @@ public abstract class AbstractScimClient<T> implements CloseableClient, Invocati
         PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .disableContentCompression()
-                .setDefaultHeaders(List.of(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "identity")))
                 .setConnectionManager(cm).build();
 
         ResteasyClientBuilder builder = (ResteasyClientBuilder) ClientBuilder.newBuilder();
