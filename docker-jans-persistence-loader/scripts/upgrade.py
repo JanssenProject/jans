@@ -443,11 +443,18 @@ class Upgrade:
         def _names(items, key):
             return {item.get(key) for item in items or [] if isinstance(item, dict) and isinstance(item.get(key), str)}
 
-        self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps({
+        new_seed = {
             "roles": sorted(_names(role_mapping.get("roles"), "role") | _seeded_names(seeded, "roles")),
             "permissions": sorted(_names(role_mapping.get("permissions"), "permission") | _seeded_names(seeded, "permissions")),
             "grants": sorted(list(grant) for grant in _default_grants(role_mapping) | _seeded_grants(seeded)),
-        }))
+        }
+        if new_seed == seeded:
+            return
+        # a failed seed write must not abort the remaining upgrade steps; it is retried next run
+        try:
+            self.manager.config.set("admin_ui_seeded_role_mapping", json.dumps(new_seed))
+        except Exception as exc:  # noqa: B902
+            logger.warning(f"Unable to save admin_ui_seeded_role_mapping; reason={exc}")
 
     def update_auth_errors_config(self):
         kwargs = {"table_name": "jansAppConf"}
