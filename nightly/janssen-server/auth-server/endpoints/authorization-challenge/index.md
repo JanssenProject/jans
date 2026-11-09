@@ -26,7 +26,7 @@ If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP stat
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 ```
