@@ -108,7 +108,7 @@ Optional:
 						idle for heavily loaded system will vary but the default is a good starting point.
 - `max_retry_attempts` (Number) Maximum retry attempts in case of failure.
 - `max_total_connections` (Number) The number of maximum connection instances in the pool.
-- `password` (String) Redis password.
+- `password` (String, Sensitive) Redis password.
 - `redis_provider_type` (String) Type of connection.
 - `sentinel_master_group_name` (String) Sentinel Master Group Name (required if SENTINEL type of connection is selected).
 - `servers` (String) server details separated by comma e.g. 'server1:8080server2:8081'.
@@ -118,7 +118,7 @@ Optional:
 						enabled prior to entering the blocking operation to have effect. The timeout must be > 0. A timeout 
 						of zero is interpreted as an infinite timeout.
 - `ssl_trust_store_file_path` (String) Directory Path to Trust Store.
-- `ssl_trust_store_password` (String) Password for accessing the Trust Store.
+- `ssl_trust_store_password` (String, Sensitive) Password for accessing the Trust Store.
 - `use_ssl` (Boolean) Enable SSL communication between Gluu Server and Redis cache.
 
 ## Import

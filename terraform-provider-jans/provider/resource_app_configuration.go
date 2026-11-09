@@ -156,8 +156,9 @@ func resourceSsaValidationConfig() *schema.Resource {
 				Optional: true,
 			},
 			"shared_secret": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 		},
 	}
@@ -1502,11 +1503,13 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"pairwise_calculation_key": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Key to calculate algorithmic pairwise IDs.",
 			},
 			"pairwise_calculation_salt": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Salt to calculate algorithmic pairwise IDs.",
 			},
@@ -1542,6 +1545,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"key_store_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "The password of the Key Store.",
 			},
@@ -1640,6 +1644,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"jms_password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "JMS Password.",
 			},
@@ -1876,6 +1881,7 @@ func resourceAppConfiguration() *schema.Resource {
 			},
 			"dcr_signature_validation_shared_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "Specifies shared secret for Dynamic Client Registration.",
 			},
@@ -2161,8 +2167,9 @@ func resourceAppConfiguration() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"api_key": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:      schema.TypeString,
+							Sensitive: true,
+							Optional:  true,
 						},
 						"auth_domain": {
 							Type:     schema.TypeString,
@@ -2193,8 +2200,9 @@ func resourceAppConfiguration() *schema.Resource {
 							Optional: true,
 						},
 						"notification_key": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:      schema.TypeString,
+							Sensitive: true,
+							Optional:  true,
 						},
 						"public_vapid_key": {
 							Type:     schema.TypeString,
@@ -2688,28 +2696,6 @@ func resourceAppConfigurationRead(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-// appConfigFalseBoolPatches returns replace patches for the boolean app-config
-// fields that are explicitly set to false in configuration. patchFromResourceData
-// relies on GetOk, which treats false as unset, so these would otherwise never be
-// sent on an update; GetRawConfig distinguishes a configured false from an unset one.
-func appConfigFalseBoolPatches(rawConfig cty.Value, get func(string) any) []jans.PatchRequest {
-	boolFields := map[string]string{
-		"security_headers_enabled":                "/securityHeadersEnabled",
-		"strict_token_redirect_uri_validation":    "/strictTokenRedirectUriValidation",
-		"allow_startup_on_jwks_uri_fetch_failure": "/allowStartupOnJwksUriFetchFailure",
-	}
-	var patches []jans.PatchRequest
-	for key, path := range boolFields {
-		if attrConfigState(rawConfig, key) != configSet {
-			continue
-		}
-		if v, ok := get(key).(bool); ok && !v {
-			patches = append(patches, jans.PatchRequest{Op: "replace", Path: path, Value: false})
-		}
-	}
-	return patches
-}
-
 func resourceAppConfigurationUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	c := meta.(*jans.Client)
@@ -2719,9 +2705,6 @@ func resourceAppConfigurationUpdate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	// patchFromResourceData (GetOk) drops explicitly-configured false bools; re-add them.
-	patches = append(patches, appConfigFalseBoolPatches(d.GetRawConfig(), d.Get)...)
 
 	if _, err := c.PatchAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
