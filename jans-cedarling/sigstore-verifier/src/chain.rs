@@ -16,10 +16,6 @@ use crate::cert::{Cert, EcCurve, SignatureAlgorithm};
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
 use crate::error::{CertificateChainError, SigstoreVerificationError};
 
-/// Upper bound on candidate intermediates. Fulcio paths have one or two; the cap
-/// keeps a bundle stuffed with look-alike CAs from multiplying signature checks.
-const MAX_INTERMEDIATE_CANDIDATES: usize = 16;
-
 /// Upper bound on intermediates on a single path.
 const MAX_PATH_INTERMEDIATES: u32 = 8;
 
@@ -47,14 +43,7 @@ pub(crate) fn validate_chain(
     // issuer/subject DN match + a verified signature. This selects the correct
     // issuer from the candidate pool (bundle-provided + trust-root intermediates)
     // rather than assuming the list is already the exact ordered path.
-    if intermediates.len() > MAX_INTERMEDIATE_CANDIDATES {
-        return Err(CertificateChainError::TooManyCandidates {
-            count: intermediates.len(),
-            max: MAX_INTERMEDIATE_CANDIDATES,
-        }
-        .into());
-    }
-
+    // The caller caps the bundle-provided share of the pool.
     let mut current = leaf;
     // `depth` = number of intermediate CAs already traversed below `current`.
     let mut depth: u32 = 0;
@@ -398,23 +387,19 @@ mod tests {
     }
 
     #[test]
-    fn oversized_candidate_pool_rejected() {
+    fn large_trusted_intermediate_pool_validates() {
         let root = make_root("fulcio-root");
+        let pool: Vec<Cert> = (0..20)
+            .map(|i| {
+                let ca = make_intermediate(&format!("intermediate-{i}"), None, &root);
+                Cert::from_der(&ca.der).expect("parse intermediate")
+            })
+            .collect();
         let leaf = make_leaf(&root, &LeafOpts::default());
         let leaf_cert = Cert::from_der(&leaf.der).unwrap();
         let root_cert = Cert::from_der(&root.der).unwrap();
-        let decoys = vec![root_cert.clone(); MAX_INTERMEDIATE_CANDIDATES + 1];
-        let err = validate_chain(&leaf_cert, &decoys, &[root_cert], anchor(&leaf_cert))
-            .expect_err("a candidate pool above the cap must be rejected");
-        assert!(
-            matches!(
-                err,
-                SigstoreVerificationError::CertificateChain(
-                    CertificateChainError::TooManyCandidates { .. }
-                )
-            ),
-            "must be rejected by the candidate cap, got {err:?}"
-        );
+        validate_chain(&leaf_cert, &pool, &[root_cert], anchor(&leaf_cert))
+            .expect("a large trust-root intermediate pool must not block a root-issued leaf");
     }
 
     /// A leaf issued through `count` intermediates below one root.

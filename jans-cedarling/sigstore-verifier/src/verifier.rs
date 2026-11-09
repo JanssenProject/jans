@@ -15,11 +15,17 @@ use crate::cert::Cert;
 use crate::cert::EcCurve;
 use crate::chain::validate_chain;
 use crate::crypto::{verify_ecdsa_p256_prehashed, verify_ecdsa_p384_prehashed};
-use crate::error::SigstoreVerificationError;
+use crate::error::{CertificateChainError, SigstoreVerificationError};
 use crate::policy::VerificationPolicy;
 use crate::sct::verify_sct;
 use crate::tlog::{verify_body_consistency, verify_set_from_bundle};
 use crate::trust_root::{SigstoreTrustRootRaw, TrustRoot};
+
+/// Upper bound on bundle-supplied intermediates, checked before decoding. Fulcio
+/// paths have one or two; the cap keeps a bundle stuffed with look-alike CAs
+/// from multiplying parsing and signature checks. Trust-root intermediates are
+/// operator-configured and not counted.
+const MAX_BUNDLE_INTERMEDIATES: usize = 16;
 
 type EcdsaPrehashVerifier = fn(&[u8], &[u8], &[u8]) -> Result<(), SigstoreVerificationError>;
 
@@ -395,8 +401,16 @@ impl SigstoreBlobVerifier {
         &self,
         parsed: &ParsedBundle,
     ) -> Result<Vec<Cert>, SigstoreVerificationError> {
+        let bundle_intermediates = parsed.intermediate_certificates_base64();
+        if bundle_intermediates.len() > MAX_BUNDLE_INTERMEDIATES {
+            return Err(CertificateChainError::TooManyCandidates {
+                count: bundle_intermediates.len(),
+                max: MAX_BUNDLE_INTERMEDIATES,
+            }
+            .into());
+        }
         let mut intermediates = self.trust_root.fulcio_intermediates.clone();
-        for b64 in parsed.intermediate_certificates_base64() {
+        for b64 in bundle_intermediates {
             let der = base64::Engine::decode(&base64::engine::general_purpose::STANDARD, b64)
                 .map_err(|e| SigstoreVerificationError::CertificateParsing {
                     reason: format!("failed to decode bundle intermediate: {e}"),
@@ -903,6 +917,39 @@ mod internal_tests {
         assert!(
             matches!(err, SigstoreVerificationError::CertificateParsing { .. }),
             "must be CertificateParsing, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn oversized_bundle_intermediates_rejected_before_decoding() {
+        let verifier = minimal_verifier();
+        let mut certificates = vec![json!({ "rawBytes": b64(&leaf_cert_der()) })];
+        // Undecodable entries prove the count is checked before any parsing.
+        certificates.extend(std::iter::repeat_n(
+            json!({ "rawBytes": "!!!not-base64!!!" }),
+            MAX_BUNDLE_INTERMEDIATES + 1,
+        ));
+        let json = serde_json::to_vec(&json!({
+            "mediaType": "application/vnd.dev.sigstore.bundle+json;version=0.2",
+            "verificationMaterial": {
+                "x509CertificateChain": { "certificates": certificates },
+                "tlogEntries": []
+            },
+            "messageSignature": { "signature": b64(b"sig") }
+        }))
+        .unwrap();
+        let parsed = ParsedBundle::from_json(&json).unwrap();
+        let err = verifier
+            .candidate_intermediates(&parsed)
+            .expect_err("a bundle above the intermediate cap must be rejected");
+        assert!(
+            matches!(
+                err,
+                SigstoreVerificationError::CertificateChain(
+                    CertificateChainError::TooManyCandidates { count, max }
+                ) if count == MAX_BUNDLE_INTERMEDIATES + 1 && max == MAX_BUNDLE_INTERMEDIATES
+            ),
+            "must be rejected by the bundle intermediate cap, got {err:?}"
         );
     }
 
