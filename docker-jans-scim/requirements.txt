@@ -2,4 +2,6 @@
 --only-binary=grpcio
 --only-binary=cryptography
 ruamel.yaml==0.18.6
+# hard-dependency of pyton-consul
+six>=1.17
 /tmp/jans/jans-pycloudlib

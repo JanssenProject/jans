@@ -1,4 +1,6 @@
 # force using wheel only, image build fails fast if wheel package isn't available
 --only-binary=grpcio
 --only-binary=cryptography
+# hard-dependency of pyton-consul
+six>=1.17
 /tmp/jans/jans-pycloudlib
