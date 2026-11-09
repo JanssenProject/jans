@@ -198,6 +198,26 @@ public class AuthzRequestServiceTest {
             put("passkey", 20);
         }});
         when(defaultAuthenticationMode.getName()).thenReturn("passkey");
+        when(externalAuthenticationService.scriptName("passkey")).thenReturn("passkey");
+
+        Client client = new Client();
+        client.getAttributes().setMinimumAcrLevel(14);
+
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setClient(client);
+
+        authzRequestService.setAcrsIfNeeded(authzRequest);
+        assertTrue(StringUtils.isBlank(authzRequest.getAcrValues()));
+    }
+
+    @Test
+    public void setAcrsIfNeeded_whenNoAcrAndDefaultMethodIsAliasWithEnoughLevel_shouldRaiseNoError() {
+        when(externalAuthenticationService.acrToLevelMapping()).thenReturn(new HashMap<String, Integer>() {{
+            put("basic", 1);
+            put("passkey", 20);
+        }});
+        when(defaultAuthenticationMode.getName()).thenReturn("strong");
+        when(externalAuthenticationService.scriptName("strong")).thenReturn("passkey");
 
         Client client = new Client();
         client.getAttributes().setMinimumAcrLevel(14);

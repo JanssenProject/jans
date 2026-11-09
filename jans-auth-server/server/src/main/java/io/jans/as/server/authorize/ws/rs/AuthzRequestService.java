@@ -580,7 +580,7 @@ public class AuthzRequestService {
             }
 
             final String defaultAcr = defaultAuthenticationMode != null ? defaultAuthenticationMode.getName() : null;
-            final Integer defaultLevel = StringUtils.isNotBlank(defaultAcr) ? getAcrToLevelMap().get(defaultAcr) : null;
+            final Integer defaultLevel = StringUtils.isNotBlank(defaultAcr) ? getAcrToLevelMap().get(externalAuthenticationService.scriptName(defaultAcr)) : null;
             return defaultLevel != null ? defaultLevel : -1;
         }
 
