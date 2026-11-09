@@ -1972,14 +1972,13 @@ the Cedarling will use the default value as specified in the property definition
 </ul>
 <p><strong>Advanced configuration:</strong></p>
 <ul>
-<li><strong><code>CEDARLING_MAX_BASE64_SIZE</code></strong> : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)</li>
-<li><strong><code>CEDARLING_MAX_DEFAULT_ENTITIES</code></strong> : Maximum number of default entities that can be loaded from the policy store.</li>
+<li><strong><code>CEDARLING_MAX_DEFAULT_ENTITIES</code></strong> : Maximum number of default entities that can be loaded from the policy store, counted before duplicate entities are merged. A store over the limit fails to load, at startup and on refresh. Set to <code>0</code> to disable; Cedarling then logs a warning at startup. Default is <code>1000</code>.</li>
 </ul>
 <h3 id="lock-server-integration-properties">Lock Server integration properties<a class="headerlink" href="#lock-server-integration-properties" title="Permanent link">#</a></h3>
 <p>The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.</p>
 <ul>
 <li><strong><code>CEDARLING_LOCK</code></strong> : <code>enabled</code> | <code>disabled</code>. If <code>enabled</code>, the Cedarling will connect to the Lock Server for policies. Default is <code>disabled</code>.</li>
-<li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-server-configuration</code>.</li>
+<li><strong><code>CEDARLING_LOCK_SERVER_CONFIGURATION_URI</code></strong> : Required if <code>LOCK</code> == <code>enabled</code>. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. <code>.well-known/lock-server-configuration</code>. The URI must use <code>https</code>, or <code>http</code> only to a loopback host (<code>localhost</code>, <code>127.0.0.1</code>, <code>::1</code>); otherwise Cedarling fails to start. The Lock access token is sent to the endpoints this file lists, so a discovered log, health or telemetry endpoint that breaks the same rule is ignored with a warning, and Cedarling does not send that data. Unless <code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code> is set, Cedarling registers a client at the IdP this file names and sends the client secret, and the SSA if one is set, to the <code>registration_endpoint</code> and <code>token_endpoint</code> of the IdP's OpenID configuration; if either breaks the same rule, Cedarling fails to start.</li>
 <li><strong><code>CEDARLING_LOCK_SSA_JWT</code></strong> : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.</li>
 <li><strong><code>CEDARLING_LOCK_ACCESS_TOKEN_JWT</code></strong> : Pre-issued access token for Lock Server. When set, Cedarling skips DCR and uses this token for every Lock Server request. Intended for testing and local development, or when DCR is not available. Cedarling cannot renew it: once it expires, Lock Server refuses the requests until Cedarling restarts with a new token. With TRACE enabled, the token must carry the <code>trace.write</code> scope, see <a href=".././cedarling-trace/#auth-server-and-lock-server-setup">Cedarling TRACE</a>. Takes precedence over <code>CEDARLING_LOCK_SSA_JWT</code>; Cedarling logs a <code>WARN</code> when both are set. Not available on WASM builds.</li>
 <li><strong><code>CEDARLING_LOCK_LOG_INTERVAL</code></strong> : How often, in seconds, to send log messages to Lock Server. <code>0</code> turns transmission off. Default is <code>0</code>.</li>
@@ -2110,7 +2109,7 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    November 05, 2026
+    November 09, 2026
   </span>
 
     

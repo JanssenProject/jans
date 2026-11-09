@@ -63239,7 +63239,7 @@ Token entities are accessible in policies via the context (e.g., `context.tokens
 
 Resource entities are built in both authorization interfaces from the `EntityData` provided in the request. The structure is identical to [principal entities](#entitydata-structure), but resources have no parent entities.
 
-If no attributes are provided and a default entity with the same UID exists in the policy store, the default entity's attributes are used.
+If a default entity with the same UID exists in the policy store, its attributes and parents are used regardless of attributes supplied in the request.
 
 ## Entity Merging and Conflict Resolution
 
@@ -64064,110 +64064,7 @@ Next, configure an [*interception script*](../../janssen-server/developer/script
 In your server, create a script file at `/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py` with the following content:
 
 ```py
-from io.jans.model.custom.script.type.client import ClientRegistrationType
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.orm.util import ArrayHelper
-from io.jans.as.server.service import ScopeService
-from io.jans.as.model.util import JwtUtil
-
-class ClientRegistration(ClientRegistrationType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Cedarling Client registration. Initialization"
-        
-        if (not configurationAttributes.containsKey("jwks_uri")):
-            print "Cedarling Client registration. Initialization failed. Property jwks_uri is not specified"
-            return False
-        else:
-            self.jwks_uri = configurationAttributes.get("jwks_uri").getValue2()
-
-        if (not configurationAttributes.containsKey("scope_list")):
-            print "Cedarling Client registration. Initialization failed. Property scope_list is not specified"
-            return False
-        else:
-            self.scope_list = configurationAttributes.get("scope_list").getValue2().split(" ")
-
-        if (not configurationAttributes.containsKey("trigger_scope")):
-            print "Cedarling Client registration. Initialization failed. Property trigger_scope is not specified"
-            return False
-        else:
-            self.trigger_scope = configurationAttributes.get("trigger_scope").getValue2()
-        
-        # used to check if the scopes we're adding exists in the AS
-        self.scopeService = CdiUtil.bean(ScopeService)
-
-        print "Cedarling Client registration. Initialized successfully"
-        return True   
-
-    def destroy(self, configurationAttributes):
-        print "Cedarling Client registration. Destroy"
-        print "Cedarling Client registration. Destroyed successfully"
-        return True   
-
-    def createClient(self, context):
-        print "Cedarling Client registration. createClient"
-
-        # Check if the request has an SSA
-        registerRequest = context.getRegisterRequest()
-        ssa = registerRequest.getSoftwareStatement()
-        if ssa == "":
-            print "Cedarling Client registration. No SSA provided, defaulting"
-            return True
-
-        # Check if the request has a trigger_scope (this is set as 'cedarling' by default) in the request.
-        # The trigger_scope is used to determine if we should add the scopes needed by Cedarling to the
-        # registering client.
-        # request_scopes = ArrayHelper.toString(registerRequest.getScope())
-        request_scopes = registerRequest.getScope()
-        if self.trigger_scope not in request_scopes:
-            print "Cedarling Client registration. the scope '%s' was not included in the request, defaulting" % self.trigger_scope
-            return True
-
-        # add cedarling scopes
-        client = context.getClient()
-        scopes = client.getScopes()
-        for scope in self.scope_list:
-            foundScope = self.scopeService.getScopeById(scope)
-            if foundScope is None:
-                print "did not find scope '%s' in the AS" % scope
-                return False
-            if len(scopes) == 0:
-                scopes = [foundScope.getDn()]
-            else:
-                scopes = ArrayHelper.addItemToStringArray(scopes, foundScope.getDn())
-
-        client.setScopes(scopes)
-
-        print "Cedarling Client registration. added Cedarling scopes"
-        return True
-
-    def updateClient(self, context):
-        print "Cedarling Client registration. UpdateClient method"
-        pass
-
-    def getApiVersion(self):
-        return 11
-
-    def getSoftwareStatementHmacSecret(self, context):
-        return ""
-
-    def getSoftwareStatementJwks(self, context):
-        print "SSA Cedarling Client registration. getting jwks from '%s'" %  self.jwks_uri
-        jwks = JwtUtil.getJSONWebKeys(self.jwks_uri)
-        if jwks is None:
-            print "SSA Cedarling Client registration. jwks not found"
-        return jwks.toString()
-
-    def modifyPutResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyReadResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyPostResponse(self, responseAsJsonObject, executionContext):
-        return False
+--8<-- "jans-cedarling/lock-server-script/add_cedarling_scopes.py"
 ```
 
 * *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
@@ -64175,45 +64072,12 @@ class ClientRegistration(ClientRegistrationType):
 Next, create a JSON file named `script_schema.json` with the following content:
 
 ```json
-{
-  "name": "add_cedarling_scopes",
-  "aliases": null,
-  "description": "A DCR script that adds the required scopes by a client to interact with the lock server",
-  "scriptType": "client_registration",
-  "programmingLanguage": "python",
-  "moduleProperties": [],
-  "configurationProperties": [
-        {
-                "value1": "jwks_uri",
-                "value2": "https://demoexample.jans.io/jans-auth/restv1/jwks",
-                "hide": false,
-                "description": "JWKS URI used for the SSA validation"
-        },
-        {
-                "value1": "scope_list",
-                "value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly",
-                "hide": false,
-                "description": "space-separated scopes that will be added by the script"
-        },
-        {
-                "value1": "trigger_scope",
-                "value2": "cedarling",
-                "hide": false,
-                "description": "the scope that must be present for the script to run"
-        }
-  ],
-  "level": 100,
-  "revision": 0,
-  "enabled": true,
-  "scriptError": null,
-  "modified": false,
-  "internal": false,
-  "locationType": "file",
-  "locationPath": "add_cedarling_scopes.py"
-}
+--8<-- "jans-cedarling/lock-server-script/script_schema.json"
 ```
 
 * *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json)*.
+
+The script adds the scopes only to clients that register with an SSA. A JWT that is not an SSA, such as an `id_token`, gets no scopes, and neither does an SSA from this Auth Server that it does not know or that is in the `REVOKED` or `EXPIRED` state. Set `ssa_issuer` to the `iss` of your SSAs to accept SSAs from that issuer only; leave it empty to accept any issuer whose signature verifies against `jwks_uri`.
 
 > Note:
 >
@@ -67286,15 +67150,14 @@ the Cedarling will use the default value as specified in the property definition
 
 **Advanced configuration:**
 
-- **`CEDARLING_MAX_BASE64_SIZE`** : Maximum size in bytes for Base64-encoded content (policies, schema, etc.)
-- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store.
+- **`CEDARLING_MAX_DEFAULT_ENTITIES`** : Maximum number of default entities that can be loaded from the policy store, counted before duplicate entities are merged. A store over the limit fails to load, at startup and on refresh. Set to `0` to disable; Cedarling then logs a warning at startup. Default is `1000`.
 
 ### Lock Server integration properties
 
 The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.
 
 - **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies. Default is `disabled`.
-- **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`.
+- **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`. The URI must use `https`, or `http` only to a loopback host (`localhost`, `127.0.0.1`, `::1`); otherwise Cedarling fails to start. The Lock access token is sent to the endpoints this file lists, so a discovered log, health or telemetry endpoint that breaks the same rule is ignored with a warning, and Cedarling does not send that data. Unless `CEDARLING_LOCK_ACCESS_TOKEN_JWT` is set, Cedarling registers a client at the IdP this file names and sends the client secret, and the SSA if one is set, to the `registration_endpoint` and `token_endpoint` of the IdP's OpenID configuration; if either breaks the same rule, Cedarling fails to start.
 - **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
 - **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server. When set, Cedarling skips DCR and uses this token for every Lock Server request. Intended for testing and local development, or when DCR is not available. Cedarling cannot renew it: once it expires, Lock Server refuses the requests until Cedarling restarts with a new token. With TRACE enabled, the token must carry the `trace.write` scope, see [Cedarling TRACE](./cedarling-trace.md#auth-server-and-lock-server-setup). Takes precedence over `CEDARLING_LOCK_SSA_JWT`; Cedarling logs a `WARN` when both are set. Not available on WASM builds.
 - **`CEDARLING_LOCK_LOG_INTERVAL`** : How often, in seconds, to send log messages to Lock Server. `0` turns transmission off. Default is `0`.
@@ -70926,12 +70789,9 @@ cargo doc -p cedarling --no-deps --open
 ```rs
 use cedarling::*;
 
-// Load the bootstrap properties from the environment variable, using default values
-// for unset properties
-let bootstrap_config = BootstrapConfig.from_env();
-
-// Initialize Cedarling
-let cedarling = Cedarling::new(bootstrap_config)
+// Load the bootstrap properties from environment variables, using default values
+// for unset properties, and initialize Cedarling
+let cedarling = Cedarling::new_with_env(None).await?;
 ```
 
 See the [bootstrap properties docs](../reference/cedarling-properties.md) for other config loading options.
@@ -70940,34 +70800,14 @@ See the [bootstrap properties docs](../reference/cedarling-properties.md) for ot
 
 Rust bindings support all policy store source types:
 
-| Source Type                                | Description                      |
-| ------------------------------------------ | -------------------------------- |
-| `PolicyStoreSource::Json(String)`          | Inline JSON policy store         |
-| `PolicyStoreSource::Yaml(String)`          | Inline YAML policy store         |
-| `PolicyStoreSource::FileJson(PathBuf)`     | Local JSON file                  |
-| `PolicyStoreSource::FileYaml(PathBuf)`     | Local YAML file                  |
-| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files |
-| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file         |
-| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL  |
-| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server               |
-| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch) |
-
-**Loading from Bytes:**
-
-For advanced use cases (embedded archives, custom fetch logic):
-
-```rust
-use cedarling::*;
-
-// Option 1: Via PolicyStoreSource enum (recommended)
-let archive_bytes: Vec<u8> = fetch_archive_with_auth();
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::ArchiveBytes(archive_bytes));
-
-// Option 2: Direct function call
-use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
-let loaded = load_policy_store_archive_bytes(archive_bytes)?;
-```
+| Source Type                                | Description                                                  |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files                             |
+| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file                                     |
+| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL                              |
+| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server                                           |
+| `PolicyStoreSource::Uri(String)`           | Remote `.cjar` archive or Lock Server, detected when loading |
+| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch)                             |
 
 **Example programmatic configuration:**
 
@@ -70976,23 +70816,23 @@ use cedarling::*;
 use std::path::PathBuf;
 
 // Load from a directory
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::Directory(
-        PathBuf::from("/path/to/policy-store/")
-    ));
+let config = BootstrapConfig {
+    policy_store_config: PolicyStoreConfig {
+        source: PolicyStoreSource::Directory(PathBuf::from("/path/to/policy-store/")),
+        ..Default::default()
+    },
+    ..Default::default()
+};
 
-// Load from a local .cjar archive (Cedar Archive)
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::CjarFile(
-        PathBuf::from("/path/to/policy-store.cjar")
-    ));
+// Other sources only change `source`, for example:
+// PolicyStoreSource::CjarFile(PathBuf::from("/path/to/policy-store.cjar"))
+// PolicyStoreSource::CjarUrl("https://example.com/policy-store.cjar".to_string())
+// PolicyStoreSource::ArchiveBytes(archive_bytes) for archives you fetch yourself
 
-// Load from a remote .cjar archive (Cedar Archive)
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::CjarUrl(
-        "https://example.com/policy-store.cjar".to_string()
-    ));
+let cedarling = Cedarling::new(&config).await?;
 ```
+
+`BootstrapConfig::default()` validates JWT signatures and status, as an empty set of bootstrap properties does, so token-based authorization needs trusted issuers in the policy store.
 
 See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
 
