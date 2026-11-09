@@ -301,6 +301,38 @@ public class AdminUISecurityServiceTest {
         assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
     }
 
+    @Test
+    public void testValidateTrustedIssuerDomainsCountsUtf8BytesForArchiveLimit() throws Exception {
+        String issuerContent = "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\","
+                + "\"padding\":\"" + "\u00e9".repeat(1_400_000) + "\"}";
+        byte[] issuerContentBytes = issuerContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(issuerContentBytes.length < 3_000_000, "Each issuer entry must remain below the per-entry limit");
+
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            for (int i = 0; i < 11; i++) {
+                String entryName = i == 0
+                        ? "trusted-issuers/GluuFlexAdminUI.json"
+                        : "trusted-issuers/Secondary" + i + ".json";
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                zipOutput.write(issuerContentBytes);
+                zipOutput.closeEntry();
+            }
+        }
+
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+                "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("ZIP archive too large when decompressed"));
+    }
+
     // ---------------------------------------------------------------------
     // editPolicyStore
     // ---------------------------------------------------------------------

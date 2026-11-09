@@ -496,11 +496,10 @@ public class AdminUISecurityService {
                         continue;
                     }
 
-                    String content = readEntryContentSafely(zis);
-                    totalUncompressed += content.length();
-                    if (totalUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
-                        throw new IOException("ZIP archive too large when decompressed");
-                    }
+                    byte[] contentBytes = readEntryContentSafely(
+                            zis, MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed);
+                    totalUncompressed += contentBytes.length;
+                    String content = new String(contentBytes, StandardCharsets.UTF_8);
                     JSONObject issuerDoc = new JSONObject(content);
                     if (rootIssuersFile) {
                         validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
@@ -837,13 +836,14 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Reads a zip entry's content as a UTF-8 string, guarding against zip-bomb entries.
+     * Reads a zip entry's bytes while enforcing per-entry and archive decompressed-size limits.
      *
      * @param is the input stream positioned at the entry to read
-     * @return the entry content decoded as UTF-8
-     * @throws IOException if reading fails or the entry exceeds {@link #MAX_ENTRY_SIZE}
+     * @param remainingArchiveBudget the remaining decompressed archive size allowed
+     * @return the entry content bytes
+     * @throws IOException if reading fails or either size limit is exceeded
      */
-    private String readEntryContentSafely(InputStream is) throws IOException {
+    private byte[] readEntryContentSafely(InputStream is, long remainingArchiveBudget) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int len;
@@ -854,9 +854,12 @@ public class AdminUISecurityService {
             if (totalRead > MAX_ENTRY_SIZE) {
                 throw new IOException("ZIP entry too large (possible ZIP bomb greater than 3 MB)");
             }
+            if (totalRead > remainingArchiveBudget) {
+                throw new IOException("ZIP archive too large when decompressed");
+            }
             baos.write(buffer, 0, len);
         }
-        return baos.toString(StandardCharsets.UTF_8);
+        return baos.toByteArray();
     }
 
     /**
