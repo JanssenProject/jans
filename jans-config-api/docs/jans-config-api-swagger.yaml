@@ -15695,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         baseDn:
           type: string
@@ -16691,6 +16691,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16700,8 +16702,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17621,10 +17621,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -17695,6 +17695,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
