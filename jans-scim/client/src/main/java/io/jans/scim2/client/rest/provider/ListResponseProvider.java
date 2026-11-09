@@ -77,11 +77,15 @@ public class ListResponseProvider implements MessageBodyReader<ListResponse> {
                 List<String> schemas=(List<String>) resourceAsMap.get("schemas");
 
                 //Guess the real class of the resource by inspecting the schemas in it
-                Class<? extends BaseScimResource> cls = findResourceClass(schemas);
-                if (cls != null) {
-                    //Create the object with the proper class
-                    resources.add(mapper.convertValue(resource, cls));
-                    logger.trace("Found resource of class {} in ListResponse", cls.getSimpleName());
+                for (String schema : schemas) {
+                    for (Class<? extends BaseScimResource> cls : IntrospectUtil.allAttrs.keySet()) {
+                        if (ScimResourceUtil.getSchemaAnnotation(cls).id().equals(schema)) {
+                            //Create the object with the proper class
+                            resources.add(mapper.convertValue(resource, cls));
+                            logger.trace("Found resource of class {} in ListResponse", cls.getSimpleName());
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -91,17 +95,6 @@ public class ListResponseProvider implements MessageBodyReader<ListResponse> {
 
         return response;
 
-    }
-
-    private Class<? extends BaseScimResource> findResourceClass(List<String> schemas) {
-        for (String schema : schemas) {
-            for (Class<? extends BaseScimResource> cls : IntrospectUtil.allAttrs.keySet()) {
-                if (ScimResourceUtil.getSchemaAnnotation(cls).id().equals(schema)) {
-                    return cls;
-                }
-            }
-        }
-        return null;
     }
 
 }
