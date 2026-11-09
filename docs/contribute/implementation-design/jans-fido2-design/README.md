@@ -19,7 +19,7 @@ Janssen's FIDO2 server - a component inside the Janssen project enables users of
 
 ![FIDO2 ecosystem](../../../assets/fido2-components.png)
 
-[Diagram reference](../../../assets/fido2-components.xml)
+[Diagram reference](../../../assets/fido2-components.drawio)
 
  1. **User**: User of an application, the one who possesses the Authenticator and who's role is to pass the Test of User Presence (TUP) (touch device, look, speak etc.).
 
