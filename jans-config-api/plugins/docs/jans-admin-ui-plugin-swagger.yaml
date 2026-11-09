@@ -221,7 +221,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     put:
@@ -263,7 +263,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
     post:
@@ -305,7 +305,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/write-all
   /admin-ui/adminUIRoles:
@@ -528,7 +528,7 @@ paths:
       description: Get Admin UI editable configuration
       operationId: get-adminui-conf
       responses:
-        "200":
+        "200    ":
           description: Ok
           content:
             application/json:
@@ -632,7 +632,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
     delete:
@@ -675,7 +675,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/delete-all
   /admin-ui/adminUIPermissions/{adminUIPermission}:

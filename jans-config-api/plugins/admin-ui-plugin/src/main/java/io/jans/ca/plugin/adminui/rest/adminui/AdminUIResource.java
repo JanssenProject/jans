@@ -56,8 +56,8 @@ public class AdminUIResource {
     static final String SCOPE_ROLE_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.admin";
     static final String SCOPE_PERMISSION_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.admin";
     static final String SCOPE_ROLE_PERMISSION_MAPPING_ADMIN = "https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.admin";
-    
-    
+
+
     @Inject
     Logger log;
 
@@ -73,10 +73,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get Admin UI editable configuration", description = "Get Admin UI editable configuration", operationId = "get-adminui-conf", tags = {
             "Admin UI - Configuration"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_WRITE}) })
+            @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_WRITE}) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON,
+            @ApiResponse(responseCode = "200    ", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = AppConfigResponse.class, description = "Admin UI editable configuration"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -154,10 +154,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get all admin ui roles", description = "Get all admin ui roles", operationId = "get-all-adminui-roles", tags = {
             "Admin UI - Role"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })                    
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -196,9 +196,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Add admin ui role", description = "Add admin ui role", operationId = "add-adminui-role", tags = {
             "Admin UI - Role"}, security ={
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })  
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
@@ -238,9 +238,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Edit admin ui role", description = "Edit admin ui role", operationId = "edit-adminui-role", tags = {
             "Admin UI - Role"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of  AdminRole")))),
@@ -280,10 +280,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get admin ui role details by role-name", description = "Get admin ui role details by role-name", operationId = "get-adminui-role", tags = {
             "Admin UI - Role"}, security ={
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })    
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -322,9 +322,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Delete admin ui role by role-name", description = "Delete admin ui role by role-name", operationId = "delete-adminui-role", tags = {
             "Admin UI - Role"}, security ={
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_DELETE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })    
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_DELETE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -362,10 +362,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get all admin ui permissions", description = "Get all admin ui permissions", operationId = "get-all-adminui-permissions", tags = {
             "Admin UI - Permission"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -404,9 +404,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Add admin ui permissions", description = "Add admin ui permissions", operationId = "add-adminui-permission", tags = {
             "Admin UI - Permission"}, security =  {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
@@ -446,9 +446,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Edit admin ui permissions", description = "Edit admin ui permissions", operationId = "edit-adminui-permission", tags = {
             "Admin UI - Permission"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
@@ -488,10 +488,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get admin ui permission by permission-name", description = "Get admin ui permission by permission-name", operationId = "get-adminui-permission", tags = {
             "Admin UI - Permission"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -530,9 +530,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Delete admin ui permission", description = "Delete admin ui permission", operationId = "delete-adminui-permission", tags = {
             "Admin UI - Permission"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_DELETE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_DELETE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })
     @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
@@ -545,7 +545,7 @@ public class AdminUIResource {
     @ProtectedApi(scopes = {SCOPE_PERMISSION_DELETE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_DELETE})
     public Response deletePermission(@Valid @NotNull AdminPermission permissionArg) {
         try {
-            
+
             String adminUIPermission = null;
             if(permissionArg!=null) {
                 adminUIPermission = permissionArg.getPermission();
@@ -576,10 +576,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get all admin ui role-permissions mapping", description = "Get all admin ui role-permissions mapping", operationId = "get-all-adminui-role-permissions", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) }) 
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -588,7 +588,7 @@ public class AdminUIResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     public Response getAllAdminUIRolePermissionsMapping() {
         try {
             log.info("Get all Admin-UI role-permissions mapping.");
@@ -618,9 +618,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Add role-permissions mapping", description = "Add role-permissions mapping", operationId = "add-role-permissions-mapping", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
@@ -630,7 +630,7 @@ public class AdminUIResource {
     @POST
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     public Response addPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Adding role-permissions to Admin-UI.");
@@ -660,9 +660,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Map permissions to role", description = "Map permissions to role", operationId = "map-permissions-to-role", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_WRITE }) })
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
@@ -672,7 +672,7 @@ public class AdminUIResource {
     @PUT
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     public Response mapPermissionsToRole(@Valid @NotNull RolePermissionMapping rolePermissionMappingArg) {
         try {
             log.info("Mapping permissions to Admin-UI role.");
@@ -703,10 +703,10 @@ public class AdminUIResource {
      */
     @Operation(summary = "Get admin ui role-permissions mapping by role-name", description = "Get admin ui role-permissions mapping by role-name", operationId = "get-adminui-role-permissions", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_READ }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_WRITE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_READ }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -715,7 +715,7 @@ public class AdminUIResource {
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     public Response getAdminUIRolePermissionsMapping(@Parameter(description = "Admin UI Role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get Admin-UI role-permissions mapping by role-name.");
@@ -745,9 +745,9 @@ public class AdminUIResource {
      */
     @Operation(summary = "Remove role-permissions mapping by role-name", description = "Remove role-permissions mapping by role-name", operationId = "remove-role-permissions-permission", tags = {
             "Admin UI - Role-Permissions Mapping"}, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_DELETE }),
-                    @SecurityRequirement(name = "oauth2", scopes = { SCOPE_PERMISSION_ADMIN }),
-                    @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_DELETE }),
+            @SecurityRequirement(name = "oauth2", scopes = { SCOPE_ROLE_PERMISSION_MAPPING_ADMIN }),
+            @SecurityRequirement(name = "oauth2", scopes = { AppConstants.SCOPE_ADMINUI_DELETE }) })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
@@ -756,7 +756,7 @@ public class AdminUIResource {
     @DELETE
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
-    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_DELETE}, superScopes = {SCOPE_PERMISSION_ADMIN, AppConstants.SCOPE_ADMINUI_DELETE})
+    @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_DELETE}, superScopes = {SCOPE_ROLE_PERMISSION_MAPPING_ADMIN, AppConstants.SCOPE_ADMINUI_DELETE})
     public Response removePermissionsFromRole(@Parameter(description = "role") @PathParam(ROLE_CONST) @NotNull String role) {
         try {
             log.info("Removing permissions to Admin-UI role.");
