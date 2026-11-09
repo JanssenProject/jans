@@ -76,7 +76,7 @@ public class AdminUIResource {
             @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_READ }),
             @SecurityRequirement(name = "oauth2", scopes = { ADMINUI_CONF_WRITE}) })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200    ", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON,
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON,
                     schema = @Schema(implementation = AppConfigResponse.class, description = "Admin UI editable configuration"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),

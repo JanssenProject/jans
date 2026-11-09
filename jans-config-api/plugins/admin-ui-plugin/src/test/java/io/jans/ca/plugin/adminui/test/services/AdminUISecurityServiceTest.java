@@ -544,7 +544,7 @@ public class AdminUISecurityServiceTest {
         assertEquals(response.getResponseCode(), 200);
         verify(policyToScopeMapper).processZipFile(any(), any());
         verify(adminUIService).resetRoles(any());
-        verify(adminUIService).resetPermissionsToRole(any());
+        verify(adminUIService).resetPermissionsToRole(any(),eq(java.util.Collections.emptySet()));
     }
 
     // ---------------------------------------------------------------------

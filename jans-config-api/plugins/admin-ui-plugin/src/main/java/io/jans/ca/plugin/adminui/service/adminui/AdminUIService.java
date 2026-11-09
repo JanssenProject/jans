@@ -471,7 +471,7 @@ public class AdminUIService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> !ele.getRole().equals(role))
+                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
             adminConf.getDynamic().setRolePermissionMapping(roleScopeMapping);
             entryManager.merge(adminConf);
