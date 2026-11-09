@@ -131,6 +131,8 @@ fn compile_protos() {
 
     tonic_prost_build::configure()
         .build_transport(false)
+        // protoc 3.12-3.14 (e.g. Ubuntu 22.04 apt) rejects proto3 `optional` without this.
+        .protoc_arg("--experimental_allow_proto3_optional")
         // Lock verifies signatures over these exact bytes; `Bytes` shares them, not copies.
         .bytes(".io.jans.lock.trace.SubmitBulkRecordsRequest.records")
         .compile_protos(&[audit_proto, trace_proto], &["src/lock/proto/"])
