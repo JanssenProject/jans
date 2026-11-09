@@ -28,7 +28,7 @@ if [[ -z $JANS_ADMIN_PASSWORD ]]; then
   read -rsp "Enter admin password:                                            " JANS_ADMIN_PASSWORD
   echo
 fi
-if [[ -z $JANS_ADMIN_PASSWORD ]] || [[ $JANS_ADMIN_PASSWORD == *$'\n'* ]]; then
+if [[ -z $JANS_ADMIN_PASSWORD ]] || [[ $JANS_ADMIN_PASSWORD == *$'\n'* || $JANS_ADMIN_PASSWORD == *$'\r'* ]]; then
   echo "[E] Admin password is required (set JANS_ADMIN_PASSWORD or enter it when prompted)"
   exit 1
 fi
@@ -88,6 +88,8 @@ if [[ $INSTALL_ISTIO == "true" ]]; then
   cd ..
 fi
 
+# owner-only before the admin password is written; install also truncates an existing file
+install -m 600 /dev/null override.yaml
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   sudo wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
   sudo microk8s.kubectl apply -f mysql.yaml --kubeconfig="$KUBECONFIG"
