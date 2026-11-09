@@ -90,11 +90,15 @@ public class BaseLockClientTest {
 	}
 
 	/**
-	 * The dev stand's TLS certificate is self-signed (see {@code VM-DEV-PROMPT.md}); this trusts
-	 * any certificate for the returned client instance only, exactly like {@code curl -k} in the
-	 * project's other manual scripts. Never use this pattern outside a test.
+	 * Verifies the server certificate by default. A dev stand with a self-signed certificate (see
+	 * {@code VM-DEV-PROMPT.md}) either needs its CA in the JVM trust store
+	 * ({@code -Djavax.net.ssl.trustStore=...}) or an explicit {@code -Dlock.test.tls.insecure=true},
+	 * which trusts any certificate for the returned client instance only. Never use that outside a test.
 	 */
-	protected static HttpClient newInsecureHttpClient() {
+	protected static HttpClient newTestHttpClient() {
+		if (!Boolean.getBoolean("lock.test.tls.insecure")) {
+			return HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+		}
 		TrustManager trustAll = new X509TrustManager() {
 
 			@Override

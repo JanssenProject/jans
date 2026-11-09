@@ -114,11 +114,12 @@ jobs:
           PY
 
           cd jans
+          # setup logs are root-only (0600) and must not ship in the package
+          sudo rm -f /opt/jans/jans-setup/logs/setup.log /opt/jans/jans-setup/logs/setup_error.log
           cp -r /opt/dist jans-src/opt/
           cp -r /opt/jans jans-src/opt/
           touch jans-src/opt/jans/jans-setup/package
           rm -rf install.py install jans-cli-tui
-          rm -f jans-src/opt/jans/jans-setup/logs/setup.log jans-src/opt/jans/jans-setup/logs/setup_error.log
           sed -i "s/%VERSION%/${JANS_VERSION}/g" run-build.sh
           sudo ./run-build.sh
           cd "$GITHUB_WORKSPACE"

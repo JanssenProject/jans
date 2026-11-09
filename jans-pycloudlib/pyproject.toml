@@ -12,7 +12,8 @@ name = "jans-pycloudlib"
 dynamic = ["version"]
 description = "Utilities for Janssen cloud-native deployment"
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [
     {name = "JanssenProject"}
 ]
@@ -21,12 +22,13 @@ maintainers = [
 ]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12"
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
     # handle CVE-2025-50181, CVE-2025-50182, GHSA-mf9v-mfxr-j63j, GHSA-qccp-gfcp-xxvc
@@ -67,7 +69,7 @@ dependencies = [
     # handle CVE-2022-36087
     "oauthlib>=3.2.1",
 
-    "boto3",
+    "boto3>=1.43",
     "sprig-aes>=0.4.0",
     "marshmallow>=3.26.2",
     "apispec[marshmallow]>=6.6.1",
@@ -82,6 +84,9 @@ dependencies = [
     # Cloud SQL Python Connector for Cloud Run to Cloud SQL connections
     "cloud-sql-python-connector[pg8000]>=1.0.0",
     "pg8000>=1.30.0",
+
+    # py3.14 is no longer shipped with six library
+    "six>=1.17",
 ]
 requires-python = ">=3.10"
 

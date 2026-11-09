@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +85,7 @@ public class LocalizedString implements Serializable {
     }
 
     public String removeLdapLanguageTag(String value, String ldapAttributeName) {
-        return value.replaceAll("(?i)" + ldapAttributeName, "")
+        return value.replaceAll("(?i)" + Pattern.quote(ldapAttributeName), "")
                 .replace(LANG_SEPARATOR + LANG_PREFIX + LANG_JOINER, "");
     }
 

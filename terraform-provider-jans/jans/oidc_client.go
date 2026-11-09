@@ -135,7 +135,34 @@ type OidcClient struct {
 	BaseDn                                     string               `schema:"base_dn" json:"baseDn,omitempty"`
 	Inum                                       string               `schema:"inum" json:"inum,omitempty"`
 	ClientName                                 string               `schema:"client_name" json:"clientName,omitempty"`
-	RequirePkce                                bool                 `schema:"require_pkce" json:"requirePkce,omitempty"`
+	RequirePkce                                bool                 `schema:"require_pkce" json:"-"`
+	fetchedRequirePkce                         *bool
+}
+
+// Config API only honours attributes.requirePkce, so the top-level flag mirrors it.
+func (o *OidcClient) pushRequirePkce() {
+	nested := o.Attributes != nil && o.Attributes.RequirePkce
+	if o.RequirePkce == nested {
+		return
+	}
+	// a fetched client knows which flag the caller edited; a fresh one lets true win
+	if o.fetchedRequirePkce != nil && *o.fetchedRequirePkce == o.RequirePkce {
+		o.RequirePkce = nested
+		return
+	}
+	if o.fetchedRequirePkce == nil && !o.RequirePkce {
+		return
+	}
+	if o.Attributes == nil {
+		o.Attributes = &OidcClientAttribute{}
+	}
+	o.Attributes.RequirePkce = o.RequirePkce
+}
+
+func (o *OidcClient) pullRequirePkce() {
+	o.RequirePkce = o.Attributes != nil && o.Attributes.RequirePkce
+	fetched := o.RequirePkce
+	o.fetchedRequirePkce = &fetched
 }
 
 // GetOidcClients returns all currently configured OIDC clients.
@@ -156,6 +183,10 @@ func (c *Client) GetOidcClients(ctx context.Context) ([]OidcClient, error) {
 		"limit": "5",
 	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
+	}
+
+	for i := range ret.Clients {
+		ret.Clients[i].pullRequirePkce()
 	}
 
 	return ret.Clients, nil
@@ -179,6 +210,7 @@ func (c *Client) GetOidcClient(ctx context.Context, inum string) (*OidcClient, e
 	if err := c.get(ctx, "/jans-config-api/api/v1/openid/clients/"+inum, token, scope, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
+	ret.pullRequirePkce()
 
 	return ret, nil
 }
@@ -192,11 +224,14 @@ func (c *Client) CreateOidcClient(ctx context.Context, client *OidcClient) (*Oid
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
+	client.pushRequirePkce()
 	ret := &OidcClient{}
 
 	if err := c.post(ctx, "/jans-config-api/api/v1/openid/clients", token, scope, client, ret); err != nil {
 		return nil, fmt.Errorf("post request failed: %w", err)
 	}
+	client.pullRequirePkce()
+	ret.pullRequirePkce()
 
 	return ret, nil
 }
@@ -216,11 +251,15 @@ func (c *Client) UpdateOidcClient(ctx context.Context, client *OidcClient) (*Oid
 
 	// we can either use PUT on /clients or PATCH on /clients/{inum}
 
+	client.pushRequirePkce()
 	ret := &OidcClient{}
 
 	if err := c.put(ctx, "/jans-config-api/api/v1/openid/clients", token, scope, client, ret); err != nil {
 		return nil, fmt.Errorf("put request failed: %w", err)
 	}
+	// rebase on what was sent so a later update on the same struct sees the right baseline
+	client.pullRequirePkce()
+	ret.pullRequirePkce()
 
 	return ret, nil
 }

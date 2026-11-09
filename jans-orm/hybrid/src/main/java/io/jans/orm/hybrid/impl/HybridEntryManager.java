@@ -22,6 +22,7 @@ import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.operation.ConfigurationException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.impl.GenericKeyConverter;
 import io.jans.orm.impl.model.ParsedKey;
@@ -83,6 +84,19 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
             for (String baseName : baseNames) {
             	baseNameToEntryManagerMapping.put(baseName, persistenceTypeEntry.getValue());
             }
+        }
+    }
+
+    @Override
+    public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
+        super.setPersistenceExtension(persistenceExtension);
+
+        if (this.persistenceEntryManagers == null) {
+            return;
+        }
+
+        for (PersistenceEntryManager persistenceEntryManager : persistenceEntryManagers.values()) {
+            persistenceEntryManager.setPersistenceExtension(persistenceExtension);
         }
     }
 
