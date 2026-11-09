@@ -58,7 +58,7 @@ public class JansPasswordService extends PasswordService {
             return false;
         }
         authenticatedUserId = currentUser.getUserId();
-        if (Boolean.valueOf(flowConfig.get("ENABLE_ACCOUNT_LOCK"))) {
+        if (Boolean.valueOf(flowConfig.get("enableLock"))) {
             logger.info("Credentials are valid and user account locked feature is activated");
             // Identity's user may be a partial or pre-login snapshot; merging it would drop attributes.
             User freshUser = userService.getUser(authenticatedUserId);
@@ -108,7 +108,14 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             long lockExpiresAt = System.currentTimeMillis() + DEFAULT_LOCK_EXP_TIME * 1000L;
-            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
+            String lockExpiresAtValue = String.valueOf(lockExpiresAt);
+            String lockKey = lockCacheKey(currentUser);
+            cacheService.put(LOCK_RECORD_RETENTION, lockKey, lockExpiresAtValue);
+            Object lockRecord = cacheService.get(lockKey);
+            if (!lockExpiresAtValue.equals(String.valueOf(lockRecord))) {
+                logger.error("Failed to verify lock record for user {}. Account remains active.", username);
+                return "Your account could not be locked. Please try again.";
+            }
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             return "Your account has been locked.";
@@ -130,10 +137,10 @@ public class JansPasswordService extends PasswordService {
             }
             if (System.currentTimeMillis() >= lockExpiresAt) {
                 logger.info("Unlocking user {} account", username);
-                cacheService.remove(lockKey);
                 currentUser.setStatus(GluuStatus.ACTIVE); // this line of code required to save user's status
                 setCustomAttribute(currentUser, JANS_STATUS, ACTIVE);
                 setCustomAttribute(currentUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
+                cacheService.remove(lockKey);
                 return "Your account  is now unlock. Try login ";
             }
 
