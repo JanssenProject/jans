@@ -70,7 +70,7 @@ public class AdminUIService {
 
     /**
      * Apply editable Admin UI settings from the provided AppConfigResponse to persistent storage and synchronize those changes into the in-memory AUIConfiguration.
-     *
+     * <p>
      * Only non-null and non-empty fields in the provided AppConfigResponse are applied; unchanged fields are left as-is.
      *
      * @param appConfigResponse the incoming editable Admin UI settings to persist and propagate
@@ -364,6 +364,9 @@ public class AdminUIService {
             }
             adminConf.getDynamic().setRolePermissionMapping(rolePermissionsArgs);
             entryManager.merge(adminConf);
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription());

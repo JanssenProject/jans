@@ -199,6 +199,7 @@ public class WebhookService {
     public WebhookEntry addWebhook(@Valid WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
+            validateWebhookUrlOrigin(webhook);
             String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());
             webhook.setInum(id);
             webhook.setDn(dnOfWebhook(id, AppConstants.WEBHOOK_DN));
@@ -275,6 +276,7 @@ public class WebhookService {
     public WebhookEntry updateWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
+            validateWebhookUrlOrigin(webhook);
             if (Strings.isNullOrEmpty(webhook.getInum())) {
                 log.error(ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
@@ -388,16 +390,24 @@ public class WebhookService {
 
         if (CommonUtils.hasShortCode(webhook.getUrl())) {
             // Trigger callers supply shortcode values, so they must not be able to pick the destination host
-            Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
-            if (!origin.find() || origin.group().contains("${")) {
-                log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", webhook.getDisplayName(), webhook.getInum());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
-            }
+            validateWebhookUrlOrigin(webhook);
             webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortcodeValueMap()));
         }
 
         if (CommonUtils.hasShortCode(webhook.getHttpRequestBody()) && Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
             webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortcodeValueMap()));
+        }
+    }
+
+    private void validateWebhookUrlOrigin(WebhookEntry webhook) throws ApplicationException {
+        if (!CommonUtils.hasShortCode(webhook.getUrl())) {
+            return;
+        }
+
+        Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
+        if (!origin.find() || origin.group().contains("${")) {
+            log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", webhook.getDisplayName(), webhook.getInum());
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
         }
     }
 
