@@ -87,7 +87,22 @@ TF_SUBCOMMAND=""
 CHDIR_ARG=""
 DESTROY_FLAG=""
 PLAN_FILE=""
+SKIP_VALUE=""
 for arg in "$@"; do
+    # Terraform reads `-var x=1` as one option, so its value is neither a plan file nor a flag.
+    # List only options that take a value: a boolean one here would hide the next argument.
+    if [[ -n "${SKIP_VALUE}" ]]; then
+        SKIP_VALUE=""
+        continue
+    fi
+    if [[ -n "${TF_SUBCOMMAND}" ]]; then
+        case "${arg/#--/-}" in
+            -backup|-generate-config-out|-lock-timeout|-out|-parallelism|-replace|-state|-state-out|-target|-var|-var-file)
+                SKIP_VALUE="yes"
+                continue
+                ;;
+        esac
+    fi
     case "${arg}" in
         -chdir=*)
             CHDIR_ARG="${arg}"
