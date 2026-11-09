@@ -107,10 +107,9 @@ public class UserPersistenceHelper {
      * @param person The person in question
      * @throws Exception
      */
-    public void removeUserFromGroups(ScimCustomPerson person) {
+    public void removeUserFromGroups(ScimCustomPerson person, List<String> groups) {
 
         String dn = person.getDn();
-        List<String> groups = person.getMemberOf();
         
         for (String oneGroup : groups) {
             try {

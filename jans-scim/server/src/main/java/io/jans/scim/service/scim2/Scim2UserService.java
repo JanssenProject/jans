@@ -562,6 +562,7 @@ public class Scim2UserService implements Serializable {
 
 	public void deleteUser(ScimCustomPerson gluuPerson) throws Exception {
 
+		List<String> groups = gluuPerson.getMemberOf() == null ? null : new ArrayList<>(gluuPerson.getMemberOf());
 		if (externalScimService.isEnabled()) {
 			boolean result = externalScimService.executeScimDeleteUserMethods(gluuPerson);
 			if (!result) {
@@ -570,9 +571,9 @@ public class Scim2UserService implements Serializable {
 			}
 		}
 
-		if (gluuPerson.getMemberOf() != null && gluuPerson.getMemberOf().size() > 0) {
+		if (groups != null && !groups.isEmpty()) {
 			log.info("Removing user {} from groups", gluuPerson.getUid());
-			userPersistenceHelper.removeUserFromGroups(gluuPerson);
+			userPersistenceHelper.removeUserFromGroups(gluuPerson, groups);
 		}
 		log.info("Removing user entry {}", gluuPerson.getDn());
 

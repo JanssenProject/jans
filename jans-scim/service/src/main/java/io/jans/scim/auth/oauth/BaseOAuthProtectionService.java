@@ -103,8 +103,8 @@ public abstract class BaseOAuthProtectionService implements IProtectionService, 
                 return IProtectionService.simpleResponse(FORBIDDEN, "Invalid token issuer");
 
             //DPoP proof-of-possession is not verified here, so key-bound tokens cannot be accepted as bearer tokens
-            JSONObject cnf = claims.getClaimAsJSON(JwtClaimName.CNF);
-            if (cnf != null && cnf.has(JwtClaimName.JKT))
+            Object cnf = claims.getClaim(JwtClaimName.CNF);
+            if (cnf != null && !(cnf instanceof JSONObject && !((JSONObject) cnf).has(JwtClaimName.JKT)))
                 return IProtectionService.simpleResponse(FORBIDDEN, "DPoP-bound tokens are not supported");
 
             int exp = Optional.ofNullable(claims.getClaimAsInteger(JwtClaimName.EXPIRATION_TIME)).orElse(0);
