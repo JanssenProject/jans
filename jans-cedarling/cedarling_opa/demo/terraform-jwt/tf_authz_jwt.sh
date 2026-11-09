@@ -86,6 +86,7 @@ fi
 TF_SUBCOMMAND=""
 CHDIR_ARG=""
 DESTROY_FLAG=""
+PLAN_FILE=""
 for arg in "$@"; do
     case "${arg}" in
         -chdir=*)
@@ -106,6 +107,8 @@ for arg in "$@"; do
         *)
             if [[ -z "${TF_SUBCOMMAND}" ]]; then
                 TF_SUBCOMMAND="${arg}"
+            elif [[ -z "${PLAN_FILE}" ]]; then
+                PLAN_FILE="${arg}"
             fi
             ;;
     esac
@@ -159,6 +162,15 @@ for cmd in curl jq; do
         exit 1
     fi
 done
+
+# A saved plan keeps its own mode, so `apply <plan>` that deletes resources needs Destroy.
+# Fail closed: anything not confirmed delete-free is treated as Destroy.
+if [[ "${CEDAR_ACTION}" == "Apply" && -n "${PLAN_FILE}" ]]; then
+    if ! "${TERRAFORM_BIN}" ${CHDIR_ARG:+"${CHDIR_ARG}"} show -json "${PLAN_FILE}" 2>/dev/null \
+        | jq -e 'any(.resource_changes[]?.change.actions[]?; . == "delete") | not' >/dev/null 2>&1; then
+        CEDAR_ACTION="Destroy"
+    fi
+fi
 
 # ─── Decode JWT claims for display (no signature check here — Cedarling does it) ──
 JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)

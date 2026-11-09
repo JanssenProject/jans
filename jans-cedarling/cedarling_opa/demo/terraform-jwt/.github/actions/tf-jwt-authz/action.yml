@@ -76,6 +76,8 @@ runs:
         read -r -d '' -a TF_ARGS <<< "${TF_COMMAND}" || true
         TF_SUBCOMMAND=""
         DESTROY_FLAG=""
+        PLAN_FILE=""
+        CHDIR_ARG=""
         for arg in "${TF_ARGS[@]}"; do
           case "${arg}" in
             -destroy|--destroy) DESTROY_FLAG="yes" ;;
@@ -86,7 +88,7 @@ runs:
                 *) DESTROY_FLAG="yes" ;;
               esac
               ;;
-            -chdir=*) ;;
+            -chdir=*) CHDIR_ARG="${arg}" ;;
             -*)
               if [[ -z "${TF_SUBCOMMAND}" ]]; then
                 echo "::error::Only -chdir= may precede the Terraform sub-command, got '${arg}'."
@@ -96,6 +98,8 @@ runs:
             *)
               if [[ -z "${TF_SUBCOMMAND}" ]]; then
                 TF_SUBCOMMAND="${arg}"
+              elif [[ -z "${PLAN_FILE}" ]]; then
+                PLAN_FILE="${arg}"
               fi
               ;;
           esac
@@ -126,6 +130,14 @@ runs:
             exit 1
           fi
         done
+        # A saved plan keeps its own mode, so `apply <plan>` that deletes resources needs Destroy.
+        # Fail closed: anything not confirmed delete-free is treated as Destroy.
+        if [[ "${CEDAR_ACTION}" == "Apply" && -n "${PLAN_FILE}" ]]; then
+          if ! terraform ${CHDIR_ARG:+"${CHDIR_ARG}"} show -json "${PLAN_FILE}" 2>/dev/null \
+            | jq -e 'any(.resource_changes[]?.change.actions[]?; . == "delete") | not' >/dev/null 2>&1; then
+            CEDAR_ACTION="Destroy"
+          fi
+        fi
 
         # ── Decode JWT claims for display (Cedarling verifies the signature) ──
         JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)
