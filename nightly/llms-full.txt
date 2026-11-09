@@ -144,7 +144,7 @@ Select the deployment method that best fits your environment and requirements.
 
     ```bash
     # Helm chart: janssen/janssen
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
     ```
     
     [Complete Kubernetes Setup Guide](janssen-server/install/helm-install/README.md)
@@ -154,7 +154,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh && chmod u+x start_janssen_aio_demo.sh && sudo bash start_janssen_aio_demo.sh demoexample.jans.io MYSQL "" <VM_IP>
     ```
     
     [Complete Docker Setup Guide](janssen-server/install/docker-install/quick-start.md)
@@ -164,7 +164,7 @@ Select the deployment method that best fits your environment and requirements.
     **For Testing and Development Only**
     
     ```bash
-    curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+    curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
     sudo python3 install.py
     ```
     
@@ -608,7 +608,7 @@ configuration JSON response, which you can find at `.well-known/openid-configura
 in your specific deployment. Typically, it is
 `https://{hostname}/jans-auth/restv1/register`
 
-The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
+The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
 registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
@@ -3906,7 +3906,7 @@ If scope is not present, AS rejects the call with a 401 (unauthorized) HTTP stat
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 ```
@@ -4696,7 +4696,7 @@ https://janssen.server.host/jans-auth/restv1/authorize
 ```
 
 More information about request and response of the authorization endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Authorization).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization).
 
 
 ## Configuration Properties
@@ -6027,7 +6027,7 @@ https://janssen.server.host/jans-auth/restv1/clientinfo
 
 Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Client_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
 Send this access token in the HTTP `Authorization: Bearer` header and do not send as a URL query
 parameter.
@@ -6244,7 +6244,7 @@ Refer to [this](https://gluu.org/docs/gluu-server/4.4/operation/logout/#openid-c
 Gluu Server documentation to understand how end session endpoint works in Janssen Server.
 
 More information about request and response of the end session endpoint can be found in the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -6322,7 +6322,7 @@ https://janssen.server.host/jans-auth/restv1/global-token-revocation
 ```
 
 More information about request and response of the global token revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml).
 
 ## Usage
 
@@ -6644,7 +6644,7 @@ can be found by checking the `introspection_endpoint` claim of the OpenID Connec
  "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
 More information about request and response of the Introspection endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 **Request parameters**
 
@@ -6928,7 +6928,7 @@ methods used are same as the ones used for client authentication at [token endpo
 
 More information about request and response of the PAR endpoint can be found in
 the OpenAPI specification of
-[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/0.0.0-nightly/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
+[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7080,7 +7080,7 @@ https://janssen.server.host/jans-auth/restv1/ssa
 
 More information about request and response of the revocation endpoint can be found in
 the OpenAPI specification
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/SSA).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
@@ -7627,7 +7627,7 @@ https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 
 
@@ -7739,7 +7739,7 @@ sample response. Actual response can greatly vary in its contents based on reque
 ```
 
 More information about request and response of the token endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
@@ -7885,7 +7885,7 @@ User Info response should contain: `sub`, `jti` and `client_id` claims.
 
 Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -14647,7 +14647,7 @@ Command will be similar to the one below:
 ALTER TABLE  jansPerson  ADD COLUMN <claimName> <dataType>
 ```
 
-[Restart](https://docs.jans.io/nightly/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
+[Restart](https://docs.jans.io/vreplace-janssen-version/janssen-server/vm-ops/jans-command/#restart) the Janssen services below in order to make this change effective:
 
 ```
 jans-auth.service
@@ -16341,7 +16341,7 @@ Operation ID: patch-config-jwks
 
 To use this operation, specify the id of the key that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `use` from `enc` to `sig`.
 
@@ -17635,7 +17635,7 @@ Operation ID: patch-oauth-uma-resources-by-id
 
 To use this operation, specify the id of the Uma that needs to be updated using the `--url-suffix`
 and the property and the new value using the [JSON Patch ](https://jsonpatch.com/#the-patch).
-Refer [here](https://docs.jans.io/nightly/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
+Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
 
 In this example; We will change the value of the property `name` from `uma resource` to `UMA`.
 
@@ -18403,7 +18403,7 @@ Another example is to delete session with **sid=c190667e-a186-421d-8679-420e8261
 curl -k -X DELETE "https://example.jans.io/jans-config-api/api/v1/jans-auth-server/session/sid/c190667e-a186-421d-8679-420e82615a38" -H "Authorization: Bearer 5abf61a6-b86f-49d7-8134-77168303d0f9"
 ```
 
-Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml).
+Navigate to **Auth - Session Management** for other endpoints of managing sessions in config-api [swagger file](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml).
 
 # SSA Configuration
 
@@ -19020,7 +19020,7 @@ are published in the [Swagger document](./../../reference/openapi.md), see endpo
 [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) provides a central place to manage and configure jans modules.
 It helps in configuring auth-server, users, fido2 and scim modules.
 
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
 ![Config-API-Architecture](../../../../assets/config-api-architecture.png)
 
@@ -20408,7 +20408,7 @@ OpenID Connect Client is Relying Parties(RP) using the OAuth Implicit Flow.
 
 # Config-api
 
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/nightly/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server).
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server).
 
 ## Jans Config API Plugins
 Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.
@@ -20931,7 +20931,7 @@ Janssen Config API endpoints are OAuth protected. It supports basic token as wel
 
 ### Invoking API using curl
 
-Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
 #### Prerequisites
 
@@ -20942,7 +20942,7 @@ You will need:
 
 #### Steps
 
- * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
+ * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
  endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
@@ -29434,7 +29434,7 @@ For details on the technical architecture of the FIDO ecosystem, see the [FIDO2 
 Janssen provides native, out-of-the-box support for passkeys, offering users seamless cross-device synchronization and platform-level biometrics. To get started with passkey deployment, refer to the [Passkeys Implementation Guide](../recipes/passkey-impl-guide.md).
 
 ### FIDO Metric API 
-Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
+Janssen server provides [FIDO Metric API](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml). These APIs enable collection of vital operational metrics such as:
 
 - Number of active registrations
 - Registration requests
@@ -31098,7 +31098,7 @@ The telemetry API is a set of read-only `GET` endpoints grouped as raw entries,
 aggregations, analytics, and utility (`config`, `health`). For the complete list of paths,
 parameters, and response schemas, use the Swagger spec:
 
-- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)**
+- **[FIDO2 Metrics API — OpenAPI/Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)**
 
 | Group | Endpoints |
 |---|---|
@@ -31919,7 +31919,7 @@ System should meet the following requirements:
 To deploy the AIO Janssen Server, first download the installation script and make it executable:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/start_janssen_aio_demo.sh 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/start_janssen_aio_demo.sh 
 chmod u+x start_janssen_aio_demo.sh
 ```
 
@@ -31976,7 +31976,7 @@ Janssen Server can be configured using the Text-based User Interface (TUI).
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example:
 
     ```bash
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz
     ```
 
 2. To connect to the TUI, you need your FQDN, Client ID, and Client Secret. Since the AIO deployment stores configurations in Consul and Vault, you can extract these credentials directly from the running Docker containers. 
@@ -32129,7 +32129,7 @@ For production environments, use a managed database service:
 Deploy PostgreSQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
 kubectl apply -f pgsql.yaml
 ```
 
@@ -32156,7 +32156,7 @@ config:
 Deploy MySQL on your cluster for testing:
 
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
 kubectl apply -f mysql.yaml
 ```
 
@@ -32643,7 +32643,7 @@ Start a fresh Ubuntu VM with ports 443 and 80 open, then run:
 ```bash
 # Helm chart: janssen/janssen
 sudo su -
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This installs Docker, MicroK8s, Helm, and Janssen with default settings.
@@ -32761,14 +32761,14 @@ Open a kubectl shell from the top right navigation menu `>_` and run:
 === "MySQL"
 
     ```bash
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/mysql.yaml
     kubectl apply -f mysql.yaml # adjust values as preferred
     ```
 
 === "PostgreSQL"
 
     ```bash 
-    wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/pgsql.yaml
+    wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/pgsql.yaml
     kubectl apply -f pgsql.yaml # adjust values as preferred
     ```
 
@@ -33178,7 +33178,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.debian13_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.debian13_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33195,17 +33195,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-debian13-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-debian13-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-debian13-0.0.0-nightly.bundle \
+          --bundle jans-debian13-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.debian13_amd64.deb
+          jans_replace-janssen-version-stable.debian13_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33217,19 +33217,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.debian13_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.debian13_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.debian13_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.debian13_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.debian13_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.debian13_amd64.deb: OK
+    jans_replace-janssen-version-stable.debian13_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install ./jans_0.0.0-nightly.debian13_amd64.deb
+sudo apt install ./jans_replace-janssen-version-stable.debian13_amd64.deb
 ```
 
 ## Run the setup script
@@ -33339,7 +33339,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~debian13_amd64) ...
+Removing jans (replace-janssen-version~debian13_amd64) ...
 Checking to make sure service is down...
 ```
 
@@ -33363,7 +33363,7 @@ System should meet [minimum VM system requirements](vm-requirements.md)
 
 1. Download the installer
 ```
-curl https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py > install.py
+curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py > install.py
 ```
 
 1. Execute Installer
@@ -33429,7 +33429,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el9.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el9.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -33440,17 +33440,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el9-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el9-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el9-0.0.0-nightly.bundle \
+          --bundle ~/jans-el9-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          ~/jans-0.0.0-nightly.el9.x86_64.rpm
+          ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33462,19 +33462,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-   echo 'paste-release-sha256sum jans-0.0.0-nightly.el9.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el9.x86_64.rpm.sha256sum
+   echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el9.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el9.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el9.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el9.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el9.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el9.x86_64.rpm
 ```
 
 ### RHEL 10
@@ -33490,7 +33490,7 @@ sudo yum -y install mod_auth_openidc
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.el10.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.el10.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -33501,17 +33501,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-el10-0.0.0-nightly.bundle -P ~/
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-el10-replace-janssen-version-stable.bundle -P ~/
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle ~/jans-el10-0.0.0-nightly.bundle \
+          --bundle ~/jans-el10-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-         ~/jans-0.0.0-nightly.el10.x86_64.rpm
+         ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33523,19 +33523,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.el10.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.el10.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.el10.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.el10.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.el10.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.el10.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo yum install ~/jans-0.0.0-nightly.el10.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-stable.el10.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -33691,7 +33691,7 @@ sudo SUSEConnect -p PackageHub/15.5/x86_64
   [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
 ```shell
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0-nightly.suse16.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-stable.suse16.x86_64.rpm -P ~/
 ```
 
 - Verify the cryptographic signature using cosign (primary verification):
@@ -33702,17 +33702,17 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-suse16-0.0.0-nightly.bundle
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-suse16-replace-janssen-version-stable.bundle
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-suse16-0.0.0-nightly.bundle \
+          --bundle jans-suse16-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans-0.0.0-nightly.suse16.x86_64.rpm
+          jans-replace-janssen-version-stable.suse16.x86_64.rpm
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33724,19 +33724,19 @@ wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-0.0.0
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans-0.0.0-nightly.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-0.0.0-nightly.suse16.x86_64.rpm.sha256sum
+    echo 'paste-release-sha256sum jans-replace-janssen-version-stable.suse16.x86_64.rpm' | sed 's/^sha256://' >jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum && sha256sum -c jans-replace-janssen-version-stable.suse16.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
       ```text
-      jans-0.0.0-nightly.suse16.x86_64.rpm: OK
+      jans-replace-janssen-version-stable.suse16.x86_64.rpm: OK
       ```
 
 - Install the package
 
 ```
-sudo zypper install ~/jans-0.0.0-nightly.suse16.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-stable.suse16.x86_64.rpm
 ```
 
 !!! note "Expected zypper prompt during install"
@@ -33884,7 +33884,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu24.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33901,17 +33901,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu24-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu24-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu24-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu24-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33923,19 +33923,19 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu24.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu24.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu24.04_amd64.deb
 ```
 
 ### Ubuntu 22.04
@@ -33944,7 +33944,7 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 [Releases](https://github.com/JanssenProject/jans/releases/latest)
 
     ```shell title="Command"
-    wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu22.04_amd64.deb -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb -P /tmp
     ```
 
 - Go to `/tmp` directory:
@@ -33961,17 +33961,17 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
     - Download the cosign bundle from the [Releases](https://github.com/JanssenProject/jans/releases/latest) page:
 
         ```bash title="Command"
-        wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-ubuntu22-0.0.0-nightly.bundle -P /tmp
+        wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-ubuntu22-replace-janssen-version-stable.bundle -P /tmp
         ```
 
     - Verify the signature:
 
         ```bash title="Command"
         cosign verify-blob \
-          --bundle jans-ubuntu22-0.0.0-nightly.bundle \
+          --bundle jans-ubuntu22-replace-janssen-version-stable.bundle \
           --certificate-identity-regexp "https://github.com/JanssenProject/jans" \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-          jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+          jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
         ```
 
         Output similar to below confirms the package was signed by the Janssen CI pipeline:
@@ -33983,19 +33983,19 @@ sudo apt install  ./jans_0.0.0-nightly.ubuntu24.04_amd64.deb
 - Optionally, verify integrity using the published checksum file (secondary check):
 
     ```bash title="Command"
-    echo 'paste-release-sha256sum jans_0.0.0-nightly.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_0.0.0-nightly.ubuntu22.04_amd64.deb.sha256sum
+    echo 'paste-release-sha256sum jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb' | sed 's/^sha256://' >jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum && sha256sum -c jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text title="Output"
-    jans_0.0.0-nightly.ubuntu22.04_amd64.deb: OK
+    jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb: OK
     ```
 
 - Install the package
 
 ```shell title="Command"
-sudo apt install  ./jans_0.0.0-nightly.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version-stable.ubuntu22.04_amd64.deb
 ```
 
 Or,
@@ -34117,7 +34117,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (0.0.0-nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 ```
 
@@ -34288,7 +34288,7 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 helm list -n <namespace>
 ```
 
-Keep note of the chart version. For example: `0.0.0-nightly`
+Keep note of the chart version. For example: `replace-janssen-version`
 
 ### Manual Restore
 
@@ -34310,7 +34310,7 @@ kubectl create -f secret-backup.yaml
 4.  Insall jans using the override or user supplied values with the same chart version:
 
 ```bash
-helm install <release-name> janssen/janssen -f values.yaml --version=<0.0.0-nightly> -n <namespace>
+helm install <release-name> janssen/janssen -f values.yaml --version=<replace-janssen-version> -n <namespace>
 ```
 
 ## Automatic Backup and Restore
@@ -34358,7 +34358,7 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -34410,7 +34410,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key
           containers:
             - name: load-web-key-rotation
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be different in Helm
@@ -34497,7 +34497,7 @@ Ingress or Gateway API controllers may use TLS secret named `tls-certificate` in
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+                  image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
                   resources:
                     requests:
                       memory: "300Mi"
@@ -34548,7 +34548,7 @@ Changing FQDN in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: change-fqdn
-              image: ghcr.io/janssenproject/jans/cloudtools:0.0.0-nightly-1
+              image: ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be different in Helm
@@ -35856,7 +35856,7 @@ kubectl scale --replicas=3 deployment/auth-server -n <namespace>
 
 1. Download the `jans-cli-tui` from the [release](https://github.com/JanssenProject/jans/releases/latest) assets depending on your OS. For example: 
 
-    `wget https://github.com/JanssenProject/jans/releases/download/nightly/jans-cli-tui-linux-ubuntu-X86-64.pyz`
+    `wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-cli-tui-linux-ubuntu-X86-64.pyz`
 
     Now we have `jans-cli-tui-linux-ubuntu-X86-64.pyz` downloaded.
 
@@ -35885,7 +35885,7 @@ This guide shows how to upgrade a Janssen helm deployment.
 
 4.  Apply your upgrade:
 
-    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=0.0.0-nightly`
+    `helm upgrade <janssen-release-name> janssen/janssen -n <namespace> -f override.yaml --version=replace-janssen-version`
 
 # Janssen Lock Guide
 
@@ -37738,13 +37738,13 @@ In cloud-native architecture, the load testing is executed via k8s pods.
 
 ### Authorization Code Flow jmeter load test
 
-For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
+For load testing with Authorization Code Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx) is used.
 
 See [Authorization code flow recipe](../recipes/benchmark.md#authorization-code-flow) for details.
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter load test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test, the following [script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx) is used.
 
 See [ROPC flow recipe](../recipes/benchmark.md#resource-owner-password-credentials-ropc-flow) for details.
 
@@ -38721,7 +38721,7 @@ credentials on one page.
 
 You can build a page like Google on your own website. You need to be able to
 list, add, and remove 2FA credentials for a given user's account. But another
-good option is the [Jans Casa](https://docs.jans.io/nightly/casa) web application.
+good option is the [Jans Casa](https://docs.jans.io/vreplace-janssen-version/casa) web application.
 
 The holy grail of security policies since the introduction of RSA OTP tokens,
 stepped-up authentication is when the subject is presented with an additional
@@ -39183,13 +39183,13 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 
 3. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
 
-4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `0.0.0-nightly_dev` which are the bleeding edge images for release `0.0.0-nightly`. Stable images such as `0.0.0-nightly-1` should be used.
+4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
    
    ```yaml
    config:
       image:
         repository: ghcr.io/janssenproject/jans/configurator
-        tag: 0.0.0-nightly_dev 
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -39233,17 +39233,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/auth-server
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/config-api
-       tag: 0.0.0-nightly_dev
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: ghcr.io/janssenproject/jans/persistence-loader
-       tag: 0.0.0-nightly_dev 
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -39277,7 +39277,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     mkdir -p add_users && cd add_users
     ```
 
-2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
 
@@ -39371,7 +39371,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder. You may run the soak auth code test by copying the [soak_test_auth_code.yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/soak_test_auth_code.yaml) instead. 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -39471,7 +39471,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
 
@@ -39559,7 +39559,7 @@ Create the client needed to run the test by executing the following. Make sure t
     EOF
     ```
 
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/nightly/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
 
 
 4. Download or build [config-cli-tui](../config-guide/config-tools/jans-tui/README.md) and run:
@@ -49962,22 +49962,22 @@ This Reference guide helps you learn about the components and architecture of Ja
 # Image references
 | Image                                                                                                                          |
 |--------------------------------------------------------------------------------------------------------------------------------|
-| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-all-in-one/README.md)       |
-| [jans-auth-server](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-auth-server/README.md)     |
-| [jans-casa](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-casa/README.md)                   |
-| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-cloudtools/README.md)       |
-| [jans-config-api](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-config-api/README.md)       |
-| [jans-configurator](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-configurator/README.md)   |
-| [jans-fido2](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-fido2/README.md)                 |
-| [jans-persistence](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-persistence/README.md)     |
-| [jans-saml](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-saml/README.md)                   |
-| [jans-scim](https://github.com/JanssenProject/jans/blob/nightly/docker-jans-scim/README.md)                   |
+| [jans-all-in-one](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-all-in-one/README.md)       |
+| [jans-auth-server](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-auth-server/README.md)     |
+| [jans-casa](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-casa/README.md)                   |
+| [jans-cloudtools](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-cloudtools/README.md)       |
+| [jans-config-api](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-config-api/README.md)       |
+| [jans-configurator](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-configurator/README.md)   |
+| [jans-fido2](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-fido2/README.md)                 |
+| [jans-persistence](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-persistence/README.md)     |
+| [jans-saml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-saml/README.md)                   |
+| [jans-scim](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docker-jans-scim/README.md)                   |
 
 # Helm Chart references
 | Helm Chart                                                                                                                   |
 |------------------------------------------------------------------------------------------------------------------------------|
-| [All In One Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen-all-in-one/README.md) |
-| [Microservices Chart](https://github.com/JanssenProject/jans/blob/nightly/charts/janssen/README.md)         |
+| [All In One Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen-all-in-one/README.md) |
+| [Microservices Chart](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/charts/janssen/README.md)         |
 
 
 ## Architectural diagram of Janssen
@@ -50731,12 +50731,12 @@ Follow the links below to access respective documentation.
 
 | Service          | REST API                                                                                                                                                                              |
 |------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml)                         |
-| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml)          |
+| Jans Auth Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml)                         |
+| Jans Config API  | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml)          |
 | Jans Core        | NA                                                                                                                                                                                    |
-| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-fido2/docs/jansFido2Swagger.yaml)                      |
-| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
-| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-lock/lock-server.yaml) |
+| Jans FIDO 2      | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-fido2/docs/jansFido2Swagger.yaml)                      |
+| Jans SCIM API    | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-scim/server/src/main/resources/jans-scim-openapi.yaml)                      |
+| Jans Lock Server | [Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-lock/lock-server.yaml) |
 
 ## Javadocs
 
@@ -54310,11 +54310,11 @@ This guide shows how to upgrade a Janssen VM deployment.
     Custom scripts are considered external configuration and are not updated automatically during an upgrade.
     Please review and adapt your custom scripts to work with the newer version of the Janssen Server.
 
-Let's assume we are upgrading Jans VM installation from `current version` to `nightly`
+Let's assume we are upgrading Jans VM installation from `current version` to `vreplace-janssen-version`
 
 1. Keep the old VM installation running.
 
-2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `nightly`.
+2. [Install](../install/vm-install/README.md) on a separate VM the target new Jans installation, i.e. `vreplace-janssen-version`.
 
     You can install with a test client. For example:
 
@@ -54322,11 +54322,11 @@ Let's assume we are upgrading Jans VM installation from `current version` to `ni
 
     This `client-id` and `client-pw` will then be used to import Terraform configurations
 
-3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `nightly` to:
+3. Use our Terraform [docs](../terraform/README.md) on the new installation, i.e. `vreplace-janssen-version` to:
     - import all the global configurations from the new installation using `terraform import`
     - define all the custom IDP configurations and apply them using `terraform apply`
 
-4. At this point there should be two versions up, `old version` and `nightly`.
+4. At this point there should be two versions up, `old version` and `vreplace-janssen-version`.
 
 5. Traffic should be switched gradually from the old setup to the new setup.
    Once confidence is gained, drain the old VM.
@@ -55984,7 +55984,7 @@ Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/nightly/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/vreplace-janssen-version/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
@@ -56071,7 +56071,7 @@ The _casa_ project allows to onboard new types of second factors (authentication
 
 ### Flow requisites
 
-To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
+To code the flow corresponding to the authentication method to add, you can use the Agama project found  [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme) as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:
 
 The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
@@ -56198,7 +56198,7 @@ Depending on the answers, you may like to start instead with plugin development 
 
 ## Enrollment plugin
 
-Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
+Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" [plugin](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme) as a template to start the work. Ensure you have:
 
 - A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH
 
@@ -56291,15 +56291,15 @@ Acquaintance with the following technologies is recommended:
 ### Sample plugins
 
 The best way to start learning Casa plugin development is by playing with the sample plugins you can find [here](
-https://github.com/JanssenProject/jans/tree/nightly/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
+https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples). Clone the repository (a shallow clone of `main` branch is fine), `cd` to one of the directories in the folder and run `mvn package`, then upload the resulting `jar-with-dependencies` through the administration console.
 
 ## Configuration management
 
-Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
+Most aspects of Casa that are configurable through the admin console UI can be programmatically operated using the configuration API. A formal description  can be found [here](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml). Note all endpoints are protected by OAuth tokens which must have the `https://jans.io/casa.config` scope.
 
 ## Credentials enrollment
 
-Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps or tokens  
@@ -56339,7 +56339,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../janssen-server/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
-Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/nightly/casa-agama-nightly-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
+Extract [the Agama project](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
 ### Page customizations
 
@@ -56430,7 +56430,7 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
@@ -56438,7 +56438,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
@@ -56533,7 +56533,7 @@ A device/location is considered trustworthy when the user has presented a strong
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/strong-authn-settings-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/strong-authn-settings-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Log in to Casa using an administrator account
 
@@ -56557,7 +56557,7 @@ For regular users, proper details appear in the widget where 2FA is turned on.
 
 ## API
 
-Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
+Configurations provided by this plugin can also be applied by means of the API exposed for this purpose. A formal description of the API can be found in this [swagger](https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-casa/plugins/strong-authn-settings/src/main/resources/assets/2fa-admin-api.yaml) file. Note all endpoints are protected by tokens which must have the `https://jans.io/casa.config` OAuth scope.
 
 # Accounts Linking Plugin
 
@@ -56595,9 +56595,9 @@ Most of work is demanded on setting up project _c_, where configuration of ident
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed.
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`
 
-1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/nightly/agama-inbound-0.0.0-nightly.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download the utility jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly. Also, add the scope `https://jans.io/oauth/config/agama.readonly` to the list of scopes  
 
@@ -56609,7 +56609,7 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     zip -r inbound.zip *
     ```
 
-1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/nightly/acct-linking-agama-0.0.0-nightly-project.zip`
+1. Download the Casa accounts linking Agama project `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives separately using TUI (Agama menu -> "Add a New Project" ). So, there will be two projects: `casa-account-linking` and `agama-inbound-oauth`. 
 
@@ -56937,7 +56937,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
     This configuration requires creating a subdomain or opening a new port for serving HTTPs. There will be only one URL served in this case, e.g. `https://acme.co:444/`; all other content will respond with HTTP 404 (not found). Hitting this URL will bring up the native web browser dialog for selecting a user certificate.  
 
-    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
+    The easiest way to set this up is adding a `VirtualHost` directive associated to a new port, for instance 444. This [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/certauthn_vhost_tls1.3.conf) exemplifies a safe way to do so. Note you have to edit accordingly:
 
     - The server name
     - The paths to the SSL certificate. This is the web serving certificate and is unrelated to the certificates used for authentication
@@ -56946,7 +56946,7 @@ The instructions to setup this URL vary depending on the TLS version required an
 
 === "Apache 2.4 with TLS 1.2"
 
-    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/nightly/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
+    This is the fastest approach and involves adding a directive inside the existing `VirtualHost` for port 443 in  `/etc/apache2/sites-enabled/https_jans.conf`. Copy this [snippet](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/cert-authn/apache/locationmatch_tls1.2.conf) and paste it just after the closing of the `Location` directive associated to `/jans-casa`.
 
     In this case your cert pickup URL is `https://<your-host-name>/jans-casa/pl/cert-authn/index.zul`.
 
@@ -56975,7 +56975,7 @@ Offering users the login page and the account onboarding regarded above is up to
 !!! Note
     Instructions provided here assume usage of TUI. Do the equivalent in admin-ui or other configuration mechanism
 
-1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-agama-0.0.0-nightly-project.zip`
+1. Download the certificate authentication Agama project archive: `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-agama-replace-janssen-version-project.zip`
 
 1. Transfer the zip file to a location in the server and deploy it. For example, if using TUI, go to Agama menu -> "Upload project". Wait one minute
 
@@ -57015,7 +57015,7 @@ The next **optional** step is assigning an icon to certificate authentication fo
 
 ## Install the cert-authn plugin
 
-1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/nightly/cert-authn-0.0.0-nightly-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
+1. Download the plugin jar file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/cert-authn-replace-janssen-version-jar-with-dependencies.jar` and copy to your server's `/opt/jans/jetty/jans-casa/plugins`. Alternatively upload the file using Casa itself: go to `Administration console` > `Casa plugins`
 
 1. Wait one minute. In the admin console, navigate to the "Authentication methods" page. A new "User certificates" widget will appear. Enable the authentication method, drag it to the location (priority) desired, and hit "Save"
 
@@ -57027,7 +57027,7 @@ This step is required only if account onboarding via certificate attributes is d
 
 Note these instructions apply for VM-based installations. On containers-based environments, please open a GitHub discussion or a support ticket.
 
-1. Download file `https://github.com/JanssenProject/jans/releases/download/nightly/jans-scim-model-0.0.0-nightly.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
+1. Download file `https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-scim-model-replace-janssen-version.jar` and place it in your server under `/opt/jans/jetty/jans-auth/custom/libs`
 
 1. Edit the file `/etc/default/jans-casa`: locate a segment that reads `-Dacr=` and assign `agama_io.jans.casa.cert.oneStepAuthn` as new value. Save the change
 
@@ -57181,7 +57181,7 @@ The Consent Management plugin gives end-users the ability to view and revoke pre
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -57207,7 +57207,7 @@ This plugin allows admins to apply a design customization by choosing colors, fa
 
 ## Installation
 
-1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/nightly/custom-branding-0.0.0-nightly-jar-with-dependencies.jar)
+1. [Download the plugin](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/custom-branding-replace-janssen-version-jar-with-dependencies.jar)
 
 1. Login to Casa using an administrator account
 
@@ -57240,7 +57240,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Plugin
 
-1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-0.0.0-nightly-jar-with-dependencies.jar) file
+1. Download the plugin [jar](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar) file
 
 1. Login to Casa using an administrative account
 
@@ -57256,7 +57256,7 @@ The SMTP configuration must be previously populated in the Jans Server. For this
 
 ### Agama project
 
-1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-agama-0.0.0-nightly-project.zip)
+1. Download the project [archive](https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip)
 
 1. Deploy the project onto the server - you can use TUI for this task
 
@@ -57443,7 +57443,7 @@ In addition to being a library, the Cedarling is an embeddable Policy Decision P
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
 Janssen Lock Server, the evidence collector, to centralize decision logs (records of allowed or
-denied access to a capability) and, when [TRACE](./reference/cedarling-properties.md#trace-properties)
+denied access to a capability) and, when [TRACE](./reference/cedarling-trace.md)
 is enabled, signed evidence of each decision whose request carries a TRACE context. Lock Server
 can enable enterprises to perform threat detection and stream the logs to a SIEM or ITDR.
 
@@ -57522,7 +57522,7 @@ The following diagram is a high-level picture of the Cedarling components:
 * **Cedar Engine** is a recent release of the Rust Cedar Engine, thanks to Amazon. It
   returns the decision and diagnostics.
 * **Observability** records decision and system logs and metrics. With
-  [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
+  [TRACE](./reference/cedarling-trace.md) enabled, it also signs a
   record, as evidence, of each decision whose request carries a
   [TRACE context](./reference/cedarling-authz.md#authorize-options-and-trace-context). In enterprise deployments, the optional
   **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence
@@ -59221,7 +59221,7 @@ with the `student` entity type in the schema:
 }
 ```
 
-For this, follow the steps found [here](https://docs.jans.io/nightly/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
+For this, follow the steps found [here](https://docs.jans.io/vreplace-janssen-version/cedarling/quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac) as a guide. Note it is highly recommended to use Agama lab's policy designer in this case as well as Tarp for quickly testing the policy. 
 
 For the short of time, there is a readily available policy store [here](https://github.com/jgomer2001/CedarlingQuickstart/releases/download/v0.0.2/tarpDemo.cjar).
 
@@ -62882,9 +62882,9 @@ Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer 
 
 ## Authorize options and TRACE context
 
-Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. In a batch request, `options` applies to the whole call, not to individual items.
 
-The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [Cedarling TRACE](./cedarling-trace.md)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
 
 | Field | Required | Meaning |
 |---|---|---|
@@ -62892,6 +62892,8 @@ The only option today is `trace`, the TRACE execution context of the call. With 
 | `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
 | `workload_id` | yes | Stable id of the workload the decision is made for |
 | `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+Each value is at most 255 characters. A longer value means no record for the decision (`not_emitted_over_limit`).
 
 The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
 
@@ -62925,7 +62927,7 @@ With TRACE enabled, the decision log entry of every decision says what happened 
 }
 ```
 
-`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-trace.md#record-status-and-metrics) for every status.
 
 In Rust, attach options with `with_options`:
 
@@ -62946,7 +62948,7 @@ options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority,
 request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
 ```
 
-In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none. Java does not see Kotlin default arguments, so Java code that calls the generated `Cedarling` class directly must pass the last argument itself (`null` for no options); `CedarlingAdapter` keeps the overloads without it:
+In Kotlin and Swift, `options` is an optional last parameter of the authorize methods. In Java, use the `CedarlingAdapter.authorize*` overloads with a trailing `AuthorizeOptions` argument; Java code that calls the generated `Cedarling` class directly must pass the last argument itself, `null` for no options:
 
 ```java
 AuthorizeOptions options = new AuthorizeOptions(
@@ -62954,7 +62956,7 @@ AuthorizeOptions options = new AuthorizeOptions(
 AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
 ```
 
-The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. TRACE is not supported on WASM, so there `options` has no effect. In Go, set the `Options` field of the request struct:
 
 ```go
 request := cedarling_go.RequestUnsigned{
@@ -64018,7 +64020,7 @@ For a Cedarling client to communicate with the Lock Server, it has to perform [D
 
 By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.
 
-> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](./cedarling-properties.md#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds** — WASM targets must use the SSA → DCR flow.
+> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](./cedarling-properties.md#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds**: WASM targets must use the SSA and DCR flow.
 
 This guide will walk you through the following setup processes:
 
@@ -64256,25 +64258,7 @@ A successful response will contain the following scopes:
 
 ## Client Setup
 
-To enable Lock Server integration in the Cedarling client, configure the appropriate [bootstrap properties](./cedarling-properties.md).
-
-Here's a table of the available properties:
-
-| Property | Description | Allowed Values | Default |
-| --- | --- | --- | --- |
-| `CEDARLING_LOCK` | Toggles the all the Lock Server integration features. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URI to fetch Lock Server metadata (`.well-known/lock-server-configuration`). Required if `CEDARLING_LOCK` is `enabled`. | String | `""` |
-| `CEDARLING_LOCK_DYNAMIC_CONFIGURATION` (WIP) | Toggles listening for Server-Sent Events (SSE) config updates. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SSA_JWT` | SSA JWT used for DCR. This is required if you followed the [auth server setup](#auth-server-setup). | String | `""` |
-| `CEDARLING_LOCK_ACCESS_TOKEN_JWT` | Pre-issued access token for Lock Server authentication. When set, **bypasses the SSA → DCR → access token flow entirely**. **Primarily intended for testing / local development** to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and `CEDARLING_LOCK_SSA_JWT` are set, this property takes precedence. **Not available on WASM builds.** | String | `""` |
-| `CEDARLING_LOCK_LOG_INTERVAL` | Frequency (in seconds) of sending log messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_HEALTH_INTERVAL` (WIP) | Frequency (in seconds) of sending health messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_TELEMETRY_INTERVAL` (WIP) | Frequency (in seconds) of sending telemetry messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_LISTEN_SSE` (WIP) | Toggles listening for updates from the Lock Server via SSE. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_ACCEPT_INVALID_CERTS` | Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).| `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_TRANSPORT` | The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. | `rest`, `grpc` | `rest` |
-| `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` | Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. | uint | `100` |
-| `CEDARLING_LOCK_LOG_MAX_RETRIES` | Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff. | uint | `5` |
+To enable Lock Server integration in the Cedarling client, set `CEDARLING_LOCK` to `enabled`, `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` to the Lock Server `.well-known/lock-server-configuration`, and `CEDARLING_LOCK_SSA_JWT` to the SSA created in [Auth Server Setup](#auth-server-setup). All Lock properties are described in [Lock Server integration properties](./cedarling-properties.md#lock-server-integration-properties).
 
 ## Loading Policy Stores from Lock Server
 
@@ -64483,7 +64467,7 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 * `dropped_tokens`: Multi-issuer only. List of supplied tokens that were not used in the decision, in ascending `index` order, each with the input `mapping`, zero-based `index`, and a claim-free `reason` (`{ "kind": "...", "detail": ..., "message": "..." }`, where `kind` is a stable slug and `detail` is optional — present for `invalid_input`, omitted for unit reasons — while `message` is always the non-empty Display text). Omitted when no token was dropped. See [Inspecting dropped tokens](./cedarling-multi-issuer.md#inspecting-dropped-tokens) for the reason slugs.
 * `decision_time_micro_sec`: how long the decision took
 * `pushed_data`: Information about pushed data injected into the authorization context (omitted if none)
-* `trace_record_status`: What happened to the TRACE record of this decision, for example `emitted` or `not_emitted_missing_context` (omitted when TRACE is disabled). See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics).
+* `trace_record_status`: What happened to the TRACE record of this decision, for example `emitted` or `not_emitted_missing_context` (omitted when TRACE is disabled). See [Record status and metrics](./cedarling-trace.md#record-status-and-metrics).
 
 Whenever a request ends with a `DENY` and Cedar diagnostics contain errors, Cedarling also emits a separate `ERROR`-level Decision log that summarizes those diagnostics. This makes policy failures immediately visible even if the full debug log is filtered out.
 
@@ -67221,9 +67205,9 @@ These properties are effective regardless of which authorization method is in us
 To load the policy store, one of the following properties must be set:
 
 - **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to local policy store. Cedarling automatically detects the format as one of the following. This property is not supported in WASM due to lack of file-system access. 
-      - Directories → loads as directory-based policy store
-      - `.cjar` files → loads as Cedar Archive
-      - `.yaml`/`.yml` files → loads as YAML (supported for test suites)
+      - Directories --> loads as directory-based policy store
+      - `.cjar` files --> loads as Cedar Archive
+      - `.yaml`/`.yml` files --> loads as YAML (supported for test suites)
       *(Note: Legacy `.json` files are no longer supported. Please migrate to the folder-based format or `.cjar` archive.)*
 
 - **`CEDARLING_POLICY_STORE_URI`** : URL to fetch policy store archive from. The URL must point to a Cedar Archive (`.cjar` or zip archive). Legacy JSON endpoints are no longer supported.
@@ -67309,121 +67293,37 @@ the Cedarling will use the default value as specified in the property definition
 
 The following bootstrap properties are only needed for the Lock Server Integration. These apply to both authorization methods.
 
-- **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events. Default is `disabled`.
+- **`CEDARLING_LOCK`** : `enabled` | `disabled`. If `enabled`, the Cedarling will connect to the Lock Server for policies. Default is `disabled`.
 - **`CEDARLING_LOCK_SERVER_CONFIGURATION_URI`** : Required if `LOCK` == `enabled`. URI where Cedarling can get JSON file with all required metadata about the Lock Server, i.e. `.well-known/lock-server-configuration`.
-- **`CEDARLING_LOCK_DYNAMIC_CONFIGURATION`** : `enabled` | `disabled`, controls whether Cedarling should listen for SSE config updates. Default is `disabled`.
 - **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
-- **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server authentication. When set, Cedarling skips the SSA → DCR → access token flow entirely and uses this token directly to authenticate with Lock Server endpoints (log, health, telemetry). **Primarily intended for testing and local development** to simplify the bootstrap flow when a full Auth Server / DCR setup is not desired. This token may also be used when token issuance is managed externally or DCR is not available. If both `CEDARLING_LOCK_ACCESS_TOKEN_JWT` and `CEDARLING_LOCK_SSA_JWT` are set, `CEDARLING_LOCK_ACCESS_TOKEN_JWT` takes precedence and a warning is emitted. **Not available on WASM builds.**
-- **`CEDARLING_LOCK_LOG_INTERVAL`** : How often to send log messages to Lock Server (0 to turn off transmission).
-- **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often to send health messages to Lock Server (0 to turn off transmission).
-- **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Server (0 to turn off transmission).
-- **`CEDARLING_LOCK_LISTEN_SSE`** : `enabled` | `disabled`: controls whether Cedarling should listen for updates from the Lock Server. Default is `disabled`.
-- **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Default is `disabled`.
-- **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Default value is `rest`.
-- **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Default is `100`.
-- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff: the delay doubles from 10 seconds up to 5 minutes. Default is `5`.
+- **`CEDARLING_LOCK_ACCESS_TOKEN_JWT`** : Pre-issued access token for Lock Server. When set, Cedarling skips DCR and uses this token for every Lock Server request. Intended for testing and local development, or when DCR is not available. Cedarling cannot renew it: once it expires, Lock Server refuses the requests until Cedarling restarts with a new token. With TRACE enabled, the token must carry the `trace.write` scope, see [Cedarling TRACE](./cedarling-trace.md#auth-server-and-lock-server-setup). Takes precedence over `CEDARLING_LOCK_SSA_JWT`; Cedarling logs a `WARN` when both are set. Not available on WASM builds.
+- **`CEDARLING_LOCK_LOG_INTERVAL`** : How often, in seconds, to send log messages to Lock Server. `0` turns transmission off. Default is `0`.
+- **`CEDARLING_LOCK_HEALTH_INTERVAL`** : How often, in seconds, to send health messages to Lock Server. `0` turns transmission off. Default is `0`.
+- **`CEDARLING_LOCK_TELEMETRY_INTERVAL`** : How often, in seconds, to send telemetry messages to Lock Server. `0` turns transmission off. Default is `0`.
+- **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Does not apply to TRACE over gRPC, see `CEDARLING_TRACE_TRANSPORT`. Default is `disabled`.
+- **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Does not affect TRACE, which has its own `CEDARLING_TRACE_TRANSPORT`. Default value is `rest`.
+- **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Also the size of the TRACE record queue. Default is `100`.
+- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff: the delay doubles from 10 seconds up to 5 minutes. Also applies to TRACE requests. Default is `5`.
 
 ### TRACE properties
 
-With TRACE enabled, Cedarling signs an `AUTHORIZATION_DECISION` TRACE record for each authorization decision that carries a TRACE context (see [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context)) and sends it to Lock Server. TRACE never changes the decision. An invalid TRACE configuration stops Cedarling at startup.
+TRACE makes Cedarling sign a record of each authorization decision that carries a TRACE context and send it to Lock Server. Requirements, the Auth Server and Lock Server setup, and troubleshooting are in [Cedarling TRACE](./cedarling-trace.md).
 
-TRACE requires:
-
-- `CEDARLING_LOCK` set to `enabled`: records are sent to Lock Server.
-- A `.cjar` policy store (local `.cjar` file, `.cjar` URL, Lock Server or policy store URI). Each record carries `bundle_hash`, the SHA-256 of the `.cjar` bytes Cedarling loaded, so a directory or YAML policy store cannot be used.
-- A signing key (`CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`).
-- A native build. TRACE is not supported on WASM.
-
-Properties:
+TRACE also uses two Lock properties: `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` is the size of its queue and `CEDARLING_LOCK_LOG_MAX_RETRIES` the number of retries. `CEDARLING_LOCK_LOG_INTERVAL` does not apply to TRACE.
 
 - **`CEDARLING_TRACE`** : `enabled` | `disabled`. Default is `disabled`.
-- **`CEDARLING_TRACE_PRODUCER_ID`** : Stable producer id signed into every record and registered in Lock. 1 to 255 ASCII characters: a letter or digit, then letters, digits or `._:/-`. Default is the value of `CEDARLING_APPLICATION_NAME`, which must then satisfy the same rule (the default `My App` does not, because of the space).
-- **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key as an unencrypted PKCS#8 PEM file, for example created with `openssl genpkey -algorithm ed25519 -out trace-key.pem`. Prefer a file (for example a mounted Kubernetes or Docker secret with restricted permissions): it keeps the secret out of the bootstrap configuration. If `CEDARLING_TRACE` == `enabled`, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used.
-- **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text in the property value, for hosts that inject secrets as values rather than files. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Prefer `CEDARLING_TRACE_SIGNING_KEY` where the host can provide a file: a key inlined in the configuration can leak through environment dumps, process listings or configuration files kept under version control. Treat a configuration that contains this property as a secret.
-- **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock, at most 255 UTF-16 code units (Lock counts Java string length). If unset or blank, the `kid` is the RFC 7638 thumbprint of the public key (`sha256:<hex>`). Cedarling logs the producer id, `kid` and thumbprint at startup, so the admin can register the key in Lock.
-- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or a URL of the TRACE bulk endpoint. `discovered` (the default) takes `trace_bulk_endpoint` from the Lock Server well-known configuration. An empty or blank value also means `discovered`. The endpoint, explicit or discovered, must use `https`, or `http` only to a loopback host (`localhost`, `127.0.0.1`, `[::1]`), because every bulk request carries the Lock access token.
-- **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one bulk request. Must be greater than 0. Default is `100`, the Lock Server default.
-- **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size in bytes of one bulk request. Must be at least `262146`: the largest record Lock Server accepts by default (`maxRequestBytes`, `262144` bytes) plus the brackets of the array, so any record fits in a request. Default is `4194304` (4 MiB), the Lock Server default.
-
-Two properties from the TRACE design are intentionally absent, because in this release each has a single possible value: `CEDARLING_TRACE_CHAIN_GENESIS` (a new producer chain always starts as `first_observed` at each start) and `CEDARLING_TRACE_EMISSION` (every decision with a TRACE context is emitted).
-
-**Tokens in a record.** A record lists the tokens an `authorize_multi_issuer` decision used, by issuer, token type and `jti` (or a fingerprint when there is no `jti`); a token reported in [`dropped_tokens`](./cedarling-logs.md) is not in the record. The token type is the request `mapping` as is, for example `Jans::Access_Token`. A JWT is listed with its `iss` claim; Lock Server accepts only an `https` issuer, or `http` with host `localhost`, so a JWT whose `iss` Lock Server would reject means no record for that decision. A custom (non-JWT) token handled by a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) has no issuer URI, so it is listed with the issuer `urn:jans:cedarling:custom-issuer:<issuer_id>`, whatever the processor returns as `iss`. `<issuer_id>` is the [`issuer`](./cedarling-policy-store.md#trusted-issuersjson) of its token type in the policy store, lowercased (`CustomKeys` becomes `customkeys`), the same prefix as its `context.tokens` key. Lock Server accepts this issuer in a token reference.
-
-#### How records are sent
-
-The authorization call only hands its record to a queue and returns; it never waits for Lock Server. A background emitter takes whatever the queue holds, up to `CEDARLING_TRACE_BULK_MAX_RECORDS` and `CEDARLING_TRACE_BULK_MAX_BYTES`, signs it and sends it as one bulk request. While a request is in flight, the next batch gathers in the queue, so under load requests fill up and when traffic is light each record goes out on its own.
-
-TRACE reuses two Lock log properties:
-
-- `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` is the size of the queue. When it is full, for example while Lock Server is down, the decision is still returned and its record is not emitted (`not_emitted_queue_full`). A record is signed only when the emitter takes it from the queue, so a record that never got into the queue leaves no gap in the producer chain. Cedarling logs a `WARN` when the queue fills and, when it has room again, an `INFO` with the number of records not emitted meanwhile.
-- `CEDARLING_LOCK_LOG_MAX_RETRIES` is how many times a failed bulk request is retried, with exponential backoff doubling from 10 seconds up to 5 minutes, and how many times one record is resent.
-
-`CEDARLING_LOCK_LOG_INTERVAL` does not apply to TRACE: records are sent as soon as the emitter takes them.
-
-What is retried:
-
-- A request that does not reach Lock Server, or gets an HTTP `5xx`, `429` or `408`, is retried with the same bytes. `429` and `408` often come from a proxy before Lock Server; both ask to repeat the request later. After the last retry its records are dropped.
-- A `Retry-After` header on such an answer, in seconds or as an HTTP date, makes the wait before the next attempt at least that long, never shorter than the emitter's own backoff, and at most 5 minutes, so a misconfigured proxy cannot stop TRACE for hours. Without the header, or with a value that cannot be read or is in the past, the emitter's own backoff applies.
-- HTTP `401`: when Cedarling obtained its token through DCR, it requests a new token and sends the same request once more; a second `401` is final. A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` cannot be renewed, so its `401` is final at once.
-- Any other refusal of the whole request is final: its records are logged at `ERROR` and dropped. This includes HTTP `403`: for a token without the `trace.write` scope, or for a client Lock Server has no evidence domain for (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)), and `400 invalid_request`.
-- Lock Server refuses a request over its `traceConfiguration.maxBulkRecords` or `maxBulkRequestBytes` with `400 invalid_request` and the reason `max_bulk_records_exceeded` or `bulk_body_too_large`. The `ERROR` then names the Cedarling setting to lower, `CEDARLING_TRACE_BULK_MAX_RECORDS` or `CEDARLING_TRACE_BULK_MAX_BYTES`, with its current value. Lock Server sends the reason only when its `errorReasonEnabled` is `true` (default `false`); without it, the `ERROR` names the causes that fit a request Cedarling builds: TRACE disabled in Lock Server (`traceConfiguration.enabled`), or a bulk limit, with both Cedarling settings and their values.
-- Per record, Lock Server answers in a `207` response. A record refused with `storage_failure` or `crypto_unavailable` is resent, after a 10-second pause, together with the next request. A record refused with `chain_not_registered` is never resent. When Lock Server refuses the first record (genesis) of the chain with `chain_not_registered`, it registers chains only through its admin API: Cedarling needs `chainRegistrationMode: FIRST_OBSERVED` (see [Lock Server setup for TRACE](#lock-server-setup-for-trace)). Every other refusal is final. The records of one response refused for the same error and reason are logged with one `ERROR` that gives their count; each record is logged at `DEBUG`.
-
-Lock Server registers a producer chain from its genesis record and refuses every other record of the chain until it does. So Cedarling sends the genesis record alone and signs no other record into the chain until Lock Server accepts it; decisions made meanwhile wait in the queue. If the genesis record is lost (refused or dropped), Cedarling opens a new chain, which starts with its own genesis record. If Lock Server refuses records with `chain_not_registered` after it accepted the genesis record (for example, its database was restored), Cedarling logs one `WARN`, drops the records of that chain it still holds, counts them in `trace.dropped` and opens a new chain. It does so without a pause when Lock Server had accepted more of the chain than its genesis record; a chain Lock Server forgot right after its genesis record is replaced after the wait described below, since the next one would likely fare the same.
-
-When Lock Server does not take a request (it is lost after its retries, refused as a whole, answered with every record refused, or Lock Server refuses the genesis record), the emitter waits before the next request: 10 seconds, doubling with each failure in a row up to 5 minutes; a longer `Retry-After` on the last answer stretches the wait, also to at most 5 minutes. Each wait is logged at `WARN` with its length. So a Lock Server that is down or refuses every record gets a request every few minutes, not one per decision. Meanwhile decisions wait in the queue; when it is full they are reported as `not_emitted_queue_full`, and the authorization path never waits. The first record Lock Server accepts ends the waits, which is logged at `INFO`. A chain Lock Server forgot after taking more than its genesis record is not such a failure and is replaced at once.
-
-`Cedarling::shut_down` stops the emitter before the log. On shut down the emitter sends every record it still holds once, without retries or pauses, so stopping Cedarling does not wait for Lock Server to come back. After the first request Lock Server does not take (it fails, or Lock Server refuses the genesis record), the remaining records are not sent: one `WARN` reports how many are dropped, and they are counted in `trace.dropped`.
-
-When Lock Server publishes no `trace_bulk_endpoint` and `CEDARLING_TRACE_ENDPOINT` is not set, or the endpoint is plain `http` to a non-loopback host, Cedarling starts, logs a `WARN` once and reports `not_emitted_no_endpoint` for every decision.
-
-#### Record status and metrics
-
-With TRACE enabled, every decision log entry has a `trace_record_status` field (see [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context)):
-
-| Status | Meaning |
-|---|---|
-| `emitted` | The record was handed to the emitter. Whether Lock Server accepted it shows in the emitter logs and the `trace.accepted` metric. |
-| `not_emitted_missing_context` | The call had no TRACE context, or a required context field was empty. |
-| `not_emitted_over_limit` | A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed facts. The first one is logged at `WARN` with the field, later ones at `DEBUG`. |
-| `not_emitted_invalid_field` | A value Lock Server rejects, such as a JWT issuer that is not `https`, or a policy store that cannot back a record: a `.cjar` whose `metadata.json` has no `policy_store.id` or `policy_store.version`. A store like this is reported with one `WARN` when it is loaded. Any other value is logged at `WARN` with the field the first time, later ones at `DEBUG`. |
-| `not_emitted_queue_full` | The queue to the emitter is full. |
-| `not_emitted_stopped` | The emitter has stopped: Cedarling was shut down, or the emitter ended unexpectedly, which is logged at `ERROR` when it happens. This instance emits no more records. Reported with one `WARN`. |
-| `not_emitted_no_endpoint` | There is no TRACE endpoint to send to. |
-
-When TRACE is disabled, the field is absent and no `trace.*` metric is added.
-
-With metrics enabled, `operational_stats` counts each status under `trace.<status>` (for example `trace.emitted`), and what the emitter did afterwards:
-
-- `trace.accepted`: records Lock Server accepted.
-- `trace.rejected`: records Lock Server refused for good, alone or with their whole request.
-- `trace.dropped`: records given up after their retries, or dropped with a chain that was replaced.
-- `trace.sign_failed`: records that could not be signed.
-- `trace.chains_opened`: chains opened to replace one whose genesis record was lost or that Lock Server no longer knows.
-
-A counter appears only after it is first incremented.
-
-#### Lock Server setup for TRACE
-
-Lock Server accepts TRACE records only with an access token that has the `https://jans.io/oauth/lock/trace.write` scope; `log.write` is not enough. With TRACE enabled, Cedarling asks for this scope in addition to the usual Lock scopes. When Cedarling registers through DCR (see [Lock Server integration](./cedarling-lock-server.md)):
-
-- In the Auth Server, add `https://jans.io/oauth/lock/trace.write` to the software roles of the SSA and to the `scope_list` of the interception script that adds the Cedarling scopes. The scope is created when Lock Server is installed.
-- In Lock Server, enable TRACE, so that it publishes `trace_bulk_endpoint`, and register the producer key: Cedarling logs the producer id, `kid` and thumbprint at startup.
-
-In the Lock Server `traceConfiguration` (see [Lock Server TRACE configuration](../../janssen-server/lock/trace.md#configuration)), Cedarling also needs:
-
-| Setting | Set it to | Without it |
-|---|---|---|
-| `chainRegistrationMode` | `FIRST_OBSERVED` | every record is refused: `chain_not_registered` |
-| `defaultEvidenceDomainId` | a domain id, for example `default` | every request is refused: HTTP `403` `client_not_bound` |
-| `defaultAllowedProducerIds` | a list that contains `CEDARLING_TRACE_PRODUCER_ID` | every record is refused: `producer_not_allowed` |
-
-Cedarling opens a new producer chain at every start and registers it with its first record, which the default `PRE_REGISTERED` mode does not allow (see [Chain registration modes](../../janssen-server/lock/trace.md#chain-registration-modes)). A per-client entry in `clientDomainBindings` also works instead of the two defaults, but Cedarling registers a new client through DCR at every start, so the defaults are simpler.
-
-To see why Lock Server refused a record, set `errorReasonEnabled: true` in the Lock Server configuration: Cedarling then logs Lock Server's `reason` with the error, for example `event_kind_not_authorized`. Lock Server reads this setting only at startup.
-
-A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` must already carry the `trace.write` scope.
-
+- **`CEDARLING_TRACE_PRODUCER_ID`** : Producer id signed into every record. 1 to 255 ASCII characters: a letter or digit, then letters, digits or `._:/-`. Default is `CEDARLING_APPLICATION_NAME`, which must then follow the same rule (the default `My App` does not, because of the space). Lock Server must allow it, see [Lock Server setup](./cedarling-trace.md#auth-server-and-lock-server-setup).
+- **`CEDARLING_TRACE_SIGNING_KEY`** : Path to the Ed25519 private key, an unencrypted PKCS#8 PEM file, for example from `openssl genpkey -algorithm ed25519 -out trace-key.pem`. With TRACE enabled, this property or `CEDARLING_TRACE_SIGNING_KEY_PEM` is required; when both are set, this one is used. Prefer it to the PEM property: a file, such as a mounted secret, keeps the key out of the configuration.
+- **`CEDARLING_TRACE_SIGNING_KEY_PEM`** : The same key as PEM text, for hosts that pass secrets only as values. Used only when `CEDARLING_TRACE_SIGNING_KEY` is not set. Treat a configuration that contains it as a secret: it can leak through environment dumps, process listings or version control.
+- **`CEDARLING_TRACE_SIGNING_KID`** : `kid` the key is registered under in Lock Server, at most 255 characters. Default is the key thumbprint, `sha256:<hex>`. Cedarling logs the producer id, `kid` and thumbprint at startup, for registering the key.
+- **`CEDARLING_TRACE_ENDPOINT`** : `discovered` or the URL of the TRACE bulk endpoint. Default is `discovered`: the `trace_bulk_endpoint` of the Lock Server configuration. A blank value also means `discovered`. The endpoint must use `https`, or `http` only to `localhost`, `127.0.0.1` or `[::1]`, because requests carry the Lock access token; otherwise Cedarling logs a `WARN` and sends no records.
+- **`CEDARLING_TRACE_TRANSPORT`** : `rest` | `grpc`. Protocol for sending records. Default is `rest`.
+    - `grpc` uses only the scheme, host and port of `CEDARLING_TRACE_ENDPOINT`. Lock Server and its proxy must serve TRACE over gRPC, see [Lock Server gRPC transport](../../janssen-server/lock/trace.md#grpc-transport). To reach a Lock Server gRPC port directly, set `CEDARLING_TRACE_ENDPOINT` to it, for example `https://lock.example.com:50051`.
+    - `grpc` requires a build with the `grpc` feature.
+    - Independent of `CEDARLING_LOCK_TRANSPORT`.
+    - Over gRPC the Lock Server certificate is always verified: `CEDARLING_LOCK_ACCEPT_INVALID_CERTS` does not apply, and Cedarling logs a `WARN` when both are set.
+- **`CEDARLING_TRACE_BULK_MAX_RECORDS`** : Maximum number of records in one request. Greater than 0. Default is `100`, the Lock Server default. Keep it at most the Lock Server `traceConfiguration.maxBulkRecords`.
+- **`CEDARLING_TRACE_BULK_MAX_BYTES`** : Maximum size of one request in bytes. At least `262146`, so the largest record Lock Server accepts by default fits. Default is `4194304` (4 MiB), the Lock Server default. Keep it at most the Lock Server `traceConfiguration.maxBulkRequestBytes`.
 
 ## authorize_multi_issuer method properties
 
@@ -67456,6 +67356,103 @@ Also called Token-based Access Control (TBAC). This is the recommended authoriza
 **Decision logging for tokens:**
 
 - **`CEDARLING_DECISION_LOG_DEFAULT_JWT_ID`** : JWT claim name used to identify tokens in decision logs. Default is `jti`. Override with any claim name (e.g., `sub`, `sid`) if your tokens lack a `jti` claim, or you need a different identifier.
+
+# Cedarling TRACE
+
+With TRACE enabled, Cedarling signs a TRACE record for each authorization decision that carries a TRACE context and sends it to Lock Server. TRACE never changes the decision, and the authorization call never waits for Lock Server.
+
+This page covers what Cedarling needs to emit records and how to find out why records do not arrive. The properties are listed in [TRACE properties](./cedarling-properties.md#trace-properties). How an application passes the TRACE context is described in [Authorize options and TRACE context](./cedarling-authz.md#authorize-options-and-trace-context). What Lock Server does with the records is in [Lock Server TRACE](../../janssen-server/lock/trace.md).
+
+## Requirements
+
+- `CEDARLING_LOCK` set to `enabled`.
+- A `.cjar` policy store: a local `.cjar` file, a `.cjar` URL, Lock Server or a policy store URI. A directory or YAML policy store cannot be used, because each record carries the SHA-256 of the `.cjar` Cedarling loaded.
+- A signing key: `CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`.
+- A native build. TRACE is not supported on WASM.
+- Auth Server and Lock Server set up as below.
+
+If a requirement is not met or a TRACE property is invalid, Cedarling does not start, and the error names the property.
+
+## Auth Server and Lock Server setup
+
+**Scope.** Lock Server accepts records only with an access token that has the `https://jans.io/oauth/lock/trace.write` scope; `log.write` is not enough. With TRACE enabled, Cedarling asks for this scope. When Cedarling registers through DCR (see [Lock Server integration](./cedarling-lock-server.md)), add the scope to the software roles of the SSA and to the `scope_list` of the interception script that adds the Cedarling scopes. A token set with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` must already carry the scope.
+
+**Producer key.** At startup Cedarling logs its producer id, `kid` and key thumbprint. Register the key in Lock Server under them, see [Register a key](../../janssen-server/lock/trace.md#register-a-key).
+
+**Lock Server `traceConfiguration`** (see [Lock Server TRACE configuration](../../janssen-server/lock/trace.md#configuration)):
+
+| Setting | Set it to | Without it |
+|---|---|---|
+| `enabled` | `true` | no `trace_bulk_endpoint` is published, so no records are sent |
+| `chainRegistrationMode` | `FIRST_OBSERVED` | every record is refused with `chain_not_registered` |
+| `defaultEvidenceDomainId` | a domain id, for example `default` | every request is refused with HTTP `403` `client_not_bound` |
+| `defaultAllowedProducerIds` | a list that contains `CEDARLING_TRACE_PRODUCER_ID` | every record is refused with `producer_not_allowed` |
+
+Cedarling starts a new producer chain at every start, and Lock Server registers it from its first record only in `FIRST_OBSERVED` mode. Cedarling also registers a new client through DCR at every start, so the default evidence domain and producer list are simpler than a per-client `clientDomainBindings` entry.
+
+To see why Lock Server refused a record, set `errorReasonEnabled: true` in Lock Server and restart it. Cedarling then logs the `reason` with the error.
+
+## How records are sent
+
+- The authorization call puts the record in a queue and returns. The queue holds `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` records. When it is full, for example while Lock Server is down, the record is not emitted (`not_emitted_queue_full`).
+- A background emitter sends what the queue holds as bulk requests, up to `CEDARLING_TRACE_BULK_MAX_RECORDS` records and `CEDARLING_TRACE_BULK_MAX_BYTES` bytes each, as soon as it can. `CEDARLING_LOCK_LOG_INTERVAL` does not apply.
+- A request that may succeed later (no answer, HTTP `5xx`, `429`, `408`, or the matching gRPC status) is retried up to `CEDARLING_LOCK_LOG_MAX_RETRIES` times, waiting 10 seconds, doubling up to 5 minutes. Then its records are dropped.
+- Any other refusal is final: the records are dropped and logged at `ERROR`. The message names the setting to change where there is one, see [Troubleshooting](#troubleshooting).
+- While Lock Server keeps failing, the emitter waits between requests the same way, so Lock Server gets a request every few minutes rather than one per decision. Each wait is logged at `WARN`.
+- On shut down, the emitter sends what it holds once, without retries. What Lock Server does not take is reported in one `WARN` and counted in `trace.dropped`.
+
+## Troubleshooting
+
+| Symptom | Cause | What to change |
+|---|---|---|
+| `WARN` "Lock Server does not publish trace_bulk_endpoint", status `not_emitted_no_endpoint` | TRACE is disabled in Lock Server | enable `traceConfiguration.enabled`, or set `CEDARLING_TRACE_ENDPOINT` |
+| `WARN` that the endpoint "must use https", status `not_emitted_no_endpoint` | the endpoint is plain `http` to a host other than `localhost` | use `https` in `CEDARLING_TRACE_ENDPOINT` or in the Lock Server `baseEndpoint` |
+| HTTP `403` `client_not_bound` | no evidence domain for the Cedarling client | `defaultEvidenceDomainId` |
+| HTTP `403` "Invalid token or insufficient scopes" | the token has no `trace.write` scope | add the scope, see [Auth Server and Lock Server setup](#auth-server-and-lock-server-setup) |
+| HTTP `401` after one renewal, or at once with `CEDARLING_LOCK_ACCESS_TOKEN_JWT` | the token is invalid or expired; a token set by hand cannot be renewed | check the token or use DCR |
+| records refused with `chain_not_registered` | Lock Server does not register chains from their first record | `chainRegistrationMode: FIRST_OBSERVED` |
+| records refused with `producer_not_allowed` | the producer id is not allowed | add `CEDARLING_TRACE_PRODUCER_ID` to `defaultAllowedProducerIds` |
+| records refused with `unknown_producer_key` | the key is not registered in Lock Server | register the key Cedarling logged at startup |
+| `invalid_request` `max_bulk_records_exceeded` or `bulk_body_too_large` | a request is larger than Lock Server accepts | lower the setting the `ERROR` names: `CEDARLING_TRACE_BULK_MAX_RECORDS` or `CEDARLING_TRACE_BULK_MAX_BYTES` |
+| `invalid_request` without a reason | Lock Server hides the reason | set `errorReasonEnabled: true` in Lock Server and read the next `ERROR` |
+| gRPC `UNIMPLEMENTED` | Lock Server or its proxy has no TRACE gRPC route | update Lock Server and its proxy routes (see [Lock Server gRPC transport](../../janssen-server/lock/trace.md#grpc-transport)), or set `CEDARLING_TRACE_TRANSPORT` to `rest` |
+| gRPC `RESOURCE_EXHAUSTED` | a request over the gRPC message limit, or a server or proxy that slows Cedarling down | lower `CEDARLING_TRACE_BULK_MAX_BYTES` |
+| `ERROR` that Lock Server's answer cannot be read | the answer is larger than `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES` | raise `CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`. Lock Server has processed the records, so they are not sent again |
+| many `not_emitted_queue_full` | Lock Server is down or slower than the decision rate | check Lock Server; raise `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` to ride out short outages |
+| records refused with another error id | see the [Lock Server error catalog](../../janssen-server/lock/trace.md#error-catalog) | |
+
+## Record status and metrics
+
+With TRACE enabled, every decision log entry has a `trace_record_status` field:
+
+| Status | Meaning |
+|---|---|
+| `emitted` | The record was queued for the emitter. Whether Lock Server accepted it shows in the emitter logs and the `trace.accepted` metric. |
+| `not_emitted_missing_context` | The call had no TRACE context, or a required context field was empty. |
+| `not_emitted_over_limit` | A value is longer, or a list larger, than Lock Server accepts. Cedarling does not truncate signed values. The first one is logged at `WARN` with the field. |
+| `not_emitted_invalid_field` | A value Lock Server rejects, such as a JWT issuer that is not `https`, or a `.cjar` whose `metadata.json` has no `policy_store.id` or `policy_store.version`. The first one is logged at `WARN` with the field. |
+| `not_emitted_queue_full` | The queue to the emitter is full. |
+| `not_emitted_stopped` | The emitter has stopped: Cedarling was shut down, or the emitter failed, which is logged at `ERROR`. |
+| `not_emitted_no_endpoint` | There is no TRACE endpoint to send to. |
+
+When TRACE is disabled, the field is absent.
+
+With metrics enabled, `operational_stats` counts each status as `trace.<status>` (for example `trace.emitted`) and adds:
+
+- `trace.accepted`: records Lock Server accepted.
+- `trace.rejected`: records Lock Server refused for good.
+- `trace.dropped`: records given up: after their retries, on shut down, or with a producer chain Lock Server lost.
+- `trace.sign_failed`: records that could not be signed.
+- `trace.chains_opened`: producer chains started again because Lock Server lost or did not accept the previous one.
+
+A counter appears only after it is first incremented.
+
+## Tokens in a record
+
+A record lists the tokens an `authorize_multi_issuer` decision used, by issuer, token type and `jti`, or a fingerprint of the token when it has no `jti`. A token reported in [`dropped_tokens`](./cedarling-logs.md) is not listed. A decision that used more than 32 tokens gets no record (`not_emitted_over_limit`).
+
+- A JWT is listed with its `iss`. Lock Server accepts only an `https` issuer, or `http` with host `localhost`, so a decision that uses a JWT with another issuer gets no record (`not_emitted_invalid_field`).
+- A token from a [custom token processor](./cedarling-multi-issuer.md#custom-non-jwt-token-processing) is listed with the issuer `urn:jans:cedarling:custom-issuer:<issuer_id>`, where `<issuer_id>` is the lowercased [`issuer`](./cedarling-policy-store.md#trusted-issuersjson) of its token type in the policy store.
 
 # Sidecar Overview
 
@@ -67607,7 +67604,7 @@ When `Audit-Workload-ID` is missing, `workload_id` is the first non-empty value 
 2. `CEDARLING_APPLICATION_NAME` from the bootstrap configuration
 3. `cedarling-sidecar`
 
-TRACE records are submitted to Lock Server only by a Cedarling build that includes record emission ([#15485](https://github.com/JanssenProject/jans/pull/15485)), with `CEDARLING_TRACE` enabled and Lock Server set up for TRACE, see [TRACE properties](../reference/cedarling-properties.md#trace-properties). The sidecar already sends the TRACE context and flushes on shutdown.
+TRACE records are submitted to Lock Server when `CEDARLING_TRACE` is enabled and Lock Server is set up for TRACE, see [Cedarling TRACE](../reference/cedarling-trace.md). The sidecar already sends the TRACE context and flushes on shutdown.
 
 Cedarling queues records and sends them in the background. When the container stops, the Gunicorn worker finishes in-flight requests and then calls Cedarling `shut_down()` from its `worker_exit` hook, which sends the queued records once. Both steps share `GUNICORN_GRACEFUL_TIMEOUT`: the Gunicorn master kills the worker when it expires, and records still queued are lost.
 
@@ -72439,7 +72436,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer
@@ -76401,7 +76398,7 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 
 ## Configuration Prerequisites
 - A Janssen Authorization Server installation
-- [Client Registration script](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
+- [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath 
 
@@ -77016,9 +77013,9 @@ To access information in your Agama consent flow related to the user attempting 
 
 |Method|Description|Reference class|
 |-|-|-|
-|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
-|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
-|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/nightly/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/nightly/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
+|`getClient`|Gets a reference to the OAuth client associated to the authentication request|[Client](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/registration/Client.java)|
+|`getScopes`|A list of OAuth scopes requested|[Scope](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/persistence-model/src/main/java/io/jans/as/persistence/model/Scope.java)|
+|`getUser`|A reference to the user attempting authentication|[User](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java) / [SimpleUser](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-core/model/src/main/java/io/jans/model/user/SimpleUser.java)|
 |`getSessionAttributes`|A map containing the parameters of the OAuth authentication request issued||
 
 Java example code:
@@ -78500,7 +78497,7 @@ The ParType interception script also adds the following method(s):
 
 # Persistence Script
 
-By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
+By overriding the interface methods in [PersistenceType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java) inside a custom script you can
 
 1. Load initialization data from DB or initialize services after the creation of Entry Manager. 
 2. Release resources, terminate services etc. after the destruction of Entry Manager.
@@ -78587,7 +78584,7 @@ The custom script has the following properties:
 |`apple_client_id`		|Name of Service ID on developer.apple.com. 	| `com.company.name`|
 |`apple_jwks`		| Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -78603,7 +78600,7 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `apple-auth-default.json` with the following contents
@@ -78632,7 +78629,7 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt.
 
 ## Authentication flow
 ```mermaid
@@ -78659,7 +78656,7 @@ Jans AS->>RP: 10. write Jans session cookie
 ```
 
 ## Administrator prerequisites
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).   
 
 ## User prerequisites
@@ -78773,7 +78770,7 @@ Now Duo is an available authentication mechanism for your Janssen Server. This m
     To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`.
 
 ## Make Duo the Default Authentication Mechanism
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 1. Create a file say `duo-auth-default.json` with the following contents
@@ -78831,8 +78828,8 @@ An out-of-the-box feature, the Google Authentication script is a `PersonAuthenti
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup#readme))    
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
+- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup#readme))    
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
 - A [Google account](https://accounts.google.com/).     
 - Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
@@ -78881,7 +78878,7 @@ The custom script has the following properties:
 |-----------------------|-------------------------------|---------------|
 |`google_creds_file`		|Details of the client created on https://console.cloud.google.com/apis/credentials. See [this](https://github.com/maduvena/jans-docs/wiki/Google-Authentication-Script/_edit#download-google-client-json-file) step.		| `/etc/certs/google_client_secret.json`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Google Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -78897,7 +78894,7 @@ Now Google is an available authentication mechanism for your Janssen Server. Thi
 
 ### Make Sign-in with Google Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `google-auth-default.json` with the following contents
@@ -80504,7 +80501,7 @@ SMS to the person's mobile number.
 
 Script contents [here](https://github.com/JanssenProject/jans/jans-linux-setup/static/extension/person_authentication/twilio2FA.py)
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -80527,7 +80524,7 @@ The module has a few properties:
 5) qr_options - Specify width and height of QR image. It's optional property.
     Example: qr_options: { width: 400, height: 400 }
 
-Script contents [here](https://github.com/JanssenProject/jans/blob/nightly/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
@@ -80860,13 +80857,13 @@ can be used in place of the password of the users for authentication.
 FIDO2 is comprised of the [W3C’s Web Authentication specification (WebAuthn)](https://www.w3.org/TR/webauthn/) and FIDO’s corresponding [Client-to-Authenticator Protocol (CTAP)](https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html). WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.
 
 This document explains how to use the Janssen Auth Server's built-in
-[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
+[Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py)
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
 
 ## Prerequisites
 
 - A Janssen Server ([installation instructions](https://github.com/JanssenProject/jans#installation))      
-- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/nightly/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
+- [Passkey Interception Script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/passkey/PasskeyInterceptionScript.py) (included in the default Janssen Server distribution);     
 - At least one FIDO2 device for testing, like one of the devices [listed below](#fido2-devices).
 
 ### FIDO2 devices
@@ -80906,7 +80903,7 @@ Now FIDO2 is an available authentication mechanism for your Janssen Server. This
     Find `"acr_values_supported":` and you should see `"fido2"`.
 
 ## Enable FIDO2 Script as default authentication script:
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable FIDO2 authentication:
 1. Create a file say `fido2-auth-default.json` with the following contents
 ```
@@ -80936,9 +80933,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 ## FIDO2 login page
 Below is an illustration of the Janssen Server's default FIDO2 login page:
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image_fido2.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png)
 
-The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/nightly/admin/developer/customization/customize-web-pages/).
+The design is being rendered from the [FIDO2 xhtml page](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml). To customize the look and feel of this page, follow the [customization guide](https://docs.jans.io/vreplace-janssen-version/admin/developer/customization/customize-web-pages/).
 
 ## Using FIDO2 tokens
 
@@ -80955,7 +80952,7 @@ All subsequent FIDO2 authentications for that user account will require the enro
 ### FIDO2 credential management
 A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.
 
-![fido2](https://github.com/JanssenProject/jans/raw/nightly/docs/assets/image-fido2-ldap-structure.png)
+![fido2](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image-fido2-ldap-structure.png)
 Diagram source in mermaid.live
 ```
 graph TD
@@ -81787,7 +81784,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `sg-auth-default.json` with the following contents
@@ -81811,9 +81808,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/nightly/docs/admin/developer/customization/customize-web-pages.md).
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md).
 
 ### Self-service
 To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, [Gluu Casa](https://casa.gluu.org).
@@ -81891,7 +81888,7 @@ By default, users will get the default authentication mechanism as specified abo
 
 e.g : `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION` , `/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7`
 
-2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
+2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
 Now `twilio_sms` is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect `acr_values`, applications can now request `twilio_sms` authentication for users.
 
@@ -81902,7 +81899,7 @@ Now `twilio_sms` is an available authentication mechanism for your Janssen Serve
 
 ## Enable `twilio_sms` Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/nightly/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 Follow the steps below to enable `twilio_sms` authentication:
 1. Create a file say `twilio_sms` -auth-default.json` with the following contents
 ```
@@ -82126,7 +82123,7 @@ Resource Owner Password Credentials script allows modifying the behavior of Reso
 The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via `context.setUser(user)`).
 
 ## Interface
-The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
+The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java) interface. This extends methods from the base script type in addition to adding new method:
 
 ### Inherited Methods
 | Method header | Method description |
@@ -82143,10 +82140,10 @@ The ROPC script implements the [ResourceOwnerPasswordCredentialsType](https://gi
 ### Objects
 | Object name | Object description |
 |:-----|:------|
-|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
+|`customScript`| The custom script object. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java) |
 |`configurationAttributes`| `configurationProperties` passed in when adding custom script. `Map<String, SimpleCustomProperty> configurationAttributes` |
-|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
-| `context` | [Reference](https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
+|`SimpleCustomProperty`| Map of configuration properties. [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java) |
+| `context` | [Reference](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java) |
 
 ## Use case: Basic ROPC authentication script
 
@@ -83771,13 +83768,13 @@ Above command contains references to the release number at two places. `v1.1.4` 
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 
-To avoid this manual, error-prone approach the Janssen Project uses a release marker, `0.0.0-nightly` instead
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead
 of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version)
 so that it stays up-to-date release after release.
 
 ```bash
-wget https://github.com/JanssenProject/jans/releases/download/nightly/jans_0.0.0-nightly.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 !!! Warning

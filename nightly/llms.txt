@@ -384,6 +384,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Multi-Issuer](https://docs.jans.io/nightly/cedarling/reference/cedarling-multi-issuer/index.md)
 - [Policy Store](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/index.md)
 - [Properties](https://docs.jans.io/nightly/cedarling/reference/cedarling-properties/index.md)
+- [TRACE](https://docs.jans.io/nightly/cedarling/reference/cedarling-trace/index.md)
 - [Overview](https://docs.jans.io/nightly/cedarling/sidecar/cedarling-sidecar-overview/index.md)
 - [Tutorial](https://docs.jans.io/nightly/cedarling/sidecar/cedarling-sidecar-tutorial/index.md)
 - [C](https://docs.jans.io/nightly/cedarling/tutorials/c/index.md)
