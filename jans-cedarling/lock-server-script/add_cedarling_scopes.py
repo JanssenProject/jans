@@ -6,6 +6,9 @@ from io.jans.as.model.util import JwtUtil
 from io.jans.as.model.configuration import AppConfiguration
 from io.jans.as.server.ssa.ws.rs import SsaService
 from io.jans.as.common.model.ssa import SsaState
+from io.jans.as.model.crypto import AbstractCryptoProvider
+from io.jans.as.model.crypto.signature import AlgorithmFamily
+from java.lang import Throwable
 
 class ClientRegistration(ClientRegistrationType):
     def __init__(self, currentTimeMillis):
@@ -102,6 +105,9 @@ class ClientRegistration(ClientRegistrationType):
                 return False
         if self.ssa_issuer and issuer != self.ssa_issuer:
             return False
+        # BUILTIN validation failure does not stop registration, so verify the signature here
+        if not self.isSignatureValid(softwareStatement):
+            return False
 
         # a JWT signed by this AS is accepted only if it was issued by the SSA endpoint
         if issuer == CdiUtil.bean(AppConfiguration).getIssuer():
@@ -109,6 +115,21 @@ class ClientRegistration(ClientRegistrationType):
             if ssa is None or ssa.getState() in [SsaState.REVOKED, SsaState.EXPIRED]:
                 return False
         return True
+
+    def isSignatureValid(self, softwareStatement):
+        try:
+            header = softwareStatement.getHeader()
+            alg = header.getSignatureAlgorithm()
+            if alg is None or alg.getFamily() in [AlgorithmFamily.NONE, AlgorithmFamily.HMAC]:
+                return False
+            jwks = JwtUtil.getJSONWebKeys(self.jwks_uri)
+            if jwks is None:
+                return False
+            return CdiUtil.bean(AbstractCryptoProvider).verifySignature(softwareStatement.getSigningInput(),
+                softwareStatement.getEncodedSignature(), header.getKeyId(), jwks, None, alg)
+        except (Exception, Throwable), e:
+            print "Cedarling Client registration. SSA signature check failed: %s" % e
+            return False
 
     def updateClient(self, context):
         print "Cedarling Client registration. UpdateClient method"
