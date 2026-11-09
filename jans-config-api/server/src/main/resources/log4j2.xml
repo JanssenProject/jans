@@ -2,11 +2,11 @@
 <Configuration status="ERROR">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
         </Console>
         
         <RollingFile name="FILE" fileName="${sys:log.base}/logs/configapi.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+            <<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB" />
@@ -15,7 +15,7 @@
         </RollingFile>		
 	
 		<RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-audit-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %m%n" />
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
             <Policies>
                 <SizeBasedTriggeringPolicy size="5 MB" />
@@ -24,7 +24,7 @@
         </RollingFile>
 
 		<RollingFile name="JANS_CONFIGAPI_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/configapi_persistence.log" filePattern="${sys:log.base}/logs/configapi_persistence-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -34,7 +34,7 @@
 		</RollingFile>
 
 		<RollingFile name="JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/configapi_persistence_duration.log" filePattern="${sys:log.base}/logs/configapi_persistence_duration-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -44,7 +44,7 @@
 		</RollingFile>
 
 		<RollingFile name="JANS_CONFIGAPI_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/configapi_persistence_ldap_statistics.log" filePattern="${sys:log.base}/logs/configapi_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
@@ -54,7 +54,7 @@
 		</RollingFile>
 
 		<RollingFile name="JANS_CONFIGAPI_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/configapi_script.log" filePattern="${sys:log.base}/logs/configapi_script-%d{yyyy-MM-dd}-%i.log">
-			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %enc{%m}{CRLF}%n" />
 
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
