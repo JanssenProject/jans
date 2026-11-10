@@ -43,6 +43,18 @@ func TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes(t *testin
 	}
 }
 
+// TestAppConfigurationGrantTypesSupportedRejectsUnsupportedGrantType checks
+// that values outside the supported grant types fail validation.
+func TestAppConfigurationGrantTypesSupportedRejectsUnsupportedGrantType(t *testing.T) {
+	grantTypesSchema := resourceAppConfiguration().Schema["grant_types_supported"]
+	validateGrantType := grantTypesSchema.Elem.(*schema.Schema).ValidateDiagFunc
+
+	diagnostics := validateGrantType("urn:ietf:params:oauth:grant-type:unsupported", cty.Path{})
+	if len(diagnostics) == 0 {
+		t.Fatal("expected unsupported grant type to fail validation")
+	}
+}
+
 func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 
 	schema := resourceAppConfiguration()
