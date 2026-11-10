@@ -73,16 +73,18 @@ func resourceSmtpConfiguration() *schema.Resource {
 				Optional: true,
 			},
 			"smtp_authentication_account_password": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			"key_store": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
 			"key_store_password": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			"key_store_alias": {
 				Type:     schema.TypeString,

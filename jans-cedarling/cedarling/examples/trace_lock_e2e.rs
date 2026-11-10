@@ -158,7 +158,6 @@ fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
         },
         lock_config: Some(lock_config),
         max_default_entities: None,
-        max_base64_size: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),
         trace_config: Some(TraceConfig {
@@ -166,6 +165,7 @@ fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
             signing_key: TraceSigningKey::File(PathBuf::from(env("TRACE_KEY_FILE")?)),
             signing_kid: None,
             endpoint: TraceEndpoint::Discovered,
+            transport: LockTransport::Rest,
             bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
             bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
         }),
