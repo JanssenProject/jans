@@ -469,3 +469,89 @@ func TestEvaluationsFunctionOptions(t *testing.T) {
 		})
 	}
 }
+
+// lockProbeWriter records whether the plugin lock was free whenever the handler wrote.
+type lockProbeWriter struct {
+	*httptest.ResponseRecorder
+	plugin          *CedarPlugin
+	writes          int
+	writesUnderLock int
+}
+
+func (w *lockProbeWriter) Write(b []byte) (int, error) {
+	w.writes++
+	if w.plugin.mtx.TryLock() {
+		w.plugin.mtx.Unlock()
+	} else {
+		w.writesUnderLock++
+	}
+	return w.ResponseRecorder.Write(b)
+}
+
+// A client that reads the response slowly must not hold the lock, or Reconfigure
+// waiting for the write lock would stop every new request.
+func TestResponsesAreWrittenWithoutTheLock(t *testing.T) {
+	single := `{"subject":{"type":"user","id":"alice"},"action":{"name":"can_read"},
+		"resource":{"type":"document","id":"a.md"}}`
+	batch := `{"subject":{"type":"user","id":"alice"},"action":{"name":"can_read"},
+		"evaluations":[{"resource":{"type":"document","id":"a.md"}},{"resource":{"type":"document","id":"b.md"}}]}`
+	tests := []struct {
+		name    string
+		path    string
+		body    string
+		handler func(*CedarPlugin) http.HandlerFunc
+	}{
+		{"single evaluation", "/access/v1/evaluation", single,
+			func(p *CedarPlugin) http.HandlerFunc { return p.AccessEvaluationHandler }},
+		{"single evaluation on the batch endpoint", "/access/v1/evaluations", single,
+			func(p *CedarPlugin) http.HandlerFunc { return p.AccessEvaluationsHandler }},
+		{"batch", "/access/v1/evaluations", batch,
+			func(p *CedarPlugin) http.HandlerFunc { return p.AccessEvaluationsHandler }},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			plugin := mockPlugin(t)
+			req := httptest.NewRequest(http.MethodPost, tt.path, bytes.NewReader([]byte(tt.body)))
+			req.Header.Set("Content-Type", "application/json")
+			w := &lockProbeWriter{ResponseRecorder: httptest.NewRecorder(), plugin: plugin}
+			tt.handler(plugin)(w, req)
+			if w.Code != http.StatusOK {
+				t.Fatalf("expected status %d, got %d: %s", http.StatusOK, w.Code, w.Body.String())
+			}
+			if w.writes == 0 {
+				t.Fatal("the handler wrote no response body, so the lock was never probed")
+			}
+			if w.writesUnderLock != 0 {
+				t.Errorf("%d of %d response writes happened while the plugin lock was held",
+					w.writesUnderLock, w.writes)
+			}
+		})
+	}
+}
+
+// Reconfigure replaces the config while requests are served, so the metadata
+// handler must read it under the lock. Run with -race.
+func TestMetaDataReadsConfigUnderLock(t *testing.T) {
+	plugin := mockPlugin(t)
+	setGlobalInstance(plugin)
+	t.Cleanup(func() {
+		clearGlobalInstance(plugin)
+	})
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		for i := 0; i < 100; i++ {
+			plugin.mtx.Lock()
+			plugin.config = Config{Host: fmt.Sprintf("https://host%d.test.org", i)}
+			plugin.mtx.Unlock()
+		}
+	}()
+	for i := 0; i < 100; i++ {
+		w := httptest.NewRecorder()
+		plugin.MetaDataHandler(w, httptest.NewRequest(http.MethodGet, "/.well-known/authzen-configuration", nil))
+		if w.Code != http.StatusOK {
+			t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+		}
+	}
+	<-done
+}

@@ -71,10 +71,29 @@ final class FakeEntryManagerBehavior {
 
 	private int pendingVersionConflicts;
 
+	private boolean caseInsensitiveDomain;
+
+	private Runnable afterPolicyBatch;
+
+	static void afterNextPolicyBatch(PersistenceEntryManager manager, Runnable action) {
+		BY_MOCK.get(manager).afterPolicyBatch = action;
+	}
+
 	private Consumer<Object> concurrentWriter;
 
 	private FakeEntryManagerBehavior() {
 		wire();
+	}
+
+	/**
+	 * Like {@link #create()}, but equality on {@code jansTraceDomainId} ignores case, as a
+	 * case-insensitive database collation does.
+	 */
+	static PersistenceEntryManager createCaseInsensitiveDomain() {
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		behavior.caseInsensitiveDomain = true;
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
 	}
 
 	static PersistenceEntryManager create() {
@@ -283,6 +302,11 @@ final class FakeEntryManagerBehavior {
 		result.setTotalEntriesCount(total);
 		result.setEntriesCount(page.size());
 		result.setEntries(new ArrayList<>(page));
+		if (count == 100 && afterPolicyBatch != null) {
+			Runnable action = afterPolicyBatch;
+			afterPolicyBatch = null;
+			action.run();
+		}
 		return result;
 	}
 
@@ -294,8 +318,10 @@ final class FakeEntryManagerBehavior {
 		return ((BaseEntry) entity).getDn();
 	}
 
-	private static boolean matches(Filter filter, Object entity) {
+	private boolean matches(Filter filter, Object entity) {
 		switch (filter.getType()) {
+		case NOT:
+			return !matches(filter.getFilters()[0], entity);
 		case AND:
 			for (Filter sub : filter.getFilters()) {
 				if (!matches(sub, entity)) {
@@ -321,7 +347,7 @@ final class FakeEntryManagerBehavior {
 		}
 	}
 
-	private static boolean matchesEquality(Filter filter, Object entity) {
+	private boolean matchesEquality(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
 		Object expected = filter.getAssertionValue();
 		if (Boolean.TRUE.equals(filter.getMultiValued())) {
@@ -334,6 +360,9 @@ final class FakeEntryManagerBehavior {
 				}
 			}
 			return false;
+		}
+		if (caseInsensitiveDomain && "jansTraceDomainId".equals(filter.getAttributeName())) {
+			return attrValue != null && String.valueOf(attrValue).equalsIgnoreCase(String.valueOf(expected));
 		}
 		return attrValue != null && String.valueOf(attrValue).equals(String.valueOf(expected));
 	}
