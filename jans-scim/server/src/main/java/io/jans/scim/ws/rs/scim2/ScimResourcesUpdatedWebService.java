@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -188,14 +189,14 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     private void removeSecretAttributes(Map<String, List<Object>> map) {
 
-        map.keySet().removeIf(name -> EXCLUDED_ATTRIBUTES.contains(name.toLowerCase()));
+        map.keySet().removeIf(name -> EXCLUDED_ATTRIBUTES.contains(name.toLowerCase(Locale.ROOT)));
         map.entrySet().removeIf(entry -> {
             if (!EXT_UID_ATTRIBUTE.equalsIgnoreCase(entry.getKey())) {
                 return false;
             }
             List<Object> values = entry.getValue();
             values.removeIf(v -> v != null && SECRET_EXT_UID_PREFIXES.stream()
-                    .anyMatch(prefix -> v.toString().toLowerCase().startsWith(prefix)));
+                    .anyMatch(prefix -> v.toString().toLowerCase(Locale.ROOT).startsWith(prefix)));
             return values.isEmpty();
         });
 
