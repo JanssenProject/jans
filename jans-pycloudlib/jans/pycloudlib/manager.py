@@ -9,16 +9,7 @@ from abc import abstractproperty
 from functools import cached_property
 from types import SimpleNamespace
 
-from jans.pycloudlib.config import ConsulConfig
-from jans.pycloudlib.config import KubernetesConfig
-from jans.pycloudlib.config import GoogleConfig
-from jans.pycloudlib.config import AwsConfig
-from jans.pycloudlib.config import FileConfig
-from jans.pycloudlib.secret import KubernetesSecret
-from jans.pycloudlib.secret import VaultSecret
-from jans.pycloudlib.secret import GoogleSecret
-from jans.pycloudlib.secret import AwsSecret
-from jans.pycloudlib.secret import FileSecret
+
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.lock import LockRecord
@@ -177,6 +168,7 @@ class ConfigManager(BaseConfiguration):
         - `google`: returns an instance of [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
         - `aws`: returns an instance of [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
         """
+        from jans.pycloudlib.config import ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig
         adapter_mappings = {
             "consul": ConsulConfig,
             "kubernetes": KubernetesConfig,
@@ -194,6 +186,7 @@ class ConfigManager(BaseConfiguration):
 
     @cached_property
     def local_adapter(self) -> AdapterProtocol:
+        from jans.pycloudlib.config import FileConfig
         return FileConfig()
 
     @property
@@ -229,6 +222,7 @@ class SecretManager(BaseConfiguration):
         - `google`: returns an instance of [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
         - `aws`: returns an instance of [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
         """
+        from jans.pycloudlib.secret import VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret
         adapter_mappings = {
             "vault": VaultSecret,
             "kubernetes": KubernetesSecret,
@@ -246,6 +240,7 @@ class SecretManager(BaseConfiguration):
 
     @cached_property
     def local_adapter(self) -> AdapterProtocol:
+        from jans.pycloudlib.secret import FileSecret
         return FileSecret()
 
     def to_file(
