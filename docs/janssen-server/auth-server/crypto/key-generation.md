@@ -321,6 +321,20 @@ comm -23 \
 
 Expected result: no output.
 
+First confirm that a CONNECT signing key was generated for every required algorithm:
+
+```bash
+jq -r --arg required "$REQUIRED_SIGNING_ALGS" '
+  [.keys[]
+   | select(.use == "sig" and ((.key_ops_type // []) | index("connect")))
+   | .alg] as $generated
+  | ($required | split(" "))[]
+  | select(. as $alg | $generated | index($alg) | not)
+' "$RECOVERY_DIR/jans-auth-keys.json"
+```
+
+Expected result: no output. Any algorithm printed here has no generated CONNECT signing key. Do not continue; regenerate the keys with that algorithm included in `-sig_keys`.
+
 Confirm that every required CONNECT signing key is published. A key that is missing here can still be used to sign tokens, and clients would then be unable to validate them:
 
 ```bash
