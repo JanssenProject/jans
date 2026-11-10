@@ -92,10 +92,10 @@ Below is a typical configuration for the Agama-PW project:
 
 Use any Relying party implementation (like [jans-tarp](https://github.com/JanssenProject/jans/tree/main/demos/jans-tarp)) to send authentication request that triggers the flow.
 
-From the incoming authentication request, the Janssen Server reads the `ACR`
+From the incoming authentication request, the Janssen Server reads the `acr_values`
 parameter value to identify which authentication method should be used.
 To invoke the `org.gluu.agama.pw.main` flow contained in the  Agama-PW project,
-specify the ACR value as `agama_<qualified-name-of-the-top-level-flow>`,
+specify the `acr_values`` value as `agama_<qualified-name-of-the-top-level-flow>`,
 i.e  `agama_org.gluu.agama.pw.main`.
 
 ![gif](openlogin.gif)
