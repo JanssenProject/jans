@@ -171,7 +171,9 @@ def main():
             try:
                 lock_path.unlink(missing_ok=True)
             except OSError as exc:
-                logger.warning("Unable to remove %s; reason=%s", lock_file, exc)
+                # a surviving marker would keep the admin console enabled
+                logger.error("Unable to remove %s; refusing to start with admin console unexpectedly enabled; reason=%s", lock_file, exc)
+                raise
 
     try:
         manager.secret.to_file(
