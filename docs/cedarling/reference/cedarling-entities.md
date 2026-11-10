@@ -245,7 +245,7 @@ Token entities are accessible in policies via the context (e.g., `context.tokens
 
 Resource entities are built in both authorization interfaces from the `EntityData` provided in the request. The structure is identical to [principal entities](#entitydata-structure), but resources have no parent entities.
 
-If a default entity with the same UID exists in the policy store, the default entity is used and any request-supplied attributes are ignored.
+If a default entity with the same UID exists in the policy store, its attributes and parents are used regardless of attributes supplied in the request.
 
 ## Entity Merging and Conflict Resolution
 

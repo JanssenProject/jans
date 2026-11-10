@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -632,6 +633,15 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         });
 
         return listAttributes;
+    }
+
+    @Override
+    protected Map<String, AttributeData> filterLocalizedStringAttributes(Map<String, AttributeData> attributesMap, String ldapAttributeName) {
+        final String name = ldapAttributeName.replace(LOCALIZED, EMPTY_LANG_TAG).toLowerCase(Locale.ROOT);
+        final String namePrefix = name + LANG_SEPARATOR;
+        return attributesMap.entrySet().stream()
+                .filter(x -> x.getKey().toLowerCase(Locale.ROOT).equals(name) || x.getKey().toLowerCase(Locale.ROOT).startsWith(namePrefix))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     @Override

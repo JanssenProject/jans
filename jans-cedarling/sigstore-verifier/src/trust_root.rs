@@ -71,7 +71,7 @@ impl SigstoreTrustRootRaw {
     /// intermediate generations (key rotation), one aging out doesn't take
     /// down the still-valid ones. If filtering leaves no valid root (or no
     /// path from leaf to root), that surfaces later as the existing
-    /// `CertificateChain` "no trusted root found" error at verification
+    /// [`CertificateChainError::NoTrustedPath`](crate::CertificateChainError::NoTrustedPath) error at verification
     /// time — parsing itself doesn't need its own separate failure mode for
     /// this.
     ///
@@ -126,7 +126,7 @@ impl SigstoreTrustRootRaw {
 ///
 /// No error here even if everything gets filtered out: an empty result
 /// (e.g. every embedded Fulcio root has expired) surfaces naturally as the
-/// existing `CertificateChain` "no trusted root found" error once a chain
+/// existing [`CertificateChainError::NoTrustedPath`](crate::CertificateChainError::NoTrustedPath) error once a chain
 /// build is actually attempted, which already has test coverage — this
 /// function doesn't need a second, earlier failure mode for the same
 /// condition.

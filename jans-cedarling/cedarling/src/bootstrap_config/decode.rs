@@ -116,7 +116,6 @@ impl BootstrapConfig {
             authorization_config,
             lock_config,
             max_default_entities: raw.max_default_entities,
-            max_base64_size: raw.max_base64_size,
             data_store_config,
             http_client_config,
             trace_config,

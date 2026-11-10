@@ -111,18 +111,13 @@ fn test_load_from_json_with_archive_bytes_ignores_policy_store_cjar_url() {
     )
     .expect("MyStore.cjar should be readable");
 
-    let result = Cedarling::load_from_json_with_archive_bytes(
-        config.to_string(),
-        &archive_bytes,
-    );
+    let result = Cedarling::load_from_json_with_archive_bytes(config.to_string(), &archive_bytes);
     result.expect(
         "initialization should succeed using archive bytes, ignoring policy_store_cjar_url",
     );
 
-    let invalid_result = Cedarling::load_from_json_with_archive_bytes(
-        config.to_string(),
-        &[0x00, 0x01, 0x02, 0x03],
-    );
+    let invalid_result =
+        Cedarling::load_from_json_with_archive_bytes(config.to_string(), &[0x00, 0x01, 0x02, 0x03]);
     match invalid_result {
         Err(CedarlingError::InitializationFailed { error_msg }) => {
             assert!(
