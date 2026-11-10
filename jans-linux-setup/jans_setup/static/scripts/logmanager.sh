@@ -33,24 +33,13 @@ KEEPDAYS2=15  #for deletion
 
 DIRS="/opt/jans/jetty/jans-auth/logs /opt/jans/jetty/jans-casa/logs /opt/jans/jetty/jans-config-api/logs /opt/jans/jetty/jans-fido2/logs /opt/jans/jetty/jans-keycloak-link/logs /opt/jans/jetty/jans-link/logs /opt/jans/jetty/jans-lock/logs /opt/jans/jetty/jans-scim/logs /var/log/ /var/log/adminui"
 
-PWD=`pwd`
-PWD1=$PWD
-TEMPDIR="/tmp/gluumanager"
-mkdir $TEMPDIR >> /var/log/logmanager.log 2>&1
-cd $TEMPDIR
-echo "$(date) : Changing to TEMP Directory" $TEMPDIR >> /var/log/logmanager.log
 #compression Section
 echo "$(date) : Starting Compression">> /var/log/logmanager.log
 for dir in $DIRS
 do
  if [ -d "$dir" ]; then
- FILES=`find $dir -type f -mtime +$KEEPDAYS1 ! -name "*.gz" |xargs ls `
+  find "$dir" -type f -mtime +$KEEPDAYS1 ! -name "*.gz" -print -exec gzip --best --force -- {} \; >> /var/log/logmanager.log 2>&1
  fi
- for fname in $FILES
-   do
-           echo "$(date) : Compressing file" $fname >> /var/log/logmanager.log
-           gzip --best --force $fname >> /var/log/logmanager.log 2>&1
-   done
 done
 
 # Deletion Section
@@ -58,15 +47,6 @@ echo "$(date) : Starting Deletion">> /var/log/logmanager.log
 for dir in $DIRS
 do
  if [ -d "$dir" ]; then
- FILES=`find $dir -name "*gz" -type f -mtime +$KEEPDAYS2 |xargs ls `
+  find "$dir" -name "*gz" -type f -mtime +$KEEPDAYS2 -print -delete >> /var/log/logmanager.log 2>&1
  fi
- for fname in $FILES
-   do
-           echo "$(date) : Deleting file" $fname >> /var/log/logmanager.log
-           rm -f $fname >> /var/log/logmanager.log 2>&1
-   done
 done
-echo "$(date) : Changing back to working  Directory" $PWD1 >> /var/log/logmanager.log
-cd $PWD1 >> /var/log/logmanager.log 2>&1
-echo "$(date) : Removing Temp Directory" $TEMPDIR >> /var/log/logmanager.log
-rm -r  $TEMPDIR >> /var/log/logmanager.log 2>&1
