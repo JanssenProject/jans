@@ -63,7 +63,8 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     //Authentication secrets (e.g. Casa OTP keys) must never leave the server
     private static final Set<String> EXCLUDED_ATTRIBUTES = Set.of("userpassword", "jansotpdevices", "jansotpcache",
-            "jansmobiledevices", "janstrusteddevices", "jansauthenticator", "jansbackchanneldeviceregistrationtkn");
+            "jansmobiledevices", "janstrusteddevices", "jansauthenticator", "jansbackchanneldeviceregistrationtkn",
+            "jansbackchannelusrcode");
     private static final String EXT_UID_ATTRIBUTE = "jansExtUid";
     private static final List<String> SECRET_EXT_UID_PREFIXES = List.of("totp:", "hotp:");
 

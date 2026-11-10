@@ -65,6 +65,8 @@ public class ScimFilterParserService {
 
         ANTLRInputStream input = new ANTLRInputStream(filter);
         ScimFilterLexer lexer = new ScimFilterLexer(input);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
         ScimFilterParser parser = new ScimFilterParser(tokens);
