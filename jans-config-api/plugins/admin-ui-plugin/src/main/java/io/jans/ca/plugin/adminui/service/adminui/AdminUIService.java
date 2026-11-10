@@ -202,7 +202,7 @@ public class AdminUIService {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
+                    .stream().filter(ele -> ele.getRole().equals(role))
                     .collect(Collectors.toList());
 
             if (!roleScopeMapping.isEmpty()) {
