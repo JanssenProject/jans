@@ -1817,6 +1817,12 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.orm.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArrayHelper</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.service</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScopeService</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">JwtUtil</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.configuration</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppConfiguration</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.server.ssa.ws.rs</span><span class="w"> </span><span class="kn">import</span> <span class="n">SsaService</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.common.model.ssa</span><span class="w"> </span><span class="kn">import</span> <span class="n">SsaState</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.crypto</span><span class="w"> </span><span class="kn">import</span> <span class="n">AbstractCryptoProvider</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io.jans.as.model.crypto.signature</span><span class="w"> </span><span class="kn">import</span> <span class="n">AlgorithmFamily</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">java.lang</span><span class="w"> </span><span class="kn">import</span> <span class="n">Throwable</span>
 
 <span class="k">class</span><span class="w"> </span><span class="nc">ClientRegistration</span><span class="p">(</span><span class="n">ClientRegistrationType</span><span class="p">):</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
@@ -1842,6 +1848,10 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssa_issuer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">containsKey</span><span class="p">(</span><span class="s2">&quot;ssa_issuer&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssa_issuer</span> <span class="o">=</span> <span class="n">configurationAttributes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ssa_issuer&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">getValue2</span><span class="p">()</span>
 
         <span class="c1"># used to check if the scopes we&#39;re adding exists in the AS</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">scopeService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">ScopeService</span><span class="p">)</span>
@@ -1873,6 +1883,11 @@
             <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. the scope &#39;</span><span class="si">%s</span><span class="s2">&#39; was not included in the request, defaulting&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_scope</span>
             <span class="k">return</span> <span class="kc">True</span>
 
+        <span class="c1"># jwks_uri is usually the AS JWKS, which also signs id_tokens, so make sure this is really an SSA</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSoftwareStatement</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">getSoftwareStatement</span><span class="p">()):</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. software_statement is not an SSA, defaulting&quot;</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
         <span class="c1"># add cedarling scopes</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
         <span class="n">scopes</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">getScopes</span><span class="p">()</span>
@@ -1891,9 +1906,47 @@
         <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. added Cedarling scopes&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">isSoftwareStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">softwareStatement</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">softwareStatement</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">claims</span> <span class="o">=</span> <span class="n">softwareStatement</span><span class="o">.</span><span class="n">getClaims</span><span class="p">()</span>
+        <span class="n">jti</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">getClaimAsString</span><span class="p">(</span><span class="s2">&quot;jti&quot;</span><span class="p">)</span>
+        <span class="n">issuer</span> <span class="o">=</span> <span class="n">claims</span><span class="o">.</span><span class="n">getClaimAsString</span><span class="p">(</span><span class="s2">&quot;iss&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">jti</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">issuer</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">claims</span><span class="o">.</span><span class="n">hasClaim</span><span class="p">(</span><span class="s2">&quot;software_id&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">idTokenClaim</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;nonce&quot;</span><span class="p">,</span> <span class="s2">&quot;at_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;c_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;auth_time&quot;</span><span class="p">,</span> <span class="s2">&quot;sid&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">claims</span><span class="o">.</span><span class="n">hasClaim</span><span class="p">(</span><span class="n">idTokenClaim</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssa_issuer</span> <span class="ow">and</span> <span class="n">issuer</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssa_issuer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1"># BUILTIN validation failure does not stop registration, so verify the signature here</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSignatureValid</span><span class="p">(</span><span class="n">softwareStatement</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># a JWT signed by this AS is accepted only if it was issued by the SSA endpoint</span>
+        <span class="k">if</span> <span class="n">issuer</span> <span class="o">==</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AppConfiguration</span><span class="p">)</span><span class="o">.</span><span class="n">getIssuer</span><span class="p">():</span>
+            <span class="n">ssa</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">SsaService</span><span class="p">)</span><span class="o">.</span><span class="n">findSsaByJti</span><span class="p">(</span><span class="n">jti</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ssa</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ssa</span><span class="o">.</span><span class="n">getState</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="n">SsaState</span><span class="o">.</span><span class="n">REVOKED</span><span class="p">,</span> <span class="n">SsaState</span><span class="o">.</span><span class="n">EXPIRED</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">isSignatureValid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">softwareStatement</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="n">softwareStatement</span><span class="o">.</span><span class="n">getHeader</span><span class="p">()</span>
+            <span class="n">alg</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">getSignatureAlgorithm</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">alg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">alg</span><span class="o">.</span><span class="n">getFamily</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="n">AlgorithmFamily</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">AlgorithmFamily</span><span class="o">.</span><span class="n">HMAC</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">jwks</span> <span class="o">=</span> <span class="n">JwtUtil</span><span class="o">.</span><span class="n">getJSONWebKeys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jwks_uri</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">jwks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+            <span class="k">return</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AbstractCryptoProvider</span><span class="p">)</span><span class="o">.</span><span class="n">verifySignature</span><span class="p">(</span><span class="n">softwareStatement</span><span class="o">.</span><span class="n">getSigningInput</span><span class="p">(),</span>
+                <span class="n">softwareStatement</span><span class="o">.</span><span class="n">getEncodedSignature</span><span class="p">(),</span> <span class="n">header</span><span class="o">.</span><span class="n">getKeyId</span><span class="p">(),</span> <span class="n">jwks</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">alg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">Exception</span><span class="p">,</span> <span class="n">Throwable</span><span class="p">),</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. SSA signature check failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Cedarling Client registration. UpdateClient method&quot;</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">11</span>
@@ -1922,45 +1975,52 @@
 </ul>
 <p>Next, create a JSON file named <code>script_schema.json</code> with the following content:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;aliases&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A DCR script that adds the required scopes by a client to interact with the lock server&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scriptType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_registration&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;programmingLanguage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;moduleProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
-<span class="w">  </span><span class="nt">&quot;configurationProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;aliases&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A DCR script that adds the required scopes by a client to interact with the lock server&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scriptType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_registration&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;programmingLanguage&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;python&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;moduleProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nt">&quot;configurationProperties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://demoexample.jans.io/jans-auth/restv1/jwks&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWKS URI used for the SSA validation&quot;</span>
+<span class="w">            </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jwks_uri&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://demoexample.jans.io/jans-auth/restv1/jwks&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;JWKS URI used for the SSA validation&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scope_list&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;space-separated scopes that will be added by the script&quot;</span>
+<span class="w">            </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scope_list&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;space-separated scopes that will be added by the script&quot;</span>
 <span class="w">        </span><span class="p">},</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">                </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling&quot;</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">                </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the scope that must be present for the script to run&quot;</span>
+<span class="w">            </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;trigger_scope&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedarling&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;the scope that must be present for the script to run&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;value1&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ssa_issuer&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value2&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;hide&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;optional; when set, only SSAs with this &#39;iss&#39; get the scopes&quot;</span>
 <span class="w">        </span><span class="p">}</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="w">  </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;scriptError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;internal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;locationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nt">&quot;locationPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes.py&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;revision&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;scriptError&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;modified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;internal&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;locationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;file&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;locationPath&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_cedarling_scopes.py&quot;</span>
 <span class="p">}</span>
 </code></pre></div>
 <ul>
 <li><em>you can also find a copy of this schema in <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json">jans/jans-cedarling/lock-server-script/script_schema.json</a></em>.</li>
 </ul>
+<p>The script adds the scopes only to clients that register with an SSA. A JWT that is not an SSA, such as an <code>id_token</code>, gets no scopes, and neither does an SSA from this Auth Server that it does not know or that is in the <code>REVOKED</code> or <code>EXPIRED</code> state. Set <code>ssa_issuer</code> to the <code>iss</code> of your SSAs to accept SSAs from that issuer only; leave it empty to accept any issuer whose signature verifies against <code>jwks_uri</code>.</p>
 <blockquote>
 <p>Note:</p>
 <p>Do not change the field ordering; The Jans server expects a specific structure.</p>
@@ -2038,7 +2098,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    November 05, 2026
+    November 09, 2026
   </span>
 
     

@@ -63,12 +63,9 @@ cargo doc -p cedarling --no-deps --open
 ```rs
 use cedarling::*;
 
-// Load the bootstrap properties from the environment variable, using default values
-// for unset properties
-let bootstrap_config = BootstrapConfig.from_env();
-
-// Initialize Cedarling
-let cedarling = Cedarling::new(bootstrap_config)
+// Load the bootstrap properties from environment variables, using default values
+// for unset properties, and initialize Cedarling
+let cedarling = Cedarling::new_with_env(None).await?;
 ```
 
 See the [bootstrap properties docs](../reference/cedarling-properties.md) for other config loading options.
@@ -77,34 +74,14 @@ See the [bootstrap properties docs](../reference/cedarling-properties.md) for ot
 
 Rust bindings support all policy store source types:
 
-| Source Type                                | Description                      |
-| ------------------------------------------ | -------------------------------- |
-| `PolicyStoreSource::Json(String)`          | Inline JSON policy store         |
-| `PolicyStoreSource::Yaml(String)`          | Inline YAML policy store         |
-| `PolicyStoreSource::FileJson(PathBuf)`     | Local JSON file                  |
-| `PolicyStoreSource::FileYaml(PathBuf)`     | Local YAML file                  |
-| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files |
-| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file         |
-| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL  |
-| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server               |
-| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch) |
-
-**Loading from Bytes:**
-
-For advanced use cases (embedded archives, custom fetch logic):
-
-```rust
-use cedarling::*;
-
-// Option 1: Via PolicyStoreSource enum (recommended)
-let archive_bytes: Vec<u8> = fetch_archive_with_auth();
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::ArchiveBytes(archive_bytes));
-
-// Option 2: Direct function call
-use cedarling::common::policy_store::loader::load_policy_store_archive_bytes;
-let loaded = load_policy_store_archive_bytes(archive_bytes)?;
-```
+| Source Type                                | Description                                                  |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| `PolicyStoreSource::Directory(PathBuf)`    | Local directory with Cedar files                             |
+| `PolicyStoreSource::CjarFile(PathBuf)`     | Local Cedar archive file                                     |
+| `PolicyStoreSource::CjarUrl(String)`       | Remote `.cjar` archive from URL                              |
+| `PolicyStoreSource::LockServer(String)`    | Remote Lock Server                                           |
+| `PolicyStoreSource::Uri(String)`           | Remote `.cjar` archive or Lock Server, detected when loading |
+| `PolicyStoreSource::ArchiveBytes(Vec<u8>)` | Raw archive bytes (custom fetch)                             |
 
 **Example programmatic configuration:**
 
@@ -113,23 +90,23 @@ use cedarling::*;
 use std::path::PathBuf;
 
 // Load from a directory
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::Directory(
-        PathBuf::from("/path/to/policy-store/")
-    ));
+let config = BootstrapConfig {
+    policy_store_config: PolicyStoreConfig {
+        source: PolicyStoreSource::Directory(PathBuf::from("/path/to/policy-store/")),
+        ..Default::default()
+    },
+    ..Default::default()
+};
 
-// Load from a local .cjar archive (Cedar Archive)
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::CjarFile(
-        PathBuf::from("/path/to/policy-store.cjar")
-    ));
+// Other sources only change `source`, for example:
+// PolicyStoreSource::CjarFile(PathBuf::from("/path/to/policy-store.cjar"))
+// PolicyStoreSource::CjarUrl("https://example.com/policy-store.cjar".to_string())
+// PolicyStoreSource::ArchiveBytes(archive_bytes) for archives you fetch yourself
 
-// Load from a remote .cjar archive (Cedar Archive)
-let config = BootstrapConfig::default()
-    .with_policy_store_source(PolicyStoreSource::CjarUrl(
-        "https://example.com/policy-store.cjar".to_string()
-    ));
+let cedarling = Cedarling::new(&config).await?;
 ```
+
+`BootstrapConfig::default()` validates JWT signatures and status, as an empty set of bootstrap properties does, so token-based authorization needs trusted issuers in the policy store.
 
 See [Policy Store Formats](../reference/cedarling-policy-store.md#policy-store-formats) for more details.
 

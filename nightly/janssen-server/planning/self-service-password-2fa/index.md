@@ -6,4 +6,4 @@ credentials on one page.
 
 You can build a page like Google on your own website. You need to be able to
 list, add, and remove 2FA credentials for a given user's account. But another
-good option is the [Jans Casa](https://docs.jans.io/nightly/casa) web application.
+good option is the [Jans Casa](https://docs.jans.io/vreplace-janssen-version/casa) web application.
