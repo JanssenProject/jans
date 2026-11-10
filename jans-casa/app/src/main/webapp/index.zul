@@ -1,4 +1,5 @@
 <?page language="xhtml"?>
+<?taglib uri="http://www.zkoss.org/dsp/web/core" prefix="c"?>
 <?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
 <?init class="io.jans.casa.core.navigation.HomeInitiator"?>
 <?script src="/scripts/ua-parser.pack-2.0.0.js"?>
@@ -13,10 +14,10 @@
                 ${labels.general.wait}
             </z:div>
             <div class="pa4" unless="${empty pageScope.error}">
-                <h4><z:label value="${pageScope.error}" /></h4>
+                <h4>${c:escapeXML(pageScope.error)}</h4>
             </div>
             <div class="pa2 mb2" unless="${empty pageScope.error}">
-                <p><z:label value="${pageScope.description}" /></p>
+                <p>${c:escapeXML(pageScope.description)}</p>
             </div>
         </div>
     
