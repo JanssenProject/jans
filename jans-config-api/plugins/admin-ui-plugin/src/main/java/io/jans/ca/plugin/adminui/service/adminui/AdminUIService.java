@@ -424,9 +424,9 @@ public class AdminUIService {
             List<String> combinedScopes = new ArrayList<>(scopesSet);
 
             if (adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))) {
+                    .stream().anyMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
                 adminConf.getDynamic().getRolePermissionMapping()
-                        .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                        .stream().filter(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))
                         .collect(Collectors.toList())
                         .forEach(ele -> ele.setPermissions(combinedScopes));
             } else {
