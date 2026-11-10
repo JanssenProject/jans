@@ -151,12 +151,14 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
     try {
       const resp = await getOpenidConfiguration(configUrl);
       if (!resp?.data?.issuer) {
+        setIssuer('');
         setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
         e.target.value = '';
       } else {
         setIssuer(configUrl);
       }
     } catch {
+      setIssuer('');
       setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
       e.target.value = '';
     }
