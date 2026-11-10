@@ -131,7 +131,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
             # Generate Random six digit code and store it in array
-            code = 100000 + SecureRandom().nextInt(900000)
+            code = str(100000 + SecureRandom().nextInt(900000))
 
             # Get code and save it in LDAP temporarily with special session entry
             self.identity.setWorkingParameter("code", code)
