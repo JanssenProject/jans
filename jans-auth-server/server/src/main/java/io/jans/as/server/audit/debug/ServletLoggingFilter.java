@@ -100,7 +100,7 @@ public class ServletLoggingFilter implements Filter {
             strDebugLog += "\nRESPONSE: " + getResponseDescription(responseWrapper);
             /** A copy of body content is logged **/
             if (appConfiguration.getHttpLoggingResponseBodyContent()) {
-                strDebugLog += "\nRESPONSE BODY: " + ((LogResponseWrapper) responseWrapper).getBodyCopy();
+                strDebugLog += "\nRESPONSE BODY: " + getResponseBodyAsJsonString(((LogResponseWrapper) responseWrapper).getBodyCopy());
             }
             log.debug(strDebugLog);
         }
@@ -128,6 +128,16 @@ public class ServletLoggingFilter implements Filter {
         }
     }
 
+
+    // JSON string encoding keeps line breaks from the body inside a single log record
+    protected String getResponseBodyAsJsonString(String body) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(body);
+        } catch (JsonProcessingException e) {
+            log.warn("Cannot serialize Response body to JSON", e);
+            return null;
+        }
+    }
 
     protected String getResponseDescription(HttpServletResponseWrapper responseWrapper) {
         HttpResponse httpResponse = new HttpResponse();

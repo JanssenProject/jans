@@ -331,6 +331,7 @@ public class AuthorizeAction {
         if (session == null || StringUtils.isBlank(session.getUserDn()) || SessionIdState.AUTHENTICATED != session.getState()) {
             Map<String, String> parameterMap = externalContext.getRequestParameterMap();
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+            requestParameterMap.put(io.jans.as.model.authorize.AuthorizeRequestParam.REDIRECT_URI, redirectUri);
 
             String redirectTo = "/login.xhtml";
             requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
@@ -480,7 +481,8 @@ public class AuthorizeAction {
             ClientAuthorization clientAuthorization = clientAuthorizationsService.find(
                     user.getAttribute("inum"),
                     client.getClientId());
-            if (clientAuthorization != null && clientAuthorization.getScopes() != null &&
+            final boolean hasAuthzDetails = authzDetails != null && authzDetails.getDetails() != null && !authzDetails.getDetails().isEmpty();
+            if (!hasAuthzDetails && clientAuthorization != null && clientAuthorization.getScopes() != null &&
                     Arrays.asList(clientAuthorization.getScopes()).containsAll(
                             io.jans.as.model.util.StringUtils.spaceSeparatedToList(scope))) {
                 permissionGranted(session);
@@ -489,7 +491,7 @@ public class AuthorizeAction {
         }
 
         if (externalConsentGatheringService.isEnabled()) {
-            if (consentGatherer.isConsentGathered()) {
+            if (consentGatherer.isConsentGathered(clientId)) {
                 log.trace("Consent-gathered flow passed successfully");
                 permissionGranted(session);
                 return;

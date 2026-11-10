@@ -172,7 +172,7 @@ public class SsaServiceTest {
         String orgId = null;
         SsaState status = null;
         String clientId = "test-client";
-        String[] scopes = new String[]{};
+        String[] scopes = new String[]{SsaScopeType.SSA_ADMIN.getValue()};
         List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(inum=%s)]", jti)));
@@ -190,7 +190,7 @@ public class SsaServiceTest {
         String orgId = "org-id-test-1";
         SsaState status = null;
         String clientId = "test-client";
-        String[] scopes = new String[]{};
+        String[] scopes = new String[]{SsaScopeType.SSA_ADMIN.getValue()};
         List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(o=%s)]", orgId)));
@@ -208,7 +208,7 @@ public class SsaServiceTest {
         String orgId = null;
         SsaState status = SsaState.ACTIVE;
         String clientId = "test-client";
-        String[] scopes = new String[]{};
+        String[] scopes = new String[]{SsaScopeType.SSA_ADMIN.getValue()};
         List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         verify(log).trace(eq("Filter with AND created: " + String.format("[(jansState=%s)]", status)));
@@ -226,7 +226,7 @@ public class SsaServiceTest {
         String orgId = null;
         SsaState status = null;
         String clientId = null;
-        String[] scopes = new String[]{};
+        String[] scopes = new String[]{SsaScopeType.SSA_ADMIN.getValue()};
         List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, status, clientId, scopes);
         assertNotNull(ssaList);
         assertTrue(ssaList.isEmpty());

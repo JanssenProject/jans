@@ -12,7 +12,9 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.util.Util;
+import io.jans.as.server.service.net.PrivateAddressUtil;
 import io.jans.as.server.service.net.SectorIdentifierUriService;
+import io.jans.as.server.service.net.UriService;
 import org.apache.logging.log4j.util.Strings;
 import org.json.JSONArray;
 import org.slf4j.Logger;
@@ -21,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.net.InetAddress;
+import java.net.URI;
 import java.util.List;
 
 import static io.jans.as.model.common.BackchannelTokenDeliveryMode.PING;
@@ -44,6 +48,9 @@ public class CIBARegisterParamsValidatorService {
     @Inject
     private SectorIdentifierUriService sectorIdentifierUriService;
 
+    @Inject
+    private UriService uriService;
+
     public boolean validateParams(
             BackchannelTokenDeliveryMode backchannelTokenDeliveryMode, String backchannelClientNotificationEndpoint,
             AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg,
@@ -63,6 +70,11 @@ public class CIBARegisterParamsValidatorService {
             // Required if the token delivery mode is set to ping or push.
             if ((backchannelTokenDeliveryMode == PING || backchannelTokenDeliveryMode == PUSH)
                     && Strings.isBlank(backchannelClientNotificationEndpoint)) {
+                return false;
+            }
+
+            if (Strings.isNotBlank(backchannelClientNotificationEndpoint)
+                    && !isAllowedNotificationEndpoint(backchannelClientNotificationEndpoint)) {
                 return false;
             }
 
@@ -114,5 +126,32 @@ public class CIBARegisterParamsValidatorService {
         }
 
         return true;
+    }
+
+    /**
+     * CIBA Core requires an https notification endpoint. The server posts to it later, so private/loopback
+     * destinations are rejected unless explicitly whitelisted (SSRF protection).
+     */
+    private boolean isAllowedNotificationEndpoint(String endpoint) {
+        try {
+            final URI uri = new URI(endpoint);
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || Strings.isBlank(uri.getHost())) {
+                log.debug("backchannel_client_notification_endpoint must be https URL with host");
+                return false;
+            }
+            if (uriService.isExplicitlyWhitelisted(endpoint)) {
+                return true;
+            }
+            for (InetAddress address : InetAddress.getAllByName(uri.getHost())) {
+                if (PrivateAddressUtil.isPrivateAddress(address)) {
+                    log.debug("backchannel_client_notification_endpoint resolves to private address");
+                    return false;
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            log.debug("Invalid or unresolvable backchannel_client_notification_endpoint");
+            return false;
+        }
     }
 }

@@ -94,7 +94,8 @@ public class SsaGetAction {
             final Client client = ssaRestWebServiceValidator.getClientFromSession();
             ssaRestWebServiceValidator.checkScopesPolicy(client, Arrays.asList(SsaScopeType.SSA_ADMIN.getValue(), SsaScopeType.SSA_PORTAL.getValue(), SsaScopeType.SSA_DEVELOPER.getValue()));
 
-            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
+            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(),
+                    ssaRestWebServiceValidator.getAuthorizedScopes(client).toArray(new String[0]));
 
             JSONArray jsonArray = ssaJsonService.getJSONArray(ssaList);
             ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);

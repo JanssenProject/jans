@@ -20,6 +20,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 /**
  * AuthZEN Access Evaluation API v1.
  * Implements single and batch evaluation endpoints per AuthZEN spec.
@@ -49,7 +51,7 @@ public class AccessEvaluationRestWebServiceImplV1 {
     @Produces({MediaType.APPLICATION_JSON})
     public Response evaluation(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
 
-        log.trace("/evaluation - request params: {}", requestParams);
+        log.trace("/evaluation - request params: {}", escapeLog(requestParams));
 
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -94,7 +96,7 @@ public class AccessEvaluationRestWebServiceImplV1 {
     @Produces({MediaType.APPLICATION_JSON})
     public Response evaluations(String requestParams, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
 
-        log.trace("/evaluations - request params: {}", requestParams);
+        log.trace("/evaluations - request params: {}", escapeLog(requestParams));
 
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -134,7 +136,8 @@ public class AccessEvaluationRestWebServiceImplV1 {
         try {
             return ServerUtil.createJsonMapper().readValue(requestParams, AccessEvaluationRequest.class);
         } catch (JsonProcessingException e) {
-            log.error(String.format("Failed to parse evaluation request json: %s", requestParams), e);
+            log.error("Failed to parse evaluation request json.");
+            log.trace("Failed to parse evaluation request json.", e);
             throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST)
                     .entity("Failed to parse evaluation request.")
                     .type(MediaType.APPLICATION_JSON_TYPE).build());
