@@ -138,6 +138,10 @@ public class MobilePhoneEnrollingWS {
             String key = RECENT_CODES_PREFIX + userId + SEPARATOR + code;
             long now = System.currentTimeMillis();
             Object value = cacheProvider.get(key);
+            if (value != null) {
+                //Consume before enrolling so a concurrent request cannot reuse the code
+                cacheProvider.remove(key);
+            }
 
             if (value == null) {
                 //No match
@@ -151,8 +155,8 @@ public class MobilePhoneEnrollingWS {
 
                 if (mobilePhoneService.addPhone(userId, phone)) {
                     result = FinishCode.SUCCESS;
-                    cacheProvider.remove(key);
                 } else {
+                    cacheProvider.put(EXPIRATION, key, value);
                     result = FinishCode.FAILED;
                     phone = null;
                 }

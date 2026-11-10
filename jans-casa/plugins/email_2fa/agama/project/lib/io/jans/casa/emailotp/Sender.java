@@ -33,7 +33,8 @@ public class Sender {
         
     public Sender(Map<String, Object> conf, String email) {
         
-        length = grabInteger(conf, "otp_length", 6);
+        //Shorter codes are guessable within the allowed attempts
+        length = Math.max(6, grabInteger(conf, "otp_length", 6));
         expirationMins = grabInteger(conf, "otp_lifetime", 1);
         subject = Optional.ofNullable(conf).map(m -> m.get("subject"))
                 .map(Object::toString).orElse("Your passcode is %");

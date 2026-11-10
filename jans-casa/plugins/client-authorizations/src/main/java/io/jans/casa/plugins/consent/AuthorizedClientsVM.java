@@ -55,8 +55,10 @@ public class AuthorizedClientsVM {
         }
         String trimmed = uri.trim();
         try {
-            String scheme = URI.create(trimmed).getScheme();
-            return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme) ? trimmed : null;
+            URI parsed = URI.create(trimmed);
+            String scheme = parsed.getScheme();
+            boolean web = "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme);
+            return web && parsed.getHost() != null ? trimmed : null;
         } catch (IllegalArgumentException e) {
             return null;
         }

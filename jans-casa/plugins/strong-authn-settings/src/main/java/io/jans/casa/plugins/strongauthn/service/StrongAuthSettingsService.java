@@ -118,12 +118,19 @@ public class StrongAuthSettingsService {
                     current.addAll(mapper.readValue(info, new TypeReference<List<TrustedDevice>>() { }));
                 }
             }
-            current.removeIf(dev -> sameDevice(dev, target));
+            //Remove only one entry: distinct devices may share these fields
+            for (int i = 0; i < current.size(); i++) {
+                if (sameDevice(current.get(i), target)) {
+                    current.remove(i);
+                    break;
+                }
+            }
             String updatedJson = Utils.stringEncrypter().encrypt(mapper.writeValueAsString(current));
 
             person.setTrustedDevices(updatedJson);
             if (persistenceService.modify(person)) {
-                devices.removeIf(dev -> current.stream().noneMatch(c -> sameDevice(c, dev)));
+                devices.clear();
+                devices.addAll(current);
                 updated = true;
             }
         } catch (Exception e) {

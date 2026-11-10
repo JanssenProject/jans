@@ -85,8 +85,11 @@ public class FidoValidator {
                 metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
 
         AssertionResult assertionResult = mapper.readValue(tokenResponse, AssertionResult.class);
-        if (expectedUid == null || expectedChallenge == null
-                || !expectedChallenge.equals(clientDataChallenge(assertionResult))) {
+        String uid = expectedUid;
+        String challenge = expectedChallenge;
+        expectedUid = null;
+        expectedChallenge = null;
+        if (uid == null || challenge == null || !challenge.equals(clientDataChallenge(assertionResult))) {
             throw new IOException("Assertion does not match the challenge issued for this login");
         }
 
@@ -100,12 +103,11 @@ public class FidoValidator {
                 throw new IOException(msg);    
             }
             String username = mapper.readTree(content).path("username").asText(null);
-            if (!Objects.equals(expectedUid, username)) {
-                logger.error("Assertion was verified for user {} but {} was expected", username, expectedUid);
+            if (!Objects.equals(uid, username)) {
+                logger.error("Assertion was verified for a user other than {}", uid);
                 throw new IOException("Assertion belongs to a different user");
             }
         }
-        expectedChallenge = null;
 
     }
 

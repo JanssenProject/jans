@@ -8,9 +8,11 @@ import javax.imageio.ImageIO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
@@ -25,6 +27,7 @@ import java.util.Optional;
 public final class WebUtils {
 
     private static final int IMAGE_FETCH_TIMEOUT_MS = 5000;
+    private static final int IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 
     private static Logger LOG = LoggerFactory.getLogger(WebUtils.class);
 
@@ -154,8 +157,16 @@ public final class WebUtils {
             conn.setInstanceFollowRedirects(false);
             conn.setConnectTimeout(IMAGE_FETCH_TIMEOUT_MS);
             conn.setReadTimeout(IMAGE_FETCH_TIMEOUT_MS);
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
             try (InputStream is = conn.getInputStream()) {
-                val = ImageIO.read(is) == null ? null : url;
+                byte[] data = is.readNBytes(IMAGE_MAX_BYTES + 1);
+                if (data.length > IMAGE_MAX_BYTES) {
+                    LOG.warn("Image at '{}' exceeds the size limit", url);
+                    return null;
+                }
+                val = ImageIO.read(new ByteArrayInputStream(data)) == null ? null : url;
             } finally {
                 conn.disconnect();
             }
@@ -170,7 +181,16 @@ public final class WebUtils {
     private static boolean isInternalAddress(InetAddress addr) {
         return addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()
                 || addr.isAnyLocalAddress() || addr.isMulticastAddress()
-                || (addr instanceof Inet6Address && (addr.getAddress()[0] & 0xfe) == 0xfc);
+                || (addr instanceof Inet6Address && (addr.getAddress()[0] & 0xfe) == 0xfc)
+                || (addr instanceof Inet4Address && isReservedIPv4(addr.getAddress()));
+    }
+
+    private static boolean isReservedIPv4(byte[] b) {
+        int first = b[0] & 0xff;
+        int second = b[1] & 0xff;
+        //0.0.0.0/8, 100.64.0.0/10 (CGNAT, includes some cloud metadata IPs), 198.18.0.0/15, 240.0.0.0/4
+        return first == 0 || (first == 100 && (second & 0xc0) == 64)
+                || (first == 198 && (second & 0xfe) == 18) || first >= 240;
     }
 
     public static String getFullRequestURL() {

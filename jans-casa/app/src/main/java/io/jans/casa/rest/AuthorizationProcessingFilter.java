@@ -101,7 +101,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
 
     private boolean isSenderConstrained(IntrospectionResponse response) {
         return "DPoP".equalsIgnoreCase(response.getTokenType()) ||
-                Optional.ofNullable(response.getCnf()).map(cnf -> cnf.containsKey("jkt")).orElse(false);
+                Optional.ofNullable(response.getCnf()).map(cnf -> !cnf.isEmpty()).orElse(false);
     }
 
     private Set<String> computeExpectedScopes(ResourceInfo resourceInfo) {
