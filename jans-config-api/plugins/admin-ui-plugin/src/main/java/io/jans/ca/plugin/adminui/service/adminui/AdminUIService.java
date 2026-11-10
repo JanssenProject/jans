@@ -513,7 +513,7 @@ public class AdminUIService {
         Set<String> allowed = permissions.stream().map(AdminPermission::getPermission).collect(Collectors.toCollection(HashSet::new));
         // Seeded and setup-appended mappings hold scopes outside the catalog; keep them re-submittable.
         Optional.ofNullable(adminConf.getDynamic().getRolePermissionMapping()).orElse(Collections.emptyList()).stream()
-                .filter(ele -> ele.getRole() != null && ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                .filter(ele -> ele.getRole() != null && ele.getRole().equals(rolePermissionMappingArg.getRole()))
                 .map(RolePermissionMapping::getPermissions).filter(Objects::nonNull)
                 .forEach(allowed::addAll);
         allowed.addAll(Optional.ofNullable(additionalAllowedPermissions).orElse(Collections.emptySet()));
