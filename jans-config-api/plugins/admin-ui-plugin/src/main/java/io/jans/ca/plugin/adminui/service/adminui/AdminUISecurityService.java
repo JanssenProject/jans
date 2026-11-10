@@ -52,6 +52,7 @@ import java.util.zip.ZipInputStream;
 
 import static io.jans.ca.plugin.adminui.utils.AppConstants.INUM;
 import static io.jans.ca.plugin.adminui.utils.AppConstants.POLICY_STORE_DN;
+import static io.jans.configapi.core.util.Util.escapeLog;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -814,7 +815,7 @@ public class AdminUISecurityService {
             throws ApplicationException, URISyntaxException {
         String issuerDomain = endpoint == null ? null : new URI(endpoint).getHost();
         if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
-            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
+            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", escapeLog(entryName));
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()

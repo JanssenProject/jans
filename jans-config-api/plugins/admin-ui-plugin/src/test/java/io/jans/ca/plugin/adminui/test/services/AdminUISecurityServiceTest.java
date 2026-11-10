@@ -302,6 +302,63 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
+    public void testValidateTrustedIssuerDomainsRejectsParentTraversalEntryName() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "../trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Invalid policy-store file path");
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsAbsoluteEntryName() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "/trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Invalid policy-store file path");
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsDetectsUppercaseJsonExtension() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/Foo.JSON",
+                "{\"configuration_endpoint\":\"https://issuer.example.invalid/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsMissingAdminUiIssuerFile() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/Other.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("Trusted issuer file not found in ZIP"));
+    }
+
+    @Test
+    public void testVerifyCentralDirectoryMatchesRejectsDifferentLocalEntryNames() throws Exception {
+        byte[] zipBytes = createZipArchive("actual.txt", "entry content");
+        Method verifyCentralDirectoryMatches = AdminUISecurityService.class.getDeclaredMethod(
+                "verifyCentralDirectoryMatches", byte[].class, java.util.List.class);
+        verifyCentralDirectoryMatches.setAccessible(true);
+
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> verifyCentralDirectoryMatches.invoke(
+                        null, zipBytes, java.util.Collections.singletonList("different.txt")));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Inconsistent policy-store archive entries");
+    }
+
+    @Test
     public void testValidateTrustedIssuerDomainsCountsUtf8BytesForArchiveLimit() throws Exception {
         String issuerContent = "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\","
                 + "\"padding\":\"" + "\u00e9".repeat(1_400_000) + "\"}";
@@ -331,6 +388,27 @@ public class AdminUISecurityServiceTest {
         ApplicationException ex = (ApplicationException) invocationException.getCause();
         assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         assertTrue(ex.getMessage().contains("ZIP archive too large when decompressed"));
+    }
+
+    private ApplicationException validateArchiveExpectingFailure(byte[] zipBytes) throws Exception {
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+                "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, zipBytes, WEB_SERVER_HOST));
+        return (ApplicationException) invocationException.getCause();
+    }
+
+    private byte[] createZipArchive(String entryName, String content) throws java.io.IOException {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryName));
+            zipOutput.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+        return archiveBytes.toByteArray();
     }
 
     // ---------------------------------------------------------------------
