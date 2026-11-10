@@ -32,7 +32,7 @@ public class AuditLoggerResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response auditLogging(@Valid @NotNull Map<String, Object> loggingRequest) {
         try {
-            log.info("{}", loggingRequest.toString());
+            log.info("{}", CommonUtils.mapToJsonString(loggingRequest));
             return Response.ok("{'status': 'success'}").build();
         } catch (Exception e) {
             log.error(ErrorResponse.AUDIT_LOGGING_ERROR.getDescription(), e);
