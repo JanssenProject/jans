@@ -79,16 +79,16 @@ public class FidoValidator {
     
     public void verify(String tokenResponse) throws IOException {
 
+        String uid = expectedUid;
+        String challenge = expectedChallenge;
+        expectedUid = null;
+        expectedChallenge = null;
         logger.debug("Verifying fido token response : "+tokenResponse);
         HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
         AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
                 metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
 
         AssertionResult assertionResult = mapper.readValue(tokenResponse, AssertionResult.class);
-        String uid = expectedUid;
-        String challenge = expectedChallenge;
-        expectedUid = null;
-        expectedChallenge = null;
         if (uid == null || challenge == null || !challenge.equals(clientDataChallenge(assertionResult))) {
             throw new IOException("Assertion does not match the challenge issued for this login");
         }

@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.Executions;
 import jakarta.servlet.http.Cookie;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -16,6 +18,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -28,6 +31,7 @@ public final class WebUtils {
 
     private static final int IMAGE_FETCH_TIMEOUT_MS = 5000;
     private static final int IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+    private static final long IMAGE_MAX_PIXELS = 25_000_000L;
 
     private static Logger LOG = LoggerFactory.getLogger(WebUtils.class);
 
@@ -166,7 +170,7 @@ public final class WebUtils {
                     LOG.warn("Image at '{}' exceeds the size limit", url);
                     return null;
                 }
-                val = ImageIO.read(new ByteArrayInputStream(data)) == null ? null : url;
+                val = isDecodableImage(data) ? url : null;
             } finally {
                 conn.disconnect();
             }
@@ -178,6 +182,28 @@ public final class WebUtils {
 
     }
     
+    //Checks dimensions from the header first so a small compressed body cannot expand into a huge raster
+    private static boolean isDecodableImage(byte[] data) throws IOException {
+
+        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(data))) {
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+            if (!readers.hasNext()) {
+                return false;
+            }
+            ImageReader reader = readers.next();
+            try {
+                reader.setInput(iis, true, true);
+                if ((long) reader.getWidth(0) * reader.getHeight(0) > IMAGE_MAX_PIXELS) {
+                    return false;
+                }
+                return reader.read(0) != null;
+            } finally {
+                reader.dispose();
+            }
+        }
+
+    }
+
     private static boolean isInternalAddress(InetAddress addr) {
         return addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()
                 || addr.isAnyLocalAddress() || addr.isMulticastAddress()
