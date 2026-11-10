@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -43,7 +43,7 @@ public class AuditLoggerResourceUnitTest {
         }
 
         ArgumentCaptor<String> jsonArgument = ArgumentCaptor.forClass(String.class);
-        verify(log).info("{}", jsonArgument.capture());
+        verify(log).info(eq("{}"), jsonArgument.capture());
 
         String loggedJson = jsonArgument.getValue();
         assertTrue(loggedJson.contains("\\n"));

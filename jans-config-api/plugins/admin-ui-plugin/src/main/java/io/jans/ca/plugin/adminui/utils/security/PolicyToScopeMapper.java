@@ -217,20 +217,23 @@ public class PolicyToScopeMapper {
             if (UNSUPPORTED_POLICY_PATTERN.matcher(code).find()) {
                 throw new IllegalStateException("Policy uses forbid/unless, which cannot be mapped to scopes: " + entry.getName());
             }
+            String extractionContent = STRING_OR_COMMENT_PATTERN.matcher(content)
+                    .replaceAll(match -> match.group().startsWith("//")
+                            ? " " : Matcher.quoteReplacement(match.group()));
 
-            String role = extractFirstMatch(ROLE_PATTERN, content);
+            String role = extractFirstMatch(ROLE_PATTERN, extractionContent);
             if (role == null) {
                 log.warn("Warning: No role found in policy: {}", entry.getName());
                 return;
             }
 
-            String resource = extractFirstMatch(RESOURCE_PATTERN, content);
+            String resource = extractFirstMatch(RESOURCE_PATTERN, extractionContent);
             if (resource == null) {
                 log.warn("Warning: No resource found in policy: {}", entry.getName());
                 return;
             }
 
-            List<String> actions = extractAllMatches(ACTION_PATTERN, content);
+            List<String> actions = extractAllMatches(ACTION_PATTERN, extractionContent);
             if (actions.isEmpty()) {
                 log.warn("Warning: No actions found in policy: {}", entry.getName());
                 return;

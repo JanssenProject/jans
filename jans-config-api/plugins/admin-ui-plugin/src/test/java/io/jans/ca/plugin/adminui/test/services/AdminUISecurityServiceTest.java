@@ -21,6 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -270,6 +271,26 @@ public class AdminUISecurityServiceTest {
         ApplicationException ex = (ApplicationException) invocationException.getCause();
         assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
+    @DataProvider(name = "invalidIssuerEndpoints")
+    public Object[][] invalidIssuerEndpoints() {
+        return new Object[][]{
+                {"userinfo-prefixed host", "https://test-jans.io@issuer.example.invalid/.well-known/openid-configuration"},
+                {"host hidden in fragment", "https://issuer.example.invalid/.well-known/openid-configuration#https://test-jans.io"},
+                {"relative path", "/.well-known/openid-configuration"}
+        };
+    }
+
+    @Test(dataProvider = "invalidIssuerEndpoints")
+    public void testValidateTrustedIssuerDomainsRejectsEndpointWithoutExpectedHost(
+            String caseName, String endpoint) throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"" + endpoint + "\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode(), caseName);
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription(), caseName);
     }
 
     @Test
