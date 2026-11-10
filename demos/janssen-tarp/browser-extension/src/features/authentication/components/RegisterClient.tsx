@@ -104,7 +104,10 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
   const getOpenidConfiguration = async (endpoint: string) => {
     try {
       setAlert('');
-      return await axios({ method: 'GET', url: endpoint });
+      // Redirect hops cannot be inspected from the browser, so an insecure hop could swap the metadata; refuse them.
+      const res = await fetch(endpoint, { method: 'GET', redirect: 'error' });
+      if (!res.ok) throw new Error(`OpenID configuration request failed: ${res.status}`);
+      return { data: await res.json() };
     } catch (err) {
       console.error(err);
     }
