@@ -1,14 +1,19 @@
 # noqa: D104
-from jans.pycloudlib.config.kubernetes_config import KubernetesConfig  # noqa: F401
-from jans.pycloudlib.config.google_config import GoogleConfig  # noqa: F401
-from jans.pycloudlib.config.aws_config import AwsConfig  # noqa: F401
-from jans.pycloudlib.config.file_config import FileConfig  # noqa: F401
 
 
 def __getattr__(name: str):
-    if name == "ConsulConfig":
-        from jans.pycloudlib.config.consul_config import ConsulConfig
-        return ConsulConfig
+    _modules = {
+        "ConsulConfig": "jans.pycloudlib.config.consul_config",
+        "KubernetesConfig": "jans.pycloudlib.config.kubernetes_config",
+        "GoogleConfig": "jans.pycloudlib.config.google_config",
+        "AwsConfig": "jans.pycloudlib.config.aws_config",
+        "FileConfig": "jans.pycloudlib.config.file_config",
+    }
+    if name in _modules:
+        import importlib
+
+        mod = importlib.import_module(_modules[name])
+        return getattr(mod, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
