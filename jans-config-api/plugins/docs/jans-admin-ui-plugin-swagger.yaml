@@ -528,7 +528,7 @@ paths:
       description: Get Admin UI editable configuration
       operationId: get-adminui-conf
       responses:
-        "200    ":
+        "200":
           description: Ok
           content:
             application/json:
