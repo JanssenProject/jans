@@ -89,6 +89,12 @@ list of claims. This allows administrators to create custom groupings of claims.
 When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md), navigate via
 `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
 
+### Claims Requested With the `claims` Parameter
+
+Individual claims requested through the `claims` authorization request parameter (`userinfo` member) are released
+only if the client is allowed to receive them: the claim must be linked to one of the granted scopes or be listed in
+the claims registered for the client (`claims` client metadata). Other requested claims are ignored.
+
 ### Interception Scripts
 
 Response from userinfo can be further customized using [dynamic scope](../../../script-catalog/dynamic_scope/dynamic-scope.md) interception script.
