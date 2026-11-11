@@ -29,14 +29,6 @@ public class PolicyToScopeMapper {
     private static final Pattern ACTION_PATTERN = Pattern.compile(
             "GluuFlexAdminUI::Action::\"([^\"]+)\""
     );
-    // Scopes can only express grants, so restrictive constructs cannot be converted without broadening access.
-    private static final Pattern UNSUPPORTED_POLICY_PATTERN = Pattern.compile(
-            "\\bforbid\\s*\\(|\\bunless\\s*\\{"
-    );
-    // One pass, so whichever of a string literal or a comment starts first wins
-    private static final Pattern STRING_OR_COMMENT_PATTERN = Pattern.compile(
-            "\"[^\"\\\\]*+(?:\\\\[\\s\\S][^\"\\\\]*+)*+\"|//[^\\r\\n]*+"
-    );
 
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
@@ -137,7 +129,8 @@ public class PolicyToScopeMapper {
      *
      * @param zipFile          the ZIP archive containing the entry
      * @param entry            the ZIP entry pointing to an entity JSON file
-     * @param parentToFeatures map that will be populated with parentId → list of featureIds
+     * @param parentToFeatures map that will be populated with parentId → list of featureIds; lists are created as
+     *                         {@link java.util.concurrent.CopyOnWriteArrayList} when a parentId is first encountered
      */
     private void processEntityEntry(ZipFile zipFile, ZipEntry entry, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
@@ -162,7 +155,7 @@ public class PolicyToScopeMapper {
                     JsonNode parentIdNode = firstParent != null ? firstParent.get("id") : null;
                     if (parentIdNode == null) continue;
                     String parentId = parentIdNode.asText();
-                    parentToFeatures.computeIfAbsent(parentId, k -> new ArrayList<>()).add(featureId);
+                    parentToFeatures.computeIfAbsent(parentId, k -> new CopyOnWriteArrayList<>()).add(featureId);
                 }
             }
         } catch (IOException e) {
@@ -215,30 +208,20 @@ public class PolicyToScopeMapper {
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            String policyCode = STRING_OR_COMMENT_PATTERN.matcher(content)
-                    .replaceAll(" ");
-            if (UNSUPPORTED_POLICY_PATTERN.matcher(policyCode).find()) {
-                throw new IllegalStateException(
-                        "Policy uses forbid/unless, which cannot be mapped to scopes: "
-                                + entry.getName());
-            }
-            String extractionContent = STRING_OR_COMMENT_PATTERN.matcher(content)
-                                        .replaceAll(match -> match.group().startsWith("//")
-                                                ? " " : Matcher.quoteReplacement(match.group()));
 
-            String role = extractFirstMatch(ROLE_PATTERN, extractionContent);
+            String role = extractFirstMatch(ROLE_PATTERN, content);
             if (role == null) {
                 log.warn("Warning: No role found in policy: {}", entry.getName());
                 return;
             }
 
-            String resource = extractFirstMatch(RESOURCE_PATTERN, extractionContent);
+            String resource = extractFirstMatch(RESOURCE_PATTERN, content);
             if (resource == null) {
                 log.warn("Warning: No resource found in policy: {}", entry.getName());
                 return;
             }
 
-            List<String> actions = extractAllMatches(ACTION_PATTERN, extractionContent);
+            List<String> actions = extractAllMatches(ACTION_PATTERN, content);
             if (actions.isEmpty()) {
                 log.warn("Warning: No actions found in policy: {}", entry.getName());
                 return;
