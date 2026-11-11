@@ -82,8 +82,6 @@ public class Fido2Configuration {
 	private boolean fido2TraceEnabled = false;
 	@DocProperty(description = "Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version")
 	private String fido2TraceProducerId;
-	@DocProperty(description = "Reference to the Ed25519 producer signing key in the key store. Never an inline key")
-	private String fido2TraceSigningKey;
 	@DocProperty(description = "Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed", defaultValue = "first_observed")
 	private String fido2TraceChainGenesis = "first_observed";
 	@DocProperty(description = "Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID", defaultValue = "true")
@@ -322,19 +320,6 @@ public class Fido2Configuration {
 
 	public void setFido2TraceProducerId(String fido2TraceProducerId) {
 		this.fido2TraceProducerId = fido2TraceProducerId;
-	}
-
-	public String getFido2TraceSigningKey() {
-		return fido2TraceSigningKey;
-	}
-
-	public void setFido2TraceSigningKey(String fido2TraceSigningKey) {
-		// reference-only: accept a key-store alias (letters, digits, '.', '_', '-') and reject anything else,
-		// including PEM blocks, line breaks and base64 key material, so it is never persisted or returned
-		if (fido2TraceSigningKey != null && !fido2TraceSigningKey.isEmpty() && !fido2TraceSigningKey.matches("[A-Za-z0-9._-]{1,128}")) {
-			throw new IllegalArgumentException("fido2TraceSigningKey must be a key-store alias (letters, digits, '.', '_', '-'; up to 128 characters), not key material");
-		}
-		this.fido2TraceSigningKey = fido2TraceSigningKey;
 	}
 
 	public String getFido2TraceChainGenesis() {
