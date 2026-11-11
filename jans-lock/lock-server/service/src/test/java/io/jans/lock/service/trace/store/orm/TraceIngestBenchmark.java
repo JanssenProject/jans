@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -75,7 +76,9 @@ import io.jans.util.security.StringEncrypter;
  * {@code lock.benchmark.min-rate} (fail when one-chain records/s is lower, default off),
  * {@code lock.benchmark.max-slowdown} (fail when the last quarter of a one-chain run is more than
  * this many times slower than the first quarter, default off; it flags work which grows with the
- * receipt table, like {@code count(*)}). Results are printed and appended to
+ * receipt table, like {@code count(*)}), {@code lock.benchmark.timing} ({@code true} wraps the store in
+ * {@link TimingTraceStore} and prints, after each scenario, the calls and time of every store method;
+ * the totals go to the CSV as extra columns, empty when timing is off). Results are printed and appended to
  * {@code target/benchmark/trace-ingest.csv}. All data uses a throw-away domain and is removed afterwards.
  *
  * @author Yuriy Movchan
@@ -87,7 +90,7 @@ class TraceIngestBenchmark {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	private static final String CSV_HEADER = "timestamp,chains,records_per_chain,total_records,seconds,records_per_s,first_quarter_per_s,last_quarter_per_s,p50_ms,p95_ms";
+	private static final String CSV_HEADER = "timestamp,chains,records_per_chain,total_records,seconds,records_per_s,first_quarter_per_s,last_quarter_per_s,p50_ms,p95_ms,store_calls_per_record,writes_per_record,reads_per_record";
 
 	private static PersistenceEntryManager entryManager;
 
@@ -186,8 +189,17 @@ class TraceIngestBenchmark {
 	}
 
 	private static Result runScenario(int chains, int records, int run) throws Exception {
-		TraceTestHarness harness = new TraceTestHarness(TraceTestCrypto.javaProvider(),
-				keys -> OrmTraceStores.create(entryManager, keys));
+		boolean timing = Boolean.getBoolean("lock.benchmark.timing");
+		AtomicReference<TimingTraceStore> timingStore = new AtomicReference<>();
+		TraceTestHarness harness = new TraceTestHarness(TraceTestCrypto.javaProvider(), keys -> {
+			OrmTraceStore store = OrmTraceStores.create(entryManager, keys);
+			if (!timing) {
+				return store;
+			}
+			TimingTraceStore wrapped = new TimingTraceStore(store);
+			timingStore.set(wrapped);
+			return wrapped;
+		});
 
 		List<List<String>> chainJsons = new ArrayList<>();
 		for (int c = 0; c < chains; c++) {
@@ -201,6 +213,9 @@ class TraceIngestBenchmark {
 			chainJsons.add(buildChain(key, producer, kid, instance, chain, records));
 		}
 
+		if (timing) {
+			timingStore.get().reset();
+		}
 		ExecutorService pool = Executors.newFixedThreadPool(chains);
 		List<Future<long[]>> futures = new ArrayList<>();
 		long startNs = System.nanoTime();
@@ -222,7 +237,7 @@ class TraceIngestBenchmark {
 		long elapsedNs = System.nanoTime() - startNs;
 		pool.shutdown();
 
-		return new Result(chains, records, elapsedNs, durations);
+		return new Result(chains, records, elapsedNs, durations, timing ? timingStore.get().snapshot() : null);
 	}
 
 	private static List<String> buildChain(KeyPair key, String producer, String kid, String instance, String chain, int count) {
@@ -242,11 +257,14 @@ class TraceIngestBenchmark {
 	}
 
 	private static void report(Result r) throws IOException {
-		String line = String.format("%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f", Instant.now(), r.chains, r.records,
+		String line = String.format("%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f,%s", Instant.now(), r.chains, r.records,
 				r.chains * r.records, r.elapsedNs / 1e9, r.recordsPerSecond(), r.firstQuarterRate(), r.lastQuarterRate(),
-				r.percentileMs(50), r.percentileMs(95));
+				r.percentileMs(50), r.percentileMs(95), timingColumns(r));
 		LOG.info("TRACE ingest benchmark: {}", line);
 		System.out.println("TRACE ingest benchmark [" + CSV_HEADER + "]\n  " + line);
+		if (r.timing != null) {
+			System.out.print(timingTable(r));
+		}
 
 		Path csv = Paths.get("target", "benchmark", "trace-ingest.csv");
 		Files.createDirectories(csv.getParent());
@@ -254,6 +272,34 @@ class TraceIngestBenchmark {
 			Files.write(csv, (CSV_HEADER + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
 		}
 		Files.write(csv, (line + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+	}
+
+	private static String timingColumns(Result r) {
+		if (r.timing == null) {
+			return ",,";
+		}
+		double total = r.chains * (double) r.records;
+		return String.format("%.2f,%.2f,%.2f", r.timing.totalCalls() / total, r.timing.writeCalls() / total,
+				r.timing.readCalls() / total);
+	}
+
+	/** Share is of thread wall time: elapsed time times the number of chains, which is the elapsed time for one chain. */
+	private static String timingTable(Result r) {
+		double records = r.chains * (double) r.records;
+		double threadWallNs = (double) r.elapsedNs * r.chains;
+		StringBuilder out = new StringBuilder();
+		out.append(String.format("Store timing, %d chain(s), %d records%n", r.chains, r.chains * r.records));
+		out.append(String.format("  %-38s %-5s %9s %12s %11s %9s %7s%n", "method", "type", "calls", "calls/record", "total ms",
+				"mean ms", "share"));
+		for (TimingTraceStore.MethodStats stats : r.timing.methods()) {
+			out.append(String.format("  %-38s %-5s %9d %12.2f %11.1f %9.3f %6.1f%%%n", stats.method(),
+					stats.write() ? "write" : "read", stats.calls(), stats.calls() / records, stats.totalNanos() / 1e6,
+					stats.totalNanos() / 1e6 / stats.calls(), 100.0 * stats.totalNanos() / threadWallNs));
+		}
+		out.append(String.format("  store calls per record %.2f, writes per record %.2f, reads per record %.2f, "
+				+ "store time %.1f%% of thread wall time%n", r.timing.totalCalls() / records, r.timing.writeCalls() / records,
+				r.timing.readCalls() / records, 100.0 * r.timing.totalNanos() / threadWallNs));
+		return out.toString();
 	}
 
 	private static PersistenceEntryManager createEntryManager(Path confDir) throws IOException {
@@ -292,8 +338,10 @@ class TraceIngestBenchmark {
 		final int records;
 		final long elapsedNs;
 		final List<long[]> durationsNs;
+		final TimingTraceStore.Snapshot timing;
 
-		Result(int chains, int records, long elapsedNs, List<long[]> durationsNs) {
+		Result(int chains, int records, long elapsedNs, List<long[]> durationsNs, TimingTraceStore.Snapshot timing) {
+			this.timing = timing;
 			this.chains = chains;
 			this.records = records;
 			this.elapsedNs = elapsedNs;
