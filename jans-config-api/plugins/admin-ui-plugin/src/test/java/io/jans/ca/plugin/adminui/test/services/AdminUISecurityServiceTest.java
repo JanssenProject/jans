@@ -24,6 +24,8 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import uniffi.cedarling_uniffi.Cedarling;
+import uniffi.cedarling_uniffi.CedarlingException;
 
 import jakarta.ws.rs.core.Response;
 
@@ -80,9 +82,13 @@ public class AdminUISecurityServiceTest {
      * as stored in the {@code policyStore} document field.
      */
     private String loadPolicyStoreBase64() throws java.io.IOException {
+        return java.util.Base64.getEncoder().encodeToString(loadPolicyStoreBytes());
+    }
+
+    private byte[] loadPolicyStoreBytes() throws java.io.IOException {
         try (java.io.InputStream is = getClass().getResourceAsStream(POLICY_STORE_FIXTURE)) {
             assertNotNull(is, "Missing test fixture: " + POLICY_STORE_FIXTURE);
-            return java.util.Base64.getEncoder().encodeToString(is.readAllBytes());
+            return is.readAllBytes();
         }
     }
 
@@ -208,6 +214,21 @@ public class AdminUISecurityServiceTest {
         assertEquals(persisted.getDn(), adminUISecurityService.getDnForPolicyStore(persisted.getInum()));
         assertEquals(persisted.getJansStatus(), AppConstants.STATUS_INACTIVE);
         assertNotNull(persisted.getCreationDate());
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsIssuerContentAtMismatchedCentralOffset()
+            throws Exception {
+        byte[] zipBytes = createPolicyStoreWithSecondaryIssuer();
+        redirectCentralEntry(zipBytes,
+                "trusted-issuers/GluuFlexAdminUI.json",
+                "trusted-issuers/Secondary.json");
+
+        ApplicationException ex = validateArchiveExpectingFailure(zipBytes);
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+        exerciseCedarlingWithArchive(zipBytes);
     }
 
     @Test
@@ -363,18 +384,18 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
-    public void testVerifyCentralDirectoryMatchesRejectsDifferentLocalEntryNames() throws Exception {
-        byte[] zipBytes = createZipArchive("actual.txt", "entry content");
-        Method verifyCentralDirectoryMatches = AdminUISecurityService.class.getDeclaredMethod(
-                "verifyCentralDirectoryMatches", byte[].class, java.util.List.class);
-        verifyCentralDirectoryMatches.setAccessible(true);
+    public void testValidateTrustedIssuerDomainsRejectsDuplicateEntryNames() throws Exception {
+        String firstName = "trusted-issuers/GluuFlexAdminUI.json";
+        String secondName = "trusted-issuers/GluuFlexAdminUj.json";
+        byte[] zipBytes = createZipArchive(firstName,
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}",
+                secondName,
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}");
+        replaceBytes(zipBytes, secondName.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                firstName.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
-        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
-                java.lang.reflect.InvocationTargetException.class,
-                () -> verifyCentralDirectoryMatches.invoke(
-                        null, zipBytes, java.util.Collections.singletonList("different.txt")));
+        ApplicationException ex = validateArchiveExpectingFailure(zipBytes);
 
-        ApplicationException ex = (ApplicationException) invocationException.getCause();
         assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         assertEquals(ex.getMessage(), "Inconsistent policy-store archive entries");
     }
@@ -411,6 +432,18 @@ public class AdminUISecurityServiceTest {
         assertTrue(ex.getMessage().contains("ZIP archive too large when decompressed"));
     }
 
+    @Test
+    public void testValidateTrustedIssuerDomainsEnforcesCentralDirectoryIssuerEntryLimit() throws Exception {
+        String issuerContent = "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\","
+                + "\"padding\":\"" + "x".repeat(3_000_001) + "\"}";
+
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/GluuFlexAdminUI.json", issuerContent));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("ZIP entry too large"));
+    }
+
     private ApplicationException validateArchiveExpectingFailure(byte[] zipBytes) throws Exception {
         Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
                 "validateTrustedIssuerDomains", byte[].class, String.class);
@@ -423,13 +456,157 @@ public class AdminUISecurityServiceTest {
     }
 
     private byte[] createZipArchive(String entryName, String content) throws java.io.IOException {
+        return createZipArchive(new String[]{entryName}, new String[]{content});
+    }
+
+    private byte[] createZipArchive(
+            String firstEntryName,
+            String firstContent,
+            String secondEntryName,
+            String secondContent) throws java.io.IOException {
+        return createZipArchive(
+                new String[]{firstEntryName, secondEntryName},
+                new String[]{firstContent, secondContent});
+    }
+
+    private byte[] createZipArchive(String[] entryNames, String[] contents) throws java.io.IOException {
         java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
         try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
-            zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryName));
-            zipOutput.write(content.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            for (int i = 0; i < entryNames.length; i++) {
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryNames[i]));
+                zipOutput.write(contents[i].getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                zipOutput.closeEntry();
+            }
+        }
+        return archiveBytes.toByteArray();
+    }
+
+    private void exerciseCedarlingWithArchive(byte[] zipBytes) throws Exception {
+        org.json.JSONObject cedarlingConfig = new org.json.JSONObject()
+                .put("CEDARLING_APPLICATION_NAME", "AdminUI")
+                .put("CEDARLING_LOG_TYPE", "off")
+                .put("CEDARLING_ID_TOKEN_TRUST_MODE", "never")
+                .put("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+                .put("CEDARLING_JWT_STATUS_VALIDATION", "disabled")
+                .put("CEDARLING_LOG_LEVEL", "INFO");
+        java.nio.ByteBuffer archiveBuffer = java.nio.ByteBuffer.allocateDirect(zipBytes.length);
+        archiveBuffer.put(zipBytes);
+        archiveBuffer.flip();
+
+        Cedarling cedarling = null;
+        try {
+            cedarling = Cedarling.Companion.loadFromJsonWithArchiveBytes(
+                    cedarlingConfig.toString(), archiveBuffer);
+        } catch (CedarlingException expected) {
+            return;
+        } finally {
+            if (cedarling != null) {
+                cedarling.shutDown();
+            }
+        }
+    }
+
+    private byte[] createPolicyStoreWithSecondaryIssuer() throws java.io.IOException {
+        byte[] fixture = loadPolicyStoreBytes();
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipInputStream zipInput = new java.util.zip.ZipInputStream(
+                     new java.io.ByteArrayInputStream(fixture));
+             java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zipInput.getNextEntry()) != null) {
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entry.getName()));
+                zipOutput.write(zipInput.readAllBytes());
+                zipOutput.closeEntry();
+            }
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/Secondary.json"));
+            zipOutput.write(("{\"name\":\"Secondary issuer\",\"description\":\"Test trusted issuer\","
+                    + "\"openid_configuration_endpoint\":\"https://evil-jans.io/.well-known/openid-configuration\","
+                    + "\"configuration_endpoint\":\"https://evil-jans.io/.well-known/openid-configuration\"}")
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
             zipOutput.closeEntry();
         }
         return archiveBytes.toByteArray();
+    }
+
+    private void redirectCentralEntry(byte[] zipBytes, String entryName, String targetEntryName) {
+        int entryCentralOffset = findCentralEntryOffset(zipBytes, entryName);
+        int targetCentralOffset = findCentralEntryOffset(zipBytes, targetEntryName);
+        int targetLocalOffset = readLittleEndianInt(zipBytes, targetCentralOffset + 42);
+        writeLittleEndianInt(zipBytes, entryCentralOffset + 42, targetLocalOffset);
+        System.arraycopy(zipBytes, targetCentralOffset + 16, zipBytes, entryCentralOffset + 16, 12);
+    }
+
+    private int findLocalEntryOffset(byte[] zipBytes, String expectedName) {
+        byte[] expectedNameBytes = expectedName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        for (int offset = 0; offset <= zipBytes.length - 30; offset++) {
+            if (readLittleEndianInt(zipBytes, offset) != 0x04034b50) {
+                continue;
+            }
+            int nameLength = readLittleEndianShort(zipBytes, offset + 26);
+            if (nameLength == expectedNameBytes.length
+                    && matches(zipBytes, offset + 30, expectedNameBytes)) {
+                return offset;
+            }
+        }
+        throw new AssertionError("Local ZIP entry not found: " + expectedName);
+    }
+
+    private int findCentralEntryOffset(byte[] zipBytes, String expectedName) {
+        byte[] expectedNameBytes = expectedName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        for (int offset = 0; offset <= zipBytes.length - 46; offset++) {
+            if (readLittleEndianInt(zipBytes, offset) != 0x02014b50) {
+                continue;
+            }
+            int nameLength = readLittleEndianShort(zipBytes, offset + 28);
+            if (nameLength == expectedNameBytes.length
+                    && matches(zipBytes, offset + 46, expectedNameBytes)) {
+                return offset;
+            }
+        }
+        throw new AssertionError("Central ZIP entry not found: " + expectedName);
+    }
+
+    private void replaceBytes(byte[] target, byte[] from, byte[] to) {
+        assertEquals(from.length, to.length);
+        int replacements = 0;
+        for (int i = 0; i <= target.length - from.length; i++) {
+            if (matches(target, i, from)) {
+                System.arraycopy(to, 0, target, i, to.length);
+                replacements++;
+                i += from.length - 1;
+            }
+        }
+        assertEquals(replacements, 2, "Expected to rename both local and central entries");
+    }
+
+    private boolean matches(byte[] target, int offset, byte[] expected) {
+        if (offset < 0 || offset > target.length - expected.length) {
+            return false;
+        }
+        for (int i = 0; i < expected.length; i++) {
+            if (target[offset + i] != expected[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int readLittleEndianInt(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff)
+                | ((bytes[offset + 1] & 0xff) << 8)
+                | ((bytes[offset + 2] & 0xff) << 16)
+                | ((bytes[offset + 3] & 0xff) << 24);
+    }
+
+    private int readLittleEndianShort(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) | ((bytes[offset + 1] & 0xff) << 8);
+    }
+
+    private void writeLittleEndianInt(byte[] bytes, int offset, int value) {
+        bytes[offset] = (byte) value;
+        bytes[offset + 1] = (byte) (value >>> 8);
+        bytes[offset + 2] = (byte) (value >>> 16);
+        bytes[offset + 3] = (byte) (value >>> 24);
     }
 
     // ---------------------------------------------------------------------

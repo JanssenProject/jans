@@ -33,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.jans.configapi.core.util.Util.escapeLog;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Singleton
@@ -406,7 +407,7 @@ public class WebhookService {
 
         Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
         if (!origin.find() || origin.group().contains("${")) {
-            log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", webhook.getDisplayName(), webhook.getInum());
+            log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", escapeLog(webhook.getDisplayName()), escapeLog(webhook.getInum()));
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
         }
     }
