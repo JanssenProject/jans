@@ -361,6 +361,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
         final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm,
                 client.getClientId(), clientService.decryptSecret(client.getClientSecret()));
+        jwtSigner.setSigningKid(client.getAttributes().getAccessTokenSigningKid());
         final Jwt jwt = jwtSigner.newJwt();
         fillPayloadOfAccessTokenJwt(jwt.getClaims(), accessToken, context);
 
