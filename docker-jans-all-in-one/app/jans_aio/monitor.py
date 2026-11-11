@@ -16,9 +16,11 @@ def watch_jans_auth():
     logger.info("Checking jans-auth status")
 
     try:
-        host = os.environ.get("CN_AUTH_JETTY_HOST", "127.0.0.1")  # nosec: B104
-        port = os.environ.get("CN_AUTH_JETTY_PORT", "8081")
-        req = requests.get(f"http://{host}:{port}/sys/health-check", timeout=15)
+        host = os.environ.get("CN_AUTH_JETTY_HOST", "0.0.0.0").strip()  # nosec: B104
+        if host in ("0.0.0.0", "::", "[::]", ""):  # nosec: B104
+            host = "127.0.0.1"
+        port = os.environ.get("CN_AUTH_JETTY_PORT", "8081").strip()
+        req = requests.get(f"http://{host}:{port}/jans-auth/sys/health-check", timeout=15)
 
         if req.ok:
             logger.info("Got response from jans-auth: status=%s, body=%s", req.status_code, req.json())
