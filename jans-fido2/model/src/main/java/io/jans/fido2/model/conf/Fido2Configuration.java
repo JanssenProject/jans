@@ -329,6 +329,10 @@ public class Fido2Configuration {
 	}
 
 	public void setFido2TraceSigningKey(String fido2TraceSigningKey) {
+		// reference-only: reject inline key material so it is never persisted or returned by the config API
+		if (fido2TraceSigningKey != null && (fido2TraceSigningKey.contains("-----BEGIN") || fido2TraceSigningKey.contains("\n") || fido2TraceSigningKey.contains("\r"))) {
+			throw new IllegalArgumentException("fido2TraceSigningKey must be a key-store reference, not key material");
+		}
 		this.fido2TraceSigningKey = fido2TraceSigningKey;
 	}
 
