@@ -168,21 +168,18 @@ class ConfigManager(BaseConfiguration):
         - `google`: returns an instance of [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
         - `aws`: returns an instance of [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
         """
-        from jans.pycloudlib.config import ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig
-        adapter_mappings = {
-            "consul": ConsulConfig,
-            "kubernetes": KubernetesConfig,
-            "google": GoogleConfig,
-            "aws": AwsConfig,
+        import importlib
+        _mapping = {
+            "consul": ("jans.pycloudlib.config.consul_config", "ConsulConfig"),
+            "kubernetes": ("jans.pycloudlib.config.kubernetes_config", "KubernetesConfig"),
+            "google": ("jans.pycloudlib.config.google_config", "GoogleConfig"),
+            "aws": ("jans.pycloudlib.config.aws_config", "AwsConfig"),
         }
-        adapter_cls = adapter_mappings.get(self.remote_adapter_name)
-
-        # unsupported adapter
-        if not adapter_cls:
+        entry = _mapping.get(self.remote_adapter_name)
+        if not entry:
             raise ValueError(f"Unsupported config adapter {self.remote_adapter_name!r}")
-
-        # resolve adapter instance
-        return adapter_cls()
+        mod = importlib.import_module(entry[0])
+        return getattr(mod, entry[1])()
 
     @cached_property
     def local_adapter(self) -> AdapterProtocol:
@@ -222,21 +219,18 @@ class SecretManager(BaseConfiguration):
         - `google`: returns an instance of [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
         - `aws`: returns an instance of [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
         """
-        from jans.pycloudlib.secret import VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret
-        adapter_mappings = {
-            "vault": VaultSecret,
-            "kubernetes": KubernetesSecret,
-            "google": GoogleSecret,
-            "aws": AwsSecret,
+        import importlib
+        _mapping = {
+            "vault": ("jans.pycloudlib.secret.vault_secret", "VaultSecret"),
+            "kubernetes": ("jans.pycloudlib.secret.kubernetes_secret", "KubernetesSecret"),
+            "google": ("jans.pycloudlib.secret.google_secret", "GoogleSecret"),
+            "aws": ("jans.pycloudlib.secret.aws_secret", "AwsSecret"),
         }
-        adapter_cls = adapter_mappings.get(self.remote_adapter_name)
-
-        # unsupported adapter
-        if not adapter_cls:
+        entry = _mapping.get(self.remote_adapter_name)
+        if not entry:
             raise ValueError(f"Unsupported secret adapter {self.remote_adapter_name!r}")
-
-        # resolve adapter instance
-        return adapter_cls()
+        mod = importlib.import_module(entry[0])
+        return getattr(mod, entry[1])()
 
     @cached_property
     def local_adapter(self) -> AdapterProtocol:
