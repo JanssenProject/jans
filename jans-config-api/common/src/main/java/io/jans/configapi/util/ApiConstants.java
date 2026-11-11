@@ -9,6 +9,10 @@ package io.jans.configapi.util;
 public class ApiConstants {
     
     private ApiConstants() {}
+    
+    public static final String READ_REQUEST = "READ";
+    public static final String WRITE_REQUEST = "WRITE";
+    public static final String DELETE_REQUEST = "DELETE";
 
     public static final String BASE_API_URL = "/";
     public static final String SEPARATOR = "/";

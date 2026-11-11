@@ -2,6 +2,7 @@ package io.jans.configapi.util;
 
 import com.unboundid.ldap.sdk.DN;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.common.User;
@@ -11,12 +12,15 @@ import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
+
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.model.configuration.DataFormatConversionConf;
 import io.jans.configapi.model.configuration.PluginConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
+import io.jans.configapi.security.service.OpenIdService;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.model.role.RolePermissionMapping;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -49,19 +53,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ResourceInfo;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,15 +97,22 @@ public class AuthUtil {
 
     @Inject
     ConfService confService;
-    
-    @Inject 
+
+    @Inject
     RolePermissionMappingService rolePermissionMappingService;
-    
+
     @Inject
     AuthClientFactory authClientFactory;
 
+    @Inject
+    OpenIdService openIdService;
+
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
+    }
+
+    public String getAuthIssuerUrl() {
+        return this.configurationFactory.getApiAppConfiguration().getAuthIssuerUrl();
     }
 
     public String getAuthOpenidConfigurationUrl() {
@@ -116,7 +130,15 @@ public class AuthUtil {
     public List<PluginConf> getPluginConf() {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
-    
+
+    public String getRoleAttributeName() {
+        return this.configurationFactory.getApiAppConfiguration().getRoleAttributeName();
+    }
+
+    public List<String> getAdminRoleNames() {
+        return this.configurationFactory.getApiAppConfiguration().getAdminRoleNames();
+    }
+
     public boolean isUserRolePermissionValidationEnabled() {
         return this.configurationFactory.getApiAppConfiguration().isUserRolePermissionValidationEnabled();
     }
@@ -128,11 +150,95 @@ public class AuthUtil {
     public List<String> getUserRolePermissionExcludedClients() {
         return this.configurationFactory.getApiAppConfiguration().getUserRolePermissionExcludedClients();
     }
-    
+
+    public List<String> getExcludedClients() {
+        List<String> excludedClients = getUserRolePermissionExcludedClients();
+        return excludedClients == null ? Collections.emptyList() : excludedClients;
+    }
+
+    public boolean isUserRolePermissionExcluded(String inum) {
+        List<String> excludedClients = getExcludedClients();
+
+        log.debug("inum:{}, excludedClients:{}", inum, excludedClients);
+
+        return excludedClients != null && excludedClients.contains(inum);
+
+    }
+
     public boolean isFetchUserRoleInIntrospectionFlag() {
         return this.configurationFactory.getApiAppConfiguration().isFetchUserRoleInIntrospectionFlag();
     }
-    
+
+    public List<String> getSuperAdminScopes() {
+        return this.configurationFactory.getApiAppConfiguration().getSuperAdminScopes();
+    }
+
+    public String getSuperAdminReadScope() {
+        String readScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return readScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/read-all"))
+                .findFirst().orElse(null);
+    }
+
+    public String getSuperAdminWriteScope() {
+        String writeScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return writeScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/write-all"))
+                .findFirst().orElse(null);
+    }
+
+    public String getSuperAdminDeleteScope() {
+        String deleteScope = null;
+        if (getSuperAdminScopes() == null || getSuperAdminScopes().isEmpty()) {
+            return deleteScope;
+        }
+        return getSuperAdminScopes().stream().filter(scope -> scope.equals("https://jans.io/oauth/config/delete-all"))
+                .findFirst().orElse(null);
+    }
+
+    public boolean hasSuperAdminReadScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminReadScope());
+    }
+
+    public boolean hasSuperAdminWriteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminWriteScope());
+    }
+
+    public boolean hasSuperAdminDeleteScope(List<String> userScopes) {
+        if (userScopes == null || userScopes.isEmpty()) {
+            return false;
+        }
+        return userScopes.contains(getSuperAdminDeleteScope());
+    }
+
+    public boolean hasSuperAdminScope(List<String> userScopes, final String httpRequestMethod) {
+        if (userScopes == null || userScopes.isEmpty() || StringUtils.isBlank(httpRequestMethod)) {
+            return false;
+        }
+
+        switch (httpRequestMethod) {
+        case ApiConstants.READ_REQUEST:
+            return hasSuperAdminReadScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+
+        case ApiConstants.DELETE_REQUEST:
+            return hasSuperAdminDeleteScope(userScopes) || hasSuperAdminWriteScope(userScopes);
+
+        default:
+            return hasSuperAdminWriteScope(userScopes);
+
+        }
+    }
+
     public String getIssuer() {
         return this.configurationService.find().getIssuer();
     }
@@ -142,11 +248,11 @@ public class AuthUtil {
      *
      * <p>
      * When endpoint injection is enabled the injected URL is preferred, so that
-     * config-api reaches the auth server over the address it was configured
-     * with instead of the externally published one. Deployments where both run
-     * in the same container or pod can then keep the call internal. Falls back
-     * to the auth server configuration when injection is disabled or the
-     * injected value is not set.
+     * config-api reaches the auth server over the address it was configured with
+     * instead of the externally published one. Deployments where both run in the
+     * same container or pod can then keep the call internal. Falls back to the auth
+     * server configuration when injection is disabled or the injected value is not
+     * set.
      * </p>
      *
      * @param injectedUrl  endpoint injected into the config-api configuration
@@ -167,12 +273,12 @@ public class AuthUtil {
      * address.
      *
      * <p>
-     * Used for endpoints that have no injected counterpart of their own. The
-     * path, query and fragment of the published URL are preserved and only the
-     * scheme and authority are replaced, which mirrors how the injected
-     * endpoints are derived in the first place. Returns the published URL
-     * unchanged when injection is disabled, when no injected issuer is
-     * configured, or when either value cannot be parsed.
+     * Used for endpoints that have no injected counterpart of their own. The path,
+     * query and fragment of the published URL are preserved and only the scheme and
+     * authority are replaced, which mirrors how the injected endpoints are derived
+     * in the first place. Returns the published URL unchanged when injection is
+     * disabled, when no injected issuer is configured, or when either value cannot
+     * be parsed.
      * </p>
      *
      * @param publishedUrl URL published by the auth server
@@ -209,8 +315,7 @@ public class AuthUtil {
                 resolved.append('#').append(published.getRawFragment());
             }
 
-            log.debug("Rebased published url:{} onto injected issuer:{} as:{}", publishedUrl, injectedIssuer,
-                    resolved);
+            log.debug("Rebased published url:{} onto injected issuer:{} as:{}", publishedUrl, injectedIssuer, resolved);
             return resolved.toString();
         } catch (URISyntaxException ex) {
             log.warn("Could not rebase published url:{} onto injected issuer:{}, using published url", publishedUrl,
@@ -308,7 +413,7 @@ public class AuthUtil {
 
         Class<?> resourceClass = resourceInfo.getResourceClass();
         ProtectedApi typeAnnotation = resourceClass.getAnnotation(ProtectedApi.class);
-        Map<ProtectionScopeType, List<String>> scopes = new HashMap<>();
+        Map<ProtectionScopeType, List<String>> scopes = new EnumMap<>(ProtectionScopeType.class);
         log.debug("Requested scopes for resourceClass:{}, typeAnnotation:{} ", resourceClass, typeAnnotation);
 
         if (typeAnnotation == null) {
@@ -354,6 +459,26 @@ public class AuthUtil {
         log.info("Final Method Scopes for resourceInfo:{}, scopes:{} ", resourceInfo, scopes);
     }
 
+    public static List<String> getMethodSuperScopes(Method resourceMethod) {
+        log.info("getMethodSuperScopes() - Get Scopes for resourceMethod:{}", resourceMethod);
+        List<String> superScopes = null;
+
+        if (resourceMethod == null) {
+            return superScopes;
+        }
+
+        ProtectedApi methodAnnotation = resourceMethod.getAnnotation(ProtectedApi.class);
+
+        if (methodAnnotation != null) {
+            superScopes = new ArrayList<>();
+            superScopes.addAll(Stream.of(methodAnnotation.superScopes()).collect(Collectors.toList()));
+        }
+
+        log.info("getMethodSuperScopes:() - Final Scopes for resourceMethod:{}, superScopes:{} ", resourceMethod,
+                superScopes);
+        return superScopes;
+    }
+
     public String requestAccessToken(final String clientId, final List<String> scope) {
         log.info("Request for AccessToken - clientId:{}, scope:{} ", clientId, scope);
         String tokenUrl = getTokenEndpoint();
@@ -393,6 +518,46 @@ public class AuthUtil {
             }
         }
         return null;
+    }
+
+    public List<String> getClientScope(final String clientId) {
+        log.info("Get scopes of Client:{} ", clientId);
+        List<String> scopes = null;
+
+        if (StringUtils.isBlank(clientId)) {
+            return scopes;
+        }
+        // Get Client
+        Client client = this.clientService.getClientByInum(clientId);
+        if (client == null) {
+            return scopes;
+        }
+
+        // Prepare scope array
+        String[] scopeArray = client.getScopes();
+        if (scopeArray == null || scopeArray.length <= 0) {
+            return scopes;
+        }
+        log.info(" scope to be scopeArray - {} ", Arrays.asList(scopeArray));
+
+        // Assign scope
+        scopes = getScopeFromDn(scopeArray);
+        log.info(" Scope of clientId:{} is :{} ", clientId, scopes);
+        return scopes;
+    }
+
+    public List<String> getScopeFromDn(String[] scopes) {
+        List<String> scopeList = null;
+        if (scopes != null && scopes.length > 0) {
+            scopeList = new ArrayList<>();
+            for (String dn : scopes) {
+                Scope scope = this.scopeService.getScopeByDn(dn);
+                if (scope != null) {
+                    scopeList.add(scope.getId());
+                }
+            }
+        }
+        return scopeList;
     }
 
     public void assignAllScope(final String clientId) {
@@ -485,7 +650,7 @@ public class AuthUtil {
         if (list1 == null || list1.isEmpty()) {
             return Collections.emptyList();
         }
-        if(list2==null || list2.isEmpty()) {
+        if (list2 == null || list2.isEmpty()) {
             return list1;
         }
         return list1.stream().filter(e -> !list2.contains(e)).collect(Collectors.toList());
@@ -560,18 +725,18 @@ public class AuthUtil {
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e) {
-            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",
-                    datePattern, dateString);
+            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", datePattern,
+                    dateString);
         }
         return date;
     }
-    
+
     public ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        if(input ==null) {
+        if (input == null) {
             return baos;
         }
-        
+
         byte[] buffer = new byte[1024];
         int len;
         while ((len = input.read(buffer)) > -1) {
@@ -580,22 +745,22 @@ public class AuthUtil {
         baos.flush();
         return baos;
     }
-    
+
     public InputStream getInputStream(ByteArrayOutputStream output) {
         InputStream input = null;
         if (output == null) {
             return input;
         }
 
-        return new ByteArrayInputStream(output.toByteArray());  
+        return new ByteArrayInputStream(output.toByteArray());
     }
-    
+
     public static String readFile(String filePath) {
         Path path = Paths.get(filePath).toAbsolutePath();
         try {
             return Files.readString(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (IOException ex) {
+            throw new WebApplicationException(ex);
         }
     }
 
@@ -652,30 +817,40 @@ public class AuthUtil {
         return getRequestedScopes(resourceInfo);
     }
 
-    public Set<String> getUserRolePermission(HttpHeaders httpHeaders) {
+    public List<String> getUserRolePermission(String userInum) {
 
+        List<String> userPermissionList = new ArrayList<>();
         Set<String> userPermissionSet = null;
-        // Get user
-        String userInum = getUserInum(httpHeaders);
-        log.info("userInum:{}", userInum);
 
-        // Get User details
+        // Get userInum from header
+        log.info("userInum:{}", userInum);
+        if (StringUtils.isBlank(userInum)) {
+            return userPermissionList;
+        }
+
+        // Get User details based on userInum
         User user = getUserByInum(userInum);
         log.info("userInum:{}, user:{}", userInum, user);
 
+        // Get user roles from DB
         List<String> userRoleList = getUserRole(user);
         log.info("userInum:{}, userRoleList:{}", userInum, userRoleList);
         if (userRoleList == null || userRoleList.isEmpty()) {
-            return userPermissionSet;
+            return userPermissionList;
         }
         log.info("userInum:{}, user:{}, userRoleList:{}", userInum, user, userRoleList);
 
+        // Fetch distinct permissions associated with role
         Set<String> safeSet = new HashSet<>(userRoleList);
         userPermissionSet = getUserPermission(safeSet);
+        if (userPermissionSet == null || userPermissionSet.isEmpty()) {
+            return userPermissionList;
+        }
+        userPermissionList = new ArrayList<>(userPermissionSet);
+        log.info("userInum:{},userRole:{}, userPermissionSet:{}, userPermissionList:{}", userInum, userRoleList,
+                userPermissionSet, userPermissionList);
 
-        log.info("userInum:{},userRole:{}, userPermissionSet:{}", userInum, userRoleList, userPermissionSet);
-
-        return userPermissionSet;
+        return userPermissionList;
     }
 
     public Set<String> getUserPermission(Set<String> userRoleSet) {
@@ -698,7 +873,7 @@ public class AuthUtil {
     }
 
     public List<String> getUserRole(User user) {
-        log.info("getUserRole user:{}", user);
+        log.info("getUserRole() - user:{}", user);
         List<String> userRoleList = null;
 
         if (user == null) {
@@ -710,13 +885,14 @@ public class AuthUtil {
             return userRoleList;
         }
 
-        userRoleList = getAttributeValueList(customAttributes, "jansAdminUIRole");
-        log.info(" user.getUserId():{}, jansAdminUIRole-userRoleList:{}", user.getUserId(), userRoleList);
+        userRoleList = getAttributeValueList(customAttributes, getRoleAttributeName());
+        log.info(" user.getUserId():{}, getRoleAttributeName():{}, userRoleList:{}", user.getUserId(),
+                getRoleAttributeName(), userRoleList);
         if (userRoleList.isEmpty()) {
             return userRoleList;
         }
 
-        log.info(" user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
+        log.info(" Returning user.getUserId():{}, userRoleList:{}", user.getUserId(), userRoleList);
         return userRoleList;
     }
 
@@ -746,7 +922,6 @@ public class AuthUtil {
         }
 
         return attributeValueList;
-
     }
 
     public String getUserInum(HttpHeaders httpHeaders) {
@@ -772,8 +947,23 @@ public class AuthUtil {
     }
 
     public IntrospectionResponse getIntrospectionResponse(String token) {
-        return AuthClientFactory.getIntrospectionResponse(this.getIntrospectionEndpoint(), token,
-                token.substring("Bearer".length()).trim());
+        IntrospectionResponse introspectionResponse = null;
+        if (StringUtils.isBlank(token)) {
+            return introspectionResponse;
+        }
+        try {
+            introspectionResponse = openIdService.getIntrospectionResponse(token,
+                    token.substring("Bearer".length()).trim(), this.getAuthIssuerUrl());
+            log.debug("introspectionResponse:{}", introspectionResponse);
+        } catch (JsonProcessingException ex) {
+            StringBuilder errMsg = new StringBuilder("Error while token Introspection - ").append("{").append(ex);
+
+            log.error(errMsg.toString());
+
+            throw new WebApplicationException(errMsg.toString(), ex,
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+        return introspectionResponse;
     }
 
     public String getJsonNodeKeyValue(JsonNode jsonNode, String key) {
@@ -787,12 +977,64 @@ public class AuthUtil {
         }
         return keyNode.asText();
     }
-    
+
     public static String getStackTraceAsString(Throwable throwable) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw); // Redirects the trace output into the StringWriter
         return sw.toString();
+    }
+
+    public static Optional<String> getStringFromObject(Object raw) {
+        if (raw == null) {
+            return Optional.empty();
+        }
+        if (raw instanceof String) {
+            return Optional.of((String) raw);
+        }
+        throw new IllegalStateException("Expected String, found " + raw.getClass().getName());
+    }
+
+    public static List<String> getListFromObject(Object raw) {
+        if (raw == null) {
+            return Collections.emptyList();
+        }
+
+        if (!(raw instanceof List<?>)) {
+            throw new IllegalStateException("Expected List, found " + raw.getClass().getName());
+        }
+
+        List<?> rawList = (List<?>) raw;
+
+        for (Object element : rawList) {
+            if (!(element instanceof String)) {
+                throw new IllegalStateException("Expected List<String>, found element of type "
+                        + (element == null ? "null" : element.getClass().getName()));
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        List<String> result = (List<String>) rawList;
+        return Collections.unmodifiableList(result);
+    }
+
+    public static List<String> tokenize(String str, String delimiters) {
+        List<String> result = new ArrayList<>();
+
+        if (StringUtils.isBlank(str)) {
+            return result;
+        }
+
+        if (StringUtils.isNotBlank(str) && StringUtils.isBlank(delimiters)) {
+            result.add(str);
+            return result;
+        }
+
+        StringTokenizer st = new StringTokenizer(str, delimiters);
+        while (st.hasMoreTokens()) {
+            result.add(st.nextToken());
+        }
+        return result;
     }
 
 }
