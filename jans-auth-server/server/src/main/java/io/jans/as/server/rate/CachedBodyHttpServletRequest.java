@@ -22,7 +22,7 @@ public class CachedBodyHttpServletRequest extends HttpServletRequestWrapper {
 
         int contentLength = request.getContentLength();
         if (contentLength > MAX_BODY_SIZE) {
-            throw new IOException("Request body exceeds maximum allowed size: " + MAX_BODY_SIZE);
+            throw new RequestBodyTooLargeException("Request body exceeds maximum allowed size: " + MAX_BODY_SIZE);
         }
 
         // Read the entire body and cache it.
@@ -30,7 +30,7 @@ public class CachedBodyHttpServletRequest extends HttpServletRequestWrapper {
         this.cachedBody = is.readNBytes(MAX_BODY_SIZE + 1);
 
         if (this.cachedBody.length > MAX_BODY_SIZE) {
-            throw new IOException("Actual body size exceeded 1MB limit.");
+            throw new RequestBodyTooLargeException("Actual body size exceeded 1MB limit.");
         }
     }
 

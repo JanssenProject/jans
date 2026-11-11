@@ -13,9 +13,12 @@ use std::fmt;
 use std::str::FromStr;
 
 use serde::Deserialize;
-use serde::de::{self, Deserializer, MapAccess, Visitor};
+use serde::de::{self, DeserializeOwned, Deserializer, MapAccess, Visitor};
+use serde_json::value::RawValue;
 use url::Url;
 
+use super::TRUSTED_ISSUERS_FILE;
+use crate::common::policy_store::formats::{UnknownField, struct_fields};
 use crate::common::policy_store::token_types::{EntityTypeName, IssuerName, TokenTypesBuilder};
 use crate::common::policy_store::{
     CustomTokenMetadata, KeySource, TokenEntityMetadata, TokenTypes, TokenTypesError,
@@ -27,6 +30,7 @@ use crate::common::policy_store::{
 #[derive(Debug, Clone, Default, PartialEq)]
 pub(crate) struct TrustedIssuersDoc {
     pub(crate) entries: Vec<TrustedIssuerEntry>,
+    pub(crate) unknown_fields: Vec<UnknownField>,
 }
 
 /// One key of the file and its entry.
@@ -37,15 +41,28 @@ pub(crate) struct TrustedIssuerEntry {
 }
 
 /// One token type; `type` selects which fields are allowed.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) enum TokenTypeConfig {
     Jwt(Box<JwtTokenConfig>),
     Custom(CustomTokenConfig),
 }
 
+/// The tag of an entry. Read apart from the entry: `serde_ignored` cannot see
+/// through an internally tagged enum, which buffers its content.
+#[derive(Deserialize)]
+struct EntryTag {
+    #[serde(rename = "type")]
+    kind: EntryKind,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum EntryKind {
+    Jwt,
+    Custom,
+}
+
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct JwtTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
@@ -57,7 +74,6 @@ pub(crate) struct JwtTokenConfig {
 }
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
-#[serde(deny_unknown_fields)]
 pub(crate) struct CustomTokenConfig {
     #[serde(deserialize_with = "de_issuer")]
     pub(crate) issuer: IssuerName,
@@ -114,7 +130,8 @@ pub(crate) enum KeySourceDoc {
 }
 
 /// Hand-written so a store author sees the actual problem rather than
-/// serde's "did not match any variant".
+/// serde's "did not match any variant". Unlike the entry, this object stays
+/// closed: it decides where an issuer's keys come from.
 impl<'de> Deserialize<'de> for KeySourceDoc {
     fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         deserializer.deserialize_map(KeySourceVisitor)
@@ -202,21 +219,88 @@ impl<'de> Visitor<'de> for TrustedIssuersVisitor {
     fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
         let mut seen = HashSet::new();
         let mut entries = Vec::new();
+        let mut unknown_fields = Vec::new();
         while let Some(key) = map.next_key::<String>()? {
             if !seen.insert(key.clone()) {
                 return Err(de::Error::custom(format!("duplicate entity type '{key}'")));
             }
             let entity_type = EntityTypeName::from_str(&key).map_err(de::Error::custom)?;
-            let config = map
-                .next_value::<TokenTypeConfig>()
+            // Raw text, not `Value`: a `Value` would hide duplicate fields.
+            let raw = map.next_value::<Box<RawValue>>()?;
+            let config = parse_entry(&key, raw.get(), &mut unknown_fields)
                 .map_err(|e| de::Error::custom(format!("invalid entry '{key}': {e}")))?;
             entries.push(TrustedIssuerEntry {
                 entity_type,
                 config,
             });
         }
-        Ok(TrustedIssuersDoc { entries })
+        Ok(TrustedIssuersDoc {
+            entries,
+            unknown_fields,
+        })
     }
+}
+
+/// Parses one entry and records the fields it ignored.
+fn parse_entry(
+    key: &str,
+    json: &str,
+    unknown_fields: &mut Vec<UnknownField>,
+) -> Result<TokenTypeConfig, serde_json::Error> {
+    let EntryTag { kind } = serde_json::from_str(json)?;
+    let (config, known_fields, ignored) = match kind {
+        EntryKind::Jwt => {
+            let Tracked { value, ignored } = parse_tracked::<JwtTokenConfig>(json)?;
+            (
+                TokenTypeConfig::Jwt(Box::new(value)),
+                struct_fields::<JwtTokenConfig>(),
+                ignored,
+            )
+        },
+        EntryKind::Custom => {
+            let Tracked { value, ignored } = parse_tracked::<CustomTokenConfig>(json)?;
+            // A wrong `type` must not silently drop a key source.
+            if let Some(field) = ignored
+                .iter()
+                .find(|path| struct_fields::<JwtTokenConfig>().contains(&path.as_str()))
+            {
+                return Err(de::Error::custom(format!(
+                    "`{field}` is only allowed on a `jwt` entry"
+                )));
+            }
+            (
+                TokenTypeConfig::Custom(value),
+                struct_fields::<CustomTokenConfig>(),
+                ignored,
+            )
+        },
+    };
+    unknown_fields.extend(ignored.into_iter().map(|path| UnknownField {
+        file: TRUSTED_ISSUERS_FILE,
+        path: format!("{key}.{path}"),
+        known_fields,
+    }));
+    Ok(config)
+}
+
+/// A deserialized value and the paths of the fields it did not read.
+struct Tracked<T> {
+    value: T,
+    ignored: Vec<String>,
+}
+
+/// Deserializes `T`, returning the paths of fields it did not read. `type` is
+/// left out: the tag is read separately.
+fn parse_tracked<T: DeserializeOwned>(json: &str) -> Result<Tracked<T>, serde_json::Error> {
+    let mut ignored = Vec::new();
+    let mut deserializer = serde_json::Deserializer::from_str(json);
+    let value = serde_ignored::deserialize(&mut deserializer, |path| {
+        let path = path.to_string();
+        if path != "type" {
+            ignored.push(path);
+        }
+    })?;
+    Ok(Tracked { value, ignored })
 }
 
 /// Parses `trusted-issuers.json` content.
@@ -307,6 +391,77 @@ mod tests {
     /// Parses one entry under `Acme::Access_token`.
     fn parse_entry(entry: &serde_json::Value) -> Result<TrustedIssuersDoc, serde_json::Error> {
         parse(&json!({ "Acme::Access_token": entry }).to_string())
+    }
+
+    #[test]
+    fn ignores_and_lists_unknown_fields() {
+        let plain = json!({
+            "type": "jwt",
+            "issuer": "Acme",
+            "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
+        });
+        let mut extended = plain.clone();
+        extended["x_vendor"] = json!({ "nested": [1, 2] });
+        extended["required_claim"] = json!(["sub"]);
+
+        let doc = parse_entry(&extended).expect("unknown fields must not fail parsing");
+        let plain_doc = parse_entry(&plain).expect("the plain entry should parse");
+
+        assert_eq!(
+            doc.clone()
+                .into_runtime()
+                .expect("the extended entry should convert"),
+            plain_doc
+                .into_runtime()
+                .expect("the plain entry should convert"),
+            "unknown fields must not change the runtime token types"
+        );
+        let paths: Vec<_> = doc
+            .unknown_fields
+            .iter()
+            .map(|unknown| unknown.path.as_str())
+            .collect();
+        assert_eq!(
+            paths,
+            [
+                "Acme::Access_token.x_vendor",
+                "Acme::Access_token.required_claim"
+            ],
+            "unknown fields should be listed in file order, without `type` or known fields"
+        );
+        assert_eq!(
+            doc.unknown_fields[0].file, TRUSTED_ISSUERS_FILE,
+            "the format should name the file it read"
+        );
+    }
+
+    #[test]
+    fn struct_fields_match_the_derived_structs() {
+        assert_eq!(
+            struct_fields::<JwtTokenConfig>(),
+            [
+                "issuer",
+                "configuration_endpoints",
+                "token_id",
+                "required_claims"
+            ],
+            "jwt field names should come from the derive"
+        );
+        assert_eq!(
+            struct_fields::<CustomTokenConfig>(),
+            ["issuer", "required_claims"],
+            "custom field names should come from the derive"
+        );
+    }
+
+    #[test]
+    fn rejects_duplicate_entry_field() {
+        let err = parse(r#"{ "Acme::T": { "type": "custom", "issuer": "A", "issuer": "B" } }"#)
+            .expect_err("a repeated field must be rejected");
+        assert!(
+            err.to_string().contains("duplicate field `issuer`"),
+            "expected the duplicate field error, got: {err}"
+        );
     }
 
     #[track_caller]
@@ -400,7 +555,7 @@ mod tests {
                 "issuer": "Acme",
                 "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" }
             }),
-            "unknown field `configuration_endpoints`",
+            "`configuration_endpoints` is only allowed on a `jwt` entry",
         );
     }
 
@@ -579,6 +734,27 @@ mod tests {
         jsonschema::draft202012::new(&schema).expect("the schema should compile")
     }
 
+    #[test]
+    fn schema_and_parser_accept_unknown_entry_fields() {
+        let validator = schema_validator();
+        for entry in [
+            json!({
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": { "jwks": "https://a/k", "iss": "https://a" },
+                "x_vendor": { "enabled": true }
+            }),
+            json!({ "type": "custom", "issuer": "Acme", "x_vendor": 1 }),
+        ] {
+            let store = json!({ "Acme::Access_token": entry });
+            assert!(
+                validator.is_valid(&store),
+                "the schema should accept an unknown field: {store}"
+            );
+            parse(&store.to_string()).expect("the parser should accept an unknown field");
+        }
+    }
+
     /// The example and every v2 fixture in the repository pass the schema and load.
     #[test]
     fn schema_and_parser_accept_the_fixtures() {
@@ -639,7 +815,6 @@ mod tests {
                 "repeated claim",
                 jwt(json!({ "required_claims": ["sub", "sub"] })),
             ),
-            ("unknown field", jwt(json!({ "trusted": true }))),
             ("reserved issuer", jwt(json!({ "issuer": "if" }))),
             ("issuer with ::", jwt(json!({ "issuer": "Acme::Corp" }))),
             (
@@ -647,6 +822,14 @@ mod tests {
                 json!({ "type": "jwt", "issuer": "Acme" }),
             ),
             ("unknown type", json!({ "type": "saml", "issuer": "Acme" })),
+            (
+                "custom with token_id",
+                json!({ "type": "custom", "issuer": "Acme", "token_id": "jti" }),
+            ),
+            (
+                "unknown key source field",
+                endpoints(json!({ "jwks": "https://a/k", "iss": "https://a", "extra": 1 })),
+            ),
             (
                 "custom with key source",
                 json!({
@@ -675,6 +858,14 @@ mod tests {
                 endpoints(json!({ "jwks": "file:///etc/passwd", "iss": "https://a" })),
             ),
             (
+                "empty host",
+                endpoints(json!({ "jwks": "https://", "iss": "https://a" })),
+            ),
+            (
+                "space in host",
+                endpoints(json!({ "jwks": "https://a b/k", "iss": "https://a" })),
+            ),
+            (
                 "iss with query",
                 endpoints(json!({ "jwks": "https://a/k", "iss": "https://a?x=1" })),
             ),
@@ -693,5 +884,104 @@ mod tests {
                 "the parser should reject {label}"
             );
         }
+    }
+
+    /// Cedar rejects a reserved word as any `::` segment, so the schema must too.
+    #[test]
+    fn schema_and_parser_reject_reserved_entity_type_keys() {
+        let validator = schema_validator();
+        for key in ["if", "true", "__cedar", "Acme::if::Token", "Acme::__cedar"] {
+            let store = json!({ key: { "type": "custom", "issuer": "Acme" } });
+            assert!(
+                !validator.is_valid(&store),
+                "the schema should reject entity type '{key}'"
+            );
+            assert!(
+                parse(&store.to_string()).is_err(),
+                "the parser should reject entity type '{key}'"
+            );
+        }
+        for key in ["ifx", "Acme::Bif", "___cedar"] {
+            let store = json!({ key: { "type": "custom", "issuer": "Acme" } });
+            assert!(
+                validator.is_valid(&store),
+                "the schema should accept entity type '{key}'"
+            );
+            parse(&store.to_string())
+                .unwrap_or_else(|e| panic!("the parser should accept entity type '{key}': {e}"));
+        }
+    }
+
+    /// The schema mirrors the runtime fetch guard: https anywhere, http only on loopback.
+    #[test]
+    fn schema_requires_https_or_loopback_http_for_fetched_urls() {
+        let validator = schema_validator();
+        let jwt = |endpoints: serde_json::Value| {
+            json!({
+                "Acme::Access_token": {
+                    "type": "jwt",
+                    "issuer": "Acme",
+                    "configuration_endpoints": endpoints
+                }
+            })
+        };
+        for (label, endpoints) in [
+            (
+                "remote http discovery",
+                json!({ "configuration": "http://idp.remote/.well-known/openid-configuration" }),
+            ),
+            (
+                "remote http jwks",
+                json!({ "jwks": "http://idp.remote/keys", "iss": "https://idp.remote" }),
+            ),
+        ] {
+            assert!(
+                !validator.is_valid(&jwt(endpoints)),
+                "the schema should reject {label}"
+            );
+        }
+        for (label, endpoints) in [
+            (
+                "https discovery",
+                json!({ "configuration": "https://idp.remote/.well-known/openid-configuration" }),
+            ),
+            (
+                "loopback http discovery",
+                json!({ "configuration": "http://localhost:8080/.well-known/openid-configuration" }),
+            ),
+            (
+                "loopback http jwks",
+                json!({ "jwks": "http://127.0.0.1:8080/keys", "iss": "http://[::1]:8080" }),
+            ),
+            (
+                "remote http iss is compared, not fetched",
+                json!({ "jwks": "https://idp.remote/keys", "iss": "http://idp.remote" }),
+            ),
+        ] {
+            assert!(
+                validator.is_valid(&jwt(endpoints)),
+                "the schema should accept {label}"
+            );
+        }
+    }
+
+    /// The schema publishes the canonical lowercase scheme; `url::Url` also takes uppercase.
+    #[test]
+    fn schema_uses_canonical_lowercase_scheme() {
+        let validator = schema_validator();
+        let store = json!({
+            "Acme::Access_token": {
+                "type": "jwt",
+                "issuer": "Acme",
+                "configuration_endpoints": {
+                    "configuration": "HTTPS://idp.acme.com/.well-known/openid-configuration"
+                }
+            }
+        });
+        assert!(
+            !validator.is_valid(&store),
+            "the schema should require the canonical lowercase scheme"
+        );
+        parse(&store.to_string()).expect("the parser should still accept an uppercase scheme");
     }
 }

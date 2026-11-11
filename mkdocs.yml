@@ -246,6 +246,7 @@ nav:
       - Conditional UI and Fallback: janssen-server/fido/conditional-ui-and-fallback.md
       - Passkey Telemetry: janssen-server/fido/passkey-telemetry.md
       - Native App Readiness: janssen-server/fido/native-app-readiness.md
+      - TRACE Producer: janssen-server/fido/trace-producer.md
       - Passkey Interception Script: script-catalog/person_authentication/passkey/README.md
     - SAML:
       - Shibboleth IDP:
@@ -626,6 +627,7 @@ nav:
     - JWT Validation: cedarling/reference/cedarling-jwt-validation.md
     - Entities: cedarling/reference/cedarling-entities.md
     - Logs: cedarling/reference/cedarling-logs.md
+    - TRACE: cedarling/reference/cedarling-trace.md
     - Lock Server: cedarling/reference/cedarling-lock-server.md
     - Benchmarks: cedarling/reference/benchmarks.md
   - Developer:

@@ -51,6 +51,7 @@ import io.jans.orm.sql.operation.SqlOperationService;
 import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.PropertiesHelper;
+import io.jans.orm.util.SensitiveDataMasker;
 import io.jans.orm.util.StringHelper;
 
 /**
@@ -70,6 +71,15 @@ public class SqlConnectionProvider {
 
 	private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
 	private static final String PASSWORD_METHOD_PREFIX = "password.method";
+
+	// Only these properties are logged on failure; connection.uri and driver properties may embed credentials
+	static final String[] LOGGABLE_PROPERTIES = { "db.schema.name", "jdbc.driver.class-name", "auth.userName",
+			"db.disable.time-zone", "password.encryption.method", "orm.validate-after-update",
+			"connection.pool.create-max-wait-time-millis", "connection.pool.max-idle", "connection.pool.max-total",
+			"connection.pool.max-wait-time-millis", "connection.pool.min-evictable-idle-time-millis",
+			"connection.pool.min-idle", "connection.pool.test-on-borrow", "connection.pool.test-on-create",
+			"connection.pool.test-on-return", "connection.pool.test-while-idle",
+			"connection.pool.time-between-eviction-runs-millis", "connection.pool.validation-enabled" };
 
 	private Properties props;
 
@@ -121,12 +131,8 @@ public class SqlConnectionProvider {
 		} catch (Exception ex) {
 			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
-			Properties clonedProperties = (Properties) props.clone();
-			if (clonedProperties.getProperty("auth.userName") != null) {
-				clonedProperties.setProperty("auth.userPassword", "REDACTED");
-			}
-
-			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
+			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}",
+					SensitiveDataMasker.allowlistProperties(props, LOGGABLE_PROPERTIES), ex.getClass().getName());
 		}
 	}
 
@@ -250,7 +256,7 @@ public class SqlConnectionProvider {
 			this.passwordEncryptionMethod = PasswordEncryptionMethod
 					.getMethod(props.getProperty("password.encryption.method"));
 		} else {
-			this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
+			this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SSHA256;
 		}
 
 		this.binaryAttributes = new ArrayList<String>();
@@ -505,7 +511,8 @@ public class SqlConnectionProvider {
 		try (Connection con = this.poolingDataSource.getConnection()) {
 			return con.isValid(30);
 		} catch (Exception ex) {
-			LOG.error("Failed to check connection", ex);
+			// Driver messages may echo connection.uri, which can embed credentials
+			LOG.error("Failed to check connection. Exception: {}", ex.getClass().getName());
 			isConnected = false;
 		}
 

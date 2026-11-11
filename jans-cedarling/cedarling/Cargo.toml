@@ -9,7 +9,7 @@ publish = true
 [features]
 default = ["grpc"]
 # exposes extra introspection and validation methods for CLI/tooling
-tools = []
+tools = ["dep:strsim"]
 # blocking feature allows to use blocking cedarling client
 blocking = ["tokio/rt-multi-thread"]
 # gRPC transport for Lock Server communication (enabled by default)
@@ -24,6 +24,8 @@ grpc = [
 
 [dependencies]
 serde = { workspace = true }
+serde_ignored = "0.1"
+strsim = { version = "0.11.1", optional = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde-saphyr = "1.3.0"
 thiserror = { workspace = true }
@@ -66,12 +68,8 @@ ahash = { version = "0.8.12", default-features = false, features = [
 ] }
 vfs = "0.13.0"
 # aes-crypto is intentionally excluded from zip default features.
-# zip's aes-crypto pulls in constant_time_eq@^0.4 (MSRV = 1.95.0), which is
-# incompatible with the nightly-2025-09-18 toolchain used by the dylint CI job.
 # cedarling only reads/writes zip archives with Deflated compression;
 # AES-encrypted zip support is not required.
-# If AES-encrypted zip support is ever needed, re-enable aes-crypto here AND
-# update custom-lints/rust-toolchain to a nightly >= rustc 1.95.0.
 zip = { version = "9.0.5", default-features = false, features = [
     "bzip2",
     "deflate64",
@@ -98,6 +96,8 @@ gloo-timers = { version = "0.4.0", features = ["futures"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { workspace = true, features = ["console"] }
+# bounded incremental body reads in the browser
+reqwest = { workspace = true, features = ["stream"] }
 # override getrandom to use `wasm_js` feature
 getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
 getrandom_03 = { package = "getrandom", version = "0.3", features = [

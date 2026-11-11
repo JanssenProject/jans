@@ -120,6 +120,7 @@ fn trace_config(signing_key: TraceSigningKey) -> TraceConfig {
         signing_key,
         signing_kid: None,
         endpoint: TraceEndpoint::Discovered,
+        transport: crate::LockTransport::Rest,
         bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
         bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
     }

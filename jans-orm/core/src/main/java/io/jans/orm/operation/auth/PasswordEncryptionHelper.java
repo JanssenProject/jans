@@ -175,8 +175,11 @@ public final class PasswordEncryptionHelper {
             break;
 
         case HASH_METHOD_CRYPT_BCRYPT:
-        case HASH_METHOD_CRYPT_BCRYPT_B:
             salt = StringHelper.getBytesUtf8(BCrypt.genSalt());
+            break;
+
+        case HASH_METHOD_CRYPT_BCRYPT_B:
+            salt = StringHelper.getBytesUtf8(algorithm.getSubPrefix() + BCrypt.genSalt().substring(algorithm.getSubPrefix().length()));
             break;
 
         case HASH_METHOD_ARGON2:
@@ -206,7 +209,8 @@ public final class PasswordEncryptionHelper {
 
         sb.append('{').append(StringHelper.toUpperCase(algorithm.getPrefix())).append('}');
 
-        if (algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_BCRYPT) {
+        if (algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_BCRYPT
+                || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_BCRYPT_B) {
             sb.append(StringHelper.utf8ToString(salt));
             sb.append(StringHelper.utf8ToString(hashedPassword));
         } else if (algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_MD5 || algorithm == PasswordEncryptionMethod.HASH_METHOD_CRYPT_SHA256
@@ -247,7 +251,13 @@ public final class PasswordEncryptionHelper {
      * Compare the credentials
      */
     public static boolean compareCredentials(byte[] receivedCredentials, byte[] storedCredentials) {
-        PasswordEncryptionMethod algorithm = findAlgorithm(storedCredentials);
+        String algorithmString = findAlgorithmString(storedCredentials);
+        PasswordEncryptionMethod algorithm = algorithmString == null ? null : PasswordEncryptionMethod.getMethod(algorithmString);
+
+        if (algorithmString != null && algorithm == null) {
+            // Unsupported hash record: comparing it as plain text would accept the stored record itself
+            return false;
+        }
 
         if (algorithm != null) {
             // Get the encrypted part of the stored password

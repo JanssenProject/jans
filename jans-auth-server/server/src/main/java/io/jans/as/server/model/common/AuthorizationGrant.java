@@ -59,7 +59,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -170,9 +172,23 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             return scope;
         }
 
-        final String result = super.checkScopesPolicy(scope);
+        final Set<String> previouslyGranted = new HashSet<>(getScopes());
+        final boolean capToPreviouslyGranted = !previouslyGranted.isEmpty() || isUserAuthorizedGrantType();
+
+        String result = super.checkScopesPolicy(scope);
+        if (capToPreviouslyGranted) {
+            // requested scopes must never exceed what was originally authorized (RFC 6749 section 6)
+            getScopes().retainAll(previouslyGranted);
+            result = String.join(" ", getScopes());
+        }
         save();
         return result;
+    }
+
+    private boolean isUserAuthorizedGrantType() {
+        final AuthorizationGrantType type = getAuthorizationGrantType();
+        return type == AuthorizationGrantType.AUTHORIZATION_CODE || type == AuthorizationGrantType.IMPLICIT
+                || type == AuthorizationGrantType.CIBA || type == AuthorizationGrantType.DEVICE_CODE;
     }
 
     @Override
@@ -312,6 +328,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             }
 
             final TokenEntity tokenEntity = asToken(accessToken);
+            tokenEntity.getAttributes().getAttributes().putAll(context.getAttributes());
             context.setAccessTokenEntity(tokenEntity);
 
             persist(tokenEntity);

@@ -65,7 +65,7 @@ class Fido2Extension(Fido2ExtensionType):
         print "Fido2Extension. authenticateAssertionStart"
 
         if paramAsJsonNode.hasNonNull("username"):
-            print "Fido2Extension. Username: '%s'" % paramAsJsonNode.get("username").asText()
+            print "Fido2Extension. Username: '%s'" % paramAsJsonNode.get("username").asText().replace("\r", "\\r").replace("\n", "\\n")
             if paramAsJsonNode.get("username").asText() == 'test_user':
                 self.throwBadRequestException("Fido2Extension authenticateAssertionStart : test_user", "Description Error from script : test_user", context)
         else:
