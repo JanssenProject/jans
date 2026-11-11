@@ -5,6 +5,7 @@ inum: 2124-0CF1
 jansConfProperty: {"value1":"chain_cert_file_path","value2":"/etc/certs/chain_cert.pem","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/cert_creds.json","description":""}
 jansConfProperty: {"value1":"map_user_cert","value2":"true","description":""}
+jansConfProperty: {"value1":"trust_client_cert_header","value2":"true","description":""}
 jansConfProperty: {"value1":"use_generic_validator","value2":"true","description":""}
 jansConfProperty: {"value1":"use_path_validator","value2":"true","description":""}
 jansConfProperty: {"value1":"use_ocsp_validator","value2":"false","description":""}

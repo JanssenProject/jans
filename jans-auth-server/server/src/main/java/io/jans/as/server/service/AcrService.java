@@ -22,6 +22,7 @@ import org.python.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -90,10 +91,11 @@ public class AcrService {
             return;
         }
 
-        final String mappedAuthorizedAcrs = applyAcrMappings(authorizedAcrs);
+        // copy: applyAcrMappings modifies the list in place and must not alter client configuration
+        final List<String> mappedAuthorizedAcrs = io.jans.as.model.util.StringUtils.spaceSeparatedToList(applyAcrMappings(new ArrayList<>(authorizedAcrs)));
 
         for (String acr : authzRequest.getAcrValuesList()) {
-            // check both actual acr and mapped (we should allow mapped values as well)
+            // check both actual acr and mapped (we should allow mapped values as well), complete values only
             if (!authorizedAcrs.contains(acr) && !mappedAuthorizedAcrs.contains(acr)) {
                 throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
                         "Restricted acr value request, please review the list of authorized acr values for this client");

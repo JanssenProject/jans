@@ -323,9 +323,9 @@ impl Sender {
 }
 
 /// Reads a response body into memory, aborting with `ResponseTooLarge` when
-/// `max_response_size` is exceeded. Rejects upfront on `Content-Length`; on
-/// native targets also enforces the cap chunk-by-chunk so chunked responses
-/// without `Content-Length` can't slip past. `None` disables the cap.
+/// `max_response_size` is exceeded. Rejects upfront on `Content-Length` and
+/// also enforces the cap chunk-by-chunk so chunked or compressed responses
+/// can't slip past. `None` disables the cap.
 pub(crate) async fn read_response_capped(
     #[cfg_attr(target_arch = "wasm32", allow(unused_mut))] mut response: reqwest::Response,
     max_response_size: Option<u64>,
@@ -340,25 +340,29 @@ pub(crate) async fn read_response_capped(
         });
     }
 
-    // WASM's reqwest backend (browser fetch) does not expose chunked reads, so
-    // we fall back to a full `bytes()` read with a post-check. The
-    // `Content-Length` fast path above is the primary defence on this target.
+    // Content-Length is the encoded size; the browser decompresses transparently,
+    // so the decoded stream must be capped as it is read.
     #[cfg(target_arch = "wasm32")]
     {
-        let bytes = response
-            .bytes()
-            .await
-            .map_err(HttpRequestReasonError::DecodeResponseBytes)?;
-        if let Some(limit) = max_response_size
-            && (bytes.len() as u64) > limit
-        {
-            return Err(HttpRequestReasonError::ResponseTooLarge {
-                limit,
-                read_so_far: bytes.len() as u64,
-            });
+        use futures::StreamExt;
+
+        let mut stream = response.bytes_stream();
+        let mut buf: Vec<u8> = Vec::new();
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk.map_err(HttpRequestReasonError::DecodeResponseBytes)?;
+            if let Some(limit) = max_response_size {
+                let new_len = (buf.len() as u64).saturating_add(chunk.len() as u64);
+                if new_len > limit {
+                    return Err(HttpRequestReasonError::ResponseTooLarge {
+                        limit,
+                        read_so_far: new_len,
+                    });
+                }
+            }
+            buf.extend_from_slice(&chunk);
         }
 
-        Ok(bytes.to_vec())
+        Ok(buf)
     }
 
     #[cfg(not(target_arch = "wasm32"))]

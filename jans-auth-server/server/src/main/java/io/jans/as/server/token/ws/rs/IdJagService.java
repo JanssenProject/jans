@@ -210,9 +210,10 @@ public class IdJagService {
         }
 
         if (SUBJECT_TOKEN_TYPE_SAML2.equalsIgnoreCase(subjectTokenType)) {
-            // SAML2 subject_token accepted as-is; subject resolution done by caller
-            log.debug("subject_token_type is saml2; accepting opaque subject_token for ID-JAG issuance.");
-            return null;
+            // SAML2 assertion validation (signature, issuer, audience, validity) is not implemented
+            final String msg = "saml2 'subject_token' is not supported.";
+            log.debug(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), executionContext.getAuditLog()));
         }
 
         // §4.3.3: If subject_token is a Refresh Token, IdP MUST validate it as a standard refresh_token grant

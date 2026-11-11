@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -663,6 +665,32 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 
 		assertTrue(store.findRecord(stored1.getIdentity()).get().getFlags().isEquivocation(),
 				"the just-inserted row's own equivocation flag must also be corrected");
+		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
+	}
+
+	@Test
+	void testAfterInsert_PositionReadFailsOnce_RetriedAndPeerFlagged() throws DuplicateEntryException {
+		registerChain();
+
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+
+		StoredTraceRecord peer = insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L,
+				TraceConstants.ZERO_HASH, plan1.getFlags());
+
+		InMemoryTraceStore flaky = spy(store);
+		doThrow(new IllegalStateException("transient read failure")).doCallRealMethod().when(flaky)
+				.findRecordsByChainPosition(any());
+		setField(service, "store", flaky);
+
+		service.afterInsert(stored1, plan1);
+
+		verify(flaky, times(2)).findRecordsByChainPosition(any());
+		assertTrue(store.findRecord(stored1.getIdentity()).get().getFlags().isEquivocation());
 		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
 	}
 

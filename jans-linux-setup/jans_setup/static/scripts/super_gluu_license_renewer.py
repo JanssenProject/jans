@@ -6,6 +6,9 @@ import json
 import ldap3
 import time
 import shutil
+import ssl
+import stat
+import subprocess
 
 def renew_license():
 
@@ -32,8 +35,12 @@ def renew_license():
                     v=v.replace('\\"','"')
                     prop[p] = v
 
-    cmd = encode_fn + ' -D ' + prop['bindPassword']
-    encoded_password = os.popen(cmd).read().strip()
+    encoded_password = subprocess.run(
+            [encode_fn, '-D', '-'],
+            input=prop['bindPassword'] + '\n',
+            capture_output=True,
+            text=True
+            ).stdout.strip()
     if not encoded_password:
         print("Password can't be encoded")
         return
@@ -41,7 +48,12 @@ def renew_license():
     ldap_server = prop['servers'].split(',')[0].strip()
     ldap_host, ldap_port = ldap_server.split(':')
 
-    server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True)
+    ldap_ca_fn = '/etc/certs/opendj.crt'
+    tls = ldap3.Tls(
+            validate=ssl.CERT_REQUIRED,
+            ca_certs_file=ldap_ca_fn if os.path.exists(ldap_ca_fn) else None
+            )
+    server = ldap3.Server(ldap_host, port=int(ldap_port), use_ssl=True, tls=tls)
     ldap_conn = ldap3.Connection(server, user=prop['bindDN'], password=encoded_password)
     try:
         ldap_conn.bind()
@@ -78,8 +90,18 @@ def renew_license():
         print("Super gluu license file {} does not exist".format(license_fn))
         return
         
-    with open(license_fn) as f:
-        license_js = json.load(f)
+    max_license_size = 1024 * 1024
+    with open(license_fn, 'rb') as f:
+        if not stat.S_ISREG(os.fstat(f.fileno()).st_mode):
+            print("Super gluu license file {} is not a regular file".format(license_fn))
+            return
+        license_data = f.read(max_license_size + 1)
+
+    if len(license_data) > max_license_size:
+        print("Super gluu license file {} is too large".format(license_fn))
+        return
+
+    license_js = json.loads(license_data)
 
     licenseId = license_js.get('licenseId')
 

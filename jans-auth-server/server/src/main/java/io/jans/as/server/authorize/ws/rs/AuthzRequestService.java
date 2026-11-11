@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -38,6 +39,8 @@ import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
+import io.jans.as.server.model.auth.AuthenticationMode;
+import io.jans.as.server.security.Identity;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
@@ -121,6 +124,15 @@ public class AuthzRequestService {
     @Inject
     private AcrService acrService;
 
+    @Inject
+    private AuthenticationMode defaultAuthenticationMode;
+
+    @Inject
+    private Identity identity;
+
+    @Inject
+    private SessionIdService sessionIdService;
+
     private final Cache<String, Map<String, Integer>> acrToLevelCache = CacheBuilder.newBuilder()
             .expireAfterWrite(ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES, TimeUnit.MINUTES).build();
 
@@ -186,6 +198,7 @@ public class AuthzRequestService {
         authzRequest.setAmrValues(par.getAttributes().getAmrValuesStr());
         authzRequest.setCodeChallenge(par.getAttributes().getCodeChallenge());
         authzRequest.setCodeChallengeMethod(par.getAttributes().getCodeChallengeMethod());
+        authzRequest.setMaxAge(par.getAttributes().getMaxAge());
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
 
@@ -434,39 +447,42 @@ public class AuthzRequestService {
             if (jwr != null) {
                 String tempRedirectUri = jwr.getClaims().getClaimAsString("redirect_uri");
                 if (StringUtils.isNotBlank(tempRedirectUri)) {
-                    redirectUriResponse.getRedirectUri().setBaseRedirectUri(URLDecoder.decode(tempRedirectUri, "UTF-8"));
+                    final String decodedRedirectUri = URLDecoder.decode(tempRedirectUri, "UTF-8");
+                    if (StringUtils.isNotBlank(redirectionUriService.validateRedirectionUri(client, decodedRedirectUri))) {
+                        redirectUriResponse.getRedirectUri().setBaseRedirectUri(decodedRedirectUri);
+                    } else {
+                        log.debug("Ignoring redirect_uri from request object which is not registered for client {}", client.getClientId());
+                    }
                 }
             }
             String clientId = client.getClientId();
             redirectUriResponse.getRedirectUri().setIssuer(appConfiguration.getIssuer());
             redirectUriResponse.getRedirectUri().setAudience(clientId);
             redirectUriResponse.getRedirectUri().setAuthorizationCodeLifetime(appConfiguration.getAuthorizationCodeLifetime());
-            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg()));
+            final boolean encryptedResponse = client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
+                    && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null;
+            SignatureAlgorithm responseSignatureAlgorithm = SignatureAlgorithm.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+            if (responseSignatureAlgorithm == null && encryptedResponse) {
+                // JARM: the response is signed then encrypted; RS256 is the default signing algorithm
+                responseSignatureAlgorithm = SignatureAlgorithm.RS256;
+            }
+            redirectUriResponse.getRedirectUri().setSignatureAlgorithm(responseSignatureAlgorithm);
             redirectUriResponse.getRedirectUri().setKeyEncryptionAlgorithm(KeyEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseAlg()));
             redirectUriResponse.getRedirectUri().setBlockEncryptionAlgorithm(BlockEncryptionAlgorithm.fromName(client.getAttributes().getAuthorizationEncryptedResponseEnc()));
             redirectUriResponse.getRedirectUri().setCryptoProvider(cryptoProvider);
 
             String keyId = null;
-            if (client.getAttributes().getAuthorizationEncryptedResponseAlg() != null
-                    && client.getAttributes().getAuthorizationEncryptedResponseEnc() != null) {
-                if (client.getAttributes().getAuthorizationSignedResponseAlg() != null) { // Signed then Encrypted
-                    // response
-                    SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
-                            .fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
-
-                    String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
-
-                    JSONObject jsonWebKeys = CommonUtils.getJwks(client);
-                    redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
-
-                    String clientSecret = clientService.decryptSecret(client.getClientSecret());
-                    redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
-                    redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
-                }
+            if (encryptedResponse) {
+                // Signed then Encrypted response
+                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
+                String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+                        Algorithm.fromString(responseSignatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
+                String clientSecret = clientService.decryptSecret(client.getClientSecret());
+                redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
+                redirectUriResponse.getRedirectUri().setNestedSharedSecret(clientSecret);
+                redirectUriResponse.getRedirectUri().setNestedKeyId(nestedKeyId);
 
                 // Encrypted response
-                JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 if (jsonWebKeys != null) {
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                             Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
@@ -503,15 +519,13 @@ public class AuthzRequestService {
         Client client = authzRequest.getClient();
 
         // explicitly set acrs via getDefaultAcrValues()
-        if (StringUtils.isBlank(authzRequest.getAcrValues())) {
-            if (!ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-                authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
-            }
-            return;
+        if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+            authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
         }
 
+        final int minimumAcrLevel = client.getAttributes().getMinimumAcrLevel();
         final int currentMinAcrLevel = getCurrentMinAcrLevel(authzRequest);
-        if (currentMinAcrLevel >= client.getAttributes().getMinimumAcrLevel()) {
+        if (currentMinAcrLevel >= minimumAcrLevel) {
             return; // do nothing -> current level is enough
         }
 
@@ -524,18 +538,23 @@ public class AuthzRequestService {
         }
 
         final Map<String, Integer> acrToLevelMap = getAcrToLevelMap();
-        if (client.getAttributes().getMinimumAcrPriorityList().isEmpty()) { // no priority list -> pick up next higher then minimum
+        if (client.getAttributes().getMinimumAcrPriorityList().isEmpty()) { // no priority list -> pick up lowest level satisfying minimum
+            Map.Entry<String, Integer> selected = null;
             for (Map.Entry<String, Integer> entry : acrToLevelMap.entrySet()) {
-                if (currentMinAcrLevel < entry.getValue()) {
-                    authzRequest.setAcrValues(entry.getKey());
-                    return;
+                if (entry.getValue() != null && entry.getValue() >= minimumAcrLevel
+                        && (selected == null || entry.getValue() < selected.getValue())) {
+                    selected = entry;
                 }
+            }
+            if (selected != null) {
+                authzRequest.setAcrValues(selected.getKey());
+                return;
             }
         }
 
         for (String acr : client.getAttributes().getMinimumAcrPriorityList()) {
             final Integer acrLevel = acrToLevelMap.get(acr);
-            if (acrLevel != null && acrLevel >= currentMinAcrLevel) {
+            if (acrLevel != null && acrLevel >= minimumAcrLevel) {
                 authzRequest.setAcrValues(acr);
                 return;
             }
@@ -550,7 +569,19 @@ public class AuthzRequestService {
 
     public int getCurrentMinAcrLevel(AuthzRequest authzRequest) {
         if (StringUtils.isBlank(authzRequest.getAcrValues())) {
-            return -1;
+            // no acr requested: an already authenticated session is reused with its actual acr, otherwise the server default method is used
+            final SessionId session = identity != null ? identity.getSessionId() : null;
+            if (session != null && session.getState() == SessionIdState.AUTHENTICATED) {
+                final String sessionAcr = sessionIdService.getAcr(session);
+                if (StringUtils.isNotBlank(sessionAcr)) {
+                    final Integer sessionLevel = getAcrToLevelMap().get(externalAuthenticationService.scriptName(sessionAcr));
+                    return sessionLevel != null ? sessionLevel : -1;
+                }
+            }
+
+            final String defaultAcr = defaultAuthenticationMode != null ? defaultAuthenticationMode.getName() : null;
+            final Integer defaultLevel = StringUtils.isNotBlank(defaultAcr) ? getAcrToLevelMap().get(externalAuthenticationService.scriptName(defaultAcr)) : null;
+            return defaultLevel != null ? defaultLevel : -1;
         }
 
         Integer currentLevel = null;

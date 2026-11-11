@@ -8,10 +8,12 @@ package io.jans.as.server.model.authorize;
 
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.ScopeType;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.as.server.service.external.ExternalSpontaneousScopeService;
 import io.jans.as.server.service.external.context.SpontaneousScopeExternalContext;
+import io.jans.as.persistence.model.Scope;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -76,7 +78,7 @@ public class ScopeChecker {
                 continue;
             }
 
-            if (spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeRequested)) {
+            if (spontaneousScopeService.isAllowedBySpontaneousScopes(client, scopeRequested) && !isExistingNonSpontaneousScope(scopeRequested)) {
                 grantedScopes.add(scopeRequested);
 
                 SpontaneousScopeExternalContext context = new SpontaneousScopeExternalContext(client, scopeRequested, grantedScopes, spontaneousScopeService);
@@ -91,5 +93,14 @@ public class ScopeChecker {
         log.debug("Granted scopes: " + grantedScopes);
 
         return grantedScopes;
+    }
+
+    private boolean isExistingNonSpontaneousScope(String scopeId) {
+        final Scope existing = scopeService.getScopeById(scopeId);
+        if (existing != null && existing.getScopeType() != ScopeType.SPONTANEOUS) {
+            log.debug("Scope {} is not spontaneous and is not allowed for client, skipping spontaneous match.", scopeId);
+            return true;
+        }
+        return false;
     }
 }

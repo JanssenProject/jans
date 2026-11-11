@@ -100,7 +100,7 @@ class TraceEndToEndTest extends BaseLockClientTest {
 		assumeTrue(hasTraceClient(),
 				"No real server/TRACE client configured (-Dcfg=<profile> with trace.client.id/secret); skipping, see profiles/default/README.md");
 		if (client == null) {
-			client = newInsecureHttpClient();
+			client = newTestHttpClient();
 			apiBasePath = discoverApiBasePath();
 		}
 	}

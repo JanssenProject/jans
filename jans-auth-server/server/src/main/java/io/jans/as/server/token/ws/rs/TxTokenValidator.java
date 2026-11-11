@@ -6,6 +6,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -22,6 +23,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
+
+import java.util.Date;
 
 /**
  * @author Yuriy Z
@@ -102,6 +105,14 @@ public class TxTokenValidator {
 
             if (idTokenGrant != null) { // id_token is in db
                 log.debug("Found subject_token in db.");
+                final AbstractToken idToken = idTokenGrant.getIdToken();
+                if (idToken != null && idToken.getExpirationDate() != null) {
+                    idToken.checkExpired();
+                }
+                if (idToken == null || !idToken.isValid()) {
+                    log.error("id_token is not valid.");
+                    throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Invalid subject_token. id_token is expired or revoked."), auditLog));
+                }
                 return idTokenGrant;
             }
 
@@ -112,6 +123,12 @@ public class TxTokenValidator {
                     null, null, jwt.getHeader().getSignatureAlgorithm())) {
                 log.error("id_token signature verification failed.");
                 throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Invalid subject_token. id_token signature verification failed."), auditLog));
+            }
+
+            final Date exp = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            if (exp == null || exp.before(new Date())) {
+                log.error("id_token is expired.");
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, "Invalid subject_token. id_token is expired."), auditLog));
             }
 
             log.debug("subject_token is validated successfully as id_token.");
