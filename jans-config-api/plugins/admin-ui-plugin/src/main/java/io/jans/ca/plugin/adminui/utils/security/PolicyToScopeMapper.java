@@ -213,13 +213,12 @@ public class PolicyToScopeMapper {
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            String code = STRING_OR_COMMENT_PATTERN.matcher(content).replaceAll(" ");
-            if (UNSUPPORTED_POLICY_PATTERN.matcher(code).find()) {
+            String extractionContent = STRING_OR_COMMENT_PATTERN.matcher(content)
+                                        .replaceAll(match -> match.group().startsWith("//")
+                                                ? " " : Matcher.quoteReplacement(match.group()));
+            if (UNSUPPORTED_POLICY_PATTERN.matcher(extractionContent).find()) {
                 throw new IllegalStateException("Policy uses forbid/unless, which cannot be mapped to scopes: " + entry.getName());
             }
-            String extractionContent = STRING_OR_COMMENT_PATTERN.matcher(content)
-                    .replaceAll(match -> match.group().startsWith("//")
-                            ? " " : Matcher.quoteReplacement(match.group()));
 
             String role = extractFirstMatch(ROLE_PATTERN, extractionContent);
             if (role == null) {
