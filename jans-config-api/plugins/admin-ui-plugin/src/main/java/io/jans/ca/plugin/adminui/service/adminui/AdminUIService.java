@@ -122,7 +122,7 @@ public class AdminUIService {
     public AdminRole getRoleObjByName(String role) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equalsIgnoreCase(role)).collect(Collectors.toList());
+            List<AdminRole> roles = adminConf.getDynamic().getRoles().stream().filter(ele -> ele.getRole().equals(role)).collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(roles)) {
                 return roles.get(0);
             }
@@ -223,7 +223,7 @@ public class AdminUIService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
 
-            roles.removeIf(ele -> ele.getRole().equalsIgnoreCase(role));
+            roles.removeIf(ele -> ele.getRole().equals(role));
 
             adminConf.getDynamic().setRoles(roles);
             entryManager.merge(adminConf);
@@ -424,9 +424,9 @@ public class AdminUIService {
             List<String> combinedScopes = new ArrayList<>(scopesSet);
 
             if (adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))) {
+                    .stream().anyMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
                 adminConf.getDynamic().getRolePermissionMapping()
-                        .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                        .stream().filter(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))
                         .collect(Collectors.toList())
                         .forEach(ele -> ele.setPermissions(combinedScopes));
             } else {
@@ -449,7 +449,7 @@ public class AdminUIService {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             List<RolePermissionMapping> roleScopeMappings = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
+                    .stream().filter(ele -> ele.getRole().equals(role))
                     .collect(Collectors.toList());
             if (!CollectionUtils.isEmpty(roleScopeMappings)) {
                 return roleScopeMappings.get(0);
@@ -474,7 +474,7 @@ public class AdminUIService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_MARKED_UNDELETABLE.getDescription());
             }
             List<RolePermissionMapping> roleScopeMapping = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().filter(ele -> !ele.getRole().equalsIgnoreCase(role))
+                    .stream().filter(ele -> !ele.getRole().equals(role))
                     .collect(Collectors.toList());
             adminConf.getDynamic().setRolePermissionMapping(roleScopeMapping);
             entryManager.merge(adminConf);
@@ -493,7 +493,7 @@ public class AdminUIService {
         validateRolePermissionMapping(adminConf, rolePermissionMappingArg);
 
         return adminConf.getDynamic().getRolePermissionMapping()
-                .stream().filter(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                .stream().filter(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))
                 .collect(Collectors.toList());
     }
 
@@ -505,7 +505,7 @@ public class AdminUIService {
         List<AdminRole> roles = adminConf.getDynamic().getRoles();
         List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
-        if (roles.stream().noneMatch(ele -> ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))) {
+        if (roles.stream().noneMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
             log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
         }
@@ -513,7 +513,7 @@ public class AdminUIService {
         Set<String> allowed = permissions.stream().map(AdminPermission::getPermission).collect(Collectors.toCollection(HashSet::new));
         // Seeded and setup-appended mappings hold scopes outside the catalog; keep them re-submittable.
         Optional.ofNullable(adminConf.getDynamic().getRolePermissionMapping()).orElse(Collections.emptyList()).stream()
-                .filter(ele -> ele.getRole() != null && ele.getRole().equalsIgnoreCase(rolePermissionMappingArg.getRole()))
+                .filter(ele -> ele.getRole() != null && ele.getRole().equals(rolePermissionMappingArg.getRole()))
                 .map(RolePermissionMapping::getPermissions).filter(Objects::nonNull)
                 .forEach(allowed::addAll);
         allowed.addAll(Optional.ofNullable(additionalAllowedPermissions).orElse(Collections.emptySet()));
