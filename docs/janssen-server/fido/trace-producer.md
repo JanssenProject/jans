@@ -27,7 +27,6 @@ All properties are set in the `fido2Configuration` object, the same place as the
 |---|---|---|---|
 | `fido2TraceEnabled` | Boolean | `false` | Master switch. When `false`, nothing is emitted. |
 | `fido2TraceProducerId` | String | derived | Stable producer ID. Leave empty to derive it from the server ID and version. |
-| `fido2TraceSigningKey` | String | — | Key-store reference to the Ed25519 producer signing key. Never place the key inline. |
 | `fido2TraceChainGenesis` | String | `first_observed` | `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
 | `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
 | `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Include optional signed attestation and MDS trust detail in each record. |

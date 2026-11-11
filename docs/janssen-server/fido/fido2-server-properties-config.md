@@ -123,7 +123,6 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `lockAuditFlushInterval` | Integer | `20` | Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike `lockAuditEnabled`, `lockAuditEndpoint` and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect. |
 | `fido2TraceEnabled` | Boolean | `false` | Master switch for emitting signed, hash-chained `FIDO_CEREMONY` records to the Lock Server. See [TRACE producer](trace-producer.md). |
 | `fido2TraceProducerId` | String | derived | Stable producer ID for this FIDO Server, fleet or per node. When empty it is derived from the server ID and version. |
-| `fido2TraceSigningKey` | String | — | Reference to the Ed25519 producer signing key in the key store. Never an inline key. |
 | `fido2TraceChainGenesis` | String | `first_observed` | Chain genesis mode: `pre_registered` (Lock knows the genesis in advance) or `first_observed`. |
 | `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Whether records include `credential_id_hash`, a hash of the WebAuthn credential ID. |
 | `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Whether records include optional signed attestation and MDS trust detail. |
