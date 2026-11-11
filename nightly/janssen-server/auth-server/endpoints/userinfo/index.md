@@ -44,7 +44,7 @@ User Info response should contain: `sub`, `jti` and `client_id` claims.
 
 Since userinfo endpoint is an OAuth2-protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/User_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
 
 
 ## Disabling The Endpoint Using Feature Flag
@@ -88,6 +88,12 @@ list of claims. This allows administrators to create custom groupings of claims.
 
 When using [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md), navigate via
 `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
+
+### Claims Requested With the `claims` Parameter
+
+Individual claims requested through the `claims` authorization request parameter (`userinfo` member) are released
+only if the client is allowed to receive them: the claim must be linked to one of the granted scopes or be listed in
+the claims registered for the client (`claims` client metadata). Other requested claims are ignored.
 
 ### Interception Scripts
 
