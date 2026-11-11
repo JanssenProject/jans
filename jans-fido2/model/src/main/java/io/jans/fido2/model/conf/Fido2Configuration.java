@@ -78,6 +78,21 @@ public class Fido2Configuration {
 	@DocProperty(description = "Interval in seconds between batched deliveries of buffered Lock Server audit events. Read once at server startup; changing it requires a restart to take effect", defaultValue = "20")
 	private int lockAuditFlushInterval = 20;
 
+	@DocProperty(description = "Master switch for FIDO_CEREMONY TRACE record emission to the Lock Server", defaultValue = "false")
+	private boolean fido2TraceEnabled = false;
+	@DocProperty(description = "Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version")
+	private String fido2TraceProducerId;
+	@DocProperty(description = "Reference to the Ed25519 producer signing key in the key store. Never an inline key")
+	private String fido2TraceSigningKey;
+	@DocProperty(description = "Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed", defaultValue = "first_observed")
+	private String fido2TraceChainGenesis = "first_observed";
+	@DocProperty(description = "Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID", defaultValue = "true")
+	private boolean fido2TraceIncludeCredentialIdHash = true;
+	@DocProperty(description = "Whether TRACE records include optional signed attestation and MDS trust detail", defaultValue = "false")
+	private boolean fido2TraceIncludeAttestationDetail = false;
+	@DocProperty(description = "Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint")
+	private String fido2TraceEndpoint;
+
 	@DocProperty(description = "Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work", defaultValue = "false")
 	private boolean nativeReadinessEnabled = false;
 	@DocProperty(description = "Boolean value indicating whether the native app readiness checks may make outbound requests to a relying party's /.well-known files. Outbound requests need both nativeReadinessEnabled and this property", defaultValue = "false")
@@ -291,6 +306,62 @@ public class Fido2Configuration {
 
 	public void setLockAuditFlushInterval(int lockAuditFlushInterval) {
 		this.lockAuditFlushInterval = lockAuditFlushInterval;
+	}
+
+	public boolean isFido2TraceEnabled() {
+		return fido2TraceEnabled;
+	}
+
+	public void setFido2TraceEnabled(boolean fido2TraceEnabled) {
+		this.fido2TraceEnabled = fido2TraceEnabled;
+	}
+
+	public String getFido2TraceProducerId() {
+		return fido2TraceProducerId;
+	}
+
+	public void setFido2TraceProducerId(String fido2TraceProducerId) {
+		this.fido2TraceProducerId = fido2TraceProducerId;
+	}
+
+	public String getFido2TraceSigningKey() {
+		return fido2TraceSigningKey;
+	}
+
+	public void setFido2TraceSigningKey(String fido2TraceSigningKey) {
+		this.fido2TraceSigningKey = fido2TraceSigningKey;
+	}
+
+	public String getFido2TraceChainGenesis() {
+		return fido2TraceChainGenesis;
+	}
+
+	public void setFido2TraceChainGenesis(String fido2TraceChainGenesis) {
+		this.fido2TraceChainGenesis = fido2TraceChainGenesis;
+	}
+
+	public boolean isFido2TraceIncludeCredentialIdHash() {
+		return fido2TraceIncludeCredentialIdHash;
+	}
+
+	public void setFido2TraceIncludeCredentialIdHash(boolean fido2TraceIncludeCredentialIdHash) {
+		this.fido2TraceIncludeCredentialIdHash = fido2TraceIncludeCredentialIdHash;
+	}
+
+	public boolean isFido2TraceIncludeAttestationDetail() {
+		return fido2TraceIncludeAttestationDetail;
+	}
+
+	public void setFido2TraceIncludeAttestationDetail(boolean fido2TraceIncludeAttestationDetail) {
+		this.fido2TraceIncludeAttestationDetail = fido2TraceIncludeAttestationDetail;
+	}
+
+	public String getFido2TraceEndpoint() {
+		return fido2TraceEndpoint;
+	}
+
+	public void setFido2TraceEndpoint(String fido2TraceEndpoint) {
+		this.fido2TraceEndpoint = fido2TraceEndpoint;
 	}
 
 	public boolean isNativeReadinessEnabled() {
