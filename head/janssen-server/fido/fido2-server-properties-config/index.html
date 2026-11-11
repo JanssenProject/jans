@@ -903,6 +903,8 @@
       
         
       
+        
+      
     
     
     
@@ -1317,6 +1319,33 @@
     
   
   Native App Readiness
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../trace-producer/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+  TRACE Producer
 
     
   </span>
@@ -2358,6 +2387,8 @@
       
         
       
+        
+      
     
     
     
@@ -2737,6 +2768,42 @@ address.</p>
 <td style="text-align: left;">Interval in seconds between batched deliveries of buffered Lock Server audit events. Delivery is asynchronous and batched, never one HTTP call per ceremony. Read once at server startup — unlike <code>lockAuditEnabled</code>, <code>lockAuditEndpoint</code> and the credential properties, which are re-read on every flush, changing this value requires a server restart to take effect.</td>
 </tr>
 <tr>
+<td style="text-align: left;"><code>fido2TraceEnabled</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Planned. Master switch for emitting signed, hash-chained <code>FIDO_CEREMONY</code> records to the Lock Server. See <a href="../trace-producer/">TRACE producer</a>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2TraceProducerId</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;">derived</td>
+<td style="text-align: left;">Planned. Stable producer ID for this FIDO Server, fleet or per node. When empty it is derived from the server ID and version, so it can change on upgrade. Set an explicit ID for continuity, because a changed ID may need new Lock producer authorization.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2TraceChainGenesis</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;"><code>first_observed</code></td>
+<td style="text-align: left;">Planned. Chain genesis mode: <code>pre_registered</code> (Lock knows the genesis in advance) or <code>first_observed</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2TraceIncludeCredentialIdHash</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>true</code></td>
+<td style="text-align: left;">Planned. Whether records include <code>credential_id_hash</code>, a hash of the WebAuthn credential ID.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2TraceIncludeAttestationDetail</code></td>
+<td style="text-align: left;">Boolean</td>
+<td style="text-align: left;"><code>false</code></td>
+<td style="text-align: left;">Planned. Whether records include optional signed attestation and MDS trust detail.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>fido2TraceEndpoint</code></td>
+<td style="text-align: left;">String</td>
+<td style="text-align: left;">discovered</td>
+<td style="text-align: left;">Planned. Lock Server TRACE ingestion endpoint, <code>/jans-lock/api/v1/audit/trace</code>. When empty it may default to the discovered Lock audit endpoint.</td>
+</tr>
+<tr>
 <td style="text-align: left;"><code>nativeReadinessEnabled</code></td>
 <td style="text-align: left;">Boolean</td>
 <td style="text-align: left;"><code>false</code></td>
@@ -3029,7 +3096,7 @@ framing policy of every existing deployment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 29, 2026
+    November 11, 2026
   </span>
 
     
