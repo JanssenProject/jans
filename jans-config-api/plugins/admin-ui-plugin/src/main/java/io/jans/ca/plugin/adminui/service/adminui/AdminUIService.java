@@ -505,12 +505,15 @@ public class AdminUIService {
         List<AdminRole> roles = adminConf.getDynamic().getRoles();
         List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
 
+
         if (roles.stream().noneMatch(ele -> ele.getRole().equals(rolePermissionMappingArg.getRole()))) {
             log.error(ErrorResponse.ROLE_NOT_FOUND.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ROLE_NOT_FOUND.getDescription());
         }
         List<String> requestedPermissions = rolePermissionMappingArg.getPermissions();
-        Set<String> allowed = permissions.stream().map(AdminPermission::getPermission).collect(Collectors.toCollection(HashSet::new));
+        Set<String> allowed = permissions.stream().map(AdminPermission::getPermission)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(HashSet::new));
         // Seeded and setup-appended mappings hold scopes outside the catalog; keep them re-submittable.
         Optional.ofNullable(adminConf.getDynamic().getRolePermissionMapping()).orElse(Collections.emptyList()).stream()
                 .filter(ele -> ele.getRole() != null && ele.getRole().equals(rolePermissionMappingArg.getRole()))

@@ -34,7 +34,9 @@ public class PolicyToScopeMapper {
             "\\bforbid\\s*\\(|\\bunless\\s*\\{"
     );
     // One pass, so whichever of a string literal or a comment starts first wins
-    private static final Pattern STRING_OR_COMMENT_PATTERN = Pattern.compile("\"[^\"\\\\\\n]*+(?:\\\\.[^\"\\\\\\n]*+)*+\"|//[^\\n]*+");
+    private static final Pattern STRING_OR_COMMENT_PATTERN = Pattern.compile(
+            "\"[^\"\\\\]*+(?:\\\\[\\s\\S][^\"\\\\]*+)*+\"|//[^\\r\\n]*+"
+    );
 
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
