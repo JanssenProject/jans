@@ -329,9 +329,10 @@ public class Fido2Configuration {
 	}
 
 	public void setFido2TraceSigningKey(String fido2TraceSigningKey) {
-		// reference-only: reject inline key material so it is never persisted or returned by the config API
-		if (fido2TraceSigningKey != null && (fido2TraceSigningKey.contains("-----BEGIN") || fido2TraceSigningKey.contains("\n") || fido2TraceSigningKey.contains("\r"))) {
-			throw new IllegalArgumentException("fido2TraceSigningKey must be a key-store reference, not key material");
+		// reference-only: accept a key-store alias (letters, digits, '.', '_', '-') and reject anything else,
+		// including PEM blocks, line breaks and base64 key material, so it is never persisted or returned
+		if (fido2TraceSigningKey != null && !fido2TraceSigningKey.isEmpty() && !fido2TraceSigningKey.matches("[A-Za-z0-9._-]{1,128}")) {
+			throw new IllegalArgumentException("fido2TraceSigningKey must be a key-store alias (letters, digits, '.', '_', '-'; up to 128 characters), not key material");
 		}
 		this.fido2TraceSigningKey = fido2TraceSigningKey;
 	}

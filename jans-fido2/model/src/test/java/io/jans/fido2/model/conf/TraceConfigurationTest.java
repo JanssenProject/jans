@@ -52,11 +52,43 @@ class TraceConfigurationTest {
     }
 
     @Test
-    void signingKey_rejectsInlinePemKeyMaterial() {
+    void serializedConfiguration_roundTrips() throws Exception {
+        Fido2Configuration conf = new Fido2Configuration();
+        conf.setFido2TraceEnabled(true);
+        conf.setFido2TraceProducerId("fido-node-1");
+        conf.setFido2TraceSigningKey("fido-trace-key");
+        conf.setFido2TraceChainGenesis("pre_registered");
+        conf.setFido2TraceIncludeCredentialIdHash(false);
+        conf.setFido2TraceIncludeAttestationDetail(true);
+        conf.setFido2TraceEndpoint("https://lock.example.com/api/v1/audit/trace");
+
+        ObjectMapper mapper = new ObjectMapper();
+        Fido2Configuration copy = mapper.readValue(mapper.writeValueAsString(conf), Fido2Configuration.class);
+        assertTrue(copy.isFido2TraceEnabled());
+        assertEquals("fido-node-1", copy.getFido2TraceProducerId());
+        assertEquals("fido-trace-key", copy.getFido2TraceSigningKey());
+        assertEquals("pre_registered", copy.getFido2TraceChainGenesis());
+        assertFalse(copy.isFido2TraceIncludeCredentialIdHash());
+        assertTrue(copy.isFido2TraceIncludeAttestationDetail());
+        assertEquals("https://lock.example.com/api/v1/audit/trace", copy.getFido2TraceEndpoint());
+    }
+
+    @Test
+    void signingKey_rejectsKeyMaterial() {
         Fido2Configuration conf = new Fido2Configuration();
         assertThrows(IllegalArgumentException.class,
                 () -> conf.setFido2TraceSigningKey("-----BEGIN PRIVATE KEY-----\nMC4CAQAw\n-----END PRIVATE KEY-----"));
         assertThrows(IllegalArgumentException.class, () -> conf.setFido2TraceSigningKey("key\nmore"));
+        assertThrows(IllegalArgumentException.class, () -> conf.setFido2TraceSigningKey("MC4CAQAwBQYDK2VwBCIEIPz+abc/def=="));
         assertEquals(null, conf.getFido2TraceSigningKey());
+    }
+
+    @Test
+    void signingKey_acceptsKeyStoreAlias() {
+        Fido2Configuration conf = new Fido2Configuration();
+        conf.setFido2TraceSigningKey("fido.trace-key_1");
+        assertEquals("fido.trace-key_1", conf.getFido2TraceSigningKey());
+        conf.setFido2TraceSigningKey("");
+        assertEquals("", conf.getFido2TraceSigningKey());
     }
 }
