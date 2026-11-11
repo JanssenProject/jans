@@ -3007,6 +3007,7 @@
 <p><strong>Future skew.</strong> <code>maxFutureSkewSeconds</code> defaults to <code>300</code>. A value of <code>0</code> or less falls back to <code>300</code>. Lock compares whole seconds on its own clock: <code>signed_at</code> equal to <code>now + maxFutureSkewSeconds</code> is accepted, one second more is rejected. A rejection stores nothing and uses no receipt position. The producer can fix its clock and re-sign with a corrected <code>signed_at</code>, or retry the unchanged assertion once Lock's clock reaches the permitted skew window. There is no lower bound: a <code>signed_at</code> in the past is never rejected. The check is a plausibility test on a producer claim. It does not make an accepted <code>signed_at</code> accurate. Use <code>receipt_sequence</code> for Lock receipt order. <code>received_at</code> is Lock's observation time.</p>
 <p><strong>Neighbor-update retries.</strong> After a record is stored, Lock updates derived flags on neighboring records. Each update is a compare-and-swap write against the neighbor's version. On a version conflict, Lock re-reads the neighbor, recomputes the flag from its current state and retries, up to <code>correlationRetryLimit</code> times. When the budget is exhausted Lock logs a warning and gives up on that update. It never fails the request.</p>
 <p><strong>Chain registration mode.</strong> <code>chainRegistrationMode</code> is <code>PRE_REGISTERED</code> (default) or <code>FIRST_OBSERVED</code>. See <a href="#chain-registration-modes">Chain registration modes</a>. A value that is not one of the two names is treated as <code>PRE_REGISTERED</code> and logged once at <code>WARN</code>.</p>
+<p><strong>Cedarling as a producer.</strong> Cedarling needs <code>traceConfiguration</code> settings that differ from the defaults described in the "Default-domain fallback" and "Chain registration mode" paragraphs above. With the defaults, Lock refuses every record from Cedarling. Before you connect Cedarling, read <a href="../../../cedarling/reference/cedarling-trace/#auth-server-and-lock-server-setup">Auth Server and Lock Server setup</a> for the values to set.</p>
 <p><strong>Crypto provider.</strong> <code>cryptoProvider</code> selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:</p>
 <ul>
 <li><code>JAVA</code> (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.</li>
@@ -4154,7 +4155,7 @@ curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 11, 2026
   </span>
 
     
