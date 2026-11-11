@@ -9,14 +9,15 @@ tags:
 
 # TRACE Producer
 
-The TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome to the
-Lock Server. Each record is signed and hash-chained, so a reader can detect a missing or altered record. This
-page covers the configuration properties and what a record contains.
+The planned TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome
+that has a session, to the Lock Server. Each record is signed and hash-chained, so a reader can detect a missing
+or altered record. This page covers the planned configuration properties and what a record contains.
 
 !!! note "Status"
-    The configuration properties are available now. Record emission, signing, and transport are being built
-    in the follow-up work tracked from [#15275](https://github.com/JanssenProject/jans/issues/15275). Until
-    that work lands, setting `fido2TraceEnabled` to `true` does not change behavior.
+    This is planned behavior, not yet available. The properties are added in
+    [#15680](https://github.com/JanssenProject/jans/pull/15680) and take effect only after that PR and the
+    follow-up work tracked in [#15275](https://github.com/JanssenProject/jans/issues/15275) (record emission,
+    signing, and transport) are merged. Until then, setting `fido2TraceEnabled` to `true` does not change behavior.
 
 ## Configuration
 
@@ -25,12 +26,12 @@ All properties are set in the `fido2Configuration` object, the same place as the
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `fido2TraceEnabled` | Boolean | `false` | Master switch. When `false`, nothing is emitted. |
-| `fido2TraceProducerId` | String | derived | Stable producer ID. Leave empty to derive it from the server ID and version. |
-| `fido2TraceChainGenesis` | String | `first_observed` | `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
-| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
-| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Include optional signed attestation and MDS trust detail in each record. |
-| `fido2TraceEndpoint` | String | discovered | Lock Server ingestion endpoint, `/api/v1/audit/trace`. |
+| `fido2TraceEnabled` | Boolean | `false` | Planned. Master switch. When `false`, nothing is emitted. |
+| `fido2TraceProducerId` | String | derived | Planned. Stable producer ID. Leave empty to derive it from the server ID and version. |
+| `fido2TraceChainGenesis` | String | `first_observed` | Planned. `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
+| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Planned. Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
+| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Planned. Include optional signed attestation and MDS trust detail in each record. |
+| `fido2TraceEndpoint` | String | discovered | Planned. Lock Server ingestion endpoint, `/api/v1/audit/trace`. |
 
 The TRACE properties are separate from the `lockAudit*` properties. Enabling one does not enable the other.
 
