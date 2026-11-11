@@ -79,9 +79,7 @@ public class JwtSigner {
             signatureAlgorithm = SignatureAlgorithm.fromString(client.getIdTokenSignedResponseAlg());
         }
 
-        final JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), decryptedSecret);
-        jwtSigner.setSigningKid(client.getAttributes().getIdTokenSigningKid());
-        return jwtSigner;
+        return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), decryptedSecret);
     }
 
     public Jwt newJwt() throws CryptoProviderException {

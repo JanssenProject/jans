@@ -143,8 +143,7 @@ public class RegisterUpdateAction {
 
             registerService.updateClientFromRequestObject(client, request, true);
 
-            registerParamsValidator.validateSigningKid(client.getAttributes().getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
-            registerParamsValidator.validateSigningKid(client.getAttributes().getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
+            validateSigningKids(client);
 
             if (requestObject.has(BACKCHANNEL_LOGOUT_URI.toString())
                     && StringUtils.isBlank(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()))) {
@@ -202,6 +201,16 @@ public class RegisterUpdateAction {
 
         log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
         throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.");
+    }
+
+    private void validateSigningKids(Client client) {
+        try {
+            registerParamsValidator.validateSigningKid(client.getAttributes().getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
+            registerParamsValidator.validateSigningKid(client.getAttributes().getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
     }
 
     private void validateEphemeralSubjectTypeBackchannelLogout(Client client) {

@@ -1607,10 +1607,10 @@ paths:
                     then the default OP signing algorithm will be used .
                 access_token_signing_kid:
                   type: string
-                  description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm.
+                  description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                 id_token_signing_kid:
                   type: string
-                  description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm.
+                  description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                 id_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
@@ -2106,10 +2106,10 @@ paths:
                     then the default OP signing algorithm will be used .
                 access_token_signing_kid:
                   type: string
-                  description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm.
+                  description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                 id_token_signing_kid:
                   type: string
-                  description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm.
+                  description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                 id_token_signed_response_alg:
                   type: string
                   description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
@@ -2585,10 +2585,10 @@ paths:
                       then the default OP signing algorithm will be used .
                   access_token_signing_kid:
                     type: string
-                    description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm.
+                    description: Key ID (kid) of the key used to sign JWT access tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                   id_token_signing_kid:
                     type: string
-                    description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm.
+                    description: Key ID (kid) of the key used to sign ID tokens. If not specified, the key is selected implicitly by signing algorithm. On client update, omitting this parameter keeps the stored value and an empty string clears it.
                   id_token_signed_response_alg:
                     type: string
                     description: JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.

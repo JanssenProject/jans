@@ -75,26 +75,10 @@ public class JwtSignerTest {
     }
 
     @Test
-    public void newJwtSigner_forClientWithIdTokenSigningKid_shouldSetSigningKid() {
+    public void newJwtSigner_forClientWithIdTokenSigningKid_shouldNotSetSigningKid() {
         Client client = new Client();
         client.setClientId("client-id");
         client.getAttributes().setIdTokenSigningKid("id-token-kid");
-        when(appConfiguration.getDefaultSignatureAlgorithm()).thenReturn("RS256");
-
-        JwtSigner signer;
-        try (MockedStatic<CdiUtil> cdiUtil = mockStatic(CdiUtil.class)) {
-            cdiUtil.when(() -> CdiUtil.bean(AbstractCryptoProvider.class)).thenReturn(cryptoProvider);
-            cdiUtil.when(() -> CdiUtil.bean(ConfigurationFactory.class)).thenReturn(configurationFactory);
-            signer = JwtSigner.newJwtSigner(appConfiguration, new JSONWebKeySet(), client, "secret");
-        }
-
-        assertEquals(signer.getSigningKid(), "id-token-kid");
-    }
-
-    @Test
-    public void newJwtSigner_forClientWithoutIdTokenSigningKid_shouldNotSetSigningKid() {
-        Client client = new Client();
-        client.setClientId("client-id");
         when(appConfiguration.getDefaultSignatureAlgorithm()).thenReturn("RS256");
 
         JwtSigner signer;
