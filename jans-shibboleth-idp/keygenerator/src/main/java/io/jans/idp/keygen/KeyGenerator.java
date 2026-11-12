@@ -1,5 +1,6 @@
 package io.jans.idp.keygen;
 
+import java.io.Console;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.security.KeyPair;
@@ -25,6 +26,7 @@ public class KeyGenerator {
     private static final int DEFAULT_KEY_SIZE = 3072;
     private static final String DEFAULT_SIGNATURE_ALGORITHM = "SHA256withRSA";
     private static final long DEFAULT_VALIDITY_YEARS = 10;
+    private static final String PROMPT_ARG = "-";
 
     public static void main(String[] args) {
         if (args.length < 3) {
@@ -33,9 +35,9 @@ public class KeyGenerator {
         }
 
         String keystorePath = args[0];
-        String keystorePassword = args[1];
+        String keystorePassword = resolvePassword(args[1], "Keystore password: ");
         String keyAlias = args[2];
-        String keyPassword = args.length > 3 ? args[3] : keystorePassword;
+        String keyPassword = args.length > 3 ? resolvePassword(args[3], "Key password: ") : keystorePassword;
         String subjectDn = args.length > 4 ? args[4] : "CN=Janssen Shibboleth IDP";
         int keySize = args.length > 5 ? Integer.parseInt(args[5]) : DEFAULT_KEY_SIZE;
 
@@ -48,15 +50,32 @@ public class KeyGenerator {
         }
     }
 
+    private static String resolvePassword(String arg, String prompt) {
+        if (!PROMPT_ARG.equals(arg)) {
+            return arg;
+        }
+        Console console = System.console();
+        if (console == null) {
+            System.err.println("No console available to read password");
+            System.exit(1);
+        }
+        char[] pwd = console.readPassword(prompt);
+        if (pwd == null || pwd.length == 0) {
+            System.err.println("Password must not be empty");
+            System.exit(1);
+        }
+        return new String(pwd);
+    }
+
     private static void printUsage() {
         System.out.println("Usage: KeyGenerator <keystore-path> <keystore-password> <key-alias> " +
                 "[key-password] [subject-dn] [key-size]");
         System.out.println();
         System.out.println("Arguments:");
         System.out.println("  keystore-path     - Path to output keystore file");
-        System.out.println("  keystore-password - Password for the keystore");
+        System.out.println("  keystore-password - Password for the keystore, or - to prompt (recommended, keeps it out of the process list)");
         System.out.println("  key-alias         - Alias for the generated key");
-        System.out.println("  key-password      - Password for the key (default: same as keystore)");
+        System.out.println("  key-password      - Password for the key, or - to prompt (default: same as keystore)");
         System.out.println("  subject-dn        - Subject DN for the certificate (default: CN=Janssen Shibboleth IDP)");
         System.out.println("  key-size          - RSA key size in bits (default: 3072)");
     }

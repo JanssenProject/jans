@@ -108,6 +108,9 @@ public class ParValidator {
                 par.getAttributes().setResponseType(jwtRequest.getJsonPayload().optString("response_type"));
             }
             if (StringUtils.isNotBlank(jwtRequest.getClientId())) {
+                if (!jwtRequest.getClientId().equals(client.getClientId())) {
+                    throw authorizeRestWebServiceValidator.createInvalidJwtRequestException(redirectUriResponse, "client_id in request object does not match client.");
+                }
                 par.getAttributes().setClientId(jwtRequest.getClientId());
             }
             if (jwtRequest.getNbf() != null) {
@@ -197,6 +200,21 @@ public class ParValidator {
 
         if (isTrue(appConfiguration.getParForbidPublicClient()) && (client == null || clientService.isPublic(client))) {
             log.trace("Client is public or not authenticated which is not allowed by 'parForbidPublicClient' AS configuration property.");
+            throw new WebApplicationException(Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))
+                    .build());
+        }
+    }
+
+    public void validateClientMatchesAuthenticatedClient(Client client, String state) {
+        SessionClient sessionClient = identity.getSessionClient();
+        if (sessionClient == null || sessionClient.getClient() == null) {
+            return;
+        }
+
+        if (client == null || !StringUtils.equals(sessionClient.getClient().getClientId(), client.getClientId())) {
+            log.trace("PAR client_id does not match authenticated client.");
             throw new WebApplicationException(Response
                     .status(Response.Status.UNAUTHORIZED)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT, state, ""))

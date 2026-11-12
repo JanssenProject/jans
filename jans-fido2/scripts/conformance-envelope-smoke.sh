@@ -14,6 +14,10 @@ BASE="${BASE:-https://localhost}"
 ATT="$BASE/jans-fido2/restv1/attestation/options"
 ASS="$BASE/jans-fido2/restv1/assertion/options"
 
+TMP_DIR="$(mktemp -d)" || exit 1
+trap 'rm -rf "$TMP_DIR"' EXIT
+BODY_FILE="$TMP_DIR/body"
+
 pp() { if command -v jq >/dev/null 2>&1; then jq -c .; else cat; fi; }
 
 call() {
@@ -21,12 +25,12 @@ call() {
   echo "──────────────────────────────────────────────────────────────"
   echo "▶ $label"
   if [ -z "${body+x}" ] || [ "$body" = "__NOBODY__" ]; then
-    code=$(curl -sk -o /tmp/_fido_body -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json')
+    code=$(curl -sk -o "$BODY_FILE" -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json')
   else
-    code=$(curl -sk -o /tmp/_fido_body -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json' -d "$body")
+    code=$(curl -sk -o "$BODY_FILE" -w '%{http_code}' -X POST "$url" -H 'Content-Type: application/json' -d "$body")
   fi
   echo "  HTTP $code"
-  printf '  body: '; cat /tmp/_fido_body | pp
+  printf '  body: '; pp < "$BODY_FILE"
   echo
 }
 

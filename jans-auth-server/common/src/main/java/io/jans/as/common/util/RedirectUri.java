@@ -295,6 +295,9 @@ public class RedirectUri {
     }
 
     private String getJwsResponse(boolean nested) throws InvalidJwtException, CryptoProviderException {
+        if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+            throw new InvalidJwtException("JARM response must be signed, 'none' algorithm is not allowed");
+        }
         Jwt jwt = new Jwt();
 
         // Header
@@ -309,7 +312,10 @@ public class RedirectUri {
             jwt.getHeader().setKeyId(keyId);
         }
 
-        // Claims
+        // Claims; protected claims are set last so response parameters cannot override them
+        for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+            jwt.getClaims().setClaim(entry.getKey(), entry.getValue());
+        }
         jwt.getClaims().setClaim(ISS, issuer);
         jwt.getClaims().setClaim(AUD, audience);
         if (responseParameters.containsKey(EXPIRES_IN)) {
@@ -318,9 +324,6 @@ public class RedirectUri {
             final Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.SECOND, authorizationCodeLifetime);
             jwt.getClaims().setClaim(EXP, calendar.getTime());
-        }
-        for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-            jwt.getClaims().setClaim(entry.getKey(), entry.getValue());
         }
 
         // Signature
@@ -339,6 +342,9 @@ public class RedirectUri {
 
         // Claims
         if (nestedJws == null) {
+            for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                jwe.getClaims().setClaim(entry.getKey(), entry.getValue());
+            }
             jwe.getClaims().setClaim(ISS, issuer);
             jwe.getClaims().setClaim(AUD, audience);
             if (responseParameters.containsKey(EXPIRES_IN)) {
@@ -347,9 +353,6 @@ public class RedirectUri {
                 final Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.SECOND, authorizationCodeLifetime);
                 jwe.getClaims().setClaim(EXP, calendar.getTime());
-            }
-            for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
-                jwe.getClaims().setClaim(entry.getKey(), entry.getValue());
             }
         } else {
             Jwt jwt = Jwt.parse(nestedJws);
@@ -402,7 +405,7 @@ public class RedirectUri {
             sb.append("<html>");
             sb.append("<head><title>Submit This Form</title></head>");
             sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-            sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
+            sb.append("<form method=\"post\" action=\"").append(StringEscapeUtils.escapeHtml4(baseRedirectUri)).append("\">");
             for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
                 String entryKey = StringEscapeUtils.escapeHtml4(entry.getKey());
                 String entryValue = StringEscapeUtils.escapeHtml4(entry.getValue());
@@ -416,8 +419,8 @@ public class RedirectUri {
             sb.append("<html>");
             sb.append("<head><title>Submit This Form</title></head>");
             sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
-            sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
-            sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(getQueryString()).append("\"/>");
+            sb.append("<form method=\"post\" action=\"").append(StringEscapeUtils.escapeHtml4(baseRedirectUri)).append("\">");
+            sb.append("<input type=\"hidden\" name=\"response\"").append(" value=\"").append(StringEscapeUtils.escapeHtml4(getQueryString())).append("\"/>");
             sb.append("</form>");
             sb.append("</body>");
             sb.append("</html>");

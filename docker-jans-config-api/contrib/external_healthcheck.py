@@ -7,16 +7,46 @@ import json
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="google")
 
+import os  # noqa: E402
+import ssl  # noqa: E402
+
 import requests  # noqa: E402
+from requests.adapters import HTTPAdapter  # noqa: E402
 
 from jans.pycloudlib import get_manager  # noqa: E402
 
+WEB_CERT_FILE = "/etc/certs/web_https.crt"
+
+
+class _TLSAdapter(HTTPAdapter):
+    def __init__(self, ssl_context, **kwargs):
+        self._ssl_context = ssl_context
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self._ssl_context
+        return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, proxy, **proxy_kwargs):
+        proxy_kwargs["ssl_context"] = self._ssl_context
+        return super().proxy_manager_for(proxy, **proxy_kwargs)
+
+
+def _build_session():
+    ctx = ssl.create_default_context()
+    if os.path.isfile(WEB_CERT_FILE):
+        # trust the deployment's (possibly self-signed) web certificate itself as an anchor
+        ctx.load_verify_locations(cafile=WEB_CERT_FILE)
+        ctx.verify_flags |= getattr(ssl, "VERIFY_X509_PARTIAL_CHAIN", 0)
+    session = requests.Session()
+    session.mount("https://", _TLSAdapter(ctx))
+    return session
+
 
 def poll_healthchecks(manager):
-    import urllib3
-
     hostname = manager.config.get("hostname")
     statuses = {}
+    session = _build_session()
 
     for comp, endpoint, status_code_only in [
         ("jans-auth", "/jans-auth/sys/health-check", False),
@@ -30,13 +60,11 @@ def poll_healthchecks(manager):
         # default component status
         status = "Down"
 
-        scheme = "https"
-        verify = False
-
-        if scheme == "https" and verify is False:
-            urllib3.disable_warnings()
-
-        resp = requests.get(f"{scheme}://{hostname}{endpoint}", timeout=5, verify=verify)
+        try:
+            resp = session.get(f"https://{hostname}{endpoint}", timeout=5)
+        except requests.exceptions.RequestException:
+            statuses[comp] = status
+            continue
 
         if resp.ok:
             if status_code_only:

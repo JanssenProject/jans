@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 
 import static io.jans.as.server.util.TestUtil.assertEmpty;
 import static io.jans.as.server.util.TestUtil.assertNotEmpty;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 
@@ -92,6 +93,15 @@ public class TokenExchangeServiceTest {
 
         assertEmpty(deviceSecret);
         assertTrue(sessionId.getDeviceSecrets().isEmpty());
+    }
+
+    @Test
+    public void createNewDeviceSecret_whenScopeOnlyContainsDeviceSSOSubstring_shouldNotGenerateDeviceSecret() {
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[]{GrantType.AUTHORIZATION_CODE, GrantType.TOKEN_EXCHANGE});
+
+        assertEmpty(tokenExchangeService.createNewDeviceSecret("sessionDn", client, "openid my_device_sso"));
+        verifyNoInteractions(sessionIdService);
     }
 
     @Test

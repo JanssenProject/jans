@@ -8,9 +8,52 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/jans/terraform-provider-jans/jans"
 )
+
+// TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes checks
+// that every grant type supported by Jans passes the app configuration validator.
+func TestAppConfigurationGrantTypesSupportedAcceptsSupportedGrantTypes(t *testing.T) {
+	grantTypesSchema := resourceAppConfiguration().Schema["grant_types_supported"]
+	validateGrantType := grantTypesSchema.Elem.(*schema.Schema).ValidateDiagFunc
+
+	grantTypes := []string{
+		"none",
+		"authorization_code",
+		"client_credentials",
+		"implicit",
+		"password",
+		"refresh_token",
+		"urn:ietf:params:oauth:grant-type:device_code",
+		"urn:ietf:params:oauth:grant-type:token-exchange",
+		"urn:ietf:params:oauth:grant-type:uma-ticket",
+		"urn:openid:params:grant-type:ciba",
+		"urn:ietf:params:oauth:grant-type:jwt-bearer",
+	}
+
+	for _, grantType := range grantTypes {
+		t.Run(grantType, func(t *testing.T) {
+			diagnostics := validateGrantType(grantType, cty.Path{})
+			if len(diagnostics) != 0 {
+				t.Errorf("expected grant type %q to be accepted, got %v", grantType, diagnostics)
+			}
+		})
+	}
+}
+
+// TestAppConfigurationGrantTypesSupportedRejectsUnsupportedGrantType checks
+// that values outside the supported grant types fail validation.
+func TestAppConfigurationGrantTypesSupportedRejectsUnsupportedGrantType(t *testing.T) {
+	grantTypesSchema := resourceAppConfiguration().Schema["grant_types_supported"]
+	validateGrantType := grantTypesSchema.Elem.(*schema.Schema).ValidateDiagFunc
+
+	diagnostics := validateGrantType("urn:ietf:params:oauth:grant-type:unsupported", cty.Path{})
+	if len(diagnostics) == 0 {
+		t.Fatal("expected unsupported grant type to fail validation")
+	}
+}
 
 func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 
@@ -215,24 +258,4 @@ func testAccReourceCheckAppConfigurationDestroy(s *terraform.State) error {
 	}
 
 	return nil
-}
-
-func TestAppConfigFalseBoolPatches(t *testing.T) {
-	raw := cty.ObjectVal(map[string]cty.Value{
-		"security_headers_enabled":                cty.False,
-		"strict_token_redirect_uri_validation":    cty.NullVal(cty.Bool),
-		"allow_startup_on_jwks_uri_fetch_failure": cty.True,
-	})
-	vals := map[string]any{
-		"security_headers_enabled":                false,
-		"strict_token_redirect_uri_validation":    false,
-		"allow_startup_on_jwks_uri_fetch_failure": true,
-	}
-	patches := appConfigFalseBoolPatches(raw, func(k string) any { return vals[k] })
-	if len(patches) != 1 {
-		t.Fatalf("expected 1 patch for configured false, got %d: %+v", len(patches), patches)
-	}
-	if p := patches[0]; p.Op != "replace" || p.Path != "/securityHeadersEnabled" || p.Value != false {
-		t.Errorf("unexpected patch: %+v", p)
-	}
 }

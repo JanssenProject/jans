@@ -38,6 +38,7 @@ func resourceOidcClient() *schema.Resource {
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "The client secret.  The client MAY omit the parameter if the client secret is an empty string.",
 			},
@@ -52,9 +53,12 @@ func resourceOidcClient() *schema.Resource {
 				Description: "",
 			},
 			"registration_access_token": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+				// unset keeps the server-issued token, which the server may rotate
+				DiffSuppressFunc: func(_, _, newValue string, _ *schema.ResourceData) bool { return newValue == "" },
+				Description:      "Sent on create and update when set; leave unset to keep the server-issued token.",
 			},
 			"client_id_issued_at": {
 				Type:        schema.TypeString,
@@ -681,6 +685,7 @@ func resourceOidcClient() *schema.Resource {
 						"require_pkce": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specifies whether to require PKCE (Proof Key for Code Exchange) for authorization code flow.",
 						},
 						"minimum_acr_level": {
@@ -940,6 +945,16 @@ func resourceOidcClientUpdate(ctx context.Context, d *schema.ResourceData, meta 
 	var client jans.OidcClient
 	if err := fromSchemaResource(d, &client); err != nil {
 		return diag.FromErr(err)
+	}
+	// both flags are computed and keep their state value, so the one the config changed must win
+	topChanged, nestedChanged := d.HasChange("require_pkce"), d.HasChange("attributes.0.require_pkce")
+	if topChanged && !nestedChanged {
+		if client.Attributes == nil {
+			client.Attributes = &jans.OidcClientAttribute{}
+		}
+		client.Attributes.RequirePkce = client.RequirePkce
+	} else if nestedChanged && !topChanged {
+		client.RequirePkce = client.Attributes != nil && client.Attributes.RequirePkce
 	}
 	tflog.Debug(ctx, "Updating OidcClient", map[string]interface{}{"inum": client.Inum})
 	if _, err := c.UpdateOidcClient(ctx, &client); err != nil {

@@ -74,6 +74,8 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
 
 	private static final int RECEIPT_LOOKUP_BATCH = 100;
+
+	private static final int POLICY_SCAN_BATCH = 100;
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
 	private static final String ATTR_RECEIPT_STATE = "jansTraceReceiptState";
 	private static final String ATTR_RECEIVED_AT_MS = "jansTraceReceivedAtMs";
@@ -141,21 +143,26 @@ public class OrmTraceStore implements TraceStore {
 		return "ou=policyReleases," + baseDn();
 	}
 
-	private String policyReleaseDn(String policyStoreId, String bundleHash) {
-		return TraceKeys.policyReleaseDn(baseDn(), traceKeys.policyReleaseKey(policyStoreId, bundleHash));
-	}
-
 	// -- duplicate-safe insert -------------------------------------------
 
+	/*
+	 * On SQL the unique key decides, so there is no read before the insert: a duplicate is reported as an
+	 * ORM DuplicateEntryException cause. Other backends can overwrite an existing entry on insert
+	 * (Couchbase upsert, Spanner insert-or-update), so they keep the read before the insert. A failed
+	 * insert without the duplicate cause re-checks the DN to tell a duplicate from a storage error.
+	 */
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
 			throws DuplicateEntryException, TraceStorageException {
-		if (persistenceEntryManager.contains(dn, entityClass)) {
+		boolean insertRejectsDuplicates = PersistenceEntryManager.PERSITENCE_TYPES.sql.name()
+				.equals(persistenceEntryManager.getPersistenceType(dn));
+		if (!insertRejectsDuplicates && persistenceEntryManager.contains(dn, entityClass)) {
 			throw new DuplicateEntryException(key);
 		}
 		try {
 			persistenceEntryManager.persist(entity);
 		} catch (EntryPersistenceException e) {
-			if (persistenceEntryManager.contains(dn, entityClass)) {
+			if ((e.getCause() instanceof io.jans.orm.exception.operation.DuplicateEntryException)
+					|| persistenceEntryManager.contains(dn, entityClass)) {
 				throw new DuplicateEntryException(key, "Entry already exists: " + key, e);
 			}
 			throw new TraceStorageException("persist_failed",
@@ -232,7 +239,7 @@ public class OrmTraceStore implements TraceStore {
 	public List<StoredTraceRecord> findRecordsByBareRecordId(String domainId, String recordId) {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_RECORD_ID, recordId));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(domainId, persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -246,7 +253,7 @@ public class OrmTraceStore implements TraceStore {
 		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
 				TraceRecordEntry.class, filter, null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING, Math.max(0, start), count,
 				count);
-		return toStoredList(paged.getEntries());
+		return toStoredList(exec.getDomainId(), paged.getEntries());
 	}
 
 	@Override
@@ -254,10 +261,10 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_EXEC_ID, traceExecutionId));
 		List<TraceRecordEntry> entities = persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class,
-				filter, new String[] { ATTR_EXEC_AUTHORITY });
+				filter, new String[] { ATTR_EXEC_AUTHORITY, ATTR_DOMAIN_ID });
 		Set<String> distinct = new LinkedHashSet<>();
 		for (TraceRecordEntry entity : entities) {
-			if (entity.getExecAuthority() != null) {
+			if (entity.getExecAuthority() != null && domainId.equals(entity.getDomainId())) {
 				distinct.add(entity.getExecAuthority());
 			}
 		}
@@ -270,7 +277,7 @@ public class OrmTraceStore implements TraceStore {
 		Filter filter = Filter.createANDFilter(
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(position.getChainIdentity().getDomainId(), persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -278,7 +285,7 @@ public class OrmTraceStore implements TraceStore {
 		String key = traceKeys.tokenKey(domainId, token);
 		Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ATTR_DOMAIN_ID, domainId),
 				Filter.createEqualityFilter(ATTR_TOKEN_KEYS, key).multiValued());
-		return toStoredList(persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+		return toStoredList(domainId, persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
 	}
 
 	@Override
@@ -303,10 +310,81 @@ public class OrmTraceStore implements TraceStore {
 		if (query.getReceivedToMs() != null) {
 			filters.add(Filter.createLessOrEqualFilter(ATTR_RECEIVED_AT_MS, query.getReceivedToMs()));
 		}
-		PagedResult<TraceRecordEntry> paged = persistenceEntryManager.findPagedEntries(recordsBase(),
-				TraceRecordEntry.class, Filter.createANDFilter(filters), null, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
-				Math.max(0, start), count, count);
-		return toStoredList(paged.getEntries());
+		Filter filter = Filter.createANDFilter(filters);
+		// Freeze the upper sequence so concurrent ingestion cannot extend this scan indefinitely.
+		List<TraceRecordEntry> head = policyBatch(filter, ATTR_RECEIPT_SEQ, SortOrder.DESCENDING, 1);
+		if (head.isEmpty()) {
+			return Collections.emptyList();
+		}
+		long upper = head.get(0).getReceiptSeq();
+		long lower = Long.MIN_VALUE;
+		int skip = Math.max(0, start);
+		List<StoredTraceRecord> result = new ArrayList<>();
+		while (result.size() < count) {
+			Filter range = Filter.createANDFilter(filter,
+					Filter.createGreaterOrEqualFilter(ATTR_RECEIPT_SEQ, lower),
+					Filter.createLessOrEqualFilter(ATTR_RECEIPT_SEQ, upper));
+			List<TraceRecordEntry> entries = policyBatch(range, ATTR_RECEIPT_SEQ, SortOrder.ASCENDING,
+					POLICY_SCAN_BATCH);
+			if (entries.isEmpty()) {
+				break;
+			}
+			long boundary = entries.get(entries.size() - 1).getReceiptSeq();
+			// The final sequence may straddle a batch (collated domains can share a sequence).
+			// Read that entire group with a unique ID cursor rather than dropping ties.
+			for (TraceRecordEntry entity : entries) {
+				if (entity.getReceiptSeq() < boundary && domainId.equals(entity.getDomainId())) {
+					if (skip > 0) {
+						skip--;
+					} else {
+						result.add(TraceEntityMapper.toStoredTraceRecord(entity));
+						if (result.size() == count) {
+							return result;
+						}
+					}
+				}
+			}
+			Filter group = Filter.createANDFilter(filter, Filter.createEqualityFilter(ATTR_RECEIPT_SEQ, boundary));
+			String lastId = policyBatch(group, ATTR_ID, SortOrder.DESCENDING, 1).stream()
+					.map(TraceRecordEntry::getId).findFirst().orElse(null);
+			if (lastId != null) {
+				group = Filter.createANDFilter(group, Filter.createLessOrEqualFilter(ATTR_ID, lastId));
+			}
+			String afterId = null;
+			while (lastId != null && result.size() < count) {
+				Filter continuation = afterId == null ? group : Filter.createANDFilter(group,
+						Filter.createGreaterOrEqualFilter(ATTR_ID, afterId),
+						Filter.createNOTFilter(Filter.createEqualityFilter(ATTR_ID, afterId)));
+				List<TraceRecordEntry> ties = policyBatch(continuation, ATTR_ID, SortOrder.ASCENDING,
+						POLICY_SCAN_BATCH);
+				if (ties.isEmpty()) {
+					break;
+				}
+				for (TraceRecordEntry entity : ties) {
+					if (domainId.equals(entity.getDomainId())) {
+						if (skip > 0) {
+							skip--;
+						} else {
+							result.add(TraceEntityMapper.toStoredTraceRecord(entity));
+							if (result.size() == count) {
+								return result;
+							}
+						}
+					}
+				}
+				afterId = ties.get(ties.size() - 1).getId();
+			}
+			if (boundary == upper) {
+				break;
+			}
+			lower = boundary + 1;
+		}
+		return result;
+	}
+
+	private List<TraceRecordEntry> policyBatch(Filter filter, String sortBy, SortOrder order, int limit) {
+		return persistenceEntryManager.findPagedEntries(recordsBase(), TraceRecordEntry.class, filter, null,
+				sortBy, order, 0, limit, limit).getEntries();
 	}
 
 	@Override
@@ -315,8 +393,12 @@ public class OrmTraceStore implements TraceStore {
 		return persistenceEntryManager.countEntries(recordsBase(), TraceRecordEntry.class, filter);
 	}
 
-	private static List<StoredTraceRecord> toStoredList(List<TraceRecordEntry> entities) {
-		return entities.stream().map(TraceEntityMapper::toStoredTraceRecord).collect(Collectors.toList());
+	/**
+	 * Drops rows of another domain: a case-insensitive collation can match a domain id spelled differently.
+	 */
+	private static List<StoredTraceRecord> toStoredList(String domainId, List<TraceRecordEntry> entities) {
+		return entities.stream().filter(entity -> domainId.equals(entity.getDomainId()))
+				.map(TraceEntityMapper::toStoredTraceRecord).collect(Collectors.toList());
 	}
 
 	// -- receipts -------------------------------------------------------------------------------

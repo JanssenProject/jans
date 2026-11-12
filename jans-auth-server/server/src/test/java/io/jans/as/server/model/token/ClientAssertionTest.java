@@ -57,6 +57,24 @@ public class ClientAssertionTest {
     }
 
     @Test
+    public void verifyAudience_whenAudienceIsEndpointUnderIssuer_shouldPass() throws InvalidJwtException {
+        AppConfiguration appConfiguration = mock(AppConfiguration.class);
+        when(appConfiguration.getIssuer()).thenReturn("https://server.com");
+
+        ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, mock(AbstractCryptoProvider.class), "clientId", ClientAssertionType.JWT_BEARER, "encodedAssertion");
+        clientAssertion.verifyAudience(Collections.singletonList("https://server.com/jans-auth/restv1/token"));
+    }
+
+    @Test(expectedExceptions = InvalidJwtException.class)
+    public void verifyAudience_whenAudienceOnlySharesIssuerPrefix_shouldFail() throws InvalidJwtException {
+        AppConfiguration appConfiguration = mock(AppConfiguration.class);
+        when(appConfiguration.getIssuer()).thenReturn("https://server.com");
+
+        ClientAssertion clientAssertion = new ClientAssertion(appConfiguration, mock(AbstractCryptoProvider.class), "clientId", ClientAssertionType.JWT_BEARER, "encodedAssertion");
+        clientAssertion.verifyAudience(Collections.singletonList("https://server.com.attacker.example.org/token"));
+    }
+
+    @Test
     public void verifyAudience_whenServerIssuerDoesNotMatchButCheckIsRelaxedByConfiguration_shouldPass() throws InvalidJwtException {
         AppConfiguration appConfiguration = mock(AppConfiguration.class);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);

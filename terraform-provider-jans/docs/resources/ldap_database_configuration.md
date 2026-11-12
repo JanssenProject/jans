@@ -21,7 +21,7 @@ resource "jans_ldap_database_configuration" "example" {
   servers           = ["ldap.example.com:1636"]
   use_ssl           = true
   bind_dn           = "cn=directory manager"
-  bind_password     = "your-secure-password"
+  bind_password     = var.ldap_bind_password
   base_dns          = ["ou=people,o=jans"]
 
   lifecycle {
@@ -37,7 +37,7 @@ resource "jans_ldap_database_configuration" "example" {
 
 - `base_dns` (List of String) List contains the location of the Active Directory/LDAP tree from where the Gluu Server shall read the user information.
 - `bind_dn` (String) This contains the username to connect to the backend server. You need to use full DN here. As for example, cn=jans,dc=company,dc=org.
-- `bind_password` (String) Ldap password for binding.
+- `bind_password` (String, Sensitive) Ldap password for binding.
 - `config_id` (String) Unique identifier - Name Example: auth_ldap_server
 - `local_primary_key` (String) Used to search local user entry in Gluu Server’s internal LDAP directory. Example: uid, email
 - `max_connections` (Number) This value defines the maximum number of connections that are allowed to read the backend Active Directory/LDAP server.

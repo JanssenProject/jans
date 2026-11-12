@@ -148,7 +148,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             accessToken = tokenService.getBearerToken(authorization);
         }
 
-        log.debug("Attempting to request User Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
+        log.debug("Attempting to request User Info, Is Secure = {}", securityContext.isSecure());
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.USERINFO);
         Response.ResponseBuilder builder = Response.ok();
 
@@ -162,14 +162,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(accessToken);
 
             if (authorizationGrant == null) {
-                log.trace("Failed to find authorization grant by access_token: {}", accessToken);
+                log.trace("Failed to find authorization grant by access_token.");
                 return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
             }
             oAuth2AuditLog.updateOAuth2AuditLog(authorizationGrant, false);
 
             final AbstractToken accessTokenObject = authorizationGrant.getAccessToken(accessToken);
             if (accessTokenObject == null || !accessTokenObject.isValid()) {
-                log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, false);
+                log.trace("Invalid access token object, isNull: {}, isValid: {}", accessTokenObject == null, false);
                 return response(401, UserInfoErrorResponseType.INVALID_TOKEN);
             }
 
@@ -250,6 +250,10 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                                   Collection<String> scopes) throws Exception {
         log.trace("Building JWT reponse with next scopes {} for user {}", scopes, user.getUserId());
 
+        return signJwt(signatureAlgorithm, createJwtClaims(user, authorizationGrant, scopes), authorizationGrant).toString();
+    }
+
+    private Jwt signJwt(SignatureAlgorithm signatureAlgorithm, JwtClaims claims, AuthorizationGrant authorizationGrant) throws Exception {
         Jwt jwt = new Jwt();
 
         // Header
@@ -262,14 +266,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         // Claims
-        jwt.setClaims(createJwtClaims(user, authorizationGrant, scopes));
+        jwt.setClaims(claims);
 
         // Signature
         String sharedSecret = clientService.decryptSecret(authorizationGrant.getClient().getClientSecret());
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), sharedSecret, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
 
-        return jwt.toString();
+        return jwt;
     }
 
     private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
@@ -302,7 +306,13 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwe.getHeader().setEncryptionMethod(blockEncryptionAlgorithm);
 
         // Claims
-        jwe.setClaims(createJwtClaims(user, authorizationGrant, scopes));
+        JwtClaims claims = createJwtClaims(user, authorizationGrant, scopes);
+        jwe.setClaims(claims);
+
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(authorizationGrant.getClient().getUserInfoSignedResponseAlg());
+        if (signatureAlgorithm != null && signatureAlgorithm != SignatureAlgorithm.NONE) {
+            jwe.setSignedJWTPayload(signJwt(signatureAlgorithm, claims, authorizationGrant));
+        }
 
         // Encryption
         if (keyEncryptionAlgorithm == KeyEncryptionAlgorithm.RSA_OAEP
@@ -406,7 +416,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
                     JansAttribute jansAttribute = attributeService.getByClaimName(claimName);
 
-                    if (jansAttribute != null) {
+                    if (jansAttribute != null && validateRequesteClaim(jansAttribute, authorizationGrant.getClient().getClaims(), scopes)) {
                         String ldapClaimName = jansAttribute.getName();
 
                         Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
@@ -488,7 +498,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope != null && scope.getClaims() != null) {
                 for (String claimDn : scope.getClaims()) {
-                    if (jansAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                    if (jansAttribute.getDn().equalsIgnoreCase(claimDn)) {
                         return true;
                     }
                 }

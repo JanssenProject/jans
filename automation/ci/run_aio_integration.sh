@@ -118,8 +118,8 @@ MVN_PAR="-T 4"   # the backgrounded cargo build holds the other four until it fi
 MVN_SKIPS="-Dmaven.gitcommitid.skip=true"
 NO_FIPS="-pl !server-fips"
 # jans-core/cedarling (and config-api, which consumes it) need cedarling-java, so they are built
-# after the native lib below.
-for mod in jans-bom jans-orm jans-core jans-auth-server jans-scim jans-fido2; do
+# after the native lib below. agama precedes jans-auth-server, whose agama-engine needs agama-transpiler.
+for mod in jans-bom agama jans-orm jans-core jans-auth-server jans-scim jans-fido2; do
   pl=""
   case "$mod" in
     jans-core) pl="-pl !cedarling" ;;
@@ -161,8 +161,8 @@ echo "::endgroup::"
 set +e
 
 # Extra-coverage modules (best-effort; tested in the unit phase). Built after the core reactor so a
-# failure can't block the AIO build or the core suites. $CED_OPTS is harmless to agama.
-for mod in agama jans-lock/lock-server; do
+# failure can't block the AIO build or the core suites.
+for mod in jans-lock/lock-server; do
   case "$mod" in
     *lock*) [ "$CED_READY" = 1 ] || { echo "[info] skip build $mod (cedarling native lib not ready)"; continue; } ;;
   esac

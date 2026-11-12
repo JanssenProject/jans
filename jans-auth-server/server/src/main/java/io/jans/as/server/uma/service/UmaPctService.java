@@ -47,6 +47,13 @@ public class UmaPctService {
         try {
             String ticketPctCode = permissions.get(0).getAttributes().get("pct");
             UmaPCT ticketPct = StringUtils.isNotBlank(ticketPctCode) ? getByCode(ticketPctCode) : null;
+            if (ticketPct != null) {
+                ticketPct.checkExpired();
+                if (!ticketPct.isValid()) {
+                    log.trace("Ignoring ticket PCT because it is expired or revoked, code: {}", ticketPctCode);
+                    ticketPct = null;
+                }
+            }
 
             boolean hasPct = pct != null;
 

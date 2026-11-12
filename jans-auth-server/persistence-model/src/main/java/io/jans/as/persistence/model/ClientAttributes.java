@@ -32,6 +32,12 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
 
+    @JsonProperty("accessTokenSigningKid")
+    private String accessTokenSigningKid;
+
+    @JsonProperty("idTokenSigningKid")
+    private String idTokenSigningKid;
+
     @JsonProperty("runIntrospectionScriptBeforeJwtCreation")
     private Boolean runIntrospectionScriptBeforeJwtCreation = false;
 
@@ -564,6 +570,22 @@ public class ClientAttributes implements Serializable {
         return this;
     }
 
+    public String getAccessTokenSigningKid() {
+        return accessTokenSigningKid;
+    }
+
+    public void setAccessTokenSigningKid(String accessTokenSigningKid) {
+        this.accessTokenSigningKid = accessTokenSigningKid;
+    }
+
+    public String getIdTokenSigningKid() {
+        return idTokenSigningKid;
+    }
+
+    public void setIdTokenSigningKid(String idTokenSigningKid) {
+        this.idTokenSigningKid = idTokenSigningKid;
+    }
+
     public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
         if (runIntrospectionScriptBeforeJwtCreation == null) {
             runIntrospectionScriptBeforeJwtCreation = false;
@@ -685,6 +707,8 @@ public class ClientAttributes implements Serializable {
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
                 ", spiffeId='" + spiffeId + '\'' +
                 ", spiffeBundleEndpoint='" + spiffeBundleEndpoint + '\'' +
+                ", accessTokenSigningKid='" + accessTokenSigningKid + '\'' +
+                ", idTokenSigningKid='" + idTokenSigningKid + '\'' +
                 ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
