@@ -388,14 +388,18 @@ public class WebhookService {
                 Future<GenericResponse> future = executor.submit(callable);
                 try {
                     responseList.add(future.get());
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (InterruptedException e) {
                     log.error("Webhook execution interrupted!", e);
+                    future.cancel(true);
                     Thread.currentThread().interrupt();
+                    break;
+                } catch (ExecutionException e) {
+                    log.error("Webhook execution failed!", e.getCause());
                 }
             }
             return responseList;
         } finally {
-            executor.shutdown();
+            executor.shutdownNow();
         }
     }
 

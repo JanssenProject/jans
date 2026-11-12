@@ -14,6 +14,13 @@
             <class name="io.jans.ca.plugin.adminui.test.security.PolicyToScopeMapperTest" />
         </classes>
     </test>
+
+    <test name="Services" enabled="true">
+        <classes>
+            <class name="io.jans.ca.plugin.adminui.test.services.AdminUIServiceTest" />
+            <class name="io.jans.ca.plugin.adminui.test.services.WebhookServiceTest" />
+        </classes>
+    </test>
 	
 	<test name="OAuth2" enabled="true">
         <classes>

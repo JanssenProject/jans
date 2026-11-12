@@ -130,7 +130,7 @@ public class PolicyToScopeMapper {
      * @param zipFile          the ZIP archive containing the entry
      * @param entry            the ZIP entry pointing to an entity JSON file
      * @param parentToFeatures map that will be populated with parentId → list of featureIds; lists are created as
-     *                         {@link java.util.concurrent.CopyOnWriteArrayList} when a parentId is first encountered
+     *                         {@link java.util.ArrayList} when a parentId is first encountered
      */
     private void processEntityEntry(ZipFile zipFile, ZipEntry entry, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
@@ -155,7 +155,7 @@ public class PolicyToScopeMapper {
                     JsonNode parentIdNode = firstParent != null ? firstParent.get("id") : null;
                     if (parentIdNode == null) continue;
                     String parentId = parentIdNode.asText();
-                    parentToFeatures.computeIfAbsent(parentId, k -> new CopyOnWriteArrayList<>()).add(featureId);
+                    parentToFeatures.computeIfAbsent(parentId, k -> new ArrayList<>()).add(featureId);
                 }
             }
         } catch (IOException e) {
@@ -250,6 +250,34 @@ public class PolicyToScopeMapper {
         return tokens;
     }
 
+    private String stripComments(String content) {
+        StringBuilder result = new StringBuilder(content.length());
+        for (int i = 0; i < content.length();) {
+            char current = content.charAt(i);
+            if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
+                i += 2;
+                while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
+                    i++;
+                }
+            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                int commentEnd = content.indexOf("*/", i + 2);
+                if (commentEnd < 0) {
+                    throw new IllegalArgumentException("Unterminated block comment");
+                }
+                i = commentEnd + 2;
+                result.append(' ');
+            } else if (current == '"') {
+                int end = skipStringLiteral(content, i);
+                result.append(content, i, end);
+                i = end;
+            } else {
+                result.append(current);
+                i++;
+            }
+        }
+        return result.toString();
+    }
+
     private int skipStringLiteral(String content, int quoteIndex) {
         for (int i = quoteIndex + 1; i < content.length(); i++) {
             char current = content.charAt(i);
@@ -273,7 +301,8 @@ public class PolicyToScopeMapper {
      */
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
-            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            // Comment text must not select a role or contribute resources/actions
+            String content = stripComments(new String(is.readAllBytes(), StandardCharsets.UTF_8));
 
             String role = extractFirstMatch(ROLE_PATTERN, content);
             if (role == null) {
