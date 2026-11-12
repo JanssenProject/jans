@@ -58,7 +58,7 @@ public class JansPasswordService extends PasswordService {
             return false;
         }
         authenticatedUserId = currentUser.getUserId();
-        if (Boolean.valueOf(flowConfig.get("ENABLE_ACCOUNT_LOCK"))) {
+        if (Boolean.parseBoolean(String.valueOf((Object) flowConfig.get("enableLock")))) {
             logger.info("Credentials are valid and user account locked feature is activated");
             // Identity's user may be a partial or pre-login snapshot; merging it would drop attributes.
             User freshUser = userService.getUser(authenticatedUserId);
@@ -108,7 +108,8 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             long lockExpiresAt = System.currentTimeMillis() + DEFAULT_LOCK_EXP_TIME * 1000L;
-            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
+            int retention = (int) Math.min(Integer.MAX_VALUE, Math.max(LOCK_RECORD_RETENTION, DEFAULT_LOCK_EXP_TIME + 24L * 3600));
+            cacheService.put(retention, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             return "Your account has been locked.";

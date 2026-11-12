@@ -21,6 +21,7 @@ import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
@@ -122,8 +123,8 @@ public class AuditLogInterceptor {
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                if (obj != null && !isAuthorizationParameter(parameters[i]) && !containsSensitiveData(obj)
-                        && !ignoreObject(propertyName, obj, auditLogConf)) {
+                if (obj != null && !isAuthorizationParameter(parameters[i]) && !isTokenCodeParameter(parameters[i])
+                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)) {
                     AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
                 }
             }
@@ -139,6 +140,11 @@ public class AuditLogInterceptor {
         HeaderParam headerParam = parameter.getAnnotation(HeaderParam.class);
         return HttpHeaders.AUTHORIZATION.equalsIgnoreCase(parameter.getName())
                 || (headerParam != null && HttpHeaders.AUTHORIZATION.equalsIgnoreCase(headerParam.value()));
+    }
+
+    private boolean isTokenCodeParameter(Parameter parameter) {
+        PathParam pathParam = parameter.getAnnotation(PathParam.class);
+        return pathParam != null && ApiConstants.TOKEN_CODE.equals(pathParam.value());
     }
 
     private boolean containsSensitiveData(Object obj) {

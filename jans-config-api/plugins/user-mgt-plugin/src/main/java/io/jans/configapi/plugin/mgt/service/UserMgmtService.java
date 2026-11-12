@@ -122,12 +122,8 @@ public class UserMgmtService {
                     getPeopleBaseDn());
         }
 
-        // Persistence backends treat a zero count as unlimited.
-        if (searchRequest.getCount() != null && searchRequest.getCount() <= 0) {
-            PagedResult<User> emptyResult = new PagedResult<>();
-            emptyResult.setEntries(new ArrayList<>());
-            return emptyResult;
-        }
+        // Persistence backends treat a zero count as unlimited, so fetch one entry to get the total and drop it.
+        boolean countOnly = searchRequest.getCount() != null && searchRequest.getCount() <= 0;
 
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
         logger.info("For searching user user useLowercaseFilter?:{}", useLowercaseFilter);
@@ -195,7 +191,13 @@ public class UserMgmtService {
         PagedResult<User> pagedResult = persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(),
                 User.class, searchFilter, null, searchRequest.getSortBy(),
                 SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
-                searchRequest.getCount(), searchRequest.getMaxCount());
+                countOnly ? 1 : searchRequest.getCount(), searchRequest.getMaxCount());
+
+        if (countOnly) {
+            pagedResult.setEntries(new ArrayList<>());
+            pagedResult.setEntriesCount(0);
+            return pagedResult;
+        }
 
         // remove inactive claims
         List<User> users = this.verifyCustomAttributes(pagedResult.getEntries());

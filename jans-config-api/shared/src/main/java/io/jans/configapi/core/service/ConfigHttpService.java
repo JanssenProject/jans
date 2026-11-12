@@ -245,7 +245,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
             Map<String, String> parameters) {
 
         // header values are not logged: Authorization carries the caller's bearer token
-        log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(requestUri),
+        log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(redactUri(requestUri)),
                 headers != null ? escapeLog(headers.keySet()) : null,
                 parameters != null ? escapeLog(parameters.keySet()) : null);
 
@@ -263,7 +263,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.debug("Final requestUri:{}", escapeLog(requestUri));
+            log.debug("Final requestUri:{}", escapeLog(redactUri(requestUri)));
         }
 
         HttpGet httpGet = new HttpGet(requestUri);
@@ -373,7 +373,7 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.debug("Final Delete requestUri:{}", escapeLog(requestUri));
+            log.debug("Final Delete requestUri:{}", escapeLog(redactUri(requestUri)));
         }
 
         HttpDelete httpDelete = new HttpDelete(requestUri);
@@ -552,4 +552,13 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         return jsonString;
     }
 
+    // Query values and URI user-info may carry credentials (e.g. access_token), so keep them out of logs.
+    private static String redactUri(String uri) {
+        if (uri == null) {
+            return null;
+        }
+        String safe = uri.replaceFirst("^([a-zA-Z][a-zA-Z0-9+.-]*://)[^/?#@]*@", "$1[REDACTED]@");
+        int query = safe.indexOf('?');
+        return query < 0 ? safe : safe.substring(0, query) + "?[REDACTED]";
+    }
 }

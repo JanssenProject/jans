@@ -169,7 +169,8 @@ public class AssetService {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
-        if (this.getAssetMgtConfiguration() == null || !this.getAssetMgtConfiguration().isAssetServerUploadEnabled()) {
+        if (documentStream != null && (this.getAssetMgtConfiguration() == null
+                || !this.getAssetMgtConfiguration().isAssetServerUploadEnabled())) {
             throw new InvalidAttributeException("Asset server upload is disabled!!!");
         }
 

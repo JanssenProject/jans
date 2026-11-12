@@ -472,6 +472,7 @@ public class AdminUISecurityService {
             boolean adminUiIssuerFound = false;
             long totalUncompressed = 0;
             List<String> localEntryNames = new ArrayList<>();
+            Map<String, String> issuerContents = new HashMap<>();
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
@@ -494,13 +495,14 @@ public class AdminUISecurityService {
                     }
 
                     String content = readEntryContentSafely(zis);
-                    totalUncompressed += content.length();
+                    issuerContents.put(entryName, content);
+                    totalUncompressed += content.getBytes(StandardCharsets.UTF_8).length;
                     if (totalUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
                         throw new IOException("ZIP archive too large when decompressed");
                     }
                     JSONObject issuerDoc = new JSONObject(content);
                     if (rootIssuersFile) {
-                        validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
+                        adminUiIssuerFound |= validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
                         continue;
                     }
 
@@ -519,7 +521,7 @@ public class AdminUISecurityService {
             }
 
             // Cedarling resolves files by central-directory name, so the validated local headers must match it.
-            verifyCentralDirectoryMatches(zipBytes, localEntryNames);
+            verifyCentralDirectoryMatches(zipBytes, localEntryNames, issuerContents);
 
             if (!adminUiIssuerFound) {
                 throw new ApplicationException(
@@ -546,21 +548,36 @@ public class AdminUISecurityService {
      * @throws ApplicationException with HTTP 400 if the names do not match
      * @throws IOException          if the archive cannot be read
      */
-    private static void verifyCentralDirectoryMatches(byte[] zipBytes, List<String> localEntryNames)
-            throws ApplicationException, IOException {
+    private void verifyCentralDirectoryMatches(byte[] zipBytes, List<String> localEntryNames,
+            Map<String, String> issuerContents) throws ApplicationException, IOException {
         Path tempFile = createSecureTempFile("adminui-policy-store-check-", ".cjar");
         Path tempDirectory = tempFile.getParent();
         try {
             Files.write(tempFile, zipBytes);
             List<String> centralEntryNames = new ArrayList<>();
+            boolean mismatch;
             try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
                 Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
                     centralEntryNames.add(entries.nextElement().getName());
                 }
+                mismatch = new HashSet<>(centralEntryNames).size() != centralEntryNames.size()
+                        || !centralEntryNames.equals(localEntryNames);
+                // Cedarling reads entry data via the central directory; it must be the data validated above.
+                Iterator<Map.Entry<String, String>> issuers = issuerContents.entrySet().iterator();
+                while (!mismatch && issuers.hasNext()) {
+                    Map.Entry<String, String> issuer = issuers.next();
+                    ZipEntry central = zipFile.getEntry(issuer.getKey());
+                    if (central == null) {
+                        mismatch = true;
+                        continue;
+                    }
+                    try (InputStream is = zipFile.getInputStream(central)) {
+                        mismatch = !issuer.getValue().equals(readEntryContentSafely(is));
+                    }
+                }
             }
-            boolean duplicates = new HashSet<>(centralEntryNames).size() != centralEntryNames.size();
-            if (duplicates || !centralEntryNames.equals(localEntryNames)) {
+            if (mismatch) {
                 throw new ApplicationException(
                         Response.Status.BAD_REQUEST.getStatusCode(),
                         "Inconsistent policy-store archive entries"
@@ -792,20 +809,23 @@ public class AdminUISecurityService {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
     }
 
-    private void validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
+    private boolean validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
             throws ApplicationException, URISyntaxException {
+        boolean issuerValidated = false;
         for (String tokenType : issuersDoc.keySet()) {
             JSONObject tokenConfig = issuersDoc.optJSONObject(tokenType);
             JSONObject endpoints = tokenConfig == null ? null : tokenConfig.optJSONObject("configuration_endpoints");
             if (endpoints == null) {
                 continue;
             }
-            for (String field : new String[]{"configuration", "jwks"}) {
+            for (String field : new String[]{"configuration", "jwks", "iss"}) {
                 if (endpoints.has(field)) {
                     validateIssuerEndpointHost(endpoints.optString(field, null), expectedDomain, entryName);
+                    issuerValidated = true;
                 }
             }
         }
+        return issuerValidated;
     }
 
     private void validateIssuerEndpointHost(String endpoint, String expectedDomain, String entryName)

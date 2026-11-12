@@ -71,7 +71,8 @@ public class Jackson {
             if (jsonNode.isArray()) {
                 for (JsonNode operationNode : jsonNode) {
                     JsonNode pathNode = operationNode.get("path");
-                    if (pathNode != null && pathNode.isTextual()) {
+                    // a "test" operation only compares, it never sets the field
+                    if (pathNode != null && pathNode.isTextual() && !"test".equals(operationNode.path("op").asText())) {
                         keys.add(pathNode.asText());
                     }
                 }
