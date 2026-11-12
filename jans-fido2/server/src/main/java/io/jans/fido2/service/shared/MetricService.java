@@ -31,6 +31,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -565,14 +568,28 @@ public class MetricService extends io.jans.service.metric.MetricService {
                 if (SESSION_ID_COOKIE.equals(cookie.getName())) {
                     String value = cookie.getValue();
                     if (value != null && !value.trim().isEmpty()) {
-                        return value;
+                        return pseudonymizeSessionId(value);
                     }
                 }
             }
         }
 
         HttpSession session = request.getSession(false);
-        return session == null ? null : session.getId();
+        return session == null ? null : pseudonymizeSessionId(session.getId());
+    }
+
+    // Session ids are bearer credentials; telemetry only needs a stable correlation key
+    static String pseudonymizeSessionId(String sessionId) {
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(sessionId.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                hex.append(String.format("%02x", b));
+            }
+            return hex.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 
     // ========== FIDO2 PASSKEY FALLBACK METRICS ==========
@@ -706,21 +723,30 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
         String lowerError = errorReason.toLowerCase();
         
-        if (lowerError.contains("timeout") || lowerError.contains("expired")) {
+        if (containsAny(lowerError, "timeout", "expired")) {
             return "TIMEOUT";
-        } else if (lowerError.contains("invalid") || lowerError.contains("malformed")) {
+        } else if (containsAny(lowerError, "invalid", "malformed")) {
             return "INVALID_INPUT";
-        } else if (lowerError.contains("not found") || lowerError.contains("missing")) {
+        } else if (containsAny(lowerError, "not found", "missing")) {
             return "NOT_FOUND";
-        } else if (lowerError.contains("unauthorized") || lowerError.contains("forbidden")) {
+        } else if (containsAny(lowerError, "unauthorized", "forbidden")) {
             return "AUTHORIZATION";
-        } else if (lowerError.contains("server") || lowerError.contains("internal")) {
+        } else if (containsAny(lowerError, "server", "internal")) {
             return "SERVER_ERROR";
-        } else if (lowerError.contains("network") || lowerError.contains("connection")) {
+        } else if (containsAny(lowerError, "network", "connection")) {
             return "NETWORK_ERROR";
         } else {
             return "OTHER";
         }
+    }
+
+    private static boolean containsAny(String text, String... fragments) {
+        for (String fragment : fragments) {
+            if (text.contains(fragment)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -943,8 +969,12 @@ public class MetricService extends io.jans.service.metric.MetricService {
             // remembers how the administrator wrote it, while the prefix they chose does.
             boolean writtenAsIpv6 = parts[0].indexOf(':') >= 0;
             int maxBits = cidrBytes.length * Byte.SIZE;
-            int typedPrefix = (parts.length == 2) ? Integer.parseInt(parts[1].trim())
-                    : (writtenAsIpv6 ? IPV6_ADDRESS_BITS : IPV4_ADDRESS_BITS);
+            int typedPrefix;
+            if (parts.length == 2) {
+                typedPrefix = Integer.parseInt(parts[1].trim());
+            } else {
+                typedPrefix = writtenAsIpv6 ? IPV6_ADDRESS_BITS : IPV4_ADDRESS_BITS;
+            }
             int prefixLength = prefixAfterNormalising(typedPrefix, writtenAsIpv6, cidrBytes.length);
             if ((prefixLength < 0) || (prefixLength > maxBits)) {
                 // Reported as typed, since that is what the administrator wrote.
