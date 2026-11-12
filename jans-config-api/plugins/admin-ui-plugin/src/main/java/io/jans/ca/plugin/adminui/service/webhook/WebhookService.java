@@ -21,7 +21,6 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.security.StringEncrypter;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.core.Response;
@@ -453,9 +452,5 @@ public class WebhookService {
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
                 : ApiConstants.DEFAULT_MAX_COUNT);
-    }
-    public static void main(String[] args) throws StringEncrypter.EncryptionException {
-        StringEncrypter se = StringEncrypter.instance("pQ8GBX8IYyRpIX3w5OiU2v7T");
-        System.out.println(se.decrypt("BH53kpSUeWBEQ0IQDBOX+w=="));
     }
 }

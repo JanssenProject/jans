@@ -29,9 +29,6 @@ public class PolicyToScopeMapper {
     private static final Pattern ACTION_PATTERN = Pattern.compile(
             "GluuFlexAdminUI::Action::\"([^\"]+)\""
     );
-    private static final Pattern FORBID_POLICY_PATTERN = Pattern.compile("\\bforbid\\s*\\(");
-    private static final Pattern UNLESS_CONDITION_PATTERN = Pattern.compile("\\bunless\\s*\\{");
-
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
 
@@ -204,15 +201,65 @@ public class PolicyToScopeMapper {
     private void validatePolicyEntry(ZipFile zipFile, ZipEntry entry) {
         try (InputStream is = zipFile.getInputStream(entry)) {
             String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-            if (FORBID_POLICY_PATTERN.matcher(content).find()) {
-                throw new IllegalArgumentException("Unsupported forbid policy in " + entry.getName());
-            }
-            if (UNLESS_CONDITION_PATTERN.matcher(content).find()) {
-                throw new IllegalArgumentException("Unsupported unless condition in " + entry.getName());
+            List<String> tokens = tokenizePolicy(content);
+            for (int i = 0; i + 1 < tokens.size(); i++) {
+                if ("forbid".equals(tokens.get(i)) && "(".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported forbid policy in " + entry.getName());
+                }
+                if ("unless".equals(tokens.get(i)) && "{".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported unless condition in " + entry.getName());
+                }
             }
         } catch (IOException e) {
             log.error("Error processing policy: {}", entry.getName() + " - " + e.getMessage());
         }
+    }
+
+    private List<String> tokenizePolicy(String content) {
+        List<String> tokens = new ArrayList<>();
+        for (int i = 0; i < content.length();) {
+            char current = content.charAt(i);
+            if (Character.isWhitespace(current)) {
+                i++;
+            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
+                i += 2;
+                while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
+                    i++;
+                }
+            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                int commentEnd = content.indexOf("*/", i + 2);
+                if (commentEnd < 0) {
+                    throw new IllegalArgumentException("Unterminated block comment");
+                }
+                i = commentEnd + 2;
+            } else if (current == '"') {
+                i = skipStringLiteral(content, i);
+                tokens.add("\"\"");
+            } else if (Character.isLetter(current) || current == '_') {
+                int tokenStart = i++;
+                while (i < content.length()
+                        && (Character.isLetterOrDigit(content.charAt(i)) || content.charAt(i) == '_')) {
+                    i++;
+                }
+                tokens.add(content.substring(tokenStart, i));
+            } else {
+                tokens.add(String.valueOf(current));
+                i++;
+            }
+        }
+        return tokens;
+    }
+
+    private int skipStringLiteral(String content, int quoteIndex) {
+        for (int i = quoteIndex + 1; i < content.length(); i++) {
+            char current = content.charAt(i);
+            if (current == '\\') {
+                i++;
+            } else if (current == '"') {
+                return i + 1;
+            }
+        }
+        throw new IllegalArgumentException("Unterminated string literal");
     }
 
     /**

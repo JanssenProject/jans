@@ -55,7 +55,7 @@ public class PolicyToScopeMapperTest {
 
     @Test
     public void testProcessZipFileRejectsForbidPolicy() throws Exception {
-        String policy = "forbid(principal, action, resource) when { "
+        String policy = "forbid // reason\n(principal, action, resource) when { "
                 + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
                 + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
                 + "action == GluuFlexAdminUI::Action::\"READ\" };";
@@ -64,11 +64,29 @@ public class PolicyToScopeMapperTest {
 
     @Test
     public void testProcessZipFileRejectsUnlessCondition() throws Exception {
-        String policy = "permit(principal, action, resource) unless { "
+        String policy = "permit(principal, action, resource) unless // reason\n{ "
                 + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
                 + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
                 + "action == GluuFlexAdminUI::Action::\"READ\" };";
         assertUnsupportedPolicy(policy, "unless");
+    }
+
+    @Test
+    public void testProcessZipFileDoesNotTreatCommentMarkersOrKeywordsInStringsAsPolicyTokens() throws Exception {
+        String policy = "permit(principal, action, resource) when { "
+                + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                + "action == GluuFlexAdminUI::Action::\"READ\" && "
+                + "\"https://example.test/forbid( // unless {\" == "
+                + "\"https://example.test/forbid( // unless {\" };";
+        Path archive = createPolicyArchive(policy);
+
+        try (ZipFile zipFile = new ZipFile(archive.toFile())) {
+            Map<String, Set<String>> result = policyToScopeMapper.processZipFile(zipFile, resourceScopes());
+            assertEquals(result, Map.of("admin", Set.of("users.read")));
+        } finally {
+            Files.deleteIfExists(archive);
+        }
     }
 
     private void assertUnsupportedPolicy(String policy, String unsupportedForm) throws Exception {
