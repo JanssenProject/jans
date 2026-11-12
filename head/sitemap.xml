@@ -994,7 +994,7 @@
         <loc>https://docs.jans.io/head/janssen-server/install/helm-install/prerequisites/rancher/</loc>
       </url>
       <url>
-        <loc>https://docs.jans.io/head/janssen-server/install/helm-install/ingress-setup/</loc>
+        <loc>https://docs.jans.io/head/janssen-server/install/helm-install/external-access/</loc>
       </url>
       <url>
         <loc>https://docs.jans.io/head/janssen-server/install/helm-install/database-setup/</loc>
