@@ -13954,7 +13954,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -13985,7 +13984,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -15695,19 +15693,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -17621,10 +17619,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -17695,10 +17693,6 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
-        jwtIntrospectionEnabled:
-          type: boolean
-          description: Flag to enable/disable introspection of JWT access tokens so
-            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
