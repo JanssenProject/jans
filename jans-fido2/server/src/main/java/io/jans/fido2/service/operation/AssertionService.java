@@ -437,10 +437,7 @@ public class AssertionService {
 
 		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
 		// instead of relying solely on the DB lookup above.
-		String issuedChallenge = authenticationData.getChallenge();
-		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
-			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
-		}
+		verifyChallengeMatchesIssued(authenticationData, challenge);
 
 		// Ordered after the conformance challenge comparison so that a mismatched challenge is still
 		// reported as such rather than being masked by the state of whichever ceremony it resolved to.
@@ -462,17 +459,10 @@ public class AssertionService {
 
 		// FIDO2 conformance: when a username-scoped ceremony issued allowCredentials, the asserted
 		// credential must belong to that user (i.e. be within the issued allowCredentials set).
-		String issuedUsername = authenticationData.getUsername();
-		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
-			throw errorResponseFactory.invalidRequest(
-					"Asserted credential is not among the allowed credentials for this ceremony");
-		}
+		verifyAssertedCredentialIsAllowed(authenticationData, registrationData);
 
 		// FIDO2 conformance: when present, userHandle must map to the credential owner.
-		String userHandle = response.getUserHandle();
-		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
-			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
-		}
+		verifyUserHandleOwnsCredential(response, registrationData);
 
 		// Compromised or canceled credentials must not authenticate, including usernameless ceremonies
 		if (registrationEntry.getRegistrationStatus() != Fido2RegistrationStatus.registered) {
@@ -517,7 +507,7 @@ public class AssertionService {
 			log.debug("There is session id. Setting session id attributes");
 
 			userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(),
-					registrationEntry, authenticationEntity, false);
+					registrationEntry, authenticationEntity);
 		}
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor();
@@ -680,6 +670,29 @@ public class AssertionService {
 		long elapsedMillis = System.currentTimeMillis() - issuedAt.getTime();
 		if (elapsedMillis > unfinishedRequestExpiration * 1000L) {
 			throw errorResponseFactory.invalidRequest("Assertion ceremony has expired");
+		}
+	}
+
+	private void verifyChallengeMatchesIssued(Fido2AuthenticationData authenticationData, String challenge) {
+		String issuedChallenge = authenticationData.getChallenge();
+		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
+			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
+		}
+	}
+
+	private void verifyAssertedCredentialIsAllowed(Fido2AuthenticationData authenticationData,
+			Fido2RegistrationData registrationData) {
+		String issuedUsername = authenticationData.getUsername();
+		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
+			throw errorResponseFactory.invalidRequest(
+					"Asserted credential is not among the allowed credentials for this ceremony");
+		}
+	}
+
+	private void verifyUserHandleOwnsCredential(Response response, Fido2RegistrationData registrationData) {
+		String userHandle = response.getUserHandle();
+		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
+			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
 		}
 	}
 

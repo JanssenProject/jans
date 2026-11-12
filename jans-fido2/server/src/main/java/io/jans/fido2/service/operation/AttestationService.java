@@ -406,7 +406,7 @@ public class AttestationService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry);
         }
 
 

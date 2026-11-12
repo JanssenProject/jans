@@ -6,8 +6,6 @@
 
 package io.jans.fido2.service.persist;
 
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
-
 import java.util.Date;
 import java.util.Map;
 
@@ -37,6 +35,10 @@ import jakarta.inject.Inject;
 public class UserSessionIdService {
 
 	public static final String AUTHENTICATED_USER = "auth_user";
+
+    private static final String SESSION_CUSTOM_STATE = "session_custom_state";
+    private static final String STATE_APPROVED = "approved";
+    private static final String STATE_DECLINED = "declined";
 
     @Inject
     private Logger log;
@@ -71,7 +73,7 @@ public class UserSessionIdService {
         return true;
     }
 
-    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll) {
+    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry) {
         SessionId entity = getSessionId(sessionId);
         if (entity == null || !isSessionUsableForUser(entity, userInum, registrationEntry)) {
             return;
@@ -79,14 +81,14 @@ public class UserSessionIdService {
 
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
         if (Fido2RegistrationStatus.registered == registrationEntry.getRegistrationStatus()) {
-            sessionAttributes.put("session_custom_state", "approved");
+            sessionAttributes.put(SESSION_CUSTOM_STATE, STATE_APPROVED);
         } else {
-            sessionAttributes.put("session_custom_state", "declined");
+            sessionAttributes.put(SESSION_CUSTOM_STATE, STATE_DECLINED);
         }
         updateSessionId(entity);
     }
 
-    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry, boolean enroll) {
+    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry) {
         SessionId entity = getSessionId(sessionId);
         if (entity == null || !isSessionUsableForUser(entity, userInum, registrationEntry)) {
             return;
@@ -94,9 +96,9 @@ public class UserSessionIdService {
 
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
         if (Fido2AuthenticationStatus.authenticated == authenticationEntry.getAuthenticationStatus()) {
-            sessionAttributes.put("session_custom_state", "approved");
+            sessionAttributes.put(SESSION_CUSTOM_STATE, STATE_APPROVED);
         } else {
-            sessionAttributes.put("session_custom_state", "declined");
+            sessionAttributes.put(SESSION_CUSTOM_STATE, STATE_DECLINED);
         }
         
 
@@ -145,7 +147,7 @@ public class UserSessionIdService {
         }
 
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
-        sessionAttributes.put("session_custom_state", "declined");
+        sessionAttributes.put(SESSION_CUSTOM_STATE, STATE_DECLINED);
 
         updateSessionId(entity);
     }

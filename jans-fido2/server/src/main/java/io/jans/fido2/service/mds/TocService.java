@@ -112,6 +112,8 @@ public class TocService {
 
 	private static final String RETRY_AFTER_HEADER = "Retry-After";
 
+	private static final String MDS_TOCS_FOLDER = "mdsTocsFolder";
+
 	/** {@link HttpURLConnection} has no constant for 429 (Too Many Requests). */
 	private static final int HTTP_TOO_MANY_REQUESTS = 429;
 
@@ -402,7 +404,7 @@ public class TocService {
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 
 		try {
-			Document mdsDocument = dbDocumentService.getDocumentByDisplayName("mdsTocsFolder");
+			Document mdsDocument = dbDocumentService.getDocumentByDisplayName(MDS_TOCS_FOLDER);
 			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, mdsDocument.getDocument());
 			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
 
@@ -794,7 +796,7 @@ public class TocService {
 				return null;
 			}
 			String description = documents.get(0).getDescription();
-			return (description == null || "mdsTocsFolder".equals(description)) ? null : stringToLocalDate(description);
+			return (description == null || MDS_TOCS_FOLDER.equals(description)) ? null : stringToLocalDate(description);
 		} catch (Exception e) {
 			log.debug("No persisted MDS TOC date available: {}", e.getMessage());
 			return null;
@@ -808,7 +810,7 @@ public class TocService {
 			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
 
 			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
+			return (document.getDescription() == null || MDS_TOCS_FOLDER.equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
 
 		} catch (Exception e) {
 			log.error("Failed to get nextUpdateDate of the MDS from jansDocument ", e);

@@ -117,26 +117,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         if (!AttestationMode.DISABLED.getValue().equalsIgnoreCase(attestationMode))
         {
         	if (attStmt.hasNonNull("x5c")) {
-
-                List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
-                X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates, registration.getRpId());
-                if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
-                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
-                }
-                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
-                authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
-                if (certificateVerifier.isSelfSigned(verifiedCert)) {
-                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
-                }
-
-
-                // If the attestation certificate carries the id-fido-gen-ce-aaguid extension, it must
-                // match the AAGUID in the authenticator data.
-                verifyAaguidExtension(attestationCertificates.get(0), authData);
-                // WebAuthn packed full-attestation certificate requirements (v3, CA:false, subject fields).
-                verifyPackedAttestationCertRequirements(attestationCertificates.get(0));
-
-
+                verifyPackedFullAttestation(attStmt, authData, registration, clientDataHash, signature, alg);
             } else if (attStmt.hasNonNull("ecdaaKeyId")) {
                 String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, ecdaaKeyId + " is not supported");
@@ -158,6 +139,30 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         credIdAndCounters.setSignatureAlgorithm(alg);
+    }
+
+    private void verifyPackedFullAttestation(JsonNode attStmt, AuthData authData, Fido2RegistrationData registration,
+            byte[] clientDataHash, String signature, int alg) {
+
+        List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
+        X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates, registration.getRpId());
+        if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
+        }
+        X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
+        authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
+        if (certificateVerifier.isSelfSigned(verifiedCert)) {
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
+        }
+
+
+        // If the attestation certificate carries the id-fido-gen-ce-aaguid extension, it must
+        // match the AAGUID in the authenticator data.
+        verifyAaguidExtension(attestationCertificates.get(0), authData);
+        // WebAuthn packed full-attestation certificate requirements (v3, CA:false, subject fields).
+        verifyPackedAttestationCertRequirements(attestationCertificates.get(0));
+
+
     }
 
 	/**

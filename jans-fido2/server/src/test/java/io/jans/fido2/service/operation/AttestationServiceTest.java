@@ -155,13 +155,14 @@ class AttestationServiceTest {
 	 */
 	@Test
 	void verify_ifFailureOccursAfterStatusSetButBeforePersistence_collectsADenyLockAuditEvent() {
-		Fido2RegistrationEntry registrationEntry = stubHappyPathThroughStatusSet();
+		stubHappyPathThroughStatusSet();
 		when(registrationPersistenceService.getPublicKeyIdHash(any())).thenThrow(new RuntimeException("boom"));
 
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(RuntimeException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(RuntimeException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(registrationPersistenceService, never()).update(any());
@@ -186,7 +187,8 @@ class AttestationServiceTest {
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(RuntimeException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(RuntimeException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(registrationPersistenceService).update(registrationEntry);
@@ -211,7 +213,8 @@ class AttestationServiceTest {
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(Fido2NativeFailureException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(Fido2NativeFailureException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(metricService).recordPasskeyRegistrationFailure(eq("alice"), any(), anyLong(),
