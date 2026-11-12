@@ -1,0 +1,100 @@
+package io.jans.shibboleth.trust.activation.coordination;
+
+import io.jans.shibboleth.trust.activation.error.StaleReport;
+import io.jans.shibboleth.trust.activation.model.TrustRelationshipRef;
+import io.jans.shibboleth.trust.activation.model.WorkItemActivation;
+import io.jans.shibboleth.trust.activation.model.WorkItemState;
+import io.jans.kernel.Result;
+import io.jans.shibboleth.trust.activation.workers.Worker;
+import io.jans.shibboleth.trust.activation.workers.WorkerId;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationDiagnostics;
+import io.jans.shibboleth.trust.shared.diagnostics.ActivationStatus;
+import io.jans.shibboleth.trust.shared.Origin;
+
+import io.jans.shibboleth.trust.activation.support.FakeLeaseRepository;
+import io.jans.shibboleth.trust.activation.support.FakeWorkItemRepository;
+import io.jans.shibboleth.trust.activation.support.FakeWorkerRepository;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static io.jans.shibboleth.trust.activation.model.WorkItemType.PROCESS_AGGREGATE_METADATA;
+
+@DisplayName("Group 11 — Orchestrator: Cancellation")
+public class WorkOrchestratorCancellationTests {
+
+    private static final Instant NOW = Instant.parse("2026-01-01T00:00:00Z");
+    private static final TimeSource CLOCK = () -> NOW;
+    private static final Duration LEASE_TTL = Duration.ofSeconds(30);
+    private static final Duration HEARTBEAT_TTL = Duration.ofSeconds(30);
+    private static final ActivationEventSink NO_EVENTS = event -> { };
+
+    private int finalizeCount = 0;
+    private final WorkOrchestrator orchestrator =
+        WorkOrchestrator.create(CLOCK, LEASE_TTL, HEARTBEAT_TTL, NO_EVENTS, (ref, diagnostics) -> finalizeCount++, new FakeWorkItemRepository(), new FakeLeaseRepository(), new FakeWorkerRepository()).getValue();
+
+    private static TrustRelationshipRef aTrustRelationship() {
+
+        return TrustRelationshipRef.of(UUID.randomUUID()).getValue();
+    }
+
+    private static Worker worker(String origin) {
+
+        return Worker.register(WorkerId.of(Origin.of(origin)).getValue(), NOW).getValue();
+    }
+
+    private static ActivationDiagnostics diagnostics(String origin) {
+
+        return ActivationDiagnostics.of(ActivationStatus.SUCCEEDED, Origin.of(origin), List.of(), Instant.EPOCH, Instant.EPOCH).getValue();
+    }
+
+    @Test
+    @DisplayName("GIVEN a TR that left ACTIVATING via cancelActivation WHEN ActivationCancelled is handled THEN the current WorkItem is marked CANCELLED and cleared as current")
+    public void shouldCancelCurrentWorkItem_whenActivationCancelled() {
+
+        TrustRelationshipRef tr = aTrustRelationship();
+        WorkItemActivation pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        orchestrator.claim(pending.id(), worker("w@host"));
+
+        WorkItemActivation cancelled = orchestrator.onActivationCancelled(tr).getValue();
+
+        assertThat(cancelled.state()).isEqualTo(WorkItemState.CANCELLED);
+        assertThat(orchestrator.isCurrent(cancelled)).isFalse();
+    }
+
+    @Test
+    @DisplayName("GIVEN a WorkItem cancelled after a Worker was busy WHEN that Worker's eventual report arrives THEN it is discarded by the identity fence")
+    public void shouldDiscardLateReport_afterCancellation() {
+
+        TrustRelationshipRef tr = aTrustRelationship();
+        WorkItemActivation pending = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        orchestrator.claim(pending.id(), worker("w@host"));
+        orchestrator.onActivationCancelled(tr);
+
+        Result<WorkItemActivation> result = orchestrator.report(pending.id(), diagnostics("w@host"));
+
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.getError()).isInstanceOf(StaleReport.class);
+        assertThat(finalizeCount).isZero();
+    }
+
+    @Test
+    @DisplayName("GIVEN a cancelled activation WHEN the TR is activated again THEN a new WorkItem with a new WorkItemId begins a fresh episode")
+    public void shouldStartFreshEpisode_whenActivatedAgainAfterCancel() {
+
+        TrustRelationshipRef tr = aTrustRelationship();
+        WorkItemActivation first = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+        orchestrator.onActivationCancelled(tr);
+
+        WorkItemActivation second = orchestrator.onActivationRequested(tr, PROCESS_AGGREGATE_METADATA).getValue();
+
+        assertThat(second.id()).isNotEqualTo(first.id());
+        assertThat(orchestrator.isCurrent(second)).isTrue();
+    }
+}
