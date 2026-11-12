@@ -45285,6 +45285,12 @@ If you’d like to contribute to this document, get started with the [Contributi
 | fido2MetricsEnabled | Boolean value specifying whether FIDO2 passkey metrics collection is enabled | [Details](#fido2metricsenabled) |
 | fido2MetricsRetentionDays | Number of days to keep FIDO2 passkey metrics data | [Details](#fido2metricsretentiondays) |
 | fido2PerformanceMetrics | Boolean value specifying whether to collect detailed performance metrics for FIDO2 operations | [Details](#fido2performancemetrics) |
+| fido2TraceChainGenesis | Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed | [Details](#fido2tracechaingenesis) |
+| fido2TraceEnabled | Master switch for FIDO_CEREMONY TRACE record emission to the Lock Server | [Details](#fido2traceenabled) |
+| fido2TraceEndpoint | Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint | [Details](#fido2traceendpoint) |
+| fido2TraceIncludeAttestationDetail | Whether TRACE records include optional signed attestation and MDS trust detail | [Details](#fido2traceincludeattestationdetail) |
+| fido2TraceIncludeCredentialIdHash | Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID | [Details](#fido2traceincludecredentialidhash) |
+| fido2TraceProducerId | Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version | [Details](#fido2traceproducerid) |
 | hints | Hints to the RP - security-key, client-device, hybrid | [Details](#hints) |
 | issuer | URL using the https scheme for Issuer identifier | [Details](#issuer) |
 | lockAuditClientId | OAuth2 client ID used to obtain a token (scope https://jans.io/oauth/lock/log.write) for posting Lock Server audit events | [Details](#lockauditclientid) |
@@ -45535,6 +45541,60 @@ If you’d like to contribute to this document, get started with the [Contributi
 - Required: No
 
 - Default value: true
+
+
+## fido2TraceChainGenesis
+
+- Description: Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed
+
+- Required: No
+
+- Default value: first_observed
+
+
+## fido2TraceEnabled
+
+- Description: Master switch for FIDO_CEREMONY TRACE record emission to the Lock Server
+
+- Required: No
+
+- Default value: false
+
+
+## fido2TraceEndpoint
+
+- Description: Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint
+
+- Required: No
+
+- Default value: None
+
+
+## fido2TraceIncludeAttestationDetail
+
+- Description: Whether TRACE records include optional signed attestation and MDS trust detail
+
+- Required: No
+
+- Default value: false
+
+
+## fido2TraceIncludeCredentialIdHash
+
+- Description: Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID
+
+- Required: No
+
+- Default value: true
+
+
+## fido2TraceProducerId
+
+- Description: Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version
+
+- Required: No
+
+- Default value: None
 
 
 ## hints
@@ -46461,13 +46521,11 @@ If you’d like to contribute to this document, get started with the [Contributi
 
 ## authorizationCodeLifetime
 
-- Description: The authorization code lifetime in seconds. The effective value
-  is capped at 600 seconds; values that are zero, negative, or greater than 600
-  use the 600-second maximum.
+- Description: The authorization code lifetime in seconds. Values that are zero, negative, or greater than 600 use the 600-second maximum
 
 - Required: No
 
-- Default value:  60 seconds (standard installation)
+- Default value: 60
 
 
 ## authorizationEncryptionAlgValuesSupported
