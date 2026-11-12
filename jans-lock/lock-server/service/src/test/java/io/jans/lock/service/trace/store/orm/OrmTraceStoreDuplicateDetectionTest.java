@@ -33,10 +33,10 @@ import io.jans.orm.exception.EntryPersistenceException;
 
 /**
  * Tests the backend-agnostic duplicate-detection protocol in isolation, with
- * a plain Mockito mock of {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}:
- * {@code persist} throws a plain {@link EntryPersistenceException} — never
- * {@code io.jans.orm.exception.operation.DuplicateEntryException} in its cause chain, exactly as
- * the SQL backend does — and the store must re-probe {@code contains} to tell a real race from a
+ * a plain Mockito mock of {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}.
+ * The store never reads before an insert: the unique key decides. A duplicate reported as an ORM
+ * {@code DuplicateEntryException} cause (SQL, LDAP) needs no read; a plain {@link EntryPersistenceException}
+ * (backends that wrap every failure) makes the store re-probe {@code contains} to tell a duplicate from a
  * genuine storage failure.
  *
  * @author Yuriy Movchan
@@ -83,19 +83,28 @@ class OrmTraceStoreDuplicateDetectionTest {
 
 	@Test
 	void testInsertProducerKey_persistFailsButContainsTrueOnReprobe_throwsDuplicateEntryException() {
-		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(false, true);
+		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
 		doThrow(new EntryPersistenceException("boom")).when(persistenceEntryManager).persist(any());
 
 		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
 	}
 
 	@Test
-	void testInsertProducerKey_containsTrueUpfront_throwsDuplicateEntryExceptionWithoutPersisting() {
-		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
+	void testInsertProducerKey_persistFailsWithDuplicateCause_throwsDuplicateEntryExceptionWithoutRead() {
+		doThrow(new EntryPersistenceException("Failed to persist entry",
+				new io.jans.orm.exception.operation.DuplicateEntryException("dn"))).when(persistenceEntryManager).persist(any());
 
 		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
 
-		verify(persistenceEntryManager, never()).persist(any());
+		verify(persistenceEntryManager, never()).contains(anyString(), any(Class.class));
+	}
+
+	@Test
+	void testInsertProducerKey_persistSucceeds_readsNothing() throws Exception {
+		store.insertProducerKey(newProducerKey());
+
+		verify(persistenceEntryManager).persist(any());
+		verify(persistenceEntryManager, never()).contains(anyString(), any(Class.class));
 	}
 
 }

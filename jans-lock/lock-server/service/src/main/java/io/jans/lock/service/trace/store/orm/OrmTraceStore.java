@@ -145,15 +145,18 @@ public class OrmTraceStore implements TraceStore {
 
 	// -- duplicate-safe insert -------------------------------------------
 
+	/*
+	 * The unique key decides, so there is no read before the insert. SQL and LDAP report a duplicate as an
+	 * ORM DuplicateEntryException cause; other backends wrap every failure, so only a failed insert
+	 * without that cause re-checks the DN to tell a duplicate from a storage error.
+	 */
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
 			throws DuplicateEntryException, TraceStorageException {
-		if (persistenceEntryManager.contains(dn, entityClass)) {
-			throw new DuplicateEntryException(key);
-		}
 		try {
 			persistenceEntryManager.persist(entity);
 		} catch (EntryPersistenceException e) {
-			if (persistenceEntryManager.contains(dn, entityClass)) {
+			if ((e.getCause() instanceof io.jans.orm.exception.operation.DuplicateEntryException)
+					|| persistenceEntryManager.contains(dn, entityClass)) {
 				throw new DuplicateEntryException(key, "Entry already exists: " + key, e);
 			}
 			throw new TraceStorageException("persist_failed",

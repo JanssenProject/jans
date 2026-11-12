@@ -42,8 +42,8 @@ import io.jans.orm.search.filter.Filter;
  * A map-backed stand-in for {@link PersistenceEntryManager} that emulates enough of a SQL backend's
  * behavior for {@code OrmTraceStore} to be exercised by the shared {@code TraceStoreContractTest}
  * suite: {@code contains}, {@code persist} (throwing
- * {@link EntryPersistenceException} with <strong>no</strong> {@code DuplicateEntryException} cause
- * on a duplicate DN, exactly like SQL), {@code find} (throwing when the DN is absent; returns a
+ * {@link EntryPersistenceException} with an ORM {@code DuplicateEntryException} cause on a duplicate
+ * DN, exactly like SQL), {@code find} (throwing when the DN is absent; returns a
  * defensive copy, like a real backend deserializing a fresh row, so a caller mutating the found
  * entity never aliases the stored state before a subsequent CAS check), {@code merge},
  * {@code updateWithVersion} (compare-and-swaps the entity's {@code @Version} field against
@@ -127,9 +127,9 @@ final class FakeEntryManagerBehavior {
 			String dn = dnOf(entity);
 			Map<String, Object> store = storeFor(entity.getClass());
 			if (store.containsKey(dn)) {
-				// SQL does not throw io.jans.orm.exception.operation.DuplicateEntryException; it
-				// wraps every persist failure in a plain EntryPersistenceException.
-				throw new EntryPersistenceException("Duplicate entry: " + dn);
+				// Like SQL: the ORM DuplicateEntryException is the cause of the EntryPersistenceException
+				throw new EntryPersistenceException("Failed to persist entry: '" + dn + "'",
+						new io.jans.orm.exception.operation.DuplicateEntryException(dn));
 			}
 			initVersionIfNeeded(entity);
 			store.put(dn, entity);
