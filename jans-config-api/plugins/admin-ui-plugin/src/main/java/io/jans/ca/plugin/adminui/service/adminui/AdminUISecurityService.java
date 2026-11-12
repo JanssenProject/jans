@@ -557,23 +557,29 @@ public class AdminUISecurityService {
             List<String> centralEntryNames = new ArrayList<>();
             boolean mismatch;
             try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
-                Enumeration<? extends ZipEntry> entries = zipFile.entries();
-                while (entries.hasMoreElements()) {
-                    centralEntryNames.add(entries.nextElement().getName());
+                List<? extends ZipEntry> centralEntries = Collections.list(zipFile.entries());
+                for (ZipEntry central : centralEntries) {
+                    centralEntryNames.add(central.getName());
                 }
                 mismatch = new HashSet<>(centralEntryNames).size() != centralEntryNames.size()
                         || !centralEntryNames.equals(localEntryNames);
-                // Cedarling reads entry data via the central directory; it must be the data validated above.
-                Iterator<Map.Entry<String, String>> issuers = issuerContents.entrySet().iterator();
-                while (!mismatch && issuers.hasNext()) {
-                    Map.Entry<String, String> issuer = issuers.next();
-                    ZipEntry central = zipFile.getEntry(issuer.getKey());
-                    if (central == null) {
-                        mismatch = true;
-                        continue;
-                    }
+                // Cedarling reads entry data via the central directory, so validate and budget that data too.
+                long centralUncompressed = 0;
+                Iterator<? extends ZipEntry> it = centralEntries.iterator();
+                while (!mismatch && it.hasNext()) {
+                    ZipEntry central = it.next();
+                    String issuerContent = issuerContents.get(central.getName());
                     try (InputStream is = zipFile.getInputStream(central)) {
-                        mismatch = !issuer.getValue().equals(readEntryContentSafely(is));
+                        if (issuerContent == null) {
+                            centralUncompressed += drainEntrySafely(is,
+                                    MAX_ARCHIVE_UNCOMPRESSED_SIZE - centralUncompressed);
+                            continue;
+                        }
+                        mismatch = !issuerContent.equals(readEntryContentSafely(is));
+                        centralUncompressed += issuerContent.getBytes(StandardCharsets.UTF_8).length;
+                    }
+                    if (centralUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
+                        throw new IOException("ZIP archive too large when decompressed");
                     }
                 }
             }

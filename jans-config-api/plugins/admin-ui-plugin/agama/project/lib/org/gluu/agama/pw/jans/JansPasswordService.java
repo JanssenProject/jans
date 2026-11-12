@@ -24,6 +24,8 @@ public class JansPasswordService extends PasswordService {
     // Keeps the lock record past its expiry so an unlock can prove this mechanism set the lock.
     // Memcached reads TTLs above 30 days as absolute timestamps.
     private static final int LOCK_RECORD_RETENTION = 30 * 24 * 3600;
+    // The record must outlive the lock, so locks are capped one day below the retention.
+    private static final int MAX_LOCK_EXP_TIME = LOCK_RECORD_RETENTION - 24 * 3600;
     private static AuthenticationService authenticationService = CdiUtil.bean(AuthenticationService.class);
     private static UserService userService = CdiUtil.bean(UserService.class);
     private static CacheService cacheService = CdiUtil.bean(CacheService.class);
@@ -39,6 +41,10 @@ public class JansPasswordService extends PasswordService {
         flowConfig = config;
         DEFAULT_MAX_LOGIN_ATTEMPT = flowConfig.get("maxLoginAttempt") != null ? Integer.valueOf(flowConfig.get("maxLoginAttempt").toString()) : DEFAULT_MAX_LOGIN_ATTEMPT;
         DEFAULT_LOCK_EXP_TIME = flowConfig.get("lockExpTime") != null ? Integer.valueOf(flowConfig.get("lockExpTime").toString()) : DEFAULT_LOCK_EXP_TIME;
+        if (DEFAULT_LOCK_EXP_TIME > MAX_LOCK_EXP_TIME) {
+            logger.warn("lockExpTime {} exceeds the supported maximum; using {} seconds.", DEFAULT_LOCK_EXP_TIME, MAX_LOCK_EXP_TIME);
+            DEFAULT_LOCK_EXP_TIME = MAX_LOCK_EXP_TIME;
+        }
     }
 
     public JansPasswordService() {
@@ -108,8 +114,7 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             long lockExpiresAt = System.currentTimeMillis() + DEFAULT_LOCK_EXP_TIME * 1000L;
-            int retention = (int) Math.min(Integer.MAX_VALUE, Math.max(LOCK_RECORD_RETENTION, DEFAULT_LOCK_EXP_TIME + 24L * 3600));
-            cacheService.put(retention, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
+            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
             setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
             return "Your account has been locked.";

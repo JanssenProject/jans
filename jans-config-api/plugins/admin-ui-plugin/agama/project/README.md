@@ -79,7 +79,7 @@ Below is a typical configuration for the Agama-PW project:
 | ----------------- | -------- | ------------------------------------------------------------------------------------------------------------- | ------- |
 | `maxLoginAttempt` | Yes      | Maximum number of consecutive failed login attempts allowed before the account is locked.                     | `6`     |
 | `enableLock`      | Yes      | Enables or disables the account lockout feature after the maximum number of failed login attempts is reached. | `true`  |
-| `lockExpTime`     | Yes      | Duration, in seconds, for which the account remains locked before it is automatically unlocked.               | `180`   |
+| `lockExpTime`     | Yes      | Duration, in seconds, for which the account remains locked before it is automatically unlocked. Maximum 2505600 (29 days). | `180`   |
 
 > **Note**
 >
