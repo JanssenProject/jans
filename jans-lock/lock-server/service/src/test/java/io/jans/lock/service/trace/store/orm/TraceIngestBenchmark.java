@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -257,7 +258,7 @@ class TraceIngestBenchmark {
 	}
 
 	private static void report(Result r) throws IOException {
-		String line = String.format("%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f,%s", Instant.now(), r.chains, r.records,
+		String line = String.format(Locale.ROOT, "%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f,%s", Instant.now(), r.chains, r.records,
 				r.chains * r.records, r.elapsedNs / 1e9, r.recordsPerSecond(), r.firstQuarterRate(), r.lastQuarterRate(),
 				r.percentileMs(50), r.percentileMs(95), timingColumns(r));
 		LOG.info("TRACE ingest benchmark: {}", line);
@@ -268,10 +269,43 @@ class TraceIngestBenchmark {
 
 		Path csv = Paths.get("target", "benchmark", "trace-ingest.csv");
 		Files.createDirectories(csv.getParent());
+		prepareCsv(csv);
+		Files.write(csv, (line + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+	}
+
+	/**
+	 * Makes sure {@code csv} starts with the current header. A file with an older header, which is a prefix
+	 * of the current one, is rewritten with empty values for the new columns. A file with any other header is
+	 * moved aside, so rows and header always match.
+	 */
+	private static void prepareCsv(Path csv) throws IOException {
 		if (!Files.exists(csv)) {
 			Files.write(csv, (CSV_HEADER + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+			return;
 		}
-		Files.write(csv, (line + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+		List<String> lines = Files.readAllLines(csv, StandardCharsets.UTF_8);
+		String header = lines.isEmpty() ? "" : lines.get(0);
+		if (header.equals(CSV_HEADER)) {
+			return;
+		}
+		if (!header.isEmpty() && CSV_HEADER.startsWith(header + ",")) {
+			int missing = CSV_HEADER.split(",").length - header.split(",").length;
+			StringBuilder padding = new StringBuilder();
+			for (int i = 0; i < missing; i++) {
+				padding.append(',');
+			}
+			List<String> migrated = new ArrayList<>(lines.size());
+			migrated.add(CSV_HEADER);
+			for (String row : lines.subList(1, lines.size())) {
+				migrated.add(row.isEmpty() ? row : row + padding);
+			}
+			Files.write(csv, migrated, StandardCharsets.UTF_8);
+			return;
+		}
+		Path aside = csv.resolveSibling("trace-ingest-" + System.currentTimeMillis() + ".csv");
+		Files.move(csv, aside);
+		LOG.warn("{} has an unknown header, moved to {}", csv, aside);
+		Files.write(csv, (CSV_HEADER + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
 	}
 
 	private static String timingColumns(Result r) {
@@ -279,7 +313,7 @@ class TraceIngestBenchmark {
 			return ",,";
 		}
 		double total = r.chains * (double) r.records;
-		return String.format("%.2f,%.2f,%.2f", r.timing.totalCalls() / total, r.timing.writeCalls() / total,
+		return String.format(Locale.ROOT, "%.2f,%.2f,%.2f", r.timing.totalCalls() / total, r.timing.writeCalls() / total,
 				r.timing.readCalls() / total);
 	}
 
