@@ -32,6 +32,8 @@
 {{- $oauthServerConfigEnabled := $routes.oauthServerConfigEnabled -}}
 {{- $lockConfigEnabled := or $routes.lockConfigEnabled (index .Values "auth-server" "ingress" "lockConfigEnabled") -}}
 {{- $lockAuditEnabled := or $routes.lockAuditEnabled (index .Values "auth-server" "ingress" "lockAuditEnabled") -}}
+{{- $lockTraceEnabled := or $routes.lockTraceEnabled (index .Values "auth-server" "ingress" "lockTraceEnabled") -}}
+{{- $lockTraceAdminEnabled := or $routes.lockTraceAdminEnabled (index .Values "auth-server" "ingress" "lockTraceAdminEnabled") -}}
 {{- $casaEnabled := or $routes.casaEnabled .Values.casa.ingress.casaEnabled -}}
 {{- $configApiEnabled := $routes.configApiEnabled -}}
 {{- $fido2Enabled := or $routes.fido2Enabled .Values.fido2.ingress.fido2Enabled -}}
@@ -327,9 +329,11 @@ spec:
         statusCode: 301
 {{- end }}
 
-{{- /* Auth Server: gRPC (Lock Server Audit) */}}
-{{- if and (index .Values "auth-server" "lockEnabled") ($lockAuditEnabled) }}
-{{- $lockGrpcServices := dict "io.jans.lock.audit.AuditService" (list "ProcessLog" "ProcessBulkLog" "ProcessHealth" "ProcessBulkHealth" "ProcessTelemetry" "ProcessBulkTelemetry") "io.jans.lock.trace.TraceService" (list "SubmitRecord" "SubmitBulkRecords" "GetRecord" "SearchRecords" "GetExecution") "io.jans.lock.trace.TraceAdminService" (list "RegisterProducerKey" "ListProducerKeys" "RevokeProducerKey" "RegisterProducerChain" "ListProducerChains") }}
+{{- /* Auth Server: gRPC (Lock Audit, Lock Trace, Lock Trace Admin) - each gets its own route, toggled by its own flag */}}
+{{- $lockGrpcRoutes := list (dict "name" "lock-audit" "enabled" $lockAuditEnabled "service" "io.jans.lock.audit.AuditService" "methods" (list "ProcessLog" "ProcessBulkLog" "ProcessHealth" "ProcessBulkHealth" "ProcessTelemetry" "ProcessBulkTelemetry")) (dict "name" "lock-trace" "enabled" $lockTraceEnabled "service" "io.jans.lock.trace.TraceService" "methods" (list "SubmitRecord" "SubmitBulkRecords" "GetRecord" "SearchRecords" "GetExecution")) (dict "name" "lock-trace-admin" "enabled" $lockTraceAdminEnabled "service" "io.jans.lock.trace.TraceAdminService" "methods" (list "RegisterProducerKey" "ListProducerKeys" "RevokeProducerKey" "RegisterProducerChain" "ListProducerChains")) -}}
+{{- if index .Values "auth-server" "lockEnabled" }}
+{{- range $lockGrpcRoute := $lockGrpcRoutes }}
+{{- if $lockGrpcRoute.enabled }}
 ---
 apiVersion: gateway.networking.k8s.io/v1
 {{- if ne $className "nginx" }}
@@ -338,7 +342,7 @@ kind: HTTPRoute
 kind: GRPCRoute
 {{- end }}
 metadata:
-  name: {{ $fullName }}-grpc-routes
+  name: {{ $fullName }}-{{ $lockGrpcRoute.name }}-grpc-routes
   namespace: {{ $namespace }}
   labels:
     app: {{ $fullName }}-routes
@@ -355,35 +359,32 @@ spec:
     namespace: {{ $authGatewayNamespace }}
     sectionName: {{ $httpsSection }}
   hostnames:
-  - {{ .Values.fqdn | quote }}
+  - {{ $.Values.fqdn | quote }}
   rules:
-  {{- /* DONT use URL rewrite to forward the Lock gRPC services (`/io.jans.lock.audit.AuditService` and others) to `/jans-auth/...` as AIO image handles it internally */}}
+  {{- /* DONT use URL rewrite to forward the Lock gRPC services to `/jans-auth/...` as AIO image handles it internally */}}
   {{- if ne $className "nginx" }}
-  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
     - path:
         type: PathPrefix
-        value: /{{ $grpcService }}
+        value: /{{ $lockGrpcRoute.service }}
     backendRefs:
     - name: {{ $svcName }}-grpc
       port: 50051
-  {{- end }}
   {{- else }}
   {{- /* One rule per service: a GRPCRoute rule allows at most 8 matches */}}
-  {{- range $grpcService, $grpcMethods := $lockGrpcServices }}
   - matches:
-    {{- range $grpcMethod := $grpcMethods }}
+    {{- range $grpcMethod := $lockGrpcRoute.methods }}
     - method:
-        service: {{ $grpcService }}
+        service: {{ $lockGrpcRoute.service }}
         method: {{ $grpcMethod }}
     {{- end }}
     backendRefs:
     - name: {{ $svcName }}-grpc
       port: 50051
   {{- end }}
-  {{- end }}
 {{- end }}
-
+{{- end }}
+{{- end }}
 
 {{- /* ======================================================== */}}
 {{- /* 2. CASA ROUTES                                           */}}
