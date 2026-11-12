@@ -137,11 +137,19 @@ public class AssertionService {
 		if (userVerificationNode == null || !userVerificationNode.isTextual()) {
 			return;
 		}
+		UserVerification hookValue;
 		try {
-			assertionOptions.setUserVerification(UserVerification.valueOf(userVerificationNode.asText()));
+			hookValue = UserVerification.valueOf(userVerificationNode.asText());
 		} catch (IllegalArgumentException e) {
 			throw errorResponseFactory.invalidRequest("Invalid userVerification");
 		}
+		// Enum order is strongest first, so a higher ordinal would weaken the requested level
+		UserVerification requested = commonVerifiers.prepareUserVerification(assertionOptions.getUserVerification());
+		if (hookValue.ordinal() > requested.ordinal()) {
+			log.warn("Ignoring start hook userVerification '{}' weaker than requested '{}'", hookValue, requested);
+			return;
+		}
+		assertionOptions.setUserVerification(hookValue);
 	}
 
 	// A failed enabled extension is replaced by a dummy that returns false, so false must block the ceremony
@@ -683,7 +691,7 @@ public class AssertionService {
 	private void verifyAssertedCredentialIsAllowed(Fido2AuthenticationData authenticationData,
 			Fido2RegistrationData registrationData) {
 		String issuedUsername = authenticationData.getUsername();
-		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
+		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equalsIgnoreCase(registrationData.getUsername())) {
 			throw errorResponseFactory.invalidRequest(
 					"Asserted credential is not among the allowed credentials for this ceremony");
 		}

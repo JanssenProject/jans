@@ -416,5 +416,7 @@ class ContentCheckerTest {
         List<CheckResult> checks = android(ONE_APP, body);
         assertNone(checks, CheckStatus.FAIL);
         assertEquals(CheckStatus.WARN, byId(checks, "content.drift").get(0).status());
+        assertTrue(byId(checks, "content.drift").get(0).reason()
+                .contains("0 expected entries missing, 1 unexpected"));
     }
 }
