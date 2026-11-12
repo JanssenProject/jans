@@ -683,4 +683,253 @@ public abstract class TraceStoreContractTest {
 		assertEquals(2, store.findProducerKeys(DOMAIN, "producer-1").size());
 	}
 
+	// -- ingest batch: atomic receipts + records ----------------------------------------------
+
+	/** A store whose {@code isAtomicIngestSupported()} is {@code false}. */
+	protected abstract TraceStore createNonAtomicStore();
+
+	/** The COMMITTED receipt row the batch path stores for {@code record}, matching its embedded receipt. */
+	protected TraceReceiptEntry batchReceiptFor(StoredTraceRecord record) {
+		io.jans.lock.service.trace.model.ReceiptEntry receipt = record.getReceipt();
+		TraceReceiptEntry row = newReceiptRow(receipt.getReceiptSequence(), receipt.getReceivedAtMs(),
+				record.getIdentity().getProducerId(), record.getIdentity().getRecordId(), TraceReceiptState.COMMITTED);
+		row.setDomainId(record.getIdentity().getDomainId());
+		row.setPrevReceiptHash(receipt.getPrevReceiptHash());
+		row.setReceiptHash(receipt.getReceiptHash());
+		row.setContentDigest(record.getContentDigest());
+		return row;
+	}
+
+	/** The record's embedded receipt fields equal the receipt row stored in the same batch. */
+	protected static void assertReceiptMatchesRecord(TraceReceiptEntry row, StoredTraceRecord record) {
+		io.jans.lock.service.trace.model.ReceiptEntry receipt = record.getReceipt();
+		assertEquals(record.getIdentity().getDomainId(), row.getDomainId());
+		assertEquals(receipt.getReceiptSequence(), row.getReceiptSeq().longValue());
+		assertEquals(receipt.getReceivedAtMs(), row.getReceivedAtMs().longValue());
+		assertEquals(receipt.getPrevReceiptHash(), row.getPrevReceiptHash());
+		assertEquals(receipt.getReceiptHash(), row.getReceiptHash());
+		assertEquals(record.getIdentity().getProducerId(), row.getProducerId());
+		assertEquals(record.getIdentity().getRecordId(), row.getRecordId());
+		assertEquals(TRACE_KEYS.recordKey(record.getIdentity()), row.getRecordKey());
+		assertEquals(record.getContentDigest(), row.getContentDigest());
+	}
+
+	private List<StoredTraceRecord> batchRecords(int firstReceiptSeq, int count) {
+		List<StoredTraceRecord> records = new java.util.ArrayList<>(count);
+		for (int i = 0; i < count; i++) {
+			long seq = firstReceiptSeq + i;
+			records.add(newRecord("producer-1", "record-" + seq, "authority-1", "exec-1", seq, seq));
+		}
+		return records;
+	}
+
+	private List<TraceReceiptEntry> batchReceipts(List<StoredTraceRecord> records) {
+		return records.stream().map(this::batchReceiptFor).collect(Collectors.toList());
+	}
+
+	private void assertNothingStored(List<StoredTraceRecord> records) {
+		for (StoredTraceRecord record : records) {
+			assertFalse(store.findRecord(record.getIdentity()).isPresent(), "record " + record.getIdentity());
+			assertFalse(store.findReceipt(DOMAIN, record.getReceipt().getReceiptSequence()).isPresent(),
+					"receipt " + record.getReceipt().getReceiptSequence());
+		}
+	}
+
+	@Test
+	void testIsAtomicIngestSupported_true() {
+		assertTrue(store.isAtomicIngestSupported());
+	}
+
+	@Test
+	void testInsertIngestBatch_storesAllReceiptsAndRecords() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 3);
+		List<TraceReceiptEntry> receipts = batchReceipts(records);
+
+		store.insertIngestBatch(receipts, records);
+
+		for (StoredTraceRecord record : records) {
+			StoredTraceRecord found = store.findRecord(record.getIdentity()).get();
+			assertEquals(record.getContentDigest(), found.getContentDigest());
+			assertEquals(record.getChainPosition(), found.getChainPosition());
+			TraceReceiptEntry row = store.findReceipt(DOMAIN, record.getReceipt().getReceiptSequence()).get();
+			assertEquals(TraceReceiptState.COMMITTED, row.getReceiptStateEnum());
+			assertEquals("node-1", row.getNodeId());
+			assertReceiptMatchesRecord(row, found);
+		}
+		assertEquals(3L, store.findReceiptHead(DOMAIN).get().getReceiptSequence());
+		assertEquals(3L, store.countRecords(DOMAIN));
+	}
+
+	@Test
+	void testInsertIngestBatch_keepsCallerReceiptState() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 1);
+		List<TraceReceiptEntry> receipts = batchReceipts(records);
+		receipts.get(0).setReceiptStateEnum(TraceReceiptState.PENDING);
+
+		store.insertIngestBatch(receipts, records);
+
+		assertEquals(TraceReceiptState.PENDING, store.findReceipt(DOMAIN, 1L).get().getReceiptStateEnum());
+	}
+
+	@Test
+	void testInsertIngestBatch_emptyBatch_noOp() throws Exception {
+		store.insertIngestBatch(Collections.emptyList(), Collections.emptyList());
+
+		assertFalse(store.findReceiptHead(DOMAIN).isPresent());
+	}
+
+	@Test
+	void testInsertIngestBatch_existingReceiptPosition_throwsAndStoresNothing() throws Exception {
+		store.insertReceipt(newReceiptRow(2L, 1000L, "producer-9", "record-other", TraceReceiptState.PENDING));
+		List<StoredTraceRecord> records = batchRecords(1, 3);
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertIngestBatch(batchReceipts(records), records));
+
+		for (StoredTraceRecord record : records) {
+			assertFalse(store.findRecord(record.getIdentity()).isPresent());
+		}
+		assertFalse(store.findReceipt(DOMAIN, 1L).isPresent());
+		assertFalse(store.findReceipt(DOMAIN, 3L).isPresent());
+		assertEquals("record-other", store.findReceipt(DOMAIN, 2L).get().getRecordId());
+	}
+
+	@Test
+	void testInsertIngestBatch_existingRecordIdentity_throwsAndStoresNoReceipts() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 3);
+		StoredTraceRecord existing = newRecord("producer-1", "record-3", "authority-1", "exec-1", 3L, 99L);
+		store.insertRecord(existing);
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertIngestBatch(batchReceipts(records), records));
+
+		for (long seq = 1; seq <= 3; seq++) {
+			assertFalse(store.findReceipt(DOMAIN, seq).isPresent(), "receipt " + seq);
+		}
+		assertFalse(store.findRecord(records.get(0).getIdentity()).isPresent());
+		assertFalse(store.findRecord(records.get(1).getIdentity()).isPresent());
+		assertEquals(99L, store.findRecord(existing.getIdentity()).get().getReceipt().getReceiptSequence());
+	}
+
+	@Test
+	void testInsertIngestBatch_samePositionTwiceInBatch_throwsAndStoresNothing() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 2);
+		List<TraceReceiptEntry> receipts = batchReceipts(records);
+		receipts.add(batchReceiptFor(records.get(0)));
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertIngestBatch(receipts, records));
+
+		assertNothingStored(records);
+	}
+
+	@Test
+	void testInsertIngestBatch_sameIdentityTwiceInBatch_throwsAndStoresNothing() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 2);
+		List<TraceReceiptEntry> receipts = batchReceipts(records);
+		List<StoredTraceRecord> withRepeat = new java.util.ArrayList<>(records);
+		withRepeat.add(records.get(1));
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertIngestBatch(receipts, withRepeat));
+
+		assertNothingStored(records);
+	}
+
+	@Test
+	void testInsertIngestBatch_nonAtomicStore_throwsUnsupportedOperation() {
+		TraceStore nonAtomic = createNonAtomicStore();
+		List<StoredTraceRecord> records = batchRecords(1, 1);
+
+		assertFalse(nonAtomic.isAtomicIngestSupported());
+		assertThrows(UnsupportedOperationException.class,
+				() -> nonAtomic.insertIngestBatch(batchReceipts(records), records));
+		assertFalse(nonAtomic.findRecord(records.get(0).getIdentity()).isPresent());
+	}
+
+	// -- multi-get: records by identity -----------------------------------------------------------
+
+	@Test
+	void testFindRecords_foundAndMissingMix() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 2);
+		store.insertIngestBatch(batchReceipts(records), records);
+		RecordIdentity missing = new RecordIdentity(DOMAIN, "producer-1", "missing");
+
+		Map<RecordIdentity, StoredTraceRecord> found = store.findRecords(
+				Arrays.asList(records.get(1).getIdentity(), missing, records.get(0).getIdentity()));
+
+		assertEquals(Arrays.asList(records.get(1).getIdentity(), records.get(0).getIdentity()),
+				new java.util.ArrayList<>(found.keySet()));
+		assertEquals(records.get(0).getContentDigest(), found.get(records.get(0).getIdentity()).getContentDigest());
+		assertFalse(found.containsKey(missing));
+	}
+
+	@Test
+	void testFindRecords_emptyInput_emptyMap() {
+		assertTrue(store.findRecords(Collections.emptyList()).isEmpty());
+	}
+
+	@Test
+	void testFindRecords_moreIdentitiesThanOneChunk() throws Exception {
+		List<RecordIdentity> identities = new java.util.ArrayList<>();
+		for (int from = 1; from <= 300; from += 100) {
+			List<StoredTraceRecord> records = batchRecords(from, 100);
+			store.insertIngestBatch(batchReceipts(records), records);
+			records.forEach(r -> identities.add(r.getIdentity()));
+		}
+		for (int i = 0; i < 250; i++) {
+			identities.add(new RecordIdentity(DOMAIN, "producer-1", "missing-" + i));
+		}
+
+		Map<RecordIdentity, StoredTraceRecord> found = store.findRecords(identities);
+
+		assertEquals(300, found.size());
+		assertEquals(identities.subList(0, 300), new java.util.ArrayList<>(found.keySet()));
+	}
+
+	// -- multi-get: records by chain position -----------------------------------------------------
+
+	@Test
+	void testFindRecordsByChainPositions_severalPositionsEquivocationAndMissing() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 3);
+		StoredTraceRecord equivocating = newRecord("producer-1", "record-equivocating", "authority-1", "exec-1", 2L, 4L);
+		List<StoredTraceRecord> all = new java.util.ArrayList<>(records);
+		all.add(equivocating);
+		store.insertIngestBatch(batchReceipts(all), all);
+		ChainPosition empty = new ChainPosition(records.get(0).getChainPosition().getChainIdentity(), 50L);
+
+		Map<ChainPosition, List<StoredTraceRecord>> found = store.findRecordsByChainPositions(Arrays.asList(
+				records.get(0).getChainPosition(), records.get(1).getChainPosition(), empty,
+				records.get(2).getChainPosition()));
+
+		assertEquals(3, found.size());
+		assertFalse(found.containsKey(empty));
+		assertEquals(Arrays.asList("record-1"), recordIdsOf(found.get(records.get(0).getChainPosition())));
+		assertEquals(Arrays.asList("record-2", "record-equivocating"),
+				recordIdsOf(found.get(records.get(1).getChainPosition())));
+		assertEquals(Arrays.asList("record-3"), recordIdsOf(found.get(records.get(2).getChainPosition())));
+	}
+
+	@Test
+	void testFindRecordsByChainPositions_emptyInput_emptyMap() {
+		assertTrue(store.findRecordsByChainPositions(Collections.emptyList()).isEmpty());
+	}
+
+	@Test
+	void testFindRecordsByChainPositions_morePositionsThanOneChunk() throws Exception {
+		List<StoredTraceRecord> records = batchRecords(1, 250);
+		store.insertIngestBatch(batchReceipts(records), records);
+		List<ChainPosition> positions = records.stream().map(StoredTraceRecord::getChainPosition)
+				.collect(Collectors.toList());
+		positions.add(new ChainPosition(positions.get(0).getChainIdentity(), 1000L));
+
+		Map<ChainPosition, List<StoredTraceRecord>> found = store.findRecordsByChainPositions(positions);
+
+		assertEquals(250, found.size());
+		for (StoredTraceRecord record : records) {
+			assertEquals(Arrays.asList(record.getIdentity().getRecordId()),
+					recordIdsOf(found.get(record.getChainPosition())));
+		}
+	}
+
+	private static List<String> recordIdsOf(List<StoredTraceRecord> records) {
+		return records.stream().map(r -> r.getIdentity().getRecordId()).collect(Collectors.toList());
+	}
+
 }

@@ -8,6 +8,7 @@ package io.jans.lock.service.trace.store;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import io.jans.lock.model.trace.entity.TraceChainEntry;
@@ -100,6 +101,26 @@ public interface TraceStore {
 	 */
 	List<StoredTraceRecord> findRecordsByChainPosition(ChainPosition position);
 
+	/**
+	 * Reads existing records by identity, in one round trip per chunk of identities.
+	 *
+	 * @return found records keyed by identity, in the order of the first occurrence of each
+	 *         identity in {@code identities}; missing identities are absent; never {@code null}
+	 * @throws TraceStorageException on a persistence failure
+	 */
+	Map<RecordIdentity, StoredTraceRecord> findRecords(Collection<RecordIdentity> identities);
+
+	/**
+	 * Reads the records at each chain position, in one round trip per chunk of positions. Several
+	 * records at one position are an equivocation, not an error, and are all returned.
+	 *
+	 * @return records keyed by position, each list ordered by {@code receiptSequence} ascending; a
+	 *         position without records is absent from the map (it never maps to an empty list);
+	 *         never {@code null}
+	 * @throws TraceStorageException on a persistence failure
+	 */
+	Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(Collection<ChainPosition> positions);
+
 	List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token);
 
 	/**
@@ -125,6 +146,27 @@ public interface TraceStore {
 	 * @throws TraceStorageException   on any other persistence failure
 	 */
 	void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException, TraceStorageException;
+
+	/**
+	 * @return {@code true} when {@link #insertIngestBatch} is atomic on this store (SQL with the ORM
+	 *         atomic batch); callers use the per-record path otherwise
+	 */
+	boolean isAtomicIngestSupported();
+
+	/**
+	 * Stores the receipt rows and the record rows in ONE transaction: either every row is stored or
+	 * none is. Receipts are stored in the state they carry (the batch path passes {@code COMMITTED});
+	 * the store does not rewrite it. As in {@link #insertReceipt}, the caller sets only the business
+	 * fields of each receipt and the store sets {@code id}/{@code dn}. Empty lists are a no-op.
+	 *
+	 * @throws DuplicateEntryException      a receipt position or a record identity already exists,
+	 *                                       or appears twice in the batch; nothing is stored
+	 * @throws TraceStorageException        any other failure, including a batch above the store's
+	 *                                       size limit; nothing is stored
+	 * @throws UnsupportedOperationException when {@link #isAtomicIngestSupported()} is {@code false}
+	 */
+	void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
+			throws DuplicateEntryException, TraceStorageException;
 
 	/**
 	 * Moves a receipt out of {@code PENDING} by compare-and-swap (design §9): reads the row, checks its

@@ -165,6 +165,27 @@ public class TimingTraceStore implements TraceStore {
 	}
 
 	@Override
+	public Map<RecordIdentity, StoredTraceRecord> findRecords(Collection<RecordIdentity> identities) {
+		long start = System.nanoTime();
+		try {
+			return delegate.findRecords(identities);
+		} finally {
+			record("findRecords", start);
+		}
+	}
+
+	@Override
+	public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+			Collection<ChainPosition> positions) {
+		long start = System.nanoTime();
+		try {
+			return delegate.findRecordsByChainPositions(positions);
+		} finally {
+			record("findRecordsByChainPositions", start);
+		}
+	}
+
+	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
 		long start = System.nanoTime();
 		try {
@@ -203,6 +224,22 @@ public class TimingTraceStore implements TraceStore {
 			delegate.insertReceipt(row);
 		} finally {
 			record("insertReceipt", start);
+		}
+	}
+
+	@Override
+	public boolean isAtomicIngestSupported() {
+		return delegate.isAtomicIngestSupported();
+	}
+
+	@Override
+	public void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
+			throws DuplicateEntryException, TraceStorageException {
+		long start = System.nanoTime();
+		try {
+			delegate.insertIngestBatch(receipts, records);
+		} finally {
+			record("insertIngestBatch", start);
 		}
 	}
 
