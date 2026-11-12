@@ -102,8 +102,6 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	@Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData registration, byte[] clientDataHash,
 	        CredAndCounterData credIdAndCounters) {
-	    int alg = authData.getKeyType();
-	    
 	    String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 	    commonVerifiers.verifyAAGUIDZeroed(authData);
 	    userVerificationVerifier.verifyUserPresent(authData);
@@ -111,7 +109,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 
 	    String attestationMode = rpPolicyService.resolveAttestationMode(registration.getRpId());
 	    if (!AttestationMode.DISABLED.getValue().equalsIgnoreCase(attestationMode)) {
-	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, registration.getRpId(), attestationMode);
+	        processAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, registration.getRpId(), attestationMode);
 	    } else {
 	        log.debug("In Global fido configuration, AttestationMode is DISABLED, hence skipping the attestation check");
 	    }
@@ -120,8 +118,8 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
 	}
 
 	private void processAttestation(JsonNode attStmt, AuthData authData, byte[] clientDataHash, String signature,
-	        CredAndCounterData credIdAndCounters, int alg, String origin, String attestationMode) {
-	    
+	        CredAndCounterData credIdAndCounters, String origin, String attestationMode) {
+	    int alg = authData.getKeyType();
 	    if (attStmt.hasNonNull("x5c")) {
 	        processX5cAttestation(attStmt, authData, clientDataHash, signature, credIdAndCounters, alg, origin);
 	    } else if (attStmt.hasNonNull("ecdaaKeyId")) {
