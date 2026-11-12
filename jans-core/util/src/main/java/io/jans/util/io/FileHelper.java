@@ -46,7 +46,12 @@ public final class FileHelper {
             long size = inChannel.size();
             long position = 0;
             while (position < size) {
-                position += inChannel.transferTo(position, maxCount, outChannel);
+                long transferred = inChannel.transferTo(position, maxCount, outChannel);
+                if (transferred <= 0) {
+                    // Source was truncated during copy
+                    break;
+                }
+                position += transferred;
             }
         } finally {
             if (inChannel != null) {

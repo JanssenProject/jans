@@ -74,7 +74,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
     }
 
     public PagedResult<CustomScript> searchScripts(SearchRequest searchRequest, CustomScriptType type) {
-        log.info("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
+        log.info("Search CustomScript with searchRequest - searchRequest:{}, type:{}", String.valueOf(searchRequest).replaceAll("[\\r\\n]", "_"), type);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();

@@ -48,7 +48,7 @@ public class DummyPeristenceType implements PersistenceType {
 
 	@Override
 	public String createHashedPassword(String credential) {
-		return credential;
+		throw new IllegalStateException("Persistence extension is not available to hash password");
 	}
 
 	@Override

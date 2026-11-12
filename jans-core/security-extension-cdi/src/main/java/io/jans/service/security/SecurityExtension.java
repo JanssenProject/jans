@@ -29,7 +29,8 @@ import jakarta.enterprise.util.AnnotationLiteral;
  */
 public class SecurityExtension implements Extension {
 
-    private Map<Method, InterceptSecure> interceptSecureForMethods = new HashMap<Method, InterceptSecure>();
+    // Keyed by bean class too: class-level constraints differ between beans sharing an inherited method
+    private Map<Class<?>, Map<Method, InterceptSecure>> interceptSecureForMethods = new HashMap<Class<?>, Map<Method, InterceptSecure>>();
 
     public <X> void processAnnotatedType(@Observes ProcessAnnotatedType<X> pat) {
         // Wrap this to override the annotations of the class
@@ -56,7 +57,8 @@ public class SecurityExtension implements Extension {
                 // Add InterceptSecure annotation
                 methodConfiguration.add(is);
 
-                interceptSecureForMethods.put(method.getJavaMember(), is);
+                interceptSecureForMethods.computeIfAbsent(at.getJavaClass(), k -> new HashMap<Method, InterceptSecure>())
+                        .put(method.getJavaMember(), is);
             }
         }
     }
@@ -74,7 +76,18 @@ public class SecurityExtension implements Extension {
     }
 
     public InterceptSecure getInterceptSecure(Method method) {
-        return interceptSecureForMethods.get(method);
+        return getInterceptSecure(method.getDeclaringClass(), method);
+    }
+
+    public InterceptSecure getInterceptSecure(Class<?> targetClass, Method method) {
+        for (Class<?> clazz = targetClass; clazz != null; clazz = clazz.getSuperclass()) {
+            Map<Method, InterceptSecure> methods = interceptSecureForMethods.get(clazz);
+            if ((methods != null) && methods.containsKey(method)) {
+                return methods.get(method);
+            }
+        }
+
+        return null;
     }
 
     private static class InterceptSecureImpl extends AnnotationLiteral<InterceptSecure> implements InterceptSecure {
