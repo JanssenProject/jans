@@ -371,20 +371,19 @@ final class FakeEntryManagerBehavior {
 
 	private static boolean matchesLessOrEqual(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
-		if (!(attrValue instanceof Number)) {
-			return false;
-		}
-		long actual = ((Number) attrValue).longValue();
-		long expected = ((Number) filter.getAssertionValue()).longValue();
-		return actual <= expected;
+		return attrValue != null && compareRange(attrValue, filter.getAssertionValue()) <= 0;
 	}
 
 	private static boolean matchesGreaterOrEqual(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
-		if (!(attrValue instanceof Number)) {
-			return false;
+		return attrValue != null && compareRange(attrValue, filter.getAssertionValue()) >= 0;
+	}
+
+	private static int compareRange(Object actual, Object expected) {
+		if (actual instanceof Number && expected instanceof Number) {
+			return Long.compare(((Number) actual).longValue(), ((Number) expected).longValue());
 		}
-		return ((Number) attrValue).longValue() >= ((Number) filter.getAssertionValue()).longValue();
+		return String.valueOf(actual).compareTo(String.valueOf(expected));
 	}
 
 	@SuppressWarnings("unchecked")
