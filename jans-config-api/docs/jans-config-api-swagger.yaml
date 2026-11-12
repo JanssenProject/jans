@@ -13954,6 +13954,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
+        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -13984,6 +13985,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
+        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -15693,19 +15695,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -17460,6 +17462,10 @@ components:
           type: boolean
         tlsClientAuthSubjectDn:
           type: string
+        accessTokenSigningKid:
+          type: string
+        idTokenSigningKid:
+          type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -18741,9 +18747,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
