@@ -126,7 +126,8 @@ public class WebhookServiceTest {
     public Object[][] invalidWebhookOrigins() {
         return new Object[][] {
                 { "${scheme}://example.test/path" },
-                { "https://${host}/path" }
+                { "https://${host}/path" },
+                { "https://example.test:${port}/path" }
         };
     }
 
