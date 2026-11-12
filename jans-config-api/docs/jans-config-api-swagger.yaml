@@ -15700,13 +15700,7 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        selected:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -15714,7 +15708,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        selected:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -17469,6 +17469,10 @@ components:
           type: boolean
         tlsClientAuthSubjectDn:
           type: string
+        accessTokenSigningKid:
+          type: string
+        idTokenSigningKid:
+          type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -17628,10 +17632,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -17702,10 +17706,6 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
-        jwtIntrospectionEnabled:
-          type: boolean
-          description: Flag to enable/disable introspection of JWT access tokens so
-            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -18754,9 +18754,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object

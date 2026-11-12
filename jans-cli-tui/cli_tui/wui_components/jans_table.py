@@ -10,6 +10,10 @@ from prompt_toolkit.layout.containers import VSplit, HSplit, DynamicContainer
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 
+# Cap cell text so wrapping a huge value (e.g. a server error message) cannot
+# stall the UI loop.
+MAX_CELL_CHARS = 4096
+
 
 class JansTableWidget():
     """This is a tabled widget used for Jan Client TUI
@@ -90,6 +94,8 @@ class JansTableWidget():
             for i, c in enumerate(row):
                 if not c:
                     c = '-'
+                if len(c) > MAX_CELL_CHARS:
+                    c = c[:MAX_CELL_CHARS] + '...'
                 if len(c) > self.preferred_size[i]:
                     c = textwrap.fill(c, self.preferred_size[i]-1)
 

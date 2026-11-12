@@ -552,7 +552,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     tmpfo.write(Config.rdbm_sslrootcert)
                     tmpfo.flush()
                     self.import_rootcert(tmpfo.name)
-                set_sslmode()
+                set_sslmode('verify-full')
             else:
                 set_sslmode('disable')
 
@@ -563,7 +563,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             src_temp_fn = os.path.join(Config.template_folder, 'jans-{}.properties'.format(Config.rdbm_type))
             targtet_fn = os.path.join(Config.config_folder, Config.jans_rdbm_properties)
             rendered_tmp = self.render_template(src_temp_fn)
-            self.writeFile(targtet_fn, rendered_tmp)
+            self.writeFile(targtet_fn, rendered_tmp, mode=0o600)
 
 
     def create_folders(self):

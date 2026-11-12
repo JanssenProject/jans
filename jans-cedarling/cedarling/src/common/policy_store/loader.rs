@@ -31,6 +31,7 @@ use jans_trace_core::inputs::compute_bundle_hash;
 
 use super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::errors::{PolicyStoreError, ValidationError};
+use super::formats::ReadOptions;
 use super::formats::{self, ParsedPolicyStore, ReadStoreError};
 use super::schema_parser::{ParsedSchema, SchemaFile};
 use super::vfs_adapter::VfsFileSystem;
@@ -42,7 +43,7 @@ use super::vfs_adapter::VfsFileSystem;
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn read_policy_store_directory(
     path: &Path,
-    strict: bool,
+    options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     let path_str = path
         .to_str()
@@ -51,7 +52,7 @@ pub(crate) fn read_policy_store_directory(
         })?;
 
     let vfs = super::vfs_adapter::PhysicalVfs::new();
-    read_from_vfs(&vfs, path_str, strict, None)
+    read_from_vfs(&vfs, path_str, None, options)
 }
 
 /// Read a policy store from a directory path (WASM stub).
@@ -61,7 +62,7 @@ pub(crate) fn read_policy_store_directory(
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn read_policy_store_directory(
     _path: &Path,
-    _strict: bool,
+    _options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
@@ -73,8 +74,8 @@ pub(crate) fn read_policy_store_directory(
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn read_policy_store_archive(
     _path: &Path,
-    _strict: bool,
     _limits: ArchiveLimits,
+    _options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     Err(PolicyStoreError::from(super::errors::ArchiveError::WasmUnsupported).into())
 }
@@ -88,14 +89,14 @@ pub(crate) fn read_policy_store_archive(
 /// - Loading archives from any byte source
 pub(crate) fn read_policy_store_archive_bytes(
     bytes: Vec<u8>,
-    strict: bool,
     limits: ArchiveLimits,
+    options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
     // Hashed here, the one place `.cjar` bytes become a store, so no archive
     // store exists without its `bundle_hash`.
     let bundle_hash = compute_bundle_hash(&bytes);
     let archive_vfs = ArchiveVfs::from_buffer(bytes, limits).map_err(PolicyStoreError::from)?;
-    read_from_vfs(&archive_vfs, ".", strict, Some(bundle_hash))
+    read_from_vfs(&archive_vfs, ".", Some(bundle_hash), options)
 }
 
 /// Read a policy store rooted at `dir` from any VFS backend into its runtime
@@ -104,10 +105,10 @@ pub(crate) fn read_policy_store_archive_bytes(
 pub(super) fn read_from_vfs(
     vfs: &dyn VfsFileSystem,
     dir: &str,
-    strict: bool,
     bundle_hash: Option<Digest>,
+    options: ReadOptions,
 ) -> Result<ParsedPolicyStore, ReadStoreError> {
-    formats::read_policy_store(&StoreFs::open(vfs, dir)?, strict, bundle_hash)
+    formats::read_policy_store(&StoreFs::open(vfs, dir)?, bundle_hash, options)
 }
 
 /// One file read from a store: a policy, template, entity or issuer file.
@@ -170,6 +171,10 @@ impl<'a> StoreFs<'a> {
     /// Maximum directory recursion depth to prevent stack overflow from deeply
     /// nested `.cjar` archives or filesystem trees.
     const MAX_RECURSION_DEPTH: usize = 64;
+
+    /// Maximum directory entries visited while collecting `.cedar` files, so that
+    /// reconverging directory symlinks cannot cause exponential traversal.
+    const MAX_VISITED_ENTRIES: usize = 100_000;
 
     /// Opens the store rooted at `root`, which must be an existing directory.
     pub(super) fn open(
@@ -278,7 +283,7 @@ impl<'a> StoreFs<'a> {
     /// recursively.
     pub(super) fn cedar_files(&self, relative: &str) -> Result<Vec<StoreFile>, PolicyStoreError> {
         let mut files = Vec::new();
-        self.load_cedar_files_recursive(&self.path(relative), &mut files, 0)?;
+        self.load_cedar_files_recursive(&self.path(relative), &mut files, 0, &mut 0)?;
         Ok(files)
     }
 
@@ -486,6 +491,7 @@ impl<'a> StoreFs<'a> {
         dir: &str,
         files: &mut Vec<StoreFile>,
         depth: usize,
+        visited: &mut usize,
     ) -> Result<(), PolicyStoreError> {
         if depth > Self::MAX_RECURSION_DEPTH {
             return Err(PolicyStoreError::MaxDepthExceeded {
@@ -502,9 +508,20 @@ impl<'a> StoreFs<'a> {
                     source,
                 })?;
 
+        *visited = visited.saturating_add(entries.len());
+        if *visited > Self::MAX_VISITED_ENTRIES {
+            return Err(PolicyStoreError::DirectoryReadError {
+                path: dir.to_string(),
+                source: std::io::Error::other(format!(
+                    "more than {} directory entries visited",
+                    Self::MAX_VISITED_ENTRIES
+                )),
+            });
+        }
+
         for entry in entries {
             if entry.is_dir {
-                self.load_cedar_files_recursive(&entry.path, files, depth + 1)?;
+                self.load_cedar_files_recursive(&entry.path, files, depth + 1, visited)?;
             } else {
                 Self::check_extension(&entry, ".cedar")?;
                 let content = self.read_text(&entry.path)?;

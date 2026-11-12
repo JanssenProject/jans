@@ -161,7 +161,7 @@ public class SpannerConnectionProvider {
         if (props.containsKey("password.encryption.method")) {
             this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("password.encryption.method"));
         } else {
-            this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
+            this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SSHA256;
         }
 
         this.binaryAttributes = new ArrayList<String>();
@@ -437,6 +437,9 @@ public class SpannerConnectionProvider {
 		}
 
 		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
+		if (columTypes == null) {
+			throw new MappingException(String.format("Table '%s' has no column metadata", tableName));
+		}
 
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);

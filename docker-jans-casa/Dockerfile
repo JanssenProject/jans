@@ -63,7 +63,7 @@ RUN mkdir -p /app/static/rdbm \
     /app/schema \
     /app/templates/jans-casa
 
-ARG JANS_SOURCE_VERSION=55d68f4c54a89a8e020485c252dad3f8524f54d8
+ARG JANS_SOURCE_VERSION=beec597356bb1c5a41e6041831fd72b68c01f70d
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
@@ -142,7 +142,7 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_PORT=8500 \
     CN_CONFIG_CONSUL_CONSISTENCY=stale \
     CN_CONFIG_CONSUL_SCHEME=http \
-    CN_CONFIG_CONSUL_VERIFY=false \
+    CN_CONFIG_CONSUL_VERIFY=true \
     CN_CONFIG_CONSUL_CACERT_FILE=/etc/certs/consul_ca.crt \
     CN_CONFIG_CONSUL_CERT_FILE=/etc/certs/consul_client.crt \
     CN_CONFIG_CONSUL_KEY_FILE=/etc/certs/consul_client.key \

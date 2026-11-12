@@ -7,6 +7,7 @@
 package io.jans.link.server.service;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.slf4j.Logger;
 
@@ -46,6 +47,23 @@ public class LinkConfigurationService implements Serializable {
         try {
         	Conf conf = getConfiguration(null);
         	conf.setDynamic(configuration);
+            persistenceEntryManager.merge(conf);
+        } catch (Exception e) {
+            log.info("", e);
+        }
+    }
+
+    /**
+     * Update only the synchronization status fields of the stored configuration, keeping any
+     * administrative change made while synchronization was running
+     */
+    public void updateStatus(Date lastUpdate, String lastUpdateCount, String problemCount) {
+        try {
+            Conf conf = getConfiguration(null);
+            AppConfiguration latest = conf.getDynamic();
+            latest.setLastUpdate(lastUpdate);
+            latest.setLastUpdateCount(lastUpdateCount);
+            latest.setProblemCount(problemCount);
             persistenceEntryManager.merge(conf);
         } catch (Exception e) {
             log.info("", e);

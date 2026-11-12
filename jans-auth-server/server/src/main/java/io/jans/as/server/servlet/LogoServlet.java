@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Locale;
+import java.util.Set;
 
 @WebServlet(urlPatterns = "/servlet/logo")
 public class LogoServlet extends HttpServlet {
@@ -33,6 +35,7 @@ public class LogoServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(LogoServlet.class);
 
     public static final String BASE_OXAUTH_LOGO_PATH = "/opt/gluu/jetty/jans-auth/custom/static/logo/";
+    private static final Set<String> IMAGE_EXTENSIONS = Set.of("png", "jpg", "jpeg", "jpe", "jfif", "pjpeg", "pjp", "gif", "svg", "ico", "webp", "bmp");
 
     @Inject
     private OrganizationService organizationService;
@@ -69,7 +72,7 @@ public class LogoServlet extends HttpServlet {
             directory.mkdir();
         }
         File logoPath = new File(organization.getJsLogoPath());
-        if (!logoPath.exists()) {
+        if (!isImageFile(logoPath)) {
             return false;
         }
         try (InputStream in = new FileInputStream(logoPath); OutputStream out = response.getOutputStream()) {
@@ -77,6 +80,20 @@ public class LogoServlet extends HttpServlet {
             return true;
         } catch (IOException e) {
             log.debug("Error loading custom logo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Branding paths come from organization config; only serve regular image files to avoid exposing arbitrary server files.
+    static boolean isImageFile(File file) {
+        try {
+            if (!file.isFile()) {
+                return false;
+            }
+            final String name = file.toPath().toRealPath().getFileName().toString().toLowerCase(Locale.ROOT);
+            final int dot = name.lastIndexOf('.');
+            return dot > 0 && IMAGE_EXTENSIONS.contains(name.substring(dot + 1));
+        } catch (IOException | RuntimeException e) {
             return false;
         }
     }

@@ -16,12 +16,10 @@ impl EntityBuilder {
     ) -> Result<Entity, BuildEntityError> {
         let resource_type_name = &resource_data.cedar_mapping.entity_type;
 
-        // Check for default entity first when attributes are empty
-        if resource_data.attributes.is_empty() {
-            let uid = build_cedar_uid(resource_type_name, &resource_data.cedar_mapping.id)?;
-            if let Some(resource_default_entity) = self.default_entities.get(&uid) {
-                return Ok(resource_default_entity.clone());
-            }
+        // Default (policy-store) entities take precedence over request-supplied attributes
+        let uid = build_cedar_uid(resource_type_name, &resource_data.cedar_mapping.id)?;
+        if let Some(resource_default_entity) = self.default_entities.get(&uid) {
+            return Ok(resource_default_entity.clone());
         }
 
         let attrs_shape = self
@@ -53,6 +51,7 @@ mod test {
     use crate::CedarEntityMapping;
     use crate::common::policy_store::TokenTypes;
     use serde_json::json;
+    use std::sync::Arc;
 
     #[test]
     fn can_build_entity() {
@@ -132,6 +131,55 @@ mod test {
         assert!(
             entity.attr("header").is_some(),
             "entity should have a `header` attribute"
+        );
+    }
+
+    /// A request must not replace the attributes of a resource the policy store defines,
+    /// or the caller could choose the attributes the policies check.
+    #[test]
+    fn default_entity_takes_precedence_over_request_attributes() {
+        let default_entity = build_cedar_entity(
+            "Test::Document",
+            "report",
+            HashMap::from([(
+                "owner".to_string(),
+                RestrictedExpression::new_string("alice".to_string()),
+            )]),
+            HashSet::new(),
+        )
+        .expect("should build the default entity");
+        let default_entities = DefaultEntities {
+            inner: Arc::new(HashMap::from([(
+                default_entity.uid(),
+                default_entity.clone(),
+            )])),
+        };
+        let builder = EntityBuilder::new(&TokenTypes::default(), None, default_entities)
+            .expect("should init entity builder");
+        let resource_data = EntityData {
+            cedar_mapping: CedarEntityMapping {
+                entity_type: "Test::Document".to_string(),
+                id: "report".to_string(),
+            },
+            attributes: HashMap::from([
+                ("owner".to_string(), json!("mallory")),
+                ("public".to_string(), json!(true)),
+            ]),
+        };
+
+        let entity = builder
+            .build_resource_entity(&resource_data)
+            .expect("expected to build resource entity");
+
+        // `Entity` equality compares only the UID, so compare the attributes too.
+        assert_eq!(
+            entity
+                .to_json_value()
+                .expect("should serialize the built entity"),
+            default_entity
+                .to_json_value()
+                .expect("should serialize the default entity"),
+            "the default entity must be used as is, ignoring the attributes in the request"
         );
     }
 }

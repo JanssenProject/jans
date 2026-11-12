@@ -12,6 +12,8 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -28,6 +30,7 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ClientIdMetadataService;
@@ -47,6 +50,7 @@ import org.slf4j.Logger;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Date;
@@ -116,6 +120,9 @@ public class UmaValidationService {
     private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
     private ClientIdMetadataService clientIdMetadataService;
 
     @Inject
@@ -140,6 +147,14 @@ public class UmaValidationService {
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByAccessToken(token);
         if (authorizationGrant == null) {
             throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, ACCESS_DENIED, "Unable to find authorization grant by token.");
+        }
+
+        final AbstractToken accessToken = authorizationGrant.getAccessToken(token);
+        if (accessToken != null && accessToken.getExpirationDate() != null) {
+            accessToken.checkExpired();
+        }
+        if (accessToken == null || !accessToken.isValid()) {
+            throw errorResponseFactory.createWebApplicationException(UNAUTHORIZED, ACCESS_DENIED, "Token is expired or otherwise invalid.");
         }
 
         Set<String> scopes = authorizationGrant.getScopes();
@@ -205,6 +220,9 @@ public class UmaValidationService {
             if (resource == null) {
                 log.error("Resource isn't registered or there are two resources with same Id");
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "Resource is not registered.");
+            }
+            if (client != null) {
+                validateRestrictedByClient(client.getDn(), resource);
             }
 
             for (String s : permission.getScopes()) {
@@ -280,7 +298,14 @@ public class UmaValidationService {
                     log.error("claim_token validation failed.");
                     throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
                 }
+                // a claim_token naming this server as issuer is always checked, so policies can trust local-issuer claims
+                if (!isTrue(appConfiguration.getUmaValidateClaimToken()) && isClaimedLocalIssuer(idToken) && !isSignedByServer(idToken)) {
+                    log.error("claim_token claims local issuer but is expired or not signed by this server.");
+                    throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "claim_token validation failed.");
+                }
                 return idToken;
+            } catch (WebApplicationException e) {
+                throw e;
             } catch (Exception e) {
                 log.error("Failed to parse claim_token as valid id_token.", e);
                 throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIM_TOKEN, "Failed to parse claim_token as valid id_token.");
@@ -327,6 +352,31 @@ public class UmaValidationService {
             return false;
         } catch (Exception e) {
             log.error("Failed to validate id_token. Message: " + e.getMessage(), e);
+            return false;
+        }
+    }
+
+    private boolean isClaimedLocalIssuer(Jwt idToken) {
+        return StringUtils.equals(idToken.getClaims().getClaimAsString(JwtClaimName.ISSUER), appConfiguration.getIssuer());
+    }
+
+    private boolean isSignedByServer(Jwt idToken) {
+        try {
+            final SignatureAlgorithm alg = idToken.getHeader().getSignatureAlgorithm();
+            // HMAC keys are client secrets, so only an asymmetric signature proves the server issued the token
+            if (alg == null || alg == SignatureAlgorithm.NONE || alg.getFamily() == AlgorithmFamily.HMAC
+                    || StringUtils.isBlank(idToken.getEncodedSignature())) {
+                return false;
+            }
+            final Date expiresAt = idToken.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            if (expiresAt == null || new Date().after(expiresAt)) {
+                log.error("claim_token is expired or has no exp.");
+                return false;
+            }
+            return cryptoProvider.verifySignature(idToken.getSigningInput(), idToken.getEncodedSignature(),
+                    idToken.getHeader().getKeyId(), null, null, alg);
+        } catch (Exception e) {
+            log.error("Failed to verify claim_token signature.", e);
             return false;
         }
     }
@@ -452,7 +502,7 @@ public class UmaValidationService {
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_CLAIMS_REDIRECT_URI, "claims_redirect_uri is blank and there is none or more then one registered claims_redirect_uri for clientId: " + clientId);
         }
 
-        throw new UmaWebException(claimsRedirectUri, errorResponseFactory, INVALID_CLAIMS_REDIRECT_URI, state);
+        throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_CLAIMS_REDIRECT_URI, "Failed to find match for claims_redirect_uri, clientId: " + clientId);
     }
 
     private String getEqualRedirectUri(String redirectUri, String[] clientRedirectUris) {
@@ -487,8 +537,14 @@ public class UmaValidationService {
 
     public void validateRestrictedByClient(String patClientDn, String rsId) {
         if (isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
-            final List<String> clients = resourceService.getResourceById(rsId).getClients();
-            if (!clients.contains(patClientDn)) {
+            validateRestrictedByClient(patClientDn, resourceService.getResourceById(rsId));
+        }
+    }
+
+    private void validateRestrictedByClient(String patClientDn, UmaResource resource) {
+        if (isTrue(appConfiguration.getUmaRestrictResourceToAssociatedClient())) {
+            final List<String> clients = resource.getClients();
+            if (clients == null || !clients.contains(patClientDn)) {
                 log.error("Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false). Associated clients: {}, PAT client: {}", clients, patClientDn);
                 throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, ACCESS_DENIED, "Access to resource is denied because resource associated client does not match PAT client (it can be switched off if set umaRestrictResourceToAssociatedClient oxauth configuration property to false).");
             }

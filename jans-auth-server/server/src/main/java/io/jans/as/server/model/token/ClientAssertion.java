@@ -114,8 +114,9 @@ public class ClientAssertion {
 
         final String serverIssuer = appConfiguration.getIssuer();
 
-        // aud must be equals to server's issuer or otherwise start with it (e.g. point to particular endpoint)
-        if (audience.stream().anyMatch(aud -> aud.equals(serverIssuer) || aud.startsWith(serverIssuer))) {
+        // aud must be equals to server's issuer or otherwise be a path under it (e.g. point to particular endpoint)
+        final String issuerPathPrefix = StringUtils.removeEnd(serverIssuer, "/") + "/";
+        if (audience.stream().anyMatch(aud -> aud.equals(serverIssuer) || aud.startsWith(issuerPathPrefix))) {
             return;
         }
 

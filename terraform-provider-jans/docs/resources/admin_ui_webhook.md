@@ -26,8 +26,8 @@ Resource for managing AdminUI webhooks.
 - `description` (String) Description of the webhook.
 - `http_headers` (Block List) HTTP headers sent when invoking the webhook. (see [below for nested schema](#nestedblock--http_headers))
 - `http_method` (String) HTTP method used when invoking the webhook.
-- `http_request_body` (Map of String) Request body sent by the webhook, as key/value pairs.
-- `http_request_body_string` (String) Request body sent by the webhook, as a raw string.
+- `http_request_body` (Map of String, Sensitive) Request body sent by the webhook, as key/value pairs.
+- `http_request_body_string` (String, Sensitive) Request body sent by the webhook, as a raw string.
 - `jans_enabled` (Boolean) Whether the webhook is enabled.
 
 ### Read-Only
@@ -43,4 +43,4 @@ Resource for managing AdminUI webhooks.
 Optional:
 
 - `key` (String) Header name.
-- `value` (String) Header value.
+- `value` (String, Sensitive) Header value.

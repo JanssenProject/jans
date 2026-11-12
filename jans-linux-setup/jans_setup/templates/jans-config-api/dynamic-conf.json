@@ -7,6 +7,7 @@
   "validateUserInumInIntrospectionFlag": true,
   "fetchUserRoleInIntrospectionFlag": true,
   "userRolePermissionExcludedClients": [],
+  "jwtIntrospectionEnabled": true,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
   "acrValidationEnabled": true,

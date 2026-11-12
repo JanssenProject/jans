@@ -38,19 +38,17 @@ pub struct AuthorizeArgs {
     pub context: String,
 }
 
-fn build_entity(
-    typ: String,
-    id: String,
-    attrs: Option<String>,
-    name: &str,
-) -> Result<EntityData> {
+fn build_entity(typ: String, id: String, attrs: Option<String>, name: &str) -> Result<EntityData> {
     let attributes = if let Some(a) = attrs {
         serde_json::from_str(&a).with_context(|| format!("failed to parse {name} as JSON"))?
     } else {
         HashMap::new()
     };
     Ok(EntityData {
-        cedar_mapping: CedarEntityMapping { entity_type: typ, id },
+        cedar_mapping: CedarEntityMapping {
+            entity_type: typ,
+            id,
+        },
         attributes,
     })
 }
@@ -66,12 +64,17 @@ pub async fn run(config: cedarling::BootstrapConfig, args: AuthorizeArgs) -> Res
         .context("failed to initialize Cedarling")?;
 
     let principal = match (args.principal_type, args.principal_id) {
-        (Some(typ), Some(id)) => {
-            Some(build_entity(typ, id, args.principal_attrs, "principal-attrs")?)
-        },
+        (Some(typ), Some(id)) => Some(build_entity(
+            typ,
+            id,
+            args.principal_attrs,
+            "principal-attrs",
+        )?),
         (None, None) => {
             if args.principal_attrs.is_some() {
-                anyhow::bail!("--principal-attrs cannot be provided without --principal-type and --principal-id");
+                anyhow::bail!(
+                    "--principal-attrs cannot be provided without --principal-type and --principal-id"
+                );
             }
             None
         },

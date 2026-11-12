@@ -239,7 +239,15 @@ jobs:
         id: prep
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MANUAL_IMAGE_TAG: ${{ github.event.inputs.image_tag }}
+          CN_VERSION: ${{ github.event.inputs.cn_version }}
         run: |
+          if [[ -n "$MANUAL_IMAGE_TAG" && ! "$MANUAL_IMAGE_TAG" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ ]]; then
+            echo "Invalid image_tag" >&2; exit 1
+          fi
+          if [[ -n "$CN_VERSION" && ! "$CN_VERSION" =~ ^[A-Za-z0-9_.-]{1,64}$ ]]; then
+            echo "Invalid cn_version" >&2; exit 1
+          fi
           REPOSITORY=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
           DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
           PLATFORMS="linux/amd64,linux/arm64"
@@ -264,7 +272,6 @@ jobs:
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
           fi
           # If the user passed a manual image tag to build a custom manual image
-          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
           if [ ! -z "$MANUAL_IMAGE_TAG" ]
           then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
@@ -274,10 +281,9 @@ jobs:
             echo "$TAGS"
           fi
           # If the user passed a war version to build off ,change this war version.
-          CN_VERSION=${{ github.event.inputs.cn_version }}
           if [ ! -z "$CN_VERSION" ]
           then
-            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
+            python3 -c "import os ; from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = os.environ['CN_VERSION']"
             echo "War version has been modified."
           else
             echo "$CN_VERSION"

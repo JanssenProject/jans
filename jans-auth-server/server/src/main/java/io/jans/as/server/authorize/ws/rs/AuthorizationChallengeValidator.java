@@ -39,19 +39,30 @@ public class AuthorizationChallengeValidator {
     @Inject
     private ScopeService scopeService;
 
+    @Inject
+    private DpopService dpopService;
+
     public void validateDpopJkt(AuthorizationChallengeSession session, String dpop) {
+        if (session == null) {
+            return;
+        }
         final String jkt = session.getAttributes().getJkt();
         if (StringUtils.isBlank(jkt)) {
             return;
         }
 
         try {
+            if (StringUtils.isBlank(dpop) || !dpopService.validateDpop(dpop)) {
+                throw new IllegalArgumentException("DPoP proof is missing or invalid.");
+            }
             final String dpopJwkThumbprint = DpopService.getDpopJwkThumbprint(dpop);
             if (jkt.equals(dpopJwkThumbprint)) {
                 return;
             } else {
                 log.debug("Unable to match dpopJkt: {} with sessionJkt: {}", dpopJwkThumbprint, jkt);
             }
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             String msg = String.format("Failed to validate dpop jtk. jkt: %s, dpop: %s", jkt, dpop);
             log.debug(msg, e);

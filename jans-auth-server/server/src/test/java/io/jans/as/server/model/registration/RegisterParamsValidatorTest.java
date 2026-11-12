@@ -6,7 +6,11 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.JSONWebKey;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.register.ApplicationType;
@@ -49,6 +53,9 @@ public class RegisterParamsValidatorTest {
 
     @Mock
     private SectorIdentifierUriService sectorIdentifierUriService;
+
+    @Mock
+    private WebKeysConfiguration webKeysConfiguration;
 
     // ---- WEB application type ----
     @Test
@@ -224,10 +231,7 @@ public class RegisterParamsValidatorTest {
     }
 
     @Test
-    public void validateRedirectUris_nativeApp_javascript_shouldReturnTrue() {
-        when(appConfiguration.getClientWhiteList()).thenReturn(Collections.singletonList("*"));
-        when(appConfiguration.getClientBlackList()).thenReturn(Collections.emptyList());
-
+    public void validateRedirectUris_nativeApp_javascript_shouldReturnFalse() {
         boolean result = registerParamsValidator.validateRedirectUris(
                 Collections.singletonList(GrantType.AUTHORIZATION_CODE),
                 Collections.singletonList(ResponseType.CODE),
@@ -235,7 +239,7 @@ public class RegisterParamsValidatorTest {
                 SubjectType.PUBLIC,
                 Collections.singletonList("javascript://example.com/callback"),
                 null);
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
@@ -546,5 +550,41 @@ public class RegisterParamsValidatorTest {
         when(appConfiguration.isFeatureEnabled(FeatureFlagType.SPIFFE_CLIENT_AUTH)).thenReturn(true);
 
         registerParamsValidator.validateSpiffe(request);
+    }
+
+    @Test
+    public void validateSigningKid_blankKid_shouldNotThrow() {
+        registerParamsValidator.validateSigningKid(" ", "access_token_signing_kid");
+        verifyNoInteractions(webKeysConfiguration);
+    }
+
+    @Test
+    public void validateSigningKid_existingKey_shouldNotThrow() {
+        when(webKeysConfiguration.getKey("kid1")).thenReturn(key("kid1", Use.SIGNATURE, Algorithm.RS256));
+
+        registerParamsValidator.validateSigningKid("kid1", "access_token_signing_kid");
+    }
+
+    @Test
+    public void validateSigningKid_encryptionKey_shouldNotThrow() {
+        when(webKeysConfiguration.getKey("kid1")).thenReturn(key("kid1", Use.ENCRYPTION, Algorithm.RSA1_5));
+
+        registerParamsValidator.validateSigningKid("kid1", "id_token_signing_kid");
+    }
+
+    @Test(expectedExceptions = WebApplicationException.class)
+    public void validateSigningKid_unknownKid_shouldThrow() {
+        when(webKeysConfiguration.getKey("missing")).thenReturn(null);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), any())).thenCallRealMethod();
+
+        registerParamsValidator.validateSigningKid("missing", "access_token_signing_kid");
+    }
+
+    private static JSONWebKey key(String kid, Use use, Algorithm alg) {
+        JSONWebKey key = new JSONWebKey();
+        key.setKid(kid);
+        key.setUse(use);
+        key.setAlg(alg);
+        return key;
     }
 }

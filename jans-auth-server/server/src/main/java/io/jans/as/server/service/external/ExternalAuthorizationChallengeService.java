@@ -21,6 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Authorization Challenge service responsible for external script interaction.
@@ -29,6 +30,9 @@ import java.util.Map;
  */
 @ApplicationScoped
 public class ExternalAuthorizationChallengeService extends ExternalScriptService {
+
+    // "userId" holds the authenticated identity set by scripts (e.g. Agama); "password" must not be persisted.
+    private static final Set<String> NOT_SAVED_REQUEST_PARAMETERS = Set.of("userId", "password");
 
     @Inject
     private transient AppConfiguration appConfiguration;
@@ -138,10 +142,10 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
         }
 
         for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-            if (!attributes.containsKey(entry.getKey()) && ArrayUtils.isNotEmpty(entry.getValue())) {
-                final String value = entry.getValue()[0];
-                attributes.put(entry.getKey(), value);
-                log.trace("Put in session request parameter: {}, value: {}", entry.getKey(), value);
+            if (!attributes.containsKey(entry.getKey()) && ArrayUtils.isNotEmpty(entry.getValue())
+                    && !NOT_SAVED_REQUEST_PARAMETERS.contains(entry.getKey())) {
+                attributes.put(entry.getKey(), entry.getValue()[0]);
+                log.trace("Put in session request parameter: {}", entry.getKey());
             }
         }
 
@@ -184,8 +188,8 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
                     .build());
         }
 
-        log.trace("Executing python 'prepareAuthzRequest' method, script name: {}, clientId: {}, scope: {}, authorizationChallengeSession: {}, sessionAttributes: {}",
-                script.getName(), authzRequest.getClientId(), authzRequest.getScope(), authzRequest.getAuthorizationChallengeSessionAttributesSafely());
+        log.trace("Executing python 'prepareAuthzRequest' method, script name: {}, clientId: {}, scope: {}, sessionAttribute keys: {}",
+                script.getName(), authzRequest.getClientId(), authzRequest.getScope(), authzRequest.getAuthorizationChallengeSessionAttributesSafely().keySet());
 
         ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setScript(script);
@@ -210,6 +214,6 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
                     .build());
         }
 
-        log.trace("Finished 'prepareAuthzRequest' method, script name: {}, clientId: {}, sessionAttributes: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), authzRequest.getAuthorizationChallengeSessionAttributesSafely());
+        log.trace("Finished 'prepareAuthzRequest' method, script name: {}, clientId: {}, sessionAttribute keys: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), authzRequest.getAuthorizationChallengeSessionAttributesSafely().keySet());
     }
 }

@@ -1,4 +1,6 @@
 import os
+import hashlib
+import hmac
 import ipaddress
 import re
 import base64
@@ -362,14 +364,16 @@ class Crypto64:
 
     def encode_test_passwords(self):
         self.logIt("Encoding test passwords")
-        hostname = Config.hostname.split('.')[0]
 
         for tmp_str in list(Config.template_rendering_dict.keys()):
             if re.match(r'(.*?)test_client_(\d*)_inum', tmp_str):
                 cli_prefix = tmp_str.strip('_inum')
                 cli_pw_var = cli_prefix +'_pw'
                 if cli_pw_var not in Config.template_rendering_dict:
-                    Config.template_rendering_dict[cli_pw_var] = Config.template_rendering_dict[tmp_str] + '-' + hostname
+                    inum = Config.template_rendering_dict[tmp_str]
+                    # keyed by the private install salt: stable per inum across runs/installers, not guessable from public ids
+                    digest = hmac.new(Config.encode_salt.encode(), inum.encode(), hashlib.sha256).hexdigest()[:24]
+                    Config.template_rendering_dict[cli_pw_var] = inum + '-' + digest
                     Config.template_rendering_dict[cli_prefix + '_encoded_pw'] = self.obscure(Config.template_rendering_dict[cli_pw_var])
 
     def get_server_certificate(self, host):
