@@ -1,0 +1,177 @@
+<mxfile host="app.diagrams.net" agent="Copilot">
+  <diagram id="cedarling-components" name="Cedarling Components">
+    <mxGraphModel dx="1414" dy="785" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="768" background="#071627" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="interfaces-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#091b2b;strokeColor=#0e696a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#26d7c6;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=20;spacingTop=16;" value="INTERFACES" vertex="1">
+          <mxGeometry height="623" width="262" x="39" y="87" as="geometry" />
+        </mxCell>
+        <mxCell id="cedarling-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#0a1a2e;strokeColor=#24578a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#5aa4ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=20;spacingTop=16;" value="CEDARLING" vertex="1">
+          <mxGeometry height="623" width="672" x="339" y="87" as="geometry" />
+        </mxCell>
+        <mxCell id="external-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#11152d;strokeColor=#514078;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#a987ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=20;spacingTop=16;" value="EXTERNAL SERVICES" vertex="1">
+          <mxGeometry height="623" width="262" x="1049" y="87" as="geometry" />
+        </mxCell>
+        <mxCell id="init-to-manager" edge="1" parent="1" source="init" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="policy-manager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="source-to-manager" edge="1" parent="1" source="policy-source" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="policy-manager">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="manager-to-jwt" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.786;exitY=0.999;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="authorize-to-jwt" edge="1" parent="1" source="authorize" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.41605839416058393;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="authorize-to-builder" edge="1" parent="1" source="authorize" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.8540145985401459;exitDx=0;exitDy=0;entryX=0.16326530612244897;entryY=0;entryDx=0;entryDy=0;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="739" y="389" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="data-api-to-store" edge="1" parent="1" source="data-api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="context-store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="store-to-builder" edge="1" parent="1" source="context-store" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jwt-to-builder" edge="1" parent="1" source="jwt-service" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.8367346938775511;exitY=1;exitDx=0;exitDy=0;entryX=0.8367346938775511;entryY=0;entryDx=0;entryDy=0;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="builder-to-engine" edge="1" parent="1" source="entity-builder" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="cedar-engine">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="engine-to-observability" edge="1" parent="1" source="cedar-engine" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0.008;exitY=0.627;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitPerimeter=0;" target="observability">
+          <mxGeometry relative="1" x="-0.0837" as="geometry">
+            <Array as="points">
+              <mxPoint x="699" y="650" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="observability-to-inspect" edge="1" parent="1" source="observability" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.389;exitDx=0;exitDy=0;entryX=1;entryY=0.389;entryDx=0;entryDy=0;" target="inspect-observe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="trusted-issuers-to-jwt" edge="1" parent="1" source="trusted-issuers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="jwt-service">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="policies-to-engine" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="cedar-engine">
+          <mxGeometry relative="1" x="0.6716" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="191.5" />
+              <mxPoint x="980" y="639" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lock-policy-store" edge="1" parent="1" source="lock-server" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;exitX=1;exitY=0.307;exitDx=0;exitDy=0;entryX=0.88;entryY=0;entryDx=0;entryDy=0;" target="policy-manager">
+          <mxGeometry relative="1" x="-0.0589" as="geometry">
+            <Array as="points">
+              <mxPoint x="1295.9" y="610" />
+              <mxPoint x="1340" y="610" />
+              <mxPoint x="1340" y="60" />
+              <mxPoint x="875" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="observability-evidence" edge="1" parent="1" source="observability" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=1;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;exitX=0.674;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="lock-server">
+          <mxGeometry relative="1" x="-0.0333" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="740" />
+              <mxPoint x="1180" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="annotations-to-inspect" edge="1" parent="1" source="policy-manager" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;dashed=1;dashPattern=2 5;endArrow=block;endFill=1;exitX=0.304;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.495;entryDx=0;entryDy=0;" target="inspect-observe">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="544" y="48" />
+              <mxPoint x="20" y="48" />
+              <mxPoint x="20" y="649" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="init" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Init&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;bootstrap config&lt;/font&gt;" vertex="1">
+          <mxGeometry height="74" width="224" x="58" y="136" as="geometry" />
+        </mxCell>
+        <mxCell id="authorize" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Authorize&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;multi-issuer tokens or&lt;br&gt;asserted principal&lt;br&gt;single or batch&lt;/font&gt;" vertex="1">
+          <mxGeometry height="137" width="224" x="58" y="272" as="geometry" />
+        </mxCell>
+        <mxCell id="data-api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Data API&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;push, get, remove&lt;br&gt;context data&lt;/font&gt;" vertex="1">
+          <mxGeometry height="94" width="224" x="58" y="456" as="geometry" />
+        </mxCell>
+        <mxCell id="inspect-observe" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Inspect &amp;amp; Observe&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;logs, metrics,&lt;br&gt;policy annotations&lt;/font&gt;" vertex="1">
+          <mxGeometry height="95" width="224" x="58" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="policy-manager" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Policy Store Manager&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;load, verify signature, refresh&lt;/font&gt;" vertex="1">
+          <mxGeometry height="74" width="575" x="369" y="136" as="geometry" />
+        </mxCell>
+        <mxCell id="jwt-service" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;JWT Service&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;signature, claims, Status List&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="245" x="699" y="291" as="geometry" />
+        </mxCell>
+        <mxCell id="context-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Context Data Store&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;pushed data with TTL&lt;/font&gt;" vertex="1">
+          <mxGeometry height="94" width="224" x="369" y="456" as="geometry" />
+        </mxCell>
+        <mxCell id="entity-builder" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Entity &amp;amp; Context Builder&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;principals, resource,&lt;br&gt;context.tokens, context.data&lt;/font&gt;" vertex="1">
+          <mxGeometry height="94" width="245" x="699" y="456" as="geometry" />
+        </mxCell>
+        <mxCell id="observability" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Observability&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;logs, telemetry,&lt;br&gt;TRACE evidence&lt;/font&gt;" vertex="1">
+          <mxGeometry height="95" width="224" x="369" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="cedar-engine" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#55a7ff;strokeWidth=3;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedar Engine&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;Allow / Deny, diagnostics&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="245" x="699" y="602" as="geometry" />
+        </mxCell>
+        <mxCell id="policy-source" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Policy store source&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;local file or URI&lt;/font&gt;" vertex="1">
+          <mxGeometry height="74" width="224" x="1069" y="136" as="geometry" />
+        </mxCell>
+        <mxCell id="trusted-issuers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Trusted issuers&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;OpenID config, JWKS,&lt;br&gt;Status List&lt;/font&gt;" vertex="1">
+          <mxGeometry height="94" width="224" x="1069" y="281" as="geometry" />
+        </mxCell>
+        <mxCell id="lock-server" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Lock Server&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#a987ff&quot;&gt;&lt;b&gt;Evidence Collector&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 17px;&quot;&gt;policy store, logs,&lt;br&gt;telemetry, TRACE evidence&lt;/font&gt;" vertex="1">
+          <mxGeometry height="127" width="224" x="1069" y="567" as="geometry" />
+        </mxCell>
+        <mxCell id="label-policy-annotations" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="policy annotations" vertex="1">
+          <mxGeometry height="24" width="142" x="211" y="37" as="geometry" />
+        </mxCell>
+        <mxCell id="label-policy-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="policy store" vertex="1">
+          <mxGeometry height="24" width="98" x="1090" y="49" as="geometry" />
+        </mxCell>
+        <mxCell id="label-trusted-issuers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="trusted issuers" vertex="1">
+          <mxGeometry height="24" width="120" x="761" y="232" as="geometry" />
+        </mxCell>
+        <mxCell id="label-tokens" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="tokens" vertex="1">
+          <mxGeometry height="24" width="56" x="457" y="317" as="geometry" />
+        </mxCell>
+        <mxCell id="label-principal-context" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="principal, resource, context" vertex="1">
+          <mxGeometry height="24" width="216" x="383" y="377" as="geometry" />
+        </mxCell>
+        <mxCell id="label-context-data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="context.data" vertex="1">
+          <mxGeometry height="24" width="98" x="597" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="label-validated-tokens" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="validated tokens" vertex="1">
+          <mxGeometry height="24" width="128" x="840" y="393" as="geometry" />
+        </mxCell>
+        <mxCell id="label-entities-context" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="entities, context" vertex="1">
+          <mxGeometry height="24" width="136" x="753" y="558" as="geometry" />
+        </mxCell>
+        <mxCell id="label-schema" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="schema" vertex="1">
+          <mxGeometry height="24" width="62" x="950" y="437" as="geometry" />
+        </mxCell>
+        <mxCell id="label-policies" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="policies" vertex="1">
+          <mxGeometry height="24" width="68" x="943" y="582" as="geometry" />
+        </mxCell>
+        <mxCell id="label-evidence" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=13;fontStyle=1;align=center;verticalAlign=middle;" value="logs, telemetry, TRACE evidence" vertex="1">
+          <mxGeometry height="24" width="238" x="716" y="726" as="geometry" />
+        </mxCell>
+        <mxCell id="cARylTLaUMteeXJc--jf-2" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;" target="entity-builder">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="980" y="503" as="sourcePoint" />
+            <mxPoint x="1067" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
