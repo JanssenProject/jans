@@ -322,7 +322,7 @@ class MetricServiceTest {
                 System.currentTimeMillis(), "platform", null);
 
         // Then
-        assertEquals("cookie-session-id", captureStoredMetrics().getSessionId());
+        assertEquals("13ba4ac87ba680f56d0b6b3fba51c2a5961e80b902f66eeee7f836dad435e4f8", captureStoredMetrics().getSessionId());
     }
 
     /**
@@ -342,7 +342,7 @@ class MetricServiceTest {
                 System.currentTimeMillis(), "platform", null);
 
         // Then
-        assertEquals("servlet-session-id", captureStoredMetrics().getSessionId());
+        assertEquals("06f252d75b7c2d82531e054638ca02e97912951afe0879adcd3eec9a0568ef68", captureStoredMetrics().getSessionId());
     }
 
     @Test

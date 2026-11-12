@@ -51,6 +51,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Context;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Date;
@@ -151,7 +152,7 @@ public class AttestationService {
 
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationOptions), httpRequest, httpResponse);
-        externalFido2InterceptionService.registerAttestationStart(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
+        requireExtensionAllowed(externalFido2InterceptionService.registerAttestationStart(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext));
 
         // Verify request parameters
         commonVerifiers.verifyAttestationOptions(attestationOptions);
@@ -244,7 +245,7 @@ public class AttestationService {
 		log.debug("Saved in DB");
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
-		externalFido2InterceptionService.registerAttestationFinish(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService.registerAttestationFinish(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext));
 
 		// Record metrics for registration attempt
 		try {
@@ -284,7 +285,7 @@ public class AttestationService {
 		try {
         // Apply external custom scripts
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationResult), httpRequest, httpResponse);
-        externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
+        requireExtensionAllowed(externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext));
 
        
 		// Verify if there are mandatory request parameters
@@ -309,12 +310,16 @@ public class AttestationService {
 		// Set username for metrics
 		username = registrationData.getUsername();
 
+		verifyRegistrationCeremonyIsStillOpen(registrationEntry);
+
 		// Verify domain
 		domainVerifier.verifyDomain(registrationData.getOrigin(), clientDataJSONNode);
 
 		// Verify authenticator attestation response
 		CredAndCounterData attestationData = attestationVerifier.verifyAuthenticatorAttestationResponse(attestationResult.getResponse(),
 				registrationData);
+
+		verifyCredentialAlgorithmIsOffered(attestationData);
 
 		registrationData.setUncompressedECPoint(attestationData.getUncompressedEcPoint());
 		registrationData.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
@@ -401,7 +406,7 @@ public class AttestationService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry);
         }
 
 
@@ -602,6 +607,63 @@ public class AttestationService {
 	
 	private static final int[] DEFAULT_ADVERTISED_ALGORITHMS = { CoseRSAAlgorithm.RS256.getNumericValue(),
 			CoseEC2Algorithm.ES256.getNumericValue(), CoseEdDSAAlgorithm.EdDSA.getNumericValue() };
+
+	// A failed enabled extension is replaced by a dummy that returns false, so false must block the ceremony
+	private void requireExtensionAllowed(boolean allowed) {
+		if (!allowed) {
+			throw errorResponseFactory.forbiddenException();
+		}
+	}
+
+	/**
+	 * A challenge stays on the entry after a successful registration, so completion must be limited to
+	 * a still-pending, unexpired ceremony; otherwise a historical challenge could replace the stored key.
+	 */
+	private void verifyRegistrationCeremonyIsStillOpen(Fido2RegistrationEntry registrationEntry) {
+		if (registrationEntry.getRegistrationStatus() != Fido2RegistrationStatus.pending) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE,
+					"Registration ceremony is no longer open");
+		}
+
+		Date issuedAt = registrationEntry.getCreationDate();
+		if (issuedAt == null) {
+			return;
+		}
+
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		if (System.currentTimeMillis() - issuedAt.getTime() > unfinishedRequestExpiration * 1000L) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE,
+					"Registration ceremony has expired");
+		}
+	}
+
+	/**
+	 * The credential key algorithm must be one this server offered in pubKeyCredParams.
+	 */
+	private void verifyCredentialAlgorithmIsOffered(CredAndCounterData attestationData) {
+		String encodedCoseKey = attestationData.getUncompressedEcPoint();
+		if (StringHelper.isEmpty(encodedCoseKey)) {
+			return;
+		}
+
+		int credentialAlgorithm;
+		try {
+			JsonNode coseKey = dataMapperService.cborReadTree(base64Service.urlDecode(encodedCoseKey));
+			if (coseKey == null || !coseKey.hasNonNull("3")) {
+				throw errorResponseFactory.invalidRequest("Credential public key has no algorithm");
+			}
+			credentialAlgorithm = coseKey.get("3").asInt();
+		} catch (IOException e) {
+			throw errorResponseFactory.invalidRequest("Unable to parse credential public key");
+		}
+
+		final int algorithm = credentialAlgorithm;
+		boolean offered = preparePublicKeyCredentialSelection().stream()
+				.anyMatch(param -> param.getAlg() == algorithm);
+		if (!offered) {
+			throw errorResponseFactory.invalidRequest("Credential algorithm " + credentialAlgorithm + " is not allowed");
+		}
+	}
 
 	// Package-private so the advertised-set derivation can be tested without standing up options().
 	Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
