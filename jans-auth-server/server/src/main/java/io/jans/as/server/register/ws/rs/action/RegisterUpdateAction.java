@@ -46,7 +46,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_KID;
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNING_KID;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -150,6 +152,8 @@ public class RegisterUpdateAction {
 
             registerService.updateClientFromRequestObject(client, request, true);
 
+            validateSigningKids(client);
+
             if (requestObject.has(BACKCHANNEL_LOGOUT_URI.toString())
                     && StringUtils.isBlank(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()))) {
                 client.getAttributes().setBackchannelLogoutUri(new ArrayList<>());
@@ -207,6 +211,16 @@ public class RegisterUpdateAction {
 
         log.trace("The Access Token is not valid for the Client ID, returns invalid_token error.");
         throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.");
+    }
+
+    private void validateSigningKids(Client client) {
+        try {
+            registerParamsValidator.validateSigningKid(client.getAttributes().getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
+            registerParamsValidator.validateSigningKid(client.getAttributes().getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
     }
 
     private void validateEphemeralSubjectTypeBackchannelLogout(Client client) {

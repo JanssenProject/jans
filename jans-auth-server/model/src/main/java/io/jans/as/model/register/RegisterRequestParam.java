@@ -152,6 +152,16 @@ public enum RegisterRequestParam {
     ACCESS_TOKEN_SIGNING_ALG("access_token_signing_alg"),
 
     /**
+     * Key ID (kid) of the key used to sign access token JWTs. Overrides implicit key lookup by algorithm.
+     */
+    ACCESS_TOKEN_SIGNING_KID("access_token_signing_kid"),
+
+    /**
+     * Key ID (kid) of the key used to sign ID tokens. Overrides implicit key lookup by algorithm.
+     */
+    ID_TOKEN_SIGNING_KID("id_token_signing_kid"),
+
+    /**
      * JWS alg algorithm JWA required for signing authorization responses.
      */
     AUTHORIZATION_SIGNED_RESPONSE_ALG("authorization_signed_response_alg"),

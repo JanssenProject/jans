@@ -15693,21 +15693,21 @@ components:
           $ref: "#/components/schemas/AttributeValidation"
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        selected:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        selected:
+        whitePagesCanView:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16691,6 +16691,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16700,8 +16702,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17462,6 +17462,10 @@ components:
           type: boolean
         tlsClientAuthSubjectDn:
           type: string
+        accessTokenSigningKid:
+          type: string
+        idTokenSigningKid:
+          type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -17621,10 +17625,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -17673,15 +17677,6 @@ components:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
             changes. Default value `false`.
-        roleAttributeName:
-          type: string
-          description: DB attribute name for storing user role
-        adminRoleNames:
-          type: array
-          description: Role names corresponding to `admin` role
-          items:
-            type: string
-            description: Role names corresponding to `admin` role
         userRolePermissionValidationEnabled:
           type: boolean
           description: Flag to enable/disable User Role-Permission mapping check while
@@ -17780,12 +17775,6 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration.
-        superAdminScopes:
-          type: array
-          description: List of Super Admin oAuth scopes.
-          items:
-            type: string
-            description: List of Super Admin oAuth scopes.
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.
