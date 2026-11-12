@@ -349,14 +349,19 @@ public class Fido2MetricsService {
                 
                 // Cleanup old metrics entries
                 Filter filter = Filter.createLessOrEqualFilter(Fido2MetricsConstants.JANS_TIMESTAMP, cutoffDate);
+                // Bounded find, then remove each entry by DN. The bulk remove(filter) path
+                // builds an invalid LIKE clause on Couchbase with scope support.
                 int totalRemoved = 0;
-                int removed;
+                List<Fido2MetricsEntry> expired;
                 do {
-                    removed = persistenceEntryManager.remove(
+                    expired = persistenceEntryManager.findEntries(
                         METRICS_ENTRY_BASE_DN, Fido2MetricsEntry.class, filter, CLEANUP_BATCH_SIZE
                     );
-                    totalRemoved += removed;
-                } while (removed >= CLEANUP_BATCH_SIZE);
+                    for (Fido2MetricsEntry entry : expired) {
+                        persistenceEntryManager.remove(entry.getDn(), Fido2MetricsEntry.class);
+                        totalRemoved++;
+                    }
+                } while (expired.size() >= CLEANUP_BATCH_SIZE);
                 
                 log.info("Cleaned up {} old metrics entries", totalRemoved);
             } catch (Exception e) {
