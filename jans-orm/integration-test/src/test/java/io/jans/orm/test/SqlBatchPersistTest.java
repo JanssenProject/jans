@@ -104,7 +104,8 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 
 	@AfterClass(alwaysRun = true)
 	public void cleanup() {
-		if (entryManager == null) {
+		// marker is null when the class is skipped: a "sid" equality filter on null would match unrelated sessions
+		if ((entryManager == null) || (marker == null)) {
 			return;
 		}
 

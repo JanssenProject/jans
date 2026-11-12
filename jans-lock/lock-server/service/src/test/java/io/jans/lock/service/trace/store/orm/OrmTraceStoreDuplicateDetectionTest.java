@@ -32,12 +32,14 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 
 /**
- * Tests the backend-agnostic duplicate-detection protocol in isolation, with
- * a plain Mockito mock of {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}.
- * The store never reads before an insert: the unique key decides. A duplicate reported as an ORM
- * {@code DuplicateEntryException} cause (SQL, LDAP) needs no read; a plain {@link EntryPersistenceException}
- * (backends that wrap every failure) makes the store re-probe {@code contains} to tell a duplicate from a
- * genuine storage failure.
+ * Tests the duplicate-detection protocol in isolation, with a plain Mockito mock of
+ * {@link PersistenceEntryManager} rather than {@link FakeEntryManagerBehavior}.
+ *
+ * <p>On SQL the store does not read before an insert: the unique key decides and a duplicate arrives as an
+ * ORM {@code DuplicateEntryException} cause. Any other persistence type (the mock's default {@code null}
+ * included) can overwrite on insert, so the store probes {@code contains} first. A plain
+ * {@link EntryPersistenceException} makes the store re-probe {@code contains} to tell a duplicate from a
+ * genuine storage failure.</p>
  *
  * @author Yuriy Movchan
  */
@@ -83,14 +85,34 @@ class OrmTraceStoreDuplicateDetectionTest {
 
 	@Test
 	void testInsertProducerKey_persistFailsButContainsTrueOnReprobe_throwsDuplicateEntryException() {
-		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
+		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(false, true);
 		doThrow(new EntryPersistenceException("boom")).when(persistenceEntryManager).persist(any());
 
 		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
 	}
 
 	@Test
-	void testInsertProducerKey_persistFailsWithDuplicateCause_throwsDuplicateEntryExceptionWithoutRead() {
+	void testInsertProducerKey_containsTrueUpfront_throwsDuplicateEntryExceptionWithoutPersisting() {
+		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
+
+		verify(persistenceEntryManager, never()).persist(any());
+	}
+
+	@Test
+	void testInsertProducerKey_couchbaseExistingEntry_isNotOverwritten() {
+		when(persistenceEntryManager.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.couchbase.name());
+		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
+
+		verify(persistenceEntryManager, never()).persist(any());
+	}
+
+	@Test
+	void testInsertProducerKey_sqlPersistFailsWithDuplicateCause_throwsDuplicateEntryExceptionWithoutRead() {
+		when(persistenceEntryManager.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.sql.name());
 		doThrow(new EntryPersistenceException("Failed to persist entry",
 				new io.jans.orm.exception.operation.DuplicateEntryException("dn"))).when(persistenceEntryManager).persist(any());
 
@@ -100,7 +122,20 @@ class OrmTraceStoreDuplicateDetectionTest {
 	}
 
 	@Test
-	void testInsertProducerKey_persistSucceeds_readsNothing() throws Exception {
+	void testInsertProducerKey_sqlPersistFailsWithoutCauseAndContainsTrue_throwsDuplicateEntryException() {
+		when(persistenceEntryManager.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.sql.name());
+		when(persistenceEntryManager.contains(anyString(), eq(TraceProducerKeyEntry.class))).thenReturn(true);
+		doThrow(new EntryPersistenceException("boom")).when(persistenceEntryManager).persist(any());
+
+		assertThrows(DuplicateEntryException.class, () -> store.insertProducerKey(newProducerKey()));
+
+		verify(persistenceEntryManager).contains(anyString(), eq(TraceProducerKeyEntry.class));
+	}
+
+	@Test
+	void testInsertProducerKey_sqlPersistSucceeds_readsNothing() throws Exception {
+		when(persistenceEntryManager.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.sql.name());
+
 		store.insertProducerKey(newProducerKey());
 
 		verify(persistenceEntryManager).persist(any());

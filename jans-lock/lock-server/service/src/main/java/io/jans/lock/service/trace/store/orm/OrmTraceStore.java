@@ -146,12 +146,18 @@ public class OrmTraceStore implements TraceStore {
 	// -- duplicate-safe insert -------------------------------------------
 
 	/*
-	 * The unique key decides, so there is no read before the insert. SQL and LDAP report a duplicate as an
-	 * ORM DuplicateEntryException cause; other backends wrap every failure, so only a failed insert
-	 * without that cause re-checks the DN to tell a duplicate from a storage error.
+	 * On SQL the unique key decides, so there is no read before the insert: a duplicate is reported as an
+	 * ORM DuplicateEntryException cause. Other backends can overwrite an existing entry on insert
+	 * (Couchbase upsert, Spanner insert-or-update), so they keep the read before the insert. A failed
+	 * insert without the duplicate cause re-checks the DN to tell a duplicate from a storage error.
 	 */
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
 			throws DuplicateEntryException, TraceStorageException {
+		boolean insertRejectsDuplicates = PersistenceEntryManager.PERSITENCE_TYPES.sql.name()
+				.equals(persistenceEntryManager.getPersistenceType(dn));
+		if (!insertRejectsDuplicates && persistenceEntryManager.contains(dn, entityClass)) {
+			throw new DuplicateEntryException(key);
+		}
 		try {
 			persistenceEntryManager.persist(entity);
 		} catch (EntryPersistenceException e) {

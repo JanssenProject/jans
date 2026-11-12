@@ -78,6 +78,9 @@ The fallback is not atomic. Use it only when the caller can handle a partial wri
 - The result order follows the first occurrence of each DN in the input. A repeated DN is read once.
 - Works on every backend. The default implementation reads one DN at a time (`contains` plus `find`), so
   no capability check is needed. The SQL backend reads the entries in one round trip per table.
+- On SQL every read failure is an `EntryPersistenceException`. The default implementation relies on
+  `contains`, which returns `false` when its read fails, so on other backends a failed read can look like
+  a missing DN.
 
 ### Hybrid persistence
 

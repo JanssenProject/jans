@@ -164,7 +164,10 @@ public interface PersistenceEntryManager extends EntityManager {
 	 * @throws io.jans.orm.exception.MappingException {@code dns} is {@code null} or contains a
 	 *         {@code null} or empty DN
 	 * @throws io.jans.orm.exception.EntryPersistenceException a read fails for a reason other than a
-	 *         missing entry
+	 *         missing entry. The default implementation checks existence with {@code contains}, which
+	 *         reports a failed read as a missing entry on backends that swallow the read error, so a DN
+	 *         can be absent from the result although the read failed. The SQL implementation reports
+	 *         every read failure.
 	 */
 	default <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns) {
 		if (dns == null) {

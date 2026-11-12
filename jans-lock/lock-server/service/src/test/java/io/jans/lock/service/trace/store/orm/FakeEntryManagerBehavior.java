@@ -119,6 +119,8 @@ final class FakeEntryManagerBehavior {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void wire() {
+		when(mock.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.sql.name());
+
 		when(mock.contains(anyString(), any(Class.class)))
 				.thenAnswer(inv -> storeFor(inv.getArgument(1)).containsKey((String) inv.getArgument(0)));
 
