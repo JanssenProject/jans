@@ -1,6 +1,8 @@
 import json
 import logging.config
 import os
+import shlex
+import subprocess
 import sys
 import time
 from collections import Counter
@@ -19,7 +21,6 @@ from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
-from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import generate_ssl_ca_certkey
 from jans.pycloudlib.utils import generate_signed_ssl_certkey
@@ -37,14 +38,30 @@ KEY_STRATEGIES = ("OLDER", "NEWER", "FIRST")
 DEFAULT_ARCHIVED_JWK_LIFETIME = 60 * 60 * 24 * 365
 
 
+# TODO: replace with jans.pycloudlib.utils.exec_cmd once the image ships a jans-pycloudlib that has the env parameter
+def exec_cmd(cmd, env=None):
+    args = shlex.split(cmd)
+    popen = subprocess.Popen(  # nosec: B603
+        args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        env={**os.environ, **env} if env else None,
+    )
+    stdout, stderr = popen.communicate()
+    return stdout.strip(), stderr.strip(), popen.returncode
+
+
 def keytool_import_key(src_jks_fn, dest_jks_fn, alias, password):
-    cmd = f"keytool -importkeystore -srckeystore {src_jks_fn} -srcstorepass {password} -srcalias {alias} -destkeystore {dest_jks_fn} -deststorepass {password} -destalias {alias}"
-    return exec_cmd(cmd)
+    # keytool reads ``:env`` passwords from the environment, keeping them out of process arguments
+    cmd = shlex.join([
+        "keytool", "-importkeystore", "-srckeystore", src_jks_fn, "-srcstorepass:env", "KEYTOOL_STOREPASS",
+        "-srcalias", alias, "-destkeystore", dest_jks_fn, "-deststorepass:env", "KEYTOOL_STOREPASS",
+        "-destalias", alias,
+    ])
+    return exec_cmd(cmd, env={"KEYTOOL_STOREPASS": password})
 
 
 def keytool_delete_key(jks_fn, alias, password):
-    cmd = f"keytool -delete -alias {alias} -keystore {jks_fn} -storepass {password}"
-    return exec_cmd(cmd)
+    cmd = shlex.join(["keytool", "-delete", "-alias", alias, "-keystore", jks_fn, "-storepass:env", "KEYTOOL_STOREPASS"])
+    return exec_cmd(cmd, env={"KEYTOOL_STOREPASS": password})
 
 
 def encode_jks(manager, jks="/etc/certs/auth-keys.jks"):

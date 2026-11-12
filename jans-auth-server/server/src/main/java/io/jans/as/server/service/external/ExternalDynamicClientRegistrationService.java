@@ -16,6 +16,7 @@ import io.jans.as.server.service.external.context.DynamicClientRegistrationConte
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
+import io.jans.model.custom.script.type.client.DummyClientRegistrationType;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.CoreCertUtil;
 import jakarta.ejb.DependsOn;
@@ -82,6 +83,10 @@ public class ExternalDynamicClientRegistrationService extends ExternalScriptServ
     public boolean executeExternalCreateClientMethods(RegisterRequest registerRequest, Client client, HttpServletRequest httpRequest) {
         boolean result = true;
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
+            if (customScriptConfiguration.getExternalType() instanceof DummyClientRegistrationType) {
+                log.error("Client registration script '{}' failed to load, rejecting client creation", customScriptConfiguration.getName());
+                return false;
+            }
             if (customScriptConfiguration.getExternalType().getApiVersion() > 1) {
                 result &= executeExternalCreateClientMethod(customScriptConfiguration, registerRequest, client, httpRequest);
                 if (!result) {

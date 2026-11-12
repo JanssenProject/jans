@@ -197,7 +197,7 @@ public abstract class UserService {
     }
 
     public User getUniqueUserByAttributes(List<String> attributeNames, String attributeValue) {
-        log.debug("Getting user information from LDAP: attributeNames = '{}', attributeValue = '{}'", attributeNames, attributeValue);
+        log.debug("Getting user information from LDAP: attributeNames = '{}', attributeValue = '{}'", attributeNames, escapeLog(attributeValue));
 
         if (attributeNames != null) {
             for (String attributeName : attributeNames) {
@@ -256,7 +256,7 @@ public abstract class UserService {
         }
 
         if (log.isDebugEnabled())
-            log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), attributeValue);
+            log.debug("Getting user information from DB: {} = {}", ArrayHelper.toString(attributeNames), escapeLog(attributeValue));
 
         String peopleBaseDn = getPeopleBaseDn();
 
@@ -284,7 +284,7 @@ public abstract class UserService {
 
         List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
         if (log.isDebugEnabled())
-            log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), attributeValue);
+            log.debug("Found {} entries for user {} = {}", entries.size(), ArrayHelper.toString(attributeNames), escapeLog(attributeValue));
 
         return entries.isEmpty() ? null : entries.get(0);
     }
@@ -334,7 +334,7 @@ public abstract class UserService {
     }
 
     public User addUserAttributeByUserInum(String userInum, String attributeName, Object attributeValue) {
-        log.debug("Add user attribute by user inum  to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        log.debug("Add user attribute by user inum  to LDAP: attributeName = '{}'", attributeName);
 
         User user = getUserByInum(userInum);
         if (user == null) {
@@ -356,7 +356,7 @@ public abstract class UserService {
     }
 
     public User addUserAttribute(String userId, String attributeName, Object attributeValue, Boolean multiValued) {
-        log.debug("Add user attribute to LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        log.debug("Add user attribute to LDAP: attributeName = '{}'", attributeName);
 
         User user = getUser(userId);
         if (user == null) {
@@ -405,7 +405,7 @@ public abstract class UserService {
     }
 
     public User removeUserAttributeValue(String userId, String attributeName, String attributeValue) {
-        log.debug("Remove user attribute value from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+        log.debug("Remove user attribute value from LDAP: attributeName = '{}'", attributeName);
 
         User user = getUser(userId);
         if (user == null) {
@@ -437,7 +437,7 @@ public abstract class UserService {
     }
 
     public User replaceUserAttribute(String userId, String attributeName, String oldAttributeValue, String newAttributeValue, Boolean multiValued) {
-        log.debug("Replace user attribute in LDAP: attributeName = '{}', oldAttributeValue = '{}', newAttributeValue = '{}'", attributeName, oldAttributeValue, newAttributeValue);
+        log.debug("Replace user attribute in LDAP: attributeName = '{}'", attributeName);
 
         User user = getUser(userId);
         if (user == null) {

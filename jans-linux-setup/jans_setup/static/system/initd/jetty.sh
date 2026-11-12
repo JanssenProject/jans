@@ -117,11 +117,22 @@ findDirectory()
   done
 }
 
+require_jetty_user()
+{
+  if [ $UID -eq 0 ] && [ -n "$JETTY_USER" ] && [ "$JETTY_USER" != "root" ]; then
+    echo "Refusing to run Jetty in foreground as root; run as $JETTY_USER or use start"
+    exit 1
+  fi
+}
+
 running()
 {
   if [ -f "$1" ]
   then
     local PID=$(cat "$1" 2>/dev/null) || return 1
+    case "$PID" in
+      ''|*[!0-9]*|0) rm -f "$1"; return 1 ;;
+    esac
     if [ -n "$PID" ]; then
       if ! ps aux | grep -w $PID | grep -v 'grep' > /dev/null 2>&1; then
         kill -9 $PID > /dev/null 2>&1
@@ -501,8 +512,9 @@ case "$ACTION" in
           SU_SHELL="-s $JETTY_SHELL"
         fi
 
+        rm -f "$JETTY_PID"
         touch "$JETTY_PID"
-        chown "$JETTY_USER" "$JETTY_PID"
+        chown -h "$JETTY_USER" "$JETTY_PID"
         # FIXME: Broken solution: wordsplitting, pathname expansion, arbitrary command execution, etc.
         su - "$JETTY_USER" $SU_SHELL -c "
           cd \"$JETTY_BASE\"
@@ -571,7 +583,7 @@ case "$ACTION" in
 
   restart)
     JETTY_SH=$0
-    > "$JETTY_STATE"
+    rm -f "$JETTY_STATE"
     if [ ! -f $JETTY_SH ]; then
       if [ ! -f $JETTY_HOME/bin/jetty.sh ]; then
         echo "$JETTY_HOME/bin/jetty.sh does not exist."
@@ -590,12 +602,14 @@ case "$ACTION" in
     # Under control of daemontools supervise monitor which
     # handles restarts and shutdowns via the svc program.
     #
+    require_jetty_user
     exec "${RUN_CMD[@]}"
 
     ;;
 
   run|demo)
     echo "Running Jetty: "
+    require_jetty_user
 
     if running "$JETTY_PID"
     then

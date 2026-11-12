@@ -8,9 +8,11 @@ import io.jans.as.model.exception.InvalidJwtException;
 import jakarta.ws.rs.WebApplicationException;
 import org.testng.annotations.Test;
 
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
@@ -165,5 +167,20 @@ public class JwtAuthorizationRequestTest {
         assertTrue(validAlg == SignatureAlgorithm.RS256, "RS256 should be recognized");
         assertTrue(!(validAlg == null || validAlg == SignatureAlgorithm.NONE),
                 "Valid signature algorithms should NOT trigger forceSignedRequestObject rejection");
+    }
+
+    @Test
+    public void isAllowedRequestUriDestination_privateOrNonHttpTarget_shouldBeRejected() {
+        AppConfiguration appConfiguration = new AppConfiguration();
+        assertFalse(JwtAuthorizationRequest.isAllowedRequestUriDestination(URI.create("https://127.0.0.1/r"), "https://127.0.0.1/r", appConfiguration));
+        assertFalse(JwtAuthorizationRequest.isAllowedRequestUriDestination(URI.create("https://169.254.169.254/r"), "https://169.254.169.254/r", appConfiguration));
+        assertFalse(JwtAuthorizationRequest.isAllowedRequestUriDestination(URI.create("file:///etc/passwd"), "file:///etc/passwd", appConfiguration));
+    }
+
+    @Test
+    public void isAllowedRequestUriDestination_whitelistedPrivateTarget_shouldBeAllowed() {
+        AppConfiguration appConfiguration = new AppConfiguration();
+        appConfiguration.setExternalUriWhiteList(Collections.singletonList("10.0.0.5"));
+        assertTrue(JwtAuthorizationRequest.isAllowedRequestUriDestination(URI.create("https://10.0.0.5/r"), "https://10.0.0.5/r", appConfiguration));
     }
 }

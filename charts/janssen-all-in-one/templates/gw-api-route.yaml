@@ -21,19 +21,19 @@
 {{- $fido2GatewayNamespace := .Values.fido2.gatewayNamespace | default $defaultGatewayNamespace -}}
 {{- $scimGatewayName := .Values.scim.gatewayName | default $defaultGatewayName -}}
 {{- $scimGatewayNamespace := .Values.scim.gatewayNamespace | default $defaultGatewayNamespace -}}
-{{- /* Endpoint flags fall back to the deprecated <service>.ingress.* flags during the transition. */}}
-{{- $authServerEnabled := or $routes.authServerEnabled (index .Values "auth-server" "ingress" "authServerEnabled") -}}
-{{- $openidConfigEnabled := or $routes.openidConfigEnabled (index .Values "auth-server" "ingress" "openidConfigEnabled") -}}
-{{- $deviceCodeEnabled := or $routes.deviceCodeEnabled (index .Values "auth-server" "ingress" "deviceCodeEnabled") -}}
-{{- $firebaseMessagingEnabled := or $routes.firebaseMessagingEnabled (index .Values "auth-server" "ingress" "firebaseMessagingEnabled") -}}
-{{- $uma2ConfigEnabled := or $routes.uma2ConfigEnabled (index .Values "auth-server" "ingress" "uma2ConfigEnabled") -}}
-{{- $webfingerEnabled := or $routes.webfingerEnabled (index .Values "auth-server" "ingress" "webfingerEnabled") -}}
-{{- $authzenConfigEnabled := or $routes.authzenConfigEnabled (index .Values "auth-server" "ingress" "authzenConfigEnabled") -}}
+{{- /* Endpoints on by default honour an explicit routes.* false. Off-by-default ones fall back to the deprecated <service>.ingress.* flags during the transition. */}}
+{{- $authServerEnabled := $routes.authServerEnabled -}}
+{{- $openidConfigEnabled := $routes.openidConfigEnabled -}}
+{{- $deviceCodeEnabled := $routes.deviceCodeEnabled -}}
+{{- $firebaseMessagingEnabled := $routes.firebaseMessagingEnabled -}}
+{{- $uma2ConfigEnabled := $routes.uma2ConfigEnabled -}}
+{{- $webfingerEnabled := $routes.webfingerEnabled -}}
+{{- $authzenConfigEnabled := $routes.authzenConfigEnabled -}}
 {{- $oauthServerConfigEnabled := $routes.oauthServerConfigEnabled -}}
 {{- $lockConfigEnabled := or $routes.lockConfigEnabled (index .Values "auth-server" "ingress" "lockConfigEnabled") -}}
 {{- $lockAuditEnabled := or $routes.lockAuditEnabled (index .Values "auth-server" "ingress" "lockAuditEnabled") -}}
 {{- $casaEnabled := or $routes.casaEnabled .Values.casa.ingress.casaEnabled -}}
-{{- $configApiEnabled := or $routes.configApiEnabled (index .Values "config-api" "ingress" "configApiEnabled") -}}
+{{- $configApiEnabled := $routes.configApiEnabled -}}
 {{- $fido2Enabled := or $routes.fido2Enabled .Values.fido2.ingress.fido2Enabled -}}
 {{- $fido2ConfigEnabled := or $routes.fido2ConfigEnabled .Values.fido2.ingress.fido2ConfigEnabled -}}
 {{- $fido2WebauthnEnabled := or $routes.fido2WebauthnEnabled .Values.fido2.ingress.fido2WebauthnEnabled -}}
@@ -81,23 +81,6 @@ spec:
         path:
           type: ReplaceFullPath
           replaceFullPath: /jans-auth/.well-known/openid-configuration
-    backendRefs:
-    - name: {{ $svcName }}
-      port: {{ $svcPort }}
-  {{- end }}
-
-  {{- /* 2. Device Code */}}
-  {{- if $deviceCodeEnabled }}
-  - matches:
-    - path:
-        type: Exact
-        value: /device-code
-    filters:
-    - type: URLRewrite
-      urlRewrite:
-        path:
-          type: ReplaceFullPath
-          replaceFullPath: /jans-auth/device_authorization.htm
     backendRefs:
     - name: {{ $svcName }}
       port: {{ $svcPort }}
@@ -264,6 +247,79 @@ spec:
     - path:
         type: PathPrefix
         value: /jans-auth
+    filters:
+    - type: RequestRedirect
+      requestRedirect:
+        scheme: https
+        statusCode: 301
+{{- end }}
+
+{{- /* Device Code: interactive page, HTTPS only (HTTP -> HTTPS) */}}
+{{- if $deviceCodeEnabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-device-code-secure
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
+    sectionName: {{ $httpsSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /device-code
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        path:
+          type: ReplaceFullPath
+          replaceFullPath: /jans-auth/device_authorization.htm
+    backendRefs:
+    - name: {{ $svcName }}
+      port: {{ $svcPort }}
+
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-device-code-redirect
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ $fullName }}-routes
+{{- if $routes.labels }}
+{{- toYaml $routes.labels | nindent 4 }}
+{{- end }}
+{{- if $routes.annotations }}
+  annotations:
+{{- toYaml $routes.annotations | nindent 4 }}
+{{- end }}
+spec:
+  parentRefs:
+  - name: {{ $authGatewayName }}
+    namespace: {{ $authGatewayNamespace }}
+    sectionName: {{ $httpSection }}
+  hostnames:
+  - {{ .Values.fqdn | quote }}
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /device-code
     filters:
     - type: RequestRedirect
       requestRedirect:

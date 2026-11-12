@@ -57,7 +57,6 @@ class KubernetesMeta(BaseMeta):
             # set client only if config is loaded properly
             if config_loaded:
                 self._client = kubernetes.client.CoreV1Api()
-                self._client.api_client.configuration.assert_hostname = False
             else:
                 logger.warning("Kubernetes client config are not loaded properly, thus client will be disabled!")
         return self._client

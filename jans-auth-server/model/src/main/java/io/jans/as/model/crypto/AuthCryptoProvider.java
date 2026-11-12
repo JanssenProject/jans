@@ -173,6 +173,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return dnName;
     }
 
+    public boolean isRejectNoneAlg() {
+        return rejectNoneAlg;
+    }
+
+    public KeySelectionStrategy getKeySelectionStrategy() {
+        return keySelectionStrategy;
+    }
+
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException {
         return generateKey(algorithm, expirationTime, 2048);
@@ -239,6 +247,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     public String sign(String signingInput, String alias, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
         try {
             if (signatureAlgorithm == SignatureAlgorithm.NONE) {
+                if (rejectNoneAlg) {
+                    throw new CryptoProviderException("None algorithm is forbidden by `rejectJwtWithNoneAlg` property.");
+                }
                 return "";
             } else if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily())) {
                 SecretKey secretKey = new SecretKeySpec(sharedSecret.getBytes(StandardCharsets.UTF_8), signatureAlgorithm.getAlgorithm());
@@ -599,7 +610,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             if (jwks == null) {
                 publicKey = getPublicKey(alias);
             } else {
-                publicKey = getPublicKey(alias, jwks, signatureAlgorithm.getAlg());
+                publicKey = getSignatureVerificationPublicKey(alias, jwks, signatureAlgorithm.getAlg());
             }
             if (publicKey == null) {
                 return false;

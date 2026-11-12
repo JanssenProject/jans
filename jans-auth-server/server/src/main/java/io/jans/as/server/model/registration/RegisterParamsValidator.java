@@ -13,6 +13,8 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.Constants;
+import io.jans.as.model.config.WebKeysConfiguration;
+import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -38,6 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -60,12 +63,16 @@ public class RegisterParamsValidator {
     private ErrorResponseFactory errorResponseFactory;
 
     @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
     private SectorIdentifierUriService sectorIdentifierUriService;
 
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static final String LOCALHOST = "localhost";
     private static final String LOOPBACK = "127.0.0.1";
+    private static final Set<String> FORBIDDEN_NATIVE_SCHEMES = Set.of("javascript", "data", "vbscript", "file", "blob");
 
     /**
      * Validates the parameters for a register request.
@@ -102,6 +109,26 @@ public class RegisterParamsValidator {
         }
 
         return new Pair<>(true, "");
+    }
+
+    /**
+     * Validates that explicitly configured signing key exists in the keystore. Algorithm and use are not checked,
+     * explicit kid always wins. Blank kid means implicit key lookup and is always valid.
+     *
+     * @param kid       key id configured for the client
+     * @param paramName name of the request parameter, used in error message
+     */
+    public void validateSigningKid(String kid, String paramName) {
+        if (StringUtils.isBlank(kid)) {
+            return;
+        }
+
+        final JSONWebKey key = webKeysConfiguration != null ? webKeysConfiguration.getKey(kid) : null;
+        if (key == null) {
+            log.debug("Parameter {} is not valid, kid: {}. Kid does not exists in key store.", paramName, kid);
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter " + paramName + " is not valid.");
+        }
     }
 
     /**
@@ -381,7 +408,11 @@ public class RegisterParamsValidator {
                 log.debug("Invalid schema for redirect_uri. Only HTTP (localhost) and HTTPS are supported, redirect_uri: '{}'", uri);
                 return false;
             case NATIVE:
-                // Any schemes (including custom) are allowed for native apps per RFC 8252 (OAuth 2.0 for Native Apps).
+                // Custom schemes are allowed for native apps per RFC 8252, but not schemes a browser executes or reads locally.
+                if (StringUtils.isBlank(scheme) || FORBIDDEN_NATIVE_SCHEMES.contains(scheme.toLowerCase(Locale.ROOT))) {
+                    log.debug("Forbidden scheme for native app redirect_uri: '{}'", uri);
+                    return false;
+                }
                 return true;
         }
         log.debug("redirect_uri is not valid, redirect_uri: '{}'", uri);

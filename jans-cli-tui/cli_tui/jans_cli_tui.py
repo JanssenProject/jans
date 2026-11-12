@@ -10,6 +10,7 @@ import sys
 import asyncio
 import concurrent.futures
 import random
+import tempfile
 
 from enum import Enum
 from pathlib import Path
@@ -1093,8 +1094,16 @@ class JansCliApp(Application):
 
         def do_save(path):
             try:
-                with open(path, 'w') as w:
-                    w.write(text_area.text)
+                # Exports may hold tokens: write a private file and swap it in, so an
+                # existing file's permissions or a symlink at path are not reused.
+                tmp_fd, tmp_path = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(path)), prefix='.export-')
+                try:
+                    with os.fdopen(tmp_fd, 'w') as w:
+                        w.write(text_area.text)
+                    os.replace(tmp_path, path)
+                finally:
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
                 self.pbar_text = _("File {} was saved".format(text_area.text))
                 self.show_message(_("Info"), _("File {} was successfully saved").format(path),
                                   tobefocused=params.get('tobefocused') or self.center_container)

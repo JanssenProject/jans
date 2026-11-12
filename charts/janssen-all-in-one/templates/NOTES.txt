@@ -36,10 +36,9 @@ ATTRIBUTE CHANGES:
 {{- $routes := index .Values "gateway-api" "routes" }}
 {{- $authIngress := index .Values "auth-server" "ingress" }}
 {{- $casaIngress := .Values.casa.ingress }}
-{{- $configApiIngress := index .Values "config-api" "ingress" }}
 {{- $fido2Ingress := .Values.fido2.ingress }}
 {{- $scimIngress := .Values.scim.ingress }}
-{{- $legacy := dict "authServerEnabled" $authIngress.authServerEnabled "openidConfigEnabled" $authIngress.openidConfigEnabled "deviceCodeEnabled" $authIngress.deviceCodeEnabled "firebaseMessagingEnabled" $authIngress.firebaseMessagingEnabled "uma2ConfigEnabled" $authIngress.uma2ConfigEnabled "webfingerEnabled" $authIngress.webfingerEnabled "authzenConfigEnabled" $authIngress.authzenConfigEnabled "lockConfigEnabled" $authIngress.lockConfigEnabled "lockAuditEnabled" $authIngress.lockAuditEnabled "casaEnabled" $casaIngress.casaEnabled "configApiEnabled" $configApiIngress.configApiEnabled "fido2Enabled" $fido2Ingress.fido2Enabled "fido2ConfigEnabled" $fido2Ingress.fido2ConfigEnabled "fido2WebauthnEnabled" $fido2Ingress.fido2WebauthnEnabled "scimEnabled" $scimIngress.scimEnabled "scimConfigEnabled" $scimIngress.scimConfigEnabled }}
+{{- $legacy := dict "lockConfigEnabled" $authIngress.lockConfigEnabled "lockAuditEnabled" $authIngress.lockAuditEnabled "casaEnabled" $casaIngress.casaEnabled "fido2Enabled" $fido2Ingress.fido2Enabled "fido2ConfigEnabled" $fido2Ingress.fido2ConfigEnabled "fido2WebauthnEnabled" $fido2Ingress.fido2WebauthnEnabled "scimEnabled" $scimIngress.scimEnabled "scimConfigEnabled" $scimIngress.scimConfigEnabled }}
 {{- $stale := list }}
 {{- range $flag, $legacyValue := $legacy }}
 {{- if and $legacyValue (not (index $routes $flag)) }}
