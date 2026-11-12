@@ -216,76 +216,80 @@ public class PolicyToScopeMapper {
     }
 
     private List<String> tokenizePolicy(String content) {
+        String code = stripComments(content);
         List<String> tokens = new ArrayList<>();
-        for (int i = 0; i < content.length();) {
-            char current = content.charAt(i);
-            if (Character.isWhitespace(current)) {
-                i++;
-            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
-                i += 2;
-                while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
-                    i++;
-                }
-            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
-                int commentEnd = content.indexOf("*/", i + 2);
-                if (commentEnd < 0) {
-                    throw new IllegalArgumentException("Unterminated block comment");
-                }
-                i = commentEnd + 2;
-            } else if (current == '"') {
-                i = skipStringLiteral(content, i);
+        int i = 0;
+        while (i < code.length()) {
+            char current = code.charAt(i);
+            int next = i + 1;
+            if (current == '"') {
+                next = skipStringLiteral(code, i);
                 tokens.add("\"\"");
             } else if (Character.isLetter(current) || current == '_') {
-                int tokenStart = i++;
-                while (i < content.length()
-                        && (Character.isLetterOrDigit(content.charAt(i)) || content.charAt(i) == '_')) {
-                    i++;
-                }
-                tokens.add(content.substring(tokenStart, i));
-            } else {
+                next = skipIdentifier(code, i);
+                tokens.add(code.substring(i, next));
+            } else if (!Character.isWhitespace(current)) {
                 tokens.add(String.valueOf(current));
-                i++;
             }
+            i = next;
         }
         return tokens;
     }
 
+    private int skipIdentifier(String content, int start) {
+        int i = start + 1;
+        while (i < content.length() && (Character.isLetterOrDigit(content.charAt(i)) || content.charAt(i) == '_')) {
+            i++;
+        }
+        return i;
+    }
+
     private String stripComments(String content) {
         StringBuilder result = new StringBuilder(content.length());
-        for (int i = 0; i < content.length();) {
-            char current = content.charAt(i);
-            if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
-                i += 2;
-                while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
-                    i++;
-                }
-            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
-                int commentEnd = content.indexOf("*/", i + 2);
-                if (commentEnd < 0) {
-                    throw new IllegalArgumentException("Unterminated block comment");
-                }
-                i = commentEnd + 2;
+        int i = 0;
+        while (i < content.length()) {
+            int next;
+            if (content.startsWith("//", i)) {
+                next = skipLineComment(content, i);
+            } else if (content.startsWith("/*", i)) {
+                next = skipBlockComment(content, i);
                 result.append(' ');
-            } else if (current == '"') {
-                int end = skipStringLiteral(content, i);
-                result.append(content, i, end);
-                i = end;
+            } else if (content.charAt(i) == '"') {
+                next = skipStringLiteral(content, i);
+                result.append(content, i, next);
             } else {
-                result.append(current);
-                i++;
+                next = i + 1;
+                result.append(content.charAt(i));
             }
+            i = next;
         }
         return result.toString();
     }
 
+    private int skipLineComment(String content, int start) {
+        int i = start + 2;
+        while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
+            i++;
+        }
+        return i;
+    }
+
+    private int skipBlockComment(String content, int start) {
+        int commentEnd = content.indexOf("*/", start + 2);
+        if (commentEnd < 0) {
+            throw new IllegalArgumentException("Unterminated block comment");
+        }
+        return commentEnd + 2;
+    }
+
     private int skipStringLiteral(String content, int quoteIndex) {
-        for (int i = quoteIndex + 1; i < content.length(); i++) {
+        int i = quoteIndex + 1;
+        while (i < content.length()) {
             char current = content.charAt(i);
-            if (current == '\\') {
-                i++;
-            } else if (current == '"') {
+            if (current == '"') {
                 return i + 1;
             }
+            i += current == '\\' ? 2 : 1;
         }
         throw new IllegalArgumentException("Unterminated string literal");
     }
