@@ -92,6 +92,7 @@ in example below:
     "frontchannel_logout_session_required": false,
     "client_secret_expires_at": 1678787218,
     "access_token_signing_alg": "RS256",
+    "access_token_signing_kid": "5e0a1b9c-example-sig_rs256",
     "response_types": ["code"]
 }
 ```

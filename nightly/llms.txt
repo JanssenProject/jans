@@ -180,6 +180,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [FIDO Logs](https://docs.jans.io/nightly/janssen-server/fido/logs/index.md)
 - [Native App Readiness](https://docs.jans.io/nightly/janssen-server/fido/native-app-readiness/index.md)
 - [Passkey Telemetry](https://docs.jans.io/nightly/janssen-server/fido/passkey-telemetry/index.md)
+- [TRACE Producer](https://docs.jans.io/nightly/janssen-server/fido/trace-producer/index.md)
 - [Trust Diagnostics](https://docs.jans.io/nightly/janssen-server/fido/trust-diagnostics/index.md)
 - [Vendor Metadata](https://docs.jans.io/nightly/janssen-server/fido/vendor-metadata/index.md)
 - [Installation](https://docs.jans.io/nightly/janssen-server/install/index.md)

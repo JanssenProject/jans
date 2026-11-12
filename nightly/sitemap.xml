@@ -373,6 +373,9 @@
         <loc>https://docs.jans.io/nightly/janssen-server/fido/native-app-readiness/</loc>
       </url>
       <url>
+        <loc>https://docs.jans.io/nightly/janssen-server/fido/trace-producer/</loc>
+      </url>
+      <url>
         <loc>https://docs.jans.io/nightly/script-catalog/person_authentication/passkey/</loc>
       </url>
       <url>
