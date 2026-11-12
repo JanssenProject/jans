@@ -17,6 +17,7 @@
 
     <test name="Services" enabled="true">
         <classes>
+            <class name="io.jans.ca.plugin.adminui.test.services.AdminUISecurityServiceTest" />
             <class name="io.jans.ca.plugin.adminui.test.services.AdminUIServiceTest" />
             <class name="io.jans.ca.plugin.adminui.test.services.WebhookServiceTest" />
         </classes>
