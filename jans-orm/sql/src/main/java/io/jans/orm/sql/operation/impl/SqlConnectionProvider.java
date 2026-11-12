@@ -563,6 +563,10 @@ public class SqlConnectionProvider {
 		return sqlQueryFactory;
 	}
 
+	public SQLTemplates getSqlTemplates() {
+		return sqlTemplates;
+	}
+
 	public TableMapping getTableMappingByKey(String key, String objectClass) {
 		String tableName = objectClass;
 		Map<String, AttributeType> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
