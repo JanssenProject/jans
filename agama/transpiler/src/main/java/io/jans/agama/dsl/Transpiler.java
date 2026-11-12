@@ -96,10 +96,10 @@ public class Transpiler {
         return fanny;
     }
     
-    private AuthnFlowParser.FlowContext getFlowContext(String DSLCode)
+    private AuthnFlowParser.FlowContext getFlowContext(String dslCode)
             throws SyntaxException, TranspilerException {
 
-        InputStream is = new ByteArrayInputStream(DSLCode.getBytes(UTF_8));
+        InputStream is = new ByteArrayInputStream(dslCode.getBytes(UTF_8));
         CharStream input = null;
 
         try {
@@ -143,9 +143,9 @@ public class Transpiler {
 
     }
 
-    public XdmNode asXML(String DSLCode) throws SyntaxException, TranspilerException, SaxonApiException {
+    public XdmNode asXML(String dslCode) throws SyntaxException, TranspilerException, SaxonApiException {
 
-        AuthnFlowParser.FlowContext flowContext = getFlowContext(DSLCode);
+        AuthnFlowParser.FlowContext flowContext = getFlowContext(dslCode);
         validateName(flowContext);
         logger.debug("Traversing parse tree");
 
