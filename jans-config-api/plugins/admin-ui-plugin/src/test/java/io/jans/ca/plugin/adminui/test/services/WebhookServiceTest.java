@@ -1,17 +1,21 @@
 package io.jans.ca.plugin.adminui.test.services;
 
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
+import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.webhook.ShortCodeRequest;
 import io.jans.ca.plugin.adminui.model.webhook.WebhookEntry;
 import io.jans.ca.plugin.adminui.service.webhook.WebhookService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
+import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
+import jakarta.ws.rs.core.Response;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.sun.net.httpserver.HttpServer;
@@ -23,7 +27,10 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -113,6 +120,54 @@ public class WebhookServiceTest {
         } finally {
             server.stop(0);
         }
+    }
+
+    @DataProvider(name = "invalidWebhookOrigins")
+    public Object[][] invalidWebhookOrigins() {
+        return new Object[][] {
+                { "${scheme}://example.test/path" },
+                { "https://${host}/path" }
+        };
+    }
+
+    @Test(dataProvider = "invalidWebhookOrigins")
+    public void testAddWebhookRejectsShortcodesInSchemeOrHostWithoutPersistence(String url) {
+        WebhookEntry webhook = createWebhook(null, "invalid-webhook", url, true);
+
+        ApplicationException exception = org.testng.Assert.expectThrows(
+                ApplicationException.class, () -> webhookService.addWebhook(webhook));
+
+        assertEquals(exception.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(exception.getMessage(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
+        verify(entryManager, never()).persist(any());
+        verify(entryManager, never()).merge(any());
+    }
+
+    @Test(dataProvider = "invalidWebhookOrigins")
+    public void testUpdateWebhookRejectsShortcodesInSchemeOrHostWithoutPersistence(String url) {
+        WebhookEntry webhook = createWebhook("existing-id", "invalid-webhook", url, true);
+
+        ApplicationException exception = org.testng.Assert.expectThrows(
+                ApplicationException.class, () -> webhookService.updateWebhook(webhook));
+
+        assertEquals(exception.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(exception.getMessage(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
+        verify(entryManager, never()).persist(any());
+        verify(entryManager, never()).merge(any());
+    }
+
+    @Test
+    public void testUpdateWebhookRejectsMissingRecord() {
+        WebhookEntry webhook = createWebhook("missing-id", "missing-webhook", "https://example.test/path", true);
+        when(entryManager.find(eq(WebhookEntry.class), anyString())).thenReturn(null);
+
+        ApplicationException exception = org.testng.Assert.expectThrows(
+                ApplicationException.class, () -> webhookService.updateWebhook(webhook));
+
+        assertEquals(exception.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(exception.getMessage(), ErrorResponse.WEBHOOK_RECORD_NOT_EXIST.getDescription());
+        verify(entryManager, never()).persist(any());
+        verify(entryManager, never()).merge(any());
     }
 
     private WebhookEntry createWebhook(String id, String name, String url, boolean enabled) {

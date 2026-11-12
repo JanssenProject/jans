@@ -25,8 +25,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
-import uniffi.cedarling_uniffi.Cedarling;
-import uniffi.cedarling_uniffi.CedarlingException;
 
 import jakarta.ws.rs.core.Response;
 
@@ -226,7 +224,7 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
-    public void testValidateTrustedIssuerDomainsRejectsIssuerContentAtMismatchedCentralOffset()
+    public void testValidateTrustedIssuerDomainsRejectsRedirectedEntryWithDifferentContentOnAllowedHost()
             throws Exception {
         byte[] zipBytes = createPolicyStoreWithSecondaryIssuer();
         redirectCentralEntry(zipBytes,
@@ -236,8 +234,7 @@ public class AdminUISecurityServiceTest {
         ApplicationException ex = validateArchiveExpectingFailure(zipBytes);
 
         assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
-        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
-        exerciseCedarlingWithArchive(zipBytes);
+        assertEquals(ex.getMessage(), "Inconsistent policy-store archive entries");
     }
 
     @Test
@@ -490,31 +487,6 @@ public class AdminUISecurityServiceTest {
         return archiveBytes.toByteArray();
     }
 
-    private void exerciseCedarlingWithArchive(byte[] zipBytes) throws Exception {
-        org.json.JSONObject cedarlingConfig = new org.json.JSONObject()
-                .put("CEDARLING_APPLICATION_NAME", "AdminUI")
-                .put("CEDARLING_LOG_TYPE", "off")
-                .put("CEDARLING_ID_TOKEN_TRUST_MODE", "never")
-                .put("CEDARLING_JWT_SIG_VALIDATION", "disabled")
-                .put("CEDARLING_JWT_STATUS_VALIDATION", "disabled")
-                .put("CEDARLING_LOG_LEVEL", "INFO");
-        java.nio.ByteBuffer archiveBuffer = java.nio.ByteBuffer.allocateDirect(zipBytes.length);
-        archiveBuffer.put(zipBytes);
-        archiveBuffer.flip();
-
-        Cedarling cedarling = null;
-        try {
-            cedarling = Cedarling.Companion.loadFromJsonWithArchiveBytes(
-                    cedarlingConfig.toString(), archiveBuffer);
-        } catch (CedarlingException expected) {
-            return;
-        } finally {
-            if (cedarling != null) {
-                cedarling.shutDown();
-            }
-        }
-    }
-
     private byte[] createPolicyStoreWithSecondaryIssuer() throws java.io.IOException {
         byte[] fixture = loadPolicyStoreBytes();
         java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
@@ -529,8 +501,8 @@ public class AdminUISecurityServiceTest {
             }
             zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/Secondary.json"));
             zipOutput.write(("{\"name\":\"Secondary issuer\",\"description\":\"Test trusted issuer\","
-                    + "\"openid_configuration_endpoint\":\"https://evil-jans.io/.well-known/openid-configuration\","
-                    + "\"configuration_endpoint\":\"https://evil-jans.io/.well-known/openid-configuration\"}")
+                    + "\"openid_configuration_endpoint\":\"https://test-jans.io/.well-known/secondary-configuration\","
+                    + "\"configuration_endpoint\":\"https://test-jans.io/.well-known/secondary-configuration\"}")
                     .getBytes(java.nio.charset.StandardCharsets.UTF_8));
             zipOutput.closeEntry();
         }
