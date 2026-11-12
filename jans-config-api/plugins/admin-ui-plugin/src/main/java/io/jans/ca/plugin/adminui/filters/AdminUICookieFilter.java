@@ -11,6 +11,7 @@ import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import io.jans.configapi.core.model.adminui.AdminUISession;
 import io.jans.configapi.core.model.adminui.CedarlingLogType;
 import io.jans.configapi.core.model.exception.ConfigApiApplicationException;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.service.adminui.AdminUISessionService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.util.TtlCache;
@@ -116,6 +117,10 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 return;
             }
             requestContext.getHeaders().putSingle(HttpHeaders.AUTHORIZATION, AUTHENTICATION_SCHEME + " " + accessToken);
+        } catch (ConfigApiApplicationException e) {
+            requestContext.abortWith(Response.status(e.getErrorCode())
+                    .entity(e.getMessage())
+                    .build());
         } catch (Exception e) {
             abortWithException(requestContext, Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -167,7 +172,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * @throws ConfigApiApplicationException if the JWT is invalid or a new access token cannot be generated
      */
     private String getAccessToken(String ujwtString, AUIConfiguration auiConfiguration) throws ConfigApiApplicationException {
-        String sub = getSubjectFromUJWT(ujwtString);
+        String sub = getSubjectFromUJWT(ujwtString, auiConfiguration);
         String cachedToken = ujwtTokenCache.get(sub);
         if (cachedToken != null) {
             try {
@@ -216,14 +221,18 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      *
      * @param ujwtString the User-Info JWT as a compact serialized string
      * @return the value of the `sub` claim from the JWT
-     * @throws ConfigApiApplicationException if the JWT is invalid or the `sub` claim is missing (HTTP 500)
+     * @throws ConfigApiApplicationException if the JWT is invalid, expired, has an invalid audience, or is missing `sub`
      */
-    private String getSubjectFromUJWT(String ujwtString) throws ConfigApiApplicationException {
+    private String getSubjectFromUJWT(String ujwtString, AUIConfiguration auiConfiguration) throws ConfigApiApplicationException {
         final Jwt tokenJwt;
         try {
             tokenJwt = Jwt.parse(ujwtString);
             Map<String, Object> claims = configApiSessionService.getClaims(tokenJwt);
 
+            if (!CommonUtils.hasValidUjwtClaims(claims, auiConfiguration)) {
+                throw new ConfigApiApplicationException(Response.Status.FORBIDDEN.getStatusCode(),
+                        "The User-Info JWT has expired or its audience does not match the Admin UI clients.");
+            }
             if (claims.get("sub") == null) {
                 throw new ConfigApiApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "The `sub` claim missing in User-Info JWT");
             }

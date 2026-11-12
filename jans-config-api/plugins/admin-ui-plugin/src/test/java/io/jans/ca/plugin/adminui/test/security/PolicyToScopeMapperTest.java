@@ -20,6 +20,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class PolicyToScopeMapperTest {
 
@@ -47,6 +48,36 @@ public class PolicyToScopeMapperTest {
         try (ZipFile zipFile = new ZipFile(archive.toFile())) {
             Map<String, Set<String>> result = policyToScopeMapper.processZipFile(zipFile, resourceScopes());
             assertEquals(result, Map.of("admin", Set.of("users.read")));
+        } finally {
+            Files.deleteIfExists(archive);
+        }
+    }
+
+    @Test
+    public void testProcessZipFileRejectsForbidPolicy() throws Exception {
+        String policy = "forbid(principal, action, resource) when { "
+                + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                + "action == GluuFlexAdminUI::Action::\"READ\" };";
+        assertUnsupportedPolicy(policy, "forbid");
+    }
+
+    @Test
+    public void testProcessZipFileRejectsUnlessCondition() throws Exception {
+        String policy = "permit(principal, action, resource) unless { "
+                + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                + "action == GluuFlexAdminUI::Action::\"READ\" };";
+        assertUnsupportedPolicy(policy, "unless");
+    }
+
+    private void assertUnsupportedPolicy(String policy, String unsupportedForm) throws Exception {
+        Path archive = createPolicyArchive(policy);
+        try (ZipFile zipFile = new ZipFile(archive.toFile())) {
+            IllegalArgumentException exception = org.testng.Assert.expectThrows(
+                    IllegalArgumentException.class,
+                    () -> policyToScopeMapper.processZipFile(zipFile, resourceScopes()));
+            assertTrue(exception.getMessage().contains(unsupportedForm));
         } finally {
             Files.deleteIfExists(archive);
         }

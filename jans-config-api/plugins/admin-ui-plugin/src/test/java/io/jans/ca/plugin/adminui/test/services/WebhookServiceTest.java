@@ -67,19 +67,21 @@ public class WebhookServiceTest {
             int port = server.getAddress().getPort();
             WebhookEntry invalidWebhook = createWebhook(
                     "invalid-id", "invalid-webhook", "http://${host}/legacy", true);
+            WebhookEntry unmatchedShortcodeWebhook = createWebhook(
+                    "unmatched-id", "unmatched-webhook", "http://${host}/legacy", true);
             WebhookEntry validWebhook = createWebhook(
                     "valid-id", "valid-webhook", "http://127.0.0.1:" + port + "/${path}", true);
             when(entryManager.findEntries(
                     eq(AppConstants.WEBHOOK_DN), eq(WebhookEntry.class), any(Filter.class)))
-                    .thenReturn(List.of(invalidWebhook, validWebhook));
+                    .thenReturn(List.of(invalidWebhook, unmatchedShortcodeWebhook, validWebhook));
 
             ShortCodeRequest invalidShortcode = createShortcode(
                     "invalid-id", Map.of("host", "127.0.0.1:" + port));
             ShortCodeRequest validShortcode = createShortcode("valid-id", Map.of("path", "trigger"));
             List<GenericResponse> responses = webhookService.triggerEnabledWebhooks(
-                    Set.of("invalid-id", "valid-id"), List.of(invalidShortcode, validShortcode));
+                    Set.of("invalid-id", "unmatched-id", "valid-id"), List.of(invalidShortcode, validShortcode));
 
-            assertEquals(responses.size(), 2);
+            assertEquals(responses.size(), 3);
             assertEquals(allWebhookCalls.get(), 1, "Only the valid webhook should reach the server");
             assertEquals(validWebhookCalls.get(), 1);
             GenericResponse invalidResponse = responses.stream()
@@ -91,6 +93,15 @@ public class WebhookServiceTest {
             assertEquals(invalidResponse.getResponseCode(), 400);
             assertEquals(invalidResponse.getResponseObject().path("webhookName").asText(), "invalid-webhook");
             assertEquals(invalidResponse.getResponseObject().path("webhookMethod").asText(), "GET");
+
+            GenericResponse unmatchedShortcodeResponse = responses.stream()
+                    .filter(response -> "unmatched-id".equals(
+                            response.getResponseObject().path("webhookId").asText()))
+                    .findFirst()
+                    .orElseThrow();
+            assertFalse(unmatchedShortcodeResponse.isSuccess());
+            assertEquals(unmatchedShortcodeResponse.getResponseCode(), 400);
+            assertEquals(unmatchedShortcodeResponse.getResponseObject().path("webhookName").asText(), "unmatched-webhook");
 
             GenericResponse validResponse = responses.stream()
                     .filter(response -> "valid-id".equals(

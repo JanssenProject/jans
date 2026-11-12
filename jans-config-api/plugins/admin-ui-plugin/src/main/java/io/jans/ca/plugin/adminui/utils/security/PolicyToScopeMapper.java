@@ -29,6 +29,8 @@ public class PolicyToScopeMapper {
     private static final Pattern ACTION_PATTERN = Pattern.compile(
             "GluuFlexAdminUI::Action::\"([^\"]+)\""
     );
+    private static final Pattern FORBID_POLICY_PATTERN = Pattern.compile("\\bforbid\\s*\\(");
+    private static final Pattern UNLESS_CONDITION_PATTERN = Pattern.compile("\\bunless\\s*\\{");
 
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
@@ -39,6 +41,7 @@ public class PolicyToScopeMapper {
      * @param zipFile       the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
      * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
      * @return a map where each key is a role name and the value is the set of resolved scope strings for that role
+     * @throws IllegalArgumentException if a policy contains a forbid effect or unless condition
      */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) {
         long startTime = System.currentTimeMillis();
@@ -186,6 +189,8 @@ public class PolicyToScopeMapper {
             throw new IllegalStateException("No policy files found in policies folder");
         }
 
+        policyEntries.forEach(entry -> validatePolicyEntry(zipFile, entry));
+
         log.trace("Processing {} policy files.", policyEntries.size());
 
         // Process policies in parallel for better performance
@@ -194,6 +199,20 @@ public class PolicyToScopeMapper {
         );
 
         return roleToScopes;
+    }
+
+    private void validatePolicyEntry(ZipFile zipFile, ZipEntry entry) {
+        try (InputStream is = zipFile.getInputStream(entry)) {
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            if (FORBID_POLICY_PATTERN.matcher(content).find()) {
+                throw new IllegalArgumentException("Unsupported forbid policy in " + entry.getName());
+            }
+            if (UNLESS_CONDITION_PATTERN.matcher(content).find()) {
+                throw new IllegalArgumentException("Unsupported unless condition in " + entry.getName());
+            }
+        } catch (IOException e) {
+            log.error("Error processing policy: {}", entry.getName() + " - " + e.getMessage());
+        }
     }
 
     /**

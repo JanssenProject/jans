@@ -678,7 +678,7 @@ public class AdminUISecurityService {
 
             // Update services
             adminUIService.resetRoles(roles);
-            adminUIService.resetPermissionsToRole(updatedMappings, resourceScopes);
+            adminUIService.resetPermissionsToRoleFromPolicySync(updatedMappings, resourceScopes);
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Sync of role-to-scope mappings from the policy store completed successfully.");

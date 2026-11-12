@@ -7,6 +7,7 @@ import io.jans.ca.plugin.adminui.service.adminui.AdminUISecurityService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.model.SearchRequest;
@@ -30,10 +31,16 @@ import uniffi.cedarling_uniffi.CedarlingException;
 import jakarta.ws.rs.core.Response;
 
 import java.lang.reflect.Method;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -65,6 +72,8 @@ public class AdminUISecurityServiceTest {
     private io.jans.ca.plugin.adminui.service.adminui.AdminUIService adminUIService;
     @Mock
     private io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper policyToScopeMapper;
+    @InjectMocks
+    private PolicyToScopeMapper actualPolicyToScopeMapper;
 
     @InjectMocks
     private AdminUISecurityService adminUISecurityService;
@@ -852,7 +861,56 @@ public class AdminUISecurityServiceTest {
         assertEquals(response.getResponseCode(), 200);
         verify(policyToScopeMapper).processZipFile(any(), any());
         verify(adminUIService).resetRoles(any());
-        verify(adminUIService).resetPermissionsToRole(any(),eq(java.util.Collections.emptySet()));
+        verify(adminUIService).resetPermissionsToRoleFromPolicySync(any(),eq(java.util.Collections.emptySet()));
+    }
+
+    @DataProvider(name = "unsupportedSyncPolicies")
+    public Object[][] unsupportedSyncPolicies() {
+        return new Object[][] {
+                { "forbid(principal, action, resource) when { "
+                        + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                        + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                        + "action == GluuFlexAdminUI::Action::\"READ\" };" },
+                { "permit(principal, action, resource) unless { "
+                        + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                        + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                        + "action == GluuFlexAdminUI::Action::\"READ\" };" }
+        };
+    }
+
+    @Test(dataProvider = "unsupportedSyncPolicies")
+    public void testSyncRoleScopeMappingRejectsUnsupportedPolicyWithoutResettingRolesOrPermissions(
+            String policy) throws Exception {
+        when(entryManager.findEntries(anyString(),
+                eq(io.jans.ca.plugin.adminui.model.adminui.AdminUIResourceScopesMapping.class),
+                any(Filter.class)))
+                .thenReturn(java.util.Collections.emptyList());
+
+        AdminUIPolicyStore activeStore = new AdminUIPolicyStore();
+        activeStore.setInum(INUM);
+        activeStore.setJansStatus(AppConstants.STATUS_ACTIVE);
+        activeStore.setPolicyStore(createPolicyStoreBase64(policy));
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class)))
+                .thenReturn(java.util.List.of(activeStore));
+        when(policyToScopeMapper.processZipFile(any(), any())).thenAnswer(invocation ->
+                actualPolicyToScopeMapper.processZipFile(invocation.getArgument(0), invocation.getArgument(1)));
+
+        ApplicationException exception = expectThrows(ApplicationException.class,
+                () -> adminUISecurityService.syncRoleScopeMapping());
+
+        assertEquals(exception.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        verify(adminUIService, never()).resetRoles(any());
+        verify(adminUIService, never()).resetPermissionsToRoleFromPolicySync(any(), any());
+    }
+
+    private String createPolicyStoreBase64(String policy) throws IOException {
+        ByteArrayOutputStream archive = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOutput = new ZipOutputStream(archive)) {
+            zipOutput.putNextEntry(new ZipEntry("policies/admin-ui.cedar"));
+            zipOutput.write(policy.getBytes(StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+        return Base64.getEncoder().encodeToString(archive.toByteArray());
     }
 
     // ---------------------------------------------------------------------

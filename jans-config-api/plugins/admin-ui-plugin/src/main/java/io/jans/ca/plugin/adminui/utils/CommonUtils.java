@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
+import io.jans.configapi.core.model.adminui.AUIConfiguration;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
@@ -300,6 +301,46 @@ public class CommonUtils {
             }
         });
         return claims;
+    }
+
+    /**
+     * Checks the expiration and audience claims required for an Admin UI UJWT.
+     *
+     * @param claims the parsed UJWT claims
+     * @param configuration the Admin UI configuration containing accepted client IDs
+     * @return {@code true} when the UJWT is not expired and targets an accepted client
+     */
+    public static boolean hasValidUjwtClaims(Map<String, Object> claims, AUIConfiguration configuration) {
+        if (claims == null || configuration == null) {
+            return false;
+        }
+
+        Object expiration = claims.get("exp");
+        if (!(expiration instanceof Number)
+                || System.currentTimeMillis() / 1000 >= ((Number) expiration).longValue()) {
+            return false;
+        }
+
+        Set<String> expectedAudiences = new HashSet<>();
+        if (configuration.getAuiWebServerClientId() != null) {
+            expectedAudiences.add(configuration.getAuiWebServerClientId());
+        }
+        if (configuration.getAuiBackendApiServerClientId() != null) {
+            expectedAudiences.add(configuration.getAuiBackendApiServerClientId());
+        }
+        if (expectedAudiences.isEmpty()) {
+            return false;
+        }
+
+        Object audience = claims.get("aud");
+        if (audience instanceof String) {
+            return expectedAudiences.contains(audience);
+        }
+        if (audience instanceof Collection<?>) {
+            return ((Collection<?>) audience).stream()
+                    .anyMatch(value -> value instanceof String && expectedAudiences.contains(value));
+        }
+        return false;
     }
 
     /**

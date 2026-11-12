@@ -353,10 +353,16 @@ public class AdminUIService {
     }
 
     public void resetPermissionsToRole(List<RolePermissionMapping> rolePermissionsArgs) throws ApplicationException {
-        resetPermissionsToRole(rolePermissionsArgs, Collections.emptySet());
+        persistRolePermissionMappings(rolePermissionsArgs, Collections.emptySet());
     }
 
-    public void resetPermissionsToRole(List<RolePermissionMapping> rolePermissionsArgs, Set<String> additionalAllowedPermissions) throws ApplicationException {
+    public void resetPermissionsToRoleFromPolicySync(List<RolePermissionMapping> rolePermissionsArgs,
+            Set<String> additionalAllowedPermissions) throws ApplicationException {
+        persistRolePermissionMappings(rolePermissionsArgs, additionalAllowedPermissions);
+    }
+
+    private void persistRolePermissionMappings(List<RolePermissionMapping> rolePermissionsArgs,
+            Set<String> additionalAllowedPermissions) throws ApplicationException {
         try {
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             for (RolePermissionMapping mapping : Optional.ofNullable(rolePermissionsArgs).orElse(Collections.emptyList())) {
@@ -514,11 +520,6 @@ public class AdminUIService {
         Set<String> allowed = permissions.stream().map(AdminPermission::getPermission)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toCollection(HashSet::new));
-        // Seeded and setup-appended mappings hold scopes outside the catalog; keep them re-submittable.
-        Optional.ofNullable(adminConf.getDynamic().getRolePermissionMapping()).orElse(Collections.emptyList()).stream()
-                .filter(ele -> ele.getRole() != null && ele.getRole().equals(rolePermissionMappingArg.getRole()))
-                .map(RolePermissionMapping::getPermissions).filter(Objects::nonNull)
-                .forEach(allowed::addAll);
         allowed.addAll(Optional.ofNullable(additionalAllowedPermissions).orElse(Collections.emptySet()));
         if (CollectionUtils.isEmpty(requestedPermissions) || !allowed.containsAll(requestedPermissions)) {
             log.error(ErrorResponse.PERMISSION_NOT_FOUND.getDescription());
