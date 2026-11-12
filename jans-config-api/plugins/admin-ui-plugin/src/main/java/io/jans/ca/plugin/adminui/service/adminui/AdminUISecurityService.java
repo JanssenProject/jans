@@ -43,6 +43,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -52,6 +54,7 @@ import java.util.zip.ZipInputStream;
 
 import static io.jans.ca.plugin.adminui.utils.AppConstants.INUM;
 import static io.jans.ca.plugin.adminui.utils.AppConstants.POLICY_STORE_DN;
+import static io.jans.configapi.core.util.Util.escapeLog;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -430,6 +433,9 @@ public class AdminUISecurityService {
             JSONObject cedarlingConfig = new JSONObject()
                     .put("CEDARLING_APPLICATION_NAME", "AdminUI")
                     .put("CEDARLING_LOG_TYPE", "off")
+                    .put("CEDARLING_ID_TOKEN_TRUST_MODE", "never")
+                    .put("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+                    .put("CEDARLING_JWT_STATUS_VALIDATION", "disabled")
                     .put("CEDARLING_LOG_LEVEL", "INFO");
             ByteBuffer archiveBuffer = ByteBuffer.allocateDirect(zipBytes.length);
             archiveBuffer.put(zipBytes);
@@ -469,10 +475,9 @@ public class AdminUISecurityService {
                 );
             }
 
-            boolean adminUiIssuerFound = false;
             long totalUncompressed = 0;
             List<String> localEntryNames = new ArrayList<>();
-            Map<String, String> issuerContents = new HashMap<>();
+            List<byte[]> localEntryDigests = new ArrayList<>();
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
@@ -484,44 +489,15 @@ public class AdminUISecurityService {
                         );
                     }
                     localEntryNames.add(entryName);
-                    // Cedarling matches extensions case-insensitively, so must the issuer checks.
-                    String normalizedName = entryName.toLowerCase(Locale.ROOT);
-                    boolean legacyIssuerFile = !entry.isDirectory()
-                            && normalizedName.startsWith(TRUSTED_ISSUERS_DIR) && normalizedName.endsWith(".json");
-                    boolean rootIssuersFile = !entry.isDirectory() && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
-                    if (!legacyIssuerFile && !rootIssuersFile) {
-                        totalUncompressed += drainEntrySafely(zis, MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed);
-                        continue;
-                    }
-
-                    String content = readEntryContentSafely(zis);
-                    issuerContents.put(entryName, content);
-                    totalUncompressed += content.getBytes(StandardCharsets.UTF_8).length;
-                    if (totalUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
-                        throw new IOException("ZIP archive too large when decompressed");
-                    }
-                    JSONObject issuerDoc = new JSONObject(content);
-                    if (rootIssuersFile) {
-                        adminUiIssuerFound |= validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
-                        continue;
-                    }
-
-                    String endpointField = issuerDoc.has("openid_configuration_endpoint")
-                            ? "openid_configuration_endpoint"
-                            : "configuration_endpoint";
-                    if (!issuerDoc.has(endpointField)) {
-                        throw new ApplicationException(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName
-                        );
-                    }
-                    validateIssuerEndpointHost(issuerDoc.getString(endpointField), expectedDomain, entryName);
-                    adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    totalUncompressed += drainEntrySafely(
+                            zis, MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed, digest);
+                    localEntryDigests.add(digest.digest());
                 }
             }
 
-            // Cedarling resolves files by central-directory name, so the validated local headers must match it.
-            verifyCentralDirectoryMatches(zipBytes, localEntryNames, issuerContents);
+            boolean adminUiIssuerFound = validateCentralDirectoryEntries(
+                    zipBytes, localEntryNames, localEntryDigests, expectedDomain);
 
             if (!adminUiIssuerFound) {
                 throw new ApplicationException(
@@ -541,53 +517,95 @@ public class AdminUISecurityService {
     }
 
     /**
-     * Rejects archives whose central-directory entry names differ from their local-header names or repeat.
+     * Validates issuer documents from central-directory entries and rejects archives whose central-directory
+     * names or entry contents differ from the local-header scan.
      *
      * @param zipBytes        the policy-store archive bytes
      * @param localEntryNames entry names read from the local file headers
-     * @throws ApplicationException with HTTP 400 if the names do not match
-     * @throws IOException          if the archive cannot be read
+     * @param localEntryDigests SHA-256 digests of the local-header entry contents
+     * @param expectedDomain   the configured Admin UI web-server host
+     * @return whether the required Admin UI issuer file was found
+     * @throws Exception if the archive cannot be read or validation fails
      */
-    private void verifyCentralDirectoryMatches(byte[] zipBytes, List<String> localEntryNames,
-            Map<String, String> issuerContents) throws ApplicationException, IOException {
+    private boolean validateCentralDirectoryEntries(
+            byte[] zipBytes,
+            List<String> localEntryNames,
+            List<byte[]> localEntryDigests,
+            String expectedDomain)
+            throws Exception {
         Path tempFile = createSecureTempFile("adminui-policy-store-check-", ".cjar");
         Path tempDirectory = tempFile.getParent();
         try {
             Files.write(tempFile, zipBytes);
+            List<ZipEntry> entries = new ArrayList<>();
             List<String> centralEntryNames = new ArrayList<>();
-            boolean mismatch;
             try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
-                List<? extends ZipEntry> centralEntries = Collections.list(zipFile.entries());
-                for (ZipEntry central : centralEntries) {
-                    centralEntryNames.add(central.getName());
+                Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+                while (enumeration.hasMoreElements()) {
+                    ZipEntry entry = enumeration.nextElement();
+                    entries.add(entry);
+                    centralEntryNames.add(entry.getName());
                 }
-                mismatch = new HashSet<>(centralEntryNames).size() != centralEntryNames.size()
-                        || !centralEntryNames.equals(localEntryNames);
-                // Cedarling reads entry data via the central directory, so validate and budget that data too.
-                long centralUncompressed = 0;
-                Iterator<? extends ZipEntry> it = centralEntries.iterator();
-                while (!mismatch && it.hasNext()) {
-                    ZipEntry central = it.next();
-                    String issuerContent = issuerContents.get(central.getName());
-                    try (InputStream is = zipFile.getInputStream(central)) {
-                        if (issuerContent == null) {
-                            centralUncompressed += drainEntrySafely(is,
-                                    MAX_ARCHIVE_UNCOMPRESSED_SIZE - centralUncompressed);
-                            continue;
+
+                boolean duplicates = new HashSet<>(centralEntryNames).size() != centralEntryNames.size();
+                if (duplicates || !centralEntryNames.equals(localEntryNames)) {
+                    throw new ApplicationException(
+                            Response.Status.BAD_REQUEST.getStatusCode(),
+                            "Inconsistent policy-store archive entries"
+                    );
+                }
+
+                long totalUncompressed = 0;
+                boolean adminUiIssuerFound = false;
+                for (int i = 0; i < entries.size(); i++) {
+                    ZipEntry entry = entries.get(i);
+                    String entryName = entry.getName();
+                    String normalizedName = entryName.toLowerCase(Locale.ROOT);
+                    boolean legacyIssuerFile = !entry.isDirectory()
+                            && normalizedName.startsWith(TRUSTED_ISSUERS_DIR)
+                            && normalizedName.endsWith(".json");
+                    boolean rootIssuersFile = !entry.isDirectory()
+                            && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                    try (InputStream input = zipFile.getInputStream(entry);
+                         InputStream digestedInput = new DigestInputStream(input, digest)) {
+                        long remaining = MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed;
+                        if (!legacyIssuerFile && !rootIssuersFile) {
+                            totalUncompressed += drainEntrySafely(digestedInput, remaining);
+                        } else {
+                            byte[] content = readEntryContentSafely(digestedInput, remaining);
+                            totalUncompressed += content.length;
+                            JSONObject issuerDoc = new JSONObject(new String(content, StandardCharsets.UTF_8));
+
+                            if (rootIssuersFile) {
+                                validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
+                            } else {
+                                String endpointField = issuerDoc.has("openid_configuration_endpoint")
+                                        ? "openid_configuration_endpoint"
+                                        : "configuration_endpoint";
+                                if (!issuerDoc.has(endpointField)) {
+                                    throw new ApplicationException(
+                                            Response.Status.BAD_REQUEST.getStatusCode(),
+                                            "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in "
+                                                    + entryName
+                                    );
+                                }
+                                validateIssuerEndpointHost(
+                                        issuerDoc.getString(endpointField), expectedDomain, entryName);
+                                adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
+                            }
                         }
-                        mismatch = !issuerContent.equals(readEntryContentSafely(is));
-                        centralUncompressed += issuerContent.getBytes(StandardCharsets.UTF_8).length;
                     }
-                    if (centralUncompressed > MAX_ARCHIVE_UNCOMPRESSED_SIZE) {
-                        throw new IOException("ZIP archive too large when decompressed");
+
+                    if (!MessageDigest.isEqual(localEntryDigests.get(i), digest.digest())) {
+                        throw new ApplicationException(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                "Inconsistent policy-store archive entries"
+                        );
                     }
                 }
-            }
-            if (mismatch) {
-                throw new ApplicationException(
-                        Response.Status.BAD_REQUEST.getStatusCode(),
-                        "Inconsistent policy-store archive entries"
-                );
+                return adminUiIssuerFound;
             }
         } finally {
             Files.deleteIfExists(tempFile);
@@ -660,7 +678,7 @@ public class AdminUISecurityService {
 
             // Update services
             adminUIService.resetRoles(roles);
-            adminUIService.resetPermissionsToRole(updatedMappings, resourceScopes);
+            adminUIService.resetPermissionsToRoleFromPolicySync(updatedMappings, resourceScopes);
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Sync of role-to-scope mappings from the policy store completed successfully.");
@@ -815,30 +833,27 @@ public class AdminUISecurityService {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
     }
 
-    private boolean validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
+    private void validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
             throws ApplicationException, URISyntaxException {
-        boolean issuerValidated = false;
         for (String tokenType : issuersDoc.keySet()) {
             JSONObject tokenConfig = issuersDoc.optJSONObject(tokenType);
             JSONObject endpoints = tokenConfig == null ? null : tokenConfig.optJSONObject("configuration_endpoints");
             if (endpoints == null) {
                 continue;
             }
-            for (String field : new String[]{"configuration", "jwks", "iss"}) {
+            for (String field : new String[]{"configuration", "jwks"}) {
                 if (endpoints.has(field)) {
                     validateIssuerEndpointHost(endpoints.optString(field, null), expectedDomain, entryName);
-                    issuerValidated = true;
                 }
             }
         }
-        return issuerValidated;
     }
 
     private void validateIssuerEndpointHost(String endpoint, String expectedDomain, String entryName)
             throws ApplicationException, URISyntaxException {
         String issuerDomain = endpoint == null ? null : new URI(endpoint).getHost();
         if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
-            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
+            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", escapeLog(entryName));
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
@@ -847,6 +862,10 @@ public class AdminUISecurityService {
     }
 
     private long drainEntrySafely(InputStream is, long remainingBudget) throws IOException {
+        return drainEntrySafely(is, remainingBudget, null);
+    }
+
+    private long drainEntrySafely(InputStream is, long remainingBudget, MessageDigest digest) throws IOException {
         byte[] buffer = new byte[4096];
         long totalRead = 0;
         int len;
@@ -855,18 +874,22 @@ public class AdminUISecurityService {
             if (totalRead > remainingBudget) {
                 throw new IOException("ZIP archive too large when decompressed");
             }
+            if (digest != null) {
+                digest.update(buffer, 0, len);
+            }
         }
         return totalRead;
     }
 
     /**
-     * Reads a zip entry's content as a UTF-8 string, guarding against zip-bomb entries.
+     * Reads a zip entry's bytes while enforcing per-entry and archive decompressed-size limits.
      *
      * @param is the input stream positioned at the entry to read
-     * @return the entry content decoded as UTF-8
-     * @throws IOException if reading fails or the entry exceeds {@link #MAX_ENTRY_SIZE}
+     * @param remainingArchiveBudget the remaining decompressed archive size allowed
+     * @return the entry content bytes
+     * @throws IOException if reading fails or either size limit is exceeded
      */
-    private String readEntryContentSafely(InputStream is) throws IOException {
+    private byte[] readEntryContentSafely(InputStream is, long remainingArchiveBudget) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int len;
@@ -877,9 +900,12 @@ public class AdminUISecurityService {
             if (totalRead > MAX_ENTRY_SIZE) {
                 throw new IOException("ZIP entry too large (possible ZIP bomb greater than 3 MB)");
             }
+            if (totalRead > remainingArchiveBudget) {
+                throw new IOException("ZIP archive too large when decompressed");
+            }
             baos.write(buffer, 0, len);
         }
-        return baos.toString(StandardCharsets.UTF_8);
+        return baos.toByteArray();
     }
 
     /**

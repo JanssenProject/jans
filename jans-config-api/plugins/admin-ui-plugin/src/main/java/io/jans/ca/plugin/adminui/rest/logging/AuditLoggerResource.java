@@ -4,6 +4,7 @@ import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Hidden;
+import static io.jans.as.model.util.Util.escapeLog;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -15,8 +16,6 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import java.util.Map;
-
-import static io.jans.as.model.util.Util.escapeLog;
 
 @Hidden
 @Path("/admin-ui/logging")
@@ -33,7 +32,7 @@ public class AuditLoggerResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response auditLogging(@Valid @NotNull Map<String, Object> loggingRequest) {
         try {
-            log.info("{}", escapeLog(loggingRequest));
+            log.info("{}", CommonUtils.mapToJsonString(loggingRequest));
             return Response.ok("{'status': 'success'}").build();
         } catch (Exception e) {
             log.error(ErrorResponse.AUDIT_LOGGING_ERROR.getDescription(), e);

@@ -101,6 +101,10 @@ public class OAuth2Resource {
             if (!isValidJWTSignature) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.SIGNATURE_NOT_VALID.getDescription());
             }
+            if (!CommonUtils.hasValidUjwtClaims(CommonUtils.getClaims(userInfoJwt), auiConfigurationService.getAUIConfiguration())) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                        "The User-Info JWT has expired or its audience does not match the Admin UI clients.");
+            }
 
             String cookie =
                     ADMIN_UI_SESSION_ID + "=" + sessionId +

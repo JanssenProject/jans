@@ -1,5 +1,7 @@
 package io.jans.ca.plugin.adminui.service.webhook;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.jans.as.common.util.AttributeConstants;
@@ -33,6 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static io.jans.configapi.core.util.Util.escapeLog;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Singleton
@@ -199,6 +202,7 @@ public class WebhookService {
     public WebhookEntry addWebhook(@Valid WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
+            validateWebhookUrlOrigin(webhook);
             String id = idFromName(webhook.getDisplayName() + webhook.getUrl() + webhook.getHttpMethod());
             webhook.setInum(id);
             webhook.setDn(dnOfWebhook(id, AppConstants.WEBHOOK_DN));
@@ -275,6 +279,7 @@ public class WebhookService {
     public WebhookEntry updateWebhook(WebhookEntry webhook) throws ApplicationException {
         try {
             validateWebhookEntry(webhook);
+            validateWebhookUrlOrigin(webhook);
             if (Strings.isNullOrEmpty(webhook.getInum())) {
                 log.error(ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_ID_MISSING.getDescription());
@@ -356,48 +361,69 @@ public class WebhookService {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         List<GenericResponse> responseList = new ArrayList<>();
         List<Callable<GenericResponse>> callables = new ArrayList<>();
-        List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
-        for (WebhookEntry webhook : webhooks) {
-            validateWebhookEntry(webhook);
-            ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getInum())).findAny().orElse(null);
-            if (webhook.isJansEnabled()) {
-                replaceShortCodeWithValues(webhook, shortCodeObj);
-                Callable<GenericResponse> callable = new WebhookCallable(webhook, log);
-                callables.add(callable);
-            }
-        }
+        try {
+            List<WebhookEntry> webhooks = getWebhookByIds(webhookIds);
+            for (WebhookEntry webhook : webhooks) {
+                validateWebhookEntry(webhook);
+                ShortCodeRequest shortCodeObj = shortCodes.stream().filter(shortCode -> shortCode.getWebhookId().equals(webhook.getInum())).findAny().orElse(null);
+                if (webhook.isJansEnabled()) {
+                    try {
+                        replaceShortCodeWithValues(webhook, shortCodeObj);
+                    } catch (ApplicationException e) {
+                        ObjectNode details = JsonNodeFactory.instance.objectNode();
+                        details.put("webhookId", webhook.getInum());
+                        details.put("webhookName", webhook.getDisplayName());
+                        details.put("webhookMethod", webhook.getHttpMethod());
 
-        for (Callable<GenericResponse> callable : callables) {
-            Future<GenericResponse> future = executor.submit(callable);
-            try {
-                responseList.add(future.get());
-            } catch (InterruptedException | ExecutionException e) {
-                log.error("Webhook execution interrupted!", e);
-                Thread.currentThread().interrupt();
+                        responseList.add(CommonUtils.createGenericResponse(
+                                false, e.getErrorCode(), e.getMessage(), details));
+                        continue;
+                    }
+
+                    callables.add(new WebhookCallable(webhook, log));
+                }
             }
+
+            for (Callable<GenericResponse> callable : callables) {
+                Future<GenericResponse> future = executor.submit(callable);
+                try {
+                    responseList.add(future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Webhook execution interrupted!", e);
+                    Thread.currentThread().interrupt();
+                }
+            }
+            return responseList;
+        } finally {
+            executor.shutdown();
         }
-        //shut down the executor service
-        executor.shutdown();
-        return responseList;
     }
 
     private void replaceShortCodeWithValues(WebhookEntry webhook, ShortCodeRequest shortCodeObj) throws ApplicationException {
+        validateWebhookUrlOrigin(webhook);
         if (shortCodeObj == null) {
             return;
         }
 
         if (CommonUtils.hasShortCode(webhook.getUrl())) {
             // Trigger callers supply shortcode values, so they must not be able to pick the destination host
-            Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
-            if (!origin.find() || origin.group().contains("${")) {
-                log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", webhook.getDisplayName(), webhook.getInum());
-                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
-            }
             webhook.setUrl(CommonUtils.replacePlaceholders(webhook.getUrl(), shortCodeObj.getShortcodeValueMap()));
         }
 
         if (CommonUtils.hasShortCode(webhook.getHttpRequestBody()) && Lists.newArrayList("POST", "PUT", "PATCH").contains(webhook.getHttpMethod())) {
             webhook.setHttpRequestBody(CommonUtils.replacePlaceholders(webhook.getHttpRequestBody(), shortCodeObj.getShortcodeValueMap()));
+        }
+    }
+
+    private void validateWebhookUrlOrigin(WebhookEntry webhook) throws ApplicationException {
+        if (!CommonUtils.hasShortCode(webhook.getUrl())) {
+            return;
+        }
+
+        Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
+        if (!origin.find() || origin.group().contains("${")) {
+            log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", escapeLog(webhook.getDisplayName()), escapeLog(webhook.getInum()));
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
         }
     }
 
