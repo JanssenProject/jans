@@ -72,6 +72,10 @@ on:
         description: "jans-lock"
         type: boolean
         default: false
+      script_catalog:
+        description: "docs/script-catalog (custom scripts load + behavior; PRs run it only when the catalog changes)"
+        type: boolean
+        default: false
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -89,6 +93,8 @@ on:
       - "jans-config-api/**"
       - "jans-fido2/**"
       - "jans-orm/**"
+      - "docs/script-catalog/**"
+      - "automation/ci/script_catalog/**"
 
 permissions:
   contents: read
@@ -157,6 +163,29 @@ jobs:
         with:
           # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
           persist-credentials: false
+
+      # Script-catalog tests run only on demand: a PR touching the catalog/harness, or a ticked dispatch.
+      - name: Decide script-catalog tests
+        id: catalog
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          run=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            run="${{ inputs.script_catalog }}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch -q --no-tags --depth=1 origin "$BASE_SHA"
+            if git diff --name-only "$BASE_SHA" HEAD | grep -qE '^(docs/script-catalog|automation/ci/script_catalog)/'; then
+              run=true
+            fi
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "[info] script-catalog tests: $run"
+
+      # Offline: catches a renamed catalog script or stale manifest entry before a VM is provisioned.
+      - name: Script-catalog harness self-test
+        if: steps.catalog.outputs.run == 'true'
+        run: python3 -m unittest discover -s automation/ci/script_catalog
 
       - name: Sweep stale CI droplets
         env:
@@ -349,6 +378,8 @@ jobs:
           [ "${{ inputs.jans_cedarling }}" = "true" ] && sel="$sel,jans-cedarling" || true
           [ "${{ inputs.jans_lock }}" = "true" ] && sel="$sel,jans-lock" || true
           sel="${sel#,}"
+          # only the script-catalog box ticked: run no Java suites
+          [ -z "$sel" ] && [ "${{ inputs.script_catalog }}" = "true" ] && sel="none"
           echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
           echo "[info] selected test modules: ${sel:-all}"
 
@@ -397,6 +428,7 @@ jobs:
             AIO_IMAGE='${{ inputs.aio_image }}' \
             LOG_LEVEL='${{ inputs.log_level }}' \
             TEST_MODULES='${{ steps.mods.outputs.modules }}' \
+            SCRIPT_CATALOG='${{ steps.catalog.outputs.run }}' \
             SAVE_CACHE='${{ github.event_name != 'pull_request' && matrix.persistence == fromJson(needs.setup.outputs.matrix)[0] && 1 || 0 }}' \
             DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
             CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \

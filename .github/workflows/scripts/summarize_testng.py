@@ -31,7 +31,7 @@ RANK = {"PASS": 3, "SKIP": 2, "FAIL": 1}
 # Top-level reactors, matched against the report filename prefix (run_aio_integration.sh names each
 # collected report "<module-path-with-_>-<original>.xml"). Used to group results in the summary.
 MODULES = ["jans-auth-server", "jans-config-api", "jans-fido2", "jans-scim", "jans-core", "jans-orm",
-           "agama", "jans-cedarling", "jans-lock"]
+           "agama", "jans-cedarling", "jans-lock", "script-catalog"]
 
 # Pre-existing failures unrelated to the Jenkins offboarding (SCIM-client + config-api fido2-plugin),
 # accepted as a baseline so the gate flags *regressions* in the offboarding-relevant suites rather
