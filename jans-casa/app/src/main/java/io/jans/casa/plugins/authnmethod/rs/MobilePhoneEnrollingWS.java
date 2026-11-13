@@ -35,6 +35,7 @@ public class MobilePhoneEnrollingWS {
     private static final String SEPARATOR = ",";
     private static final String RECENT_CODES_PREFIX = "casa_reccode_";
     private static final int EXPIRATION = (int) TimeUnit.MINUTES.toSeconds(2);
+    private static final String EXPIRY_SEPARATOR = "|";
     private static final SecureRandom RANDOM = new SecureRandom();
 
     @Inject
@@ -77,7 +78,9 @@ public class MobilePhoneEnrollingWS {
                 SMSDeliveryStatus deliveryStatus = mobilePhoneService.sendSMS(aNumber, body);
                 if (deliveryStatus.equals(SUCCESS)) {
                     logger.trace("sendCode. code={}", aCode);
-                    cacheProvider.put(EXPIRATION, RECENT_CODES_PREFIX + userId + SEPARATOR + aCode, aNumber);
+                    long expiresAt = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(EXPIRATION);
+                    cacheProvider.put(EXPIRATION, RECENT_CODES_PREFIX + userId + SEPARATOR + aCode,
+                            aNumber + EXPIRY_SEPARATOR + expiresAt);
                     result = SendCode.SUCCESS;
                 } else {
                     result = SendCode.FAILURE;
@@ -151,12 +154,13 @@ public class MobilePhoneEnrollingWS {
                 phone = new VerifiedMobile();
                 phone.setNickName(nickName);
                 phone.setAddedOn(now);
-                phone.setNumber(value.toString());
+                String[] entry = value.toString().split(java.util.regex.Pattern.quote(EXPIRY_SEPARATOR), 2);
+                phone.setNumber(entry[0]);
 
                 if (mobilePhoneService.addPhone(userId, phone)) {
                     result = FinishCode.SUCCESS;
                 } else {
-                    cacheProvider.put(EXPIRATION, key, value);
+                    restoreCode(key, value, entry, now);
                     result = FinishCode.FAILED;
                     phone = null;
                 }
@@ -164,6 +168,21 @@ public class MobilePhoneEnrollingWS {
         }
         return result.getResponse(phone);
 
+    }
+
+    //A failed enrollment must not extend the code's original lifetime
+    private void restoreCode(String key, Object value, String[] entry, long now) {
+        if (entry.length < 2) {
+            return;
+        }
+        try {
+            long remainingSec = TimeUnit.MILLISECONDS.toSeconds(Long.parseLong(entry[1]) - now);
+            if (remainingSec > 0) {
+                cacheProvider.put((int) remainingSec, key, value);
+            }
+        } catch (NumberFormatException e) {
+            logger.warn("Invalid expiry in cached enrollment code");
+        }
     }
 
 }
