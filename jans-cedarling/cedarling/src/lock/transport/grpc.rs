@@ -25,7 +25,10 @@ use crate::{
         },
         transport::{
             AuditItem, AuditKind, AuditTransport, TransportError, TransportResult,
-            mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
+            mapping::{
+                self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
+                NothingToSend,
+            },
         },
     },
     log::{LogWriter, LoggerWeak},
@@ -72,60 +75,67 @@ impl GrpcTransport {
     }
 }
 
+/// The request message for one audit endpoint, built once and cloned per attempt.
+#[derive(Debug)]
+pub(in crate::lock) enum GrpcBatch {
+    Log(BulkLogRequest),
+    Telemetry(BulkTelemetryRequest),
+    Health(BulkHealthRequest),
+}
+
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
-    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()> {
-        if entries.is_empty() {
-            return Ok(());
-        }
+    type Batch = GrpcBatch;
+    type PrepareError = NothingToSend;
 
+    fn prepare(
+        &self,
+        entries: &[AuditItem],
+        audit_kind: &AuditKind,
+    ) -> Result<GrpcBatch, NothingToSend> {
+        let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
+        Ok(match audit_kind {
+            AuditKind::Log(_) => GrpcBatch::Log(BulkLogRequest {
+                entries: mapping::map_entries::<LockServerLogEntry>(entries, warn)?
+                    .into_iter()
+                    .map(log_json_to_proto)
+                    .collect(),
+            }),
+            AuditKind::Telemetry(_) => GrpcBatch::Telemetry(BulkTelemetryRequest {
+                entries: mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
+                    .into_iter()
+                    .map(telemetry_json_to_proto)
+                    .collect(),
+            }),
+            AuditKind::Health(_) => GrpcBatch::Health(BulkHealthRequest {
+                entries: mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
+                    .into_iter()
+                    .map(health_json_to_proto)
+                    .collect(),
+            }),
+        })
+    }
+
+    async fn send(&self, batch: &GrpcBatch) -> TransportResult<()> {
         let token: MetadataValue<_> = format!("Bearer {}", self.access_token).parse()?;
         let mut client = self.client.clone();
-        let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
 
-        let response = match audit_kind {
-            AuditKind::Log(_) => {
-                let entries: Vec<LogEntry> =
-                    mapping::map_entries::<LockServerLogEntry>(entries, warn)?
-                        .into_iter()
-                        .map(log_json_to_proto)
-                        .collect();
-
-                let mut request = Request::new(BulkLogRequest { entries });
-                request
-                    .metadata_mut()
-                    .insert("authorization", token.clone());
-
-                client.process_bulk_log(request).await?
+        let response = match batch {
+            GrpcBatch::Log(message) => {
+                client
+                    .process_bulk_log(authorized(message.clone(), token))
+                    .await?
             },
-            AuditKind::Telemetry(_) => {
-                let entries: Vec<TelemetryEntry> =
-                    mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
-                        .into_iter()
-                        .map(telemetry_json_to_proto)
-                        .collect();
-
-                let mut request = Request::new(BulkTelemetryRequest { entries });
-                request
-                    .metadata_mut()
-                    .insert("authorization", token.clone());
-
-                client.process_bulk_telemetry(request).await?
+            GrpcBatch::Telemetry(message) => {
+                client
+                    .process_bulk_telemetry(authorized(message.clone(), token))
+                    .await?
             },
-            AuditKind::Health(_) => {
-                let proto_entries: Vec<HealthEntry> =
-                    mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
-                        .into_iter()
-                        .map(health_json_to_proto)
-                        .collect();
-
-                let mut request = Request::new(BulkHealthRequest {
-                    entries: proto_entries,
-                });
-                request.metadata_mut().insert("authorization", token);
-
-                client.process_bulk_health(request).await?
+            GrpcBatch::Health(message) => {
+                client
+                    .process_bulk_health(authorized(message.clone(), token))
+                    .await?
             },
         };
 
@@ -139,6 +149,12 @@ impl AuditTransport for GrpcTransport {
 
         Ok(())
     }
+}
+
+fn authorized<T>(message: T, token: MetadataValue<tonic::metadata::Ascii>) -> Request<T> {
+    let mut request = Request::new(message);
+    request.metadata_mut().insert("authorization", token);
+    request
 }
 
 /// Converts a [`LockServerLogEntry`] into a [`LogEntry`]
@@ -211,6 +227,19 @@ mod test {
     use std::net::SocketAddr;
 
     use super::*;
+
+    /// Prepares and sends `entries`, as the audit worker does.
+    async fn deliver(
+        transport: &GrpcTransport,
+        entries: &[AuditItem],
+        kind: AuditKind,
+    ) -> TransportResult<()> {
+        let batch = transport
+            .prepare(entries, &kind)
+            .expect("the test batch should map");
+        transport.send(&batch).await
+    }
+
     use tokio::{net::TcpListener, sync::mpsc};
     use tokio_stream::wrappers::TcpListenerStream;
     use tonic::{Response, Status, transport::Server};
@@ -463,13 +492,13 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         // Verify the server received the logs
         let received = rx.try_recv().unwrap();
@@ -483,16 +512,17 @@ mod test {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        transport
-            .send(
-                &Vec::<AuditItem>::new(),
+        let err = transport
+            .prepare(
+                &[],
                 &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
             )
-            .await
-            .expect("logs should be sent successfully");
-
-        // Should not have sent anything
-        assert!(rx.try_recv().is_err());
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(err, NothingToSend { count: 0 }),
+            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+        );
+        assert!(rx.try_recv().is_err(), "nothing should have been sent");
     }
 
     #[tokio::test]
@@ -502,16 +532,15 @@ mod test {
 
         let entries = vec![malformed_log_item()];
 
-        let error = transport
-            .send(
+        let err = transport
+            .prepare(
                 &entries,
                 &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
             )
-            .await
-            .expect_err("this should cause a serialization error");
+            .expect_err("a batch with no mappable entry has nothing to send");
         assert!(
-            matches!(error, TransportError::Serialization(_)),
-            "expected serialization error, got {error:?}"
+            matches!(err, NothingToSend { count: 1 }),
+            "expected NothingToSend {{ count: 1 }}, got {err:?}"
         );
     }
 
@@ -522,13 +551,13 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        let error = transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect_err("this should cause a server error");
+        let error = deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect_err("this should cause a server error");
 
         assert!(
             matches!(error, TransportError::GrpcServer(_)),
@@ -543,13 +572,13 @@ mod test {
 
         let entries = vec![sample_log_item(), malformed_log_item(), sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully despite malformed entries");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully despite malformed entries");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 2, "only valid entries should be forwarded");
@@ -564,13 +593,13 @@ mod test {
 
         let entries = vec![sample_log_item(), sample_log_item(), sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 3);
@@ -586,13 +615,13 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
@@ -615,13 +644,13 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
@@ -636,13 +665,13 @@ mod test {
 
         let entries: Vec<_> = (0..100).map(|_| sample_log_item()).collect();
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         let received = rx.try_recv().unwrap();
         assert_eq!(received.len(), 100);
@@ -655,13 +684,13 @@ mod test {
 
         let entries = vec![sample_metric_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Telemetry(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("telemetry should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Telemetry(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("telemetry should be sent successfully");
 
         let received = telemetry_rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
@@ -739,13 +768,13 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("health check should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("health check should be sent successfully");
 
         let received = health_rx.try_recv().unwrap();
         assert_eq!(received.len(), 1);
@@ -760,15 +789,20 @@ mod test {
         let (addr, _, _, mut health_rx) = start_mock_server(false).await;
         let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
 
-        transport
-            .send(
-                &Vec::<AuditItem>::new(),
+        let err = transport
+            .prepare(
+                &[],
                 &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
             )
-            .await
-            .expect("empty health check should succeed");
-
-        assert!(health_rx.try_recv().is_err());
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(err, NothingToSend { count: 0 }),
+            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+        );
+        assert!(
+            health_rx.try_recv().is_err(),
+            "nothing should have been sent"
+        );
     }
 
     #[tokio::test]
@@ -778,13 +812,13 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        let error = transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect_err("this should cause a server error");
+        let error = deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect_err("this should cause a server error");
 
         assert!(
             matches!(error, TransportError::GrpcServer(_)),
@@ -799,13 +833,13 @@ mod test {
 
         let entries: Vec<_> = (0..100).map(|_| sample_health_item()).collect();
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("health checks should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+        )
+        .await
+        .expect("health checks should be sent successfully");
 
         let received = health_rx.try_recv().unwrap();
         assert_eq!(received.len(), 100);

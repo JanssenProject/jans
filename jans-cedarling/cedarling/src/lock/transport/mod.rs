@@ -79,11 +79,20 @@ impl Display for AuditKind {
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(super) trait AuditTransport: Send + Sync {
-    /// Send a batch of typed audit items to the given audit endpoint using [`AuditKind`].
-    ///
-    /// Mapping into the Lock Server wire shape and JSON/protobuf serialization both
-    /// happen here, off the authorization hot path.
-    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()>;
+    /// A batch in the wire form of one endpoint, built once and sent on every attempt.
+    type Batch: Send + Sync;
+    type PrepareError: std::error::Error + Send;
+
+    /// Maps `entries` into the Lock Server wire shape for `audit_kind`, off the
+    /// authorization hot path. Each entry that cannot be mapped is logged once, here.
+    fn prepare(
+        &self,
+        entries: &[AuditItem],
+        audit_kind: &AuditKind,
+    ) -> Result<Self::Batch, Self::PrepareError>;
+
+    /// Sends a prepared batch to the endpoint it was prepared for.
+    async fn send(&self, batch: &Self::Batch) -> TransportResult<()>;
 }
 
 /// Errors that can occur during transport operations.
@@ -112,7 +121,4 @@ pub enum TransportError {
     #[error("failed to parse access token: {0}")]
     #[cfg(feature = "grpc")]
     InvalidAccessToken(#[from] tonic::metadata::errors::InvalidMetadataValue),
-
-    #[error("serialization error: {0}")]
-    Serialization(String),
 }

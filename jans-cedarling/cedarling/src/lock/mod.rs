@@ -621,6 +621,7 @@ fn create_worker(
                 audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
+                WORKER_HTTP_RETRY_DUR,
             );
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
@@ -642,6 +643,7 @@ fn create_worker(
                 audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
+                WORKER_HTTP_RETRY_DUR,
             );
 
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });

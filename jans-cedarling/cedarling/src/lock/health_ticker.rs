@@ -85,12 +85,20 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
             status: None,
         };
 
-        let result = self
+        let batch = match self
             .transport
-            .send(&[item], &AuditKind::Health(self.health_url.clone()))
-            .await;
+            .prepare(&[item], &AuditKind::Health(self.health_url.clone()))
+        {
+            Ok(batch) => batch,
+            Err(e) => {
+                logger.log_any(LockLogEntry::error(format!(
+                    "failed to prepare health check for lock server: {e}"
+                )));
+                return;
+            },
+        };
 
-        if let Err(e) = result {
+        if let Err(e) = self.transport.send(&batch).await {
             logger.log_any(LockLogEntry::error(format!(
                 "failed to send health check to lock server: {e}"
             )));
@@ -135,11 +143,18 @@ mod test {
 
     #[async_trait::async_trait]
     impl AuditTransport for NoopTransport {
-        async fn send(
+        type Batch = ();
+        type PrepareError = std::convert::Infallible;
+
+        fn prepare(
             &self,
             _entries: &[AuditItem],
             _audit_kind: &AuditKind,
-        ) -> TransportResult<()> {
+        ) -> Result<(), std::convert::Infallible> {
+            Ok(())
+        }
+
+        async fn send(&self, (): &()) -> TransportResult<()> {
             Ok(())
         }
     }

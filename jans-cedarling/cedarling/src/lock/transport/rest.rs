@@ -6,6 +6,10 @@
 //! REST transport implementation for Lock Server communication.
 
 use async_trait::async_trait;
+use bytes::Bytes;
+use reqwest::header::CONTENT_TYPE;
+use serde::Serialize;
+use url::Url;
 
 use crate::{
     http::HttpClient,
@@ -13,7 +17,10 @@ use crate::{
         LockLogEntry,
         transport::{
             AuditItem, AuditKind, AuditTransport, TransportResult,
-            mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
+            mapping::{
+                self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
+                NothingToSend,
+            },
         },
     },
     log::{LogWriter, LoggerWeak},
@@ -31,48 +38,67 @@ impl RestTransport {
     }
 }
 
+/// The JSON body for one audit endpoint. `Bytes` clones share the buffer, so a
+/// retry does not serialize or copy the batch again.
+#[derive(Debug)]
+pub(in crate::lock) struct RestBatch {
+    url: Url,
+    body: Bytes,
+}
+
+/// Why a REST batch has no body to send.
+#[derive(Debug, thiserror::Error)]
+pub(in crate::lock) enum RestPrepareError {
+    #[error(transparent)]
+    NothingToSend(#[from] NothingToSend),
+    #[error("failed to serialize the batch as JSON: {0}")]
+    Serialize(serde_json::Error),
+}
+
+fn json_body<T: Serialize>(payloads: &[T]) -> Result<Bytes, RestPrepareError> {
+    serde_json::to_vec(payloads)
+        .map(Bytes::from)
+        .map_err(RestPrepareError::Serialize)
+}
+
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for RestTransport {
-    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()> {
-        if entries.is_empty() {
-            return Ok(());
-        }
+    type Batch = RestBatch;
+    type PrepareError = RestPrepareError;
 
+    fn prepare(
+        &self,
+        entries: &[AuditItem],
+        audit_kind: &AuditKind,
+    ) -> Result<RestBatch, RestPrepareError> {
         let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
-        match audit_kind {
-            AuditKind::Log(url) => {
-                let payloads: Vec<LockServerLogEntry> = mapping::map_entries(entries, warn)?;
-                self.client
-                    .raw_client
-                    .post(url.as_str())
-                    .json(&payloads)
-                    .send()
-                    .await?
-                    .error_for_status()?;
+        let body = match audit_kind {
+            AuditKind::Log(_) => {
+                json_body(&mapping::map_entries::<LockServerLogEntry>(entries, warn)?)
             },
-            AuditKind::Telemetry(url) => {
-                let payloads: Vec<LockServerMetricsEntry> = mapping::map_entries(entries, warn)?;
-                self.client
-                    .raw_client
-                    .post(url.as_str())
-                    .json(&payloads)
-                    .send()
-                    .await?
-                    .error_for_status()?;
-            },
-            AuditKind::Health(url) => {
-                let payloads: Vec<LockServerHealthEntry> = mapping::map_entries(entries, warn)?;
-                self.client
-                    .raw_client
-                    .post(url.as_str())
-                    .json(&payloads)
-                    .send()
-                    .await?
-                    .error_for_status()?;
-            },
-        }
+            AuditKind::Telemetry(_) => json_body(&mapping::map_entries::<LockServerMetricsEntry>(
+                entries, warn,
+            )?),
+            AuditKind::Health(_) => json_body(&mapping::map_entries::<LockServerHealthEntry>(
+                entries, warn,
+            )?),
+        }?;
+        Ok(RestBatch {
+            url: audit_kind.url().clone(),
+            body,
+        })
+    }
 
+    async fn send(&self, batch: &RestBatch) -> TransportResult<()> {
+        self.client
+            .raw_client
+            .post(batch.url.as_str())
+            .header(CONTENT_TYPE, "application/json")
+            .body(batch.body.clone())
+            .send()
+            .await?
+            .error_for_status()?;
         Ok(())
     }
 }
@@ -82,6 +108,18 @@ mod test {
     use crate::{HttpClientConfig, lock::transport::TransportError};
 
     use super::*;
+
+    /// Prepares and sends `entries`, as the audit worker does.
+    async fn deliver(
+        transport: &RestTransport,
+        entries: &[AuditItem],
+        kind: AuditKind,
+    ) -> TransportResult<()> {
+        let batch = transport
+            .prepare(entries, &kind)
+            .expect("the test batch should map");
+        transport.send(&batch).await
+    }
 
     use mockito::{Server, ServerGuard};
     use url::Url;
@@ -120,8 +158,7 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(&entries, &AuditKind::Log(endpoint))
+        deliver(&transport, &entries, AuditKind::Log(endpoint))
             .await
             .expect("logs should be sent successfully");
         mock.assert();
@@ -133,10 +170,16 @@ mod test {
         let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        transport
-            .send(&[], &AuditKind::Log(endpoint))
-            .await
-            .expect("logs should be sent successfully");
+        let err = transport
+            .prepare(&[], &AuditKind::Log(endpoint))
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(
+                err,
+                RestPrepareError::NothingToSend(NothingToSend { count: 0 })
+            ),
+            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+        );
     }
 
     #[tokio::test]
@@ -153,8 +196,7 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Log(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Log(endpoint))
             .await
             .expect_err("this should cause a server error");
         assert!(
@@ -178,8 +220,7 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Log(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Log(endpoint))
             .await
             .expect_err("this should cause a server error");
         assert!(
@@ -196,8 +237,7 @@ mod test {
 
         let entries = vec![sample_log_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Log(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Log(endpoint))
             .await
             .expect_err("this should cause a network error");
         assert!(
@@ -213,11 +253,16 @@ mod test {
 
         let entries = vec![malformed_log_item()];
 
-        let result = transport.send(&entries, &AuditKind::Log(endpoint)).await;
-        assert!(matches!(
-            result.unwrap_err(),
-            TransportError::Serialization(_)
-        ));
+        let err = transport
+            .prepare(&entries, &AuditKind::Log(endpoint))
+            .expect_err("a batch with no mappable entry has nothing to send");
+        assert!(
+            matches!(
+                err,
+                RestPrepareError::NothingToSend(NothingToSend { count: 1 })
+            ),
+            "expected NothingToSend {{ count: 1 }}, got {err:?}"
+        );
     }
 
     #[tokio::test]
@@ -231,8 +276,7 @@ mod test {
         // Send 1000 entries
         let entries = (0..1000).map(|_| sample_log_item()).collect::<Vec<_>>();
 
-        transport
-            .send(&entries, &AuditKind::Log(endpoint))
+        deliver(&transport, &entries, AuditKind::Log(endpoint))
             .await
             .expect("logs should be sent successfully");
         mock.assert();
@@ -250,8 +294,7 @@ mod test {
 
         let entries = vec![sample_metric_item()];
 
-        transport
-            .send(&entries, &AuditKind::Telemetry(endpoint))
+        deliver(&transport, &entries, AuditKind::Telemetry(endpoint))
             .await
             .expect("telemetry should be sent successfully");
 
@@ -278,8 +321,7 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        transport
-            .send(&entries, &AuditKind::Health(endpoint))
+        deliver(&transport, &entries, AuditKind::Health(endpoint))
             .await
             .expect("health check should be sent successfully");
 
@@ -294,10 +336,16 @@ mod test {
             .unwrap();
         let transport = RestTransport::new(create_test_client(), None);
 
-        transport
-            .send(&[], &AuditKind::Health(endpoint))
-            .await
-            .expect("health check should be sent successfully");
+        let err = transport
+            .prepare(&[], &AuditKind::Health(endpoint))
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(
+                err,
+                RestPrepareError::NothingToSend(NothingToSend { count: 0 })
+            ),
+            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+        );
     }
 
     #[tokio::test]
@@ -316,8 +364,7 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Health(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Health(endpoint))
             .await
             .expect_err("this should cause a server error");
         assert!(
@@ -343,8 +390,7 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Health(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Health(endpoint))
             .await
             .expect_err("this should cause a client error");
         assert!(
@@ -361,8 +407,7 @@ mod test {
 
         let entries = vec![sample_health_item()];
 
-        let error = transport
-            .send(&entries, &AuditKind::Health(endpoint))
+        let error = deliver(&transport, &entries, AuditKind::Health(endpoint))
             .await
             .expect_err("this should cause a network error");
         assert!(
@@ -383,8 +428,7 @@ mod test {
 
         let entries = (0..1000).map(|_| sample_health_item()).collect::<Vec<_>>();
 
-        transport
-            .send(&entries, &AuditKind::Health(endpoint))
+        deliver(&transport, &entries, AuditKind::Health(endpoint))
             .await
             .expect("health checks should be sent successfully");
         mock.assert();
