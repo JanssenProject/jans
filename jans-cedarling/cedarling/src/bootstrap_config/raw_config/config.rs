@@ -437,7 +437,8 @@ pub struct BootstrapConfigRaw {
         deserialize_with = "deserialize_or_parse_string_as_json"
     )]
     pub http_client_request_timeout: u64,
-    /// Maximum number of retry attempts per request.
+    /// Maximum number of retries per request. Only network failures, `408`, `429`
+    /// and `5xx` are retried; any other failure would repeat on every attempt.
     #[serde(
         rename = "CEDARLING_HTTP_REQUEST_MAX_RETRIES",
         default = "default_http_client_max_retries",

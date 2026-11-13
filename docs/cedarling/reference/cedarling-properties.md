@@ -104,7 +104,7 @@ the Cedarling will use the default value as specified in the property definition
 **HTTP client:**
 
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
-- **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
+- **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retries per request. Only network failures and the statuses `408`, `429` and `5xx` are retried. Any other `4xx`, an invalid URL or a refused redirect fails at once, because it would fail the same way again. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
 - **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. Default is `10485760` (10 MB).
 

@@ -22,9 +22,8 @@ use thiserror::Error;
 /// A wrapper around `reqwest::Client` providing HTTP request functionality
 /// with retry logic using exponential backoff.
 ///
-/// The `HttpClient` struct allows for sending GET requests with a retry mechanism
-/// that attempts to fetch the requested resource up to a maximum number of times
-/// if an error occurs, using the `Sender` and `Backoff` utilities from `http_utils`.
+/// GET requests are retried with backoff, up to a maximum number of times, when the
+/// failure may clear (see [`Sender::send_with_retry`]).
 ///
 /// Structure is thread safe, feel free to clone.
 #[derive(Debug, Clone)]
@@ -42,7 +41,8 @@ pub(crate) struct HttpClient {
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HttpClientConfig {
-    /// Maximum number of times a failed request is retried before giving up.
+    /// Maximum number of times a request that failed on the network, or with `408`,
+    /// `429` or `5xx`, is retried before giving up.
     pub max_retries: u32,
     /// Base delay between retries; actual delay grows exponentially with each attempt.
     pub retry_delay: Duration,
