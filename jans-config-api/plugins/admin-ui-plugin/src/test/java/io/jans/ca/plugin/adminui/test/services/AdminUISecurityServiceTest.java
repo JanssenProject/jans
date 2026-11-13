@@ -166,10 +166,9 @@ public class AdminUISecurityServiceTest {
 
     @Test
     public void testUploadPolicyStore_nullRequestThrowsBadRequest() {
-        // validateRequest fails -> wrapped as INTERNAL_SERVER_ERROR by uploadPolicyStore
         ApplicationException ex = expectThrows(ApplicationException.class,
                 () -> adminUISecurityService.uploadPolicyStore(null));
-        assertEquals(ex.getErrorCode(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         verify(entryManager, never()).persist(any());
     }
 
@@ -177,11 +176,10 @@ public class AdminUISecurityServiceTest {
     public void testUploadPolicyStore_missingPolicyStoreDocument() {
         AdminUIPolicyStore store = new AdminUIPolicyStore();
         store.setDisplayname("test");
-        // policyStore document is null -> validation fails
 
         ApplicationException ex = expectThrows(ApplicationException.class,
                 () -> adminUISecurityService.uploadPolicyStore(store));
-        assertEquals(ex.getErrorCode(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         verify(entryManager, never()).persist(any());
     }
 
@@ -245,6 +243,10 @@ public class AdminUISecurityServiceTest {
             zipOutput.write("not a Cedarling policy store".getBytes(StandardCharsets.UTF_8));
             zipOutput.closeEntry();
         }
+        io.jans.configapi.core.model.adminui.AUIConfiguration auiConfiguration =
+                mock(io.jans.configapi.core.model.adminui.AUIConfiguration.class);
+        when(auiConfigurationService.getAUIConfiguration()).thenReturn(auiConfiguration);
+        when(auiConfiguration.getAuiWebServerHost()).thenReturn(WEB_SERVER_HOST);
 
         AdminUIPolicyStore store = new AdminUIPolicyStore();
         store.setDisplayname("invalid-store");
@@ -755,7 +757,8 @@ public class AdminUISecurityServiceTest {
 
     @Test
     public void testDeletePolicyStore_notFound() {
-        when(entryManager.find(eq(AdminUIPolicyStore.class), anyString())).thenReturn(null);
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class), eq(1)))
+                .thenReturn(java.util.List.of());
 
         ApplicationException ex = expectThrows(ApplicationException.class,
                 () -> adminUISecurityService.deletePolicyStore(INUM));
