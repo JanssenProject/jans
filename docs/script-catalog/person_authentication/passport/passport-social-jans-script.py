@@ -90,6 +90,9 @@ class PersonAuthentication(PersonAuthenticationType):
                 if self.jwtHasExpired(jwt):
                     return False
 
+                if not self.matchesPendingRequest(identity, jwt, configurationAttributes):
+                    return False
+
                 (user_profile, jsonp) = self.getUserProfile(jwt)
                 if user_profile is None:
                     return False
@@ -136,7 +139,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 user_profile = json.loads(jsonp)
                 user_profile["mail"] = [ mail ]
 
-                return self.attemptAuthentication(identity, user_profile, jsonp)
+                return self.attemptAuthentication(identity, user_profile, jsonp, True)
 
             print "Passport. authenticate for step 2. Failed: expected mail value in HTTP request and json profile in session"
             return False
@@ -200,7 +203,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getExtraParametersForStep(self, configurationAttributes, step):
         print "Passport. getExtraParametersForStep called"
         if step == 1:
-            return Arrays.asList("selectedProvider", "externalProviders")
+            return Arrays.asList("selectedProvider", "externalProviders", "passport_request_id")
         elif step == 2:
             return Arrays.asList("passport_user_profile")
         return None
@@ -354,6 +357,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. getPassportRedirectUrl. Response was %s" % httpResponse.getStatusLine().getStatusCode()
 
             tokenObj = json.loads(response)
+            # passport echoes this id back as the request_id claim so the assertion is bound to this browser session
+            requestId = Jwt.parse(tokenObj["token_"]).getClaims().getClaimAsString("jwt")
+            CdiUtil.bean(Identity).setWorkingParameter("passport_request_id", requestId)
             url = "%s%s/%s/%s" % (self.passportFQDN, self.passportAuthEndpointPath, provider, tokenObj["token_"])
         except (Exception, Throwable):
             print "Passport. getPassportRedirectUrl. Error building redirect URL: ", sys.exc_info()[1]
@@ -381,6 +387,24 @@ class PersonAuthentication(PersonAuthenticationType):
 
         print "Passport. validSignature. Validation result was %s" % valid
         return valid
+
+
+    def matchesPendingRequest(self, identity, jwt, configurationAttributes):
+        requestId = jwt.getClaims().getClaimAsString("request_id")
+        expected = identity.getWorkingParameter("passport_request_id")
+        identity.setWorkingParameter("passport_request_id", None)
+
+        if requestId is None:
+            required = configurationAttributes.containsKey("require_request_binding") and \
+                StringHelper.equalsIgnoreCase(configurationAttributes.get("require_request_binding").getValue2(), "true")
+            if required:
+                print "Passport. matchesPendingRequest. JWT has no request_id claim"
+            return not required
+
+        if expected is None or requestId != expected:
+            print "Passport. matchesPendingRequest. JWT request_id does not match the pending authentication request"
+            return False
+        return True
 
 
     def jwtHasExpired(self, jwt):
@@ -412,7 +436,8 @@ class PersonAuthentication(PersonAuthenticationType):
         return (user_profile, user_profile_json)
 
 
-    def attemptAuthentication(self, identity, user_profile, user_profile_json):
+    # mail_from_user: mail was typed in the browser, not asserted by the provider, so it must not link accounts
+    def attemptAuthentication(self, identity, user_profile, user_profile_json, mail_from_user=False):
 
         uidKey = "uid"
         if not self.checkRequiredAttributes(user_profile, [uidKey, self.providerKey]):
@@ -423,7 +448,10 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Passport. attemptAuthentication. Identity Provider %s not recognized" % provider
             return False
 
-        uid = user_profile[uidKey][0]
+        uid = self.firstValue(user_profile[uidKey])
+        if uid is None or uid == "":
+            print "Passport. attemptAuthentication. Invalid uid in profile"
+            return False
         externalUid = "passport-%s:%s" % (provider, uid)
 
         userService = CdiUtil.bean(UserService)
@@ -431,11 +459,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         email = None
         if "mail" in user_profile:
-            email = user_profile["mail"]
-            if len(email) == 0:
+            email = self.firstValue(user_profile["mail"])
+            if not email:
                 email = None
             else:
-                email = email[0]
                 user_profile["mail"] = [ email ]
 
         if email is None and self.registeredProviders[provider]["requestForEmail"]:
@@ -471,7 +498,7 @@ class PersonAuthentication(PersonAuthenticationType):
         else:
             if userByMail is None:
                 doAdd = True
-            elif self.registeredProviders[provider]["emailLinkingSafe"]:
+            elif self.registeredProviders[provider]["emailLinkingSafe"] and not mail_from_user:
 
                 tmpList = userByMail.getAttributeValues("jansExtUid")
                 tmpList = ArrayList() if tmpList is None else ArrayList(tmpList)
@@ -508,6 +535,12 @@ class PersonAuthentication(PersonAuthenticationType):
             logged_in = CdiUtil.bean(AuthenticationService).authenticate(username)
             print "Passport. attemptAuthentication. Authentication for %s returned %s" % (username, logged_in)
             return logged_in
+
+
+    def firstValue(self, value):
+        if isinstance(value, list):
+            return value[0] if len(value) > 0 else None
+        return value
 
 
     def setMessageError(self, severity, msg):

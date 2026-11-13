@@ -35,12 +35,14 @@ public class TokenExchange implements TokenExchangeType {
             return ScriptTokenExchangeControl.fail();
         }
 
-        // user identified by request information or otherwise null
-        User user = new User();
+        // user identified by request information or otherwise null (null means user is taken from validated session)
+        User user = null;
 
+        // Built-in validation of subject_token/actor_token/session stays enabled. Call setSkipBuiltinValidation(true)
+        // only if the validations above fully authenticate the subject and set the user.
         return ScriptTokenExchangeControl
                 .ok()
-                .setSkipBuiltinValidation(true) // this skip build-in validations of all parameters that come
+                .setSkipBuiltinValidation(false)
                 .setUser(user);
     }
 

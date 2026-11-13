@@ -21,12 +21,12 @@ from threading import Lock
 import ssl
 try:
     # python3
-    from urllib.request import urlopen
+    from urllib.request import build_opener, HTTPRedirectHandler, HTTPSHandler
     from urllib.parse import urlencode
     from urllib.error import URLError
 except ImportError:
     # python2
-    from urllib2 import urlopen, URLError
+    from urllib2 import build_opener, HTTPRedirectHandler, HTTPSHandler, URLError
     from urllib import urlencode
 
 DEFAULT_CADATA = u'''-----BEGIN CERTIFICATE-----
@@ -72,6 +72,11 @@ CLIENT_KEY = 'c'
 class WWPassException(IOError):
     pass
 
+# responses are unpickled, so never follow a redirect away from the configured SPFE
+class NoRedirectHandler(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise WWPassException('SPFE redirect refused: %s' % newurl)
+
 class WWPassConnection(object):
 
     def __init__(self, key_file, cert_file, timeout=10, spfe_addr='https://spfe.wwpass.com', cafile=None):
@@ -86,21 +91,27 @@ class WWPassConnection(object):
         """
 
         self.context = ssl.SSLContext(protocol=ssl.PROTOCOL_TLSv1_2)
+        # responses are unpickled, so the SPFE must be authenticated
+        self.context.verify_mode = ssl.CERT_REQUIRED
+        self.context.check_hostname = True
         self.context.load_cert_chain(certfile=cert_file, keyfile=key_file)
         if cafile is None:
             self.context.load_verify_locations(cadata=DEFAULT_CADATA)
         else:
             self.context.load_verify_locations(cafile=cafile)
         self.spfe_addr = 'https://%s' % spfe_addr if spfe_addr.find('://') == -1 else spfe_addr
+        if not self.spfe_addr.startswith('https://'):
+            raise ValueError('SPFE address must use https: %s' % self.spfe_addr)
+        self.opener = build_opener(HTTPSHandler(context=self.context), NoRedirectHandler)
         self.timeout = timeout
 
     def makeRequest(self, method, command, attempts=3,**paramsDict):
         params = {k:v.encode('UTF-8') if hasattr(v,"encode") else v for k, v in paramsDict.items() if v is not None}
         try:
             if method == 'GET':
-                res = urlopen(self.spfe_addr +'/'+command+'?'+urlencode(params), context=self.context, timeout=self.timeout)
+                res = self.opener.open(self.spfe_addr +'/'+command+'?'+urlencode(params), timeout=self.timeout)
             else:
-                res = urlopen(self.spfe_addr +'/'+command, data=urlencode(params).encode('UTF-8'), context=self.context, timeout=self.timeout)
+                res = self.opener.open(self.spfe_addr +'/'+command, data=urlencode(params).encode('UTF-8'), timeout=self.timeout)
             res = pickle.loads(res.read())
             if not res['result']:
                 if 'code'in res:

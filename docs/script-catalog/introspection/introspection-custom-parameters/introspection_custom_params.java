@@ -78,15 +78,15 @@ public class Introspection implements IntrospectionType {
             return true;
         }
 
-        // Return session_id
-        response.accumulate("session_id", sessionDn);
-
         SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
-        SessionId session = sessionIdService.getSessionById(sessionDn, false);
+        SessionId session = sessionIdService.getSessionByDn(sessionDn, false);
         if(session == null) {
             scriptLogger.info("Introspection Java script. Failed to load session");
             return true;
         }
+
+        // Return the public sid, never the session DN/id which equals the browser SSO cookie
+        response.put("sid", session.getOutsideSid());
 
         Map<String, String> sessionAttributes = session.getSessionAttributes();
         if(sessionAttributes == null) {

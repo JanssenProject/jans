@@ -61,8 +61,8 @@ class Introspection(IntrospectionType):
                 print "Github. Introspection. Failed to load session '%s'" % sessionDn
                 return False
 
-            # Return session_id
-            responseAsJsonObject.accumulate("session_id", sessionDn)
+            # Return the public sid, never the session DN/id which equals the browser SSO cookie
+            responseAsJsonObject.put("sid", session.getOutsideSid())
 
             sessionAttributes = session.getSessionAttributes()
             if sessionAttributes is None:

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { assertSameIssuer, assertSecureUrl } from '../../../shared/urlSecurity';
 import { RegistrationRequest, OIDCClient, OpenIDConfiguration } from '../../../shared/types';
 import type { Moment } from 'moment';
 import moment from 'moment';
@@ -103,7 +104,10 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
   const getOpenidConfiguration = async (endpoint: string) => {
     try {
       setAlert('');
-      return await axios({ method: 'GET', url: endpoint });
+      // Redirect hops cannot be inspected from the browser, so an insecure hop could swap the metadata; refuse them.
+      const res = await fetch(endpoint, { method: 'GET', redirect: 'error' });
+      if (!res.ok) throw new Error(`OpenID configuration request failed: ${res.status}`);
+      return { data: await res.json() };
     } catch (err) {
       console.error(err);
     }
@@ -147,12 +151,14 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
     try {
       const resp = await getOpenidConfiguration(configUrl);
       if (!resp?.data?.issuer) {
+        setIssuer('');
         setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
         e.target.value = '';
       } else {
         setIssuer(configUrl);
       }
     } catch {
+      setIssuer('');
       setIssuerError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.');
       e.target.value = '';
     }
@@ -219,12 +225,21 @@ export default function RegisterClient({ isOpen, handleDialog }: RegisterClientP
       issuerUrl = issuerValue.replace(/\/$/, '');
       opConfigurationEndpoint = `${issuerUrl}/.well-known/openid-configuration`;
     }
+    assertSecureUrl(opConfigurationEndpoint, 'OpenID configuration URL');
     const openidConfig = await getOpenidConfiguration(opConfigurationEndpoint);
     if (!openidConfig?.data) {
       setAlert('Error in fetching OpenID configuration!'); setAlertSeverity('error');
       return null;
     }
-    return { issuerUrl, configData: openidConfig.data };
+    const configData = openidConfig.data;
+    // Stored configs are keyed by issuer, so a mismatched issuer could replace another provider's metadata.
+    assertSameIssuer(configData.issuer, issuerUrl);
+    assertSecureUrl(configData.authorization_endpoint, 'Authorization endpoint');
+    assertSecureUrl(configData.token_endpoint, 'Token endpoint');
+    for (const [key, label] of [['userinfo_endpoint', 'Userinfo endpoint'], ['registration_endpoint', 'Registration endpoint'], ['end_session_endpoint', 'End session endpoint']]) {
+      if (configData[key]) assertSecureUrl(configData[key], label);
+    }
+    return { issuerUrl, configData };
   };
 
   // ── Register ───────────────────────────────────────────────────────────────
