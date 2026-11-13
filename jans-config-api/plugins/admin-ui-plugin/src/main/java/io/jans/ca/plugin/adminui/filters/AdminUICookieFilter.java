@@ -103,6 +103,11 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 return;
             }
 
+            if (auiConfiguration != null && configApiSessionService.isUjwtExpired(ujwtOptional.get(), new Date())) {
+                log.debug("User-info JWT expired for Admin UI session.");
+                return;
+            }
+
             initializeAdminUIConfiguration();
             if (auiConfiguration == null) {
                 log.warn("Admin UI configuration could not be initialized. Skipping token injection.");

@@ -8,7 +8,9 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -380,6 +382,19 @@ public class AdminUISessionService {
                 claims.put(key, (jwtClaims.getClaim(key)));
         });
         return claims;
+    }
+
+    public boolean isUjwtExpired(String ujwt, Date currentDate) {
+        if (Strings.isNullOrEmpty(ujwt)) {
+            return false;
+        }
+        try {
+            Date expirationDate = Jwt.parse(ujwt).getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+            return expirationDate != null && expirationDate.before(currentDate);
+        } catch (InvalidJwtException e) {
+            logger.debug("Unable to parse user-info JWT while removing expired sessions", e);
+            return false;
+        }
     }
 
 }
