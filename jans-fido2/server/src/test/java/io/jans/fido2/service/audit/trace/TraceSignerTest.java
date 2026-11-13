@@ -52,11 +52,11 @@ class TraceSignerTest {
         return sb.toString();
     }
 
-    private static ObjectNode record() {
-        ObjectNode record = new ObjectMapper().createObjectNode();
-        record.put("sequence_number", 7);
-        record.put("ceremony_outcome", "SUCCESS");
-        return record;
+    private static ObjectNode sampleRecord() {
+        ObjectNode sample = new ObjectMapper().createObjectNode();
+        sample.put("sequence_number", 7);
+        sample.put("ceremony_outcome", "SUCCESS");
+        return sample;
     }
 
     @Test
@@ -82,13 +82,13 @@ class TraceSignerTest {
     void signatureVerifiesOverCanonicalForm() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
         KeyPair keys = generator.generateKeyPair();
-        ObjectNode record = record();
+        ObjectNode sample = sampleRecord();
 
-        String signature = new TraceSigner(keys.getPrivate()).sign(record);
+        String signature = new TraceSigner(keys.getPrivate()).sign(sample);
 
         // Ed25519 signatures are 64 bytes, which is 86 base64url characters without padding
         assertEquals(86, signature.length());
-        assertTrue(verify(keys.getPublic(), TraceCanonicalizer.canonicalBytes(record),
+        assertTrue(verify(keys.getPublic(), TraceCanonicalizer.canonicalBytes(sample),
                 Base64.getUrlDecoder().decode(signature)));
     }
 
@@ -96,9 +96,9 @@ class TraceSignerTest {
     void tamperedRecordFailsVerification() throws Exception {
         KeyPairGenerator generator = KeyPairGenerator.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
         KeyPair keys = generator.generateKeyPair();
-        String signature = new TraceSigner(keys.getPrivate()).sign(record());
+        String signature = new TraceSigner(keys.getPrivate()).sign(sampleRecord());
 
-        ObjectNode tampered = record();
+        ObjectNode tampered = sampleRecord();
         tampered.put("ceremony_outcome", "FAILURE");
         assertFalse(verify(keys.getPublic(), TraceCanonicalizer.canonicalBytes(tampered),
                 Base64.getUrlDecoder().decode(signature)));

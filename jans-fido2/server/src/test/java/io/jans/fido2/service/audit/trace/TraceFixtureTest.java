@@ -41,14 +41,14 @@ class TraceFixtureTest {
         try (InputStream in = getClass().getResourceAsStream("trace-ed25519-fixture.json")) {
             fixture = new ObjectMapper().readTree(in);
         }
-        JsonNode record = fixture.get("record");
+        JsonNode recordNode = fixture.get("record");
 
-        assertEquals(fixture.get("canonical").asText(), TraceCanonicalizer.canonicalString(record));
+        assertEquals(fixture.get("canonical").asText(), TraceCanonicalizer.canonicalString(recordNode));
 
         String seed = fixture.get("seed").asText();
         PrivateKey key = KeyFactory.getInstance("Ed25519", SecurityProviderUtility.getBCProvider())
                 .generatePrivate(new PKCS8EncodedKeySpec(hex(PKCS8_PREFIX + seed)));
-        assertEquals(fixture.get("signature").asText(), new TraceSigner(key).sign(record));
+        assertEquals(fixture.get("signature").asText(), new TraceSigner(key).sign(recordNode));
         assertEquals(32, Base64.getUrlDecoder().decode(fixture.get("jwk").get("x").asText()).length);
     }
 

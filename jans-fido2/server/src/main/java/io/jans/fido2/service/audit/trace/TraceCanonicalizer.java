@@ -19,7 +19,8 @@ import com.fasterxml.jackson.databind.JsonNode;
  * JSON Canonicalization Scheme (RFC 8785) for TRACE records.
  *
  * <p>Member names are sorted by UTF-16 code units, strings are escaped as RFC 8785 requires, and numbers are
- * formatted with the ECMAScript Number-to-String rules over IEEE 754 doubles. Non-finite values are rejected.
+ * formatted with the ECMAScript Number-to-String rules over IEEE 754 doubles. Non-finite numbers and unpaired
+ * surrogates are rejected.
  */
 public final class TraceCanonicalizer {
 
@@ -29,7 +30,8 @@ public final class TraceCanonicalizer {
     /**
      * @param node JSON value to canonicalize
      * @return the RFC 8785 canonical form as UTF-8 bytes
-     * @throws IllegalArgumentException if the value holds a non-finite number or an unsupported node type
+     * @throws IllegalArgumentException if the value holds a non-finite number, an unpaired surrogate or an
+     *         unsupported node type
      */
     public static byte[] canonicalBytes(JsonNode node) {
         return canonicalString(node).getBytes(StandardCharsets.UTF_8);
@@ -57,21 +59,39 @@ public final class TraceCanonicalizer {
         if (value < 0) {
             return "-" + formatNumber(-value);
         }
-        // Find the shortest decimal that round-trips to the same double. Ties in length are resolved by
-        // rounding the exact binary value, which picks the closest candidate.
-        BigDecimal exact = new BigDecimal(value);
-        BigDecimal shortest = null;
+        return ecmaScriptFormat(shortestRoundTrip(value));
+    }
+
+    /**
+     * Shortest decimal that converts back to the same double. Both neighbours of the rounded candidate are
+     * checked at each precision, because the rounding interval of a double can be asymmetric (at powers of two)
+     * and the lower neighbour may not round-trip while the upper one does. Among round-tripping candidates the
+     * one closest to the exact binary value wins.
+     */
+    private static BigDecimal shortestRoundTrip(double value) {
+        // Exact binary value is required here; BigDecimal.valueOf would start from the shortest decimal form
+        BigDecimal exact = new BigDecimal(value); // NOSONAR
         for (int precision = 1; precision <= 17; precision++) {
-            BigDecimal candidate = exact.round(new MathContext(precision, RoundingMode.HALF_EVEN));
-            if (candidate.doubleValue() == value) {
-                shortest = candidate;
-                break;
+            BigDecimal rounded = exact.round(new MathContext(precision, RoundingMode.HALF_EVEN));
+            BigDecimal unit = BigDecimal.ONE.movePointLeft(rounded.scale());
+            BigDecimal best = null;
+            for (BigDecimal candidate : new BigDecimal[] {rounded, rounded.add(unit), rounded.subtract(unit)}) {
+                if (candidate.doubleValue() == value && (best == null || isCloser(candidate, best, exact))) {
+                    best = candidate;
+                }
+            }
+            if (best != null) {
+                return best.stripTrailingZeros();
             }
         }
-        if (shortest == null) {
-            shortest = exact.round(new MathContext(17, RoundingMode.HALF_EVEN));
-        }
-        shortest = shortest.stripTrailingZeros();
+        return exact.round(new MathContext(17, RoundingMode.HALF_EVEN)).stripTrailingZeros();
+    }
+
+    private static boolean isCloser(BigDecimal candidate, BigDecimal other, BigDecimal exact) {
+        return candidate.subtract(exact).abs().compareTo(other.subtract(exact).abs()) < 0;
+    }
+
+    private static String ecmaScriptFormat(BigDecimal shortest) {
         String digits = shortest.unscaledValue().abs().toString();
         int k = digits.length();
         // n is the position of the decimal point relative to the first digit (ECMAScript's n)
@@ -114,59 +134,82 @@ public final class TraceCanonicalizer {
         } else if (node.isNumber()) {
             out.append(formatNumber(node.doubleValue()));
         } else if (node.isArray()) {
-            out.append('[');
-            for (int i = 0; i < node.size(); i++) {
-                if (i > 0) {
-                    out.append(',');
-                }
-                write(node.get(i), out);
-            }
-            out.append(']');
+            writeArray(node, out);
         } else if (node.isObject()) {
-            // RFC 8785 sorts members by UTF-16 code units, which is String.compareTo order
-            Map<String, JsonNode> members = new TreeMap<>();
-            node.fields().forEachRemaining(entry -> members.put(entry.getKey(), entry.getValue()));
-            out.append('{');
-            boolean first = true;
-            for (Map.Entry<String, JsonNode> member : members.entrySet()) {
-                if (!first) {
-                    out.append(',');
-                }
-                first = false;
-                writeString(member.getKey(), out);
-                out.append(':');
-                write(member.getValue(), out);
-            }
-            out.append('}');
+            writeObject(node, out);
         } else {
             throw new IllegalArgumentException("Unsupported JSON value for TRACE canonicalization: " + node.getNodeType());
         }
+    }
+
+    private static void writeArray(JsonNode node, StringBuilder out) {
+        out.append('[');
+        for (int i = 0; i < node.size(); i++) {
+            if (i > 0) {
+                out.append(',');
+            }
+            write(node.get(i), out);
+        }
+        out.append(']');
+    }
+
+    private static void writeObject(JsonNode node, StringBuilder out) {
+        // RFC 8785 sorts members by UTF-16 code units, which is String.compareTo order
+        Map<String, JsonNode> members = new TreeMap<>();
+        for (Map.Entry<String, JsonNode> member : node.properties()) {
+            members.put(member.getKey(), member.getValue());
+        }
+        out.append('{');
+        boolean first = true;
+        for (Map.Entry<String, JsonNode> member : members.entrySet()) {
+            if (!first) {
+                out.append(',');
+            }
+            first = false;
+            writeString(member.getKey(), out);
+            out.append(':');
+            write(member.getValue(), out);
+        }
+        out.append('}');
     }
 
     private static void writeString(String value, StringBuilder out) {
         out.append('"');
         for (int i = 0; i < value.length(); i++) {
             char c = value.charAt(i);
-            if (c == '"') {
-                out.append("\\\"");
-            } else if (c == '\\') {
-                out.append("\\\\");
-            } else if (c == '\b') {
-                out.append("\\b");
-            } else if (c == '\f') {
-                out.append("\\f");
-            } else if (c == '\n') {
-                out.append("\\n");
-            } else if (c == '\r') {
-                out.append("\\r");
-            } else if (c == '\t') {
-                out.append("\\t");
-            } else if (c < 0x20) {
-                out.append(String.format("\\u%04x", (int) c));
+            if (Character.isHighSurrogate(c)) {
+                if (i + 1 >= value.length() || !Character.isLowSurrogate(value.charAt(i + 1))) {
+                    throw new IllegalArgumentException("Unpaired surrogate cannot be canonicalized");
+                }
+                out.append(c).append(value.charAt(++i));
+            } else if (Character.isLowSurrogate(c)) {
+                throw new IllegalArgumentException("Unpaired surrogate cannot be canonicalized");
             } else {
-                out.append(c);
+                appendEscaped(c, out);
             }
         }
         out.append('"');
+    }
+
+    private static void appendEscaped(char c, StringBuilder out) {
+        if (c == '"') {
+            out.append("\\\"");
+        } else if (c == '\\') {
+            out.append("\\\\");
+        } else if (c == '\b') {
+            out.append("\\b");
+        } else if (c == '\f') {
+            out.append("\\f");
+        } else if (c == '\n') {
+            out.append("\\n");
+        } else if (c == '\r') {
+            out.append("\\r");
+        } else if (c == '\t') {
+            out.append("\\t");
+        } else if (c < 0x20) {
+            out.append(String.format("\\u%04x", (int) c));
+        } else {
+            out.append(c);
+        }
     }
 }

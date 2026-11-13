@@ -92,16 +92,15 @@ class TraceKeyLoaderTest {
 
     @Test
     void wrongPasswordFails() throws Exception {
-        Path file = keystore("trace-producer", ed25519());
-        assertThrows(IllegalStateException.class,
-                () -> TraceKeyLoader.load(file.toString(), "wrong".toCharArray(), "trace-producer"));
+        String path = keystore("trace-producer", ed25519()).toString();
+        char[] wrong = "wrong".toCharArray();
+        assertThrows(IllegalStateException.class, () -> TraceKeyLoader.load(path, wrong, "trace-producer"));
     }
 
     @Test
     void missingAliasFails() throws Exception {
-        Path file = keystore("trace-producer", ed25519());
-        assertThrows(IllegalStateException.class,
-                () -> TraceKeyLoader.load(file.toString(), PASSWORD, "no-such-alias"));
+        String path = keystore("trace-producer", ed25519()).toString();
+        assertThrows(IllegalStateException.class, () -> TraceKeyLoader.load(path, PASSWORD, "no-such-alias"));
     }
 
     @Test
@@ -122,7 +121,7 @@ class TraceKeyLoaderTest {
 
     @Test
     void configurationWithoutKeyFails() {
-        assertThrows(IllegalStateException.class,
-                () -> TraceKeyLoader.fromConfiguration(new Fido2Configuration(), value -> value));
+        Fido2Configuration empty = new Fido2Configuration();
+        assertThrows(IllegalStateException.class, () -> TraceKeyLoader.fromConfiguration(empty, value -> value));
     }
 }

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class TraceCanonicalizerTest {
 
@@ -69,5 +70,26 @@ class TraceCanonicalizerTest {
     void rejectsNonFiniteNumbers() {
         assertThrows(IllegalArgumentException.class, () -> TraceCanonicalizer.formatNumber(Double.NaN));
         assertThrows(IllegalArgumentException.class, () -> TraceCanonicalizer.formatNumber(Double.POSITIVE_INFINITY));
+    }
+
+    @Test
+    void asymmetricPowerOfTwoUsesShortestRoundTripForm() {
+        // 2^89: the lower neighbour at 16 digits does not round-trip, the upper one does (CodeRabbit regression)
+        assertEquals("6.189700196426902e+26", TraceCanonicalizer.formatNumber(Math.scalb(1.0, 89)));
+    }
+
+    @Test
+    void rejectsUnpairedSurrogatesInValuesAndNames() {
+        String lone = "\ud800";
+        assertThrows(IllegalArgumentException.class,
+                () -> TraceCanonicalizer.canonicalString(MAPPER.getNodeFactory().textNode(lone)));
+        ObjectNode object = MAPPER.createObjectNode();
+        object.put("\udc00", 1);
+        assertThrows(IllegalArgumentException.class, () -> TraceCanonicalizer.canonicalString(object));
+    }
+
+    @Test
+    void acceptsValidSurrogatePairs() {
+        assertEquals("\"😀\"", TraceCanonicalizer.canonicalString(MAPPER.getNodeFactory().textNode("😀")));
     }
 }
