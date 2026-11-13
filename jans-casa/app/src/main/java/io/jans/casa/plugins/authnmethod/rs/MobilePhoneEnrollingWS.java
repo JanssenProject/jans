@@ -148,7 +148,7 @@ public class MobilePhoneEnrollingWS {
                 cacheProvider.remove(key);
             }
 
-            String[] entry = activeEntry(value, now);
+            String[] entry = activeEntry(value, System.currentTimeMillis());
             if (entry == null) {
                 //No match or past its stored expiry
                 result = FinishCode.NO_MATCH_OR_EXPIRED;
