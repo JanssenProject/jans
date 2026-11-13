@@ -1,6 +1,7 @@
 package io.jans.casa.ui.vm.user;
 
 import io.jans.casa.core.*;
+import io.jans.casa.core.model.Person;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.extension.PreferredMethodFragment;
 import io.jans.casa.misc.Utils;
@@ -112,7 +113,14 @@ public class UserPreferenceViewModel extends UserViewModel {
 
     }
 
+    @NotifyChange("mfaEnabled")
     public void change() {
+        if (!isEnableDisableAllowed()) {
+            logger.warn("User {} attempted to change 2FA status but self enable/disable is not allowed", user.getUserName());
+            mfaEnabled = !mfaEnabled;
+            UIUtils.showMessageUI(false);
+            return;
+        }
         //If 2FA has been turned on, try to restore the preferred method if there was any set previously 
         boolean outcome = mfaEnabled ? userService.turn2faOn(user, selectedMethod) : userService.turn2faOff(user);
         UIUtils.showMessageUI(outcome);
@@ -137,6 +145,17 @@ public class UserPreferenceViewModel extends UserViewModel {
     
     @NotifyChange("uiPreferredWindowShown")
     public void update() {
+        if (!isEnableDisableAllowed()) {
+            //2FA may have been turned off meanwhile; changing the preferred method must not turn it back on
+            PersistenceService ps = Utils.managedBean(PersistenceService.class);
+            Person person = ps.get(Person.class, ps.getPersonDn(user.getId()));
+            if (person == null || person.getPreferredMethod() == null) {
+                logger.warn("User {} attempted to re-enable 2FA but self enable/disable is not allowed", user.getUserName());
+                UIUtils.showMessageUI(false);
+                cancelUpdate(null);
+                return;
+            }
+        }
     	boolean outcome = userService.turn2faOn(user, selectedMethod);
     	UIUtils.showMessageUI(outcome);
     	cancelUpdate(null);

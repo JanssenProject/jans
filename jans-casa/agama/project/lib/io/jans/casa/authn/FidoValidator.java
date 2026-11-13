@@ -13,7 +13,9 @@ import jakarta.ws.rs.core.Response;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,8 @@ public class FidoValidator {
     private static final Logger logger = LoggerFactory.getLogger(FidoValidator.class);
 
     private String metadataConfiguration;
+    private String expectedUid;
+    private String expectedChallenge;
 
 	private static final ObjectMapper mapper = new ObjectMapper();;
     
@@ -66,6 +70,8 @@ public class FidoValidator {
                 logger.error(msg + "; response was: " + content);
                 throw new IOException(msg);
             }
+            expectedUid = uid;
+            expectedChallenge = mapper.readTree(content).path("challenge").asText(null);
             return content;
         }
         
@@ -73,12 +79,20 @@ public class FidoValidator {
     
     public void verify(String tokenResponse) throws IOException {
 
+        String uid = expectedUid;
+        String challenge = expectedChallenge;
+        expectedUid = null;
+        expectedChallenge = null;
         logger.debug("Verifying fido token response : "+tokenResponse);
         HttpServletRequest httpRequest = CdiUtil.bean(HttpServletRequest.class);
         AssertionService assertionService = Fido2ClientFactory.instance().createAssertionService(
                 metadataConfiguration, httpRequest.getRemoteAddr(), httpRequest.getHeader("User-Agent"));
 
         AssertionResult assertionResult = mapper.readValue(tokenResponse, AssertionResult.class);
+        if (uid == null || challenge == null || !challenge.equals(clientDataChallenge(assertionResult))) {
+            throw new IOException("Assertion does not match the challenge issued for this login");
+        }
+
         try (Response response = assertionService.verify(assertionResult)) {
             int status = response.getStatus();
 			String content = response.readEntity(String.class);
@@ -88,7 +102,28 @@ public class FidoValidator {
                 logger.error(msg + "; response was: " + content);
                 throw new IOException(msg);    
             }
+            String username = mapper.readTree(content).path("username").asText(null);
+            if (!Objects.equals(uid, username)) {
+                logger.error("Assertion was verified for a user other than {}", uid);
+                throw new IOException("Assertion belongs to a different user");
+            }
         }
+
+    }
+
+    private static String clientDataChallenge(AssertionResult assertionResult) throws IOException {
+
+        if (assertionResult.getResponse() == null || assertionResult.getResponse().getClientDataJSON() == null) {
+            return null;
+        }
+        String clientData = assertionResult.getResponse().getClientDataJSON();
+        byte[] decoded;
+        try {
+            decoded = Base64.getUrlDecoder().decode(clientData);
+        } catch (IllegalArgumentException e) {
+            decoded = Base64.getDecoder().decode(clientData);
+        }
+        return mapper.readTree(decoded).path("challenge").asText(null);
 
     }
 

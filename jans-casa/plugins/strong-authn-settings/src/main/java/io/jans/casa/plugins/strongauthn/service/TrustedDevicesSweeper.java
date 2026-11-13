@@ -123,7 +123,7 @@ public class TrustedDevicesSweeper implements Job {
                 }
                 //Remove expired ones from the origins. This is a right-to-left removal
                 origIndexes.forEach(ind -> origins.remove(ind.intValue()));    //intValue() is important here!
-                changed = origIndexes.size() > 0;
+                changed |= origIndexes.size() > 0;
             }
             if (device.getAddedOn() > 0 && time - device.getAddedOn() > deviceExpiration) {
                 deviceIndexes.add(0, i);

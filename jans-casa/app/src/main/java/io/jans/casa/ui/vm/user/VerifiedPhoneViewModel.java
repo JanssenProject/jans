@@ -6,6 +6,7 @@ import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.service.SMSDeliveryStatus;
 import io.jans.casa.plugins.authnmethod.service.MobilePhoneService;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ import org.zkoss.zul.Messagebox;
  */
 public class VerifiedPhoneViewModel extends UserViewModel {
 
+    private static final SecureRandom RAND = new SecureRandom();
+    private static final int MAX_CODE_ATTEMPTS = 5;
+
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     String ACR;
@@ -39,6 +43,8 @@ public class VerifiedPhoneViewModel extends UserViewModel {
     private VerifiedMobile newPhone;
     private String code;
     private String realCode;
+    private String codeNumber;
+    private int codeAttempts;
     private String editingNumber;
 
     public String getEditingNumber() {
@@ -91,7 +97,9 @@ public class VerifiedPhoneViewModel extends UserViewModel {
                     UIUtils.showMessageUI(Clients.NOTIFICATION_TYPE_WARNING, Labels.getLabel("usr.mobile_already_exists"));
                 } else {
                     //Generate random in [100000, 999999]
-                    realCode = Integer.toString(new Double(100000 + Math.random() * 899999).intValue());
+                    realCode = Integer.toString(100000 + RAND.nextInt(900000));
+                    codeNumber = numb;
+                    codeAttempts = 0;
 
                     String body = Labels.getLabel("usr.mobile_sms_body", new String[] { realCode });
                     logger.trace("sendCode. code={}", realCode);
@@ -115,13 +123,17 @@ public class VerifiedPhoneViewModel extends UserViewModel {
 
     @NotifyChange({ "uiCodesMatch", "uiSmsDelivered" })
     public void checkCode(HtmlBasedComponent toFocus) {
-        uiCodesMatch = Utils.isNotEmpty(code) && Utils.isNotEmpty(realCode) && realCode.equals(code.trim());
+        uiCodesMatch = Utils.isNotEmpty(code) && Utils.isNotEmpty(realCode) && realCode.equals(code.trim())
+                && Objects.equals(codeNumber, newPhone.getNumber());
         if (uiCodesMatch) {
             if (toFocus != null) {
                 toFocus.focus();
             }
             uiSmsDelivered = false;
         } else {
+            if (++codeAttempts >= MAX_CODE_ATTEMPTS) {
+                realCode = null;
+            }
             UIUtils.showMessageUI(Clients.NOTIFICATION_TYPE_WARNING, Labels.getLabel("usr.mobile_code_wrong"));
         }
     }
@@ -129,7 +141,11 @@ public class VerifiedPhoneViewModel extends UserViewModel {
     @NotifyChange({"uiCodesMatch", "code", "phones", "newPhone"})
     public void add() {
 
-        if (Utils.isNotEmpty(newPhone.getNickName())) {
+        //Only the number the code was sent to (and verified) can be saved
+        if (!uiCodesMatch || !Objects.equals(codeNumber, newPhone.getNumber())) {
+            UIUtils.showMessageUI(false, Labels.getLabel("usr.enroll.error"));
+            cancel();
+        } else if (Utils.isNotEmpty(newPhone.getNickName())) {
             newPhone.setAddedOn(new Date().getTime());
 
             if (mpService.updateMobilePhonesAdd(user.getId(), phones, newPhone)) {
@@ -148,6 +164,7 @@ public class VerifiedPhoneViewModel extends UserViewModel {
     public void cancel() {
         uiCodesMatch = false;
         realCode = null;
+        codeNumber = null;
         code = null;
         uiSmsDelivered = false;
         newPhone = new VerifiedMobile();

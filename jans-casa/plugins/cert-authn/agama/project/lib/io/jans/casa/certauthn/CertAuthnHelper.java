@@ -1,6 +1,7 @@
 package io.jans.casa.certauthn;
 
 import io.jans.service.CacheService;
+import io.jans.service.cache.CacheProvider;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.util.security.StringEncrypter;
 
@@ -70,8 +71,18 @@ public class CertAuthnHelper {
         
     }
 
-    public static String decryptValue(String val) throws StringEncrypter.EncryptionException {
-        return encrypter.decrypt(val);
+    public static String lookupUid(String uidRef) {
+
+        if (uidRef == null) return null;
+        //See class io.jans.casa.plugins.certauthn.vm.CertAuthenticationSummaryVM
+        //Written with CacheProvider (no key prefix), so read it the same way
+        CacheProvider cache = CdiUtil.bean(CacheProvider.class);
+        String uid = Optional.ofNullable(cache.get(uidRef)).map(Object::toString).orElse(null);
+        if (uid != null) {
+            cache.remove(uidRef);
+        }
+        return uid;
+
     }
     
 }

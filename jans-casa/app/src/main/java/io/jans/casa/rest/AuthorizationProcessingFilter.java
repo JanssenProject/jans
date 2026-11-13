@@ -69,7 +69,7 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
                 failureResponse = Response.status(Status.FORBIDDEN).entity("Authorization header absent");
             } else {
                 token = token.replaceFirst("Bearer\\s+", "");
-                logger.debug("Validating token {}", token);
+                logger.debug("Validating token");
                 
                 IntrospectionResponse response = null;
                 try {
@@ -83,6 +83,11 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
                 	String msg = "Invalid token or insufficient scopes";
                     logger.error("{}. Token scopes: {}", msg, tokenScopes);
                     failureResponse = Response.status(Status.UNAUTHORIZED).entity(msg);
+                } else if (isSenderConstrained(response)) {
+                    //This API does not validate DPoP proofs, so DPoP-bound tokens cannot be honored
+                    String msg = "Sender-constrained tokens are not supported";
+                    logger.error(msg);
+                    failureResponse = Response.status(Status.UNAUTHORIZED).entity(msg);
                 }
             }
         }
@@ -92,6 +97,11 @@ public class AuthorizationProcessingFilter implements ContainerRequestFilter {
             requestContext.abortWith(failureResponse.build());
         }
 
+    }
+
+    private boolean isSenderConstrained(IntrospectionResponse response) {
+        return "DPoP".equalsIgnoreCase(response.getTokenType()) ||
+                Optional.ofNullable(response.getCnf()).map(cnf -> !cnf.isEmpty()).orElse(false);
     }
 
     private Set<String> computeExpectedScopes(ResourceInfo resourceInfo) {
