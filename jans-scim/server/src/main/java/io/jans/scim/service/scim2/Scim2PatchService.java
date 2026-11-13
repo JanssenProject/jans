@@ -142,7 +142,7 @@ public class Scim2PatchService {
                 }
             }
 
-            log.debug("applyPatchOperation. Generating a ScimResource from generic map: {}", genericMap.toString());
+            log.debug("applyPatchOperation. Generating a ScimResource from generic map with keys: {}", genericMap.keySet());
         }
 
         //Try parse genericMap as an instance of the resource

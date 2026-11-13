@@ -562,12 +562,7 @@ public class Scim2UserService implements Serializable {
 
 	public void deleteUser(ScimCustomPerson gluuPerson) throws Exception {
 
-		if (gluuPerson.getMemberOf() != null && gluuPerson.getMemberOf().size() > 0) {
-			log.info("Removing user {} from groups", gluuPerson.getUid());
-			userPersistenceHelper.removeUserFromGroups(gluuPerson);
-		}
-		log.info("Removing user entry {}", gluuPerson.getDn());
-
+		List<String> groups = gluuPerson.getMemberOf() == null ? null : new ArrayList<>(gluuPerson.getMemberOf());
 		if (externalScimService.isEnabled()) {
 			boolean result = externalScimService.executeScimDeleteUserMethods(gluuPerson);
 			if (!result) {
@@ -575,6 +570,12 @@ public class Scim2UserService implements Serializable {
 						Status.PRECONDITION_FAILED);
 			}
 		}
+
+		if (groups != null && !groups.isEmpty()) {
+			log.info("Removing user {} from groups", gluuPerson.getUid());
+			userPersistenceHelper.removeUserFromGroups(gluuPerson, groups);
+		}
+		log.info("Removing user entry {}", gluuPerson.getDn());
 
 		userPersistenceHelper.removePerson(gluuPerson);
 
@@ -588,7 +589,7 @@ public class Scim2UserService implements Serializable {
 
 		Filter ldapFilter = scimFilterParserService.createFilter(filter, Filter.createPresenceFilter("inum"), UserResource.class);
 		log.info("Executing search for users using: ldapfilter '{}', sortBy '{}', sortOrder '{}', startIndex '{}', count '{}'",
-				ldapFilter.toString(), sortBy, sortOrder.getValue(), startIndex, count);
+				ldapFilter.toString().replaceAll("[\\r\\n\\t]", "_"), sortBy == null ? null : sortBy.replaceAll("[\\r\\n\\t]", "_"), sortOrder.getValue(), startIndex, count);
 
 		PagedResult<ScimCustomPerson> list = ldapEntryManager.findPagedEntries(personService.getDnForPerson(null),
 				ScimCustomPerson.class, ldapFilter, null, sortBy, sortOrder, startIndex - 1, count, maxCount);

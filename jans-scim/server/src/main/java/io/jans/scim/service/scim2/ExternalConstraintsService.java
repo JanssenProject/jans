@@ -13,6 +13,7 @@ import io.jans.orm.model.base.Entry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.model.conf.ScimMode;
+import io.jans.scim.model.scim2.ErrorScimType;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.service.external.OperationContext;
@@ -66,6 +67,9 @@ public class ExternalConstraintsService {
                 if (!StringUtils.isEmpty(filterPrepend)) {
                     if (StringUtils.isEmpty(searchReq.getFilter())) {
                         searchReq.setFilter(filterPrepend);
+                    } else if (!hasBalancedGrouping(searchReq.getFilter())) {
+                        return BaseScimWebService.getErrorResponse(Status.BAD_REQUEST, ErrorScimType.INVALID_FILTER,
+                                "Unbalanced grouping in filter");
                     } else {
                         searchReq.setFilter(String.format("%s and (%s)", filterPrepend, searchReq.getFilter()));
                     }
@@ -102,6 +106,44 @@ public class ExternalConstraintsService {
             ctx.setTokenDetails(details);
         }
         return ctx;
+
+    }
+
+    /**
+     * Checks parentheses and brackets outside string literals are balanced, so the caller's filter
+     * cannot close the group it is wrapped in and escape the mandatory prepended restriction
+     */
+    static boolean hasBalancedGrouping(String filter) {
+
+        int parens = 0;
+        int brackets = 0;
+        boolean inString = false;
+        boolean escaped = false;
+        for (int i = 0; i < filter.length(); i++) {
+            char c = filter.charAt(i);
+            if (inString) {
+                if (escaped) {
+                    escaped = false;
+                } else if (c == '\\') {
+                    escaped = true;
+                } else if (c == '"') {
+                    inString = false;
+                }
+                continue;
+            }
+            switch (c) {
+                case '"': inString = true; break;
+                case '(': parens++; break;
+                case ')': parens--; break;
+                case '[': brackets++; break;
+                case ']': brackets--; break;
+                default: break;
+            }
+            if (parens < 0 || brackets < 0) {
+                return false;
+            }
+        }
+        return !inString && parens == 0 && brackets == 0;
 
     }
 
