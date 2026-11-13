@@ -1003,32 +1003,41 @@ mod test {
             }
         }
 
-        async fn listen() -> (TcpListenerStream, String) {
+        /// A bound local port: the connections to serve and the origin to call.
+        struct Listening {
+            incoming: TcpListenerStream,
+            origin: String,
+        }
+
+        async fn listen() -> Listening {
             let listener = TcpListener::bind("127.0.0.1:0")
                 .await
                 .expect("a local port is free");
             let addr = listener.local_addr().expect("the listener has an address");
-            (TcpListenerStream::new(listener), format!("http://{addr}"))
+            Listening {
+                incoming: TcpListenerStream::new(listener),
+                origin: format!("http://{addr}"),
+            }
         }
 
         async fn lock(reply: Reply, calls: Arc<AtomicUsize>) -> String {
-            let (incoming, url) = listen().await;
+            let Listening { incoming, origin } = listen().await;
             tokio::spawn(
                 Server::builder()
                     .add_service(AuditServiceServer::new(ReplyingLock { reply, calls }))
                     .serve_with_incoming(incoming),
             );
-            url
+            origin
         }
 
         async fn proxy(status: u16, calls: Arc<AtomicUsize>) -> String {
-            let (incoming, url) = listen().await;
+            let Listening { incoming, origin } = listen().await;
             tokio::spawn(
                 Server::builder()
                     .add_routes(tonic::service::Routes::new(ProxyAnswer { status, calls }))
                     .serve_with_incoming(incoming),
             );
-            url
+            origin
         }
 
         /// Runs a log worker on one entry until it is sent or dropped.
