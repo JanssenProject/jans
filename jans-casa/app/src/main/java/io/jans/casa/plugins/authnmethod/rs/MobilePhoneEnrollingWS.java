@@ -109,7 +109,7 @@ public class MobilePhoneEnrollingWS {
             result = ValidateCode.MISSING_PARAMS;
         } else {
             Object value = cacheProvider.get(RECENT_CODES_PREFIX + userId + SEPARATOR + code);
-            result = activeEntry(value, System.currentTimeMillis()) == null
+            result = activeEntry(value, System.currentTimeMillis()).isEmpty()
                     ? ValidateCode.NO_MATCH_OR_EXPIRED : ValidateCode.MATCH;
         }
         return result.getResponse();
@@ -148,7 +148,7 @@ public class MobilePhoneEnrollingWS {
                 cacheProvider.remove(key);
             }
 
-            String[] entry = activeEntry(value, System.currentTimeMillis());
+            String[] entry = activeEntry(value, System.currentTimeMillis()).orElse(null);
             if (entry == null) {
                 //No match or past its stored expiry
                 result = FinishCode.NO_MATCH_OR_EXPIRED;
@@ -172,16 +172,16 @@ public class MobilePhoneEnrollingWS {
     }
 
     //Returns {number, expiresAt} only while the stored expiry has not passed; cache TTL alone may lag it
-    private String[] activeEntry(Object value, long now) {
+    private Optional<String[]> activeEntry(Object value, long now) {
         if (value == null) {
-            return null;
+            return Optional.empty();
         }
         String[] entry = value.toString().split(Pattern.quote(EXPIRY_SEPARATOR), 2);
         try {
-            return entry.length == 2 && now < Long.parseLong(entry[1]) ? entry : null;
+            return entry.length == 2 && now < Long.parseLong(entry[1]) ? Optional.of(entry) : Optional.empty();
         } catch (NumberFormatException e) {
             logger.warn("Invalid expiry in cached enrollment code");
-            return null;
+            return Optional.empty();
         }
     }
 
