@@ -408,4 +408,15 @@ class ContentCheckerTest {
                 .path("webcredentials").path("apps").size());
         assertEquals(CheckStatus.PASS, byId(checks, "content.drift").get(0).status());
     }
+
+    @Test
+    void oversizedPackageName_isIgnoredAsDrift() {
+        String longPkg = "a".repeat(ContentChecker.MAX_PACKAGE_NAME_LENGTH + 1);
+        String body = "[" + statement(REL, "com.example.app", FP1) + "," + statement(REL, longPkg, FP1, FP2) + "]";
+        List<CheckResult> checks = android(ONE_APP, body);
+        assertNone(checks, CheckStatus.FAIL);
+        assertEquals(CheckStatus.WARN, byId(checks, "content.drift").get(0).status());
+        assertTrue(byId(checks, "content.drift").get(0).reason()
+                .contains("0 expected entries missing, 1 unexpected"));
+    }
 }

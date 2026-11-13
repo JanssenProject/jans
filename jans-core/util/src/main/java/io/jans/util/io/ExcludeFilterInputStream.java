@@ -26,27 +26,40 @@ public class ExcludeFilterInputStream extends BufferedInputStream {
 
     @Override
     public int read() throws IOException {
+        int c = super.read();
+        if (c == -1) {
+            return -1;
+        }
 
-        char symbol = (char) super.read();
+        char symbol = (char) c;
         if (searchFor.startsWith(new String(new char[] {symbol}))) {
             super.mark(searchFor.length());
             StringBuffer startBuffer = new StringBuffer();
             startBuffer.append(symbol);
             for (int i = 1; i < searchFor.length(); i++) {
-                startBuffer.append((char) super.read());
+                int next = super.read();
+                if (next == -1) {
+                    break;
+                }
+                startBuffer.append((char) next);
             }
 
             if (searchFor.equals(startBuffer.toString())) {
                 this.searchFor = this.end;
                 skip = !skip;
+                int result = -1;
                 if (!skip) {
-                    symbol = (char) read();
+                    result = read();
                 }
                 while (skip) {
-                    symbol = (char) read();
+                    result = read();
+                    if (result == -1) {
+                        // Unterminated excluded region
+                        skip = false;
+                    }
                 }
                 this.searchFor = this.start;
-                return symbol;
+                return result;
             } else {
                 super.reset();
                 return (symbol);
@@ -60,11 +73,11 @@ public class ExcludeFilterInputStream extends BufferedInputStream {
     public int read(byte[] b, int off, int len) throws IOException {
         int i;
         for (i = 0; i < len; i++) {
-            byte symbol = (byte) read();
+            int symbol = read();
             if (symbol == -1) {
                 return i > 0 ? i : -1;
             }
-            b[i] = symbol;
+            b[off + i] = (byte) symbol;
         }
         return i;
 

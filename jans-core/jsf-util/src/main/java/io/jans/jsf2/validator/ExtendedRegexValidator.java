@@ -15,7 +15,7 @@ import jakarta.faces.validator.RegexValidator;
 public class ExtendedRegexValidator extends RegexValidator {
 
     public ExtendedRegexValidator() {
-        String pattern = ".*";
+        String pattern = "(?s).*";
 
         setPattern(pattern);
     }
@@ -26,8 +26,8 @@ public class ExtendedRegexValidator extends RegexValidator {
 
         if (pattern != null) {
             setPattern(pattern);
-            super.validate(context, component, value);
         }
+        super.validate(context, component, value);
     }
 
 }

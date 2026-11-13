@@ -55,7 +55,7 @@ public class EncryptionService {
             resultValue = stringEncrypter.decrypt(encryptedValue);
         } catch (Exception ex) {
             if (!returnSource) {
-                log.error(String.format("Failed to decrypt value: '%s'", encryptedValue, ex));
+                log.error("Failed to decrypt value", ex);
             }
         }
 
