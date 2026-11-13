@@ -647,7 +647,7 @@ components:
             whitespace-only value is rejected with `required_value_missing`.
           examples: [University Portal SP]
         description:
-          type: string
+          type: [string, "null"]
           default: ""
           description: Optional free-text description. Omitted or null is stored as an empty string.
           examples: [SAML SP for the university student portal]
@@ -666,7 +666,7 @@ components:
           description: Human-readable name. Trimmed server-side; must be non-blank.
           examples: [University Portal SP]
         description:
-          type: string
+          type: [string, "null"]
           default: ""
           description: Optional free-text. Omitting it or sending null clears it to empty.
           examples: [SAML SP for the university student portal]
@@ -1695,11 +1695,13 @@ components:
           description: Where the activation ran (empty when there has been no activation yet).
           examples: ["worker-1@host.example.org"]
         started_at:
-          type: string
+          type: [string, "null"]
           format: date-time
+          description: When the activation started; null when none has completed (`NO_DATA`).
         completed_at:
-          type: string
+          type: [string, "null"]
           format: date-time
+          description: When the activation completed; null when none has completed (`NO_DATA`).
         log_entries:
           type: array
           items:

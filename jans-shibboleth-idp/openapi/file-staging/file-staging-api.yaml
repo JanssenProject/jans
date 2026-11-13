@@ -130,9 +130,10 @@ paths:
 
         The move takes the entry out of staging, so a claimed file is no longer subject to the cleaner and
         there is no separate release step. The filename under `destination` is **derived deterministically**
-        from the token, so `claim` is **idempotent** per `(token, destination)`: a retry after a partial
-        failure yields the same handle. An expired or already-reaped token fails with `409`; an unknown token
-        fails with `404`.
+        from the token, so `claim` is **idempotent** per `(token, destination)`: retrying with the same
+        destination — after a partial failure *or a prior success* — yields the same handle with `200`. An
+        expired token fails with `409`; claiming an already-claimed file under a **different** destination
+        also fails with `409`; an unknown or already-reaped token fails with `404`.
 
         `destination` is validated for namespace hygiene (a well-formed path within the caller's agreed
         layout) — this prevents accidental clobbering, not privilege escalation: the document store's
@@ -163,7 +164,7 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
-          $ref: '#/components/responses/Gone'
+          $ref: '#/components/responses/Conflict'
 
 components:
 
@@ -225,8 +226,11 @@ components:
           schema:
             $ref: '../components/common.yaml#/components/schemas/Problem'
 
-    Gone:
-      description: The token has expired or its staged file was already reaped/claimed (`file_expired`).
+    Conflict:
+      description: |
+        The token has expired, or its staged file was already claimed under a different destination
+        (`file_expired`, `already_claimed`). Retrying a successful claim with the same destination is
+        idempotent and returns `200`.
       content:
         application/problem+json:
           schema:
@@ -264,7 +268,7 @@ components:
           description: Size of the staged bytes, in bytes.
           examples: [20480]
         content_type:
-          type: string
+          type: [string, "null"]
           description: The file's logical media type as asserted at upload; null/absent if none was given.
           examples: [application/samlmetadata+xml]
         sha256:
@@ -313,7 +317,7 @@ components:
           description: Size of the file, in bytes (unchanged by the move).
           examples: [20480]
         content_type:
-          type: string
+          type: [string, "null"]
           description: The file's logical media type, carried over from upload; null/absent if none was given.
           examples: [application/samlmetadata+xml]
         sha256:
