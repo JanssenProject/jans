@@ -108,17 +108,12 @@ def _transform_lock_dynamic_config(conf, manager):
         conf["protectionMode"] = "cedarling"
         should_update = True
 
-    trace_client_ids = [manager.config.get("lock_trace_client_id")]
-
     # lock config is created after persistence-loader imports test data, so bind the test client here
     if as_boolean(os.environ.get("CN_PERSISTENCE_LOAD_TEST_DATA", "false")):
-        trace_client_ids.append(LOCK_TRACE_TEST_CLIENT_ID)
-
-    for trace_client_id in trace_client_ids:
         bindings = conf["traceConfiguration"].setdefault("clientDomainBindings", [])
-        if not any(binding.get("clientId") == trace_client_id for binding in bindings):
+        if not any(binding.get("clientId") == LOCK_TRACE_TEST_CLIENT_ID for binding in bindings):
             bindings.append({
-                "clientId": trace_client_id,
+                "clientId": LOCK_TRACE_TEST_CLIENT_ID,
                 "evidenceDomainId": "default",
                 "allowedProducerIds": ["*"],
             })
