@@ -37,9 +37,7 @@
 		"enabled": true,
 		"defaultEvidenceDomainId": "",
 		"defaultAllowedProducerIds": [],
-		"clientDomainBindings": [
-			{"clientId": "%(lock_client_id)s", "evidenceDomainId": "default", "allowedProducerIds": ["*"]}
-		],
+		"clientDomainBindings": [],
 		"latenessThresholdSeconds": 300,
 		"policyMismatchGraceSeconds": 300,
 		"policyReleaseRetentionDays": 30,
