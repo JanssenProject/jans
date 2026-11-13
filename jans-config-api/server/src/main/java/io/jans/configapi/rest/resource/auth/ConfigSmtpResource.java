@@ -38,6 +38,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -240,12 +241,12 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         String existingPassword = existingConfiguration != null
                 ? existingConfiguration.getSmtpAuthenticationAccountPassword()
                 : null;
-        if (password != null && !password.isEmpty() && !password.equals(existingPassword)) {
+        if (password != null && !password.isEmpty() && !password.equals(existingPassword) && !isPasswordEncrypted(password)) {
             smtpConfiguration.setSmtpAuthenticationAccountPassword(encryptionService.encrypt(password));
         }
         password = smtpConfiguration.getKeyStorePassword();
         existingPassword = existingConfiguration != null ? existingConfiguration.getKeyStorePassword() : null;
-        if (password != null && !password.isEmpty() && !password.equals(existingPassword)) {
+        if (password != null && !password.isEmpty() && !password.equals(existingPassword) && !isPasswordEncrypted(password)) {
             smtpConfiguration.setKeyStorePassword(encryptionService.encrypt(password));
         }
         return smtpConfiguration;
@@ -265,6 +266,22 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             smtpConfiguration = new SmtpConfiguration();
         }
         return smtpConfiguration;
+    }
+    
+    private boolean isPasswordEncrypted(String password) {
+        boolean isPasswordEncrypted = true;
+        if (StringUtils.isBlank(password)) {
+            return isPasswordEncrypted;
+        }
+
+        try {
+            encryptionService.decrypt(password);
+        } catch (EncryptionException ex) {
+            log.info("SMTP Password is not encrypted, will encrypt before storage");
+            isPasswordEncrypted = false;
+        }
+
+        return isPasswordEncrypted;
     }
 
 }
