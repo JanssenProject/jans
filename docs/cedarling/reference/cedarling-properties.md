@@ -104,7 +104,7 @@ the Cedarling will use the default value as specified in the property definition
 **HTTP client:**
 
 - **`CEDARLING_HTTP_REQUEST_TIMEOUT`** : Per-request timeout in seconds. Only applicable for native targets (not WASM). Default is `10` (10 seconds).
-- **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retry attempts per request. Only applicable for native targets (not WASM). Default is `3`.
+- **`CEDARLING_HTTP_REQUEST_MAX_RETRIES`** : Maximum number of retries per request. Only network failures and the statuses `408`, `429` and `5xx` are retried. Any other `4xx`, an invalid URL or a refused redirect fails at once, because it would fail the same way again. Only applicable for native targets (not WASM). Default is `3`.
 - **`CEDARLING_HTTP_REQUEST_RETRY_DELAY`** : Base delay between retries in seconds. Only applicable for native targets (not WASM). Default is `3` (3 seconds).
 - **`CEDARLING_HTTP_MAX_RESPONSE_SIZE_BYTES`** : Maximum bytes Cedarling will buffer from any HTTP response (JWKS, OIDC discovery, status list, policy store, Lock Server). Oversized responses are rejected before they exhaust memory. Set to `0` to disable. Default is `10485760` (10 MB).
 
@@ -126,7 +126,7 @@ The following bootstrap properties are only needed for the Lock Server Integrati
 - **`CEDARLING_LOCK_ACCEPT_INVALID_CERTS`** : `enabled` | `disabled`: Allows interaction with a Lock server with invalid certificates. Mainly used for testing. Doesn't work for WASM builds. Does not apply to TRACE over gRPC, see `CEDARLING_TRACE_TRANSPORT`. Default is `disabled`.
 - **`CEDARLING_LOCK_TRANSPORT`** : `rest` | `grpc`: Controls the transport protocol used to communicate with the Lock server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. Does not affect TRACE, which has its own `CEDARLING_TRACE_TRANSPORT`. Default value is `rest`.
 - **`CEDARLING_LOCK_LOG_CHANNEL_CAPACITY`** : Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. Also the size of the TRACE record queue. Default is `100`.
-- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff: the delay doubles from 10 seconds up to 5 minutes. Also applies to TRACE requests. Default is `5`.
+- **`CEDARLING_LOCK_LOG_MAX_RETRIES`** : Maximum number of retries for sending a batch of logs or telemetry to the Lock Server. Uses exponential backoff: the delay doubles from 10 seconds up to 5 minutes. Only network failures, the statuses `408`, `429` and `5xx`, and the matching gRPC codes (`UNAVAILABLE`, `INTERNAL`, `UNKNOWN`, `DEADLINE_EXCEEDED`, `CANCELLED`, `ABORTED`) are retried. A refusal by Lock Server, or by a proxy before it (any other `4xx`, any other gRPC code, or a gRPC reply with `success = false`), drops the batch at once with one error, because the same batch would be refused again. For logs and telemetry that includes `401`, as the token is fixed at startup. Also applies to TRACE requests, which follow the same rule but first reissue their token once after a `401`. Default is `5`.
 
 ### TRACE properties
 

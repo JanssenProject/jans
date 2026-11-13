@@ -15,7 +15,7 @@ use sigstore_verifier::{
 
 use crate::bootstrap_config::{PolicyStoreSignature, SigstoreSigner};
 use crate::http::{HttpClient, HttpClientError};
-use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
+use crate::http_utils::{HttpRequestError, ReadBodyError};
 
 /// Bundles are a few KB; anything near this is not a bundle.
 const MAX_BUNDLE_BYTES: u64 = 1024 * 1024;
@@ -226,11 +226,13 @@ async fn fetch_bundle(http: &HttpClient, url: &str) -> Result<Vec<u8>, Signature
     crate::http_utils::read_response_capped(response, Some(MAX_BUNDLE_BYTES))
         .await
         .map_err(|reason| match reason {
-            HttpRequestReasonError::ResponseTooLarge { .. } => SignatureError::Bundle {
+            ReadBodyError::TooLarge { .. } => SignatureError::Bundle {
                 location: url.to_string(),
                 reason: format!("bundle exceeds {MAX_BUNDLE_BYTES} bytes"),
             },
-            reason => fetch_err(HttpRequestError::new(reason, Some(status))),
+            error @ ReadBodyError::Read(_) => {
+                fetch_err(HttpRequestError::ReadBody { status, error })
+            },
         })
 }
 

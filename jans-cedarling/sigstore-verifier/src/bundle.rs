@@ -296,19 +296,15 @@ impl ParsedBundle {
     /// and carry no intermediates (the verifier uses the trust root's).
     #[must_use]
     pub(crate) fn intermediate_certificates_base64(&self) -> Vec<&str> {
-        self.0
-            .verification_material
-            .x509_certificate_chain
-            .as_ref()
-            .map(|chain| {
-                chain
-                    .certificates
-                    .iter()
-                    .skip(1)
-                    .map(|c| c.raw_bytes.as_str())
-                    .collect()
-            })
-            .unwrap_or_default()
+        let Some(chain) = &self.0.verification_material.x509_certificate_chain else {
+            return Vec::new();
+        };
+        chain
+            .certificates
+            .iter()
+            .skip(1)
+            .map(|c| c.raw_bytes.as_str())
+            .collect()
     }
 
     /// Returns the signature (base64-encoded) from the bundle.

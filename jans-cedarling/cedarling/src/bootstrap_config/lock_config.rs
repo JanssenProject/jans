@@ -90,7 +90,8 @@ pub struct LockServiceConfig {
     pub transport: LockTransport,
     /// Channel capacity for buffering log entries before they are sent to the lock server.
     pub log_channel_capacity: NonZeroUsize,
-    /// Maximum number of retry attempts for sending logs to the lock server.
+    /// Maximum number of retries for sending a batch to the lock server; a
+    /// refusal is not retried.
     pub log_max_retries: u32,
 }
 

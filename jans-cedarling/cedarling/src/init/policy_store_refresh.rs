@@ -846,27 +846,40 @@ fn fetch_error(
 }
 
 /// Pure classifier for [`fetch_error`] — extracted so unit tests can pin the
-/// routing without constructing a full [`WorkerContext`].
-///
-/// Order matters:
-/// 1. **Body decode failure** (`DecodeResponseBytes`) — distinct bucket so
-///    truncated bodies don't conflate with status errors.
-/// 2. **HTTP status error** (`status_code.is_some()`) — covers the case the
-///    retry layer collapses 4xx/5xx exhaustion into `MaxRetriesExceeded` but
-///    still carries the response status; without this, *every* GET-path
-///    `HttpError` outcome would silently land in `NetworkError`.
-/// 3. **Transport failure** (`is_max_retries_exceeded()` with no status) —
-///    DNS / TCP / TLS; nothing arrived.
-/// 4. **Fallback** — any other variant routes to `HttpError`.
+/// routing without constructing a full [`WorkerContext`]. A response that arrived
+/// with a failure status is an HTTP error; only one that never arrived is a
+/// network error, and a body cut short has its own bucket.
 fn classify_fetch_error(e: &crate::http::HttpClientError) -> (&'static str, RefreshOutcome) {
-    if e.is_decode_error() {
-        ("body decode error", RefreshOutcome::DecodeError)
-    } else if e.status_code().is_some() {
-        ("HTTP error", RefreshOutcome::HttpError)
-    } else if e.is_max_retries_exceeded() {
-        ("network error", RefreshOutcome::NetworkError)
-    } else {
-        ("HTTP error", RefreshOutcome::HttpError)
+    use crate::http::HttpClientError;
+    use crate::http_utils::{
+        AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError,
+    };
+
+    const HTTP: (&str, RefreshOutcome) = ("HTTP error", RefreshOutcome::HttpError);
+    const NETWORK: (&str, RefreshOutcome) = ("network error", RefreshOutcome::NetworkError);
+    const INVALID: (&str, RefreshOutcome) = ("invalid request", RefreshOutcome::HttpError);
+
+    match e {
+        HttpClientError::Send(SendError::RetriesExhausted { last, .. })
+        | HttpClientError::Attempt(AttemptFailure::Retryable(last)) => match last {
+            RetryableFailure::Transport(_) => NETWORK,
+            RetryableFailure::Status { .. } => HTTP,
+        },
+        HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+        | HttpClientError::Attempt(AttemptFailure::Final(FinalFailure::InvalidRequest(_))) => {
+            INVALID
+        },
+        HttpClientError::ReadBody {
+            error: ReadBodyError::Read(_),
+            ..
+        } => ("body decode error", RefreshOutcome::DecodeError),
+        HttpClientError::Send(SendError::Final(FinalFailure::Status { .. }))
+        | HttpClientError::Attempt(AttemptFailure::Final(FinalFailure::Status { .. }))
+        | HttpClientError::ReadBody {
+            error: ReadBodyError::TooLarge { .. },
+            ..
+        }
+        | HttpClientError::DeserializeJson { .. } => HTTP,
     }
 }
 
@@ -1928,54 +1941,76 @@ mod tests {
 
     // ---- classify_fetch_error: routing for HTTP / network / decode / status ----
 
+    fn store_url() -> reqwest::Url {
+        reqwest::Url::parse("https://lock.test/store").expect("a valid URL")
+    }
+
     #[test]
-    fn classify_max_retries_exceeded_without_status_routes_to_network_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
-        let (kind, outcome) = classify_fetch_error(&err);
+    fn classify_failure_statuses_route_to_http_error() {
+        use crate::http::HttpClientError;
+        use crate::http_utils::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
+        use reqwest::StatusCode;
+
+        let final_status = || FinalFailure::Status {
+            status: StatusCode::NOT_FOUND,
+            url: Box::new(store_url()),
+        };
+        let retryable_status = || RetryableFailure::Status {
+            status: StatusCode::SERVICE_UNAVAILABLE,
+            url: Box::new(store_url()),
+        };
+        let cases = [
+            HttpClientError::Send(SendError::Final(final_status())),
+            HttpClientError::Send(SendError::RetriesExhausted {
+                retries: 3,
+                last: retryable_status(),
+            }),
+            HttpClientError::Attempt(AttemptFailure::Final(final_status())),
+            HttpClientError::Attempt(AttemptFailure::Retryable(retryable_status())),
+        ];
+        for err in cases {
+            assert_eq!(
+                classify_fetch_error(&err),
+                ("HTTP error", RefreshOutcome::HttpError),
+                "a response with a failure status means the upstream replied: {err:?}",
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn classify_transport_failure_routes_to_network_error() {
+        use crate::http::HttpClientError;
+        use crate::http_utils::{RetryableFailure, SendError};
+
+        // Port 1 is never listening, so the request fails before any response.
+        let transport = reqwest::get("http://127.0.0.1:1/store")
+            .await
+            .expect_err("nothing listens on port 1");
+        let err = HttpClientError::Send(SendError::RetriesExhausted {
+            retries: 3,
+            last: RetryableFailure::Transport(transport),
+        });
         assert_eq!(
-            kind, "network error",
-            "MaxRetriesExceeded with no status must classify as a transport-level network error",
-        );
-        assert_eq!(
-            outcome,
-            RefreshOutcome::NetworkError,
-            "no-status MaxRetriesExceeded must surface as NetworkError, got {outcome:?}",
+            classify_fetch_error(&err),
+            ("network error", RefreshOutcome::NetworkError),
+            "no response arrived, so it is a network error: {err:?}",
         );
     }
 
     #[test]
-    fn classify_max_retries_exceeded_with_status_routes_to_http_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(
-            HttpRequestReasonError::MaxRetriesExceeded,
-            Some(reqwest::StatusCode::NOT_FOUND),
-        );
-        let (kind, outcome) = classify_fetch_error(&err);
-        assert_eq!(
-            kind, "HTTP error",
-            "MaxRetriesExceeded carrying a status code means the upstream replied — classify as HttpError",
-        );
-        assert_eq!(
-            outcome,
-            RefreshOutcome::HttpError,
-            "retry-exhausted 4xx/5xx must surface as HttpError, not NetworkError, got {outcome:?}",
-        );
-    }
+    fn classify_invalid_request_routes_to_http_error() {
+        use crate::http::HttpClientError;
+        use crate::http_utils::{FinalFailure, SendError};
 
-    #[test]
-    fn classify_http_status_error_routes_to_http_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(
-            HttpRequestReasonError::HttpStatusError,
-            Some(reqwest::StatusCode::INTERNAL_SERVER_ERROR),
-        );
-        let (kind, outcome) = classify_fetch_error(&err);
-        assert_eq!(kind, "HTTP error");
+        let builder = reqwest::Client::new()
+            .get("not a url")
+            .build()
+            .expect_err("a relative URL cannot be built");
+        let err = HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(builder)));
         assert_eq!(
-            outcome,
-            RefreshOutcome::HttpError,
-            "HttpStatusError variant must surface as HttpError, got {outcome:?}",
+            classify_fetch_error(&err),
+            ("invalid request", RefreshOutcome::HttpError),
+            "an invalid request never reached the network: {err:?}",
         );
     }
 }

@@ -661,6 +661,7 @@ impl Emitter {
                 Ok(results) => return Sent::Results(results),
                 Err(
                     err @ (PostBulkError::Rejected { .. }
+                    | PostBulkError::NotSent { .. }
                     | PostBulkError::UnreadableResponse { .. }),
                 ) => {
                     let fix = err
