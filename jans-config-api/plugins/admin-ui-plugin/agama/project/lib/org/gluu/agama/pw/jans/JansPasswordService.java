@@ -114,9 +114,11 @@ public class JansPasswordService extends PasswordService {
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.ACTIVE.getValue())) {
             logger.info("Locking {} account for {} seconds.", username, DEFAULT_LOCK_EXP_TIME);
             long lockExpiresAt = System.currentTimeMillis() + DEFAULT_LOCK_EXP_TIME * 1000L;
-            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser), String.valueOf(lockExpiresAt));
             currentUser.setStatus(GluuStatus.INACTIVE); // this line of code required to save user's status
-            setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
+            User lockedUser = setCustomAttribute(currentUser, JANS_STATUS, INACTIVE);
+            // Any later change to the entry (e.g. an administrator disable) bumps updatedAt and blocks auto-unlock
+            cacheService.put(LOCK_RECORD_RETENTION, lockCacheKey(currentUser),
+                    lockExpiresAt + ":" + updatedAtMillis(lockedUser));
             return "Your account has been locked.";
         }
         if (currentFailCount >= DEFAULT_MAX_LOGIN_ATTEMPT && currentStatus.equalsIgnoreCase(GluuStatus.INACTIVE.getValue())) {
@@ -127,11 +129,19 @@ public class JansPasswordService extends PasswordService {
                 logger.info("User {} account was not locked by this flow. Not unlocking.", username);
                 return null;
             }
+            String[] recordParts = lockRecord.toString().split(":");
             long lockExpiresAt;
+            long lockedUpdatedAt;
             try {
-                lockExpiresAt = Long.parseLong(lockRecord.toString());
-            } catch (NumberFormatException e) {
+                lockExpiresAt = Long.parseLong(recordParts[0]);
+                lockedUpdatedAt = Long.parseLong(recordParts[1]);
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 logger.warn("Invalid lock record for user {}. Not unlocking.", username);
+                return null;
+            }
+            if (recordParts.length != 2 || lockedUpdatedAt < 0 || lockedUpdatedAt != updatedAtMillis(currentUser)) {
+                logger.info("User {} account changed after this flow locked it. Not unlocking.", username);
+                cacheService.remove(lockKey);
                 return null;
             }
             if (System.currentTimeMillis() >= lockExpiresAt) {
@@ -145,6 +155,10 @@ public class JansPasswordService extends PasswordService {
 
         }
         return null;
+    }
+
+    private static long updatedAtMillis(User user) {
+        return user != null && user.getUpdatedAt() != null ? user.getUpdatedAt().getTime() : -1L;
     }
 
     private static String lockCacheKey(User user) {
