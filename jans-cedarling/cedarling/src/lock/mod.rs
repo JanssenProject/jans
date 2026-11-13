@@ -127,6 +127,8 @@
 //! - Issue access tokens for Lock Server communication
 //! - Provide JWKS endpoint for key validation
 
+#[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+mod grpc_failure;
 pub(crate) mod health_registry;
 mod health_ticker;
 mod lock_config;

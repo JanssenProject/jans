@@ -8,14 +8,14 @@
 //! one, the REST error body being the status description.
 
 use bytes::Bytes;
-use reqwest::StatusCode;
 use tonic::codegen::http::uri::InvalidUri;
 use tonic::metadata::MetadataValue;
 use tonic::transport::{Channel, ClientTlsConfig};
-use tonic::{Code, Request, Status};
+use tonic::{Code, Request};
 
 use super::{Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus};
 use crate::HttpClientConfig;
+use crate::lock::grpc_failure::GrpcFailure;
 use crate::lock::trace_proto::trace_service_client::TraceServiceClient;
 use crate::lock::trace_proto::{
     BulkAcceptance, BulkResultEntry, SubmitBulkRecordsRequest, TraceError, TraceFlags,
@@ -78,7 +78,7 @@ impl GrpcTraceClient {
         match self.client.clone().submit_bulk_records(request).await {
             Ok(response) => results(response.into_inner()).map(Attempt::Results),
             Err(status) if status.code() == Code::Unauthenticated => Ok(Attempt::Unauthorized),
-            Err(status) => Err(failure(&status)),
+            Err(status) => Err(failure(GrpcFailure::sort(status))),
         }
     }
 }
@@ -102,56 +102,29 @@ fn bulk_request(
     Ok(request)
 }
 
-/// How tonic describes an HTTP answer without `grpc-status`, which comes from a
-/// proxy before Lock rather than from Lock.
-const NO_GRPC_STATUS: &str = "grpc-status header missing, mapped from HTTP status code ";
-
-/// The same split as REST: what the network or a failing Lock may answer
-/// differently next time goes again, a refusal does not. `INTERNAL` is Lock's
-/// `500` and `UNKNOWN` its answer for an unmapped HTTP status.
-fn failure(status: &Status) -> PostBulkError {
-    match status.code() {
-        Code::Unavailable
-        | Code::Internal
-        | Code::Unknown
-        | Code::DeadlineExceeded
-        | Code::Cancelled
-        | Code::Aborted => match proxy_refusal(status) {
-            Some(http) => PostBulkError::Rejected {
-                status: RejectedStatus::Http(http),
-                error: None,
-                reason: None,
-            },
-            None => super::retryable(format!("gRPC {:?}: {}", status.code(), status.message())),
+/// TRACE's outcome for a sorted failure.
+fn failure(failure: GrpcFailure) -> PostBulkError {
+    match failure {
+        GrpcFailure::Retryable(status) => {
+            super::retryable(format!("gRPC {:?}: {}", status.code(), status.message()))
         },
-        // Lock sends no `OUT_OF_RANGE`: tonic gives it for an answer over the
-        // response cap, after Lock processed the request.
-        Code::OutOfRange => PostBulkError::UnreadableResponse {
+        GrpcFailure::ProxyRefusal(http) => PostBulkError::Rejected {
+            status: RejectedStatus::Http(http),
+            error: None,
+            reason: None,
+        },
+        GrpcFailure::ResponseTooLarge(status) => PostBulkError::UnreadableResponse {
             reason: format!("gRPC OutOfRange: {}", status.message()),
         },
-        code => {
+        GrpcFailure::Refused(status) => {
             let body = serde_json::from_str::<ErrorBody>(status.message()).ok();
             PostBulkError::Rejected {
-                status: RejectedStatus::Grpc(code),
+                status: RejectedStatus::Grpc(status.code()),
                 error: body.as_ref().map(|body| body.error.clone()),
                 reason: body.and_then(|body| body.reason),
             }
         },
     }
-}
-
-/// tonic reads a proxy's `400` as `INTERNAL` and a `413` or `405` as `UNKNOWN`,
-/// both retried; REST makes such a `4xx` final, and so does this. `408` and
-/// `429` still ask to repeat the request.
-fn proxy_refusal(status: &Status) -> Option<StatusCode> {
-    let code = status
-        .message()
-        .strip_prefix(NO_GRPC_STATUS)?
-        .parse()
-        .ok()?;
-    let http = StatusCode::from_u16(code).ok()?;
-    let repeat = http == StatusCode::REQUEST_TIMEOUT || http == StatusCode::TOO_MANY_REQUESTS;
-    (http.is_client_error() && !repeat).then_some(http)
 }
 
 fn results(acceptance: BulkAcceptance) -> Result<Vec<BulkItemResult>, PostBulkError> {
@@ -195,12 +168,13 @@ fn is_set(flag: ProblemFlag, flags: &TraceFlags) -> bool {
 #[cfg(test)]
 mod tests {
     use mockito::Server as HttpServer;
+    use reqwest::StatusCode;
     use serde_json::json;
     use tokio::net::TcpListener;
     use tokio::sync::mpsc;
     use tokio_stream::wrappers::TcpListenerStream;
-    use tonic::Response;
     use tonic::transport::Server;
+    use tonic::{Response, Status};
 
     use super::*;
     use crate::lock::register_client::TokenSource;
