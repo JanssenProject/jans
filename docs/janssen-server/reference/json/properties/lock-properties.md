@@ -14,6 +14,8 @@ tags:
 | auditPersistenceMode | Audit persistence mode | [Details](#auditpersistencemode) |
 | baseDN | Entry Base distinguished name (DN) that identifies the starting point of a search | [Details](#basedn) |
 | baseEndpoint | Lock base endpoint URL | [Details](#baseendpoint) |
+| batchIngestEnabled | Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record | [Details](#batchingestenabled) |
+| batchVerifyThreads | Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64 | [Details](#batchverifythreads) |
 | cedarlingConfiguration | Cedarling configuration | [Details](#cedarlingconfiguration) |
 | chainRegistrationMode | How producer chains come to exist: PRE_REGISTERED (admin API only) or FIRST_OBSERVED (a genesis record of an unregistered chain registers it); an unknown value is treated as PRE_REGISTERED | [Details](#chainregistrationmode) |
 | cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
@@ -53,6 +55,7 @@ tags:
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
 | policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag | [Details](#policymismatchgraceseconds) |
 | policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
+| postCommitCorrelationThreads | Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64 | [Details](#postcommitcorrelationthreads) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
@@ -100,6 +103,24 @@ tags:
 - Required: No
 
 - Default value: None
+
+
+## batchIngestEnabled
+
+- Description: Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record
+
+- Required: No
+
+- Default value: false
+
+
+## batchVerifyThreads
+
+- Description: Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64
+
+- Required: No
+
+- Default value: 0
 
 
 ## cedarlingConfiguration
@@ -451,6 +472,15 @@ tags:
 - Required: No
 
 - Default value: 30
+
+
+## postCommitCorrelationThreads
+
+- Description: Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64
+
+- Required: No
+
+- Default value: 0
 
 
 ## protectionMode

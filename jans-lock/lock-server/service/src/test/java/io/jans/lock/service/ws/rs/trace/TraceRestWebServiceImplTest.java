@@ -350,6 +350,185 @@ class TraceRestWebServiceImplTest extends BaseLockServiceTest {
 		verify(applicationAuditLogger).log(any(), eq(true));
 	}
 
+	// -- submitBulkRecords with traceConfiguration.batchIngestEnabled ----------
+
+	private static final String BATCH_BODY = "[{\"producer\":\"p-1\",\"record_id\":\"r-good\",\"m\":\"good\"},"
+			+ "{\"producer\":\"p-1\",\"record_id\":\"r-bad\",\"m\":\"bad\"},{\"m\":\"bad\"},7]";
+
+	private static final TraceValidationException BAD_ELEMENT = new TraceValidationException(
+			TraceErrorResponseType.INVALID_ASSERTION, "missing:trace.signed_at");
+
+	private String bulkResponseJson(Response response) throws Exception {
+		com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+		return mapper.writeValueAsString(response.getEntity());
+	}
+
+	private void stubSingleIngest() {
+		when(ingestionService.ingest(any(), eq(context))).thenAnswer(inv -> {
+			if (readAll(inv.getArgument(0)).contains("good")) {
+				return AcceptanceResult.fromStored(storedRecord(false), false);
+			}
+			throw BAD_ELEMENT;
+		});
+	}
+
+	private void stubBatchIngest() {
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+		when(ingestionService.ingestBatch(any(), eq(context))).thenAnswer(inv -> {
+			List<io.jans.lock.service.trace.ingest.BatchElement> elements = inv.getArgument(0);
+			List<io.jans.lock.service.trace.ingest.BatchOutcome> outcomes = new java.util.ArrayList<>();
+			for (io.jans.lock.service.trace.ingest.BatchElement element : elements) {
+				if (readAll(element.openStream()).contains("good")) {
+					outcomes.add(io.jans.lock.service.trace.ingest.BatchOutcome
+							.accepted(AcceptanceResult.fromStored(storedRecord(false), false)));
+				} else {
+					outcomes.add(io.jans.lock.service.trace.ingest.BatchOutcome.failed(BAD_ELEMENT));
+				}
+			}
+			return outcomes;
+		});
+	}
+
+	@Test
+	void testSubmitBulkRecords_BatchFlagOn_UsesIngestBatchOnceAndSameBody() throws Exception {
+		stubSingleIngest();
+		String loopBody = bulkResponseJson(impl.submitBulkRecords(body(BATCH_BODY), httpServletRequest, null));
+
+		traceConfiguration.setBatchIngestEnabled(true);
+		stubBatchIngest();
+		Response response = impl.submitBulkRecords(body(BATCH_BODY), httpServletRequest, null);
+
+		assertEquals(207, response.getStatus());
+		assertEquals(loopBody, bulkResponseJson(response));
+		verify(ingestionService, times(1)).ingestBatch(any(), eq(context));
+		verify(ingestionService, times(4)).ingest(any(), eq(context));
+		verify(applicationAuditLogger, times(2)).log(any(), eq(true));
+	}
+
+	@Test
+	void testSubmitBulkRecords_BatchFlagOn_PassesRawBytesAndIndexOfEachElement() throws Exception {
+		traceConfiguration.setBatchIngestEnabled(true);
+		stubBatchIngest();
+		String first = "{ \"producer\" : \"p-1\", \"m\":\"good\" }";
+		String multibyte = "{ \"note\" : \"caf\u00e9 \u65e5\u672c\", \"m\":\"good\" }";
+
+		impl.submitBulkRecords(body("[" + first + ",  " + multibyte + "]"), httpServletRequest, null);
+
+		ArgumentCaptor<List<io.jans.lock.service.trace.ingest.BatchElement>> captor = ArgumentCaptor.forClass(List.class);
+		verify(ingestionService).ingestBatch(captor.capture(), eq(context));
+		List<io.jans.lock.service.trace.ingest.BatchElement> elements = captor.getValue();
+		assertEquals(2, elements.size());
+		assertEquals(0, elements.get(0).getIndex());
+		assertEquals(1, elements.get(1).getIndex());
+		assertEquals(first, readAll(elements.get(0).openStream()));
+		assertEquals(multibyte, readAll(elements.get(1).openStream()));
+	}
+
+	@Test
+	void testSubmitRecord_BatchFlagOnAndAvailable_UsesIngestAsBatch() {
+		traceConfiguration.setBatchIngestEnabled(true);
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+		when(ingestionService.ingestAsBatch(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		Response response = impl.submitRecord(body(), httpServletRequest, null);
+
+		assertEquals(202, response.getStatus());
+		verify(ingestionService).ingestAsBatch(any(), eq(context));
+		verify(ingestionService, never()).ingest(any(), any());
+	}
+
+	@Test
+	void testSubmitRecord_BatchFlagOnButUnavailable_UsesIngest() {
+		traceConfiguration.setBatchIngestEnabled(true);
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(false);
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		Response response = impl.submitRecord(body(), httpServletRequest, null);
+
+		assertEquals(202, response.getStatus());
+		verify(ingestionService, never()).ingestAsBatch(any(), any());
+	}
+
+	@Test
+	void testSubmitRecord_BatchFlagOff_UsesIngest() {
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+		when(ingestionService.ingest(any(), eq(context)))
+				.thenReturn(AcceptanceResult.fromStored(storedRecord(false), false));
+
+		impl.submitRecord(body(), httpServletRequest, null);
+
+		verify(ingestionService, never()).ingestAsBatch(any(), any());
+		verify(ingestionService).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitRecord_BatchPathFailure_MapsLikeSinglePath() {
+		traceConfiguration.setBatchIngestEnabled(true);
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+		when(ingestionService.ingestAsBatch(any(), eq(context))).thenThrow(
+				new TraceConflictException(TraceErrorResponseType.RECORD_CONFLICT, "digest_mismatch"));
+
+		WebApplicationException ex = assertThrows(WebApplicationException.class,
+				() -> impl.submitRecord(body(), httpServletRequest, null));
+
+		assertEquals(409, ex.getResponse().getStatus());
+	}
+
+	@Test
+	void testSubmitBulkRecords_BatchFlagOffEvenIfStoreSupportsBatches_UsesLoop() {
+		stubSingleIngest();
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+
+		impl.submitBulkRecords(body(BATCH_BODY), httpServletRequest, null);
+
+		verify(ingestionService, never()).ingestBatch(any(), any());
+		verify(ingestionService, times(4)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_BatchFlagOnButBatchUnavailable_UsesLoop() {
+		traceConfiguration.setBatchIngestEnabled(true);
+		stubSingleIngest();
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(false);
+
+		impl.submitBulkRecords(body(BATCH_BODY), httpServletRequest, null);
+
+		verify(ingestionService, never()).ingestBatch(any(), any());
+		verify(ingestionService, times(4)).ingest(any(), eq(context));
+	}
+
+	@Test
+	void testSubmitBulkRecords_BatchFlagOn_RequestLevelFailuresUnchanged() {
+		traceConfiguration.setBatchIngestEnabled(true);
+		when(ingestionService.isBatchIngestAvailable()).thenReturn(true);
+
+		InputStream mixed = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]");
+		WebApplicationException mixedEx = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(mixed, httpServletRequest, null));
+		assertEquals(400, mixedEx.getResponse().getStatus());
+		@SuppressWarnings("unchecked")
+		Map<String, String> entity = (Map<String, String>) mixedEx.getResponse().getEntity();
+		assertEquals("bulk_mixed_producers", entity.get("reason"));
+
+		traceConfiguration.setMaxBulkRequestBytes(16);
+		InputStream tooLarge = body("[{\"a\":\"this element alone is already longer than 16 bytes\"}]");
+		WebApplicationException largeEx = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(tooLarge, httpServletRequest, null));
+		assertEquals(400, largeEx.getResponse().getStatus());
+
+		traceConfiguration.setMaxBulkRequestBytes(TraceConfiguration.DEFAULT_MAX_BULK_REQUEST_BYTES);
+		traceConfiguration.setMaxBulkRecords(1);
+		InputStream tooMany = body("[{\"a\":1},{\"b\":2}]");
+		WebApplicationException manyEx = assertThrows(WebApplicationException.class,
+				() -> impl.submitBulkRecords(tooMany, httpServletRequest, null));
+		assertEquals(400, manyEx.getResponse().getStatus());
+
+		verify(ingestionService, never()).ingestBatch(any(), any());
+		verify(ingestionService, never()).ingest(any(), any());
+	}
+
 	@Test
 	void testSubmitBulkRecords_MixedProducers_Returns400BeforeAnyIngest() {
 		InputStream requestBody = body("[{\"producer\":\"p-1\"},{\"producer\":\"p-2\"}]");

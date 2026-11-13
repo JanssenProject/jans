@@ -29,6 +29,9 @@ import io.jans.lock.service.trace.correlation.TraceCorrelationService;
 import io.jans.lock.trace.crypto.TraceCryptoProvider;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
+import io.jans.lock.service.trace.ingest.BatchElement;
+import io.jans.lock.service.trace.ingest.BatchOutcome;
+import io.jans.lock.service.trace.ingest.TraceIngestExecutors;
 import io.jans.lock.service.trace.ingest.TraceIngestionService;
 import io.jans.lock.service.trace.model.ChainIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -94,9 +97,18 @@ public final class TraceTestHarness {
 
 	private final TraceIngestionService ingestionService = new TraceIngestionService();
 
+	private final TraceIngestExecutors executors = new TraceIngestExecutors();
+
 	private final TraceRetrievalService retrievalService = new TraceRetrievalService();
 
 	private volatile long nowMs = DEFAULT_NOW_MS;
+
+	/** How {@link #ingest(String, TraceRequestContext)} submits a record. */
+	private enum IngestPath {
+		SINGLE, BULK_OF_ONE, SINGLE_AS_BATCH
+	}
+
+	private volatile IngestPath ingestPath = IngestPath.SINGLE;
 
 	/** Wires the harness over the {@code JAVA} provider. */
 	public TraceTestHarness() {
@@ -159,6 +171,10 @@ public final class TraceTestHarness {
 		setField(ingestionService, "receiptChain", receiptChain);
 		setField(ingestionService, "store", store);
 		setField(ingestionService, "traceKeys", traceKeys);
+		setField(ingestionService, "cryptoProvider", provider);
+		setField(executors, "log", LoggerFactory.getLogger(TraceIngestExecutors.class));
+		setField(executors, "appConfiguration", appConfiguration);
+		setField(ingestionService, "executors", executors);
 
 		setField(retrievalService, "traceStore", store);
 	}
@@ -182,8 +198,25 @@ public final class TraceTestHarness {
 		return ingestionService;
 	}
 
+	public TraceIngestExecutors executors() {
+		return executors;
+	}
+
+	/**
+	 * Stops the ingest pools after the work they already have is done, so post-commit correlation
+	 * scheduled by earlier calls is visible in the store. The next batch starts new pools.
+	 */
+	public void drainExecutors() {
+		executors.shutdown();
+	}
+
 	public TraceCorrelationService correlation() {
 		return correlation;
+	}
+
+	/** Replaces the policy store release check used by planning (default: no policy store served). */
+	public void setPolicyMismatchCheck(io.jans.lock.service.trace.correlation.PolicyMismatchCheck check) {
+		setField(correlation, "policyMismatchCheck", check);
 	}
 
 	public TraceReceiptChain receiptChain() {
@@ -280,8 +313,43 @@ public final class TraceTestHarness {
 
 	// -- ingestion / retrieval ------------------------------------------------------------------------
 
+	/**
+	 * Makes {@link #ingest(String, TraceRequestContext)} submit each record as a one-element batch
+	 * through {@code TraceIngestionService.ingestBatch}, so the existing scenarios run over the batch path.
+	 *
+	 * @return this harness
+	 */
+	public TraceTestHarness useBatchPath() {
+		this.ingestPath = IngestPath.BULK_OF_ONE;
+		return this;
+	}
+
+	/**
+	 * Makes {@link #ingest(String, TraceRequestContext)} submit each record through
+	 * {@code TraceIngestionService.ingestAsBatch}, the path of a single submission with batch ingest
+	 * enabled.
+	 *
+	 * @return this harness
+	 */
+	public TraceTestHarness useSingleAsBatchPath() {
+		this.ingestPath = IngestPath.SINGLE_AS_BATCH;
+		return this;
+	}
+
 	public AcceptanceResult ingest(String json, TraceRequestContext ctx) {
-		return ingestionService.ingest(body(json), ctx);
+		if (ingestPath == IngestPath.SINGLE) {
+			return ingestionService.ingest(body(json), ctx);
+		}
+		if (ingestPath == IngestPath.SINGLE_AS_BATCH) {
+			return ingestionService.ingestAsBatch(body(json), ctx);
+		}
+		BatchOutcome outcome = ingestionService
+				.ingestBatch(Collections.singletonList(new BatchElement(0, json.getBytes(StandardCharsets.UTF_8))), ctx)
+				.get(0);
+		if (!outcome.isAccepted()) {
+			throw outcome.getError();
+		}
+		return outcome.getResult();
 	}
 
 	public StoredTraceRecord getRecord(String domainId, String recordId, String producerIdOrNull) {

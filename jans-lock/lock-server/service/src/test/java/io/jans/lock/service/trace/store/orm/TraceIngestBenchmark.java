@@ -49,6 +49,8 @@ import io.jans.lock.service.trace.testkit.TraceRecordBuilder;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.testkit.TraceTestHarness;
 import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.service.trace.ingest.BatchElement;
+import io.jans.lock.service.trace.ingest.BatchOutcome;
 import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -79,7 +81,13 @@ import io.jans.util.security.StringEncrypter;
  * this many times slower than the first quarter, default off; it flags work which grows with the
  * receipt table, like {@code count(*)}), {@code lock.benchmark.timing} ({@code true} wraps the store in
  * {@link TimingTraceStore} and prints, after each scenario, the calls and time of every store method;
- * the totals go to the CSV as extra columns, empty when timing is off). Results are printed and appended to
+ * the totals go to the CSV as extra columns, empty when timing is off), {@code lock.benchmark.path}
+ * ({@code single}, the default: {@code ingest} per record; {@code single-as-batch}: {@code ingestAsBatch} per
+ * record, the single submission path with batch ingest enabled; {@code bulk}: {@code ingestBatch} with
+ * {@code lock.benchmark.bulk-size} records per call, default 100, each record timed as its share of the call),
+ * {@code lock.benchmark.verify-threads} and {@code lock.benchmark.post-commit-threads} (the
+ * {@code batchVerifyThreads} and {@code postCommitCorrelationThreads} settings, default 0).
+ * Results are printed and appended to
  * {@code target/benchmark/trace-ingest.csv}. All data uses a throw-away domain and is removed afterwards.
  *
  * @author Yuriy Movchan
@@ -91,7 +99,7 @@ class TraceIngestBenchmark {
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 
-	private static final String CSV_HEADER = "timestamp,chains,records_per_chain,total_records,seconds,records_per_s,first_quarter_per_s,last_quarter_per_s,p50_ms,p95_ms,store_calls_per_record,writes_per_record,reads_per_record";
+	private static final String CSV_HEADER = "timestamp,chains,records_per_chain,total_records,seconds,records_per_s,first_quarter_per_s,last_quarter_per_s,p50_ms,p95_ms,store_calls_per_record,writes_per_record,reads_per_record,path";
 
 	private static PersistenceEntryManager entryManager;
 
@@ -201,6 +209,13 @@ class TraceIngestBenchmark {
 			timingStore.set(wrapped);
 			return wrapped;
 		});
+		String path = ingestPath();
+		if (path.equals("single-as-batch")) {
+			harness.useSingleAsBatchPath();
+		}
+		int bulkSize = intProperty("lock.benchmark.bulk-size", 100);
+		harness.traceConfiguration().setBatchVerifyThreads(intProperty("lock.benchmark.verify-threads", 0));
+		harness.traceConfiguration().setPostCommitCorrelationThreads(intProperty("lock.benchmark.post-commit-threads", 0));
 
 		List<List<String>> chainJsons = new ArrayList<>();
 		for (int c = 0; c < chains; c++) {
@@ -223,6 +238,16 @@ class TraceIngestBenchmark {
 		for (List<String> jsons : chainJsons) {
 			futures.add(pool.submit(() -> {
 				long[] durationsNs = new long[jsons.size()];
+				if (path.equals("bulk")) {
+					for (int from = 0; from < jsons.size(); from += bulkSize) {
+						int to = Math.min(from + bulkSize, jsons.size());
+						long begin = System.nanoTime();
+						ingestBulk(harness, jsons.subList(from, to));
+						long share = (System.nanoTime() - begin) / (to - from);
+						Arrays.fill(durationsNs, from, to, share);
+					}
+					return durationsNs;
+				}
 				for (int i = 0; i < jsons.size(); i++) {
 					long begin = System.nanoTime();
 					harness.ingest(jsons.get(i), harness.ctx(domain));
@@ -237,8 +262,38 @@ class TraceIngestBenchmark {
 		}
 		long elapsedNs = System.nanoTime() - startNs;
 		pool.shutdown();
+		harness.drainExecutors();
 
 		return new Result(chains, records, elapsedNs, durations, timing ? timingStore.get().snapshot() : null);
+	}
+
+	private static String ingestPath() {
+		String path = System.getProperty("lock.benchmark.path", "single").trim();
+		if (!Arrays.asList("single", "single-as-batch", "bulk").contains(path)) {
+			throw new IllegalArgumentException("lock.benchmark.path must be single, single-as-batch or bulk: " + path);
+		}
+		return path;
+	}
+
+	private static String pathColumn() {
+		String path = ingestPath();
+		String column = path.equals("bulk") ? "bulk-" + intProperty("lock.benchmark.bulk-size", 100) : path;
+		int verifyThreads = intProperty("lock.benchmark.verify-threads", 0);
+		int postCommitThreads = intProperty("lock.benchmark.post-commit-threads", 0);
+		return verifyThreads + postCommitThreads == 0 ? column
+				: column + "-v" + verifyThreads + "-p" + postCommitThreads;
+	}
+
+	private static void ingestBulk(TraceTestHarness harness, List<String> jsons) {
+		List<BatchElement> elements = new ArrayList<>(jsons.size());
+		for (int i = 0; i < jsons.size(); i++) {
+			elements.add(new BatchElement(i, jsons.get(i).getBytes(StandardCharsets.UTF_8)));
+		}
+		for (BatchOutcome outcome : harness.ingestionService().ingestBatch(elements, harness.ctx(domain))) {
+			if (!outcome.isAccepted()) {
+				throw outcome.getError();
+			}
+		}
 	}
 
 	private static List<String> buildChain(KeyPair key, String producer, String kid, String instance, String chain, int count) {
@@ -258,9 +313,9 @@ class TraceIngestBenchmark {
 	}
 
 	private static void report(Result r) throws IOException {
-		String line = String.format(Locale.ROOT, "%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f,%s", Instant.now(), r.chains, r.records,
+		String line = String.format(Locale.ROOT, "%s,%d,%d,%d,%.2f,%.1f,%.1f,%.1f,%.2f,%.2f,%s,%s", Instant.now(), r.chains, r.records,
 				r.chains * r.records, r.elapsedNs / 1e9, r.recordsPerSecond(), r.firstQuarterRate(), r.lastQuarterRate(),
-				r.percentileMs(50), r.percentileMs(95), timingColumns(r));
+				r.percentileMs(50), r.percentileMs(95), timingColumns(r), pathColumn());
 		LOG.info("TRACE ingest benchmark: {}", line);
 		System.out.println("TRACE ingest benchmark [" + CSV_HEADER + "]\n  " + line);
 		if (r.timing != null) {

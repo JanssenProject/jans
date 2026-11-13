@@ -191,6 +191,16 @@ public class InMemoryTraceStore implements TraceStore {
 				.unmodifiableList(recordsByKey.values().stream().map(StoredTraceRecord::copy).collect(Collectors.toList()));
 	}
 
+	/**
+	 * @return a snapshot of every receipt row, ordered by domain and receipt sequence
+	 */
+	public List<TraceReceiptEntry> receiptSnapshot() {
+		return receiptsByKey.values().stream().map(InMemoryTraceStore::copyOf)
+				.sorted(Comparator.comparing(TraceReceiptEntry::getDomainId)
+						.thenComparingLong(TraceReceiptEntry::getReceiptSeq))
+				.collect(Collectors.toList());
+	}
+
 	// -- records --------------------------------------------------------------------------------
 
 	@Override
@@ -407,6 +417,11 @@ public class InMemoryTraceStore implements TraceStore {
 		ingestBatches.incrementAndGet();
 		if (failNextInsertIngestBatch.getAndSet(false)) {
 			throw new TraceStorageException("test_fail_next_insert_ingest_batch", "Forced test failure");
+		}
+		// a fault armed for the per-record writes also fails the atomic batch; it stays armed (not
+		// consumed) so the per-record fallback meets it, as it would on a store that is really failing
+		if (failNextInsertRecord.get() || failAfterNextInsertRecord.get() || failNextInsertReceipt.get()) {
+			throw new TraceStorageException("test_armed_single_write_fault", "Forced test failure");
 		}
 
 		Map<String, TraceReceiptEntry> receiptRows = new LinkedHashMap<>();

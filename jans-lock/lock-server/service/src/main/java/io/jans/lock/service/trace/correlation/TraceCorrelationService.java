@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -76,6 +77,8 @@ public class TraceCorrelationService {
 	@Inject
 	private PolicyMismatchCheck policyMismatchCheck;
 
+	private final PlanLookup storeLookup = position -> store.findRecordsByChainPosition(position);
+
 	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
 	private volatile String warnedChainRegistrationMode;
 
@@ -84,6 +87,17 @@ public class TraceCorrelationService {
 	 * or {@code invalid_genesis}
 	 */
 	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx) {
+		return plan(verified, ctx, storeLookup);
+	}
+
+	/**
+	 * Same as {@link #plan(VerifiedAssertion, TraceRequestContext)}, reading the existing records
+	 * from {@code lookup} instead of the store.
+	 *
+	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered}
+	 * or {@code invalid_genesis}
+	 */
+	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx, PlanLookup lookup) {
 		CorrelationInputs inputs = verified.getInputs();
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
@@ -94,32 +108,34 @@ public class TraceCorrelationService {
 		long policyJudgedAtMs = late ? inputs.getSignedAt() * 1000L : ctx.getReceivedAtMs();
 		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), policyJudgedAtMs);
 
-		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
-				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
-		long sequenceNumber = producerChain.getSequenceNumber();
-		ChainPosition position = new ChainPosition(chainIdentity, sequenceNumber);
+		ChainPosition position = positionOf(verified, ctx);
+		ChainIdentity chainIdentity = position.getChainIdentity();
+		long sequenceNumber = position.getSequenceNumber();
 
-		if (chainRegistrationMode() == ChainRegistrationMode.FIRST_OBSERVED) {
-			chainRegistry.requireRegisteredOrObserveGenesis(chainIdentity, sequenceNumber,
-					producerChain.getPrevRecordHash(), ctx.getClientId(), ctx.getReceivedAtMs());
-		} else {
-			chainRegistry.requireRegistered(chainIdentity);
+		if (!lookup.isChainConfirmed(chainIdentity)) {
+			if (chainRegistrationMode() == ChainRegistrationMode.FIRST_OBSERVED) {
+				chainRegistry.requireRegisteredOrObserveGenesis(chainIdentity, sequenceNumber,
+						producerChain.getPrevRecordHash(), ctx.getClientId(), ctx.getReceivedAtMs());
+			} else {
+				chainRegistry.requireRegistered(chainIdentity);
+			}
+			lookup.confirmChain(chainIdentity);
 		}
 		chainRegistry.checkGenesis(sequenceNumber, producerChain.getPrevRecordHash());
 
 		List<StoredTraceRecord> predecessors = sequenceNumber > 1
-				? store.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber - 1))
+				? lookup.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber - 1))
 				: Collections.emptyList();
 		boolean coverageGap = ProducerChainRules.isCoverageGap(sequenceNumber, predecessors);
 		boolean chainLinkFailure = ProducerChainRules.isChainLinkFailure(sequenceNumber, predecessors,
 				producerChain.getPrevRecordHash());
 
-		List<StoredTraceRecord> rowsAtPosition = store.findRecordsByChainPosition(position);
+		List<StoredTraceRecord> rowsAtPosition = lookup.findRecordsByChainPosition(position);
 		List<RecordIdentity> equivocationPeers = ProducerChainRules.equivocationPeers(verified.getIdentity(),
 				rowsAtPosition);
 		boolean equivocation = !equivocationPeers.isEmpty();
 
-		List<StoredTraceRecord> successors = store
+		List<StoredTraceRecord> successors = lookup
 				.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber + 1));
 
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
@@ -138,6 +154,16 @@ public class TraceCorrelationService {
 
 		return new CorrelationPlan(flags, position, execution, tokenKeys, equivocationPeers,
 				successors, inputs.getWarnings());
+	}
+
+	/**
+	 * @return the producer-chain position the record claims in the request's evidence domain
+	 */
+	public ChainPosition positionOf(VerifiedAssertion verified, TraceRequestContext ctx) {
+		ParsedAssertion.ProducerChain producerChain = verified.getInputs().getChainPosition();
+		ChainIdentity chainIdentity = new ChainIdentity(ctx.getEvidenceDomainId(), producerChain.getProducerId(),
+				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
+		return new ChainPosition(chainIdentity, producerChain.getSequenceNumber());
 	}
 
 	private ChainRegistrationMode chainRegistrationMode() {
@@ -187,6 +213,19 @@ public class TraceCorrelationService {
 	 * propagate.
 	 */
 	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan) {
+		afterInsert(inserted, plan, null);
+	}
+
+	/**
+	 * Same as {@link #afterInsert(StoredTraceRecord, CorrelationPlan)} with the rows at the insert's
+	 * chain position already read by the caller (one {@code findRecordsByChainPositions} for a whole
+	 * batch, after its commit).
+	 *
+	 * @param positionRows rows per chain position as read after the insert; a position absent from
+	 *                     the map counts as empty. {@code null} makes this method read the position itself.
+	 */
+	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan,
+			Map<ChainPosition, List<StoredTraceRecord>> positionRows) {
 		for (StoredTraceRecord successor : plan.getSuccessors()) {
 			updateSuccessor(inserted, successor.getIdentity());
 		}
@@ -194,7 +233,8 @@ public class TraceCorrelationService {
 		// equivocation is never cleared, so rows already flagged need no per-row re-read; this keeps
 		// the work for one insert from growing with the number of records already at the position
 		Set<RecordIdentity> unseenPlanPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
-		List<StoredTraceRecord> rowsAtPosition = readPosition(inserted, plan);
+		List<StoredTraceRecord> rowsAtPosition = positionRows == null ? readPosition(inserted, plan)
+				: positionRows.getOrDefault(plan.getPosition(), Collections.<StoredTraceRecord>emptyList());
 		boolean newPeerFound = false;
 		boolean insertedFlagged = inserted.getFlags() != null && inserted.getFlags().isEquivocation();
 		for (StoredTraceRecord row : rowsAtPosition) {

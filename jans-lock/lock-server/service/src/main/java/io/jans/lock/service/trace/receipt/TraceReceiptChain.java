@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 
@@ -58,10 +59,20 @@ import jakarta.inject.Inject;
  * depend on the state, so the chain stays valid whatever an unsettled position becomes.</li>
  * </ul>
  *
- * <p>{@link #claim} is the only method that allocates a new sequence; {@link #commit} and
- * {@link #voidClaim} settle an already-allocated one and never throw: a store failure is logged
- * at WARN, reported as {@link ReceiptSettlement#FAILED} and left for
+ * <p>{@link #claim} and {@link #runWithRange} are the only methods that allocate new sequences;
+ * {@link #commit} and {@link #voidClaim} settle an already-allocated one and never throw: a store
+ * failure is logged at WARN, reported as {@link ReceiptSettlement#FAILED} and left for
  * {@code TraceReceiptRepairTimer} to resolve later.
+ *
+ * <p>Batch path: {@link #runWithRange} reserves a contiguous run under the per-domain lock held
+ * across the one database transaction that stores the receipts and the records, so the lock does
+ * carry same-node ordering there; across nodes the unique key of the receipt row still decides, and
+ * a collision retries the whole run. Batch receipts are inserted {@code COMMITTED} in the same
+ * transaction as their records and are never {@code PENDING}. Therefore the ingest fence
+ * ({@link #fenceMs}, {@link #isFenceExpired}) does not apply to them, {@code TraceReceiptRepairTimer}
+ * (which only looks at {@code PENDING}) cannot void them, and the late-insert-after-{@code VOID}
+ * case cannot occur. {@link #verifyDomain} walks stored rows and needs no change for a chain that
+ * mixes single claims and batch rows.
  *
  * @author Yuriy Movchan
  */
@@ -103,23 +114,9 @@ public class TraceReceiptChain {
 				Optional<ReceiptHead> head = store.findReceiptHead(domainId);
 				long seq = head.map(h -> h.getReceiptSequence() + 1).orElse(1L);
 				String prevReceiptHash = head.map(ReceiptHead::getReceiptHash).orElse(TraceConstants.ZERO_HASH);
-				String receiptHash = cryptoProvider.receiptHash(domainId, seq, receivedAtMs, producerId, recordId,
-						contentDigest, prevReceiptHash);
-
-				TraceReceiptEntry row = new TraceReceiptEntry();
-				row.setDomainId(domainId);
-				row.setReceiptSeq(seq);
-				row.setReceivedAt(new Date(receivedAtMs));
-				row.setReceivedAtMs(receivedAtMs);
-				row.setProducerId(producerId);
-				row.setRecordId(recordId);
-				row.setRecordKey(recordKey);
-				row.setContentDigest(contentDigest);
-				row.setPrevReceiptHash(prevReceiptHash);
-				row.setReceiptHash(receiptHash);
-				row.setReceiptStateEnum(TraceReceiptState.PENDING);
-				row.setNodeId(nodeId);
-				row.setCreationDate(new Date(receivedAtMs));
+				TraceReceiptEntry row = buildRow(domainId, seq, producerId, recordId, recordKey, contentDigest,
+						receivedAtMs, prevReceiptHash, TraceReceiptState.PENDING, nodeId);
+				String receiptHash = row.getReceiptHash();
 
 				try {
 					store.insertReceipt(row);
@@ -133,6 +130,125 @@ public class TraceReceiptChain {
 		} finally {
 			lock.unlock();
 		}
+	}
+
+	/**
+	 * The commit step of {@link #runWithRange}: stores the run's receipt rows together with the record
+	 * rows in one atomic write (for example {@link TraceStore#insertIngestBatch}). The run carries the
+	 * attempt number ({@link ReceiptRun#getAttempt()}).
+	 */
+	@FunctionalInterface
+	public interface RangeAction {
+
+		/**
+		 * @throws DuplicateEntryException a receipt position or a record identity already exists and
+		 *                                  nothing was stored; {@code runWithRange} retries
+		 */
+		void commit(ReceiptRun run) throws DuplicateEntryException;
+
+	}
+
+	/** Same as {@link #runWithRange(String, List, String, RangeAction, Supplier)} without a re-plan hook. */
+	public ReceiptRun runWithRange(String domainId, List<ReceiptBatchItem> items, String nodeId, RangeAction action) {
+		return runWithRange(domainId, items, nodeId, action, null);
+	}
+
+	/**
+	 * Reserves the contiguous positions {@code head+1 ... head+N} of {@code domainId}'s chain for
+	 * {@code items} and commits them through {@code action}. Contract:
+	 * <ul>
+	 * <li>The per-domain lock is taken before the head is read and released after {@code action}
+	 * returns or fails. Do verification, parsing and correlation before calling this method.</li>
+	 * <li>The head is read once per attempt, never cached. Row k is hash-chained to row k-1; the first
+	 * row binds the head's hash or {@link TraceConstants#ZERO_HASH}. Rows are {@code COMMITTED} with
+	 * {@code nodeId} set and computed exactly as {@link #claim} computes them.</li>
+	 * <li>{@link DuplicateEntryException} from {@code action} means another writer took a position or
+	 * a record identity: nothing was stored, so the whole run is recomputed from a fresh head and
+	 * retried, up to {@code receiptAllocationRetryLimit} attempts in total, then
+	 * {@link TraceStorageException} {@code receipt_allocation_exhausted}.</li>
+	 * <li>{@code replan}, when not {@code null}, runs under the lock after each duplicate and before
+	 * the next attempt, only if another attempt remains. It returns the items for that attempt,
+	 * possibly fewer. An empty list ends the run with no writes. Keep it cheap: the lock is held.
+	 * Without {@code replan} the same items are retried.</li>
+	 * <li>Any other exception from {@code action} (or from {@code replan}) propagates unchanged and
+	 * is not retried. The caller decides the fallback.</li>
+	 * </ul>
+	 * Batch rows are never {@code PENDING}: see the class Javadoc.
+	 *
+	 * @return the run that {@code action} committed, or an empty run if {@code items} was or became empty
+	 * @throws TraceStorageException {@code receipt_allocation_exhausted}, or a store failure while
+	 *                                reading the head
+	 */
+	public ReceiptRun runWithRange(String domainId, List<ReceiptBatchItem> items, String nodeId, RangeAction action,
+			Supplier<List<ReceiptBatchItem>> replan) {
+		if (items.isEmpty()) {
+			return ReceiptRun.empty(domainId, 0);
+		}
+		ReentrantLock lock = domainLocks.computeIfAbsent(domainId, d -> new ReentrantLock());
+		int retryLimit = appConfiguration.getTraceConfiguration().getReceiptAllocationRetryLimit();
+
+		lock.lock();
+		try {
+			List<ReceiptBatchItem> current = items;
+			for (int attempt = 0; attempt < retryLimit; attempt++) {
+				Optional<ReceiptHead> head = store.findReceiptHead(domainId);
+				long seq = head.map(h -> h.getReceiptSequence() + 1).orElse(1L);
+				String prevReceiptHash = head.map(ReceiptHead::getReceiptHash).orElse(TraceConstants.ZERO_HASH);
+
+				List<TraceReceiptEntry> rows = new ArrayList<>(current.size());
+				for (ReceiptBatchItem item : current) {
+					TraceReceiptEntry row = buildRow(domainId, seq, item.getProducerId(), item.getRecordId(),
+							item.getRecordKey(), item.getContentDigest(), item.getReceivedAtMs(), prevReceiptHash,
+							TraceReceiptState.COMMITTED, nodeId);
+					rows.add(row);
+					seq++;
+					prevReceiptHash = row.getReceiptHash();
+				}
+
+				ReceiptRun run = new ReceiptRun(domainId, attempt, current, rows);
+				try {
+					action.commit(run);
+					return run;
+				} catch (DuplicateEntryException ex) {
+					log.debug("receipt range contended: domain={}, firstSeq={}, size={}, attempt={}", domainId,
+							rows.get(0).getReceiptSeq(), rows.size(), attempt);
+				}
+
+				if (attempt + 1 < retryLimit && replan != null) {
+					current = replan.get();
+					if (current == null || current.isEmpty()) {
+						return ReceiptRun.empty(domainId, attempt + 1);
+					}
+				}
+			}
+			throw new TraceStorageException("receipt_allocation_exhausted",
+					"Exhausted receipt allocation retries for domain " + domainId);
+		} finally {
+			lock.unlock();
+		}
+	}
+
+	private TraceReceiptEntry buildRow(String domainId, long seq, String producerId, String recordId,
+			String recordKey, String contentDigest, long receivedAtMs, String prevReceiptHash,
+			TraceReceiptState state, String nodeId) {
+		String receiptHash = cryptoProvider.receiptHash(domainId, seq, receivedAtMs, producerId, recordId,
+				contentDigest, prevReceiptHash);
+
+		TraceReceiptEntry row = new TraceReceiptEntry();
+		row.setDomainId(domainId);
+		row.setReceiptSeq(seq);
+		row.setReceivedAt(new Date(receivedAtMs));
+		row.setReceivedAtMs(receivedAtMs);
+		row.setProducerId(producerId);
+		row.setRecordId(recordId);
+		row.setRecordKey(recordKey);
+		row.setContentDigest(contentDigest);
+		row.setPrevReceiptHash(prevReceiptHash);
+		row.setReceiptHash(receiptHash);
+		row.setReceiptStateEnum(state);
+		row.setNodeId(nodeId);
+		row.setCreationDate(new Date(receivedAtMs));
+		return row;
 	}
 
 	/**

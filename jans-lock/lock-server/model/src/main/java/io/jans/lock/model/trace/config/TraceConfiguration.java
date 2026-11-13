@@ -40,6 +40,11 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_BULK_REQUEST_BYTES = 4_194_304;
     public static final String DEFAULT_CHAIN_REGISTRATION_MODE = "PRE_REGISTERED";
     public static final String DEFAULT_CRYPTO_PROVIDER = "JAVA";
+    public static final boolean DEFAULT_BATCH_INGEST_ENABLED = false;
+    public static final int DEFAULT_BATCH_VERIFY_THREADS = 0;
+    public static final int DEFAULT_POST_COMMIT_CORRELATION_THREADS = 0;
+    /** Ceiling the two ingest thread counts clamp to regardless of configuration. */
+    public static final int HARD_MAX_INGEST_THREADS = 64;
     /** Ceiling {@link #getMaxBulkRequestBytes()} clamps to regardless of configuration, so a
      *  careless value can never make the bulk endpoint buffer an unbounded amount of memory per
      *  request (CWE-770). Not itself configurable. */
@@ -100,6 +105,18 @@ public class TraceConfiguration {
     @DocProperty(description = "Maximum retries when allocating a receipt-chain sequence number", defaultValue = "8")
     @Schema(description = "Maximum retries when allocating a receipt-chain sequence number")
     private int receiptAllocationRetryLimit = DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT;
+
+    @DocProperty(description = "Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record", defaultValue = "false")
+    @Schema(description = "Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record")
+    private boolean batchIngestEnabled = DEFAULT_BATCH_INGEST_ENABLED;
+
+    @DocProperty(description = "Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64", defaultValue = "0")
+    @Schema(description = "Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64")
+    private int batchVerifyThreads = DEFAULT_BATCH_VERIFY_THREADS;
+
+    @DocProperty(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64", defaultValue = "0")
+    @Schema(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64")
+    private int postCommitCorrelationThreads = DEFAULT_POST_COMMIT_CORRELATION_THREADS;
 
     @DocProperty(description = "Maximum retries when a correlation neighbor update hits a version conflict", defaultValue = "3")
     @Schema(description = "Maximum retries when a correlation neighbor update hits a version conflict")
@@ -241,6 +258,34 @@ public class TraceConfiguration {
         this.receiptAllocationRetryLimit = receiptAllocationRetryLimit;
     }
 
+    public boolean isBatchIngestEnabled() {
+        return batchIngestEnabled;
+    }
+
+    public void setBatchIngestEnabled(boolean batchIngestEnabled) {
+        this.batchIngestEnabled = batchIngestEnabled;
+    }
+
+    public int getBatchVerifyThreads() {
+        return clampThreads(batchVerifyThreads);
+    }
+
+    public void setBatchVerifyThreads(int batchVerifyThreads) {
+        this.batchVerifyThreads = batchVerifyThreads;
+    }
+
+    public int getPostCommitCorrelationThreads() {
+        return clampThreads(postCommitCorrelationThreads);
+    }
+
+    public void setPostCommitCorrelationThreads(int postCommitCorrelationThreads) {
+        this.postCommitCorrelationThreads = postCommitCorrelationThreads;
+    }
+
+    private static int clampThreads(int threads) {
+        return Math.max(0, Math.min(threads, HARD_MAX_INGEST_THREADS));
+    }
+
     public int getCorrelationRetryLimit() {
         return correlationRetryLimit > 0 ? correlationRetryLimit : DEFAULT_CORRELATION_RETRY_LIMIT;
     }
@@ -320,6 +365,9 @@ public class TraceConfiguration {
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
+                + ", batchIngestEnabled=" + isBatchIngestEnabled()
+                + ", batchVerifyThreads=" + getBatchVerifyThreads()
+                + ", postCommitCorrelationThreads=" + getPostCommitCorrelationThreads()
                 + ", correlationRetryLimit=" + getCorrelationRetryLimit()
                 + ", receiptRepairIntervalSeconds=" + getReceiptRepairIntervalSeconds()
                 + ", pendingReceiptTimeoutSeconds=" + getPendingReceiptTimeoutSeconds() + ", maxBulkRecords="
