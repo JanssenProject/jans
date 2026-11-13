@@ -184,7 +184,6 @@ class Upgrade:
 
         if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
             self.update_lock_dynamic_config()
-            self.update_lock_client_scopes()
             self.update_lock_error_config()
             self.update_lock_static_config()
             self.update_lock_policy_config()
@@ -216,47 +215,6 @@ class Upgrade:
             entry.attrs["jansId"]: entry.attrs.get("dn") or entry.id
             for entry in entries
         }
-
-    def update_lock_client_scopes(self):
-        kwargs = {"table_name": "jansClnt"}
-        client_id = self.manager.config.get("lock_client_id")
-        id_ = doc_id_from_dn(f"inum={client_id},ou=clients,o=jans")
-
-        entry = self.backend.get_entry(id_, **kwargs)
-
-        if not entry:
-            return
-
-        if not self.backend.client.use_simple_json:
-            client_scopes = entry.attrs["jansScope"]["v"]
-        else:
-            client_scopes = entry.attrs.get("jansScope") or []
-
-        if not isinstance(client_scopes, list):
-            client_scopes = [client_scopes]
-
-        # all scopes mapping from persistence
-        all_scopes = self.get_all_scopes()
-
-        # all potential scopes for client
-        new_client_scopes = []
-
-        # extract config_api scopes within range of jansId defined in swagger
-        swagger = parse_lock_swagger_file()
-        lock_jans_ids = list(swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"].keys())
-        lock_scopes = list({
-            dn for jid, dn in all_scopes.items()
-            if jid in lock_jans_ids
-        })
-        new_client_scopes += lock_scopes
-
-        # find missing scopes from the client
-        if diff := list(set(new_client_scopes).difference(client_scopes)):
-            if not self.backend.client.use_simple_json:
-                entry.attrs["jansScope"]["v"] = client_scopes + diff
-            else:
-                entry.attrs["jansScope"] = client_scopes + diff
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_lock_error_config(self):
         kwargs = {"table_name": "jansAppConf"}
