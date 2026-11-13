@@ -158,6 +158,13 @@ paths:
                     }
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/data.readonly
+      - oauth2:
+        - https://jans.io/oauth/config/health.admin
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /api/v1/health/service-status:
     get:
       tags:

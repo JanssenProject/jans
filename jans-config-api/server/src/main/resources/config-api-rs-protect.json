@@ -3846,6 +3846,37 @@
       ]
     },
     {
+      "path": "/jans-config-api/api/v1/health/server-stat",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.90",
+              "name": "https://jans.io/oauth/config/data.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.05.30",
+              "name": "https://jans.io/oauth/config/health.admin"
+            },
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            },
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "path": "/jans-config-api/lock/lockConfig",
       "conditions": [
         {

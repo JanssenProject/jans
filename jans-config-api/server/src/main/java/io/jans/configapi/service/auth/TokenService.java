@@ -16,6 +16,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,9 @@ public class TokenService {
 
     @Inject
     StaticConfiguration staticConfiguration;
+
+    @Inject
+    TokenStatusListService tokenStatusListService;
 
     public String getDnForTokenEntity(String tknCde) {
         String orgDn = organizationService.getDnForOrganization();
@@ -122,15 +126,16 @@ public class TokenService {
             return tokens;
         }
         Filter ssnIdFilter = Filter.createEqualityFilter("ssnId", sessionDn);
-        Filter searchFilter = Filter.createANDFilter(ssnIdFilter);
+        Filter searchFilter = ssnIdFilter;
         if (tokenTypeList != null && tokenTypeList.length > 0) {
-            searchFilter = Filter.createANDFilter(Filter.createANDFilter(ssnIdFilter),
-                    Filter.createSubstringFilter("tknTyp", null, tokenTypeList, null));
+            Filter[] tokenTypeFilters = Arrays.stream(tokenTypeList)
+                    .map(tokenType -> Filter.createEqualityFilter("tknTyp", tokenType)).toArray(Filter[]::new);
+            searchFilter = Filter.createANDFilter(ssnIdFilter, Filter.createORFilter(tokenTypeFilters));
         }
 
-        logger.info("Fileter for token sessionDn:{}, tokenTypeList:{} is:{}", sessionDn, tokenTypeList, searchFilter);
+        logger.info("Filter for token sessionDn:{}, tokenTypeList:{} is:{}", sessionDn, tokenTypeList, searchFilter);
         tokens = persistenceEntryManager.findEntries(getDnForTokenEntity(null), TokenEntity.class, searchFilter);
-        logger.debug("Token for session sessionDn:{} are tokens:{}", sessionDn, tokens);
+        logger.debug("Token count for session sessionDn:{} is:{}", sessionDn, tokens != null ? tokens.size() : 0);
         return tokens;
     }
 
@@ -140,12 +145,19 @@ public class TokenService {
         }
 
         TokenEntity tokenEntity = this.getTokenEntityByCode(tknCde);
-        logger.debug("Token to be revoked identified by tknCde:{} is:{}", tokenEntity, tknCde);
+        logger.debug("Token to be revoked identified by tknCde:{} found:{}", escapeLog(tknCde), tokenEntity != null);
 
         if (tokenEntity == null) {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);
         }
 
+        // removal is the primary revocation, so it must not wait on the status list
+        boolean statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
+        logger.debug("Token:{} invalidate status:{}", escapeLog(tknCde), statusInvalidated);
+        if (!statusInvalidated) {
+            throw new InternalServerErrorException(
+                    "Token removed but its status list entry could not be invalidated - " + tknCde);
+        }
         persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
     }
 

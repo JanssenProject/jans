@@ -71,7 +71,7 @@ public class JansResetService extends ResetService{
 
         User user = getUser(MAIL, email);
         boolean local = user != null;
-        LogUtils.log("There is % local account for %", local ? "a" : "no", email);
+        LogUtils.log("There is % local account for %", local ? "a" : "no", sanitizeForLog(email));
     
         if (local) {            
             String uid = getSingleValuedAttr(user, UID);
@@ -134,8 +134,8 @@ public class JansResetService extends ResetService{
     public String sendEmail(String to) {
         String userLang = null;
         User user = getUser(MAIL, to);
-        LogUtils.log("User is: %", user.getUserId());
         if (user != null) {
+            LogUtils.log("User is: %", user.getUserId());
             userLang = getSingleValuedAttr(user, LANG);
             if (userLang == null || userLang.isBlank()) {
                 userLang = getSingleValuedAttr(user, LOCALE);
@@ -159,18 +159,27 @@ public class JansResetService extends ResetService{
 
         String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4); 
 
-        SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
-        String from = smtpConfiguration.getFromEmailAddress();
+        try {
+            SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
+            String from = smtpConfiguration.getFromEmailAddress();
 
-        MailService mailService = CdiUtil.bean(MailService.class);
-        if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
-            LogUtils.log("E-mail delivery succeeded");
-            return otp;
+            MailService mailService = CdiUtil.bean(MailService.class);
+            if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
+                LogUtils.log("E-mail delivery succeeded");
+                return otp;
+            }
+            LogUtils.log("E-mail delivery failed, check jans-auth logs");
+        } catch (Exception e) {
+            LogUtils.log("E-mail delivery failed: %", e.getMessage());
         }
 
-        LogUtils.log("E-mail delivery failed, check jans-auth logs");
-        return null;
+        // Unguessable code, like the unknown-mail path, so failures neither reveal accounts nor match an absent passcode.
+        return UUID.randomUUID().toString();
     } 
+
+    private static String sanitizeForLog(String value) {
+        return value == null ? null : value.replaceAll("[\\r\\n]", "_");
+    }
 
     private SmtpConfiguration getSmtpConfiguration() {
         ConfigurationService configurationService = CdiUtil.bean(ConfigurationService.class);

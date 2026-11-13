@@ -10,6 +10,8 @@ public abstract class PasswordService {
 
     public abstract String lockAccount(String username);
 
+    public abstract String getAuthenticatedUserId();
+
     public static PasswordService getInstance(HashMap config) {
         return new JansPasswordService(config);
     }

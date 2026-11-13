@@ -11,6 +11,7 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.model.configuration.ObjectDetails;
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AuthUtil;
 
 import jakarta.annotation.Priority;
@@ -19,16 +20,21 @@ import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 @Interceptor
 @RequestAuditInterceptor
@@ -37,6 +43,8 @@ public class AuditLogInterceptor {
 
     private static final Logger LOG = LogManager.getLogger(AuditLogInterceptor.class);
     private static final Logger AUDIT_LOG = LogManager.getLogger("audit");
+    private static final List<String> SENSITIVE_MARKERS = List.of("PASSWORD", "SECRET", "BEARER ",
+            "REGISTRATIONACCESSTOKEN", "AUTHORIZATIONTOKEN", "ACCESS_TOKEN", "REFRESH_TOKEN");
 
     @Inject
     AuthUtil authUtil;
@@ -69,13 +77,16 @@ public class AuditLogInterceptor {
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreHttpMethod(method, auditLogConf)) {
 
-                // Request audit
+                // Actor comes from the validated token; caller-supplied headers are recorded as unverified labels
+                String subject = getRequestAttribute(request, ApiConstants.AUTHENTICATED_SUBJECT_ATTRIBUTE);
+                String clientId = getRequestAttribute(request, ApiConstants.AUTHENTICATED_CLIENT_ATTRIBUTE);
                 String client = httpHeaders.getHeaderString("jans-client");
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
                 // Log request without data
-                AUDIT_LOG.error("User:{} {} {} using client:{}", userInum, getAction(method),
-                        getResource(uriInfo.getPath()), client);
+                AUDIT_LOG.error("User:{} {} {} using client:{} (unverified User-inum:{}, jans-client:{})",
+                        escapeLog(subject), getAction(method), escapeLog(getResource(uriInfo.getPath())),
+                        escapeLog(clientId), escapeLog(userInum), escapeLog(client));
 
                 if (auditLogConf.isLogData()) {
                     // Log request data
@@ -112,17 +123,33 @@ public class AuditLogInterceptor {
                         propertyValue, clazz, clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                if (obj != null && !obj.toString().toUpperCase().contains("PASSWORD")
-                        && !obj.toString().toUpperCase().contains("SECRET")) {
-               
-
-                    LOG.trace("ignoreObject(propertyName, obj, auditLogConf):{} ",
-                            ignoreObject(propertyName, obj, auditLogConf));
-
-                    AUDIT_LOG.error("{}:{}", propertyName, obj);
+                if (obj != null && !isAuthorizationParameter(parameters[i]) && !isTokenCodeParameter(parameters[i])
+                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)) {
+                    AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
                 }
             }
         }
+    }
+
+    private String getRequestAttribute(HttpServletRequest request, String name) {
+        Object value = request != null ? request.getAttribute(name) : null;
+        return value != null ? value.toString() : null;
+    }
+
+    private boolean isAuthorizationParameter(Parameter parameter) {
+        HeaderParam headerParam = parameter.getAnnotation(HeaderParam.class);
+        return HttpHeaders.AUTHORIZATION.equalsIgnoreCase(parameter.getName())
+                || (headerParam != null && HttpHeaders.AUTHORIZATION.equalsIgnoreCase(headerParam.value()));
+    }
+
+    private boolean isTokenCodeParameter(Parameter parameter) {
+        PathParam pathParam = parameter.getAnnotation(PathParam.class);
+        return pathParam != null && ApiConstants.TOKEN_CODE.equals(pathParam.value());
+    }
+
+    private boolean containsSensitiveData(Object obj) {
+        String value = obj.toString().toUpperCase();
+        return SENSITIVE_MARKERS.stream().anyMatch(value::contains);
     }
 
     private AuditLogConf getAuditLogConf() {
@@ -157,8 +184,7 @@ public class AuditLogInterceptor {
     }
 
     private boolean ignoreObject(String objectName, Object objectValue, AuditLogConf auditLogConf) {
-        LOG.trace("Checking if object to be ignored - objectName:{}, objectValue:{}, auditLogConf:{}", objectName,
-                objectValue, auditLogConf);
+        LOG.trace("Checking if object to be ignored - objectName:{}, auditLogConf:{}", objectName, auditLogConf);
 
         if (StringUtils.isBlank(objectName) || auditLogConf == null || auditLogConf.getIgnoreObjectMapping() == null
                 || auditLogConf.getIgnoreObjectMapping().isEmpty()) {
@@ -171,10 +197,7 @@ public class AuditLogInterceptor {
         if (objectDetails == null) {
             return false;
         }
-        LOG.trace(
-                "objectName:{}, objectValue:{}, objectDetails:{}, objectDetails.getText():{}, objectDetails.getText().contains(objectValue.toString()):{}",
-                objectName, objectValue, objectDetails, objectDetails.getText(),
-                objectDetails.getText().contains(objectValue.toString()));
+        LOG.trace("objectName:{}, objectDetails:{}", objectName, objectDetails);
 
         if (objectName.equalsIgnoreCase(objectDetails.getName())) {
 
@@ -231,8 +254,7 @@ public class AuditLogInterceptor {
             LOG.debug("inputStream.available():{}", inputStream.available());
             if (inputStream.available() > 0) {
                 byte[] requestEntity = inputStream.readAllBytes();
-                StringBuilder stringBuilder = new StringBuilder(new String(requestEntity)).append("\n");
-                LOG.debug(stringBuilder);
+                LOG.debug("Request entity size:{}", requestEntity.length);
             }
 
         } catch (Exception ex) {

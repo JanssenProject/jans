@@ -126,6 +126,11 @@ public class SessionResource extends ConfigBaseResource {
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
+        // persistence treats a non-positive count as unlimited
+        if (limit < 1) {
+            throwBadRequestException("Search size must be a positive number");
+        }
+
         SearchRequest searchReq = createSearchRequest(sessionService.getDnForSession(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, SessionId.class);
 

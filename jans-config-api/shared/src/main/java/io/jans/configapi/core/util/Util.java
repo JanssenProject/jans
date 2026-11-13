@@ -13,6 +13,7 @@ import io.jans.orm.annotation.AttributesList;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -57,12 +58,12 @@ public class Util {
         if (!str.contains(tokenizer)) {
 
             list.add(str);
-            log.trace(" Not tokenized string - list:{}", list);
+            log.trace(" Not tokenized string - list:{}", escapeLog(list));
             return list;
         }
 
-        log.info("final tokenized list:{}", Collections.list(new StringTokenizer(str, tokenizer)).stream()
-                .map(token -> (String) token).collect(Collectors.toList()));
+        log.info("final tokenized list:{}", escapeLog(Collections.list(new StringTokenizer(str, tokenizer)).stream()
+                .map(token -> (String) token).collect(Collectors.toList())));
 
         return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
@@ -84,7 +85,7 @@ public class Util {
         log.trace("getTokens(str, tokenizer):{}", getTokens(str, tokenizer));
 
         List<String> fieldValueList = getTokens(str, tokenizer);
-        log.debug("fieldValueList:{}", fieldValueList);
+        log.debug("fieldValueList:{}", escapeLog(fieldValueList));
 
         if (fieldValueList == null || fieldValueList.isEmpty()) {
             return fieldValueMap;
@@ -93,19 +94,19 @@ public class Util {
         for (String data : fieldValueList) {
             String[] result = data.split(fieldValueSeparator);
 
-            log.debug("fieldValueSeparator:{}, result:{}", fieldValueSeparator, result);
+            log.debug("fieldValueSeparator:{}, result:{}", escapeLog(fieldValueSeparator), escapeLog(Arrays.toString(result)));
             if (result != null && result.length > 0) {
                 String fieldName = result[0];
                 String value = null;
                 if (result.length > 1) {
                     value = result[1];
                 }
-                log.info("fieldName:{},value:{}", fieldName, value);
+                log.info("fieldName:{},value:{}", escapeLog(fieldName), escapeLog(value));
                 fieldValueMap.put(fieldName, value);
             }
         }
 
-        log.info("fieldValueMap:{}", fieldValueMap);
+        log.info("fieldValueMap:{}", escapeLog(fieldValueMap));
 
         // Replace filedValue with the DB field name
         fieldValueMap = getAttributeData(entityClass, fieldValueMap);
@@ -126,7 +127,7 @@ public class Util {
         }
 
         List<String> fieldValueList = getTokens(str, tokenizer);
-        log.debug("After tokenizing fieldValueList:{}", fieldValueList);
+        log.debug("After tokenizing fieldValueList:{}", escapeLog(fieldValueList));
 
         if (fieldValueList == null || fieldValueList.isEmpty()) {
             return fieldFilterDataList;
@@ -143,14 +144,14 @@ public class Util {
             }
         }
 
-        log.info("Returning fieldFilterDataList:{}", fieldFilterDataList);
+        log.info("Returning fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
 
         return fieldFilterDataList;
     }
 
     private FieldFilterData getFieldFilterData(Map<String, List<Annotation>> propertiesAnnotations,
             Map<String, String> fieldTypeMap, String dataStr, List<String> fieldValueSeparator) {
-        log.info("Get FieldFilterData - dataStr:{} , fieldValueSeparator:{}", dataStr, fieldValueSeparator);
+        log.info("Get FieldFilterData - dataStr:{} , fieldValueSeparator:{}", escapeLog(dataStr), escapeLog(fieldValueSeparator));
 
         FieldFilterData fieldFilterData = null;
         if (StringUtils.isBlank(dataStr) || fieldValueSeparator == null || fieldValueSeparator.isEmpty()) {
@@ -160,7 +161,7 @@ public class Util {
             if (dataStr.contains(separator)) {
                 String[] result = dataStr.split(separator);
 
-                log.debug("separator:{}, result:{}", separator, result);
+                log.debug("separator:{}, result:{}", escapeLog(separator), escapeLog(Arrays.toString(result)));
                 if (result != null && result.length > 0) {
                     String fieldName = result[0];
                     String value = null;
@@ -169,20 +170,20 @@ public class Util {
                     }
                     String dbFieldName = getFieldDBName(fieldName, propertiesAnnotations.get(fieldName));
                     String fieldType = getFieldDataType(fieldName, fieldTypeMap);
-                    log.debug("fieldName:{}, dbFieldName:{}, fieldType:{}, value:{}, separator:{}", fieldName,
-                            dbFieldName, fieldType, value, separator);
+                    log.debug("fieldName:{}, dbFieldName:{}, fieldType:{}, value:{}, separator:{}", escapeLog(fieldName),
+                            escapeLog(dbFieldName), fieldType, escapeLog(value), escapeLog(separator));
                     fieldFilterData = new FieldFilterData(dbFieldName, separator, value, fieldType);
 
                 }
             }
-            log.info("Final fieldFilterData:{}", fieldFilterData);
+            log.info("Final fieldFilterData:{}", escapeLog(fieldFilterData));
         }
         return fieldFilterData;
 
     }
 
     private String getFieldDataType(String fieldName, Map<String, String> fieldTypeMap) {
-        log.info("Get data type for fieldName:{}, fieldTypeMap:{}", fieldName, fieldTypeMap);
+        log.info("Get data type for fieldName:{}, fieldTypeMap:{}", escapeLog(fieldName), fieldTypeMap);
         String fieldType = "String";
         if (StringUtils.isBlank(fieldName) || fieldTypeMap == null || fieldTypeMap.isEmpty()) {
             return fieldType;
@@ -214,7 +215,7 @@ public class Util {
         if (!fieldValueMap.isEmpty()) {
 
             for (Map.Entry<String, String> entry : fieldValueMap.entrySet()) {
-                log.debug("entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+                log.debug("entry.getKey():{}, entry.getValue():{}", escapeLog(entry.getKey()), escapeLog(entry.getValue()));
                 String dbFieldName = getFieldDBName(entry.getKey(), propertiesAnnotations.get(entry.getKey()));
                 if (StringUtils.isNotBlank(dbFieldName)) {
                     updatedFieldValueMap.put(dbFieldName, entry.getValue());
@@ -223,12 +224,12 @@ public class Util {
                 }
             }
         }
-        log.info("Returning updatedFieldValueMap:{} ", updatedFieldValueMap);
+        log.info("Returning updatedFieldValueMap:{} ", escapeLog(updatedFieldValueMap));
         return updatedFieldValueMap;
     }
 
     private String getFieldDBName(String fieldName, List<Annotation> annotations) {
-        log.info("DB field to be fetched for fieldName:{} are annotations:{}", fieldName, annotations);
+        log.info("DB field to be fetched for fieldName:{} are annotations:{}", escapeLog(fieldName), annotations);
         if (StringUtils.isBlank(fieldName) || (annotations == null || annotations.isEmpty())) {
             return fieldName;
         }
@@ -240,11 +241,11 @@ public class Util {
                     fieldName = attributeName.name();
                 }
             } catch (Exception ex) {
-                log.error("Error while fetching DB fieldName for fieldName:{} is :{}", fieldName, ex);
+                log.error("Error while fetching DB fieldName for fieldName:{} is :{}", escapeLog(fieldName), ex);
             }
         }
 
-        log.info("Final DB field fieldName:{} ", fieldName);
+        log.info("Final DB field fieldName:{} ", escapeLog(fieldName));
         return fieldName;
     }
 

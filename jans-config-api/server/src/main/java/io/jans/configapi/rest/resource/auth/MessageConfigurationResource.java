@@ -130,7 +130,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.MESSAGE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchMessageConfiguration(@NotNull String requestString) {
-        logger.debug(" MESSAGE details to patch - requestString:{}", requestString);
+        logger.debug(" MESSAGE details to patch");
         final MessageConfiguration modifiedMessage = mergeModifiedMessage(message -> {
             try {
                 return Jackson.applyPatch(requestString, message);
@@ -187,7 +187,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.MESSAGE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateRedisMessageConfiguration(@NotNull RedisMessageConfiguration redisConfiguration) {
-        logger.debug("REDIS MESSAGE details to update - redisConfiguration:{}", redisConfiguration);
+        logger.debug("REDIS MESSAGE details to update");
         final MessageConfiguration modifiedMessage = mergeModifiedMessage(message -> {
             message.setRedisConfiguration(redisConfiguration);
             return message;
@@ -217,7 +217,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.MESSAGE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchRedisMessageConfiguration(@NotNull String requestString) {
-        logger.debug("REDIS MESSAGE details to patch - requestString:{} ", requestString);
+        logger.debug("REDIS MESSAGE details to patch");
         mergeModifiedMessage(message -> {
             try {
                 message.setRedisConfiguration(
@@ -279,8 +279,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
             ApiAccessConstants.MESSAGE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updatePostgresMessageConfiguration(
             @NotNull PostgresMessageConfiguration postgresMessageConfiguration) {
-        logger.debug("POSTGRES_PERSISTENCE MESSAGE details to update - postgresMessageConfiguration:{}",
-                postgresMessageConfiguration);
+        logger.debug("POSTGRES_PERSISTENCE MESSAGE details to update");
         final MessageConfiguration modifiedMessage = mergeModifiedMessage(message -> {
             message.setPostgresConfiguration(postgresMessageConfiguration);
             return message;
@@ -311,7 +310,7 @@ public class MessageConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.MESSAGE_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.MESSAGE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchPostgresMessageConfiguration(@NotNull String requestString) {
-        logger.debug("POSTGRES_PERSISTENCE MESSAGE details to patch - requestString:{} ", requestString);
+        logger.debug("POSTGRES_PERSISTENCE MESSAGE details to patch");
         mergeModifiedMessage(message -> {
             try {
                 message.setPostgresConfiguration(
