@@ -1072,7 +1072,7 @@ impl Cedarling {
                 );
 
                 match e {
-                    PolicyStoreLoadError::FetchFromLockServer(_)
+                    PolicyStoreLoadError::Fetch { .. }
                     | PolicyStoreLoadError::Archive(_)
                     | PolicyStoreLoadError::Directory(_) => {
                         Err(ValidateInfraError::Io(std::io::Error::other(err_str)))

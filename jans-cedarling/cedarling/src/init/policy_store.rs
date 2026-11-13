@@ -56,9 +56,9 @@ pub enum PolicyStoreLoadError {
     /// Failed to parse policy store from YAML string.
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_saphyr::Error),
-    /// Failed to fetch the policy store from the lock server.
-    #[error("failed to fetch the policy store from the lock server")]
-    FetchFromLockServer(#[from] HttpClientError),
+    /// Failed to fetch the policy store from a URL, the Lock Server's or any other.
+    #[error("failed to fetch the policy store from '{url}': {error}")]
+    Fetch { url: String, error: HttpClientError },
     /// Invalid structure in the policy store.
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
@@ -294,11 +294,18 @@ async fn load_policy_store_from_uri(
     verifier: Option<&ArchiveVerifier>,
     options: LoadOptions,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let response = http_client.get_with_retry(uri).await?;
+    let fetch_err = |error| PolicyStoreLoadError::Fetch {
+        url: uri.to_string(),
+        error,
+    };
+    let response = http_client.get_with_retry(uri).await.map_err(fetch_err)?;
 
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
 
-    let bytes = http_client.read_response_capped(response).await?;
+    let bytes = http_client
+        .read_response_capped(response)
+        .await
+        .map_err(fetch_err)?;
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
@@ -822,6 +829,51 @@ mod test {
             "expected LegacyJsonNotSupported, got {err:?}"
         );
 
+        mock_endpoint.assert();
+    }
+
+    #[tokio::test]
+    async fn fetch_failure_names_the_url_and_the_http_cause() {
+        use crate::http::HttpClientError;
+        use crate::http_utils::{FinalFailure, SendError};
+
+        let mut mock_server = Server::new_async().await;
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(404)
+            .expect(1)
+            .create();
+        let uri = format!("{}/policy-store", mock_server.url());
+
+        let err = load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri.clone()),
+                ..Default::default()
+            },
+            &HTTP_CLIENT,
+            ReadOptions::for_test(false),
+        )
+        .await
+        .expect_err("a 404 policy store must fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreLoadError::Fetch {
+                    url,
+                    error: HttpClientError::Send(SendError::Final(FinalFailure::Status {
+                        status: reqwest::StatusCode::NOT_FOUND,
+                        ..
+                    })),
+                } if *url == uri
+            ),
+            "expected a Fetch error with the URL and the 404, got {err:?}"
+        );
+        let message = err.to_string();
+        assert!(
+            message.contains(&uri) && message.contains("404 Not Found"),
+            "the message must name the URL and the status, got: {message}"
+        );
         mock_endpoint.assert();
     }
 
