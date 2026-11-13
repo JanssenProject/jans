@@ -56,9 +56,9 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
 | **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are checked when present and required when listed in `required_claims` | No — accepts raw entity data as-is |
 | **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
-| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
+| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Workloads and agents whose identity the host system already established, service-to-service with upstream verification, custom auth flows |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
-| **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
+| **Recommended for** | Most production deployments | Production deployments where authentication is handled outside Cedarling; prototyping without an IDP |
 
 ## Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
 
@@ -401,7 +401,8 @@ let context = {
 
 The `authorize_unsigned` method allows making authorization decisions without JWT token verification. Use this when:
 
-- Your application has already verified the principals through other means
+- Your application has already verified the principals through other means (for example, a host
+  that assigns identities to the workloads or agents it runs)
 - You need to make authorization decisions for non-token-based scenarios
 - You're implementing custom authentication flows
 - You're testing or prototyping without an IDP
