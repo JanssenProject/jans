@@ -121,6 +121,9 @@ This nested block defines WebAuthn and FIDO2 attestation and assertion policy be
 | `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Planned. Whether records include `credential_id_hash`, a hash of the WebAuthn credential ID. |
 | `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Planned. Whether records include optional signed attestation and MDS trust detail. |
 | `fido2TraceEndpoint` | String | discovered | Planned. Lock Server TRACE ingestion endpoint, `/jans-lock/api/v1/audit/trace`. When empty it may default to the discovered Lock audit endpoint. |
+| `fido2TraceKeyStorePath` | String | — | Planned. Path to a BCFKS keystore file that holds the Ed25519 TRACE producer signing key. The key stays in the file and is never stored in configuration. |
+| `fido2TraceKeyAlias` | String | — | Planned. Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
+| `fido2TraceKeyStorePassword` | String | — | Planned. Keystore password, encrypted at rest like other client secrets. |
 | `nativeReadinessEnabled` | Boolean | `false` | Makes the native app readiness endpoint available. When `false` the endpoint does no work. |
 | `nativeReadinessAllowExternalFetch` | Boolean | `false` | Allows the readiness checks to make outbound requests to a relying party's `/.well-known` association files. Outbound requests need both this and `nativeReadinessEnabled`. |
 | `nativeReadinessMaxResponseBytes` | Integer | `131072` | Maximum number of bytes read from one association file. The server also enforces a fixed upper bound, so a mis-set value cannot remove the limit. |
