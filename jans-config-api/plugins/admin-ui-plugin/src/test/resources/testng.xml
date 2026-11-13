@@ -4,10 +4,16 @@
 
     <parameter name="propertiesFile" value="target/test-classes/test.properties" />
 	
-	<listeners>
+    <listeners>
         <listener class-name="io.jans.configapi.core.test.listener.AlterSuiteListener" />
         <listener class-name="io.jans.configapi.core.test.listener.SkipTestsListener" />
     </listeners>
+
+    <test name="PolicyMapper" enabled="true">
+        <classes>
+            <class name="io.jans.ca.plugin.adminui.test.security.PolicyToScopeMapperTest" />
+        </classes>
+    </test>
 	
 	<test name="OAuth2" enabled="true">
         <classes>
@@ -19,6 +25,7 @@
     <test name="Logging" enabled="true">
         <classes>
              <class name="io.jans.ca.plugin.adminui.test.AuditLoggingResourceTest" />
+             <class name="io.jans.ca.plugin.adminui.test.AuditLoggerResourceUnitTest" />
         </classes>
     </test>
 	

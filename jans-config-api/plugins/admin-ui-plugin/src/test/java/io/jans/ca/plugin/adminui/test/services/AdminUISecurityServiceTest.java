@@ -7,6 +7,7 @@ import io.jans.ca.plugin.adminui.service.adminui.AdminUISecurityService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.model.SearchRequest;
@@ -21,16 +22,23 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import jakarta.ws.rs.core.Response;
 
 import java.lang.reflect.Method;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -62,6 +70,8 @@ public class AdminUISecurityServiceTest {
     private io.jans.ca.plugin.adminui.service.adminui.AdminUIService adminUIService;
     @Mock
     private io.jans.ca.plugin.adminui.utils.security.PolicyToScopeMapper policyToScopeMapper;
+    @InjectMocks
+    private PolicyToScopeMapper actualPolicyToScopeMapper;
 
     @InjectMocks
     private AdminUISecurityService adminUISecurityService;
@@ -79,9 +89,13 @@ public class AdminUISecurityServiceTest {
      * as stored in the {@code policyStore} document field.
      */
     private String loadPolicyStoreBase64() throws java.io.IOException {
+        return java.util.Base64.getEncoder().encodeToString(loadPolicyStoreBytes());
+    }
+
+    private byte[] loadPolicyStoreBytes() throws java.io.IOException {
         try (java.io.InputStream is = getClass().getResourceAsStream(POLICY_STORE_FIXTURE)) {
             assertNotNull(is, "Missing test fixture: " + POLICY_STORE_FIXTURE);
-            return java.util.Base64.getEncoder().encodeToString(is.readAllBytes());
+            return is.readAllBytes();
         }
     }
 
@@ -138,7 +152,7 @@ public class AdminUISecurityServiceTest {
         searchRequest.setSortBy(AppConstants.INUM);
         searchRequest.setSortOrder(SortOrder.ASCENDING.getValue());
         lenient().when(entryManager.findPagedEntries(anyString(), any(), any(), any(), any(),
-                any(), anyInt(), anyInt(), anyInt()))
+                        any(), anyInt(), anyInt(), anyInt()))
                 .thenThrow(new RuntimeException("db down"));
 
         ApplicationException ex = expectThrows(ApplicationException.class,
@@ -210,6 +224,20 @@ public class AdminUISecurityServiceTest {
     }
 
     @Test
+    public void testValidateTrustedIssuerDomainsRejectsRedirectedEntryWithDifferentContentOnAllowedHost()
+            throws Exception {
+        byte[] zipBytes = createPolicyStoreWithSecondaryIssuer();
+        redirectCentralEntry(zipBytes,
+                "trusted-issuers/GluuFlexAdminUI.json",
+                "trusted-issuers/Secondary.json");
+
+        ApplicationException ex = validateArchiveExpectingFailure(zipBytes);
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Inconsistent policy-store archive entries");
+    }
+
+    @Test
     public void testUploadPolicyStore_invalidCedarlingArchiveReturnsBadRequest() throws Exception {
         java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
         try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
@@ -244,33 +272,323 @@ public class AdminUISecurityServiceTest {
         verify(entryManager, never()).persist(any());
     }
 
-        @Test
-        public void testValidateTrustedIssuerDomainsRejectsMismatchedSecondaryIssuer() throws Exception {
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsMismatchedSecondaryIssuer() throws Exception {
         java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
         try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
             zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/GluuFlexAdminUI.json"));
             zipOutput.write("{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"
-                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
             zipOutput.closeEntry();
 
             zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/Secondary.json"));
             zipOutput.write("{\"configuration_endpoint\":\"https://issuer.example.invalid/.well-known/openid-configuration\"}"
-                .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
             zipOutput.closeEntry();
         }
 
         Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
-            "validateTrustedIssuerDomains", byte[].class, String.class);
+                "validateTrustedIssuerDomains", byte[].class, String.class);
         validateTrustedIssuerDomains.setAccessible(true);
         java.lang.reflect.InvocationTargetException invocationException = expectThrows(
-            java.lang.reflect.InvocationTargetException.class,
-            () -> validateTrustedIssuerDomains.invoke(
-                adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
 
         ApplicationException ex = (ApplicationException) invocationException.getCause();
         assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
         assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
+    @DataProvider(name = "invalidIssuerEndpoints")
+    public Object[][] invalidIssuerEndpoints() {
+        return new Object[][]{
+                {"userinfo-prefixed host", "https://test-jans.io@issuer.example.invalid/.well-known/openid-configuration"},
+                {"host hidden in fragment", "https://issuer.example.invalid/.well-known/openid-configuration#https://test-jans.io"},
+                {"relative path", "/.well-known/openid-configuration"}
+        };
+    }
+
+    @Test(dataProvider = "invalidIssuerEndpoints")
+    public void testValidateTrustedIssuerDomainsRejectsEndpointWithoutExpectedHost(
+            String caseName, String endpoint) throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"" + endpoint + "\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode(), caseName);
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription(), caseName);
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsMismatchedRootIssuersFile() throws Exception {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/GluuFlexAdminUI.json"));
+            zipOutput.write("{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers.json"));
+            zipOutput.write(("{\"Acme::Access_token\":{\"type\":\"jwt\",\"issuer\":\"Acme\",\"configuration_endpoints\":"
+                    + "{\"jwks\":\"https://issuer.example.invalid/keys\",\"iss\":\"https://issuer.example.invalid\"}}}")
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
         }
+
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+                "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsParentTraversalEntryName() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "../trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Invalid policy-store file path");
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsAbsoluteEntryName() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "/trusted-issuers/GluuFlexAdminUI.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Invalid policy-store file path");
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsDetectsUppercaseJsonExtension() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/Foo.JSON",
+                "{\"configuration_endpoint\":\"https://issuer.example.invalid/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription());
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsMissingAdminUiIssuerFile() throws Exception {
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/Other.json",
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}"));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("Trusted issuer file not found in ZIP"));
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsRejectsDuplicateEntryNames() throws Exception {
+        String firstName = "trusted-issuers/GluuFlexAdminUI.json";
+        String secondName = "trusted-issuers/GluuFlexAdminUj.json";
+        byte[] zipBytes = createZipArchive(firstName,
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}",
+                secondName,
+                "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\"}");
+        replaceBytes(zipBytes, secondName.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                firstName.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        ApplicationException ex = validateArchiveExpectingFailure(zipBytes);
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertEquals(ex.getMessage(), "Inconsistent policy-store archive entries");
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsCountsUtf8BytesForArchiveLimit() throws Exception {
+        String issuerContent = "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\","
+                + "\"padding\":\"" + "\u00e9".repeat(1_400_000) + "\"}";
+        byte[] issuerContentBytes = issuerContent.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        assertTrue(issuerContentBytes.length < 3_000_000, "Each issuer entry must remain below the per-entry limit");
+
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            for (int i = 0; i < 11; i++) {
+                String entryName = i == 0
+                        ? "trusted-issuers/GluuFlexAdminUI.json"
+                        : "trusted-issuers/Secondary" + i + ".json";
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryName));
+                zipOutput.write(issuerContentBytes);
+                zipOutput.closeEntry();
+            }
+        }
+
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+                "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, archiveBytes.toByteArray(), WEB_SERVER_HOST));
+
+        ApplicationException ex = (ApplicationException) invocationException.getCause();
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("ZIP archive too large when decompressed"));
+    }
+
+    @Test
+    public void testValidateTrustedIssuerDomainsEnforcesCentralDirectoryIssuerEntryLimit() throws Exception {
+        String issuerContent = "{\"configuration_endpoint\":\"https://test-jans.io/.well-known/openid-configuration\","
+                + "\"padding\":\"" + "x".repeat(3_000_001) + "\"}";
+
+        ApplicationException ex = validateArchiveExpectingFailure(createZipArchive(
+                "trusted-issuers/GluuFlexAdminUI.json", issuerContent));
+
+        assertEquals(ex.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        assertTrue(ex.getMessage().contains("ZIP entry too large"));
+    }
+
+    private ApplicationException validateArchiveExpectingFailure(byte[] zipBytes) throws Exception {
+        Method validateTrustedIssuerDomains = AdminUISecurityService.class.getDeclaredMethod(
+                "validateTrustedIssuerDomains", byte[].class, String.class);
+        validateTrustedIssuerDomains.setAccessible(true);
+        java.lang.reflect.InvocationTargetException invocationException = expectThrows(
+                java.lang.reflect.InvocationTargetException.class,
+                () -> validateTrustedIssuerDomains.invoke(
+                        adminUISecurityService, zipBytes, WEB_SERVER_HOST));
+        return (ApplicationException) invocationException.getCause();
+    }
+
+    private byte[] createZipArchive(String entryName, String content) throws java.io.IOException {
+        return createZipArchive(new String[]{entryName}, new String[]{content});
+    }
+
+    private byte[] createZipArchive(
+            String firstEntryName,
+            String firstContent,
+            String secondEntryName,
+            String secondContent) throws java.io.IOException {
+        return createZipArchive(
+                new String[]{firstEntryName, secondEntryName},
+                new String[]{firstContent, secondContent});
+    }
+
+    private byte[] createZipArchive(String[] entryNames, String[] contents) throws java.io.IOException {
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            for (int i = 0; i < entryNames.length; i++) {
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entryNames[i]));
+                zipOutput.write(contents[i].getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                zipOutput.closeEntry();
+            }
+        }
+        return archiveBytes.toByteArray();
+    }
+
+    private byte[] createPolicyStoreWithSecondaryIssuer() throws java.io.IOException {
+        byte[] fixture = loadPolicyStoreBytes();
+        java.io.ByteArrayOutputStream archiveBytes = new java.io.ByteArrayOutputStream();
+        try (java.util.zip.ZipInputStream zipInput = new java.util.zip.ZipInputStream(
+                     new java.io.ByteArrayInputStream(fixture));
+             java.util.zip.ZipOutputStream zipOutput = new java.util.zip.ZipOutputStream(archiveBytes)) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zipInput.getNextEntry()) != null) {
+                zipOutput.putNextEntry(new java.util.zip.ZipEntry(entry.getName()));
+                zipOutput.write(zipInput.readAllBytes());
+                zipOutput.closeEntry();
+            }
+            zipOutput.putNextEntry(new java.util.zip.ZipEntry("trusted-issuers/Secondary.json"));
+            zipOutput.write(("{\"name\":\"Secondary issuer\",\"description\":\"Test trusted issuer\","
+                    + "\"openid_configuration_endpoint\":\"https://test-jans.io/.well-known/secondary-configuration\","
+                    + "\"configuration_endpoint\":\"https://test-jans.io/.well-known/secondary-configuration\"}")
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+        return archiveBytes.toByteArray();
+    }
+
+    private void redirectCentralEntry(byte[] zipBytes, String entryName, String targetEntryName) {
+        int entryCentralOffset = findCentralEntryOffset(zipBytes, entryName);
+        int targetCentralOffset = findCentralEntryOffset(zipBytes, targetEntryName);
+        int targetLocalOffset = readLittleEndianInt(zipBytes, targetCentralOffset + 42);
+        writeLittleEndianInt(zipBytes, entryCentralOffset + 42, targetLocalOffset);
+        System.arraycopy(zipBytes, targetCentralOffset + 16, zipBytes, entryCentralOffset + 16, 12);
+    }
+
+    private int findLocalEntryOffset(byte[] zipBytes, String expectedName) {
+        byte[] expectedNameBytes = expectedName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        for (int offset = 0; offset <= zipBytes.length - 30; offset++) {
+            if (readLittleEndianInt(zipBytes, offset) != 0x04034b50) {
+                continue;
+            }
+            int nameLength = readLittleEndianShort(zipBytes, offset + 26);
+            if (nameLength == expectedNameBytes.length
+                    && matches(zipBytes, offset + 30, expectedNameBytes)) {
+                return offset;
+            }
+        }
+        throw new AssertionError("Local ZIP entry not found: " + expectedName);
+    }
+
+    private int findCentralEntryOffset(byte[] zipBytes, String expectedName) {
+        byte[] expectedNameBytes = expectedName.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        for (int offset = 0; offset <= zipBytes.length - 46; offset++) {
+            if (readLittleEndianInt(zipBytes, offset) != 0x02014b50) {
+                continue;
+            }
+            int nameLength = readLittleEndianShort(zipBytes, offset + 28);
+            if (nameLength == expectedNameBytes.length
+                    && matches(zipBytes, offset + 46, expectedNameBytes)) {
+                return offset;
+            }
+        }
+        throw new AssertionError("Central ZIP entry not found: " + expectedName);
+    }
+
+    private void replaceBytes(byte[] target, byte[] from, byte[] to) {
+        assertEquals(from.length, to.length);
+        int replacements = 0;
+        for (int i = 0; i <= target.length - from.length; i++) {
+            if (matches(target, i, from)) {
+                System.arraycopy(to, 0, target, i, to.length);
+                replacements++;
+                i += from.length - 1;
+            }
+        }
+        assertEquals(replacements, 2, "Expected to rename both local and central entries");
+    }
+
+    private boolean matches(byte[] target, int offset, byte[] expected) {
+        if (offset < 0 || offset > target.length - expected.length) {
+            return false;
+        }
+        for (int i = 0; i < expected.length; i++) {
+            if (target[offset + i] != expected[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int readLittleEndianInt(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff)
+                | ((bytes[offset + 1] & 0xff) << 8)
+                | ((bytes[offset + 2] & 0xff) << 16)
+                | ((bytes[offset + 3] & 0xff) << 24);
+    }
+
+    private int readLittleEndianShort(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) | ((bytes[offset + 1] & 0xff) << 8);
+    }
+
+    private void writeLittleEndianInt(byte[] bytes, int offset, int value) {
+        bytes[offset] = (byte) value;
+        bytes[offset + 1] = (byte) (value >>> 8);
+        bytes[offset + 2] = (byte) (value >>> 16);
+        bytes[offset + 3] = (byte) (value >>> 24);
+    }
 
     // ---------------------------------------------------------------------
     // editPolicyStore
@@ -515,7 +833,56 @@ public class AdminUISecurityServiceTest {
         assertEquals(response.getResponseCode(), 200);
         verify(policyToScopeMapper).processZipFile(any(), any());
         verify(adminUIService).resetRoles(any());
-        verify(adminUIService).resetPermissionsToRole(any());
+        verify(adminUIService).resetPermissionsToRoleFromPolicySync(any(),eq(java.util.Collections.emptySet()));
+    }
+
+    @DataProvider(name = "unsupportedSyncPolicies")
+    public Object[][] unsupportedSyncPolicies() {
+        return new Object[][] {
+                { "forbid(principal, action, resource) when { "
+                        + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                        + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                        + "action == GluuFlexAdminUI::Action::\"READ\" };" },
+                { "permit(principal, action, resource) unless { "
+                        + "principal.getTag(\"jansAdminUIRole\").contains(\"admin\") && "
+                        + "resource in GluuFlexAdminUIResources::Features::\"users\" && "
+                        + "action == GluuFlexAdminUI::Action::\"READ\" };" }
+        };
+    }
+
+    @Test(dataProvider = "unsupportedSyncPolicies")
+    public void testSyncRoleScopeMappingRejectsUnsupportedPolicyWithoutResettingRolesOrPermissions(
+            String policy) throws Exception {
+        when(entryManager.findEntries(anyString(),
+                eq(io.jans.ca.plugin.adminui.model.adminui.AdminUIResourceScopesMapping.class),
+                any(Filter.class)))
+                .thenReturn(java.util.Collections.emptyList());
+
+        AdminUIPolicyStore activeStore = new AdminUIPolicyStore();
+        activeStore.setInum(INUM);
+        activeStore.setJansStatus(AppConstants.STATUS_ACTIVE);
+        activeStore.setPolicyStore(createPolicyStoreBase64(policy));
+        when(entryManager.findEntries(anyString(), eq(AdminUIPolicyStore.class), any(Filter.class)))
+                .thenReturn(java.util.List.of(activeStore));
+        when(policyToScopeMapper.processZipFile(any(), any())).thenAnswer(invocation ->
+                actualPolicyToScopeMapper.processZipFile(invocation.getArgument(0), invocation.getArgument(1)));
+
+        ApplicationException exception = expectThrows(ApplicationException.class,
+                () -> adminUISecurityService.syncRoleScopeMapping());
+
+        assertEquals(exception.getErrorCode(), Response.Status.BAD_REQUEST.getStatusCode());
+        verify(adminUIService, never()).resetRoles(any());
+        verify(adminUIService, never()).resetPermissionsToRoleFromPolicySync(any(), any());
+    }
+
+    private String createPolicyStoreBase64(String policy) throws IOException {
+        ByteArrayOutputStream archive = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOutput = new ZipOutputStream(archive)) {
+            zipOutput.putNextEntry(new ZipEntry("policies/admin-ui.cedar"));
+            zipOutput.write(policy.getBytes(StandardCharsets.UTF_8));
+            zipOutput.closeEntry();
+        }
+        return Base64.getEncoder().encodeToString(archive.toByteArray());
     }
 
     // ---------------------------------------------------------------------

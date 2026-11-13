@@ -29,7 +29,6 @@ public class PolicyToScopeMapper {
     private static final Pattern ACTION_PATTERN = Pattern.compile(
             "GluuFlexAdminUI::Action::\"([^\"]+)\""
     );
-
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
 
@@ -39,6 +38,7 @@ public class PolicyToScopeMapper {
      * @param zipFile       the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
      * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
      * @return a map where each key is a role name and the value is the set of resolved scope strings for that role
+     * @throws IllegalArgumentException if a policy contains a forbid effect or unless condition
      */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) {
         long startTime = System.currentTimeMillis();
@@ -186,6 +186,8 @@ public class PolicyToScopeMapper {
             throw new IllegalStateException("No policy files found in policies folder");
         }
 
+        policyEntries.forEach(entry -> validatePolicyEntry(zipFile, entry));
+
         log.trace("Processing {} policy files.", policyEntries.size());
 
         // Process policies in parallel for better performance
@@ -194,6 +196,70 @@ public class PolicyToScopeMapper {
         );
 
         return roleToScopes;
+    }
+
+    private void validatePolicyEntry(ZipFile zipFile, ZipEntry entry) {
+        try (InputStream is = zipFile.getInputStream(entry)) {
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            List<String> tokens = tokenizePolicy(content);
+            for (int i = 0; i + 1 < tokens.size(); i++) {
+                if ("forbid".equals(tokens.get(i)) && "(".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported forbid policy in " + entry.getName());
+                }
+                if ("unless".equals(tokens.get(i)) && "{".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported unless condition in " + entry.getName());
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error processing policy: {}", entry.getName() + " - " + e.getMessage());
+        }
+    }
+
+    private List<String> tokenizePolicy(String content) {
+        List<String> tokens = new ArrayList<>();
+        for (int i = 0; i < content.length();) {
+            char current = content.charAt(i);
+            if (Character.isWhitespace(current)) {
+                i++;
+            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '/') {
+                i += 2;
+                while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
+                    i++;
+                }
+            } else if (current == '/' && i + 1 < content.length() && content.charAt(i + 1) == '*') {
+                int commentEnd = content.indexOf("*/", i + 2);
+                if (commentEnd < 0) {
+                    throw new IllegalArgumentException("Unterminated block comment");
+                }
+                i = commentEnd + 2;
+            } else if (current == '"') {
+                i = skipStringLiteral(content, i);
+                tokens.add("\"\"");
+            } else if (Character.isLetter(current) || current == '_') {
+                int tokenStart = i++;
+                while (i < content.length()
+                        && (Character.isLetterOrDigit(content.charAt(i)) || content.charAt(i) == '_')) {
+                    i++;
+                }
+                tokens.add(content.substring(tokenStart, i));
+            } else {
+                tokens.add(String.valueOf(current));
+                i++;
+            }
+        }
+        return tokens;
+    }
+
+    private int skipStringLiteral(String content, int quoteIndex) {
+        for (int i = quoteIndex + 1; i < content.length(); i++) {
+            char current = content.charAt(i);
+            if (current == '\\') {
+                i++;
+            } else if (current == '"') {
+                return i + 1;
+            }
+        }
+        throw new IllegalArgumentException("Unterminated string literal");
     }
 
     /**

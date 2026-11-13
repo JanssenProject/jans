@@ -37,11 +37,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -51,6 +54,7 @@ import java.util.zip.ZipInputStream;
 
 import static io.jans.ca.plugin.adminui.utils.AppConstants.INUM;
 import static io.jans.ca.plugin.adminui.utils.AppConstants.POLICY_STORE_DN;
+import static io.jans.configapi.core.util.Util.escapeLog;
 
 /**
  * Service responsible for managing Admin UI security related operations such as
@@ -91,10 +95,13 @@ public class AdminUISecurityService {
     Tika tika = new Tika();
 
     private static final long MAX_ENTRY_SIZE = 3_000_000; // 3 MB
+    private static final long MAX_ARCHIVE_UNCOMPRESSED_SIZE = 30_000_000; // 30 MB
 
     private static final ReentrantLock POLICY_STORE_ACTIVATION_LOCK = new ReentrantLock();
 
     private static final String TRUSTED_ISSUER_FILE = "trusted-issuers/GluuFlexAdminUI.json";
+    private static final String TRUSTED_ISSUERS_DIR = "trusted-issuers/";
+    private static final String TRUSTED_ISSUERS_ROOT_FILE = "trusted-issuers.json";
 
     /**
      * Searches persisted policy stores matching the given request.
@@ -426,6 +433,9 @@ public class AdminUISecurityService {
             JSONObject cedarlingConfig = new JSONObject()
                     .put("CEDARLING_APPLICATION_NAME", "AdminUI")
                     .put("CEDARLING_LOG_TYPE", "off")
+                    .put("CEDARLING_ID_TOKEN_TRUST_MODE", "never")
+                    .put("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+                    .put("CEDARLING_JWT_STATUS_VALIDATION", "disabled")
                     .put("CEDARLING_LOG_LEVEL", "INFO");
             ByteBuffer archiveBuffer = ByteBuffer.allocateDirect(zipBytes.length);
             archiveBuffer.put(zipBytes);
@@ -465,46 +475,29 @@ public class AdminUISecurityService {
                 );
             }
 
-            boolean adminUiIssuerFound = false;
+            long totalUncompressed = 0;
+            List<String> localEntryNames = new ArrayList<>();
+            List<byte[]> localEntryDigests = new ArrayList<>();
             try (ZipInputStream zis = new ZipInputStream(new ByteArrayInputStream(zipBytes))) {
                 ZipEntry entry;
                 while ((entry = zis.getNextEntry()) != null) {
                     String entryName = entry.getName();
-                    if (entry.isDirectory() || entryName == null ||
-                            !entryName.startsWith("trusted-issuers/") || !entryName.endsWith(".json")) {
-                        zis.closeEntry();
-                        continue;
-                    }
-                    if (entryName.contains("..") || entryName.startsWith("/")) {
+                    if (entryName == null || entryName.contains("..") || entryName.startsWith("/")) {
                         throw new ApplicationException(
                                 Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Invalid trusted-issuer file path"
+                                "Invalid policy-store file path"
                         );
                     }
-
-                    JSONObject issuer = new JSONObject(readEntryContentSafely(zis));
-                    String endpointField = issuer.has("openid_configuration_endpoint")
-                            ? "openid_configuration_endpoint"
-                            : "configuration_endpoint";
-                    if (!issuer.has(endpointField)) {
-                        throw new ApplicationException(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName
-                        );
-                    }
-                    URI endpointUri = new URI(issuer.getString(endpointField));
-                    String issuerDomain = endpointUri.getHost();
-                    if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
-                        log.error("Trusted issuer endpoint host does not match Admin UI host: {}", entryName);
-                        throw new ApplicationException(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
-                        );
-                    }
-                    adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
-                    zis.closeEntry();
+                    localEntryNames.add(entryName);
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                    totalUncompressed += drainEntrySafely(
+                            zis, MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed, digest);
+                    localEntryDigests.add(digest.digest());
                 }
             }
+
+            boolean adminUiIssuerFound = validateCentralDirectoryEntries(
+                    zipBytes, localEntryNames, localEntryDigests, expectedDomain);
 
             if (!adminUiIssuerFound) {
                 throw new ApplicationException(
@@ -520,6 +513,103 @@ public class AdminUISecurityService {
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     "Error processing trusted issuers: " + e.getMessage()
             );
+        }
+    }
+
+    /**
+     * Validates issuer documents from central-directory entries and rejects archives whose central-directory
+     * names or entry contents differ from the local-header scan.
+     *
+     * @param zipBytes        the policy-store archive bytes
+     * @param localEntryNames entry names read from the local file headers
+     * @param localEntryDigests SHA-256 digests of the local-header entry contents
+     * @param expectedDomain   the configured Admin UI web-server host
+     * @return whether the required Admin UI issuer file was found
+     * @throws Exception if the archive cannot be read or validation fails
+     */
+    private boolean validateCentralDirectoryEntries(
+            byte[] zipBytes,
+            List<String> localEntryNames,
+            List<byte[]> localEntryDigests,
+            String expectedDomain)
+            throws Exception {
+        Path tempFile = createSecureTempFile("adminui-policy-store-check-", ".cjar");
+        Path tempDirectory = tempFile.getParent();
+        try {
+            Files.write(tempFile, zipBytes);
+            List<ZipEntry> entries = new ArrayList<>();
+            List<String> centralEntryNames = new ArrayList<>();
+            try (ZipFile zipFile = new ZipFile(tempFile.toFile())) {
+                Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+                while (enumeration.hasMoreElements()) {
+                    ZipEntry entry = enumeration.nextElement();
+                    entries.add(entry);
+                    centralEntryNames.add(entry.getName());
+                }
+
+                boolean duplicates = new HashSet<>(centralEntryNames).size() != centralEntryNames.size();
+                if (duplicates || !centralEntryNames.equals(localEntryNames)) {
+                    throw new ApplicationException(
+                            Response.Status.BAD_REQUEST.getStatusCode(),
+                            "Inconsistent policy-store archive entries"
+                    );
+                }
+
+                long totalUncompressed = 0;
+                boolean adminUiIssuerFound = false;
+                for (int i = 0; i < entries.size(); i++) {
+                    ZipEntry entry = entries.get(i);
+                    String entryName = entry.getName();
+                    String normalizedName = entryName.toLowerCase(Locale.ROOT);
+                    boolean legacyIssuerFile = !entry.isDirectory()
+                            && normalizedName.startsWith(TRUSTED_ISSUERS_DIR)
+                            && normalizedName.endsWith(".json");
+                    boolean rootIssuersFile = !entry.isDirectory()
+                            && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
+                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                    try (InputStream input = zipFile.getInputStream(entry);
+                         InputStream digestedInput = new DigestInputStream(input, digest)) {
+                        long remaining = MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed;
+                        if (!legacyIssuerFile && !rootIssuersFile) {
+                            totalUncompressed += drainEntrySafely(digestedInput, remaining);
+                        } else {
+                            byte[] content = readEntryContentSafely(digestedInput, remaining);
+                            totalUncompressed += content.length;
+                            JSONObject issuerDoc = new JSONObject(new String(content, StandardCharsets.UTF_8));
+
+                            if (rootIssuersFile) {
+                                validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
+                            } else {
+                                String endpointField = issuerDoc.has("openid_configuration_endpoint")
+                                        ? "openid_configuration_endpoint"
+                                        : "configuration_endpoint";
+                                if (!issuerDoc.has(endpointField)) {
+                                    throw new ApplicationException(
+                                            Response.Status.BAD_REQUEST.getStatusCode(),
+                                            "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in "
+                                                    + entryName
+                                    );
+                                }
+                                validateIssuerEndpointHost(
+                                        issuerDoc.getString(endpointField), expectedDomain, entryName);
+                                adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
+                            }
+                        }
+                    }
+
+                    if (!MessageDigest.isEqual(localEntryDigests.get(i), digest.digest())) {
+                        throw new ApplicationException(
+                                Response.Status.BAD_REQUEST.getStatusCode(),
+                                "Inconsistent policy-store archive entries"
+                        );
+                    }
+                }
+                return adminUiIssuerFound;
+            }
+        } finally {
+            Files.deleteIfExists(tempFile);
+            Files.deleteIfExists(tempDirectory);
         }
     }
 
@@ -581,9 +671,14 @@ public class AdminUISecurityService {
             // Remove duplicate permissions efficiently
             List<RolePermissionMapping> updatedMappings = removeDuplicatePermissions(rolePermissionMappings);
 
+            // Derived scopes come only from the stored resource-scope mappings, which may extend the permission catalog.
+            Set<String> resourceScopes = adminUIResourceScopesMappings.stream()
+                    .map(AdminUIResourceScopesMapping::getScopes).filter(Objects::nonNull)
+                    .flatMap(List::stream).collect(Collectors.toSet());
+
             // Update services
             adminUIService.resetRoles(roles);
-            adminUIService.resetPermissionsToRole(updatedMappings);
+            adminUIService.resetPermissionsToRoleFromPolicySync(updatedMappings, resourceScopes);
 
             return CommonUtils.createGenericResponse(true, 200,
                     "Sync of role-to-scope mappings from the policy store completed successfully.");
@@ -738,14 +833,63 @@ public class AdminUISecurityService {
         return String.format("inum=%s,%s", inum, POLICY_STORE_DN);
     }
 
+    private void validateTrustedIssuersRootFile(JSONObject issuersDoc, String expectedDomain, String entryName)
+            throws ApplicationException, URISyntaxException {
+        for (String tokenType : issuersDoc.keySet()) {
+            JSONObject tokenConfig = issuersDoc.optJSONObject(tokenType);
+            JSONObject endpoints = tokenConfig == null ? null : tokenConfig.optJSONObject("configuration_endpoints");
+            if (endpoints == null) {
+                continue;
+            }
+            for (String field : new String[]{"configuration", "jwks"}) {
+                if (endpoints.has(field)) {
+                    validateIssuerEndpointHost(endpoints.optString(field, null), expectedDomain, entryName);
+                }
+            }
+        }
+    }
+
+    private void validateIssuerEndpointHost(String endpoint, String expectedDomain, String entryName)
+            throws ApplicationException, URISyntaxException {
+        String issuerDomain = endpoint == null ? null : new URI(endpoint).getHost();
+        if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
+            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", escapeLog(entryName));
+            throw new ApplicationException(
+                    Response.Status.BAD_REQUEST.getStatusCode(),
+                    ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()
+            );
+        }
+    }
+
+    private long drainEntrySafely(InputStream is, long remainingBudget) throws IOException {
+        return drainEntrySafely(is, remainingBudget, null);
+    }
+
+    private long drainEntrySafely(InputStream is, long remainingBudget, MessageDigest digest) throws IOException {
+        byte[] buffer = new byte[4096];
+        long totalRead = 0;
+        int len;
+        while ((len = is.read(buffer)) != -1) {
+            totalRead += len;
+            if (totalRead > remainingBudget) {
+                throw new IOException("ZIP archive too large when decompressed");
+            }
+            if (digest != null) {
+                digest.update(buffer, 0, len);
+            }
+        }
+        return totalRead;
+    }
+
     /**
-     * Reads a zip entry's content as a UTF-8 string, guarding against zip-bomb entries.
+     * Reads a zip entry's bytes while enforcing per-entry and archive decompressed-size limits.
      *
      * @param is the input stream positioned at the entry to read
-     * @return the entry content decoded as UTF-8
-     * @throws IOException if reading fails or the entry exceeds {@link #MAX_ENTRY_SIZE}
+     * @param remainingArchiveBudget the remaining decompressed archive size allowed
+     * @return the entry content bytes
+     * @throws IOException if reading fails or either size limit is exceeded
      */
-    private String readEntryContentSafely(InputStream is) throws IOException {
+    private byte[] readEntryContentSafely(InputStream is, long remainingArchiveBudget) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         byte[] buffer = new byte[4096];
         int len;
@@ -756,9 +900,12 @@ public class AdminUISecurityService {
             if (totalRead > MAX_ENTRY_SIZE) {
                 throw new IOException("ZIP entry too large (possible ZIP bomb greater than 3 MB)");
             }
+            if (totalRead > remainingArchiveBudget) {
+                throw new IOException("ZIP archive too large when decompressed");
+            }
             baos.write(buffer, 0, len);
         }
-        return baos.toString(StandardCharsets.UTF_8);
+        return baos.toByteArray();
     }
 
     /**
