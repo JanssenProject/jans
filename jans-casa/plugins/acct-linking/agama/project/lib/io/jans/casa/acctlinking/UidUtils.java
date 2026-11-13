@@ -38,12 +38,9 @@ public class UidUtils {
             return user.getUserId();
         }
         
-        logger.debug("Looking up uid ref");
-        CacheProvider cache = CdiUtil.bean(CacheProvider.class);
-        Object value = cache.get(uidRef);
+        logger.debug("Looking up uid ref {}", uidRef);
+        Object value = CdiUtil.bean(CacheProvider.class).get(uidRef);
         if (value == null) throw new IOException("uid reference passed not found in Cache!");
-        //single use
-        cache.remove(uidRef);
 
         return value.toString();
         

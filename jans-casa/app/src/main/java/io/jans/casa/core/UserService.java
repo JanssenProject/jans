@@ -18,7 +18,6 @@ import io.jans.casa.core.pojo.User;
 import io.jans.casa.credential.CredentialRemovalConflict;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.misc.WebUtils;
 import io.jans.casa.service.SndFactorAuthenticationUtils;
 import org.slf4j.Logger;
 import org.zkoss.util.Pair;
@@ -61,11 +60,6 @@ public class UserService implements SndFactorAuthenticationUtils {
         if (inum == null || username == null) {
             logger.error("Could not obtain minimal user claims!");
             throw new AttributeNotFoundException("Cannot retrieve claims for logged user");
-        }
-
-        String img = u.getPictureURL();
-        if (Utils.isNotEmpty(img)) {
-            u.setPictureURL(WebUtils.validateImageUrl(img));
         }
 
         Person person = personInstance(inum);

@@ -4,21 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.zkoss.zk.ui.Executions;
 import jakarta.servlet.http.Cookie;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -28,10 +18,6 @@ import java.util.Optional;
  * @author jgomer
  */
 public final class WebUtils {
-
-    private static final int IMAGE_FETCH_TIMEOUT_MS = 5000;
-    private static final int IMAGE_MAX_BYTES = 5 * 1024 * 1024;
-    private static final long IMAGE_MAX_PIXELS = 25_000_000L;
 
     private static Logger LOG = LoggerFactory.getLogger(WebUtils.class);
 
@@ -132,91 +118,6 @@ public final class WebUtils {
     public static String getQueryParam(String param) {
         String[] values = Executions.getCurrent().getParameterValues(param);
         return Utils.isEmpty(values) ? null :  values[0];
-    }
-
-    /**
-     * Reads the contents of the URL passes as param and returns null if the contents received are not image-like (e.g.
-     * different file format or HTTP error)
-     * @param url String with URL to inspect
-     * @return The value received in parameter if it points to a valid image, null otherwise
-     */
-    public static String validateImageUrl(String url) {
-
-        String val = null;
-        try {
-            URL u = new URL(url);
-            if (!"https".equalsIgnoreCase(u.getProtocol()) && !"http".equalsIgnoreCase(u.getProtocol())) {
-                LOG.warn("Unsupported scheme in image url '{}'", url);
-                return null;
-            }
-            for (InetAddress addr : InetAddress.getAllByName(u.getHost())) {
-                if (isInternalAddress(addr)) {
-                    LOG.warn("Image url '{}' points to a non-public address", url);
-                    return null;
-                }
-            }
-
-            HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-            //Redirects could lead to non-public destinations
-            conn.setInstanceFollowRedirects(false);
-            conn.setConnectTimeout(IMAGE_FETCH_TIMEOUT_MS);
-            conn.setReadTimeout(IMAGE_FETCH_TIMEOUT_MS);
-            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                return null;
-            }
-            try (InputStream is = conn.getInputStream()) {
-                byte[] data = is.readNBytes(IMAGE_MAX_BYTES + 1);
-                if (data.length > IMAGE_MAX_BYTES) {
-                    LOG.warn("Image at '{}' exceeds the size limit", url);
-                    return null;
-                }
-                val = isDecodableImage(data) ? url : null;
-            } finally {
-                conn.disconnect();
-            }
-        } catch (Exception e) {
-            LOG.warn("Error validating image url '{}'", url);
-            //LOG.error(e.getMessage(), e);
-        }
-        return val;
-
-    }
-    
-    //Checks dimensions from the header first so a small compressed body cannot expand into a huge raster
-    private static boolean isDecodableImage(byte[] data) throws IOException {
-
-        try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(data))) {
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            if (!readers.hasNext()) {
-                return false;
-            }
-            ImageReader reader = readers.next();
-            try {
-                reader.setInput(iis, true, true);
-                if ((long) reader.getWidth(0) * reader.getHeight(0) > IMAGE_MAX_PIXELS) {
-                    return false;
-                }
-                return reader.read(0) != null;
-            } finally {
-                reader.dispose();
-            }
-        }
-
-    }
-
-    private static boolean isInternalAddress(InetAddress addr) {
-        return addr.isLoopbackAddress() || addr.isSiteLocalAddress() || addr.isLinkLocalAddress()
-                || addr.isAnyLocalAddress() || addr.isMulticastAddress()
-                || (addr instanceof Inet6Address && (addr.getAddress()[0] & 0xfe) == 0xfc)
-                || (addr instanceof Inet4Address && isReservedIPv4(addr.getAddress()));
-    }
-
-    private static boolean isReservedIPv4(byte[] b) {
-        int first = b[0] & 0xff;
-        int second = b[1] & 0xff;
-        //0.0.0.0/8, 100.64.0.0/10 (CGNAT, includes some cloud metadata IPs), 198.18.0.0/15, 240.0.0.0/4
-        return first == 0 || (first == 100 && (second & 0xc0) == 64)
-                || (first == 198 && (second & 0xfe) == 18) || first >= 240;
     }
 
     public static String getFullRequestURL() {
