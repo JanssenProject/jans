@@ -160,7 +160,7 @@ public class MobilePhoneEnrollingWS {
                 if (mobilePhoneService.addPhone(userId, phone)) {
                     result = FinishCode.SUCCESS;
                 } else {
-                    restoreCode(key, value, entry, now);
+                    restoreCode(key, value, entry, System.currentTimeMillis());
                     result = FinishCode.FAILED;
                     phone = null;
                 }

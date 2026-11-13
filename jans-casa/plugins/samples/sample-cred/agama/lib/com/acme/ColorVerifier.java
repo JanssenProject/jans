@@ -21,9 +21,8 @@ public class ColorVerifier {
         User user = CdiUtil.bean(UserService.class).getUserByInum(inum, COLOR_ATTR);
         String userColor = user.getAttribute(COLOR_ATTR);
         
-        boolean match = Optional.ofNullable(userColor).map(color::equalsIgnoreCase).orElse(false);
-        logger.info("Color {}", match ? "matches" : "does not match");
-        return match;
+        logger.info("Checking if color {} matches {}", userColor, color);
+        return Optional.ofNullable(userColor).map(color::equalsIgnoreCase).orElse(false);
         
     }
     

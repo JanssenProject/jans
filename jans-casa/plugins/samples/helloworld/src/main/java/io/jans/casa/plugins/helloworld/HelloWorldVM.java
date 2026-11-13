@@ -68,7 +68,7 @@ public class HelloWorldVM {
      */
     @NotifyChange("organizationName")
     public void loadOrgName() {
-        logger.debug("You typed {}", message == null ? null : message.replaceAll("[\\r\\n]", "_"));
+        logger.debug("You typed {}", message);
         organizationName = persistenceService.getOrganization().getDisplayName();
     }
 
