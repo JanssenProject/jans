@@ -8,7 +8,7 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::lock::transport::{AuditItem, AuditKind, AuditTransport};
+use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
 
 use crate::http_utils::Backoff;
@@ -134,7 +134,15 @@ where
                     )));
                     return;
                 },
-                Err(err) => {
+                // Repeating would get the same answer, and hold the channel meanwhile.
+                Err(SendFailure::Final(err)) => {
+                    logger.log_any(LockLogEntry::error(format!(
+                        "dropping {batch_size} {} entries: {err}",
+                        self.kind,
+                    )));
+                    return;
+                },
+                Err(SendFailure::Retryable(err)) => {
                     logger.log_any(LockLogEntry::error(format!(
                         "failed to send to {} audit endpoint: {err}",
                         self.kind,
@@ -198,7 +206,7 @@ mod tests {
     use crate::common::app_types::PdpID;
     use crate::http::{HttpClient, HttpClientConfig};
     use crate::lock::transport::rest::RestTransport;
-    use crate::lock::transport::test_utils::malformed_log_item;
+    use crate::lock::transport::test_utils::{malformed_log_item, sample_log_item};
     use crate::log::{LogLevel, LogStrategy, Logger};
     use crate::{LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig};
 
@@ -267,6 +275,102 @@ mod tests {
         assert!(
             worker.buffer.is_empty(),
             "the dropped batch leaves the buffer"
+        );
+    }
+
+    const MAX_RETRIES: u32 = 2;
+
+    /// A REST log worker for `url` that retries after 1 ms, logging into `log`.
+    fn rest_worker(url: &str, log: &Logger) -> AuditWorker<RestTransport> {
+        let http = HttpClient::new(HttpClientConfig::default()).expect("HTTP client");
+        AuditWorker::new(
+            Duration::from_secs(60),
+            Arc::new(RestTransport::new(http, Some(Arc::downgrade(log)))),
+            AuditKind::Log(url.parse().expect("valid URL")),
+            Some(Arc::downgrade(log)),
+            MAX_RETRIES,
+            Duration::from_millis(1),
+        )
+    }
+
+    #[tokio::test]
+    async fn refused_batch_is_dropped_after_one_request() {
+        for status in [400, 401, 403, 404, 413] {
+            let mut server = Server::new_async().await;
+            let bulk = server
+                .mock("POST", "/audit/log/bulk")
+                .with_status(status)
+                .expect(1)
+                .create_async()
+                .await;
+            let log = memory_log();
+            let mut worker = rest_worker(&format!("{}/audit/log/bulk", server.url()), &log);
+            worker.buffer.push_back(sample_log_item());
+
+            worker.flush(None).await;
+
+            bulk.assert_async().await;
+            let logs = log.pop_logs();
+            let errors = messages(&logs, "ERROR");
+            assert!(
+                errors.len() == 1
+                    && errors[0].contains("dropping 1 log entries")
+                    && errors[0].contains(&format!("HTTP {status}")),
+                "HTTP {status} must drop the batch with one ERROR, got {errors:?}"
+            );
+            assert!(
+                messages(&logs, "WARN").is_empty(),
+                "a refused batch is not retried until exhausted"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn server_error_is_retried_until_exhausted() {
+        let mut server = Server::new_async().await;
+        let bulk = server
+            .mock("POST", "/audit/log/bulk")
+            .with_status(503)
+            .expect(usize::try_from(MAX_RETRIES).expect("small") + 1)
+            .create_async()
+            .await;
+        let log = memory_log();
+        let mut worker = rest_worker(&format!("{}/audit/log/bulk", server.url()), &log);
+        worker.buffer.push_back(sample_log_item());
+
+        worker.flush(None).await;
+
+        bulk.assert_async().await;
+        assert_exhausted(&log.pop_logs());
+    }
+
+    #[tokio::test]
+    async fn connection_failure_is_retried_until_exhausted() {
+        // Binding and dropping a listener leaves a loopback port nothing listens on.
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind a free port");
+        let addr = listener.local_addr().expect("local addr");
+        drop(listener);
+        let log = memory_log();
+        let mut worker = rest_worker(&format!("http://{addr}/audit/log/bulk"), &log);
+        worker.buffer.push_back(sample_log_item());
+
+        worker.flush(None).await;
+
+        assert_exhausted(&log.pop_logs());
+    }
+
+    /// One ERROR per attempt, then the batch is dropped with a WARN.
+    fn assert_exhausted(logs: &[serde_json::Value]) {
+        let attempts = messages(logs, "ERROR");
+        assert_eq!(
+            attempts.len(),
+            usize::try_from(MAX_RETRIES).expect("small") + 1,
+            "the first attempt and {MAX_RETRIES} retries: {attempts:?}"
+        );
+        let warnings = messages(logs, "WARN");
+        assert!(
+            warnings.len() == 1 && warnings[0].contains("retries exhausted"),
+            "the batch is dropped once retries are exhausted, got {warnings:?}"
         );
     }
 }

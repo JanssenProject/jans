@@ -10,21 +10,23 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use prost_types::Timestamp;
+use tonic::Request;
+use tonic::metadata::{Ascii, MetadataValue};
 #[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
-use tonic::{Request, metadata::MetadataValue};
 #[cfg(target_arch = "wasm32")]
 use tonic_web_wasm_client::Client;
 
 use crate::{
     lock::{
         LockLogEntry,
+        grpc_failure::GrpcFailure,
         proto::{
             BulkHealthRequest, BulkLogRequest, BulkTelemetryRequest, HealthEntry, LogEntry,
             TelemetryEntry, audit_service_client::AuditServiceClient,
         },
         transport::{
-            AuditItem, AuditKind, AuditTransport, TransportError, TransportResult,
+            AuditItem, AuditKind, AuditTransport, FinalSend, SendFailure, TransportError,
             mapping::{
                 self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
                 NothingToSend,
@@ -43,7 +45,9 @@ pub(crate) struct GrpcTransport {
     client: AuditServiceClient<Channel>,
     #[cfg(target_arch = "wasm32")]
     client: AuditServiceClient<Client>,
-    access_token: String,
+    /// Parsed once: an access token that is not a valid header value fails here,
+    /// not on every attempt.
+    authorization: MetadataValue<Ascii>,
     logger: Option<LoggerWeak>,
 }
 
@@ -69,7 +73,7 @@ impl GrpcTransport {
 
         Ok(Self {
             client,
-            access_token: access_token.into(),
+            authorization: format!("Bearer {access_token}").parse()?,
             logger,
         })
     }
@@ -117,41 +121,40 @@ impl AuditTransport for GrpcTransport {
         })
     }
 
-    async fn send(&self, batch: &GrpcBatch) -> TransportResult<()> {
-        let token: MetadataValue<_> = format!("Bearer {}", self.access_token).parse()?;
+    async fn send(&self, batch: &GrpcBatch) -> Result<(), SendFailure> {
+        let token = self.authorization.clone();
         let mut client = self.client.clone();
 
-        let response = match batch {
+        let result = match batch {
             GrpcBatch::Log(message) => {
                 client
                     .process_bulk_log(authorized(message.clone(), token))
-                    .await?
+                    .await
             },
             GrpcBatch::Telemetry(message) => {
                 client
                     .process_bulk_telemetry(authorized(message.clone(), token))
-                    .await?
+                    .await
             },
             GrpcBatch::Health(message) => {
                 client
                     .process_bulk_health(authorized(message.clone(), token))
-                    .await?
+                    .await
             },
         };
 
-        let inner = response.into_inner();
+        let inner = result.map_err(GrpcFailure::sort)?.into_inner();
         if !inner.success {
-            return Err(TransportError::GrpcServer(format!(
-                "Server reported failure: {}",
-                inner.message
-            )));
+            return Err(SendFailure::Final(FinalSend::Unsuccessful {
+                message: inner.message,
+            }));
         }
 
         Ok(())
     }
 }
 
-fn authorized<T>(message: T, token: MetadataValue<tonic::metadata::Ascii>) -> Request<T> {
+fn authorized<T>(message: T, token: MetadataValue<Ascii>) -> Request<T> {
     let mut request = Request::new(message);
     request.metadata_mut().insert("authorization", token);
     request
@@ -233,7 +236,7 @@ mod test {
         transport: &GrpcTransport,
         entries: &[AuditItem],
         kind: AuditKind,
-    ) -> TransportResult<()> {
+    ) -> Result<(), SendFailure> {
         let batch = transport
             .prepare(entries, &kind)
             .expect("the test batch should map");
@@ -560,8 +563,11 @@ mod test {
         .expect_err("this should cause a server error");
 
         assert!(
-            matches!(error, TransportError::GrpcServer(_)),
-            "expected server error, got {error:?}",
+            matches!(
+                error,
+                SendFailure::Final(FinalSend::Unsuccessful { ref message }) if message == "Server error"
+            ),
+            "success = false is Lock's answer to this batch, so it is final, got {error:?}",
         );
     }
 
@@ -821,8 +827,11 @@ mod test {
         .expect_err("this should cause a server error");
 
         assert!(
-            matches!(error, TransportError::GrpcServer(_)),
-            "expected server error, got {error:?}",
+            matches!(
+                error,
+                SendFailure::Final(FinalSend::Unsuccessful { ref message }) if message == "Server error"
+            ),
+            "success = false is Lock's answer to this batch, so it is final, got {error:?}",
         );
     }
 
@@ -880,5 +889,221 @@ mod test {
         assert_eq!(proto.node_name, "test-pdp");
         assert_eq!(proto.status, "running");
         assert_eq!(proto.engine_status.get("core").unwrap(), "success");
+    }
+
+    mod retries {
+        use std::sync::Arc;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::time::Duration;
+
+        use tokio::net::TcpListener;
+        use tokio::sync::mpsc;
+        use tokio_stream::wrappers::TcpListenerStream;
+        use tokio_util::sync::CancellationToken;
+        use tonic::transport::Server;
+        use tonic::{Request, Response, Status};
+
+        use crate::lock::log_worker::AuditWorker;
+        use crate::lock::proto::audit_service_server::{AuditService, AuditServiceServer};
+        use crate::lock::proto::{self, AuditResponse, BulkLogRequest};
+        use crate::lock::transport::AuditKind;
+        use crate::lock::transport::grpc::GrpcTransport;
+        use crate::lock::transport::test_utils::sample_log_item;
+
+        const MAX_RETRIES: usize = 2;
+
+        type Reply = fn() -> Result<AuditResponse, Status>;
+
+        /// Answers every bulk log call with `reply` and counts the calls.
+        struct ReplyingLock {
+            reply: Reply,
+            calls: Arc<AtomicUsize>,
+        }
+
+        #[tonic::async_trait]
+        impl AuditService for ReplyingLock {
+            async fn process_log(
+                &self,
+                _: Request<proto::LogRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_log(
+                &self,
+                _: Request<BulkLogRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                self.calls.fetch_add(1, Ordering::SeqCst);
+                (self.reply)().map(Response::new)
+            }
+
+            async fn process_telemetry(
+                &self,
+                _: Request<proto::TelemetryRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_telemetry(
+                &self,
+                _: Request<proto::BulkTelemetryRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_health(
+                &self,
+                _: Request<proto::HealthRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_health(
+                &self,
+                _: Request<proto::BulkHealthRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+        }
+
+        /// Answers every call with `status`'s HTTP status and no `grpc-status`, as a
+        /// proxy before Lock does when it refuses the request itself.
+        #[derive(Clone)]
+        struct ProxyAnswer {
+            status: u16,
+            calls: Arc<AtomicUsize>,
+        }
+
+        impl tonic::server::NamedService for ProxyAnswer {
+            const NAME: &'static str = "io.jans.lock.audit.AuditService";
+        }
+
+        impl tonic::codegen::Service<tonic::codegen::http::Request<tonic::body::Body>> for ProxyAnswer {
+            type Response = tonic::codegen::http::Response<tonic::body::Body>;
+            type Error = std::convert::Infallible;
+            type Future = std::future::Ready<Result<Self::Response, Self::Error>>;
+
+            fn poll_ready(
+                &mut self,
+                _: &mut std::task::Context<'_>,
+            ) -> std::task::Poll<Result<(), Self::Error>> {
+                std::task::Poll::Ready(Ok(()))
+            }
+
+            fn call(
+                &mut self,
+                _: tonic::codegen::http::Request<tonic::body::Body>,
+            ) -> Self::Future {
+                self.calls.fetch_add(1, Ordering::SeqCst);
+                let response = tonic::codegen::http::Response::builder()
+                    .status(self.status)
+                    .body(tonic::body::Body::default())
+                    .expect("a status-only response builds");
+                std::future::ready(Ok(response))
+            }
+        }
+
+        async fn listen() -> (TcpListenerStream, String) {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("a local port is free");
+            let addr = listener.local_addr().expect("the listener has an address");
+            (TcpListenerStream::new(listener), format!("http://{addr}"))
+        }
+
+        async fn lock(reply: Reply, calls: Arc<AtomicUsize>) -> String {
+            let (incoming, url) = listen().await;
+            tokio::spawn(
+                Server::builder()
+                    .add_service(AuditServiceServer::new(ReplyingLock { reply, calls }))
+                    .serve_with_incoming(incoming),
+            );
+            url
+        }
+
+        async fn proxy(status: u16, calls: Arc<AtomicUsize>) -> String {
+            let (incoming, url) = listen().await;
+            tokio::spawn(
+                Server::builder()
+                    .add_routes(tonic::service::Routes::new(ProxyAnswer { status, calls }))
+                    .serve_with_incoming(incoming),
+            );
+            url
+        }
+
+        /// Runs a log worker on one entry until it is sent or dropped.
+        async fn flush_one_entry(origin: &str) {
+            let transport = GrpcTransport::new(origin, "test-token", None).expect("transport");
+            let mut worker = AuditWorker::new(
+                Duration::from_secs(60),
+                Arc::new(transport),
+                AuditKind::Log(format!("{origin}/audit/log").parse().expect("valid URL")),
+                None,
+                u32::try_from(MAX_RETRIES).expect("small"),
+                Duration::from_millis(1),
+            );
+            let (tx, rx) = mpsc::channel(1);
+            tx.send(sample_log_item())
+                .await
+                .expect("the entry is queued");
+            let cancel = CancellationToken::new();
+            cancel.cancel();
+            // Shutting down flushes the queued entry, retries included.
+            worker.run(rx, cancel).await;
+            drop(tx);
+        }
+
+        #[tokio::test]
+        async fn lock_refusal_is_sent_once() {
+            let cases: [(&str, Reply); 3] = [
+                ("InvalidArgument", || Err(Status::invalid_argument("bad"))),
+                ("PermissionDenied", || {
+                    Err(Status::permission_denied("missing scope"))
+                }),
+                ("success = false", || {
+                    Ok(AuditResponse {
+                        success: false,
+                        message: "refused".to_string(),
+                    })
+                }),
+            ];
+            for (name, reply) in cases {
+                let calls = Arc::new(AtomicUsize::new(0));
+                flush_one_entry(&lock(reply, calls.clone()).await).await;
+                assert_eq!(
+                    calls.load(Ordering::SeqCst),
+                    1,
+                    "{name} is Lock's answer to this batch, so it is not repeated"
+                );
+            }
+        }
+
+        #[tokio::test]
+        async fn unavailable_is_retried() {
+            let calls = Arc::new(AtomicUsize::new(0));
+            let origin = lock(|| Err(Status::unavailable("restarting")), calls.clone()).await;
+
+            flush_one_entry(&origin).await;
+
+            assert_eq!(
+                calls.load(Ordering::SeqCst),
+                MAX_RETRIES + 1,
+                "UNAVAILABLE may clear, so it is sent once and retried {MAX_RETRIES} times"
+            );
+        }
+
+        #[tokio::test]
+        async fn proxy_client_error_is_sent_once() {
+            let calls = Arc::new(AtomicUsize::new(0));
+            let origin = proxy(400, calls.clone()).await;
+
+            flush_one_entry(&origin).await;
+
+            assert_eq!(
+                calls.load(Ordering::SeqCst),
+                1,
+                "a proxy's 400 without grpc-status is final, as over REST"
+            );
+        }
     }
 }

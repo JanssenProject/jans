@@ -13,10 +13,11 @@ use url::Url;
 
 use crate::{
     http::HttpClient,
+    http_utils::AttemptFailure,
     lock::{
         LockLogEntry,
         transport::{
-            AuditItem, AuditKind, AuditTransport, TransportResult,
+            AuditItem, AuditKind, AuditTransport, SendFailure,
             mapping::{
                 self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
                 NothingToSend,
@@ -90,22 +91,27 @@ impl AuditTransport for RestTransport {
         })
     }
 
-    async fn send(&self, batch: &RestBatch) -> TransportResult<()> {
-        self.client
+    async fn send(&self, batch: &RestBatch) -> Result<(), SendFailure> {
+        let result = self
+            .client
             .raw_client
             .post(batch.url.as_str())
             .header(CONTENT_TYPE, "application/json")
             .body(batch.body.clone())
             .send()
-            .await?
-            .error_for_status()?;
+            .await;
+        AttemptFailure::check(result)?;
         Ok(())
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{HttpClientConfig, lock::transport::TransportError};
+    use reqwest::StatusCode;
+
+    use crate::HttpClientConfig;
+    use crate::http_utils::{FinalFailure, RetryableFailure};
+    use crate::lock::transport::{FinalSend, RetryableSend};
 
     use super::*;
 
@@ -114,7 +120,7 @@ mod test {
         transport: &RestTransport,
         entries: &[AuditItem],
         kind: AuditKind,
-    ) -> TransportResult<()> {
+    ) -> Result<(), SendFailure> {
         let batch = transport
             .prepare(entries, &kind)
             .expect("the test batch should map");
@@ -200,8 +206,14 @@ mod test {
             .await
             .expect_err("this should cause a server error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Http(RetryableFailure::Status {
+                    status: StatusCode::INTERNAL_SERVER_ERROR,
+                    ..
+                }))
+            ),
+            "a 500 may clear, so it is retryable, got {error:?}"
         );
         mock.assert();
     }
@@ -224,8 +236,14 @@ mod test {
             .await
             .expect_err("this should cause a server error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Final(FinalSend::Http(FinalFailure::Status {
+                    status: StatusCode::BAD_REQUEST,
+                    ..
+                }))
+            ),
+            "a 400 is answered the same way again, so it is final, got {error:?}"
         );
         mock.assert();
     }
@@ -241,8 +259,11 @@ mod test {
             .await
             .expect_err("this should cause a network error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Http(RetryableFailure::Transport(_)))
+            ),
+            "a refused connection may clear, so it is retryable, got {error:?}"
         );
     }
 
@@ -368,8 +389,14 @@ mod test {
             .await
             .expect_err("this should cause a server error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Http(RetryableFailure::Status {
+                    status: StatusCode::INTERNAL_SERVER_ERROR,
+                    ..
+                }))
+            ),
+            "a 500 may clear, so it is retryable, got {error:?}"
         );
         mock.assert();
     }
@@ -394,8 +421,14 @@ mod test {
             .await
             .expect_err("this should cause a client error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Final(FinalSend::Http(FinalFailure::Status {
+                    status: StatusCode::BAD_REQUEST,
+                    ..
+                }))
+            ),
+            "a 400 is answered the same way again, so it is final, got {error:?}"
         );
         mock.assert();
     }
@@ -411,8 +444,11 @@ mod test {
             .await
             .expect_err("this should cause a network error");
         assert!(
-            matches!(error, TransportError::Rest(_)),
-            "expected reqwest error, got {error:?}"
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Http(RetryableFailure::Transport(_)))
+            ),
+            "a refused connection may clear, so it is retryable, got {error:?}"
         );
     }
 

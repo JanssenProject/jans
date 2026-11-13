@@ -15,7 +15,7 @@ use tonic::{Code, Request};
 
 use super::{Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus};
 use crate::HttpClientConfig;
-use crate::lock::grpc_failure::GrpcFailure;
+use crate::lock::grpc_failure::{GrpcFailure, GrpcRefusal};
 use crate::lock::trace_proto::trace_service_client::TraceServiceClient;
 use crate::lock::trace_proto::{
     BulkAcceptance, BulkResultEntry, SubmitBulkRecordsRequest, TraceError, TraceFlags,
@@ -108,15 +108,17 @@ fn failure(failure: GrpcFailure) -> PostBulkError {
         GrpcFailure::Retryable(status) => {
             super::retryable(format!("gRPC {:?}: {}", status.code(), status.message()))
         },
-        GrpcFailure::ProxyRefusal(http) => PostBulkError::Rejected {
+        GrpcFailure::Final(GrpcRefusal::Proxy(http)) => PostBulkError::Rejected {
             status: RejectedStatus::Http(http),
             error: None,
             reason: None,
         },
-        GrpcFailure::ResponseTooLarge(status) => PostBulkError::UnreadableResponse {
-            reason: format!("gRPC OutOfRange: {}", status.message()),
+        GrpcFailure::Final(GrpcRefusal::ResponseTooLarge(status)) => {
+            PostBulkError::UnreadableResponse {
+                reason: format!("gRPC OutOfRange: {}", status.message()),
+            }
         },
-        GrpcFailure::Refused(status) => {
+        GrpcFailure::Final(GrpcRefusal::Lock(status)) => {
             let body = serde_json::from_str::<ErrorBody>(status.message()).ok();
             PostBulkError::Rejected {
                 status: RejectedStatus::Grpc(status.code()),

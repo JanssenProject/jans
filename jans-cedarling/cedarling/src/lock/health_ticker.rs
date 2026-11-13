@@ -134,7 +134,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::lock::{health_registry::HealthStatus, transport::TransportResult};
+    use crate::lock::{health_registry::HealthStatus, transport::SendFailure};
     use std::sync::Arc;
     use url::Url;
 
@@ -154,7 +154,7 @@ mod test {
             Ok(())
         }
 
-        async fn send(&self, (): &()) -> TransportResult<()> {
+        async fn send(&self, (): &()) -> Result<(), SendFailure> {
             Ok(())
         }
     }

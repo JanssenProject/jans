@@ -18,13 +18,22 @@ pub(super) enum GrpcFailure {
     /// What the network or a failing Lock may answer differently next time.
     /// `INTERNAL` is Lock's `500` and `UNKNOWN` its answer for an unmapped HTTP status.
     Retryable(Status),
+    Final(GrpcRefusal),
+}
+
+/// A gRPC call the same request would fail again.
+#[derive(Debug, thiserror::Error)]
+pub(super) enum GrpcRefusal {
     /// A proxy's `4xx` without `grpc-status`, final as over REST.
-    ProxyRefusal(StatusCode),
+    #[error("a proxy before Lock refused the gRPC request with HTTP {0}")]
+    Proxy(StatusCode),
     /// Lock sends no `OUT_OF_RANGE`: tonic gives it for an answer over the
     /// response cap, after Lock processed the request.
+    #[error("Lock's gRPC answer is over the response cap: {}", .0.message())]
     ResponseTooLarge(Status),
-    /// Lock refused the request; the same request gets the same answer.
-    Refused(Status),
+    /// Lock refused the request.
+    #[error("Lock refused the gRPC request with {:?}: {}", .0.code(), .0.message())]
+    Lock(Status),
 }
 
 impl GrpcFailure {
@@ -36,11 +45,11 @@ impl GrpcFailure {
             | Code::DeadlineExceeded
             | Code::Cancelled
             | Code::Aborted => match proxy_refusal(&status) {
-                Some(http) => Self::ProxyRefusal(http),
+                Some(http) => Self::Final(GrpcRefusal::Proxy(http)),
                 None => Self::Retryable(status),
             },
-            Code::OutOfRange => Self::ResponseTooLarge(status),
-            _ => Self::Refused(status),
+            Code::OutOfRange => Self::Final(GrpcRefusal::ResponseTooLarge(status)),
+            _ => Self::Final(GrpcRefusal::Lock(status)),
         }
     }
 }
@@ -85,9 +94,13 @@ mod tests {
             let described = format!("{:?} {}", status.code(), status.message());
             let got = match GrpcFailure::sort(status) {
                 GrpcFailure::Retryable(_) => "Retryable".to_string(),
-                GrpcFailure::ProxyRefusal(http) => format!("ProxyRefusal({})", http.as_u16()),
-                GrpcFailure::ResponseTooLarge(_) => "ResponseTooLarge".to_string(),
-                GrpcFailure::Refused(_) => "Refused".to_string(),
+                GrpcFailure::Final(GrpcRefusal::Proxy(http)) => {
+                    format!("ProxyRefusal({})", http.as_u16())
+                },
+                GrpcFailure::Final(GrpcRefusal::ResponseTooLarge(_)) => {
+                    "ResponseTooLarge".to_string()
+                },
+                GrpcFailure::Final(GrpcRefusal::Lock(_)) => "Refused".to_string(),
             };
             assert_eq!(got, expected, "{described} sorted wrongly");
         }
