@@ -183,8 +183,7 @@ public class SessionResource extends ConfigBaseResource {
      */
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
-                            ApiAccessConstants.AUTH_REVOKE_SESSION }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
                             ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
@@ -193,8 +192,7 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS}, groupScopes = {}, superScopes = {
                     ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USER + ApiConstants.USERDN_PATH)
     public Response deleteUsersSession(
@@ -215,8 +213,7 @@ public class SessionResource extends ConfigBaseResource {
      */
     @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
             "Auth - Session Management" }, security = {
-                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
-                            ApiAccessConstants.AUTH_REVOKE_SESSION }),
+                    @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = {
                             ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS }) })
@@ -225,8 +222,7 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { ApiAccessConstants.AUTH_SESSION_DELETE_ACCESS }, groupScopes = {}, superScopes = {
                     ApiAccessConstants.AUTH_SESSION_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
     public Response deleteSessionBySid(

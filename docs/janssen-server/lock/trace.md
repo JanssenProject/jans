@@ -747,7 +747,15 @@ gRPC is served in the mode set by `grpcConfiguration.serverMode` (`bridge`, `pla
 - `io.jans.lock.trace.TraceService`
 - `io.jans.lock.trace.TraceAdminService`
 
-The Apache template of the VM installer, the all-in-one nginx configuration and the Helm gateway routes (`lockAuditEnabled`) include them. A custom proxy needs the same rules.
+The Apache template of the VM installer and the all-in-one nginx configuration include them. In the Helm charts each service has its own route and its own flag, so Lock Audit, Lock Trace and Lock Trace Admin can be exposed independently:
+
+| Service | Helm flag |
+|---|---|
+| `io.jans.lock.audit.AuditService` | `gateway-api.routes.lockAuditEnabled` |
+| `io.jans.lock.trace.TraceService` | `gateway-api.routes.lockTraceEnabled` |
+| `io.jans.lock.trace.TraceAdminService` | `gateway-api.routes.lockTraceAdminEnabled` |
+
+All three require `global.auth-server.lockEnabled: true`. A custom proxy needs the same rules.
 
 | gRPC method | REST equivalent | Scope |
 |---|---|---|

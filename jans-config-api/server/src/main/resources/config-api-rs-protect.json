@@ -2362,10 +2362,6 @@
             {
               "inum": "1800.01.47",
               "name": "https://jans.io/oauth/jans-auth-server/session.delete"
-            },
-            {
-              "inum": "",
-              "name": "revoke_session"
             }
           ],
           "groupScopes": [],
