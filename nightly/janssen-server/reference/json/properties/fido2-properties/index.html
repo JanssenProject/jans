@@ -1548,6 +1548,72 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fido2tracechaingenesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceChainGenesis
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceEnabled
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceendpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceEndpoint
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceincludeattestationdetail" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceIncludeAttestationDetail
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceincludecredentialidhash" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceIncludeCredentialIdHash
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceproducerid" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceProducerId
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#hints" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2991,6 +3057,72 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#fido2tracechaingenesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceChainGenesis
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceEnabled
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceendpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceEndpoint
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceincludeattestationdetail" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceIncludeAttestationDetail
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceincludecredentialidhash" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceIncludeCredentialIdHash
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2traceproducerid" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        fido2TraceProducerId
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#hints" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3736,6 +3868,36 @@
 <td><a href="#fido2performancemetrics">Details</a></td>
 </tr>
 <tr>
+<td>fido2TraceChainGenesis</td>
+<td>Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed</td>
+<td><a href="#fido2tracechaingenesis">Details</a></td>
+</tr>
+<tr>
+<td>fido2TraceEnabled</td>
+<td>Master switch for FIDO_CEREMONY TRACE record emission to the Lock Server</td>
+<td><a href="#fido2traceenabled">Details</a></td>
+</tr>
+<tr>
+<td>fido2TraceEndpoint</td>
+<td>Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint</td>
+<td><a href="#fido2traceendpoint">Details</a></td>
+</tr>
+<tr>
+<td>fido2TraceIncludeAttestationDetail</td>
+<td>Whether TRACE records include optional signed attestation and MDS trust detail</td>
+<td><a href="#fido2traceincludeattestationdetail">Details</a></td>
+</tr>
+<tr>
+<td>fido2TraceIncludeCredentialIdHash</td>
+<td>Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID</td>
+<td><a href="#fido2traceincludecredentialidhash">Details</a></td>
+</tr>
+<tr>
+<td>fido2TraceProducerId</td>
+<td>Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version</td>
+<td><a href="#fido2traceproducerid">Details</a></td>
+</tr>
+<tr>
 <td>hints</td>
 <td>Hints to the RP - security-key, client-device, hybrid</td>
 <td><a href="#hints">Details</a></td>
@@ -4193,6 +4355,78 @@
 </li>
 <li>
 <p>Default value: true</p>
+</li>
+</ul>
+<h2 id="fido2tracechaingenesis">fido2TraceChainGenesis<a class="headerlink" href="#fido2tracechaingenesis" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Chain genesis mode: pre_registered (Lock knows the genesis in advance) or first_observed</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: first_observed</p>
+</li>
+</ul>
+<h2 id="fido2traceenabled">fido2TraceEnabled<a class="headerlink" href="#fido2traceenabled" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Master switch for FIDO_CEREMONY TRACE record emission to the Lock Server</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
+<h2 id="fido2traceendpoint">fido2TraceEndpoint<a class="headerlink" href="#fido2traceendpoint" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
+<h2 id="fido2traceincludeattestationdetail">fido2TraceIncludeAttestationDetail<a class="headerlink" href="#fido2traceincludeattestationdetail" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Whether TRACE records include optional signed attestation and MDS trust detail</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
+<h2 id="fido2traceincludecredentialidhash">fido2TraceIncludeCredentialIdHash<a class="headerlink" href="#fido2traceincludecredentialidhash" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: true</p>
+</li>
+</ul>
+<h2 id="fido2traceproducerid">fido2TraceProducerId<a class="headerlink" href="#fido2traceproducerid" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
 </li>
 </ul>
 <h2 id="hints">hints<a class="headerlink" href="#hints" title="Permanent link">#</a></h2>
@@ -4659,7 +4893,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 22, 2026
+    November 12, 2026
   </span>
 
     

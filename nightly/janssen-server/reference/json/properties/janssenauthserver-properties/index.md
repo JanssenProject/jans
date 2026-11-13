@@ -617,13 +617,11 @@
 
 ## authorizationCodeLifetime
 
-- Description: The authorization code lifetime in seconds. The effective value
-  is capped at 600 seconds; values that are zero, negative, or greater than 600
-  use the 600-second maximum.
+- Description: The authorization code lifetime in seconds. Values that are zero, negative, or greater than 600 use the 600-second maximum
 
 - Required: No
 
-- Default value:  60 seconds (standard installation)
+- Default value: 60
 
 
 ## authorizationEncryptionAlgValuesSupported

@@ -39,8 +39,8 @@ flowchart TD
     E -- No --> UNSIGNED
     E -- Yes --> JWT[JWT flow\nterraform-authz-jwt.md]
 
-    style UNSIGNED fill:#d4edda,stroke:#28a745,color:#155724
-    style JWT fill:#cce5ff,stroke:#0d6efd,color:#004085
+    style UNSIGNED fill:#2E8B57,stroke:#1e5e3b,color:#ffffff
+    style JWT fill:#4682B4,stroke:#2b5476,color:#ffffff
 ```
 
 ## What both flows share
