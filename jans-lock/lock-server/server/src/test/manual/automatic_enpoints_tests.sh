@@ -17,6 +17,8 @@
 #   * automatic_enpoints_tests.local.properties in this folder (git-ignored)
 #   * the client test profile
 #     ../../../../client/profiles/<test.profile>/config-jans-lock-test-data.properties
+# lock.context.path (default /jans-lock) and proto.dir (folder with the .proto files) are set the
+# same way.
 # See the comments in the properties file. A section whose client is not configured is skipped.
 #
 # TRACE keys and chains cannot be deleted from Lock: every run registers new, uniquely named
@@ -28,7 +30,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCK_SERVER_DIR="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 PROFILES_DIR="${LOCK_SERVER_DIR}/client/profiles"
-PROTO_DIR="${LOCK_SERVER_DIR}/service/src/main/proto/grpc"
+DEFAULT_PROTO_DIR="${LOCK_SERVER_DIR}/service/src/main/proto/grpc"
 DEFAULTS_FILE="${SCRIPT_DIR}/automatic_enpoints_tests.properties"
 LOCAL_FILE="${SCRIPT_DIR}/automatic_enpoints_tests.local.properties"
 
@@ -93,6 +95,12 @@ fi
 
 SERVER_NAME="$(prop test.server.name)"
 HOST="https://${SERVER_NAME}"
+# Lock context path: /jans-lock when Lock runs as a server, /jans-auth when it is a jans-auth plugin
+LOCK_CONTEXT="/$(trim "$(prop lock.context.path /jans-lock)" | sed 's#^/*##; s#/*$##')"
+[[ "$LOCK_CONTEXT" == "/" ]] && LOCK_CONTEXT=""
+LOCK_URL="${HOST}${LOCK_CONTEXT}"
+PROTO_DIR="$(prop proto.dir "$DEFAULT_PROTO_DIR")"
+[[ "$PROTO_DIR" == /* ]] || PROTO_DIR="${SCRIPT_DIR}/${PROTO_DIR}"
 GRPC_ADDR="$(prop grpc.address "${SERVER_NAME}:443")"
 AUDIT_CLIENT_ID="$(prop audit.client.id)"
 AUDIT_CLIENT_SECRET="$(prop audit.client.secret)"
@@ -102,12 +110,14 @@ INVALID_TOKEN="$(prop invalid.token this-is-definitely-not-a-valid-token)"
 
 CURL_TLS=""
 GRPC_TLS=()
-if is_true "$(prop tls.insecure true)"; then
+if is_true "$(prop tls.insecure false)"; then
   CURL_TLS="-k"
   GRPC_TLS=(-insecure)
 fi
 GRPCURL_CMD=(grpcurl ${GRPC_TLS[@]+"${GRPC_TLS[@]}"} -import-path "$PROTO_DIR")
 GRPCURL="${GRPCURL_CMD[*]}"
+
+[[ -d "$PROTO_DIR" ]] || { echo "❌ proto.dir not found: $PROTO_DIR"; exit 1; }
 
 for tool in curl jq grpcurl; do
   command -v "$tool" >/dev/null 2>&1 || { echo "❌ required tool not found: $tool"; exit 1; }
@@ -389,10 +399,19 @@ GRPC_OUT=""
 t_pass() { echo "✅  $1"; }
 t_fail() { echo "❌  $1"; [[ -n "${2:-}" ]] && echo "    $2"; exit 1; }
 
+# is_bearer_token VALUE: RFC 6750 b64token, so a token can never carry shell or curl config syntax
+is_bearer_token() { [[ "$1" =~ ^[A-Za-z0-9._~+/-]+=*$ ]]; }
+
 get_token() { # CLIENT_ID CLIENT_SECRET SCOPE: credentials go to curl through stdin, not the process list
-  printf 'user = "%s:%s"\n' "$1" "$2" \
+  local token
+  token=$(printf 'user = "%s:%s"\n' "$1" "$2" \
     | curl -sS $CURL_TLS -K - "${HOST}/jans-auth/restv1/token" -d "grant_type=client_credentials" -d "scope=$3" \
-    | jq -r '.access_token // empty'
+    | jq -r '.access_token // empty')
+  if [[ -n "$token" ]] && ! is_bearer_token "$token"; then
+    echo "❌ access_token is not a valid bearer token, ignoring it" >&2
+    return 0
+  fi
+  printf '%s' "$token"
 }
 
 get_audit_token() { get_token "$AUDIT_CLIENT_ID" "$AUDIT_CLIENT_SECRET" "$1"; }
@@ -531,7 +550,7 @@ b64() { printf '%s' "$1" | base64 -w0; }
 # ─────────────────────────────────────────────────────────────────────────────
 
 run_trace_tests() {
-  local api="${HOST}/jans-lock/api/v1/audit/trace"
+  local api="${LOCK_URL}/api/v1/audit/trace"
 
   echo "┌────────────────────────────────────────────────────────────────────┐"
   echo "│           TRACE API AUTO-TEST (REST + gRPC, admin / write / read)  │"
@@ -628,14 +647,16 @@ run_trace_tests() {
   rest_post "$api" "$write_token" "$rec_rest_1"
   expect_http "submit record (genesis of the REST chain)" 202
   expect_rest_jq "acceptance is not a replay" '.accepted == true and .idempotent_replay == false'
-  digest_rest_1="$(jq -r '.content_digest' <<<"$HTTP_BODY")"
-  receipt_rest_1="$(jq -r '.receipt_sequence' <<<"$HTTP_BODY")"
+  digest_rest_1="$(jq -r '.content_digest | tostring | select(test("^sha256:[0-9a-f]{64}$"))' <<<"$HTTP_BODY")"
+  receipt_rest_1="$(jq -r '.receipt_sequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$HTTP_BODY")"
+  [[ -n "$digest_rest_1" && -n "$receipt_rest_1" ]] || t_fail "REST  receipt carries no well-formed content_digest and receipt_sequence" "$HTTP_BODY"
 
   grpc TraceService/SubmitRecord "$write_token" "{\"assertion\": \"$(b64 "$rec_grpc_1")\"}"
   expect_grpc "submit record (genesis of the gRPC chain)"
   expect_grpc_jq "acceptance is not a replay" '.accepted == true and .idempotentReplay == false'
-  digest_grpc_1="$(jq -r '.contentDigest' <<<"$GRPC_OUT")"
-  receipt_grpc_1="$(jq -r '.receiptSequence' <<<"$GRPC_OUT")"
+  digest_grpc_1="$(jq -r '.contentDigest | tostring | select(test("^sha256:[0-9a-f]{64}$"))' <<<"$GRPC_OUT")"
+  receipt_grpc_1="$(jq -r '.receiptSequence | tostring | select(test("^[0-9]{1,18}$"))' <<<"$GRPC_OUT")"
+  [[ -n "$receipt_grpc_1" ]] || t_fail "gRPC  receipt carries no well-formed receiptSequence" "$GRPC_OUT"
   [[ "$digest_grpc_1" == "$(py digest <<<"$rec_grpc_1")" ]] || t_fail "gRPC  content_digest differs from the digest of the submitted bytes" "$digest_grpc_1"
   t_pass "gRPC  content_digest matches the digest of the submitted record"
 
@@ -802,20 +823,20 @@ run_audit_tests() {
   echo -e "\n2. Tests with valid write tokens (should succeed)\n"
 
   echo -e "\n── Log ───────────────────────────────────────────────"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries"
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_LOG_TOKEN' -d '$SINGLE_LOG_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessLog" "gRPC → ProcessLog"
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_LOG_TOKEN' -H 'GRPC_APP: jans-lock' -d '$BULK_LOG_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkLog" "gRPC → ProcessBulkLog"
 
   echo -e "\n── Health ───────────────────────────────────────────"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries"
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_HEALTH_TOKEN' -d '$SINGLE_HEALTH_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessHealth" "gRPC → ProcessHealth"
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_HEALTH_TOKEN' -d '$BULK_HEALTH_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkHealth" "gRPC → ProcessBulkHealth"
 
   echo -e "\n── Telemetry ─────────────────────────────────────────"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry"
-  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry"
+  check_http_success "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries"
 
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_TELEMETRY_TOKEN' -d '$SINGLE_TELEMETRY_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessTelemetry" "gRPC → ProcessTelemetry"
   check_grpc_success "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_TELEMETRY_TOKEN' -d '$BULK_TELEMETRY_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkTelemetry" "gRPC → ProcessBulkTelemetry"
@@ -823,54 +844,54 @@ run_audit_tests() {
   echo -e "\n3. Tests with invalid write tokens → write operations should fail\n"
 
   echo -e "\n── Log with invalid scope ────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_HEALTH_TOKEN' -d '$SINGLE_LOG_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessLog" "gRPC → ProcessLog"
 
   echo -e "\n── Health with invalid scope ─────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_LOG_TOKEN' -d '$SINGLE_HEALTH_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessHealth" "gRPC → ProcessHealth"
 
   echo -e "\n── Telemetry with invalid scope ──────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $WRITE_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $WRITE_LOG_TOKEN' -d '$SINGLE_TELEMETRY_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessTelemetry" "gRPC → ProcessTelemetry"
 
   echo -e "\n4. Tests with read-only tokens → write operations should fail\n"
 
   echo -e "\n── Log read token ────────────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry with read-only token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_LOG_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_LOG_TOKEN' -d '$SINGLE_LOG_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessLog" "gRPC → ProcessLog with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_LOG_TOKEN' -d '$BULK_LOG_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkLog" "gRPC → ProcessBulkLog with read-only token"
 
   echo -e "\n── Health read token ─────────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry with read-only token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_HEALTH_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_HEALTH_TOKEN' -d '$SINGLE_HEALTH_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessHealth" "gRPC → ProcessHealth with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_HEALTH_TOKEN' -d '$BULK_HEALTH_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkHealth" "gRPC → ProcessBulkHealth with read-only token"
 
   echo -e "\n── Telemetry read token ──────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry with read-only token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry with read-only token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $READ_TELEMETRY_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_TELEMETRY_TOKEN' -d '$SINGLE_TELEMETRY_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessTelemetry" "gRPC → ProcessTelemetry with read-only token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $READ_TELEMETRY_TOKEN' -d '$BULK_TELEMETRY_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkTelemetry" "gRPC → ProcessBulkTelemetry with read-only token"
 
   echo -e "\n5. Tests with invalid token (should fail)\n"
 
   echo -e "\n── Log invalid token ────────────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry with invalid token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log' <<< '$SINGLE_LOG_JSON_REST'" "REST → single log entry with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/log/bulk' <<< '$BULK_LOG_JSON_REST'" "REST → bulk log entries with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -d '$SINGLE_LOG_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessLog" "gRPC → ProcessLog with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -d '$BULK_LOG_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkLog" "gRPC → ProcessBulkLog with invalid token"
 
   echo -e "\n── Health invalid token ─────────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry with invalid token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health' <<< '$SINGLE_HEALTH_JSON_REST'" "REST → single health entry with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/health/bulk' <<< '$BULK_HEALTH_JSON_REST'" "REST → bulk health entries with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -d '$SINGLE_HEALTH_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessHealth" "gRPC → ProcessHealth with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -d '$BULK_HEALTH_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkHealth" "gRPC → ProcessBulkHealth with invalid token"
 
   echo -e "\n── Telemetry invalid token ──────────────────────────────"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry with invalid token"
-  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${HOST}/jans-lock/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry' <<< '$SINGLE_TELEMETRY_JSON_REST'" "REST → single telemetry entry with invalid token"
+  check_http_should_fail "curl $CURL_TLS -H 'Authorization: Bearer $INVALID_TOKEN' -H 'Content-Type: application/json' -d @- '${LOCK_URL}/api/v1/audit/telemetry/bulk' <<< '$BULK_TELEMETRY_JSON_REST'" "REST → bulk telemetry entries with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -H 'GRPC_APP: jans-lock' -d '$SINGLE_TELEMETRY_GRPC' $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessTelemetry" "gRPC → ProcessTelemetry with invalid token"
   check_grpc_should_fail "$GRPCURL --proto audit.proto -H 'authorization: bearer $INVALID_TOKEN' -d '$BULK_TELEMETRY_GRPC'  $GRPC_ADDR io.jans.lock.audit.AuditService/ProcessBulkTelemetry" "gRPC → ProcessBulkTelemetry with invalid token"
 }

@@ -7,12 +7,9 @@ import argparse
 import zipfile
 import shutil
 import time
-import ssl
 
 from urllib import request
 from pathlib import Path
-
-ssl._create_default_https_context = ssl._create_unverified_context
 
 SETUP_BRANCH = 'main'
 

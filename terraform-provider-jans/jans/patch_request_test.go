@@ -77,3 +77,27 @@ func TestPartialPatchCreation(t *testing.T) {
 	}
 
 }
+
+func TestPatchDiffExactFieldMatch(t *testing.T) {
+
+	type cfg struct {
+		GrantTypesSupported                      []string `json:"grantTypesSupported,omitempty"`
+		GrantTypesSupportedByDynamicRegistration []string `json:"grantTypesSupportedByDynamicRegistration,omitempty"`
+	}
+
+	orig := &cfg{
+		GrantTypesSupported:                      []string{"authorization_code"},
+		GrantTypesSupportedByDynamicRegistration: []string{"authorization_code"},
+	}
+
+	patches, err := createPatchesDiff(orig, []PatchRequest{
+		{Op: "replace", Path: "/grantTypesSupportedByDynamicRegistration", Value: []string{"implicit"}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 1 || patches[0].Path != "/grantTypesSupportedByDynamicRegistration" {
+		t.Fatalf("Expected only the dynamic registration patch, got %v", patches)
+	}
+}

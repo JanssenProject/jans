@@ -10,10 +10,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.IntrospectionResponse;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -26,6 +29,7 @@ import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.IntrospectionService;
+import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.token.TokenService;
@@ -51,7 +55,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -85,6 +93,9 @@ public class IntrospectionWebService {
 
     @Inject
     private IntrospectionService introspectionService;
+
+    @Inject
+    private ScopeService scopeService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -148,11 +159,15 @@ public class IntrospectionWebService {
                 throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Access token is not valid")).build());
             }
 
+            if (isTrue(pair.getSecond())) {
+                // authorizationGrant belongs to the introspected token, so check the authenticated client's own scopes
+                validateBasicClientScopes(authorization);
+                return authorizationGrant;
+            }
+
             if (isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope()) &&
-                    !authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) { // #562 - make uma_protection optional
-                final String reason = "access_token used to access introspection endpoint does not have uma_protection scope, however in AS configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true";
-                log.trace(reason);
-                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build());
+                    !hasScope(authorizationGrant.getScopes(), UmaScopeType.PROTECTION.getValue())) { // #562 - make uma_protection optional
+                throwMissingScope("access_token used to access introspection endpoint does not have uma_protection scope, however in AS configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true");
             }
             introspectionService.validateIntrospectionScopePresence(authorizationGrant);
             return authorizationGrant;
@@ -166,7 +181,38 @@ public class IntrospectionWebService {
         }
     }
 
+    private void validateBasicClientScopes(String authorization) throws UnsupportedEncodingException {
+        final boolean umaProtectionRequired = isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope());
+        final boolean introspectionRequired = isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope());
+        if (!umaProtectionRequired && !introspectionRequired) {
+            return;
+        }
+
+        final String token = new String(Base64.decodeBase64(tokenService.getBasicToken(authorization)), StandardCharsets.UTF_8);
+        final int delim = token.indexOf(":");
+        final Client client = delim != -1 ? clientService.getClient(URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING)) : null;
+        final List<String> clientScopes = client != null && client.getScopes() != null
+                ? scopeService.getScopeIdsByDns(Arrays.asList(client.getScopes())) : Collections.emptyList();
+
+        if (umaProtectionRequired && !hasScope(clientScopes, UmaScopeType.PROTECTION.getValue())) {
+            throwMissingScope("client used to access introspection endpoint does not have uma_protection scope");
+        }
+        if (introspectionRequired && !hasScope(clientScopes, ScopeConstants.INTROSPECTION)) {
+            throwMissingScope("client used to access introspection endpoint does not have 'introspection' scope");
+        }
+    }
+
+    private static boolean hasScope(Collection<String> scopes, String scope) {
+        return scopes != null && scopes.contains(scope);
+    }
+
+    private void throwMissingScope(String reason) {
+        log.trace(reason);
+        throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build());
+    }
+
     private Response introspect(String authorization, String accept,  String token, String tokenTypeHint, String responseAsJwt, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.INTROSPECTION);
         try {
             if (log.isTraceEnabled()) {
                 log.trace("Introspect token, authorization: {}, token to introspect: {}, tokenTypeHint: {}, accept: {}", escapeLog(authorization), escapeLog(token), escapeLog(tokenTypeHint), escapeLog(accept));

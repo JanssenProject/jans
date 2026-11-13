@@ -11,7 +11,7 @@ resource jans_user "user" {
   locale              = "en_US"
   timezone            = "UTC"
   active              = true
-  password            = "password"
+  password            = var.user_password
   
   name {
     family_name     = "Doe"

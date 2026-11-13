@@ -17462,6 +17462,10 @@ components:
           type: boolean
         tlsClientAuthSubjectDn:
           type: string
+        accessTokenSigningKid:
+          type: string
+        idTokenSigningKid:
+          type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:

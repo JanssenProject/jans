@@ -154,7 +154,7 @@ When `Audit-Workload-ID` is missing, `workload_id` is the first non-empty value 
 2. `CEDARLING_APPLICATION_NAME` from the bootstrap configuration
 3. `cedarling-sidecar`
 
-TRACE records are submitted to Lock Server only by a Cedarling build that includes record emission ([#15485](https://github.com/JanssenProject/jans/pull/15485)), with `CEDARLING_TRACE` enabled and Lock Server set up for TRACE, see [TRACE properties](../reference/cedarling-properties.md#trace-properties). The sidecar already sends the TRACE context and flushes on shutdown.
+TRACE records are submitted to Lock Server when `CEDARLING_TRACE` is enabled and Lock Server is set up for TRACE, see [Cedarling TRACE](../reference/cedarling-trace.md). The sidecar already sends the TRACE context and flushes on shutdown.
 
 Cedarling queues records and sends them in the background. When the container stops, the Gunicorn worker finishes in-flight requests and then calls Cedarling `shut_down()` from its `worker_exit` hook, which sends the queued records once. Both steps share `GUNICORN_GRACEFUL_TIMEOUT`: the Gunicorn master kills the worker when it expires, and records still queued are lost.
 

@@ -116,6 +116,11 @@ public class CreateUserAction {
 
             log.debug("Creating user ...");
 
+            if (StringUtils.isBlank(uid) || userService.getUser(uid) != null) {
+                log.debug("Skipped user creation. uid is blank or already exists.");
+                return;
+            }
+
             ExecutionContext executionContext = ExecutionContext.of(externalContext);
             User user = prepareUserObject(executionContext);
 
@@ -139,12 +144,6 @@ public class CreateUserAction {
     private User prepareUserObject(ExecutionContext executionContext) {
         User user = new User();
         executionContext.setUser(user);
-
-        final User fetchedUser = userService.getUser(uid);
-        if (fetchedUser != null) {
-            log.debug("User with uid {} already exists.", uid);
-            user = fetchedUser;
-        }
 
         user.setAttribute("displayName", displayName, false);
         user.setAttribute("mail", email, false);

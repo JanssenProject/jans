@@ -168,6 +168,9 @@ pub(crate) enum TokenKind<'a> {
     AuthorizeCustom {
         mapping: Cow<'a, str>,
         generation: u64,
+        /// Identity of the processor that produced the result, so a request still
+        /// running on a replaced processor cannot feed the new one's cache entries.
+        processor: usize,
     },
 }
 
@@ -213,6 +216,7 @@ impl From<&TokenKind<'_>> for OwnedTokenKind {
             TokenKind::AuthorizeCustom {
                 mapping,
                 generation,
+                ..
             } => Self::AuthorizeCustom {
                 mapping: mapping.to_string(),
                 generation: *generation,
@@ -240,6 +244,7 @@ impl OwnedTokenKind {
                 TokenKind::AuthorizeCustom {
                     mapping,
                     generation,
+                    ..
                 },
             ) => owned_mapping.as_str() == mapping && owned_generation == generation,
             _ => false,

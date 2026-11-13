@@ -95,7 +95,6 @@ public class ApiAccessConstants {
 
     public static final String AUTH_SESSION_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/session.readonly";
     public static final String AUTH_SESSION_DELETE_ACCESS = "https://jans.io/oauth/jans-auth-server/session.delete";
-    public static final String AUTH_REVOKE_SESSION = "revoke_session";
     public static final String AUTH_SESSION_ADMIN_ACCESS = "https://jans.io/oauth/jans-auth-server/session.admin";
 
     // Super Scopes

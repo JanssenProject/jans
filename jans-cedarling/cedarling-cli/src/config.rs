@@ -56,7 +56,10 @@ pub fn resolve_bootstrap(args: &CommonArgs) -> Result<BootstrapConfig> {
         if s.starts_with("http://") || s.starts_with("https://") {
             raw_config.policy_store_uri = Some(s);
         } else {
-            raw_config.policy_store_local_fn = Some(s);
+            // Cedarling reads a directory store by absolute path only. A path that
+            // cannot be resolved is passed on, so Cedarling reports it as given.
+            let path = std::fs::canonicalize(store).unwrap_or_else(|_| store.clone());
+            raw_config.policy_store_local_fn = Some(path.to_string_lossy().to_string());
         }
     }
 

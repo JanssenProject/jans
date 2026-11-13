@@ -8,6 +8,7 @@ package io.jans.as.server.uma.service;
 
 import com.google.common.collect.Lists;
 import io.jans.as.model.config.Constants;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.uma.JsonLogic;
 import io.jans.as.model.uma.JsonLogicNode;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author yuriyz
@@ -54,6 +56,9 @@ public class UmaExpressionService {
 
     @Inject
     private UmaPermissionService permissionService;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     private static Map<String, String> scopeIdToDnMap(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, List<String> scriptDNs) {
         Map<String, String> result = new HashMap<>();
@@ -85,12 +90,25 @@ public class UmaExpressionService {
             if (StringHelper.isNotEmpty(resource.getScopeExpression())) {
                 evaluateScopeExpression(scriptMap, permission, resource);
             } else {
-                if (!evaluateByScopes(filterByScopeDns(scriptMap, permission.getScopeDns()))) {
+                Map<UmaScriptByScope, UmaAuthorizationContext> permissionScripts = filterByScopeDns(scriptMap, permission.getScopeDns());
+                if (permissionScripts.isEmpty() && !isTrue(appConfiguration.getUmaGrantAccessIfNoPolicies())) {
+                    log.trace("No policies protect permission scopes, access FORBIDDEN. Permission: {}", permission.getDn());
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Access denied because there are no any protection.");
+                }
+                if (!evaluateByScopes(permissionScripts)) {
                     log.trace("Regular evaluation returns false, access FORBIDDEN.");
                     throw errorResponseFactory.createWebApplicationException(Response.Status.FORBIDDEN, UmaErrorResponseType.FORBIDDEN_BY_POLICY, "Regular evaluation returns false, access FORBIDDEN.");
                 }
             }
         }
+    }
+
+    public boolean isScopeAuthorized(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap, String scopeDn) {
+        Map<UmaScriptByScope, UmaAuthorizationContext> scopeScripts = filterByScopeDns(scriptMap, Lists.newArrayList(scopeDn));
+        if (scopeScripts.isEmpty()) {
+            return isTrue(appConfiguration.getUmaGrantAccessIfNoPolicies());
+        }
+        return evaluateByScopes(scopeScripts);
     }
 
     private boolean evaluateByScopes(Map<UmaScriptByScope, UmaAuthorizationContext> scriptMap) {

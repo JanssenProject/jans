@@ -131,6 +131,34 @@ public class AssertionService {
 	 * Requires mandatory parameters: username Support non mandatory parameters:
 	 * userVerification, origin, extensions, timeout
 	 */
+	// The start hook may tighten userVerification; it must drive the ceremony rather than the caller's value
+	private void applyStartHookUserVerification(AssertionOptions assertionOptions, JsonNode assertionOptionsNode) {
+		JsonNode userVerificationNode = assertionOptionsNode == null ? null : assertionOptionsNode.get("userVerification");
+		if (userVerificationNode == null || !userVerificationNode.isTextual()) {
+			return;
+		}
+		UserVerification hookValue;
+		try {
+			hookValue = UserVerification.valueOf(userVerificationNode.asText());
+		} catch (IllegalArgumentException e) {
+			throw errorResponseFactory.invalidRequest("Invalid userVerification");
+		}
+		// Enum order is strongest first, so a higher ordinal would weaken the requested level
+		UserVerification requested = commonVerifiers.prepareUserVerification(assertionOptions.getUserVerification());
+		if (hookValue.ordinal() > requested.ordinal()) {
+			log.warn("Ignoring start hook userVerification '{}' weaker than requested '{}'", hookValue, requested);
+			return;
+		}
+		assertionOptions.setUserVerification(hookValue);
+	}
+
+	// A failed enabled extension is replaced by a dummy that returns false, so false must block the ceremony
+	private void requireExtensionAllowed(boolean allowed) {
+		if (!allowed) {
+			throw errorResponseFactory.forbiddenException();
+		}
+	}
+
 	public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
 		// Only the payload itself is mandatory here. An absent username is legitimate -
 		// it is how usernameless (discoverable credential) authentication is requested,
@@ -147,10 +175,12 @@ public class AssertionService {
 		long startTime = System.currentTimeMillis();
 
 		// Apply external custom scripts
+		JsonNode assertionOptionsNode = CommonUtilService.toJsonNode(assertionOptions);
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
-				CommonUtilService.toJsonNode(assertionOptions), httpRequest, httpResponse);
-		externalFido2InterceptionService.authenticateAssertionStart(
-				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
+				assertionOptionsNode, httpRequest, httpResponse);
+		requireExtensionAllowed(externalFido2InterceptionService.authenticateAssertionStart(
+				assertionOptionsNode, externalFido2InterceptionContext));
+		applyStartHookUserVerification(assertionOptions, assertionOptionsNode);
 
 		// Verify request parameters
 		String username = assertionOptions.getUsername();
@@ -239,8 +269,8 @@ public class AssertionService {
 		authenticationPersistenceService.save(authenticationEntity);
 
 		externalFido2InterceptionContext.addToContext(null, authenticationEntity);
-		externalFido2InterceptionService.authenticateAssertionFinish(CommonUtilService.toJsonNode(assertionOptions),
-				externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService.authenticateAssertionFinish(
+				CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext));
 
 		// Record metrics for authentication attempt
 		try {
@@ -374,8 +404,8 @@ public class AssertionService {
 		// Apply external custom scripts
 		ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(
 				CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
-		externalFido2InterceptionService
-				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
+		requireExtensionAllowed(externalFido2InterceptionService
+				.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext));
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);
@@ -415,10 +445,7 @@ public class AssertionService {
 
 		// FIDO2 conformance: explicitly compare the clientData challenge to the issued challenge
 		// instead of relying solely on the DB lookup above.
-		String issuedChallenge = authenticationData.getChallenge();
-		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
-			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
-		}
+		verifyChallengeMatchesIssued(authenticationData, challenge);
 
 		// Ordered after the conformance challenge comparison so that a mismatched challenge is still
 		// reported as such rather than being masked by the state of whichever ceremony it resolved to.
@@ -440,17 +467,17 @@ public class AssertionService {
 
 		// FIDO2 conformance: when a username-scoped ceremony issued allowCredentials, the asserted
 		// credential must belong to that user (i.e. be within the issued allowCredentials set).
-		String issuedUsername = authenticationData.getUsername();
-		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equals(registrationData.getUsername())) {
-			throw errorResponseFactory.invalidRequest(
-					"Asserted credential is not among the allowed credentials for this ceremony");
-		}
+		verifyAssertedCredentialIsAllowed(authenticationData, registrationData);
 
 		// FIDO2 conformance: when present, userHandle must map to the credential owner.
-		String userHandle = response.getUserHandle();
-		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
-			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
+		verifyUserHandleOwnsCredential(response, registrationData);
+
+		// Compromised or canceled credentials must not authenticate, including usernameless ceremonies
+		if (registrationEntry.getRegistrationStatus() != Fido2RegistrationStatus.registered) {
+			throw errorResponseFactory.invalidRequest("Credential is not in registered state");
 		}
+		// The nested status is written back on update; keep it in line with the authoritative one
+		registrationData.setStatus(registrationEntry.getRegistrationStatus());
 
 		// Set username and authenticator type for metrics
 		username = registrationData.getUsername();
@@ -488,7 +515,7 @@ public class AssertionService {
 			log.debug("There is session id. Setting session id attributes");
 
 			userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(),
-					registrationEntry, authenticationEntity, false);
+					registrationEntry, authenticationEntity);
 		}
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor();
@@ -651,6 +678,29 @@ public class AssertionService {
 		long elapsedMillis = System.currentTimeMillis() - issuedAt.getTime();
 		if (elapsedMillis > unfinishedRequestExpiration * 1000L) {
 			throw errorResponseFactory.invalidRequest("Assertion ceremony has expired");
+		}
+	}
+
+	private void verifyChallengeMatchesIssued(Fido2AuthenticationData authenticationData, String challenge) {
+		String issuedChallenge = authenticationData.getChallenge();
+		if (issuedChallenge == null || !issuedChallenge.equals(challenge)) {
+			throw errorResponseFactory.invalidRequest("Challenge in clientData does not match the issued challenge");
+		}
+	}
+
+	private void verifyAssertedCredentialIsAllowed(Fido2AuthenticationData authenticationData,
+			Fido2RegistrationData registrationData) {
+		String issuedUsername = authenticationData.getUsername();
+		if (StringHelper.isNotEmpty(issuedUsername) && !issuedUsername.equalsIgnoreCase(registrationData.getUsername())) {
+			throw errorResponseFactory.invalidRequest(
+					"Asserted credential is not among the allowed credentials for this ceremony");
+		}
+	}
+
+	private void verifyUserHandleOwnsCredential(Response response, Fido2RegistrationData registrationData) {
+		String userHandle = response.getUserHandle();
+		if (StringHelper.isNotEmpty(userHandle) && !userHandle.equals(registrationData.getUserId())) {
+			throw errorResponseFactory.invalidRequest("userHandle does not match the credential owner");
 		}
 	}
 

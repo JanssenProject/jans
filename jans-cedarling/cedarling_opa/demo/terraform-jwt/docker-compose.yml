@@ -21,7 +21,7 @@ services:
       - /app/demo/terraform-jwt/rego
     working_dir: /app/demo/terraform-jwt
     ports:
-      - "8181:8181"
+      - "127.0.0.1:8181:8181"
     healthcheck:
       # The distroless base image has no shell or curl.
       # `opa-cedarling health --addr` issues an HTTP GET /health and exits 0 when ready.

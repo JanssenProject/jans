@@ -98,6 +98,7 @@ public class EasyX509TrustManager implements X509TrustManager {
             Principal certIssuer = certChain.getIssuerDN();
             Principal certSubject = certChain.getSubjectDN();
             while (!certs.isEmpty()) {
+                int remaining = certs.size();
                 List<X509Certificate> tempcerts = new ArrayList<X509Certificate>();
                 tempcerts.addAll(certs);
                 for (X509Certificate cert : tempcerts) {
@@ -114,6 +115,9 @@ public class EasyX509TrustManager implements X509TrustManager {
                         certs.remove(cert);
                         continue;
                     }
+                }
+                if (certs.size() == remaining) {
+                    throw new CertificateException("Server certificate chain is not connected");
                 }
             }
             standardTrustManager.checkServerTrusted(chainList.toArray(new X509Certificate[] {}), authType);

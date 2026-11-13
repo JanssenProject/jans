@@ -128,6 +128,8 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
 
 **Chain registration mode.** `chainRegistrationMode` is `PRE_REGISTERED` (default) or `FIRST_OBSERVED`. See [Chain registration modes](#chain-registration-modes). A value that is not one of the two names is treated as `PRE_REGISTERED` and logged once at `WARN`.
 
+**Cedarling as a producer.** Cedarling needs `traceConfiguration` settings that differ from the defaults described in the "Default-domain fallback" and "Chain registration mode" paragraphs above. With the defaults, Lock refuses every record from Cedarling. Before you connect Cedarling, read [Auth Server and Lock Server setup](../../cedarling/reference/cedarling-trace.md#auth-server-and-lock-server-setup) for the values to set.
+
 **Crypto provider.** `cryptoProvider` selects the implementation that parses producer keys, canonicalizes assertions, verifies signatures and computes receipt hashes. Values are matched case-insensitively:
 
 - `JAVA` (default): BouncyCastle, in the Lock process. This is the implementation Lock shipped with.
@@ -745,7 +747,15 @@ gRPC is served in the mode set by `grpcConfiguration.serverMode` (`bridge`, `pla
 - `io.jans.lock.trace.TraceService`
 - `io.jans.lock.trace.TraceAdminService`
 
-The Apache template of the VM installer, the all-in-one nginx configuration and the Helm gateway routes (`lockAuditEnabled`) include them. A custom proxy needs the same rules.
+The Apache template of the VM installer and the all-in-one nginx configuration include them. In the Helm charts each service has its own route and its own flag, so Lock Audit, Lock Trace and Lock Trace Admin can be exposed independently:
+
+| Service | Helm flag |
+|---|---|
+| `io.jans.lock.audit.AuditService` | `gateway-api.routes.lockAuditEnabled` |
+| `io.jans.lock.trace.TraceService` | `gateway-api.routes.lockTraceEnabled` |
+| `io.jans.lock.trace.TraceAdminService` | `gateway-api.routes.lockTraceAdminEnabled` |
+
+All three require `global.auth-server.lockEnabled: true`. A custom proxy needs the same rules.
 
 | gRPC method | REST equivalent | Scope |
 |---|---|---|

@@ -5,7 +5,15 @@
 
 #![cfg(feature = "tools")]
 
-use crate::{BootstrapConfigRaw, Cedarling, LevelResult};
+use crate::{BootstrapConfig, BootstrapConfigRaw, Cedarling, LevelResult, PolicyStoreConfig};
+
+/// Bootstrap config with defaults for everything but the policy store.
+fn bootstrap(policy_store_config: PolicyStoreConfig) -> BootstrapConfig {
+    BootstrapConfig {
+        policy_store_config,
+        ..Default::default()
+    }
+}
 
 #[tokio::test]
 async fn test_validate_schema_error() {
@@ -15,10 +23,9 @@ async fn test_validate_schema_error() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report =
-        Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
-            .await
-            .expect("infra layer ok");
+    let report = Cedarling::validate_policy_store(&config)
+        .await
+        .expect("infra layer ok");
 
     assert!(
         !report.is_ok(),
@@ -44,9 +51,8 @@ async fn test_validate_parse_error() {
         source: crate::PolicyStoreSource::Yaml(": broken yaml - [".to_string()),
         ..Default::default()
     };
-    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&policy_store_config, &http_client_config)
+    let report = Cedarling::validate_policy_store(&bootstrap(policy_store_config))
         .await
         .expect("infra layer ok");
 
@@ -97,9 +103,8 @@ policy_stores:
         source: crate::PolicyStoreSource::Yaml(bad_metadata_store.to_string()),
         ..Default::default()
     };
-    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&policy_store_config, &http_client_config)
+    let report = Cedarling::validate_policy_store(&bootstrap(policy_store_config))
         .await
         .expect("infra layer ok");
 
@@ -133,10 +138,9 @@ async fn test_validate_ok() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let report =
-        Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
-            .await
-            .expect("infra layer ok");
+    let report = Cedarling::validate_policy_store(&config)
+        .await
+        .expect("infra layer ok");
 
     assert!(
         report.is_ok(),
@@ -152,9 +156,7 @@ async fn test_validate_infra_error() {
     };
 
     let config: crate::BootstrapConfig = raw_config.try_into().expect("should parse");
-    let result =
-        Cedarling::validate_policy_store(&config.policy_store_config, &config.http_client_config)
-            .await;
+    let result = Cedarling::validate_policy_store(&config).await;
 
     assert!(
         result.is_err(),
@@ -179,9 +181,8 @@ policy_stores:
         source: crate::PolicyStoreSource::Yaml(schemaless_store.to_string()),
         ..Default::default()
     };
-    let http_client_config = crate::http::HttpClientConfig::default();
 
-    let report = Cedarling::validate_policy_store(&policy_store_config, &http_client_config)
+    let report = Cedarling::validate_policy_store(&bootstrap(policy_store_config))
         .await
         .expect("infra layer ok");
 
@@ -215,9 +216,7 @@ fn archive_source(spec_version: Option<u32>) -> crate::PolicyStoreConfig {
 
 #[tokio::test]
 async fn test_validate_reports_outdated_spec_version_as_warning() {
-    let http_client_config = crate::http::HttpClientConfig::default();
-
-    let report = Cedarling::validate_policy_store(&archive_source(Some(0)), &http_client_config)
+    let report = Cedarling::validate_policy_store(&bootstrap(archive_source(Some(0))))
         .await
         .expect("infra layer ok");
 
@@ -241,13 +240,10 @@ async fn test_validate_reports_outdated_spec_version_as_warning() {
 
 #[tokio::test]
 async fn test_validate_current_spec_version_has_no_warnings() {
-    let http_client_config = crate::http::HttpClientConfig::default();
-
     let current = crate::common::policy_store::formats::CURRENT_FORMAT_VERSION;
-    let report =
-        Cedarling::validate_policy_store(&archive_source(Some(current)), &http_client_config)
-            .await
-            .expect("infra layer ok");
+    let report = Cedarling::validate_policy_store(&bootstrap(archive_source(Some(current))))
+        .await
+        .expect("infra layer ok");
 
     assert!(
         report.is_ok(),
@@ -261,9 +257,7 @@ async fn test_validate_current_spec_version_has_no_warnings() {
 
 #[tokio::test]
 async fn test_validate_unsupported_spec_version_fails_metadata() {
-    let http_client_config = crate::http::HttpClientConfig::default();
-
-    let report = Cedarling::validate_policy_store(&archive_source(Some(99)), &http_client_config)
+    let report = Cedarling::validate_policy_store(&bootstrap(archive_source(Some(99))))
         .await
         .expect("infra layer ok");
 
@@ -302,10 +296,9 @@ async fn test_validate_migration_error_fails_parse() {
         ..Default::default()
     };
 
-    let report =
-        Cedarling::validate_policy_store(&config, &crate::http::HttpClientConfig::default())
-            .await
-            .expect("a migration error is not an infrastructure error");
+    let report = Cedarling::validate_policy_store(&bootstrap(config))
+        .await
+        .expect("a migration error is not an infrastructure error");
     assert!(
         matches!(
             &report.parse,
@@ -337,8 +330,8 @@ policy_stores:
     }
 }
 
-async fn validate_metadata(config: &crate::PolicyStoreConfig) -> LevelResult {
-    Cedarling::validate_policy_store(config, &crate::http::HttpClientConfig::default())
+async fn validate_metadata(config: crate::PolicyStoreConfig) -> LevelResult {
+    Cedarling::validate_policy_store(&bootstrap(config))
         .await
         .expect("infra layer ok")
         .metadata
@@ -347,7 +340,7 @@ async fn validate_metadata(config: &crate::PolicyStoreConfig) -> LevelResult {
 #[tokio::test]
 async fn test_validate_yaml_non_hex_key_passes_metadata() {
     // The `policy_stores` key becomes the store ID and need not be hex.
-    let metadata = validate_metadata(&yaml_store_with_key("test_store")).await;
+    let metadata = validate_metadata(yaml_store_with_key("test_store")).await;
     assert!(
         matches!(metadata, LevelResult::Ok),
         "a non-hex YAML key should pass metadata: {metadata:?}"
@@ -356,10 +349,48 @@ async fn test_validate_yaml_non_hex_key_passes_metadata() {
 
 #[tokio::test]
 async fn test_validate_yaml_key_rules_other_than_id_still_apply() {
-    let metadata = validate_metadata(&yaml_store_with_key(&"a".repeat(256))).await;
+    let metadata = validate_metadata(yaml_store_with_key(&"a".repeat(256))).await;
     assert!(
         matches!(&metadata, LevelResult::Failed { errors }
             if errors.iter().any(|e| e.message.contains("name too long"))),
         "a YAML key over 255 bytes should fail the name check: {metadata:?}"
+    );
+}
+
+/// `CEDARLING_MAX_DEFAULT_ENTITIES` must reach validation, so `validate` and
+/// `Cedarling::new` accept and reject the same stores.
+#[tokio::test]
+async fn test_validate_applies_configured_entity_limit() {
+    let store = || crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::ArchiveBytes(
+            crate::common::policy_store::test_utils::fixtures::with_multiple_entities(5)
+                .build_archive()
+                .expect("should build archive"),
+        ),
+        ..Default::default()
+    };
+    let with_limit = |max_default_entities| BootstrapConfig {
+        max_default_entities: Some(max_default_entities),
+        ..bootstrap(store())
+    };
+
+    let report = Cedarling::validate_policy_store(&with_limit(3))
+        .await
+        .expect("infra layer ok");
+    assert!(
+        matches!(
+            &report.parse,
+            LevelResult::Failed { errors }
+                if errors.iter().any(|e| e.message.contains("Maximum number of default entities (3) exceeded, found 5"))
+        ),
+        "5 entities must fail a configured limit of 3: {report:?}"
+    );
+
+    let report = Cedarling::validate_policy_store(&with_limit(10))
+        .await
+        .expect("infra layer ok");
+    assert!(
+        report.is_ok(),
+        "5 entities must pass a configured limit of 10: {report:?}"
     );
 }

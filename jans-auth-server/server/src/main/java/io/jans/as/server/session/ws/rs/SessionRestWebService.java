@@ -4,7 +4,12 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwt.DPoPJwtPayloadParam;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
+import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.CertUtils;
+import io.jans.as.server.auth.DpopService;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
@@ -15,6 +20,8 @@ import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.util.CoreCertUtil;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -34,6 +41,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,6 +54,8 @@ import static io.jans.as.model.userinfo.UserInfoErrorResponseType.INVALID_TOKEN;
  */
 @Path("/session")
 public class SessionRestWebService {
+
+    private static final String DPOP_AUTH_SCHEME = "DPoP ";
 
     @Inject
     private Logger log;
@@ -68,6 +78,9 @@ public class SessionRestWebService {
     @Inject
     private ExternalApplicationSessionService externalApplicationSessionService;
 
+    @Inject
+    private DpopService dpopService;
+
     @POST
     @Path("/active")
     @Produces({MediaType.APPLICATION_JSON})
@@ -78,7 +91,7 @@ public class SessionRestWebService {
             @Context SecurityContext securityContext) {
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACTIVE_SESSION);
-            AuthorizationGrant grant = validateToken(getToken(authorization));
+            AuthorizationGrant grant = validateToken(getToken(authorization), request);
 
             ExecutionContext executionContext = new ExecutionContext(request, response);
             executionContext.setGrant(grant);
@@ -160,7 +173,7 @@ public class SessionRestWebService {
         return (int) (date.getTime() / 1000L);
     }
 
-    private AuthorizationGrant validateToken(String accessToken) {
+    private AuthorizationGrant validateToken(String accessToken, HttpServletRequest request) {
         if (StringUtils.isBlank(accessToken)) {
             throw new WebApplicationException(response(Response.Status.BAD_REQUEST, INVALID_TOKEN));
         }
@@ -176,6 +189,7 @@ public class SessionRestWebService {
             log.trace("Invalid access token object, access_token: {}, isNull: {}, isValid: {}", accessToken, accessTokenObject == null, false);
             throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
         }
+        validateSenderConstraint(accessToken, accessTokenObject, request);
 
         final Set<String> scopes = authorizationGrant.getScopes();
         if (BooleanUtils.isFalse(appConfiguration.getOpenidScopeBackwardCompatibility()) && !scopes.contains(DefaultScope.OPEN_ID.toString())) {
@@ -191,6 +205,65 @@ public class SessionRestWebService {
         return authorizationGrant;
     }
 
+    // Sender-constrained tokens (RFC 8705 / RFC 9449) must be presented together with proof of the bound key.
+    private void validateSenderConstraint(String accessToken, AbstractToken accessTokenObject, HttpServletRequest request) {
+        final String x5ts256 = accessTokenObject.getX5ts256();
+        if (StringUtils.isNotBlank(x5ts256)
+                && !x5ts256.equals(CertUtils.confirmationMethodHashS256(CoreCertUtil.getClientCert(request).getCert()))) {
+            log.trace("Client certificate does not match access token binding.");
+            throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
+        }
+
+        final String jkt = accessTokenObject.getDpop();
+        if (StringUtils.isBlank(jkt)) {
+            return;
+        }
+        final String dpop = request != null ? request.getHeader("DPoP") : null;
+        boolean valid = false;
+        try {
+            valid = StringUtils.isNotBlank(dpop) && dpopService.validateDpop(dpop) && jkt.equals(DpopService.getDpopJwkThumbprint(dpop))
+                    && isDpopProofForRequest(Jwt.parseOrThrow(dpop), accessToken, request, appConfiguration.getBaseEndpoint());
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.trace("Failed to validate DPoP proof.", e);
+        }
+        if (!valid) {
+            log.trace("DPoP proof does not match access token binding.");
+            throw new WebApplicationException(response(Response.Status.UNAUTHORIZED, INVALID_TOKEN));
+        }
+    }
+
+    // RFC 9449 section 7.1: the proof must be for this method, this endpoint and this access token
+    static boolean isDpopProofForRequest(Jwt dpop, String accessToken, HttpServletRequest request, String baseEndpoint) {
+        final String htm = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTM);
+        final String htu = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.HTU);
+        final String ath = dpop.getClaims().getClaimAsString(DPoPJwtPayloadParam.ATH);
+        if (!request.getMethod().equals(htm) || StringUtils.isBlank(htu)
+                || !Base64Util.base64urlencode(DigestUtils.sha256(accessToken)).equals(ath)) {
+            return false;
+        }
+        final URI htuUri = URI.create(htu);
+        if (!request.getRequestURI().equals(htuUri.getRawPath())) {
+            return false;
+        }
+        // scheme/authority come from the configured public endpoint, not the request, because of TLS-terminating proxies
+        return StringUtils.isNotBlank(baseEndpoint) && isSameOrigin(htuUri, URI.create(baseEndpoint));
+    }
+
+    private static boolean isSameOrigin(URI a, URI b) {
+        return StringUtils.equalsIgnoreCase(a.getScheme(), b.getScheme())
+                && StringUtils.equalsIgnoreCase(a.getHost(), b.getHost())
+                && effectivePort(a) == effectivePort(b);
+    }
+
+    private static int effectivePort(URI uri) {
+        if (uri.getPort() != -1) {
+            return uri.getPort();
+        }
+        return "http".equalsIgnoreCase(uri.getScheme()) ? 80 : 443;
+    }
+
     private Response response(Response.Status status, UserInfoErrorResponseType errorResponseType) {
         return Response
                 .status(status)
@@ -203,6 +276,9 @@ public class SessionRestWebService {
     private String getToken(String authorization) {
         if (tokenService.isBearerAuthToken(authorization)) {
             return tokenService.getBearerToken(authorization);
+        }
+        if (authorization != null && StringUtils.startsWithIgnoreCase(authorization, DPOP_AUTH_SCHEME)) {
+            return authorization.substring(DPOP_AUTH_SCHEME.length()).trim();
         }
         return null;
     }

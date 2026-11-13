@@ -153,7 +153,6 @@ async fn prepare_cedarling() -> Result<Cedarling, InitCedarlingError> {
         jwt_config: JwtConfig::new_without_validation(),
         authorization_config: AuthorizationConfig::default(),
         lock_config: None,
-        max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),

@@ -8,8 +8,11 @@ package io.jans.orm;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -27,6 +30,8 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.event.DeleteNotifier;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.MappingException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeType;
@@ -84,6 +89,113 @@ public interface PersistenceEntryManager extends EntityManager {
 	 *         {@code @Version} fields
 	 */
 	Void updateWithVersion(Object entry);
+
+	/**
+	 * Reports whether {@link #persistBatch(List)} is implemented atomically by this backend. Only the
+	 * SQL backend implements it; every other backend returns {@code false} and its
+	 * {@code persistBatch} throws {@link io.jans.orm.exception.UnsupportedOperationException}.
+	 *
+	 * <p>A hybrid entry manager returns {@code true} only when every configured backend supports it.
+	 * Use {@link #isAtomicBatchSupported(String)} to ask for the backend that stores a given DN.</p>
+	 *
+	 * @return {@code true} when {@code persistBatch} is atomic on this backend
+	 */
+	default boolean isAtomicBatchSupported() {
+		return false;
+	}
+
+	/**
+	 * Reports whether {@link #persistBatch(List)} is atomic for entries stored under {@code primaryKey}.
+	 * Single-backend managers return {@link #isAtomicBatchSupported()}; a hybrid entry manager returns
+	 * the capability of the backend that the DN maps to.
+	 *
+	 * @param primaryKey DN (or base DN) of the entries to write
+	 * @return {@code true} when {@code persistBatch} is atomic for that DN
+	 */
+	default boolean isAtomicBatchSupported(String primaryKey) {
+		return isAtomicBatchSupported();
+	}
+
+	/**
+	 * Inserts all entries in ONE transaction: either every entry is stored or none is. There are no
+	 * partial results. Entries may be of different entity classes (and tables). The insertion order is
+	 * the list order.
+	 *
+	 * <p>Each entry is mapped exactly as {@link #persist(Object)} maps it: the DN comes from the
+	 * {@code @DN} property and is handled the same way, object classes and expiration are the same, and
+	 * the {@code @Version} property of an entry is initialized exactly as {@code persist} initializes
+	 * it (the entry object is updated in place before the write).</p>
+	 *
+	 * <p>An empty list is a no-op. The method is stateless and thread safe; on the SQL backend the
+	 * batch is one transaction on one pooled connection. There is no general transaction API: the
+	 * batch is the unit of atomicity.</p>
+	 *
+	 * <p>The default implementation always throws {@link io.jans.orm.exception.UnsupportedOperationException},
+	 * also for an empty list. Callers check {@link #isAtomicBatchSupported()} first and fall back to
+	 * {@link #persist(Object)} per entry.</p>
+	 *
+	 * @param entries entries to insert, in order
+	 * @throws io.jans.orm.exception.MappingException {@code entries} is {@code null} or contains a
+	 *         {@code null} element, or an entry cannot be mapped; nothing is stored
+	 * @throws io.jans.orm.exception.EntryPersistenceException an entry with the same DN already exists:
+	 *         the cause is a {@link io.jans.orm.exception.operation.DuplicateEntryException} (checked, so it
+	 *         is wrapped exactly as {@code persist} wraps it), with {@code getDn()} set to the failing DN
+	 *         when the backend reports it; the transaction is rolled back and nothing is stored. Any other
+	 *         failure is an {@code EntryPersistenceException} without that cause; nothing is stored
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no atomic batch
+	 */
+	default void persistBatch(List<?> entries) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Atomic batch insert (persistBatch) is not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reads entries by DN. Backends with a native implementation (SQL) read them in one round trip
+	 * per table; the default implementation works on every backend and reads one DN at a time, so
+	 * callers never need a capability check.
+	 *
+	 * <p>Missing DNs are absent from the result. Result keys are the DNs as passed; the iteration
+	 * order of the result follows the first occurrence of each DN in {@code dns}. A DN passed more than
+	 * once is read once. An empty collection returns an empty map.</p>
+	 *
+	 * @param entryClass entity class of all requested entries
+	 * @param dns DNs to read
+	 * @return found entries keyed by DN; never {@code null}
+	 * @throws io.jans.orm.exception.MappingException {@code dns} is {@code null} or contains a
+	 *         {@code null} or empty DN
+	 * @throws io.jans.orm.exception.EntryPersistenceException a read fails for a reason other than a
+	 *         missing entry. The default implementation checks existence with {@code contains}, which
+	 *         reports a failed read as a missing entry on backends that swallow the read error, so a DN
+	 *         can be absent from the result although the read failed. The SQL implementation reports
+	 *         every read failure.
+	 */
+	default <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns) {
+		if (dns == null) {
+			throw new MappingException("DNs to find entries are null");
+		}
+
+		Map<String, T> result = new LinkedHashMap<>();
+		Set<String> processed = new HashSet<>();
+		for (String dn : dns) {
+			if (dn == null || dn.isEmpty()) {
+				throw new MappingException("DN to find entry is null");
+			}
+			if (!processed.add(dn) || !contains(dn, entryClass)) {
+				continue;
+			}
+
+			try {
+				result.put(dn, find(dn, entryClass, null));
+			} catch (EntryPersistenceException ex) {
+				// The entry can be removed between contains() and find(): skip it only in that case
+				if (contains(dn, entryClass)) {
+					throw ex;
+				}
+			}
+		}
+
+		return result;
+	}
 
 	@Deprecated
 	boolean contains(Object entity);

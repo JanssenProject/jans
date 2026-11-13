@@ -20,9 +20,9 @@ use p256::ecdsa::{Signature, SigningKey, VerifyingKey, signature::Signer};
 use p256::pkcs8::DecodePrivateKey;
 use p384::ecdsa::SigningKey as P384SigningKey;
 use rcgen::{
-    BasicConstraints, CertificateParams, CustomExtension, DnType, ExtendedKeyUsagePurpose, IsCa,
-    Issuer, KeyPair, KeyUsagePurpose, PKCS_ECDSA_P256_SHA256, PKCS_ECDSA_P384_SHA384, SanType,
-    SerialNumber, date_time_ymd,
+    BasicConstraints, CertificateParams, CustomExtension, DnType, ExtendedKeyUsagePurpose,
+    GeneralSubtree, IsCa, Issuer, KeyPair, KeyUsagePurpose, NameConstraints,
+    PKCS_ECDSA_P256_SHA256, PKCS_ECDSA_P384_SHA384, SanType, SerialNumber, date_time_ymd,
 };
 use sha2::{Digest, Sha256};
 
@@ -149,6 +149,21 @@ pub fn make_intermediate(common_name: &str, path_len: Option<u8>, issuer: &Ca) -
         .der()
         .to_vec();
     Ca { params, key, der }
+}
+
+/// Reissue `ca` with a `NameConstraints` extension, keeping its key and subject, so
+/// certificates it signs still chain to it. `issuer` is `None` for a root.
+pub fn with_name_constraints(mut ca: Ca, issuer: Option<&Ca>) -> Ca {
+    ca.params.name_constraints = Some(NameConstraints {
+        permitted_subtrees: vec![GeneralSubtree::DnsName("example.com".to_string())],
+        excluded_subtrees: vec![],
+    });
+    let cert = match issuer {
+        Some(issuer) => ca.params.signed_by(&ca.key, &issuer.issuer()),
+        None => ca.params.self_signed(&ca.key),
+    };
+    ca.der = cert.expect("reissue name-constrained CA").der().to_vec();
+    ca
 }
 
 /// Build a self-signed P-384 root CA valid 2020-01-01 .. 2030-01-01 — matches

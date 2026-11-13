@@ -7,6 +7,8 @@ use anyhow::{Context, Result};
 use cedarling::{Cedarling, LevelResult, PolicyStoreConfig};
 use colored::Colorize;
 
+use crate::output::Untrusted;
+
 /// Validates a policy store according to parse, schema, and metadata rules, outputting diagnostics
 /// to stdout.
 ///
@@ -21,10 +23,7 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
     let source_label = describe_source(&bootstrap.policy_store_config);
     println!("validating {source_label}");
 
-    let report = Cedarling::validate_policy_store(
-        &bootstrap.policy_store_config,
-        &bootstrap.http_client_config,
-    )
+    let report = Cedarling::validate_policy_store(&bootstrap)
         .await
         .context("failed to run policy store validation")?;
 
@@ -35,8 +34,17 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         println!(
             "  {} {}: {}",
             "warning:".yellow(),
-            warning.file,
-            warning.message
+            Untrusted(&warning.file),
+            Untrusted(&warning.message)
+        );
+    }
+
+    for unknown in &report.unknown_fields {
+        println!(
+            "  {} {}: {}",
+            "warning:".yellow(),
+            Untrusted(&unknown.file),
+            Untrusted(&unknown.message)
         );
     }
 
@@ -44,10 +52,15 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         .iter()
         .filter(|r| matches!(r, LevelResult::Skipped { .. }))
         .count();
-        
-    let skip_msg = if skips > 0 { format!(" ({skips} level(s) skipped)") } else { String::new() };
 
-    let passed = report.is_ok() && !(strict && skips > 0);
+    let skip_msg = if skips > 0 {
+        format!(" ({skips} level(s) skipped)")
+    } else {
+        String::new()
+    };
+
+    let unknown = report.unknown_fields.len();
+    let passed = report.is_ok() && !(strict && (skips > 0 || unknown > 0));
 
     if passed {
         println!("validation passed{skip_msg}");
@@ -57,7 +70,10 @@ pub async fn run(bootstrap: cedarling::BootstrapConfig, strict: bool) -> Result<
         if n > 0 {
             println!("validation failed: {n} error(s){skip_msg}");
         } else {
-            println!("validation failed: {skips} skipped level(s) with --strict");
+            println!(
+                "validation failed: {skips} skipped level(s), {unknown} unknown field(s) with \
+                 --strict"
+            );
         }
         Ok(1)
     }
@@ -67,26 +83,31 @@ fn print_level(name: &str, result: &LevelResult) {
     let dots = ".".repeat(24usize.saturating_sub(name.len()));
     match result {
         LevelResult::Ok => println!("  {name} {dots} {}", "OK".green()),
-        LevelResult::Skipped { reason } => println!("  {name} {dots} skipped ({reason})"),
+        LevelResult::Skipped { reason } => {
+            println!("  {name} {dots} skipped ({})", Untrusted(reason));
+        },
         LevelResult::Failed { errors } => {
             println!("  {name} {dots} {}", "FAIL".red());
             for e in errors {
+                let file = Untrusted(&e.file).to_string();
                 let loc = match (e.line, e.column) {
-                    (Some(l), Some(c)) => format!("{}:{l}:{c}", e.file),
-                    (Some(l), None) => format!("{}:{l}", e.file),
-                    _ => e.file.clone(),
+                    (Some(l), Some(c)) => format!("{file}:{l}:{c}"),
+                    (Some(l), None) => format!("{file}:{l}"),
+                    _ => file,
                 };
-                println!("    {loc}: {}", e.message);
+                println!("    {loc}: {}", Untrusted(&e.message));
             }
         },
     }
 }
 
+/// Printed as is: the operator set the path or URL in the bootstrap config.
 fn describe_source(cfg: &PolicyStoreConfig) -> String {
     use cedarling::PolicyStoreSource;
     match &cfg.source {
-        PolicyStoreSource::FileYaml(path)
-        | PolicyStoreSource::CjarFile(path) => path.display().to_string(),
+        PolicyStoreSource::FileYaml(path) | PolicyStoreSource::CjarFile(path) => {
+            path.display().to_string()
+        },
         PolicyStoreSource::Directory(path) => format!("{}/", path.display()),
         PolicyStoreSource::Uri(url)
         | PolicyStoreSource::CjarUrl(url)
