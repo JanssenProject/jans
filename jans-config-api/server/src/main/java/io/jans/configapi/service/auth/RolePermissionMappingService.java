@@ -99,7 +99,10 @@ public class RolePermissionMappingService {
             List<RolePermissionMapping> roleScopeMappings = rolePermissionMappingConf.getDynamic()
                     .getRolePermissionMapping().stream().filter(ele -> ele.getRole().equalsIgnoreCase(role))
                     .collect(Collectors.toList());
+            
+            logger.error("RolePermissionMappingService -  roleScopeMappings:{}",roleScopeMappings);
             if (!CollectionUtils.isEmpty(roleScopeMappings)) {
+                logger.error("RolePermissionMappingService -  roleScopeMappings.get(0):{}",roleScopeMappings.get(0));
                 return roleScopeMappings.get(0);
             }
             logger.error(ROLE_PERMISSION_MAP_NOT_FOUND);

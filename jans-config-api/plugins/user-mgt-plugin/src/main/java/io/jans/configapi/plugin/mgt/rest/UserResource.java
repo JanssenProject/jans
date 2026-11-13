@@ -730,7 +730,8 @@ public class UserResource extends BaseResource {
 
         String loggedInUserInum = this.getContextUserInum(servletRequest);
         String clientId = this.getContextClientId(servletRequest);
-        logger.info(" loggedInUserInum:{}, clientId:{} ", loggedInUserInum, clientId);
+        logger.info("UserResource::validateUserPermission() - loggedInUserInum:{}, clientId:{} ", loggedInUserInum,
+                clientId);
 
         // If user excluded from role-permission check then return
         if (isRolePermissionExemptClient(clientId)) {
@@ -755,11 +756,12 @@ public class UserResource extends BaseResource {
             HttpServletRequest servletRequest) throws ApiApplicationException {
 
         if (logger.isInfoEnabled()) {
-            logger.info("validateUserPermission - loggedInUserInum:{}, userInum:{}, httpRequestMethod:{}",
+            logger.info(
+                    "UserResource::validateUserPermission() - loggedInUserInum:{}, userInum:{}, httpRequestMethod:{}",
                     loggedInUserInum, escapeLog(userInum), httpRequestMethod);
         }
 
-        // validation based on user inum
+        // validation based on loggedInUserInum
         User loggedInUser = null;
         if (StringUtils.isNotBlank(loggedInUserInum)) {
             // Get User details
@@ -773,13 +775,14 @@ public class UserResource extends BaseResource {
 
         // check if user has `admin` role or permission
         boolean isAdmin = isAdminUser(loggedInUser, httpRequestMethod, servletRequest);
-        logger.info("validateUserPermission - User isAdmin:{}", isAdmin);
+        logger.info("Final UserResource::validateUserPermission() - loggedInUserInum:{}, isAdmin:{}", loggedInUserInum,
+                isAdmin);
 
         // if updating others profile and does not have role/permission
-        if (StringUtils.isNotBlank(userInum) && !isAdmin) {
+        if (!isAdmin) {
             String errMsg = String.format(USER_PERMISSION_ERROR_MSG.toString(),
                     (loggedInUserInum != null) ? loggedInUserInum : "", userInum);
-            logger.error("validateUserPermission - errMsg:{}", errMsg);
+            logger.error("UserResource::validateUserPermission() - errMsg:{}", errMsg);
 
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(), errMsg));

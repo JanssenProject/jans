@@ -84,6 +84,7 @@ public class JwtUtil {
             final Date expiresAt = jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
             String issuer = jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER);
             List<String> scopes = jwt.getClaims().getClaimAsStringList("scope");
+            log.error("\n\n JWT scopes:{}, user_inum:{}, user_role:{}", scopes, jwt.getClaims().getClaimAsStringList("user_inum"), jwt.getClaims().getClaimAsStringList("user_role"));
 
             // Validate token is not expired
             log.info("Validate JWT");

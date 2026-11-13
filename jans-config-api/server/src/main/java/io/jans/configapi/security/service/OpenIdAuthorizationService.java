@@ -65,7 +65,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path, HttpHeaders httpHeaders) throws WebApplicationException {
-        logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ", issuer,
+        logger.error("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ", issuer,
                 resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
@@ -81,7 +81,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         // Check the type of token simple, jwt, reference
-        logger.info("Verify if JWT");
+        logger.error("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = false;
         List<String> tokenScopes = null;
@@ -90,7 +90,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
             if (isJwtToken) {
 
-                logger.info("Since token is JWT Validate it");
+                logger.error("Since token is JWT Validate it");
                 jwtUtil.parse(acccessToken);
                 tokenScopes = jwtUtil.validateToken(acccessToken);
             }
@@ -104,10 +104,13 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         if (!isJwtToken) {
-            logger.info("Non JWT Token Introspection");
+            logger.error("Non JWT Token Introspection");
             IntrospectionResponse introspectionResponse = null;
             try {
                 introspectionResponse = openIdService.getIntrospectionResponse(token, acccessToken, issuer);
+                logger.error(" OpenIdAuthorizationService::processAuthorization() - introspectionResponse:{}", introspectionResponse);
+                logger.error(" OpenIdAuthorizationService - user_inum:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_inum"));
+                logger.error(" OpenIdAuthorizationService - user_role:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_role"));
             } catch (JsonProcessingException ex) {
                 logger.error("Error while token Introspection exception - ", ex);
                 throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
@@ -123,7 +126,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
             tokenScopes = introspectionResponse.getScope();
         }
-
+        logger.error(" OpenIdAuthorizationService - tokenScopes:{}", tokenScopes); 
         // Validate Scopes
         acccessToken = validateScope(token, tokenScopes, resourceInfo, issuer, httpHeaders);
 
@@ -155,10 +158,10 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.info(" If no resource scopes required return original accessToken");
                 return accessToken;
             }
-
+            logger.error(" OpenIdAuthorizationService- tokenScopes:{}, resourceScopes:{}", tokenScopes, resourceScopes); 
             // find missing scopes
             List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.info("missingScopes:{}", missingScopes);
+            logger.error("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);

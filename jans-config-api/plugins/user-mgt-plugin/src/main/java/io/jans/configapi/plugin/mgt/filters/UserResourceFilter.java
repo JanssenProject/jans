@@ -102,8 +102,12 @@ public class UserResourceFilter extends BaseFilter {
         }
 
         IntrospectionResponse introspectionResponse = getIntrospectionResponse(requestContext);
-        log.info(" UserResourceFilter - token introspection done- introspectionResponse:{} ", introspectionResponse);
+        log.error(" UserResourceFilter - token introspection done- introspectionResponse:{} ", introspectionResponse);
+        log.error(" UserResourceFilter - tokenScopes:{}", introspectionResponse.getScope());
+        log.error(" UserResourceFilter - user_inum:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_inum"));
+        log.error(" UserResourceFilter - user_role:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_role"));
 
+        // If user excluded from role-permission check then return
         if (isRolePermissionExemptClient(introspectionResponse)) {
             log.info(" UserResourceFilter - Skip validateUserRolePermission as isRolePermissionExemptClient ");
             return;
@@ -118,15 +122,16 @@ public class UserResourceFilter extends BaseFilter {
 
         List<String> resourceScopes = authUtil.getAllScopeList(resourceScopesByType);
         log.debug("Get resourceScopesByType: {}, resourceScopes: {}", resourceScopesByType, resourceScopes);
-
+        log.error(" UserResourceFilter - resourceScopes:{}", resourceScopes);
+        
         // Fetch current UserRolePermission of user
         List<String> userCurrentScopes = authUtil.getUserRolePermission(getUserInum(introspectionResponse));
-        log.debug("userCurrentScopes:{}", userCurrentScopes);
+        log.error("UserResourceFilter - userCurrentScopes:{}", userCurrentScopes);
 
         // For any missing scopes throw unauthorized error
         List<String> safeList = new ArrayList<>(userCurrentScopes);
         List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, safeList);
-        log.info("missingScopes:{}", missingScopes);
+        log.error("UserResourceFilter - missingScopes:{}", missingScopes);
         if (missingScopes != null && !missingScopes.isEmpty()) {
             log.error("Insufficient scopes!!! for new token as well - Required scope:{}, userCurrentScopes:{}",
                     resourceScopes, userCurrentScopes);
