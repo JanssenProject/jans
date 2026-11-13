@@ -79,7 +79,7 @@ impl AttemptFailure {
         }
     }
 
-    fn from_send_error(err: reqwest::Error) -> Self {
+    pub(crate) fn from_send_error(err: reqwest::Error) -> Self {
         if err.is_builder() || err.is_redirect() {
             Self::Final(FinalFailure::InvalidRequest(err))
         } else {
@@ -87,8 +87,9 @@ impl AttemptFailure {
         }
     }
 
-    // `408` and `429` come from a proxy as often as from the server: both ask to repeat later.
-    fn from_response(response: &reqwest::Response) -> Option<Self> {
+    /// `None` for a response that is not a failure. `408` and `429` come from a proxy
+    /// as often as from the server: both ask to repeat the request later.
+    pub(crate) fn from_response(response: &reqwest::Response) -> Option<Self> {
         let status = response.status();
         let url = Box::new(response.url().clone());
         if status.is_server_error()

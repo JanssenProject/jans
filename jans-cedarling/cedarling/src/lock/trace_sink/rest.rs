@@ -18,7 +18,7 @@ use super::{
     Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus, retryable,
 };
 use crate::http::HttpClient;
-use crate::http_utils::{HttpRequestError, MAX_EXPONENTIAL_DELAY, ReadBodyError};
+use crate::http_utils::{AttemptFailure, HttpRequestError, MAX_EXPONENTIAL_DELAY, ReadBodyError};
 
 /// Lock's TRACE bulk endpoint and the client that posts to it.
 pub(in crate::lock) struct RestTraceClient {
@@ -44,25 +44,27 @@ impl RestTraceClient {
     }
 
     pub(super) async fn submit(&self, token: &str, body: &Bytes) -> Result<Attempt, PostBulkError> {
-        let response = self
-            .bulk_request(token, body)
-            .send()
-            .await
-            .map_err(|err| retryable(err.to_string()))?;
+        let response = self.bulk_request(token, body).send().await.map_err(|err| {
+            match AttemptFailure::from_send_error(err) {
+                AttemptFailure::Retryable(failure) => retryable(failure.to_string()),
+                AttemptFailure::Final(failure) => PostBulkError::NotSent {
+                    reason: failure.to_string(),
+                },
+            }
+        })?;
         let status = response.status();
         if status == StatusCode::UNAUTHORIZED {
             return Ok(Attempt::Unauthorized);
         }
-        // `429` and `408` come from a proxy before Lock as often as from Lock:
-        // both ask to repeat the request later, not to drop it.
-        if status.is_server_error()
-            || status == StatusCode::TOO_MANY_REQUESTS
-            || status == StatusCode::REQUEST_TIMEOUT
-        {
-            return Err(PostBulkError::Retryable {
-                reason: format!("HTTP {status}"),
-                retry_after: retry_after(response.headers(), Utc::now()),
-            });
+        match AttemptFailure::from_response(&response) {
+            Some(AttemptFailure::Retryable(_)) => {
+                return Err(PostBulkError::Retryable {
+                    reason: format!("HTTP {status}"),
+                    retry_after: retry_after(response.headers(), Utc::now()),
+                });
+            },
+            // Read for Lock's error, as is any answer other than `207`.
+            Some(AttemptFailure::Final(_)) | None => {},
         }
         let bytes = self
             .http
@@ -452,6 +454,32 @@ mod tests {
                 }
             ),
             "expected Retryable without Retry-After, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn refused_redirect_is_not_sent_again() {
+        let mut server = Server::new_async().await;
+        let redirect = server
+            .mock("POST", BULK_PATH)
+            .with_status(302)
+            .with_header("location", "http://lock.invalid/bulk")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let err = sink(&server, None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a redirect from loopback to remote http must not be followed");
+
+        redirect.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                PostBulkError::NotSent { ref reason } if reason.contains("refusing redirect")
+            ),
+            "a refused redirect fails the same way every time, got {err:?}"
         );
     }
 
