@@ -22,8 +22,8 @@ from aio import Aio, HttpError, jwt_claims  # noqa: E402
 from catalog import REPO, discover  # noqa: E402
 
 RELOAD_INTERVAL = 30  # CustomScriptManager.DEFAULT_INTERVAL
-SENTINEL_TYPE = {"jans-auth": "introspection", "jans-scim": "scim", "jans-config-api": "config_api_auth",
-                 "jans-fido2": "fido2_extension"}
+# config-api has no safe sentinel: a broken config_api_auth script denies every config-api call.
+SENTINEL_TYPE = {"jans-auth": "introspection", "jans-scim": "scim", "jans-fido2": "fido2_extension"}
 SENTINEL_BODY = "this is not valid python (\n"
 INIT_FAILED = "Using default external type class"
 TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange"
@@ -98,7 +98,9 @@ class Run:
         init() calls later in the same pass are not mistaken for clean loads.
         """
         sentinels = {}
-        for svc in services:
+        if set(services) - set(SENTINEL_TYPE):
+            time.sleep(2 * RELOAD_INTERVAL + 10)
+        for svc in set(services) & set(SENTINEL_TYPE):
             sentinels[svc] = self.aio.create_script(self.name("sentinel"), SENTINEL_TYPE[svc], "python",
                                                     SENTINEL_BODY)["inum"]
             self.scripts.append(sentinels[svc])
@@ -142,7 +144,7 @@ def check_installed(run, scripts):
         return
     ldif = (REPO / "jans-linux-setup/jans_setup/templates/scripts.ldif").read_text(encoding="utf-8")
     placeholders = set(re.findall(r"%\((\w+)\)s", ldif))
-    expected = {s.key: s for s in scripts if s.key in placeholders}
+    expected = {s.key: s for s in scripts if s.key in placeholders and s.rel not in manifest.NOT_INSTALLED}
     bodies, start = set(), 0
     while True:
         entries = run.aio.api("GET", f"/api/v1/config/scripts?limit=100&startIndex={start}").get("entries") or []
@@ -339,6 +341,7 @@ def main():
         behavior_tests(run, scripts)
         run.delete(list(run.scripts))
         load_check(run, isolated["persistence_extension"])
+        load_check(run, isolated["config_api_auth"])
         client_authn_test(run, scripts)
     except Exception as e:  # noqa: BLE001 - a harness crash must still leave a failing report
         report.add("ScriptCatalog.harness", "run", "fail", f"{type(e).__name__}: {e}", traceback.format_exc())

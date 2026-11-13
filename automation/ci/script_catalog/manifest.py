@@ -10,8 +10,14 @@ NON_AUTH_LOADERS = {
 NOT_IN_AIO = {"idp", "link_interception", "lock_extension", "shib_post_authn_approval"}
 
 # Loaded (or compiled) with a global effect on every request, so each one runs alone after the shared
-# batch. client_authn answers 401 to any request without Basic auth, so it always runs last.
-ISOLATED_TYPES = ["persistence_extension", "client_authn"]
+# batch. A config_api_auth script that fails to load falls back to DummyConfigApiType, which denies every
+# config-api call; client_authn answers 401 to any request without Basic auth, so it always runs last.
+ISOLATED_TYPES = ["persistence_extension", "config_api_auth", "client_authn"]
+
+# In scripts.ldif, but removed from the AIO by the persistence-loader.
+NOT_INSTALLED = {
+    "person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py": "loader deletes the DUO entry unless CN_DUO_ENABLED",
+}
 
 # Scripts that do not load on the current server. A test reports them skipped; if one starts loading,
 # drop it from here so a later regression fails.

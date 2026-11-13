@@ -27,7 +27,8 @@ class CatalogTest(unittest.TestCase):
         self.assertEqual(self.by_rel["person_authentication/other/postauthn/postauthn.py"].script_type, "post_authn")
 
     def test_manifest_paths_exist(self):
-        for rel in itertools.chain(manifest.KNOWN_BROKEN, manifest.INIT_REQUIRED, manifest.LIBRARIES):
+        for rel in itertools.chain(manifest.KNOWN_BROKEN, manifest.INIT_REQUIRED, manifest.LIBRARIES,
+                                   manifest.NOT_INSTALLED):
             self.assertIn(rel, self.by_rel, rel)
 
     def test_init_required_scripts_are_not_known_broken(self):
@@ -40,8 +41,11 @@ class CatalogTest(unittest.TestCase):
     def test_every_loaded_type_has_a_sentinel(self):
         for s in self.scripts:
             svc = manifest.loader_service(s.script_type) if s.script_type else None
-            if svc:
-                self.assertIn(svc, run.SENTINEL_TYPE)
+            if svc and s.script_type not in manifest.ISOLATED_TYPES:
+                self.assertIn(svc, run.SENTINEL_TYPE, s.rel)
+
+    def test_no_sentinel_type_can_lock_out_config_api(self):
+        self.assertNotIn("config_api_auth", run.SENTINEL_TYPE.values())
 
 
 class ClassifyTest(unittest.TestCase):
