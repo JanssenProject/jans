@@ -73,23 +73,55 @@ A record is signed as follows:
 4. Store the 64-byte signature as base64url without padding, which is 86 characters.
 
 Records that contain an unpaired surrogate, or a non-finite number such as NaN, are rejected rather than signed.
-Any hash of canonical bytes uses the `sha256:` prefix followed by the lowercase hex digest.
+Hashes use the `sha256:` prefix followed by the lowercase hex digest.
+
+The `prev_record_hash` of a record is the `content_digest` of the previous record. Lock computes that digest over
+the complete previous record, including its `signature`. Hash the signed form, not the unsigned form, when you
+set `prev_record_hash`. Otherwise Lock flags the link with `chain_link_failure_flag`.
 
 ## Signing key
 
-The producer key is an Ed25519 key in a BCFKS keystore. Create one with a BouncyCastle provider jar, and
-store the password you choose as `fido2TraceKeyStorePassword`:
+The producer key is an Ed25519 key in a BCFKS keystore. Create one with a BouncyCastle provider jar. `keytool`
+prompts for the keystore and key passwords, so do not pass them on the command line:
 
 ```bash
 keytool -genkeypair -storetype BCFKS -keystore /etc/jans/conf/trace-producer.bcfks \
-  -storepass '<keystore-password>' -keypass '<keystore-password>' \
   -alias trace-producer -keyalg Ed25519 -dname "CN=jans-fido2-trace" -validity 3650 \
   -providerpath /path/to/bcprov-jdk18on.jar \
   -providerclass org.bouncycastle.jce.provider.BouncyCastleProvider
 ```
 
 Then set `fido2TraceKeyStorePath` to the file, `fido2TraceKeyAlias` to `trace-producer`, and
-`fido2TraceKeyStorePassword` to the password. The password is encrypted when it is stored.
+`fido2TraceKeyStorePassword` to the keystore password. The password is encrypted when it is stored.
+
+### Register the public key on Lock
+
+Lock needs the public key as an Ed25519 JWK. Export the certificate that `keytool` created, then take the raw
+32-byte key from its public key and encode it as base64url:
+
+```bash
+keytool -exportcert -storetype BCFKS -keystore /etc/jans/conf/trace-producer.bcfks -alias trace-producer \
+  -providerpath /path/to/bcprov-jdk18on.jar \
+  -providerclass org.bouncycastle.jce.provider.BouncyCastleProvider -file trace-producer.der
+openssl x509 -inform DER -in trace-producer.der -pubkey -noout > trace-producer.pem
+openssl pkey -pubin -in trace-producer.pem -outform DER | tail -c 32 | base64 | tr '+/' '-_' | tr -d '='
+```
+
+Register the result with `{"kty": "OKP", "crv": "Ed25519", "x": "<output>"}` as described in
+[Register a key](../lock/trace.md#register-a-key). Lock does not yet define the `FIDO_CEREMONY` event kind, so
+registration with that kind cannot succeed until Lock adds it.
+
+### Rotating the signing key
+
+Lock accepts a new key only under a new `kid`, and it never changes a registered key. To rotate:
+
+1. Create a new key with a new alias, or in a new keystore file.
+2. Register its public key on Lock under a new `kid`, as described in [Register a key](../lock/trace.md#register-a-key).
+3. Set `fido2TraceKeyAlias` or `fido2TraceKeyStorePath` to the new key.
+4. Revoke the old key on Lock once its records no longer need to be verified, as described in
+   [Revoke a key](../lock/trace.md#revoke-a-key).
+5. Decide whether the producer chain continues or starts a new one. See
+   [Register a producer chain](../lock/trace.md#register-a-producer-chain) for when a new chain is needed.
 
 !!! warning "FIPS builds"
     Ed25519 signs and verifies under the BC-FIPS 1.0.2.7 provider that the FIPS build uses. When BC-FIPS
