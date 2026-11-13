@@ -196,12 +196,6 @@ impl HttpClient {
         Self::new(self.conf)
     }
 
-    /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
-    /// (e.g. when they need to inspect headers before consuming the body).
-    pub(crate) fn max_response_size_bytes(&self) -> Option<u64> {
-        self.max_response_size_bytes
-    }
-
     /// Creates a new Sender with the configured backoff strategy.
     pub(crate) fn create_sender(&self) -> Sender {
         let backoff = {
@@ -219,15 +213,13 @@ impl HttpClient {
     }
 
     /// Sends a GET request to the specified URI with retry logic. Returns the
-    /// response body as a string wrapped in [`Response`], which the caller can
-    /// then deserialize. Test-only: production callers use [`Self::get_bytes`]
+    /// response body wrapped in [`Response`], which the caller can then
+    /// deserialize. Test-only: production callers use [`Self::get_with_retry`]
     /// or [`Self::get_json`].
     #[cfg(test)]
     pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        let text = sender.send_text(|| client.get(uri)).await?;
-        Ok(Response { text })
+        let body = self.get_bytes(uri).await?;
+        Ok(Response { body })
     }
 
     pub(crate) async fn get_json<T>(&self, uri: &str) -> Result<T, HttpClientError>
@@ -442,13 +434,13 @@ pub(crate) enum HeadOutcome {
     NotSupported,
 }
 
-/// Wrapper around a text response body — lets callers defer JSON deserialization
+/// Wrapper around a response body — lets callers defer JSON deserialization
 /// to a stage where they hold the response. Returned by [`HttpClient::get`].
 /// Test-only.
 #[cfg(test)]
 #[derive(Debug)]
 pub(crate) struct Response {
-    text: String,
+    body: Vec<u8>,
 }
 
 #[cfg(test)]
@@ -457,7 +449,7 @@ impl Response {
     where
         T: Deserialize<'a>,
     {
-        serde_json::from_str::<'a, T>(&self.text)
+        serde_json::from_slice::<'a, T>(&self.body)
     }
 }
 

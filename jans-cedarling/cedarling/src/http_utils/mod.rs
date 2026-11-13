@@ -118,14 +118,8 @@ pub enum HttpRequestReasonError {
     MaxRetriesExceeded,
     #[error("response status indicates failure")]
     HttpStatusError,
-    #[error("failed to deserialize response to JSON: {0}")]
-    DeserializeToJson(#[source] reqwest::Error),
     #[error("failed to deserialize response body bytes to JSON: {0}")]
     DeserializeBytesToJson(#[source] serde_json::Error),
-    #[error("failed to decode response body as text: {0}")]
-    DecodeResponseText(#[source] reqwest::Error),
-    #[error("response body is not valid UTF-8: {0}")]
-    InvalidUtf8(#[source] std::string::FromUtf8Error),
     #[error("failed to read response body bytes: {0}")]
     DecodeResponseBytes(#[source] reqwest::Error),
     // Names the property so an operator can tell which knob to raise, whichever
@@ -289,22 +283,6 @@ impl Sender {
                 HttpRequestReasonError::DeserializeBytesToJson(e),
                 Some(status),
             )
-        })
-    }
-
-    /// Sends an HTTP request with retry logic and returns the response body as text.
-    #[cfg(test)]
-    pub(crate) async fn send_text<F>(&mut self, request: F) -> Result<String, HttpRequestError>
-    where
-        F: FnMut() -> RequestBuilder,
-    {
-        let response = self.send_with_retry(request).await?;
-        let status = response.status();
-        let bytes = read_response_capped(response, self.max_response_size)
-            .await
-            .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
-        String::from_utf8(bytes).map_err(|e| {
-            HttpRequestError::new(HttpRequestReasonError::InvalidUtf8(e), Some(status))
         })
     }
 
