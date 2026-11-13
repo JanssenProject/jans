@@ -3,6 +3,7 @@ package io.jans.casa.plugins.authnmethod.rs;
 import io.jans.service.cache.CacheProvider;
 
 import java.security.SecureRandom;
+import java.util.regex.Pattern;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -108,7 +109,8 @@ public class MobilePhoneEnrollingWS {
             result = ValidateCode.MISSING_PARAMS;
         } else {
             Object value = cacheProvider.get(RECENT_CODES_PREFIX + userId + SEPARATOR + code);
-            result = value == null ? ValidateCode.NO_MATCH_OR_EXPIRED : ValidateCode.MATCH;
+            result = activeEntry(value, System.currentTimeMillis()) == null
+                    ? ValidateCode.NO_MATCH_OR_EXPIRED : ValidateCode.MATCH;
         }
         return result.getResponse();
 
@@ -146,15 +148,14 @@ public class MobilePhoneEnrollingWS {
                 cacheProvider.remove(key);
             }
 
-            if (value == null) {
-                //No match
+            String[] entry = activeEntry(value, now);
+            if (entry == null) {
+                //No match or past its stored expiry
                 result = FinishCode.NO_MATCH_OR_EXPIRED;
             } else {
-                //data still valid
                 phone = new VerifiedMobile();
                 phone.setNickName(nickName);
                 phone.setAddedOn(now);
-                String[] entry = value.toString().split(java.util.regex.Pattern.quote(EXPIRY_SEPARATOR), 2);
                 phone.setNumber(entry[0]);
 
                 if (mobilePhoneService.addPhone(userId, phone)) {
@@ -170,18 +171,25 @@ public class MobilePhoneEnrollingWS {
 
     }
 
-    //A failed enrollment must not extend the code's original lifetime
-    private void restoreCode(String key, Object value, String[] entry, long now) {
-        if (entry.length < 2) {
-            return;
+    //Returns {number, expiresAt} only while the stored expiry has not passed; cache TTL alone may lag it
+    private String[] activeEntry(Object value, long now) {
+        if (value == null) {
+            return null;
         }
+        String[] entry = value.toString().split(Pattern.quote(EXPIRY_SEPARATOR), 2);
         try {
-            long remainingSec = TimeUnit.MILLISECONDS.toSeconds(Long.parseLong(entry[1]) - now);
-            if (remainingSec > 0) {
-                cacheProvider.put((int) remainingSec, key, value);
-            }
+            return entry.length == 2 && now < Long.parseLong(entry[1]) ? entry : null;
         } catch (NumberFormatException e) {
             logger.warn("Invalid expiry in cached enrollment code");
+            return null;
+        }
+    }
+
+    //A failed enrollment must not extend the code's original lifetime
+    private void restoreCode(String key, Object value, String[] entry, long now) {
+        long remainingSec = TimeUnit.MILLISECONDS.toSeconds(Long.parseLong(entry[1]) - now);
+        if (remainingSec > 0) {
+            cacheProvider.put((int) remainingSec, key, value);
         }
     }
 
