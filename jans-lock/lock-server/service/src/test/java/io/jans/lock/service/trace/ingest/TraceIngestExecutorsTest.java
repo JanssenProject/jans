@@ -145,4 +145,42 @@ class TraceIngestExecutorsTest {
 		}
 	}
 
+	@Test
+	void stoppedPoolAbandonsQueuedTasks() throws Exception {
+		config.setBatchVerifyThreads(1);
+		Executor pool = executors.verificationExecutor();
+		CountDownLatch running = new CountDownLatch(1);
+		CountDownLatch release = new CountDownLatch(1);
+		pool.execute(() -> {
+			running.countDown();
+			try {
+				release.await(10, TimeUnit.SECONDS);
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+		});
+		assertTrue(running.await(10, TimeUnit.SECONDS));
+		AtomicInteger abandoned = new AtomicInteger();
+		pool.execute(new TraceIngestExecutors.AbandonableTask() {
+			@Override
+			public void run() {
+			}
+
+			@Override
+			public void abandon() {
+				abandoned.incrementAndGet();
+			}
+		});
+
+		Thread.currentThread().interrupt();
+		try {
+			executors.shutdown();
+		} finally {
+			assertTrue(Thread.interrupted(), "the interrupt is kept");
+			release.countDown();
+		}
+
+		assertEquals(1, abandoned.get());
+	}
+
 }

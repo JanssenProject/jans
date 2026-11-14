@@ -690,4 +690,41 @@ class TraceBatchIngestTest {
 		assertFalse(store.findRecord(successorId).get().getFlags().isCoverageGap());
 	}
 
+	// -- review follow-ups ----------------------------------------------------------------------
+
+	@Test
+	void identityStoredWithOtherContentDuringTheBatchSendsTheBatchOneByOne() {
+		List<String> c = chain(CHAIN_1, 2);
+		String conflicting = TraceRecordBuilder.fromJson(c.get(0)).producerChainId(CHAIN_2).sign(key.getPrivate());
+		store.beforeBatchInsert = () -> competitor.ingest(conflicting, competitor.ctx(DOMAIN));
+
+		List<BatchOutcome> outcomes = submit(node, c);
+
+		assertFalse(outcomes.get(0).isAccepted());
+		assertTrue(outcomes.get(0).getError() instanceof TraceConflictException);
+		assertTrue(outcomes.get(1).isAccepted());
+		assertTrue(outcomes.get(1).getResult().isCoverageGapFlag(),
+				"planned without the dropped predecessor, as on the one-by-one path");
+		assertTrue(storedFlags(c.get(1)).isCoverageGap());
+		assertDenseValidChain(2);
+	}
+
+	@Test
+	void replayOfStoredRecordIsClassifiedFromTheStoreWhenTheBatchFallsBack() {
+		List<String> c = chain(CHAIN_1, 2);
+		assertTrue(submit(node, c.subList(1, 2)).get(0).isAccepted());
+		assertTrue(storedFlags(c.get(1)).isCoverageGap());
+
+		store.failNextInsertIngestBatch();
+		store.failNextInsertRecord();
+		List<BatchOutcome> outcomes = submit(node, c);
+
+		assertFalse(outcomes.get(0).isAccepted(), "the predecessor fails on the per-record path too");
+		assertTrue(outcomes.get(1).isAccepted());
+		assertTrue(outcomes.get(1).getResult().isIdempotentReplay());
+		assertTrue(outcomes.get(1).getResult().isCoverageGapFlag(),
+				"the overlay cleared the gap for a predecessor that was never stored");
+		assertTrue(storedFlags(c.get(1)).isCoverageGap());
+	}
+
 }

@@ -42,6 +42,16 @@ public class TraceIngestExecutors {
 
 	static final long SHUTDOWN_WAIT_SECONDS = 10;
 
+	/**
+	 * A task whose submitter waits for it. A stopping pool that drops the task unrun calls
+	 * {@link #abandon()}, so the submitter is released instead of waiting forever.
+	 */
+	interface AbandonableTask extends Runnable {
+
+		void abandon();
+
+	}
+
 	@Inject
 	private Logger log;
 
@@ -69,8 +79,8 @@ public class TraceIngestExecutors {
 	}
 
 	/**
-	 * Stops both pools. Queued correlation work gets {@link #SHUTDOWN_WAIT_SECONDS} to finish; what
-	 * is left after that is lost and logged.
+	 * Stops both pools. Queued work gets {@link #SHUTDOWN_WAIT_SECONDS} to finish; what is left after
+	 * that is lost and logged, and each {@link AbandonableTask} among it is abandoned.
 	 */
 	@PreDestroy
 	public void shutdown() {
@@ -134,10 +144,19 @@ public class TraceIngestExecutors {
 				if (!closing.awaitTermination(SHUTDOWN_WAIT_SECONDS, TimeUnit.SECONDS)) {
 					List<Runnable> dropped = closing.shutdownNow();
 					log.warn("TRACE {} pool stopped with {} queued tasks not run", name, dropped.size());
+					abandon(dropped);
 				}
 			} catch (InterruptedException ex) {
-				closing.shutdownNow();
+				abandon(closing.shutdownNow());
 				Thread.currentThread().interrupt();
+			}
+		}
+
+		private void abandon(List<Runnable> dropped) {
+			for (Runnable task : dropped) {
+				if (task instanceof AbandonableTask) {
+					((AbandonableTask) task).abandon();
+				}
 			}
 		}
 

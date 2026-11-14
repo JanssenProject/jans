@@ -215,7 +215,10 @@ public class InMemoryTraceStore implements TraceStore {
 		awaitInsertRecordBarrier();
 
 		String key = traceKeys.recordKey(stored.getIdentity());
-		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, stored.copy());
+		StoredTraceRecord existing;
+		synchronized (this) {
+			existing = recordsByKey.putIfAbsent(key, stored.copy());
+		}
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
@@ -392,7 +395,10 @@ public class InMemoryTraceStore implements TraceStore {
 
 		String key = traceKeys.receiptKey(row.getDomainId(), row.getReceiptSeq());
 		row.setId(key);
-		TraceReceiptEntry existing = receiptsByKey.putIfAbsent(key, copyOf(row));
+		TraceReceiptEntry existing;
+		synchronized (this) {
+			existing = receiptsByKey.putIfAbsent(key, copyOf(row));
+		}
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
@@ -405,8 +411,9 @@ public class InMemoryTraceStore implements TraceStore {
 
 	/**
 	 * Atomic like the SQL store: every receipt position and record identity is checked against the
-	 * stored rows and against the rest of the batch before anything is written. A single-row insert
-	 * that wins a race in between makes the batch undo its own rows and report the duplicate.
+	 * stored rows and against the rest of the batch before anything is written. Single-row inserts
+	 * and {@link #findReceiptHead} take the same monitor, so no row can win a race between the
+	 * check and the publication, and no head read sees a batch half published.
 	 */
 	@Override
 	public synchronized void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
@@ -513,7 +520,7 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public Optional<ReceiptHead> findReceiptHead(String domainId) {
+	public synchronized Optional<ReceiptHead> findReceiptHead(String domainId) {
 		return receiptsByKey.values().stream().filter(r -> r.getDomainId().equals(domainId))
 				.max(Comparator.comparingLong(TraceReceiptEntry::getReceiptSeq))
 				.map(r -> new ReceiptHead(r.getReceiptSeq(), r.getReceiptHash()));

@@ -62,6 +62,16 @@ final class DomainAudit {
 	 * @return this audit; {@link #problems()} is empty when everything holds
 	 */
 	DomainAudit run(long expectedAccepted, boolean walkChain, TraceReceiptChain chain) {
+		return run(expectedAccepted, walkChain, chain, 0L);
+	}
+
+	/**
+	 * Same as {@link #run(long, boolean, TraceReceiptChain)} for a domain whose receipts
+	 * {@code 1..syntheticPrefix} were written directly, without records and with zero hashes (the
+	 * benchmark preload). Those positions are excluded from the record checks and from the chain
+	 * walk's verdict; every position after them is checked in full.
+	 */
+	DomainAudit run(long expectedAccepted, boolean walkChain, TraceReceiptChain chain, long syntheticPrefix) {
 		head = store.findReceiptHead(domain).map(h -> h.getReceiptSequence()).orElse(0L);
 		receipts = DatabaseProfile.countReceipts(entryManager, domain);
 		records = (int) store.countRecords(domain);
@@ -80,12 +90,13 @@ final class DomainAudit {
 		if (expectedAccepted >= 0 && records != expectedAccepted) {
 			problems.add("record rows " + records + " but accepted outcomes " + expectedAccepted);
 		}
-		if (records != head) {
-			problems.add("record rows " + records + " but head sequence " + head);
+		if (records != head - syntheticPrefix) {
+			problems.add("record rows " + records + " but head sequence " + head + " after " + syntheticPrefix
+					+ " synthetic receipts");
 		}
 
 		Map<RecordIdentity, Long> seqByIdentity = new HashMap<>();
-		for (long from = 1; from <= head; from += CHUNK) {
+		for (long from = syntheticPrefix + 1; from <= head; from += CHUNK) {
 			List<Long> sequences = new ArrayList<>();
 			for (long seq = from; seq < from + CHUNK && seq <= head; seq++) {
 				sequences.add(seq);
@@ -123,8 +134,16 @@ final class DomainAudit {
 
 		if (walkChain && chain != null) {
 			ChainVerificationReport report = chain.verifyDomain(domain, Integer.MAX_VALUE);
-			if (!report.isOk()) {
-				problems.add("verifyDomain: " + report);
+			if (syntheticPrefix == 0) {
+				if (!report.isOk()) {
+					problems.add("verifyDomain: " + report);
+				}
+			} else {
+				for (ChainVerificationReport.Entry entry : report.getEntries()) {
+					if (entry.getSeq() > syntheticPrefix && !entry.isOk()) {
+						problems.add("verifyDomain: " + entry);
+					}
+				}
 			}
 			if (report.getHeadSequence() != head) {
 				problems.add("verifyDomain head " + report.getHeadSequence() + " differs from " + head);

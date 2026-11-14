@@ -104,6 +104,10 @@ class TraceHttpLoad {
 		final int bulkSize;
 
 		Point(int chains, int connections, int bulkSize) {
+			if (chains <= 0 || connections <= 0 || bulkSize <= 0) {
+				throw new IllegalArgumentException(
+						"Point dimensions must be positive: " + chains + "x" + connections + "x" + bulkSize);
+			}
 			this.chains = chains;
 			this.connections = connections;
 			this.bulkSize = bulkSize;

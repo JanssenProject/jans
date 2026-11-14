@@ -28,6 +28,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.AfterAll;
@@ -178,7 +179,7 @@ class TraceIngestBenchmark {
 				}
 			}
 		}
-		long accepted = preload;
+		long accepted = 0;
 		int run = 0;
 		for (int[] scenario : scenarios) {
 			boolean last = run == scenarios.size() - 1;
@@ -186,7 +187,7 @@ class TraceIngestBenchmark {
 			accepted += result.chains * (long) result.records - result.exhausted;
 			report(result);
 			if (audit) {
-				audit(accepted, last);
+				audit(accepted, last, preload);
 			}
 			if (result.chains == 1) {
 				if (minRate > 0) {
@@ -202,11 +203,11 @@ class TraceIngestBenchmark {
 		}
 	}
 
-	private static void audit(long expectedAccepted, boolean walkChain) {
+	private static void audit(long expectedAccepted, boolean walkChain, long syntheticPrefix) {
 		TraceTestHarness harness = newNode("audit", 0);
 		long start = System.nanoTime();
 		DomainAudit audit = new DomainAudit(harness.traceStore(), entryManager, domain).run(expectedAccepted, walkChain,
-				harness.receiptChain());
+				harness.receiptChain(), syntheticPrefix);
 		String line = String.format(Locale.ROOT, "domain audit: head=%d receipts=%d records=%d walked=%s seconds=%.1f problems=%s",
 				audit.head(), audit.receipts(), audit.records(), walkChain, (System.nanoTime() - start) / 1e9,
 				audit.problems());
@@ -621,20 +622,30 @@ class TraceIngestBenchmark {
 			List<String> jsons = buildChain(key, producer, kid, instance, chain, total);
 
 			ExecutorService pool = Executors.newFixedThreadPool(2);
-			long startNs = System.nanoTime();
-			for (int round = 0; round < rounds; round++) {
-				CyclicBarrier barrier = new CyclicBarrier(2);
-				List<String> partA = jsons.subList(round * 2 * block, round * 2 * block + block);
-				List<String> partB = jsons.subList(round * 2 * block + block, (round + 1) * 2 * block);
-				Future<?> a = pool.submit(() -> ingestPart(nodeA, path, partA, concurrentDomain, barrier));
-				Future<?> b = pool.submit(() -> ingestPart(nodeB, path, partB, concurrentDomain, barrier));
-				a.get();
-				b.get();
+			long elapsedNs;
+			try {
+				long startNs = System.nanoTime();
+				for (int round = 0; round < rounds; round++) {
+					CyclicBarrier barrier = new CyclicBarrier(2);
+					List<String> partA = jsons.subList(round * 2 * block, round * 2 * block + block);
+					List<String> partB = jsons.subList(round * 2 * block + block, (round + 1) * 2 * block);
+					Future<?> a = pool.submit(() -> ingestPart(nodeA, path, partA, concurrentDomain, barrier));
+					Future<?> b = pool.submit(() -> ingestPart(nodeB, path, partB, concurrentDomain, barrier));
+					try {
+						a.get();
+						b.get();
+					} finally {
+						a.cancel(true);
+						b.cancel(true);
+					}
+				}
+				elapsedNs = System.nanoTime() - startNs;
+			} finally {
+				pool.shutdownNow();
+				pool.awaitTermination(60, TimeUnit.SECONDS);
+				nodeA.drainExecutors();
+				nodeB.drainExecutors();
 			}
-			long elapsedNs = System.nanoTime() - startNs;
-			pool.shutdown();
-			nodeA.drainExecutors();
-			nodeB.drainExecutors();
 
 			for (String json : jsons) {
 				sequential.ingest(json, sequential.ctx(sequentialDomain));

@@ -539,32 +539,41 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 	@Test
 	void testRequestKeys_ConcurrentCallers_OneRead() throws Exception {
 		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		int callers = 16;
 		AtomicInteger reads = new AtomicInteger();
-		InMemoryTraceStore slow = new InMemoryTraceStore() {
+		CountDownLatch ready = new CountDownLatch(callers);
+		CountDownLatch inRead = new CountDownLatch(1);
+		CountDownLatch release = new CountDownLatch(1);
+		InMemoryTraceStore held = new InMemoryTraceStore() {
 			@Override
 			public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
 				reads.incrementAndGet();
+				inRead.countDown();
 				try {
-					Thread.sleep(50);
+					release.await(10, TimeUnit.SECONDS);
 				} catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
 				return store.findProducerKey(domainId, producerId, kid);
 			}
 		};
-		setField(registry, "traceStore", slow);
+		setField(registry, "traceStore", held);
 		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
-		ExecutorService pool = Executors.newFixedThreadPool(4);
+		ExecutorService pool = Executors.newFixedThreadPool(callers);
 		try {
-			CountDownLatch start = new CountDownLatch(1);
 			List<Future<ProducerKeyRegistry.ResolvedKey>> futures = new ArrayList<>();
-			for (int i = 0; i < 16; i++) {
-				futures.add(pool.submit(() -> {
-					start.await();
-					return keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
-				}));
+			try {
+				for (int i = 0; i < callers; i++) {
+					futures.add(pool.submit(() -> {
+						ready.countDown();
+						return keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+					}));
+				}
+				assertTrue(ready.await(10, TimeUnit.SECONDS), "callers did not reach resolve");
+				assertTrue(inRead.await(10, TimeUnit.SECONDS), "no caller reached the store read");
+			} finally {
+				release.countDown();
 			}
-			start.countDown();
 			for (Future<ProducerKeyRegistry.ResolvedKey> future : futures) {
 				assertEquals(KID, future.get(10, TimeUnit.SECONDS).getKey().getKid());
 			}

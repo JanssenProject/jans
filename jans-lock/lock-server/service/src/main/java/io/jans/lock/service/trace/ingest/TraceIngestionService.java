@@ -86,6 +86,15 @@ public class TraceIngestionService {
 	/** The record is stored but its receipt is {@code VOID}: an orphan that blocks its identity. */
 	static final String REASON_VOID_AFTER_INSERT = "receipt_void_after_insert";
 
+	/**
+	 * Another writer stored a batch element's identity with a different digest. Plans of later
+	 * elements may rely on that element's provisional record, so the batch goes one by one.
+	 */
+	static final String REASON_BATCH_PLAN_INVALIDATED = "batch_plan_invalidated";
+
+	/** The verification pool stopped before it ran the element's verification. */
+	static final String REASON_VERIFICATION_ABANDONED = "batch_verification_abandoned";
+
 	@Inject
 	private Logger log;
 
@@ -350,7 +359,10 @@ public class TraceIngestionService {
 	 * <li>Reserve one contiguous receipt range and insert all receipts and records in one transaction
 	 * ({@link TraceReceiptChain#runWithRange}). On a position or identity collision the range is
 	 * recomputed; identities that now exist are dropped. Plans are not recomputed: the one-by-one
-	 * path has the same window between planning and insert, which {@code afterInsert} corrects.</li>
+	 * path has the same window between planning and insert, which {@code afterInsert} corrects.
+	 * When a dropped identity was stored with a different digest, later plans may depend on its
+	 * provisional record, so the batch fails with {@code batch_plan_invalidated} and goes one by
+	 * one (step 8).</li>
 	 * <li>After the commit run {@code afterInsert} for each stored record with one shared read of the
 	 * predecessor, own and successor positions; on the post-commit pool when
 	 * {@code postCommitCorrelationThreads} is set, so the outcomes are returned without waiting for
@@ -365,7 +377,9 @@ public class TraceIngestionService {
 	 * interrupted attempt: the elements without an outcome fail with
 	 * {@code receipt_allocation_interrupted} and are not retried one by one.</li>
 	 * <li>If the commit fails for any other reason nothing was stored by it: the elements without an
-	 * outcome and the elements dropped in step 4 go one by one through {@link #ingestVerified},
+	 * outcome, the replays of records stored before the batch (classified from overlay copies that
+	 * may carry uncommitted corrections) and the elements dropped in step 4 go one by one through
+	 * {@link #ingestVerified},
 	 * which also reports an element whose transaction committed without the caller learning it as a
 	 * replay.</li>
 	 * </ol>
@@ -404,12 +418,20 @@ public class TraceIngestionService {
 		logBatch(outcomes, stats);
 	}
 
-	/** One acceptance line per dropped element that ended as a replay, with the row it was classified from. */
+	/**
+	 * One acceptance line per element that ended as a replay of a stored row (classified before the
+	 * commit, or dropped after a collision), with the row it was classified from.
+	 */
 	private void logDroppedReplays(List<BatchItem> items, BatchOutcome[] outcomes) {
 		for (BatchItem item : items) {
 			BatchOutcome outcome = outcomes[item.index];
-			if (item.dropped != null && outcome != null && outcome.isAccepted()) {
+			if (outcome == null || !outcome.isAccepted()) {
+				continue;
+			}
+			if (item.dropped != null) {
 				logAcceptance(item.dropped, true);
+			} else if (item.replayed != null) {
+				logAcceptance(item.replayed, true);
 			}
 		}
 	}
@@ -439,7 +461,9 @@ public class TraceIngestionService {
 
 		List<CompletableFuture<VerifiedAssertion>> futures = new ArrayList<>(elements.size());
 		for (BatchElement element : elements) {
-			futures.add(CompletableFuture.supplyAsync(() -> verification.verify(element.openStream(), ctx, keys), pool));
+			VerifyTask task = new VerifyTask(() -> verification.verify(element.openStream(), ctx, keys));
+			futures.add(task.future);
+			pool.execute(task);
 		}
 		for (int index = 0; index < elements.size(); index++) {
 			try {
@@ -463,6 +487,34 @@ public class TraceIngestionService {
 		return wrapper;
 	}
 
+	/** Verifies one element on the pool; a stopping pool that drops it fails the element. */
+	private static final class VerifyTask implements TraceIngestExecutors.AbandonableTask {
+
+		private final CompletableFuture<VerifiedAssertion> future = new CompletableFuture<>();
+
+		private final Supplier<VerifiedAssertion> verify;
+
+		private VerifyTask(Supplier<VerifiedAssertion> verify) {
+			this.verify = verify;
+		}
+
+		@Override
+		public void run() {
+			try {
+				future.complete(verify.get());
+			} catch (Throwable ex) {
+				future.completeExceptionally(ex);
+			}
+		}
+
+		@Override
+		public void abandon() {
+			future.completeExceptionally(new TraceStorageException(REASON_VERIFICATION_ABANDONED,
+					"Batch verification pool stopped before the element was verified"));
+		}
+
+	}
+
 	/** One element that passed verification. */
 	private static final class BatchItem {
 
@@ -483,6 +535,12 @@ public class TraceIngestionService {
 		 * writer's row, as last read. Its outcome is classified from this row.
 		 */
 		private StoredTraceRecord dropped;
+
+		/**
+		 * For a replay of a record stored before the batch: the overlay's copy it was classified from.
+		 * That copy may carry corrections from provisional records, so a fallback classifies it again.
+		 */
+		private StoredTraceRecord replayed;
 
 		private final List<BatchItem> duplicates = new ArrayList<>();
 
@@ -524,7 +582,15 @@ public class TraceIngestionService {
 		}
 		Map<RecordIdentity, StoredTraceRecord> existing = store.findRecords(identities);
 		Map<ChainPosition, List<StoredTraceRecord>> prefetched = store.findRecordsByChainPositions(positions);
-		Map<Long, TraceReceiptState> receiptStates = loadReceiptStates(domainId, existing.values());
+		List<StoredTraceRecord> requested = new ArrayList<>(existing.values());
+		for (List<StoredTraceRecord> rows : prefetched.values()) {
+			for (StoredTraceRecord row : rows) {
+				if (identities.contains(row.getIdentity()) && !existing.containsKey(row.getIdentity())) {
+					requested.add(row);
+				}
+			}
+		}
+		Map<Long, TraceReceiptState> receiptStates = loadReceiptStates(domainId, requested);
 		BatchOverlay overlay = new BatchOverlay(existing, prefetched);
 
 		Map<RecordIdentity, BatchItem> firstByIdentity = new HashMap<>();
@@ -536,7 +602,8 @@ public class TraceIngestionService {
 			Optional<StoredTraceRecord> known = overlay.find(identity);
 			if (known.isPresent()) {
 				if (!overlay.isProvisional(identity)) {
-					outcomes[item.index] = classifyOutcome(known.get(), digest, receiptStates);
+					item.replayed = known.get();
+					outcomes[item.index] = classifyQuietly(known.get(), digest, receiptStates);
 				} else if (digestsEqual(known.get().getContentDigest(), digest)) {
 					item.duplicateOf = firstByIdentity.get(identity);
 					item.snapshot = known.get().getFlags();
@@ -572,7 +639,14 @@ public class TraceIngestionService {
 			state.stored = insertRun(run, state.remaining, ctx);
 		};
 		Supplier<List<ReceiptBatchItem>> replan = () -> {
+			int known = state.dropped.size();
 			state.remaining = dropExisting(state.remaining, domainId, outcomes, state.dropped);
+			for (BatchItem item : state.dropped.subList(known, state.dropped.size())) {
+				if (!digestsEqual(item.dropped.getContentDigest(), item.verified.getContentDigest())) {
+					throw new TraceStorageException(REASON_BATCH_PLAN_INVALIDATED,
+							"Another writer stored a batch identity with a different digest");
+				}
+			}
 			return receiptItems(state.remaining, ctx);
 		};
 		ReceiptRun run = receiptChain.runWithRange(domainId, receiptItems(candidates, ctx), ctx.getNodeId(), action,
@@ -720,17 +794,7 @@ public class TraceIngestionService {
 		return kept;
 	}
 
-	private BatchOutcome classifyOutcome(StoredTraceRecord existing, String digest,
-			Map<Long, TraceReceiptState> receiptStates) {
-		try {
-			boolean orphan = receiptStates.get(existing.getReceipt().getReceiptSequence()) == TraceReceiptState.VOID;
-			return BatchOutcome.accepted(classifyExisting(existing, digest, orphan));
-		} catch (RuntimeException ex) {
-			return BatchOutcome.failed(ex);
-		}
-	}
-
-	/** {@link #classifyOutcome} without the acceptance log line. */
+	/** Classifies a replay or conflict without the acceptance log line. */
 	private static BatchOutcome classifyQuietly(StoredTraceRecord existing, String digest,
 			Map<Long, TraceReceiptState> receiptStates) {
 		try {
@@ -785,8 +849,9 @@ public class TraceIngestionService {
 	/**
 	 * The batch could not be committed as a unit; nothing was stored by the failed attempt. Every
 	 * element without an outcome goes through the one-by-one path, whose outcome it keeps. So do the
-	 * elements dropped after a collision and their in-batch replays: their provisional outcome was
-	 * read before the elements ahead of them are stored here.
+	 * elements dropped after a collision and their in-batch replays, and the replays of records
+	 * stored before the batch: their provisional outcome was read before the elements ahead of them
+	 * are stored here, or from overlay corrections that were never committed.
 	 */
 	private void fallbackToSinglePath(List<BatchItem> items, TraceRequestContext ctx, BatchOutcome[] outcomes,
 			BatchStats stats, RuntimeException cause) {
@@ -798,6 +863,10 @@ public class TraceIngestionService {
 				for (BatchItem duplicate : item.duplicates) {
 					outcomes[duplicate.index] = null;
 				}
+			}
+			if (item.replayed != null) {
+				item.replayed = null;
+				outcomes[item.index] = null;
 			}
 		}
 		int pending = 0;
