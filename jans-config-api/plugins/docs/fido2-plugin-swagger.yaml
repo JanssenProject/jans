@@ -1922,6 +1922,12 @@ components:
           type: boolean
         fido2TraceEndpoint:
           type: string
+        fido2TraceKeyStorePath:
+          type: string
+        fido2TraceKeyAlias:
+          type: string
+        fido2TraceKeyStorePassword:
+          type: string
         nativeReadinessEnabled:
           type: boolean
         nativeReadinessAllowExternalFetch:
@@ -2000,12 +2006,12 @@ components:
         lastUpdated:
           type: string
           format: date-time
+        period:
+          type: string
         metricsData:
           type: object
           additionalProperties:
             type: object
-        period:
-          type: string
         registrationAttempts:
           type: integer
           format: int64

@@ -1206,6 +1206,7 @@ components:
           description: "TRACE cryptography implementation: JAVA (BouncyCastle, in-process)\
             \ or NATIVE (jans-trace-core through the jans-trace-java binding); an\
             \ unknown value is treated as JAVA"
+          default: JAVA
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object

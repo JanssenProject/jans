@@ -13954,7 +13954,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -13985,7 +13984,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -15695,9 +15693,9 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
