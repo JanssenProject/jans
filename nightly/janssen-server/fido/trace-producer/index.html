@@ -1211,6 +1211,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Signing
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signing-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Signing key
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signing key">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#register-the-public-key-on-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Register the public key on Lock
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rotating-the-signing-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rotating the signing key
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delivery" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1972,6 +2022,56 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#signing" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Signing
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signing-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Signing key
+      </span>
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signing key">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#register-the-public-key-on-lock" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Register the public key on Lock
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rotating-the-signing-key" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Rotating the signing key
+      </span>
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#delivery" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2228,6 +2328,24 @@ until Lock adds support for it.</p>
 <td>discovered</td>
 <td>Planned. Lock Server ingestion endpoint, <code>/jans-lock/api/v1/audit/trace</code>.</td>
 </tr>
+<tr>
+<td><code>fido2TraceKeyStorePath</code></td>
+<td>String</td>
+<td>—</td>
+<td>Planned. Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration.</td>
+</tr>
+<tr>
+<td><code>fido2TraceKeyAlias</code></td>
+<td>String</td>
+<td>—</td>
+<td>Planned. Alias of the Ed25519 signing key inside <code>fido2TraceKeyStorePath</code>.</td>
+</tr>
+<tr>
+<td><code>fido2TraceKeyStorePassword</code></td>
+<td>String</td>
+<td>—</td>
+<td>Planned. Keystore password, encrypted at rest like other client secrets.</td>
+</tr>
 </tbody>
 </table>
 <p>The TRACE properties are separate from the <code>lockAudit*</code> properties. Enabling one does not enable the other.</p>
@@ -2246,6 +2364,65 @@ through the SSA-to-DCR client-credentials flow.</p>
 </ul>
 <p>Records do not contain policy decisions, invocations, or capability IDs. TRACE records describe what happened
 in a ceremony, and they do not affect how the ceremony is decided.</p>
+<h2 id="signing">Signing<a class="headerlink" href="#signing" title="Permanent link">#</a></h2>
+<p>A record is signed as follows:</p>
+<ol>
+<li>Remove the <code>signature</code> member, if present, and take the rest of the record.</li>
+<li>Serialize it with the JSON Canonicalization Scheme (RFC 8785): members sorted by UTF-16 code units, no
+   insignificant whitespace, and numbers in the ECMAScript form, for example <code>1e+30</code> and <code>0.000001</code>.</li>
+<li>Sign the UTF-8 bytes of that canonical form with Ed25519 (RFC 8032).</li>
+<li>Store the 64-byte signature as base64url without padding, which is 86 characters.</li>
+</ol>
+<p>Records that contain an unpaired surrogate, or a non-finite number such as NaN, are rejected rather than signed.
+Hashes use the <code>sha256:</code> prefix followed by the lowercase hex digest.</p>
+<p>The <code>prev_record_hash</code> of a record is the <code>content_digest</code> of the previous record. Lock computes that digest over
+the complete previous record, including its <code>signature</code>. Hash the signed form, not the unsigned form, when you
+set <code>prev_record_hash</code>. Otherwise Lock flags the link with <code>chain_link_failure_flag</code>.</p>
+<h2 id="signing-key">Signing key<a class="headerlink" href="#signing-key" title="Permanent link">#</a></h2>
+<p>The producer key is an Ed25519 key in a BCFKS keystore. Create one with a BouncyCastle provider jar. <code>keytool</code>
+prompts for the keystore and key passwords, so do not pass them on the command line:</p>
+<div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-genkeypair<span class="w"> </span>-storetype<span class="w"> </span>BCFKS<span class="w"> </span>-keystore<span class="w"> </span>/etc/jans/conf/trace-producer.bcfks<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-alias<span class="w"> </span>trace-producer<span class="w"> </span>-keyalg<span class="w"> </span>Ed25519<span class="w"> </span>-dname<span class="w"> </span><span class="s2">&quot;CN=jans-fido2-trace&quot;</span><span class="w"> </span>-validity<span class="w"> </span><span class="m">3650</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-providerpath<span class="w"> </span>/path/to/bcprov-jdk18on.jar<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-providerclass<span class="w"> </span>org.bouncycastle.jce.provider.BouncyCastleProvider
+</code></pre></div>
+<p>Then set <code>fido2TraceKeyStorePath</code> to the file, <code>fido2TraceKeyAlias</code> to <code>trace-producer</code>, and
+<code>fido2TraceKeyStorePassword</code> to the keystore password. The password is encrypted when it is stored.</p>
+<h3 id="register-the-public-key-on-lock">Register the public key on Lock<a class="headerlink" href="#register-the-public-key-on-lock" title="Permanent link">#</a></h3>
+<p>Lock needs the public key as an Ed25519 JWK. Export the certificate that <code>keytool</code> created, then take the raw
+32-byte key from its public key and encode it as base64url:</p>
+<div class="highlight"><pre><span></span><code>keytool<span class="w"> </span>-exportcert<span class="w"> </span>-storetype<span class="w"> </span>BCFKS<span class="w"> </span>-keystore<span class="w"> </span>/etc/jans/conf/trace-producer.bcfks<span class="w"> </span>-alias<span class="w"> </span>trace-producer<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-providerpath<span class="w"> </span>/path/to/bcprov-jdk18on.jar<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-providerclass<span class="w"> </span>org.bouncycastle.jce.provider.BouncyCastleProvider<span class="w"> </span>-file<span class="w"> </span>trace-producer.der
+openssl<span class="w"> </span>x509<span class="w"> </span>-inform<span class="w"> </span>DER<span class="w"> </span>-in<span class="w"> </span>trace-producer.der<span class="w"> </span>-pubkey<span class="w"> </span>-noout<span class="w"> </span>&gt;<span class="w"> </span>trace-producer.pem
+openssl<span class="w"> </span>pkey<span class="w"> </span>-pubin<span class="w"> </span>-in<span class="w"> </span>trace-producer.pem<span class="w"> </span>-outform<span class="w"> </span>DER<span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-c<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span><span class="s1">&#39;+/&#39;</span><span class="w"> </span><span class="s1">&#39;-_&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;=&#39;</span>
+</code></pre></div>
+<p>Register the result with <code>{"kty": "OKP", "crv": "Ed25519", "x": "&lt;output&gt;"}</code> as described in
+<a href="../../lock/trace/#register-a-key">Register a key</a>. Lock does not yet define the <code>FIDO_CEREMONY</code> event kind, so
+registration with that kind cannot succeed until Lock adds it.</p>
+<h3 id="rotating-the-signing-key">Rotating the signing key<a class="headerlink" href="#rotating-the-signing-key" title="Permanent link">#</a></h3>
+<p>Lock accepts a new key only under a new <code>kid</code>, and it never changes a registered key. To rotate:</p>
+<ol>
+<li>Create a new key with a new alias, or in a new keystore file.</li>
+<li>Register its public key on Lock under a new <code>kid</code>, as described in <a href="../../lock/trace/#register-a-key">Register a key</a>.</li>
+<li>Set <code>fido2TraceKeyAlias</code> or <code>fido2TraceKeyStorePath</code> to the new key.</li>
+<li>Revoke the old key on Lock once its records no longer need to be verified, as described in
+   <a href="../../lock/trace/#revoke-a-key">Revoke a key</a>.</li>
+<li>Decide whether the producer chain continues or starts a new one. See
+   <a href="../../lock/trace/#register-a-producer-chain">Register a producer chain</a> for when a new chain is needed.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">FIPS builds</p>
+<p>Ed25519 signs and verifies under the BC-FIPS 1.0.2.7 provider that the FIPS build uses. When BC-FIPS
+approved-only mode is enabled, Ed25519 is rejected. Jans does not enable that mode, so TRACE signing works
+in the FIPS build but is not FIPS-approved. Do not describe TRACE signing as FIPS-approved until this changes.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Lock compatibility</p>
+<p>For integers above 2^53, RFC 8785 requires rounding to an IEEE double before serialization. The current Lock
+canonicalizer does not do this, so records with such integers fail verification on Lock. Tracked in
+<a href="https://github.com/JanssenProject/jans/issues/15703">#15703</a>.</p>
+</div>
 <h2 id="delivery">Delivery<a class="headerlink" href="#delivery" title="Permanent link">#</a></h2>
 <p>Records are sent asynchronously and in batches, never one HTTP call per ceremony, and they are kept off the
 ceremony's hot path. Delivery is retried on transport failure.</p>
@@ -2312,7 +2489,7 @@ ceremony's hot path. Delivery is retried on transport failure.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    November 11, 2026
+    November 13, 2026
   </span>
 
     
