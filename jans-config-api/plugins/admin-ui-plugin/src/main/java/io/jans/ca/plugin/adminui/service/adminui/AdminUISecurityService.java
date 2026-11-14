@@ -558,58 +558,73 @@ public class AdminUISecurityService {
                 long totalUncompressed = 0;
                 boolean adminUiIssuerFound = false;
                 for (int i = 0; i < entries.size(); i++) {
-                    ZipEntry entry = entries.get(i);
-                    String entryName = entry.getName();
-                    String normalizedName = entryName.toLowerCase(Locale.ROOT);
-                    boolean legacyIssuerFile = !entry.isDirectory()
-                            && normalizedName.startsWith(TRUSTED_ISSUERS_DIR)
-                            && normalizedName.endsWith(".json");
-                    boolean rootIssuersFile = !entry.isDirectory()
-                            && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
-                    MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
-                    try (InputStream input = zipFile.getInputStream(entry);
-                         InputStream digestedInput = new DigestInputStream(input, digest)) {
-                        long remaining = MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed;
-                        if (!legacyIssuerFile && !rootIssuersFile) {
-                            totalUncompressed += drainEntrySafely(digestedInput, remaining);
-                        } else {
-                            byte[] content = readEntryContentSafely(digestedInput, remaining);
-                            totalUncompressed += content.length;
-                            JSONObject issuerDoc = new JSONObject(new String(content, StandardCharsets.UTF_8));
-
-                            if (rootIssuersFile) {
-                                validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
-                            } else {
-                                String endpointField = issuerDoc.has("openid_configuration_endpoint")
-                                        ? "openid_configuration_endpoint"
-                                        : "configuration_endpoint";
-                                if (!issuerDoc.has(endpointField)) {
-                                    throw new ApplicationException(
-                                            Response.Status.BAD_REQUEST.getStatusCode(),
-                                            "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in "
-                                                    + entryName
-                                    );
-                                }
-                                validateIssuerEndpointHost(
-                                        issuerDoc.getString(endpointField), expectedDomain, entryName);
-                                adminUiIssuerFound |= TRUSTED_ISSUER_FILE.equals(entryName);
-                            }
-                        }
-                    }
-
-                    if (!MessageDigest.isEqual(localEntryDigests.get(i), digest.digest())) {
-                        throw new ApplicationException(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                "Inconsistent policy-store archive entries"
-                        );
-                    }
+                    EntryValidation result = validateCentralDirectoryEntry(zipFile, entries.get(i),
+                            localEntryDigests.get(i), expectedDomain,
+                            MAX_ARCHIVE_UNCOMPRESSED_SIZE - totalUncompressed);
+                    totalUncompressed += result.consumedBytes;
+                    adminUiIssuerFound |= result.adminUiIssuerFound;
                 }
                 return adminUiIssuerFound;
             }
         } finally {
             Files.deleteIfExists(tempFile);
             Files.deleteIfExists(tempDirectory);
+        }
+    }
+
+    private EntryValidation validateCentralDirectoryEntry(ZipFile zipFile, ZipEntry entry,
+            byte[] localDigest, String expectedDomain, long remaining) throws Exception {
+        String entryName = entry.getName();
+        String normalizedName = entryName.toLowerCase(Locale.ROOT);
+        boolean legacyIssuerFile = !entry.isDirectory()
+                && normalizedName.startsWith(TRUSTED_ISSUERS_DIR)
+                && normalizedName.endsWith(".json");
+        boolean rootIssuersFile = !entry.isDirectory()
+                && normalizedName.equals(TRUSTED_ISSUERS_ROOT_FILE);
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        long consumedBytes;
+        boolean adminUiIssuerFound = false;
+        try (InputStream input = zipFile.getInputStream(entry);
+             InputStream digestedInput = new DigestInputStream(input, digest)) {
+            if (!legacyIssuerFile && !rootIssuersFile) {
+                consumedBytes = drainEntrySafely(digestedInput, remaining);
+            } else {
+                byte[] content = readEntryContentSafely(digestedInput, remaining);
+                consumedBytes = content.length;
+                validateIssuerDocument(content, rootIssuersFile, expectedDomain, entryName);
+                adminUiIssuerFound = legacyIssuerFile && TRUSTED_ISSUER_FILE.equals(entryName);
+            }
+        }
+        if (!MessageDigest.isEqual(localDigest, digest.digest())) {
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Inconsistent policy-store archive entries");
+        }
+        return new EntryValidation(consumedBytes, adminUiIssuerFound);
+    }
+
+    private void validateIssuerDocument(byte[] content, boolean rootIssuersFile,
+            String expectedDomain, String entryName) throws Exception {
+        JSONObject issuerDoc = new JSONObject(new String(content, StandardCharsets.UTF_8));
+        if (rootIssuersFile) {
+            validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
+            return;
+        }
+        String endpointField = issuerDoc.has("openid_configuration_endpoint")
+                ? "openid_configuration_endpoint" : "configuration_endpoint";
+        if (!issuerDoc.has(endpointField)) {
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
+                    "Missing 'openid_configuration_endpoint' or 'configuration_endpoint' in " + entryName);
+        }
+        validateIssuerEndpointHost(issuerDoc.getString(endpointField), expectedDomain, entryName);
+    }
+
+    private static final class EntryValidation {
+        private final long consumedBytes;
+        private final boolean adminUiIssuerFound;
+
+        private EntryValidation(long consumedBytes, boolean adminUiIssuerFound) {
+            this.consumedBytes = consumedBytes;
+            this.adminUiIssuerFound = adminUiIssuerFound;
         }
     }
 

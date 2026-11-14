@@ -169,22 +169,23 @@ public class SessionService {
 
     public void revokeSessionTokens(String id, String sessionDn) {
         logger.info("Revoke session tokens for sessionDn:{}", sessionDn);
-        try {
-            String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
-            List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
-            if (tokenList == null) {
-                return;
+        String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
+        List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
+        if (tokenList == null) {
+            return;
+        }
+        logger.info("Revoke tokens for sessionDn:{}, token count:{}", sessionDn, tokenList.size());
+        boolean complete = true;
+        for (TokenEntity token : tokenList) {
+            try {
+                tokenService.revokeTokenEntity(token.getTokenCode());
+            } catch (Exception ex) {
+                logger.error("Error while revoking session token for sessionDn:{} - ", sessionDn, ex);
+                complete = false;
             }
-            logger.info("Revoke tokens for sessionDn:{}, token count:{}", sessionDn, tokenList.size());
-            for (TokenEntity token : tokenList) {
-                try {
-                    tokenService.revokeTokenEntity(token.getTokenCode());
-                } catch (Exception ex) {
-                    logger.error("Error while revoking session token for sessionDn:{} - ", sessionDn, ex);
-                }
-            }
-        } catch (Exception ex) {
-            logger.error(" Error while revoking session token is - ", ex);
+        }
+        if (!complete) {
+            throw new jakarta.ws.rs.InternalServerErrorException("Session token revocation incomplete");
         }
     }
 

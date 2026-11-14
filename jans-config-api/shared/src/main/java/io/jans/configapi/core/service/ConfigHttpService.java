@@ -146,10 +146,16 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
         // the socket factory of the connection manager is the one used, so each TLS policy needs its own pool
         String policyKey = Arrays.toString(enabledProtocols) + "|" + Arrays.toString(allowedCipherSuites);
         PoolingHttpClientConnectionManager policyConnectionManager = tlsPolicyConnectionManagers
-                .computeIfAbsent(policyKey, key -> new PoolingHttpClientConnectionManager(
+                .computeIfAbsent(policyKey, key -> {
+                    PoolingHttpClientConnectionManager pool = new PoolingHttpClientConnectionManager(
                         RegistryBuilder.<ConnectionSocketFactory>create()
                                 .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                                .register("https", sslsf).build()));
+                                .register("https", sslsf).build());
+                    pool.setMaxTotal(connectionManager.getMaxTotal());
+                    pool.setDefaultMaxPerRoute(connectionManager.getDefaultMaxPerRoute());
+                    pool.setValidateAfterInactivity(connectionManager.getValidateAfterInactivity());
+                    return pool;
+                });
 
         return HttpClients.custom().setSSLSocketFactory(sslsf)
                 .setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())

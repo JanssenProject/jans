@@ -152,13 +152,17 @@ public class TokenService {
         }
 
         // removal is the primary revocation, so it must not wait on the status list
-        boolean statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
+        boolean statusInvalidated;
+        try {
+            statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
+        } finally {
+            persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
+        }
         logger.debug("Token:{} invalidate status:{}", escapeLog(tknCde), statusInvalidated);
         if (!statusInvalidated) {
             throw new InternalServerErrorException(
                     "Token removed but its status list entry could not be invalidated - " + tknCde);
         }
-        persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
     }
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
