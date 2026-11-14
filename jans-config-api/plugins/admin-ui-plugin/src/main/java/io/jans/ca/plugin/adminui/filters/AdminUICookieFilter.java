@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -98,6 +99,14 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
             }
             //Return this if the session record is not present in the database, covering non–Admin UI requests.
             if (ujwtOptional.isEmpty()) {
+                return;
+            }
+
+            if (configApiSessionService.isUjwtExpired(ujwtOptional.get(), new Date())) {
+                String sessionId = cookies.get(ADMIN_UI_SESSION_ID).getValue();
+                configApiSessionService.removeSession(sessionId);
+                log.debug("User-info JWT expired for Admin UI session.");
+                abortWithException(requestContext, Response.Status.FORBIDDEN, "User-info JWT expired for Admin UI session.");
                 return;
             }
 
