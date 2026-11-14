@@ -928,6 +928,41 @@ public abstract class TraceStoreContractTest {
 		}
 	}
 
+	/** Many chunks of the ORM lookup, with duplicates, gaps and an equivocation in a late chunk. */
+	@Test
+	void testFindRecordsByChainPositions_severalChunksSameMapAsOneByOne() throws Exception {
+		List<StoredTraceRecord> first = batchRecords(1, 350);
+		List<StoredTraceRecord> second = batchRecords(351, 350);
+		store.insertIngestBatch(batchReceipts(first), first);
+		store.insertIngestBatch(batchReceipts(second), second);
+		StoredTraceRecord equivocating = newRecord("producer-1", "record-equivocating", "authority-1", "exec-1", 690L,
+				701L);
+		store.insertIngestBatch(batchReceipts(Collections.singletonList(equivocating)),
+				Collections.singletonList(equivocating));
+		ChainIdentity chain = first.get(0).getChainPosition().getChainIdentity();
+		List<ChainPosition> positions = new java.util.ArrayList<>();
+		for (long seq = 760; seq >= 1; seq--) {
+			positions.add(new ChainPosition(chain, seq));
+			if (seq % 97 == 0) {
+				positions.add(new ChainPosition(chain, seq));
+			}
+		}
+
+		Map<ChainPosition, List<StoredTraceRecord>> found = store.findRecordsByChainPositions(positions);
+
+		assertEquals(700, found.size());
+		for (ChainPosition position : positions) {
+			List<StoredTraceRecord> expected = store.findRecordsByChainPosition(position);
+			if (expected.isEmpty()) {
+				assertFalse(found.containsKey(position), () -> "position " + position.getSequenceNumber());
+			} else {
+				assertEquals(recordIdsOf(expected), recordIdsOf(found.get(position)), "position " + position.getSequenceNumber());
+			}
+		}
+		assertEquals(Arrays.asList("record-690", "record-equivocating"),
+				recordIdsOf(found.get(new ChainPosition(chain, 690L))));
+	}
+
 	private static List<String> recordIdsOf(List<StoredTraceRecord> records) {
 		return records.stream().map(r -> r.getIdentity().getRecordId()).collect(Collectors.toList());
 	}

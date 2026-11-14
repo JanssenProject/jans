@@ -33,6 +33,9 @@ public class TraceConfiguration {
     public static final int DEFAULT_MAX_ARRAY_LENGTH = 256;
     public static final int DEFAULT_MAX_OBJECT_MEMBERS = 256;
     public static final int DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT = 8;
+    public static final int DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT = 32;
+    public static final int DEFAULT_RANGE_ALLOCATION_BACKOFF_MS = 5;
+    public static final int DEFAULT_RANGE_ALLOCATION_MAX_BACKOFF_MS = 250;
     public static final int DEFAULT_CORRELATION_RETRY_LIMIT = 3;
     public static final int DEFAULT_RECEIPT_REPAIR_INTERVAL_SECONDS = 300;
     public static final int DEFAULT_PENDING_RECEIPT_TIMEOUT_SECONDS = 120;
@@ -102,9 +105,21 @@ public class TraceConfiguration {
     @Schema(description = "Maximum accepted JSON object member count in a TRACE assertion")
     private int maxObjectMembers = DEFAULT_MAX_OBJECT_MEMBERS;
 
-    @DocProperty(description = "Maximum retries when allocating a receipt-chain sequence number", defaultValue = "8")
-    @Schema(description = "Maximum retries when allocating a receipt-chain sequence number")
+    @DocProperty(description = "Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit", defaultValue = "8")
+    @Schema(description = "Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit")
     private int receiptAllocationRetryLimit = DEFAULT_RECEIPT_ALLOCATION_RETRY_LIMIT;
+
+    @DocProperty(description = "Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default", defaultValue = "32")
+    @Schema(description = "Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default")
+    private int rangeAllocationRetryLimit = DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT;
+
+    @DocProperty(description = "Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default", defaultValue = "5")
+    @Schema(description = "Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default")
+    private int rangeAllocationBackoffMs = DEFAULT_RANGE_ALLOCATION_BACKOFF_MS;
+
+    @DocProperty(description = "Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default", defaultValue = "250")
+    @Schema(description = "Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default")
+    private int rangeAllocationMaxBackoffMs = DEFAULT_RANGE_ALLOCATION_MAX_BACKOFF_MS;
 
     @DocProperty(description = "Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record", defaultValue = "false")
     @Schema(description = "Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record")
@@ -258,6 +273,30 @@ public class TraceConfiguration {
         this.receiptAllocationRetryLimit = receiptAllocationRetryLimit;
     }
 
+    public int getRangeAllocationRetryLimit() {
+        return rangeAllocationRetryLimit > 0 ? rangeAllocationRetryLimit : DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT;
+    }
+
+    public void setRangeAllocationRetryLimit(int rangeAllocationRetryLimit) {
+        this.rangeAllocationRetryLimit = rangeAllocationRetryLimit;
+    }
+
+    public int getRangeAllocationBackoffMs() {
+        return rangeAllocationBackoffMs >= 0 ? rangeAllocationBackoffMs : DEFAULT_RANGE_ALLOCATION_BACKOFF_MS;
+    }
+
+    public void setRangeAllocationBackoffMs(int rangeAllocationBackoffMs) {
+        this.rangeAllocationBackoffMs = rangeAllocationBackoffMs;
+    }
+
+    public int getRangeAllocationMaxBackoffMs() {
+        return rangeAllocationMaxBackoffMs > 0 ? rangeAllocationMaxBackoffMs : DEFAULT_RANGE_ALLOCATION_MAX_BACKOFF_MS;
+    }
+
+    public void setRangeAllocationMaxBackoffMs(int rangeAllocationMaxBackoffMs) {
+        this.rangeAllocationMaxBackoffMs = rangeAllocationMaxBackoffMs;
+    }
+
     public boolean isBatchIngestEnabled() {
         return batchIngestEnabled;
     }
@@ -365,6 +404,9 @@ public class TraceConfiguration {
                 + getMaxJsonDepth() + ", maxStringLength=" + getMaxStringLength() + ", maxArrayLength="
                 + getMaxArrayLength() + ", maxObjectMembers=" + getMaxObjectMembers()
                 + ", receiptAllocationRetryLimit=" + getReceiptAllocationRetryLimit()
+                + ", rangeAllocationRetryLimit=" + getRangeAllocationRetryLimit()
+                + ", rangeAllocationBackoffMs=" + getRangeAllocationBackoffMs()
+                + ", rangeAllocationMaxBackoffMs=" + getRangeAllocationMaxBackoffMs()
                 + ", batchIngestEnabled=" + isBatchIngestEnabled()
                 + ", batchVerifyThreads=" + getBatchVerifyThreads()
                 + ", postCommitCorrelationThreads=" + getPostCommitCorrelationThreads()

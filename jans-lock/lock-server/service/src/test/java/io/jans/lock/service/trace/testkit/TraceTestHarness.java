@@ -110,6 +110,8 @@ public final class TraceTestHarness {
 
 	private volatile IngestPath ingestPath = IngestPath.SINGLE;
 
+	private volatile String nodeId = DEFAULT_NODE_ID;
+
 	/** Wires the harness over the {@code JAVA} provider. */
 	public TraceTestHarness() {
 		this(TraceTestCrypto.javaProvider());
@@ -246,6 +248,22 @@ public final class TraceTestHarness {
 		return nowMs;
 	}
 
+	/**
+	 * The node id every {@link #ctx(String, String...)} of this harness carries (default
+	 * {@link #DEFAULT_NODE_ID}). Several harnesses over one store with different node ids simulate
+	 * several Lock nodes: each has its own receipt chain, so there is no shared in-process lock.
+	 *
+	 * @return this harness
+	 */
+	public TraceTestHarness setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+		return this;
+	}
+
+	public String nodeId() {
+		return nodeId;
+	}
+
 	// -- registries ---------------------------------------------------------------------------------
 
 	/** Registers a key authorized for every event kind. */
@@ -308,7 +326,7 @@ public final class TraceTestHarness {
 	public TraceRequestContext ctx(String domainId, String clientId, long receivedAtMs, String... allowedProducerIds) {
 		List<String> allowed = allowedProducerIds.length == 0 ? Collections.singletonList("*")
 				: Arrays.asList(allowedProducerIds);
-		return new TraceRequestContext(clientId, domainId, allowed, receivedAtMs, DEFAULT_NODE_ID);
+		return new TraceRequestContext(clientId, domainId, allowed, receivedAtMs, nodeId);
 	}
 
 	// -- ingestion / retrieval ------------------------------------------------------------------------

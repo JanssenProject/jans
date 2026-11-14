@@ -12,12 +12,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 
 import io.jans.lock.model.config.AppConfiguration;
+import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.model.trace.entity.TraceReceiptState;
 import io.jans.lock.service.trace.TraceConstants;
@@ -67,8 +69,9 @@ import jakarta.inject.Inject;
  * <p>Batch path: {@link #runWithRange} reserves a contiguous run under the per-domain lock held
  * across the one database transaction that stores the receipts and the records, so the lock does
  * carry same-node ordering there; across nodes the unique key of the receipt row still decides, and
- * a collision retries the whole run. Batch receipts are inserted {@code COMMITTED} in the same
- * transaction as their records and are never {@code PENDING}. Therefore the ingest fence
+ * a collision retries the whole run after a short random backoff taken with the lock released.
+ * Batch receipts are inserted {@code COMMITTED} in the same transaction as their records and are
+ * never {@code PENDING}. Therefore the ingest fence
  * ({@link #fenceMs}, {@link #isFenceExpired}) does not apply to them, {@code TraceReceiptRepairTimer}
  * (which only looks at {@code PENDING}) cannot void them, and the late-insert-after-{@code VOID}
  * case cannot occur. {@link #verifyDomain} walks stored rows and needs no change for a chain that
@@ -78,6 +81,9 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class TraceReceiptChain {
+
+	/** Reason of the {@link TraceStorageException} when the thread is interrupted during a range backoff. */
+	public static final String REASON_ALLOCATION_INTERRUPTED = "receipt_allocation_interrupted";
 
 	@Inject
 	private Logger log;
@@ -92,6 +98,8 @@ public class TraceReceiptChain {
 	private TraceCryptoProvider cryptoProvider;
 
 	private Clock clock = Clock.systemUTC();
+
+	private Sleeper sleeper = Thread::sleep;
 
 	private final ConcurrentHashMap<String, ReentrantLock> domainLocks = new ConcurrentHashMap<>();
 
@@ -148,6 +156,14 @@ public class TraceReceiptChain {
 
 	}
 
+	/** Waits between two {@link #runWithRange} attempts; replaced by tests so they do not sleep. */
+	@FunctionalInterface
+	interface Sleeper {
+
+		void sleep(long millis) throws InterruptedException;
+
+	}
+
 	/** Same as {@link #runWithRange(String, List, String, RangeAction, Supplier)} without a re-plan hook. */
 	public ReceiptRun runWithRange(String domainId, List<ReceiptBatchItem> items, String nodeId, RangeAction action) {
 		return runWithRange(domainId, items, nodeId, action, null);
@@ -157,27 +173,41 @@ public class TraceReceiptChain {
 	 * Reserves the contiguous positions {@code head+1 ... head+N} of {@code domainId}'s chain for
 	 * {@code items} and commits them through {@code action}. Contract:
 	 * <ul>
-	 * <li>The per-domain lock is taken before the head is read and released after {@code action}
-	 * returns or fails. Do verification, parsing and correlation before calling this method.</li>
+	 * <li>The per-domain lock is taken before the head is read and held through {@code action}; it is
+	 * released after the run ends and during each backoff (below). Do verification, parsing and
+	 * correlation before calling this method.</li>
 	 * <li>The head is read once per attempt, never cached. Row k is hash-chained to row k-1; the first
 	 * row binds the head's hash or {@link TraceConstants#ZERO_HASH}. Rows are {@code COMMITTED} with
 	 * {@code nodeId} set and computed exactly as {@link #claim} computes them.</li>
 	 * <li>{@link DuplicateEntryException} from {@code action} means another writer took a position or
 	 * a record identity: nothing was stored, so the whole run is recomputed from a fresh head and
-	 * retried, up to {@code receiptAllocationRetryLimit} attempts in total, then
+	 * retried, up to {@code rangeAllocationRetryLimit} attempts in total (not
+	 * {@code receiptAllocationRetryLimit}, which only bounds {@link #claim}), then
 	 * {@link TraceStorageException} {@code receipt_allocation_exhausted}.</li>
-	 * <li>{@code replan}, when not {@code null}, runs under the lock after each duplicate and before
-	 * the next attempt, only if another attempt remains. It returns the items for that attempt,
-	 * possibly fewer. An empty list ends the run with no writes. Keep it cheap: the lock is held.
-	 * Without {@code replan} the same items are retried.</li>
+	 * <li>Backoff: when another attempt remains after a duplicate, the lock is released, the thread
+	 * sleeps a uniformly random time in {@code [0, min(rangeAllocationBackoffMs * 2^(k-1),
+	 * rangeAllocationMaxBackoffMs)]} milliseconds before retry {@code k} (k = 1 for the first retry),
+	 * and the lock is taken again. The lock is never held during the sleep, so other requests of this
+	 * node can commit meanwhile; the head is re-read after it. A base of {@code 0} disables the sleep
+	 * and the lock stays held. The total wait of one call is at most
+	 * {@code (rangeAllocationRetryLimit - 1) * rangeAllocationMaxBackoffMs}; with the defaults (32
+	 * attempts, base 5 ms, cap 250 ms) the windows add up to 6565 ms, under 8 s. An
+	 * interrupt during the sleep restores the thread's interrupt flag, writes nothing more and throws
+	 * {@link TraceStorageException} {@link #REASON_ALLOCATION_INTERRUPTED}; the batch ingest path
+	 * fails the pending elements with it instead of falling back to per-record ingest.</li>
+	 * <li>{@code replan}, when not {@code null}, runs after each duplicate and before the next attempt,
+	 * only if another attempt remains, under the lock and after the backoff, so it sees the rows other
+	 * writers stored meanwhile. The order per retry is: unlock, sleep, lock, {@code replan}, head read.
+	 * It returns the items for that attempt, possibly fewer. An empty list ends the run with no writes.
+	 * Keep it cheap: the lock is held. Without {@code replan} the same items are retried.</li>
 	 * <li>Any other exception from {@code action} (or from {@code replan}) propagates unchanged and
 	 * is not retried. The caller decides the fallback.</li>
 	 * </ul>
 	 * Batch rows are never {@code PENDING}: see the class Javadoc.
 	 *
 	 * @return the run that {@code action} committed, or an empty run if {@code items} was or became empty
-	 * @throws TraceStorageException {@code receipt_allocation_exhausted}, or a store failure while
-	 *                                reading the head
+	 * @throws TraceStorageException {@code receipt_allocation_exhausted}, {@code receipt_allocation_interrupted},
+	 *                                or a store failure while reading the head
 	 */
 	public ReceiptRun runWithRange(String domainId, List<ReceiptBatchItem> items, String nodeId, RangeAction action,
 			Supplier<List<ReceiptBatchItem>> replan) {
@@ -185,9 +215,13 @@ public class TraceReceiptChain {
 			return ReceiptRun.empty(domainId, 0);
 		}
 		ReentrantLock lock = domainLocks.computeIfAbsent(domainId, d -> new ReentrantLock());
-		int retryLimit = appConfiguration.getTraceConfiguration().getReceiptAllocationRetryLimit();
+		TraceConfiguration config = appConfiguration.getTraceConfiguration();
+		int retryLimit = config.getRangeAllocationRetryLimit();
+		int backoffBaseMs = config.getRangeAllocationBackoffMs();
+		int backoffMaxMs = config.getRangeAllocationMaxBackoffMs();
 
 		lock.lock();
+		boolean locked = true;
 		try {
 			List<ReceiptBatchItem> current = items;
 			for (int attempt = 0; attempt < retryLimit; attempt++) {
@@ -210,11 +244,30 @@ public class TraceReceiptChain {
 					action.commit(run);
 					return run;
 				} catch (DuplicateEntryException ex) {
-					log.debug("receipt range contended: domain={}, firstSeq={}, size={}, attempt={}", domainId,
-							rows.get(0).getReceiptSeq(), rows.size(), attempt);
+					boolean retryRemains = attempt + 1 < retryLimit;
+					boolean backoff = retryRemains && backoffBaseMs > 0;
+					long backoffMs = backoff ? backoffMs(attempt + 1, backoffBaseMs, backoffMaxMs) : 0L;
+					log.debug("receipt range contended: domain={}, firstSeq={}, size={}, attempt={}, backoffMs={}",
+							domainId, rows.get(0).getReceiptSeq(), rows.size(), attempt, backoffMs);
+					if (!retryRemains) {
+						break;
+					}
+					if (backoff) {
+						lock.unlock();
+						locked = false;
+						try {
+							sleeper.sleep(backoffMs);
+						} catch (InterruptedException ie) {
+							Thread.currentThread().interrupt();
+							throw new TraceStorageException(REASON_ALLOCATION_INTERRUPTED,
+									"Interrupted while backing off a receipt range retry for domain " + domainId, ie);
+						}
+						lock.lock();
+						locked = true;
+					}
 				}
 
-				if (attempt + 1 < retryLimit && replan != null) {
+				if (replan != null) {
 					current = replan.get();
 					if (current == null || current.isEmpty()) {
 						return ReceiptRun.empty(domainId, attempt + 1);
@@ -224,8 +277,20 @@ public class TraceReceiptChain {
 			throw new TraceStorageException("receipt_allocation_exhausted",
 					"Exhausted receipt allocation retries for domain " + domainId);
 		} finally {
-			lock.unlock();
+			if (locked) {
+				lock.unlock();
+			}
 		}
+	}
+
+	/**
+	 * The backoff before retry {@code retry} (1 for the first retry): uniformly random in
+	 * {@code [0, min(baseMs * 2^(retry-1), maxMs)]} milliseconds, both ends included.
+	 */
+	static long backoffMs(int retry, int baseMs, int maxMs) {
+		int shift = retry - 1;
+		long window = shift >= 31 ? maxMs : Math.min((long) baseMs << shift, maxMs);
+		return ThreadLocalRandom.current().nextLong(window + 1);
 	}
 
 	private TraceReceiptEntry buildRow(String domainId, long seq, String producerId, String recordId,

@@ -24,6 +24,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.lock.model.trace.entity.TraceReceiptEntry;
 import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.service.trace.error.TraceErrors;
+import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.trace.model.ChainPosition;
+import io.jans.lock.service.trace.model.ExecutionIdentity;
+import io.jans.lock.service.trace.model.ReceiptEntry;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
@@ -42,6 +46,11 @@ import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 public class TraceBatchIngestDifferentialTest {
 
 	private static final String DOMAIN = "domain-a";
+
+	/** The evidence domain each harness writes; both are {@link #DOMAIN} unless a subclass separates them. */
+	private String sequentialDomain;
+
+	private String batchDomain;
 
 	private static final String PRODUCER = "cedarling-fleet-1";
 
@@ -67,17 +76,36 @@ public class TraceBatchIngestDifferentialTest {
 	void setUp() {
 		sequential = newHarness();
 		batch = newHarness();
-		key = sequential.registerKey(DOMAIN, PRODUCER, KID);
-		batch.registerKey(DOMAIN, PRODUCER, KID, key);
+		sequentialDomain = sequentialDomain();
+		batchDomain = batchDomain();
+		key = sequential.registerKey(sequentialDomain, PRODUCER, KID);
+		batch.registerKey(batchDomain, PRODUCER, KID, key);
 		for (String chain : new String[] { CHAIN_1, CHAIN_2 }) {
-			sequential.registerChain(DOMAIN, PRODUCER, INSTANCE, chain);
-			batch.registerChain(DOMAIN, PRODUCER, INSTANCE, chain);
+			sequential.registerChain(sequentialDomain, PRODUCER, INSTANCE, chain);
+			batch.registerChain(batchDomain, PRODUCER, INSTANCE, chain);
 		}
 	}
 
 	/** Override to run the same scenarios over another {@code TraceStore}. */
 	protected TraceTestHarness newHarness() {
 		return new TraceTestHarness();
+	}
+
+	/**
+	 * The domain the one-by-one harness writes. Two harnesses over separate stores use the same
+	 * domain; a subclass whose harnesses share one database returns two different throw-away domains.
+	 */
+	protected String sequentialDomain() {
+		return DOMAIN;
+	}
+
+	/** The domain the batch harness writes; see {@link #sequentialDomain()}. */
+	protected String batchDomain() {
+		return DOMAIN;
+	}
+
+	private String domainOf(TraceTestHarness harness) {
+		return harness == sequential ? sequentialDomain : batchDomain;
 	}
 
 	// -- helpers ------------------------------------------------------------------------------
@@ -121,7 +149,7 @@ public class TraceBatchIngestDifferentialTest {
 		List<Object> outcomes = new ArrayList<>();
 		for (String json : elements) {
 			try {
-				outcomes.add(sequential.ingest(json, sequential.ctx(DOMAIN)));
+				outcomes.add(sequential.ingest(json, sequential.ctx(sequentialDomain)));
 			} catch (RuntimeException ex) {
 				outcomes.add(ex);
 			}
@@ -135,7 +163,7 @@ public class TraceBatchIngestDifferentialTest {
 			list.add(new BatchElement(i, elements.get(i).getBytes(StandardCharsets.UTF_8)));
 		}
 		List<Object> outcomes = new ArrayList<>();
-		for (BatchOutcome outcome : batch.ingestionService().ingestBatch(list, batch.ctx(DOMAIN))) {
+		for (BatchOutcome outcome : batch.ingestionService().ingestBatch(list, batch.ctx(batchDomain))) {
 			outcomes.add(outcome.isAccepted() ? outcome.getResult() : outcome.getError());
 		}
 		return outcomes;
@@ -154,8 +182,8 @@ public class TraceBatchIngestDifferentialTest {
 		remember(preload);
 		remember(elements);
 		for (String json : preload) {
-			sequential.ingest(json, sequential.ctx(DOMAIN));
-			batch.ingest(json, batch.ctx(DOMAIN));
+			sequential.ingest(json, sequential.ctx(sequentialDomain));
+			batch.ingest(json, batch.ctx(batchDomain));
 		}
 
 		List<Object> expected = runSequential(elements);
@@ -190,20 +218,21 @@ public class TraceBatchIngestDifferentialTest {
 		}
 	}
 
-	private static List<StoredTraceRecord> storedRecords(TraceTestHarness harness, List<String> recordIds) {
+	private List<StoredTraceRecord> storedRecords(TraceTestHarness harness, List<String> recordIds) {
 		List<StoredTraceRecord> records = new ArrayList<>();
 		for (String recordId : recordIds) {
-			harness.traceStore().findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordId)).ifPresent(records::add);
+			harness.traceStore().findRecord(new RecordIdentity(domainOf(harness), PRODUCER, recordId)).ifPresent(records::add);
 		}
 		records.sort((x, y) -> Long.compare(x.getReceipt().getReceiptSequence(), y.getReceipt().getReceiptSequence()));
 		return records;
 	}
 
-	private static List<TraceReceiptEntry> storedReceipts(TraceTestHarness harness) {
+	private List<TraceReceiptEntry> storedReceipts(TraceTestHarness harness) {
 		List<TraceReceiptEntry> receipts = new ArrayList<>();
-		long head = harness.traceStore().findReceiptHead(DOMAIN).map(h -> h.getReceiptSequence()).orElse(0L);
+		String domain = domainOf(harness);
+		long head = harness.traceStore().findReceiptHead(domain).map(h -> h.getReceiptSequence()).orElse(0L);
 		for (long seq = 1; seq <= head; seq++) {
-			harness.traceStore().findReceipt(DOMAIN, seq).ifPresent(receipts::add);
+			harness.traceStore().findReceipt(domain, seq).ifPresent(receipts::add);
 		}
 		return receipts;
 	}
@@ -214,6 +243,18 @@ public class TraceBatchIngestDifferentialTest {
 				: -1;
 	}
 
+	/** The two harnesses may write different domains: compare the position without it. */
+	private static ChainPosition withoutDomain(ChainPosition position) {
+		ChainIdentity id = position.getChainIdentity();
+		return new ChainPosition(new ChainIdentity("", id.getProducerId(), id.getProducerInstanceId(), id.getProducerChainId()),
+				position.getSequenceNumber());
+	}
+
+	private static ExecutionIdentity withoutDomain(ExecutionIdentity execution) {
+		return execution == null ? null
+				: new ExecutionIdentity("", execution.getExecutionAuthority(), execution.getTraceExecutionId());
+	}
+
 	private void assertSameStore() {
 		List<StoredTraceRecord> expected = storedRecords(sequential, knownRecordIds);
 		List<StoredTraceRecord> actual = storedRecords(batch, knownRecordIds);
@@ -222,14 +263,15 @@ public class TraceBatchIngestDifferentialTest {
 			StoredTraceRecord e = expected.get(i);
 			StoredTraceRecord a = actual.get(i);
 			String label = "record " + e.getIdentity();
-			assertEquals(e.getIdentity(), a.getIdentity(), label);
+			assertEquals(e.getIdentity().getProducerId(), a.getIdentity().getProducerId(), label);
+			assertEquals(e.getIdentity().getRecordId(), a.getIdentity().getRecordId(), label);
 			assertEquals(e.getAssertionRaw(), a.getAssertionRaw(), label);
 			assertEquals(e.getContentDigest(), a.getContentDigest(), label);
-			assertEquals(e.getReceipt(), a.getReceipt(), label + " receipt");
+			assertSameReceipt(e.getReceipt(), a.getReceipt(), label + " receipt");
 			assertEquals(e.getFlags(), a.getFlags(), label + " flags");
-			assertEquals(e.getChainPosition(), a.getChainPosition(), label);
+			assertEquals(withoutDomain(e.getChainPosition()), withoutDomain(a.getChainPosition()), label);
 			assertEquals(e.getPrevRecordHash(), a.getPrevRecordHash(), label);
-			assertEquals(e.getExecution(), a.getExecution(), label);
+			assertEquals(withoutDomain(e.getExecution()), withoutDomain(a.getExecution()), label);
 			assertEquals(e.getNodeId(), a.getNodeId(), label);
 			assertEquals(e.getCreatedAtMs(), a.getCreatedAtMs(), label);
 			assertEquals(e.getVersion(), a.getVersion(), label + " version");
@@ -243,18 +285,42 @@ public class TraceBatchIngestDifferentialTest {
 			TraceReceiptEntry a = actualReceipts.get(i);
 			String label = "receipt " + e.getReceiptSeq();
 			assertEquals(e.getReceiptSeq(), a.getReceiptSeq(), label);
-			assertEquals(e.getReceiptHash(), a.getReceiptHash(), label);
-			assertEquals(e.getPrevReceiptHash(), a.getPrevReceiptHash(), label);
-			assertEquals(e.getRecordKey(), a.getRecordKey(), label);
+			if (sameDomain()) {
+				assertEquals(e.getReceiptHash(), a.getReceiptHash(), label);
+				assertEquals(e.getPrevReceiptHash(), a.getPrevReceiptHash(), label);
+				assertEquals(e.getRecordKey(), a.getRecordKey(), label);
+			}
 			assertEquals(e.getContentDigest(), a.getContentDigest(), label);
 			assertEquals(e.getReceivedAtMs(), a.getReceivedAtMs(), label);
 			assertEquals(e.getNodeId(), a.getNodeId(), label);
 			assertEquals(e.getReceiptStateEnum(), a.getReceiptStateEnum(), label + " state");
 		}
 
-		ChainVerificationReport report = batch.verifyDomain(DOMAIN);
+		ChainVerificationReport report = batch.verifyDomain(batchDomain);
 		assertTrue(report.isOk(), () -> "batch store chain: " + report);
 		assertEquals(report.getHeadSequence(), report.getEntries().size(), "receipt chain must be dense");
+		if (!sameDomain()) {
+			ChainVerificationReport sequentialReport = sequential.verifyDomain(sequentialDomain);
+			assertTrue(sequentialReport.isOk(), () -> "sequential store chain: " + sequentialReport);
+		}
+	}
+
+	private boolean sameDomain() {
+		return sequentialDomain.equals(batchDomain);
+	}
+
+	/**
+	 * The receipt hash and the record key bind the domain id, so two domains give different values
+	 * for the same records: they are compared only when both harnesses write one domain, and each
+	 * domain's chain is verified on its own instead.
+	 */
+	private void assertSameReceipt(ReceiptEntry e, ReceiptEntry a, String label) {
+		if (sameDomain()) {
+			assertEquals(e, a, label);
+			return;
+		}
+		assertEquals(e.getReceiptSequence(), a.getReceiptSequence(), label);
+		assertEquals(e.getReceivedAtMs(), a.getReceivedAtMs(), label);
 	}
 
 	// -- scenarios ----------------------------------------------------------------------------

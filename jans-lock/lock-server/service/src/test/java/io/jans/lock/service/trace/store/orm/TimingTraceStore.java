@@ -497,6 +497,23 @@ public class TimingTraceStore implements TraceStore {
 			return sum;
 		}
 
+		/** @return one snapshot with the calls and nanos of every method added up over {@code snapshots} */
+		public static Snapshot sum(List<Snapshot> snapshots) {
+			Map<String, long[]> totals = new TreeMap<>();
+			for (Snapshot snapshot : snapshots) {
+				for (MethodStats stats : snapshot.methods()) {
+					long[] total = totals.computeIfAbsent(stats.method(), name -> new long[2]);
+					total[0] += stats.calls();
+					total[1] += stats.totalNanos();
+				}
+			}
+			List<MethodStats> merged = new ArrayList<>();
+			for (Map.Entry<String, long[]> entry : totals.entrySet()) {
+				merged.add(new MethodStats(entry.getKey(), entry.getValue()[0], entry.getValue()[1]));
+			}
+			return new Snapshot(merged);
+		}
+
 		/** @return the stats of {@code method}, or {@code null} when it was never called */
 		public MethodStats get(String method) {
 			for (MethodStats stats : methods) {

@@ -57,7 +57,10 @@ tags:
 | policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
 | postCommitCorrelationThreads | Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64 | [Details](#postcommitcorrelationthreads) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
-| receiptAllocationRetryLimit | Maximum retries when allocating a receipt-chain sequence number | [Details](#receiptallocationretrylimit) |
+| rangeAllocationBackoffMs | Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default | [Details](#rangeallocationbackoffms) |
+| rangeAllocationMaxBackoffMs | Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default | [Details](#rangeallocationmaxbackoffms) |
+| rangeAllocationRetryLimit | Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default | [Details](#rangeallocationretrylimit) |
+| receiptAllocationRetryLimit | Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit | [Details](#receiptallocationretrylimit) |
 | receiptRepairIntervalSeconds | Interval in seconds between receipt repair timer runs | [Details](#receiptrepairintervalseconds) |
 | serverMode | gRPC server mode | [Details](#servermode) |
 | statEnabled | Active stat enabled | [Details](#statenabled) |
@@ -492,9 +495,36 @@ tags:
 - Default value: None
 
 
+## rangeAllocationBackoffMs
+
+- Description: Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default
+
+- Required: No
+
+- Default value: 5
+
+
+## rangeAllocationMaxBackoffMs
+
+- Description: Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default
+
+- Required: No
+
+- Default value: 250
+
+
+## rangeAllocationRetryLimit
+
+- Description: Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default
+
+- Required: No
+
+- Default value: 32
+
+
 ## receiptAllocationRetryLimit
 
-- Description: Maximum retries when allocating a receipt-chain sequence number
+- Description: Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit
 
 - Required: No
 

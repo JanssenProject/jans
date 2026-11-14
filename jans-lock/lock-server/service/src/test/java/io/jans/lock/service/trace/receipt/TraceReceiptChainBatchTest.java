@@ -15,14 +15,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,13 +43,15 @@ import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.model.ReceiptHead;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
+import io.jans.lock.service.trace.receipt.TraceReceiptChain.Sleeper;
 import io.jans.lock.service.trace.store.InMemoryTraceStore;
 import io.jans.lock.service.trace.testkit.StoredTraceRecordFactory;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 
 /**
  * Tests for {@link TraceReceiptChain#runWithRange}: contiguous range reservation, hash chaining,
- * collision retry and re-plan, exhaustion, concurrency and per-domain independence.
+ * collision retry and re-plan, exhaustion, concurrency and per-domain independence, the separate
+ * range retry limit and the jittered backoff taken with the domain lock released.
  */
 class TraceReceiptChainBatchTest extends BaseLockServiceTest {
 
@@ -238,7 +244,7 @@ class TraceReceiptChainBatchTest extends BaseLockServiceTest {
 
 	@Test
 	void testRunWithRange_AlwaysDuplicate_ExhaustsAfterRetryLimit() {
-		traceConfiguration.setReceiptAllocationRetryLimit(3);
+		traceConfiguration.setRangeAllocationRetryLimit(3);
 		TraceReceiptChain chain = newChain(store);
 		AtomicInteger attempts = new AtomicInteger();
 		AtomicInteger replans = new AtomicInteger();
@@ -329,7 +335,7 @@ class TraceReceiptChainBatchTest extends BaseLockServiceTest {
 
 	@Test
 	void testRunWithRange_ConcurrentBatchesSameDomain_ChainDense() throws Exception {
-		traceConfiguration.setReceiptAllocationRetryLimit(1_000);
+		traceConfiguration.setRangeAllocationRetryLimit(1_000);
 		TraceReceiptChain nodeA = newChain(store);
 		TraceReceiptChain nodeB = newChain(store);
 		int threads = 8;
@@ -377,6 +383,293 @@ class TraceReceiptChainBatchTest extends BaseLockServiceTest {
 
 		assertEquals(1L, a.get(10, TimeUnit.SECONDS).getPositions().get(0).getSeq());
 		assertEquals(1L, b.get(10, TimeUnit.SECONDS).getPositions().get(0).getSeq());
+	}
+
+	// -- range retry limit and backoff -----------------------------------------------------------
+
+	/** Backoff base for the tests that need a sleep, pinned so they do not depend on the default. */
+	private static final int BACKOFF_BASE_MS = 5;
+
+	/** Records every requested sleep instead of sleeping. */
+	private static final class RecordingSleeper implements Sleeper {
+
+		private final List<Long> sleeps = Collections.synchronizedList(new ArrayList<>());
+
+		@Override
+		public void sleep(long millis) {
+			sleeps.add(millis);
+		}
+
+	}
+
+	private static RecordingSleeper recordingSleeper(TraceReceiptChain chain) {
+		RecordingSleeper sleeper = new RecordingSleeper();
+		setField(chain, "sleeper", sleeper);
+		return sleeper;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static ReentrantLock domainLock(TraceReceiptChain chain, String domainId) {
+		try {
+			java.lang.reflect.Field field = TraceReceiptChain.class.getDeclaredField("domainLocks");
+			field.setAccessible(true);
+			return ((Map<String, ReentrantLock>) field.get(chain)).get(domainId);
+		} catch (ReflectiveOperationException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
+	@Test
+	void testRunWithRange_OwnRetryLimit_ClaimKeepsReceiptAllocationRetryLimit() {
+		traceConfiguration.setReceiptAllocationRetryLimit(3);
+		traceConfiguration.setRangeAllocationRetryLimit(5);
+		traceConfiguration.setRangeAllocationBackoffMs(BACKOFF_BASE_MS);
+		AlwaysDuplicateReceiptStore duplicates = new AlwaysDuplicateReceiptStore();
+		TraceReceiptChain chain = newChain(duplicates);
+		RecordingSleeper sleeper = recordingSleeper(chain);
+		AtomicInteger attempts = new AtomicInteger();
+
+		TraceStorageException rangeFailure = assertThrows(TraceStorageException.class,
+				() -> chain.runWithRange(DOMAIN, items("rec-", 2), "node-batch", run -> {
+					attempts.incrementAndGet();
+					throw new DuplicateEntryException("forced");
+				}));
+		assertEquals("receipt_allocation_exhausted", rangeFailure.getReason());
+		assertEquals(5, attempts.get());
+		assertEquals(4, sleeper.sleeps.size(), "one backoff per retry, none after the last attempt");
+
+		TraceStorageException claimFailure = assertThrows(TraceStorageException.class,
+				() -> chain.claim(DOMAIN, PRODUCER, "single-1", "single-1-key", digest("single-1"), 1_000L, "node-single"));
+		assertEquals("receipt_allocation_exhausted", claimFailure.getReason());
+		assertEquals(3, duplicates.receiptInserts.get());
+		assertEquals(4, sleeper.sleeps.size(), "claim never backs off");
+	}
+
+	@Test
+	void testRunWithRange_RangeRetryLimitNotPositive_FallsBackToDefault() {
+		traceConfiguration.setRangeAllocationRetryLimit(0);
+		traceConfiguration.setRangeAllocationBackoffMs(0);
+		TraceReceiptChain chain = newChain(store);
+		AtomicInteger attempts = new AtomicInteger();
+
+		assertThrows(TraceStorageException.class, () -> chain.runWithRange(DOMAIN, items("rec-", 1), "node-batch", run -> {
+			attempts.incrementAndGet();
+			throw new DuplicateEntryException("forced");
+		}));
+
+		assertEquals(TraceConfiguration.DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT, attempts.get());
+	}
+
+	@Test
+	void testRunWithRange_BackoffSequence_WithinExponentialWindowAndCap() {
+		int base = 7;
+		int max = 100;
+		int limit = 12;
+		traceConfiguration.setRangeAllocationRetryLimit(limit);
+		traceConfiguration.setRangeAllocationBackoffMs(base);
+		traceConfiguration.setRangeAllocationMaxBackoffMs(max);
+		TraceReceiptChain chain = newChain(store);
+		RecordingSleeper sleeper = recordingSleeper(chain);
+
+		for (int round = 0; round < 50; round++) {
+			sleeper.sleeps.clear();
+			assertThrows(TraceStorageException.class,
+					() -> chain.runWithRange(DOMAIN, items("rec-", 1), "node-batch", run -> {
+						throw new DuplicateEntryException("forced");
+					}));
+
+			assertEquals(limit - 1, sleeper.sleeps.size());
+			for (int k = 1; k <= sleeper.sleeps.size(); k++) {
+				long window = Math.min((long) base << (k - 1), max);
+				long slept = sleeper.sleeps.get(k - 1);
+				assertTrue(slept >= 0 && slept <= window, "retry " + k + " slept " + slept + " outside [0, " + window + "]");
+			}
+		}
+		assertFalse(store.findReceiptHead(DOMAIN).isPresent());
+	}
+
+	@Test
+	void testBackoffMs_BoundsAndNoOverflow() {
+		boolean sawZero = false;
+		boolean sawTop = false;
+		for (int i = 0; i < 2_000; i++) {
+			long value = TraceReceiptChain.backoffMs(1, 1, 250);
+			assertTrue(value == 0 || value == 1, "retry 1 with base 1 is 0 or 1: " + value);
+			sawZero |= value == 0;
+			sawTop |= value == 1;
+			long capped = TraceReceiptChain.backoffMs(40, Integer.MAX_VALUE, 250);
+			assertTrue(capped >= 0 && capped <= 250, "capped: " + capped);
+			long large = TraceReceiptChain.backoffMs(31, 5, Integer.MAX_VALUE);
+			assertTrue(large >= 0 && large <= Integer.MAX_VALUE, "large: " + large);
+		}
+		assertTrue(sawZero && sawTop, "both ends of the window are drawn");
+	}
+
+	@Test
+	void testRunWithRange_DefaultBackoff_TotalWaitBoundUnderEightSeconds() {
+		int base = TraceConfiguration.DEFAULT_RANGE_ALLOCATION_BACKOFF_MS;
+		int max = TraceConfiguration.DEFAULT_RANGE_ALLOCATION_MAX_BACKOFF_MS;
+		long total = 0;
+		for (int k = 1; k < TraceConfiguration.DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT; k++) {
+			total += Math.min((long) base << (k - 1), max);
+		}
+		assertEquals(6565L, total);
+		assertTrue(total < 8_000L);
+	}
+
+	@Test
+	void testRunWithRange_BackoffBaseZero_NoSleepAndLockKept() {
+		traceConfiguration.setRangeAllocationRetryLimit(4);
+		traceConfiguration.setRangeAllocationBackoffMs(0);
+		TraceReceiptChain chain = newChain(store);
+		RecordingSleeper sleeper = recordingSleeper(chain);
+		AtomicInteger attempts = new AtomicInteger();
+		AtomicBoolean lockHeldInReplan = new AtomicBoolean(true);
+
+		assertThrows(TraceStorageException.class, () -> chain.runWithRange(DOMAIN, items("rec-", 1), "node-batch", run -> {
+			attempts.incrementAndGet();
+			throw new DuplicateEntryException("forced");
+		}, () -> {
+			lockHeldInReplan.compareAndSet(true, domainLock(chain, DOMAIN).isHeldByCurrentThread());
+			return items("rec-", 1);
+		}));
+
+		assertEquals(4, attempts.get());
+		assertTrue(sleeper.sleeps.isEmpty(), "base 0 disables the sleep");
+		assertTrue(lockHeldInReplan.get());
+	}
+
+	@Test
+	void testRunWithRange_Backoff_UnlockSleepLockReplanHeadRead() throws Exception {
+		traceConfiguration.setRangeAllocationRetryLimit(3);
+		traceConfiguration.setRangeAllocationBackoffMs(BACKOFF_BASE_MS);
+		List<String> events = Collections.synchronizedList(new ArrayList<>());
+		InMemoryTraceStore recording = new InMemoryTraceStore() {
+			@Override
+			public Optional<ReceiptHead> findReceiptHead(String domainId) {
+				events.add("head");
+				return super.findReceiptHead(domainId);
+			}
+		};
+		TraceReceiptChain chain = newChain(recording);
+		setField(chain, "sleeper", (Sleeper) millis -> events
+				.add("sleep:lockHeld=" + domainLock(chain, DOMAIN).isHeldByCurrentThread()));
+		AtomicInteger attempts = new AtomicInteger();
+		TraceReceiptChain.RangeAction inner = storeInto(recording, DOMAIN);
+
+		ReceiptRun run = chain.runWithRange(DOMAIN, items("rec-", 2), "node-batch", r -> {
+			events.add("commit");
+			if (attempts.getAndIncrement() == 0) {
+				throw new DuplicateEntryException("forced");
+			}
+			inner.commit(r);
+		}, () -> {
+			events.add("replan:lockHeld=" + domainLock(chain, DOMAIN).isHeldByCurrentThread());
+			return items("rec-", 2);
+		});
+
+		assertEquals(1, run.getAttempt());
+		assertEquals(List.of("head", "commit", "sleep:lockHeld=false", "replan:lockHeld=true", "head", "commit"),
+				events);
+		assertFalse(domainLock(chain, DOMAIN).isLocked(), "lock released after the run");
+	}
+
+	@Test
+	void testRunWithRange_LockReleasedDuringBackoff_OtherThreadCommitsThenRetryUsesFreshHead() throws Exception {
+		traceConfiguration.setRangeAllocationBackoffMs(BACKOFF_BASE_MS);
+		TraceReceiptChain chain = newChain(store);
+		CountDownLatch inSleep = new CountDownLatch(1);
+		CountDownLatch resume = new CountDownLatch(1);
+		setField(chain, "sleeper", (Sleeper) millis -> {
+			inSleep.countDown();
+			if (!resume.await(10, TimeUnit.SECONDS)) {
+				throw new AssertionError("never resumed");
+			}
+		});
+		AtomicInteger attempts = new AtomicInteger();
+		TraceReceiptChain.RangeAction inner = storeInto(store, DOMAIN);
+		executor = Executors.newFixedThreadPool(2);
+
+		Future<ReceiptRun> first = executor.submit(() -> chain.runWithRange(DOMAIN, items("first-", 2), "node-batch", r -> {
+			if (attempts.getAndIncrement() == 0) {
+				throw new DuplicateEntryException("lost the position");
+			}
+			inner.commit(r);
+		}, () -> items("first-", 2)));
+		assertTrue(inSleep.await(10, TimeUnit.SECONDS), "first run reached its backoff");
+
+		Future<ReceiptRun> second = executor
+				.submit(() -> chain.runWithRange(DOMAIN, items("second-", 2), "node-batch", storeInto(store, DOMAIN)));
+		ReceiptRun secondRun = second.get(10, TimeUnit.SECONDS);
+		assertEquals(1L, secondRun.getPositions().get(0).getSeq(), "the same domain lock was free during the sleep");
+		assertFalse(first.isDone());
+
+		resume.countDown();
+		ReceiptRun firstRun = first.get(10, TimeUnit.SECONDS);
+
+		assertEquals(1, firstRun.getAttempt());
+		assertEquals(3L, firstRun.getPositions().get(0).getSeq());
+		assertEquals(secondRun.getPositions().get(1).getReceiptHash(), firstRun.getPositions().get(0).getPrevReceiptHash());
+		assertChainOk(chain, DOMAIN, 4);
+	}
+
+	@Test
+	void testRunWithRange_InterruptedDuringBackoff_FailsWithFlagSetAndNoRows() throws Exception {
+		traceConfiguration.setRangeAllocationBackoffMs(BACKOFF_BASE_MS);
+		TraceReceiptChain chain = newChain(store);
+		setField(chain, "sleeper", (Sleeper) millis -> {
+			throw new InterruptedException("stop");
+		});
+		AtomicInteger attempts = new AtomicInteger();
+		AtomicInteger replans = new AtomicInteger();
+
+		TraceStorageException ex = assertThrows(TraceStorageException.class,
+				() -> chain.runWithRange(DOMAIN, items("rec-", 2), "node-batch", run -> {
+					attempts.incrementAndGet();
+					throw new DuplicateEntryException("forced");
+				}, () -> {
+					replans.incrementAndGet();
+					return items("rec-", 2);
+				}));
+
+		assertEquals("receipt_allocation_interrupted", ex.getReason());
+		assertTrue(Thread.interrupted(), "interrupt flag restored (and cleared here)");
+		assertEquals(1, attempts.get());
+		assertEquals(0, replans.get());
+		assertFalse(store.findReceiptHead(DOMAIN).isPresent());
+		assertFalse(domainLock(chain, DOMAIN).isLocked(), "lock not left held");
+
+		ReceiptRun run = chain.runWithRange(DOMAIN, items("rec-", 2), "node-batch", storeInto(store, DOMAIN));
+		assertEquals(1L, run.getPositions().get(0).getSeq());
+	}
+
+	@Test
+	void testRunWithRange_InterruptFlagSetBeforeRealSleep_FailsInterrupted() {
+		traceConfiguration.setRangeAllocationBackoffMs(BACKOFF_BASE_MS);
+		TraceReceiptChain chain = newChain(store);
+
+		TraceStorageException ex = assertThrows(TraceStorageException.class,
+				() -> chain.runWithRange(DOMAIN, items("rec-", 1), "node-batch", run -> {
+					Thread.currentThread().interrupt();
+					throw new DuplicateEntryException("forced");
+				}));
+
+		assertEquals("receipt_allocation_interrupted", ex.getReason());
+		assertTrue(Thread.interrupted());
+		assertFalse(store.findReceiptHead(DOMAIN).isPresent());
+	}
+
+	/** Rejects every receipt claim as a duplicate and counts the attempts. */
+	private static final class AlwaysDuplicateReceiptStore extends InMemoryTraceStore {
+
+		private final AtomicInteger receiptInserts = new AtomicInteger();
+
+		@Override
+		public void insertReceipt(TraceReceiptEntry row) throws DuplicateEntryException {
+			receiptInserts.incrementAndGet();
+			throw new DuplicateEntryException("forced");
+		}
+
 	}
 
 	private static void awaitOrFail(CountDownLatch latch) {

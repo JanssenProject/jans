@@ -8,16 +8,24 @@ package io.jans.lock.service.trace.registry;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +38,7 @@ import io.jans.lock.service.trace.TraceConstants;
 import io.jans.lock.trace.crypto.bc.testkit.TraceTestKeys;
 import io.jans.lock.service.trace.testkit.TraceTestCrypto;
 import io.jans.lock.service.trace.error.TraceConflictException;
+import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.trace.crypto.TraceCryptoException;
 import io.jans.lock.service.trace.error.TraceValidationException;
 import io.jans.lock.service.BaseLockServiceTest;
@@ -405,6 +414,165 @@ class ProducerKeyRegistryTest extends BaseLockServiceTest {
 			sb.append(c);
 		}
 		return sb.toString();
+	}
+
+	// -- request key memo ------------------------------------------------------------------
+
+	/** Wires {@link #registry} over a store that counts {@code findProducerKey} calls. */
+	private AtomicInteger countKeyReads() {
+		AtomicInteger reads = new AtomicInteger();
+		InMemoryTraceStore counting = new InMemoryTraceStore() {
+			@Override
+			public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
+				reads.incrementAndGet();
+				return store.findProducerKey(domainId, producerId, kid);
+			}
+		};
+		setField(registry, "traceStore", counting);
+		return reads;
+	}
+
+	@Test
+	void testRequestKeys_SameKeyTwice_OneReadOneParse() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		AtomicInteger reads = countKeyReads();
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+
+		ProducerKeyRegistry.ResolvedKey first = keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+		ProducerKeyRegistry.ResolvedKey second = keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+
+		assertEquals(1, reads.get());
+		assertEquals(KID, second.getKey().getKid());
+		assertSame(first.getVerificationKey(), second.getVerificationKey());
+	}
+
+	@Test
+	void testRequestKeys_KeptKey_ValidityJudgedAtEachCallersInstant() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, 9000L, REGISTERED_BY, 1000L);
+		AtomicInteger reads = countKeyReads();
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+
+		keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+		TraceValidationException expired = assertThrows(TraceValidationException.class,
+				() -> keys.resolve(DOMAIN, PRODUCER, KID, 9000L));
+		TraceValidationException early = assertThrows(TraceValidationException.class,
+				() -> keys.resolve(DOMAIN, PRODUCER, KID, 999L));
+
+		assertEquals(TraceErrorResponseType.KEY_NOT_VALID, expired.getErrorId());
+		assertEquals(ProducerKeyRegistry.REASON_EXPIRED, expired.getReason());
+		assertEquals(ProducerKeyRegistry.REASON_NOT_YET_VALID, early.getReason());
+		assertEquals(1, reads.get());
+	}
+
+	@Test
+	void testRequestKeys_FailingKey_NotKeptAndReadAgain() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		registry.revoke(DOMAIN, PRODUCER, KID, 5000L);
+		AtomicInteger reads = countKeyReads();
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+
+		for (int i = 0; i < 3; i++) {
+			TraceValidationException ex = assertThrows(TraceValidationException.class,
+					() -> keys.resolve(DOMAIN, PRODUCER, KID, 6000L));
+			assertEquals(ProducerKeyRegistry.REASON_REVOKED, ex.getReason());
+		}
+		TraceValidationException unknown = assertThrows(TraceValidationException.class,
+				() -> keys.resolve(DOMAIN, PRODUCER, "kid-unknown", 6000L));
+
+		assertEquals(ProducerKeyRegistry.REASON_KEY_NOT_REGISTERED, unknown.getReason());
+		assertEquals(4, reads.get());
+	}
+
+	@Test
+	void testRequestKeys_UnusableStoredKey_SameReasonsAndOrderAsResolveForVerification() throws Exception {
+		Map<String, String> badJwk = new LinkedHashMap<>();
+		badJwk.put("kty", "OKP");
+		badJwk.put("crv", "Ed25519");
+		badJwk.put("x", "not-valid-base64url!!");
+		TraceProducerKeyEntry key = new TraceProducerKeyEntry();
+		key.setDomainId(DOMAIN);
+		key.setProducerId(PRODUCER);
+		key.setKid(KID);
+		key.setPublicKeyJwk(badJwk);
+		key.setValidFrom(new Date(1000L));
+		key.setValidUntil(new Date(9000L));
+		key.setRegisteredBy(REGISTERED_BY);
+		key.setCreationDate(new Date(1000L));
+		store.insertProducerKey(key);
+		AtomicInteger reads = countKeyReads();
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+
+		for (long now : new long[] { 5000L, 9000L, 5000L }) {
+			TraceValidationException direct = assertThrows(TraceValidationException.class,
+					() -> registry.resolveForVerification(DOMAIN, PRODUCER, KID, now));
+			TraceValidationException memo = assertThrows(TraceValidationException.class,
+					() -> keys.resolve(DOMAIN, PRODUCER, KID, now));
+			assertEquals(direct.getErrorId(), memo.getErrorId());
+			assertEquals(direct.getReason(), memo.getReason());
+		}
+		assertEquals(6, reads.get(), "an unusable key is never kept");
+	}
+
+	@Test
+	void testRequestKeys_StoreFailure_PropagatesAndIsNotKept() {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		AtomicInteger reads = new AtomicInteger();
+		InMemoryTraceStore failingOnce = new InMemoryTraceStore() {
+			@Override
+			public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
+				if (reads.incrementAndGet() == 1) {
+					throw new TraceStorageException("read_failed", "injected");
+				}
+				return store.findProducerKey(domainId, producerId, kid);
+			}
+		};
+		setField(registry, "traceStore", failingOnce);
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+
+		assertThrows(TraceStorageException.class, () -> keys.resolve(DOMAIN, PRODUCER, KID, 5000L));
+		keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+		keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+
+		assertEquals(2, reads.get());
+	}
+
+	@Test
+	void testRequestKeys_ConcurrentCallers_OneRead() throws Exception {
+		registry.register(DOMAIN, PRODUCER, KID, jwk, ALL_KINDS, 1000L, null, REGISTERED_BY, 1000L);
+		AtomicInteger reads = new AtomicInteger();
+		InMemoryTraceStore slow = new InMemoryTraceStore() {
+			@Override
+			public Optional<TraceProducerKeyEntry> findProducerKey(String domainId, String producerId, String kid) {
+				reads.incrementAndGet();
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
+				return store.findProducerKey(domainId, producerId, kid);
+			}
+		};
+		setField(registry, "traceStore", slow);
+		ProducerKeyRegistry.KeyResolver keys = registry.newRequestKeys();
+		ExecutorService pool = Executors.newFixedThreadPool(4);
+		try {
+			CountDownLatch start = new CountDownLatch(1);
+			List<Future<ProducerKeyRegistry.ResolvedKey>> futures = new ArrayList<>();
+			for (int i = 0; i < 16; i++) {
+				futures.add(pool.submit(() -> {
+					start.await();
+					return keys.resolve(DOMAIN, PRODUCER, KID, 5000L);
+				}));
+			}
+			start.countDown();
+			for (Future<ProducerKeyRegistry.ResolvedKey> future : futures) {
+				assertEquals(KID, future.get(10, TimeUnit.SECONDS).getKey().getKid());
+			}
+		} finally {
+			pool.shutdownNow();
+		}
+
+		assertEquals(1, reads.get());
 	}
 
 }

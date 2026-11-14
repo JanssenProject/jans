@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -611,6 +612,236 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertFalse(successorAfter.getFlags().isChainLinkFailure());
 	}
 
+	// -- afterInsert: post-commit re-read of the neighboring positions ---------------------------
+
+	private VerifiedAssertion secondRecord(String recordId, String prevRecordHash) {
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId).sequenceNumber(2)
+				.prevRecordHash(prevRecordHash).unsignedJson();
+		return buildVerified(json, context());
+	}
+
+	private StoredTraceRecord current(StoredTraceRecord record) {
+		return store.findRecord(record.getIdentity()).orElseThrow(AssertionError::new);
+	}
+
+	@Test
+	void testAfterInsert_PredecessorArrivedAfterPlan_OwnCoverageGapCleared() throws DuplicateEntryException {
+		registerChain();
+		VerifiedAssertion verified2 = secondRecord(recordId(), digest("1"));
+		CorrelationPlan plan2 = service.plan(verified2, context());
+		assertTrue(plan2.getFlags().isCoverageGap(), "no predecessor when record 2 is planned");
+
+		// Another node stores the predecessor between this node's plan and its insert.
+		insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH, new IngestionFlags(false, false, false, false));
+		StoredTraceRecord stored2 = insertRecord(verified2.getRecordId(), verified2.getContentDigest(), 2L, digest("1"),
+				plan2.getFlags());
+
+		service.afterInsert(stored2, plan2);
+
+		IngestionFlags flags = current(stored2).getFlags();
+		assertFalse(flags.isCoverageGap(), "the predecessor is stored now");
+		assertFalse(flags.isChainLinkFailure(), "the predecessor's digest matches prev_record_hash");
+	}
+
+	@Test
+	void testAfterInsert_PredecessorWithOtherDigestArrivedAfterPlan_OwnCoverageGapClearedAndChainLinkFailureSet()
+			throws DuplicateEntryException {
+		registerChain();
+		VerifiedAssertion verified2 = secondRecord(recordId(), digest("1"));
+		CorrelationPlan plan2 = service.plan(verified2, context());
+
+		insertRecord(recordId(), digest("other"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		StoredTraceRecord stored2 = insertRecord(verified2.getRecordId(), verified2.getContentDigest(), 2L, digest("1"),
+				plan2.getFlags());
+
+		service.afterInsert(stored2, plan2);
+
+		IngestionFlags flags = current(stored2).getFlags();
+		assertFalse(flags.isCoverageGap());
+		assertTrue(flags.isChainLinkFailure(), "the predecessor's digest does not match prev_record_hash");
+		assertFalse(flags.isEquivocation());
+		assertEquals(plan2.getFlags().isLate(), flags.isLate(), "late is never touched");
+	}
+
+	@Test
+	void testAfterInsert_MatchingPredecessorArrivedAfterPlannedLinkFailure_ChainLinkFailureNotCleared()
+			throws DuplicateEntryException {
+		registerChain();
+		insertRecord(recordId(), digest("other"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		VerifiedAssertion verified2 = secondRecord(recordId(), digest("1"));
+		CorrelationPlan plan2 = service.plan(verified2, context());
+		assertTrue(plan2.getFlags().isChainLinkFailure());
+
+		// An equivocating predecessor that matches arrives after the plan.
+		insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH, new IngestionFlags(false, false, true, false));
+		StoredTraceRecord stored2 = insertRecord(verified2.getRecordId(), verified2.getContentDigest(), 2L, digest("1"),
+				plan2.getFlags());
+		InMemoryTraceStore counting = spy(store);
+		setField(service, "store", counting);
+
+		service.afterInsert(stored2, plan2);
+
+		assertTrue(current(stored2).getFlags().isChainLinkFailure(), "design §8: never self-clearing");
+		verify(counting, times(0)).updateRecordFlags(eq(stored2.getIdentity()), any(), anyLong());
+	}
+
+	@Test
+	void testAfterInsert_SuccessorArrivedAfterPlan_SuccessorUpdated() throws DuplicateEntryException {
+		registerChain();
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		assertTrue(plan1.getSuccessors().isEmpty(), "no successor when record 1 is planned");
+
+		// Another node stores the successor, against the empty chain, before this node's insert.
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("mismatch"),
+				new IngestionFlags(true, false, false, false));
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan1.getFlags());
+
+		service.afterInsert(stored1, plan1);
+
+		IngestionFlags flags = current(successor).getFlags();
+		assertFalse(flags.isCoverageGap(), "the successor's predecessor is stored now");
+		assertTrue(flags.isChainLinkFailure(), "the successor's prev_record_hash does not match");
+	}
+
+	@Test
+	void testAfterInsert_UnplannedSuccessorLinkedToEquivocatingPeer_ChainLinkFailureNotSet()
+			throws DuplicateEntryException {
+		registerChain();
+		String json1 = SignedAssertionFactory.capabilityInvoked().recordId(recordId()).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json1, context());
+		StoredTraceRecord peer = insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH,
+				new IngestionFlags(false, false, false, false));
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		assertTrue(plan1.getSuccessors().isEmpty());
+
+		// The successor is planned after both records at position 1 are stored and links to the peer:
+		// on the one-by-one path it would see both, and one matching predecessor means no link failure.
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("1"),
+				new IngestionFlags(false, false, false, false));
+		StoredTraceRecord stored1 = insertRecord(verified1.getRecordId(), verified1.getContentDigest(), 1L,
+				TraceConstants.ZERO_HASH, plan1.getFlags());
+
+		service.afterInsert(stored1, plan1);
+
+		assertFalse(current(successor).getFlags().isChainLinkFailure());
+		assertTrue(current(peer).getFlags().isEquivocation());
+		assertTrue(current(stored1).getFlags().isEquivocation());
+	}
+
+	@Test
+	void testAfterInsert_PlannedSuccessorAlsoReturnedByReRead_WrittenOnce() throws DuplicateEntryException {
+		registerChain();
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("mismatch"),
+				new IngestionFlags(true, false, false, false));
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		assertEquals(1, plan1.getSuccessors().size());
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan1.getFlags());
+		InMemoryTraceStore counting = spy(store);
+		setField(service, "store", counting);
+
+		service.afterInsert(stored1, plan1);
+
+		verify(counting, times(1)).updateRecordFlags(eq(successor.getIdentity()), any(),
+				anyLong());
+		verify(counting, times(0)).findRecord(any());
+		assertFalse(current(successor).getFlags().isCoverageGap());
+	}
+
+	@Test
+	void testAfterInsert_OwnRecordVersionConflict_ReReadAndRetriedWithoutLosingTheOtherWrite()
+			throws DuplicateEntryException {
+		registerChain();
+		VerifiedAssertion verified2 = secondRecord(recordId(), digest("1"));
+		CorrelationPlan plan2 = service.plan(verified2, context());
+		insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH, new IngestionFlags(false, false, false, false));
+		StoredTraceRecord stored2 = insertRecord(verified2.getRecordId(), verified2.getContentDigest(), 2L, digest("1"),
+				plan2.getFlags());
+
+		// The rows are read after the insert, then another writer changes the record (version + 1).
+		Map<ChainPosition, List<StoredTraceRecord>> rows = store
+				.findRecordsByChainPositions(ProducerChainRules.neighborhood(plan2.getPosition()));
+		StoredTraceRecord read = current(stored2);
+		IngestionFlags otherWrite = read.getFlags();
+		otherWrite.setEquivocation(true);
+		assertTrue(store.updateRecordFlags(stored2.getIdentity(), otherWrite, read.getVersion()));
+		InMemoryTraceStore counting = spy(store);
+		setField(service, "store", counting);
+
+		service.afterInsert(stored2, plan2, rows);
+
+		verify(counting, times(2)).updateRecordFlags(eq(stored2.getIdentity()), any(),
+				anyLong());
+		verify(counting, times(1)).findRecord(stored2.getIdentity());
+		IngestionFlags flags = current(stored2).getFlags();
+		assertFalse(flags.isCoverageGap(), "the correction is written after the re-read");
+		assertTrue(flags.isEquivocation(), "the other writer's change is kept");
+	}
+
+	@Test
+	void testAfterInsert_NoNeighborChange_OneReadAndNoWrite() throws DuplicateEntryException {
+		registerChain();
+		String recordId1 = recordId();
+		String json1 = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json1, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan1.getFlags());
+		service.afterInsert(stored1, plan1);
+
+		VerifiedAssertion verified2 = secondRecord(recordId(), verified1.getContentDigest());
+		CorrelationPlan plan2 = service.plan(verified2, context());
+		StoredTraceRecord stored2 = insertRecord(verified2.getRecordId(), verified2.getContentDigest(), 2L,
+				verified1.getContentDigest(), plan2.getFlags());
+		InMemoryTraceStore counting = spy(store);
+		setField(service, "store", counting);
+
+		service.afterInsert(stored2, plan2);
+
+		verify(counting, times(1)).findRecordsByChainPositions(any());
+		verify(counting, times(0)).updateRecordFlags(any(), any(), anyLong());
+		verify(counting, times(0)).findRecord(any());
+		assertSameChainFlags(plan2.getFlags(), current(stored2).getFlags());
+	}
+
+	@Test
+	void testAfterInsert_NeighborhoodReadFailsEveryTime_OwnFlagsKeptPlannedSuccessorStillUpdated()
+			throws DuplicateEntryException {
+		registerChain();
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("mismatch"),
+				new IngestionFlags(true, false, false, false));
+		String recordId1 = recordId();
+		String json = SignedAssertionFactory.capabilityInvoked().recordId(recordId1).genesis().unsignedJson();
+		VerifiedAssertion verified1 = buildVerified(json, context());
+		CorrelationPlan plan1 = service.plan(verified1, context());
+		StoredTraceRecord stored1 = insertRecord(recordId1, verified1.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan1.getFlags());
+		InMemoryTraceStore flaky = spy(store);
+		doThrow(new IllegalStateException("read failure")).when(flaky).findRecordsByChainPositions(any());
+		setField(service, "store", flaky);
+
+		service.afterInsert(stored1, plan1);
+
+		verify(flaky, times(3)).findRecordsByChainPositions(any());
+		assertFalse(current(successor).getFlags().isCoverageGap(), "the planned successor is read and updated");
+		assertSameChainFlags(plan1.getFlags(), current(stored1).getFlags());
+	}
+
+	private static void assertSameChainFlags(IngestionFlags expected, IngestionFlags actual) {
+		assertEquals(expected.isCoverageGap(), actual.isCoverageGap(), "coverage_gap");
+		assertEquals(expected.isChainLinkFailure(), actual.isChainLinkFailure(), "chain_link_failure");
+		assertEquals(expected.isEquivocation(), actual.isEquivocation(), "equivocation");
+	}
+
 	// -- afterInsert: equivocation ------------------------------------------
 
 	@Test
@@ -684,12 +915,12 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 
 		InMemoryTraceStore flaky = spy(store);
 		doThrow(new IllegalStateException("transient read failure")).doCallRealMethod().when(flaky)
-				.findRecordsByChainPosition(any());
+				.findRecordsByChainPositions(any());
 		setField(service, "store", flaky);
 
 		service.afterInsert(stored1, plan1);
 
-		verify(flaky, times(2)).findRecordsByChainPosition(any());
+		verify(flaky, times(2)).findRecordsByChainPositions(any());
 		assertTrue(store.findRecord(stored1.getIdentity()).get().getFlags().isEquivocation());
 		assertTrue(store.findRecord(peer.getIdentity()).get().getFlags().isEquivocation());
 	}
@@ -801,6 +1032,12 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		@Override
 		public List<StoredTraceRecord> findRecordsByChainPosition(io.jans.lock.service.trace.model.ChainPosition position) {
 			return delegate.findRecordsByChainPosition(position);
+		}
+
+		@Override
+		public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+				java.util.Collection<ChainPosition> positions) {
+			return delegate.findRecordsByChainPositions(positions);
 		}
 
 		@Override
