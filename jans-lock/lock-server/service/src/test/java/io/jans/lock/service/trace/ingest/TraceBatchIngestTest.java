@@ -727,4 +727,21 @@ class TraceBatchIngestTest {
 		assertTrue(storedFlags(c.get(1)).isCoverageGap());
 	}
 
+	@Test
+	void conflictWithUnstoredEarlierElementIsClassifiedAgainWhenTheBatchFallsBack() {
+		String first = chain(CHAIN_1, 1).get(0);
+		String second = TraceRecordBuilder.fromJson(first)
+				.withField("9.9.9-conflict", "trace", "policy", "policy_store_version").sign(key.getPrivate());
+
+		store.failNextInsertIngestBatch();
+		store.failNextInsertRecord();
+		List<BatchOutcome> outcomes = submit(node, List.of(first, second));
+
+		assertFalse(outcomes.get(0).isAccepted(), "the first element fails on the per-record path too");
+		assertTrue(outcomes.get(1).isAccepted(), "the identity is free once the first element failed");
+		assertFalse(outcomes.get(1).getResult().isIdempotentReplay());
+		assertEquals(digestOf(second), store.findRecord(new RecordIdentity(DOMAIN, PRODUCER, recordIdOf(second)))
+				.orElseThrow(AssertionError::new).getContentDigest());
+	}
+
 }

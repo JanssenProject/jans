@@ -542,6 +542,12 @@ public class TraceIngestionService {
 		 */
 		private StoredTraceRecord replayed;
 
+		/**
+		 * The element was rejected because an earlier element of the batch planned the same identity
+		 * with another digest. That element may never be stored, so a fallback classifies this one again.
+		 */
+		private boolean provisionalConflict;
+
 		private final List<BatchItem> duplicates = new ArrayList<>();
 
 		private BatchItem(int index, VerifiedAssertion verified) {
@@ -609,6 +615,7 @@ public class TraceIngestionService {
 					item.snapshot = known.get().getFlags();
 					item.duplicateOf.duplicates.add(item);
 				} else {
+					item.provisionalConflict = true;
 					outcomes[item.index] = BatchOutcome.failed(
 							new TraceConflictException(TraceErrorResponseType.RECORD_CONFLICT, REASON_DIGEST_MISMATCH));
 				}
@@ -849,8 +856,8 @@ public class TraceIngestionService {
 	/**
 	 * The batch could not be committed as a unit; nothing was stored by the failed attempt. Every
 	 * element without an outcome goes through the one-by-one path, whose outcome it keeps. So do the
-	 * elements dropped after a collision and their in-batch replays, and the replays of records
-	 * stored before the batch: their provisional outcome was read before the elements ahead of them
+	 * elements dropped after a collision and their in-batch replays, the replays of records
+	 * stored before the batch, and the conflicts with a provisional record of the batch: their provisional outcome was read before the elements ahead of them
 	 * are stored here, or from overlay corrections that were never committed.
 	 */
 	private void fallbackToSinglePath(List<BatchItem> items, TraceRequestContext ctx, BatchOutcome[] outcomes,
@@ -864,8 +871,9 @@ public class TraceIngestionService {
 					outcomes[duplicate.index] = null;
 				}
 			}
-			if (item.replayed != null) {
+			if (item.replayed != null || item.provisionalConflict) {
 				item.replayed = null;
+				item.provisionalConflict = false;
 				outcomes[item.index] = null;
 			}
 		}
