@@ -263,7 +263,7 @@ verification. See [TRACE Evidence](./trace.md) for the feature description and A
 | `maxStringLength` | integer | `8192` | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion. |
 | `maxArrayLength` | integer | `256` | Maximum accepted JSON array length in a TRACE assertion. |
 | `maxObjectMembers` | integer | `256` | Maximum accepted JSON object member count in a TRACE assertion. |
-| `receiptAllocationRetryLimit` | integer | `8` | Maximum retries when allocating the next receipt-chain sequence number under multi-node contention. |
+| `receiptAllocationRetryLimit` | integer | `8` | Maximum attempts when claiming the next receipt-chain sequence number for one record on the one-by-one path under multi-node contention. The batch path (`batchIngestEnabled`) uses `rangeAllocationRetryLimit` instead; see [TRACE](./trace.md#batch-ingest). |
 | `correlationRetryLimit` | integer | `3` | Maximum retries when a neighbor-flag update after a record insert hits a version conflict. After the limit Lock logs a warning and gives up on that update; the request still succeeds. |
 | `receiptRepairIntervalSeconds` | integer | `300` | Interval between runs of the receipt repair timer, which settles stale `PENDING` receipts. |
 | `pendingReceiptTimeoutSeconds` | integer | `120` | Seconds a `PENDING` receipt may remain unresolved before the repair timer marks it `COMMITTED` or `VOID`. |
