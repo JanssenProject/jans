@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -364,7 +365,8 @@ public class TraceIngestionService {
 	 * provisional record, so the batch fails with {@code batch_plan_invalidated} and goes one by
 	 * one (step 8).</li>
 	 * <li>After the commit run {@code afterInsert} for each stored record with one shared read of the
-	 * predecessor, own and successor positions; on the post-commit pool when
+	 * predecessor, own and successor positions, in input order; each record sees the rows of the
+	 * batch's earlier records but not of its later ones, as on the one-by-one path. On the post-commit pool when
 	 * {@code postCommitCorrelationThreads} is set, so the outcomes are returned without waiting for
 	 * it. {@code afterInsert} corrects the stored record's own {@code coverage_gap} and
 	 * {@code chain_link_failure} and those of every successor now stored.</li>
@@ -844,13 +846,48 @@ public class TraceIngestionService {
 				log.warn("TRACE batch afterInsert chain position read failed, attempt {}", attempt, ex);
 			}
 		}
+		Map<RecordIdentity, StoredTraceRecord> batchRows = new HashMap<>();
+		Map<ChainPosition, List<StoredTraceRecord>> visible = rows == null ? null : withoutBatch(rows, records, batchRows);
 		for (int i = 0; i < items.size(); i++) {
+			StoredTraceRecord own = batchRows.get(records.get(i).getIdentity());
+			if (own != null) {
+				visible.computeIfAbsent(items.get(i).plan.getPosition(), p -> new ArrayList<>()).add(own);
+			}
 			try {
-				correlation.afterInsert(records.get(i), items.get(i).plan, rows);
+				correlation.afterInsert(records.get(i), items.get(i).plan, visible);
 			} catch (RuntimeException ex) {
 				log.error("TRACE batch afterInsert failed: inserted={}", records.get(i).getIdentity(), ex);
 			}
 		}
+	}
+
+	/**
+	 * The rows read after the commit without the batch's own records, which {@code afterInsertBatch}
+	 * adds back one at a time: record i is correlated against the rows stored before it, never against
+	 * later elements of the batch, as on the one-by-one path.
+	 *
+	 * @param batchRows receives the rows of the batch's own records, by identity
+	 */
+	private static Map<ChainPosition, List<StoredTraceRecord>> withoutBatch(
+			Map<ChainPosition, List<StoredTraceRecord>> rows, List<StoredTraceRecord> records,
+			Map<RecordIdentity, StoredTraceRecord> batchRows) {
+		Set<RecordIdentity> identities = new HashSet<>();
+		for (StoredTraceRecord record : records) {
+			identities.add(record.getIdentity());
+		}
+		Map<ChainPosition, List<StoredTraceRecord>> visible = new HashMap<>();
+		for (Map.Entry<ChainPosition, List<StoredTraceRecord>> entry : rows.entrySet()) {
+			List<StoredTraceRecord> kept = new ArrayList<>(entry.getValue().size());
+			for (StoredTraceRecord row : entry.getValue()) {
+				if (identities.contains(row.getIdentity())) {
+					batchRows.put(row.getIdentity(), row);
+				} else {
+					kept.add(row);
+				}
+			}
+			visible.put(entry.getKey(), kept);
+		}
+		return visible;
 	}
 
 	/**

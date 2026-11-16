@@ -836,6 +836,48 @@ class TraceCorrelationServiceTest extends BaseLockServiceTest {
 		assertSameChainFlags(plan1.getFlags(), current(stored1).getFlags());
 	}
 
+	@Test
+	void testAfterInsert_ForkNextToMatchingPredecessor_SuccessorStaysLinked() throws DuplicateEntryException {
+		registerChain();
+		insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH, new IngestionFlags(false, false, false, false));
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("1"),
+				new IngestionFlags(false, false, false, false));
+		String forkId = recordId();
+		VerifiedAssertion fork = buildVerified(
+				SignedAssertionFactory.capabilityInvoked().recordId(forkId).genesis().unsignedJson(), context());
+		CorrelationPlan plan = service.plan(fork, context());
+		StoredTraceRecord stored = insertRecord(forkId, fork.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan.getFlags());
+
+		service.afterInsert(stored, plan);
+
+		assertFalse(current(successor).getFlags().isChainLinkFailure(), "the other predecessor still matches");
+	}
+
+	@Test
+	void testAfterInsert_ForkNextToMatchingPredecessorAndReadFails_PlannedRowsKeepSuccessorLinked()
+			throws DuplicateEntryException {
+		registerChain();
+		insertRecord(recordId(), digest("1"), 1L, TraceConstants.ZERO_HASH, new IngestionFlags(false, false, false, false));
+		StoredTraceRecord successor = insertRecord(recordId(), digest("2"), 2L, digest("1"),
+				new IngestionFlags(true, false, false, false));
+		String forkId = recordId();
+		VerifiedAssertion fork = buildVerified(
+				SignedAssertionFactory.capabilityInvoked().recordId(forkId).genesis().unsignedJson(), context());
+		CorrelationPlan plan = service.plan(fork, context());
+		StoredTraceRecord stored = insertRecord(forkId, fork.getContentDigest(), 1L, TraceConstants.ZERO_HASH,
+				plan.getFlags());
+		InMemoryTraceStore flaky = spy(store);
+		doThrow(new IllegalStateException("read failure")).when(flaky).findRecordsByChainPositions(any());
+		setField(service, "store", flaky);
+
+		service.afterInsert(stored, plan);
+
+		assertFalse(current(successor).getFlags().isCoverageGap(), "the planned successor is still updated");
+		assertFalse(current(successor).getFlags().isChainLinkFailure(),
+				"judged against the rows the plan saw at the position");
+	}
+
 	private static void assertSameChainFlags(IngestionFlags expected, IngestionFlags actual) {
 		assertEquals(expected.isCoverageGap(), actual.isCoverageGap(), "coverage_gap");
 		assertEquals(expected.isChainLinkFailure(), actual.isChainLinkFailure(), "chain_link_failure");

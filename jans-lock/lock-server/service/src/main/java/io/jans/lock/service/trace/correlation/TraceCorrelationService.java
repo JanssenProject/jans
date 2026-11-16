@@ -163,7 +163,7 @@ public class TraceCorrelationService {
 		List<String> tokenKeys = dedupKeys(inputs.getTokenRefs(), token -> traceKeys.tokenKey(domainId, token));
 
 		return new CorrelationPlan(flags, position, execution, tokenKeys, equivocationPeers,
-				successors, inputs.getWarnings());
+				successors, rowsAtPosition, inputs.getWarnings());
 	}
 
 	/**
@@ -230,7 +230,8 @@ public class TraceCorrelationService {
 	 * <li>updates the records now stored at {@code sequence_number + 1}: every successor the plan
 	 * knew, and every other one whose coverage gap is still set.
 	 * It clears the coverage gap and sets the chain link failure when the successor's
-	 * {@code prev_record_hash} does not match the inserted digest;</li>
+	 * {@code prev_record_hash} matches no record now at the inserted position (the inserted one or
+	 * an equivocation peer), the rule {@link #plan} applies to a record's own predecessors;</li>
 	 * <li>flags as equivocating every other record at the inserted position, and the inserted record
 	 * itself when a peer arrived that the plan did not know.</li>
 	 * </ol>
@@ -298,34 +299,51 @@ public class TraceCorrelationService {
 	 * one-by-one path would update it. A successor the plan did not know may have been planned
 	 * either before or after {@code inserted} became visible. It is updated only while its coverage
 	 * gap is still set: its own plan then saw no predecessor, so it cannot have taken
-	 * {@code inserted} into account. Otherwise its chain link was judged against the predecessors it
-	 * saw, and setting {@code chain_link_failure} from {@code inserted} alone would contradict the
-	 * one-by-one result when another predecessor at the same position matches.
+	 * {@code inserted} into account. Otherwise its chain link was already judged against the
+	 * predecessors it saw.
+	 *
+	 * <p>A successor's link is judged against every record at the inserted position, as read after
+	 * the insert (or as the plan saw them when that read failed), plus {@code inserted}: one
+	 * matching digest is enough, as in {@link ProducerChainRules#isChainLinkFailure}.
 	 */
 	private void updateSuccessors(StoredTraceRecord inserted, CorrelationPlan plan,
 			Map<ChainPosition, List<StoredTraceRecord>> rows) {
+		ChainPosition position = plan.getPosition();
+		List<StoredTraceRecord> predecessors = withInserted(
+				rows != null ? rowsAt(rows, position) : plan.getPositionRows(), inserted);
+		long successorSequence = position.getSequenceNumber() + 1;
 		Set<RecordIdentity> planned = new HashSet<>();
 		for (StoredTraceRecord successor : plan.getSuccessors()) {
 			planned.add(successor.getIdentity());
 		}
 		Set<RecordIdentity> updated = new HashSet<>();
 		if (rows != null) {
-			ChainPosition position = plan.getPosition();
-			ChainPosition next = new ChainPosition(position.getChainIdentity(), position.getSequenceNumber() + 1);
+			ChainPosition next = new ChainPosition(position.getChainIdentity(), successorSequence);
 			for (StoredTraceRecord successor : rowsAt(rows, next)) {
 				RecordIdentity successorId = successor.getIdentity();
 				updated.add(successorId);
 				boolean known = planned.contains(successorId);
 				if (known || (successor.getFlags() != null && successor.getFlags().isCoverageGap())) {
-					updateSuccessor(inserted, successorId, successor, !known);
+					updateSuccessor(inserted, predecessors, successorSequence, successorId, successor, !known);
 				}
 			}
 		}
 		for (StoredTraceRecord successor : plan.getSuccessors()) {
 			if (updated.add(successor.getIdentity())) {
-				updateSuccessor(inserted, successor.getIdentity(), null, false);
+				updateSuccessor(inserted, predecessors, successorSequence, successor.getIdentity(), null, false);
 			}
 		}
+	}
+
+	/** @return {@code rows} with {@code inserted} added when it is not among them */
+	private static List<StoredTraceRecord> withInserted(List<StoredTraceRecord> rows, StoredTraceRecord inserted) {
+		if (find(rows, inserted.getIdentity()) != null) {
+			return rows;
+		}
+		List<StoredTraceRecord> all = new ArrayList<>(rows.size() + 1);
+		all.addAll(rows);
+		all.add(inserted);
+		return all;
 	}
 
 	private void updateEquivocation(StoredTraceRecord inserted, CorrelationPlan plan,
@@ -386,12 +404,14 @@ public class TraceCorrelationService {
 	}
 
 	/**
-	 * @param observed     the successor's row as read after the insert, or {@code null} to read it here
-	 * @param whileGapOnly {@code true} to change nothing once the successor's coverage gap is clear,
-	 *                     also on a re-read after a lost compare-and-swap
+	 * @param predecessors      the records at the inserted position, {@code inserted} included
+	 * @param successorSequence the successor's {@code sequence_number}
+	 * @param observed          the successor's row as read after the insert, or {@code null} to read it here
+	 * @param whileGapOnly      {@code true} to change nothing once the successor's coverage gap is clear,
+	 *                          also on a re-read after a lost compare-and-swap
 	 */
-	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId, StoredTraceRecord observed,
-			boolean whileGapOnly) {
+	private void updateSuccessor(StoredTraceRecord inserted, List<StoredTraceRecord> predecessors,
+			long successorSequence, RecordIdentity successorId, StoredTraceRecord observed, boolean whileGapOnly) {
 		updateFlags(successorId, observed, stored -> {
 			IngestionFlags flags = stored.getFlags();
 			if (whileGapOnly && !flags.isCoverageGap()) {
@@ -403,8 +423,8 @@ public class TraceCorrelationService {
 				changed = true;
 			}
 			// design §8: chainLinkFailure is never self-clearing, only ever set here.
-			if (!flags.isChainLinkFailure()
-					&& ProducerChainRules.successorLinkBroken(stored.getPrevRecordHash(), inserted.getContentDigest())) {
+			if (!flags.isChainLinkFailure() && ProducerChainRules.isChainLinkFailure(successorSequence, predecessors,
+					stored.getPrevRecordHash())) {
 				flags.setChainLinkFailure(true);
 				changed = true;
 			}

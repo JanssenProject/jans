@@ -99,15 +99,6 @@ public final class ProducerChainRules {
 	}
 
 	/**
-	 * Design §8: a successor's {@code prev_record_hash} must equal the just-inserted record's
-	 * {@code content_digest}; a mismatch is a chain-link failure that the successor was not able to
-	 * detect at its own insertion time (out-of-order arrival).
-	 */
-	public static boolean successorLinkBroken(String successorPrevRecordHash, String insertedContentDigest) {
-		return !constantTimeEquals(successorPrevRecordHash, insertedContentDigest);
-	}
-
-	/**
 	 * Constant-time equality for the {@code sha256:<hex>} hash strings compared throughout
 	 * correlation, so a timing side channel never leaks how much of a hash matched.
 	 */
