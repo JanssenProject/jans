@@ -11,7 +11,9 @@ use crate::LogWriter;
 use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
 
-use crate::http_utils::Backoff;
+use crate::common::retry::{
+    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+};
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
@@ -123,64 +125,51 @@ where
                 return;
             },
         };
-        let mut backoff = Backoff::new_exponential(self.retry_delay, Some(self.max_retries));
-
-        loop {
+        let policy = RetryPolicy {
+            backoff: Backoff::exponential(self.retry_delay),
+            max_retries: self.max_retries,
+        };
+        let attempt = || async {
             match self.transport.send(&batch).await {
-                Ok(()) => {
-                    logger.log_any(LockLogEntry::info(format!(
-                        "sent {batch_size} {} entries to lock server",
-                        self.kind,
-                    )));
-                    return;
-                },
-                // Repeating would get the same answer, and hold the channel meanwhile.
-                Err(SendFailure::Final(err)) => {
-                    logger.log_any(LockLogEntry::error(format!(
-                        "dropping {batch_size} {} entries: {err}",
-                        self.kind,
-                    )));
-                    return;
-                },
+                Ok(()) => Attempt::Done(()),
+                Err(SendFailure::Final(err)) => Attempt::Final(err),
                 Err(SendFailure::Retryable(err)) => {
                     logger.log_any(LockLogEntry::error(format!(
                         "failed to send to {} audit endpoint: {err}",
                         self.kind,
                     )));
-
-                    match cancel_tkn {
-                        Some(tkn) => {
-                            tokio::select! {
-                                result = backoff.snooze() => {
-                                    if result.is_err() {
-                                        logger.log_any(LockLogEntry::warn(format!(
-                                            "retries exhausted; dropping {batch_size} {} entries",
-                                            self.kind,
-                                        )));
-                                        break;
-                                    }
-                                },
-                                () = tkn.cancelled() => {
-                                    logger.log_any(LockLogEntry::warn(format!(
-                                        "cancellation requested during retry; dropping {batch_size} {} entries",
-                                        self.kind,
-                                    )));
-                                    break;
-                                },
-                            }
-                        },
-                        None => {
-                            if backoff.snooze().await.is_err() {
-                                logger.log_any(LockLogEntry::warn(format!(
-                                    "retries exhausted; dropping {batch_size} {} entries",
-                                    self.kind,
-                                )));
-                                break;
-                            }
-                        },
+                    Attempt::Retryable {
+                        error: err,
+                        wait_at_least: None,
                     }
                 },
             }
+        };
+        let result = match cancel_tkn {
+            Some(cancel) => retry_until_cancelled(policy, cancel, attempt).await,
+            None => Ok(retry(policy, attempt).await),
+        };
+
+        match result {
+            Ok(Ok(())) => logger.log_any(LockLogEntry::info(format!(
+                "sent {batch_size} {} entries to lock server",
+                self.kind,
+            ))),
+            // Repeating would get the same answer, and hold the channel meanwhile.
+            Ok(Err(RetryError::Final(err))) => logger.log_any(LockLogEntry::error(format!(
+                "dropping {batch_size} {} entries: {err}",
+                self.kind,
+            ))),
+            Ok(Err(RetryError::RetriesExhausted { .. })) => {
+                logger.log_any(LockLogEntry::warn(format!(
+                    "retries exhausted; dropping {batch_size} {} entries",
+                    self.kind,
+                )));
+            },
+            Err(Cancelled) => logger.log_any(LockLogEntry::warn(format!(
+                "cancellation requested during retry; dropping {batch_size} {} entries",
+                self.kind,
+            ))),
         }
     }
 }

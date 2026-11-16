@@ -36,8 +36,10 @@ use super::status::EmitterEvent;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
+use crate::common::retry::{
+    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+};
 use crate::http::{JoinHandle, spawn_task};
-use crate::http_utils::Backoff;
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
@@ -210,8 +212,9 @@ enum ChainUse {
 enum LockState {
     /// Lock took the last request; the next one goes without waiting.
     Accepting,
-    /// Lock did not take the last requests in a row: each next one waits longer.
-    Refusing { backoff: Backoff },
+    /// Lock did not take the last `failures` requests in a row: each next one
+    /// waits longer.
+    Refusing { failures: u32 },
 }
 
 /// What a round leaves: the chain to sign into next and how the round went.
@@ -396,12 +399,16 @@ impl Emitter {
     /// `retry_after` is how long Lock or a proxy before it last asked to wait;
     /// the wait is never shorter than the backoff.
     async fn back_off(&mut self, cancel: &CancellationToken, retry_after: Option<Duration>) {
-        let mut backoff = match std::mem::replace(&mut self.lock, LockState::Accepting) {
-            LockState::Refusing { backoff } => backoff,
-            LockState::Accepting => Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, None),
+        let failures = match self.lock {
+            LockState::Refusing { failures } => failures,
+            LockState::Accepting => 0,
         };
-        let delay = backoff.next_delay().max(retry_after.unwrap_or_default());
-        self.lock = LockState::Refusing { backoff };
+        let delay = Backoff::exponential(WORKER_HTTP_RETRY_DUR)
+            .delay(failures)
+            .max(retry_after.unwrap_or_default());
+        self.lock = LockState::Refusing {
+            failures: failures.saturating_add(1),
+        };
         self.log(
             LogLevel::WARN,
             None,
@@ -655,52 +662,73 @@ impl Emitter {
 
     /// Posts `body`, retrying a failed request with the same bytes.
     async fn send(&mut self, body: &Bytes, records: usize, mode: Mode<'_>) -> Sent {
-        let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
-        loop {
-            let (err, retry_after) = match self.sink.post_bulk(body).await {
-                Ok(results) => return Sent::Results(results),
+        let sink = &self.sink;
+        let attempt = || async {
+            match sink.post_bulk(body).await {
+                Ok(results) => Attempt::Done(results),
+                Err(err @ PostBulkError::Retryable { retry_after, .. }) => Attempt::Retryable {
+                    error: err,
+                    wait_at_least: retry_after,
+                },
                 Err(
                     err @ (PostBulkError::Rejected { .. }
                     | PostBulkError::NotSent { .. }
                     | PostBulkError::UnreadableResponse { .. }),
-                ) => {
-                    let fix = err.refusal().map_or_else(String::new, |refusal| {
-                        format!("; {}", self.refusal_fix(refusal))
-                    });
-                    self.log(
-                        LogLevel::ERROR,
-                        None,
-                        format!("{err}; its {records} TRACE records are lost{fix}"),
-                    );
-                    self.count(EmitterEvent::Rejected, records);
-                    return Sent::Lost { retry_after: None };
-                },
-                Err(err @ PostBulkError::Retryable { retry_after, .. }) => (err, retry_after),
-            };
-            let retry = match mode {
-                Mode::Running(cancel) => tokio::select! {
-                    retry = backoff.snooze_at_least(retry_after.unwrap_or_default()) => retry.is_ok(),
-                    () = cancel.cancelled() => return Sent::Interrupted,
-                },
-                Mode::Stopping => {
-                    self.log(
-                        LogLevel::WARN,
-                        None,
-                        format!("{err}; Cedarling is shutting down, its {records} TRACE records are dropped"),
-                    );
-                    self.count(EmitterEvent::Dropped, records);
-                    return Sent::Lost { retry_after: None };
-                },
-            };
-            if !retry {
+                ) => Attempt::Final(err),
+            }
+        };
+        let result = match mode {
+            Mode::Running(cancel) => {
+                let policy = RetryPolicy {
+                    backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
+                    max_retries: self.max_retries,
+                };
+                match retry_until_cancelled(policy, cancel, attempt).await {
+                    Ok(result) => result,
+                    Err(Cancelled) => return Sent::Interrupted,
+                }
+            },
+            // Each batch goes once, so stopping while Lock is down is quick.
+            Mode::Stopping => {
+                let once = RetryPolicy {
+                    backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
+                    max_retries: 0,
+                };
+                retry(once, attempt).await
+            },
+        };
+
+        match result {
+            Ok(results) => Sent::Results(results),
+            Err(RetryError::Final(err)) => {
+                let fix = err.refusal().map_or_else(String::new, |refusal| {
+                    format!("; {}", self.refusal_fix(refusal))
+                });
+                self.log(
+                    LogLevel::ERROR,
+                    None,
+                    format!("{err}; its {records} TRACE records are lost{fix}"),
+                );
+                self.count(EmitterEvent::Rejected, records);
+                Sent::Lost { retry_after: None }
+            },
+            Err(RetryError::RetriesExhausted { last, .. }) => {
+                let reason = match mode {
+                    Mode::Running(_) => "retries exhausted",
+                    Mode::Stopping => "Cedarling is shutting down",
+                };
                 self.log(
                     LogLevel::WARN,
                     None,
-                    format!("{err}; retries exhausted, its {records} TRACE records are dropped"),
+                    format!("{last}; {reason}, its {records} TRACE records are dropped"),
                 );
                 self.count(EmitterEvent::Dropped, records);
-                return Sent::Lost { retry_after };
-            }
+                let retry_after = match (mode, last) {
+                    (Mode::Running(_), PostBulkError::Retryable { retry_after, .. }) => retry_after,
+                    _ => None,
+                };
+                Sent::Lost { retry_after }
+            },
         }
     }
 

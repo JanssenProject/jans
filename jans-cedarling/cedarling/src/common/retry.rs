@@ -6,8 +6,11 @@
 //! Repeating one request: how long to wait between attempts, and the one loop that
 //! decides whether to repeat. Callers sort each failure and keep their own logging.
 
+use std::convert::Infallible;
 use std::future::Future;
 use std::time::Duration;
+
+use tokio_util::sync::CancellationToken;
 
 use crate::async_sleep::sleep;
 
@@ -77,32 +80,77 @@ pub enum RetryError<R, F> {
 /// before each retry.
 pub(crate) async fn retry<T, R, F, Op, Fut>(
     policy: RetryPolicy,
-    mut attempt: Op,
+    attempt: Op,
 ) -> Result<T, RetryError<R, F>>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
 {
+    let Ok(result) = repeat(policy, attempt, |delay| async move {
+        sleep(delay).await;
+        Ok::<(), Infallible>(())
+    })
+    .await;
+    result
+}
+
+/// The caller stopped waiting for the next retry.
+#[derive(Debug)]
+pub(crate) struct Cancelled;
+
+/// [`retry`], giving up when `cancel` fires during a wait. An attempt already
+/// sent is let finish, so a request in flight is never cut off.
+pub(crate) async fn retry_until_cancelled<T, R, F, Op, Fut>(
+    policy: RetryPolicy,
+    cancel: &CancellationToken,
+    attempt: Op,
+) -> Result<Result<T, RetryError<R, F>>, Cancelled>
+where
+    Op: FnMut() -> Fut,
+    Fut: Future<Output = Attempt<T, R, F>>,
+{
+    repeat(policy, attempt, |delay| async move {
+        tokio::select! {
+            () = sleep(delay) => Ok(()),
+            () = cancel.cancelled() => Err(Cancelled),
+        }
+    })
+    .await
+}
+
+/// The loop of [`retry`] and [`retry_until_cancelled`], which differ only in how
+/// they wait.
+async fn repeat<T, R, F, E, Op, Fut, Wait, WaitFut>(
+    policy: RetryPolicy,
+    mut attempt: Op,
+    mut wait: Wait,
+) -> Result<Result<T, RetryError<R, F>>, E>
+where
+    Op: FnMut() -> Fut,
+    Fut: Future<Output = Attempt<T, R, F>>,
+    Wait: FnMut(Duration) -> WaitFut,
+    WaitFut: Future<Output = Result<(), E>>,
+{
     let mut retries = 0;
     loop {
         match attempt().await {
-            Attempt::Done(value) => return Ok(value),
-            Attempt::Final(error) => return Err(RetryError::Final(error)),
+            Attempt::Done(value) => return Ok(Ok(value)),
+            Attempt::Final(error) => return Ok(Err(RetryError::Final(error))),
             Attempt::Retryable {
                 error,
                 wait_at_least,
             } => {
                 if retries == policy.max_retries {
-                    return Err(RetryError::RetriesExhausted {
+                    return Ok(Err(RetryError::RetriesExhausted {
                         retries,
                         last: error,
-                    });
+                    }));
                 }
                 let delay = policy
                     .backoff
                     .delay(retries)
                     .max(wait_at_least.unwrap_or_default());
-                sleep(delay).await;
+                wait(delay).await?;
                 retries += 1;
             },
         }
@@ -237,6 +285,44 @@ mod tests {
         assert!(
             started.elapsed() >= asked,
             "the 1 ms backoff gives way to the server's {asked:?}, waited {:?}",
+            started.elapsed()
+        );
+    }
+
+    #[tokio::test]
+    async fn cancellation_stops_the_wait_but_not_an_attempt() {
+        let cancel = CancellationToken::new();
+        let attempts = AtomicU32::new(0);
+        let long_wait = RetryPolicy {
+            backoff: Backoff::exponential(Duration::from_secs(60)),
+            max_retries: 3,
+        };
+        let started = Instant::now();
+        let result: Result<Result<(), RetryError<(), ()>>, Cancelled> =
+            retry_until_cancelled(long_wait, &cancel, || async {
+                attempts.fetch_add(1, Ordering::SeqCst);
+                // Cancelled while this attempt is in flight: it still completes.
+                cancel.cancel();
+                tokio::task::yield_now().await;
+                Attempt::Retryable {
+                    error: (),
+                    wait_at_least: None,
+                }
+            })
+            .await;
+
+        assert!(
+            matches!(result, Err(Cancelled)),
+            "cancelled during the wait, got {result:?}"
+        );
+        assert_eq!(
+            attempts.load(Ordering::SeqCst),
+            1,
+            "the attempt finished and no retry was made"
+        );
+        assert!(
+            started.elapsed() < Duration::from_secs(1),
+            "the 60 s wait was cut short, waited {:?}",
             started.elapsed()
         );
     }

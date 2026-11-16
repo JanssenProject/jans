@@ -5,12 +5,8 @@
 
 //! HTTP requests with retry logic that is both native and WASM compatible.
 
-mod backoff;
-
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
-
-pub(crate) use backoff::Backoff;
 
 use reqwest::{StatusCode, Url};
 use thiserror::Error;

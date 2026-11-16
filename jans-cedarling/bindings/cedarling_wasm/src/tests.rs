@@ -84,6 +84,34 @@ async fn test_cedarling_new_from_map() {
         .expect("Cedarling::new_from_map should be initialized");
 }
 
+/// A retried HTTP request waits between attempts. In the browser there is no Tokio
+/// runtime, so the wait must use a browser timer: a Tokio one panics, even for 0 s.
+#[wasm_bindgen_test]
+async fn test_http_retry_waits_in_browser() {
+    // Port 1 is never listening, so every attempt fails without an answer.
+    let config = json!({
+        "CEDARLING_APPLICATION_NAME": "My App",
+        "CEDARLING_POLICY_STORE_URI": "http://127.0.0.1:1/policy-store.cjar",
+        "CEDARLING_HTTP_REQUEST_MAX_RETRIES": 1,
+        "CEDARLING_HTTP_REQUEST_RETRY_DELAY": 0,
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+    });
+    let config = serde_wasm_bindgen::to_value(&config).expect("the config converts to JsValue");
+
+    let err = init(config)
+        .await
+        .err()
+        .expect("an unreachable policy store must fail startup");
+
+    let message = format!("{err:?}");
+    assert!(
+        message.contains("gave up after 1 retries"),
+        "startup must fail after its 1 retry, not panic while waiting: {message}"
+    );
+}
+
 /// test init with map value using `init`
 #[wasm_bindgen_test]
 async fn test_init_conf_as_map() {
