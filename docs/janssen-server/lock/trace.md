@@ -884,7 +884,58 @@ The total wait of one request is at most `(rangeAllocationRetryLimit - 1) * rang
 - Roll back by setting `batchIngestEnabled` to `false`. Rows written by the batch path are ordinary `COMMITTED` receipt entries and records. They need no cleanup, and a replay of a record written by either path is answered the same way.
 - Recommended order: upgrade all nodes, enable the flag on one node, compare the rate of `500 storage_failure` responses with reason `receipt_allocation_exhausted` and the ingest throughput against the other nodes, then enable it everywhere.
 
-**Sizing.** Measured over HTTPS on one test VM with 8 vCPUs and 8 GB of RAM. Lock (Jetty 12, Java heap limit 634 MB, behind Apache) and PostgreSQL 16 ran on that VM, and the load client ran on another host. The load was signed `AUTHORIZATION_DECISION` records in one evidence domain, sent as bulk requests of 100 records, one chain per request. One Lock node accepted about 6000-7200 records per second as soon as the client used 4 or more parallel connections. The best setting was `batchVerifyThreads=8` and `postCommitCorrelationThreads=4` with 4 connections: 6927-7175 records/s at a request latency of 55 ms p50. More connections did not raise the rate. They only raised the latency (16 connections: about 230 ms p50). The thread pools matter only with few connections. With one connection the rate was 2209-2218 records/s without pools and 4074-4224 records/s with `4`/`2` or `8`/`4`. With 4 or more connections all three settings reached the same rate. At that rate Lock used about 1.7-1.9 cores, PostgreSQL about 0.6 core and the whole VM less than 3 of its 8 cores, so CPU was not the limit. The limit is the per-domain receipt lock of a node. One batch at a time holds it while Lock reads the receipt head and writes the batch transaction, which comes to about 14 ms per batch of 100 at this rate, and the other requests for that domain wait. Bulk requests of 50 records gave 5939-6009 records/s. With the best setting, one chain gave 5768-6743 records/s and 32 chains gave 6179-6182 records/s, against 6274-6991 records/s with 8 chains in the same session. Single submissions (`POST /audit/trace`, flag on, 8 connections) gave 402-425 records/s. Rule of thumb: plan for about 7000 records per second per evidence domain and Lock node, with bulk requests of 100 and at least 4 client connections. To go beyond that, add evidence domains or Lock nodes; more CPU does not help. Lock also checks every request's access token with jans-auth. On the test VM the jans-auth request log grew by more than 10 GB during these runs and filled the disk, so size the log disks and log levels of both services for the request rate.
+**Sizing.** The figures below help choose the settings and the client concurrency. They were measured on 2026-11-14 (batch ingest on) and 2026-11-16 (batch ingest off) over HTTPS on one test VM with 8 vCPUs and 8 GB of RAM. Lock (Jetty 12, Java heap limit 634 MB, behind Apache) and PostgreSQL 16 ran on that VM, and the load client ran on another host. The load was signed `AUTHORIZATION_DECISION` records for one evidence domain, one producer per request, with `batchIngestEnabled=true` unless noted and every other setting at its default. Before each pool setting the domain was preloaded with 200 000 records and the database statistics were refreshed. Each row is two runs of 20 000 records; each session began with one warm-up run, not shown. These are measurements on one test VM, not guarantees: measure on your own hardware before you rely on them.
+
+Bulk requests of 100 records, 8 producer chains:
+
+| `batchVerifyThreads` | `postCommitCorrelationThreads` | Client connections | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|---|
+| `0` | `0` | 1 | 2209-2218 | 44 | 49-50 | 0 |
+| `0` | `0` | 4 | 6264-6862 | 55-57 | 75-104 | 0 |
+| `0` | `0` | 8 | 7103-7161 | 109-110 | 120-130 | 1-2 |
+| `0` | `0` | 16 | 5986-6250 | 241-243 | 321-357 | 189 |
+| `4` | `2` | 1 | 4074-4142 | 23 | 28 | 0 |
+| `4` | `2` | 4 | 6377-6805 | 54-58 | 67-75 | 0 |
+| `4` | `2` | 8 | 6675-6722 | 112-116 | 132-162 | 3-10 |
+| `4` | `2` | 16 | 6639-6767 | 233-238 | 245-250 | 190-191 |
+| `8` | `4` | 1 | 4154-4224 | 22 | 27-28 | 0 |
+| `8` | `4` | 4 | 6926-7175 | 55-56 | 62-67 | 0 |
+| `8` | `4` | 8 | 6930-7016 | 109-110 | 131-141 | 4 |
+| `8` | `4` | 16 | 6280-6733 | 234-237 | 248-411 | 189-190 |
+
+Other request shapes with `batchVerifyThreads=8`, `postCommitCorrelationThreads=4` and 4 client connections, measured in one later session. The single-submission row comes from an earlier session without the preload, with `4`/`2` and 8 connections:
+
+| Requests | Producer chains | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|
+| Bulk, 100 records | 8 | 6274-6991 | 55 | 64-129 | 0 |
+| Bulk, 50 records | 8 | 5939-6009 | 32-33 | 39-40 | 0 |
+| Bulk, 100 records | 1 | 5768-6743 | 57-60 | 66-142 | 199 |
+| Bulk, 100 records | 32 | 6179-6182 | 55-56 | 88-96 | 0 |
+| Single (`POST /audit/trace`) | 8 | 414-425 | 16 | 28-29 | 42-58 |
+
+With batch ingest off (`batchIngestEnabled=false`, the per-record path), 8 producer chains, measured the same way on 2026-11-16. A control run with batch ingest on (`8`/`4`, 4 connections, bulk requests of 100) gave 6714-6852 records/s that day, so the two days are comparable:
+
+| Requests | Client connections | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|
+| Bulk, 100 records | 1 | 161-165 | 605-618 | 638-676 | 0 |
+| Bulk, 100 records | 4 | 372-373 | 1071-1072 | 1115 | 0 |
+| Bulk, 100 records | 8 | 365-368 | 2145-2180 | 2278-2350 | 15-17 |
+| Bulk, 100 records | 16 | 354-372 | 4283-4503 | 4505-4982 | 183-186 |
+| Single (`POST /audit/trace`) | 8 | 329-330 | 22 | 34 | 5-6 |
+
+With batch ingest off the rate stops at about 370 records/s from 4 connections on, and more connections only add latency. The limit is the database's write-ahead log: every record needs about three commits, and each commit waits for a log flush (top waits `LWLock:WALWrite` and `IO:WALSync`). Lock used less than one core.
+
+Choosing the settings:
+
+- **Batch ingest.** Turn on `batchIngestEnabled` for producers that send bulk requests. On the test VM, bulk requests of 100 records were about 13 times faster with one connection and no pools (2209-2218 against 161-165 records/s), about 25 times faster with one connection and pools, and 16-20 times faster from 4 connections on (5986-7175 against 354-373 records/s), at a small fraction of the latency. Single submissions gained less: 414-425 against 329-330 records/s, measured on different days and, with batch ingest on, without the preload.
+- **Request size.** Send bulk requests of 100 records, the default `maxBulkRecords`. Bulk requests of 50 records reached 85-96 % of the rate of bulk requests of 100 in the same session, and single submissions about 6-7 %.
+- **Client connections.** From 4 parallel connections per Lock node and evidence domain on, every setting reached about 6000-7200 records/s, and 4 connections gave the lowest latency at that rate. More connections raised the latency much more than the rate: about 235-245 ms p50 at 16 connections.
+- **Thread pools.** The pools pay off when producers use only one or two connections. With one connection, `batchVerifyThreads=4` and `postCommitCorrelationThreads=2` nearly doubled the rate and halved the latency; `8`/`4` added little more. With 4 or more connections all three settings reached the same rate, so the pools are optional there. `postCommitCorrelationThreads` has a cost: the flags of neighboring records are updated after the response, and updates still queued when Lock stops are lost (see Thread pools above). `batchVerifyThreads` without `postCommitCorrelationThreads` was not measured.
+- **Requests of one chain.** Send the requests of one producer chain one after another. When several requests of one chain are in flight, for example with more connections than chains or with one chain over 4 connections, records arrive out of order. Their responses then report `coverage_gap_flag`, as the last column shows; Lock corrects the stored flag after the missing record arrives.
+- **Where the limit is.** With batch ingest on, CPU was not the limit. With 4 or more connections Lock used 1.3-2.3 cores, PostgreSQL 0.4-0.7 core and the whole VM at most 3.3 of its 8 cores. The limit is the per-domain receipt lock of a Lock node. One batch at a time holds it while Lock reads the receipt head and writes the batch transaction, about 14 ms per batch of 100 at this rate, and the other requests for that domain wait. More CPU does not raise the rate of one domain.
+- **Going further.** Each evidence domain has its own lock, so separate domains should add up, but this was not measured. Lock nodes that write the same evidence domain compete for its receipt positions and retry. In tests with several nodes on one domain, four nodes were not reliably faster than two. Several domains or several nodes over HTTP were not measured.
+- **Rule of thumb.** On comparable hardware, plan for about 6000-7000 records per second per evidence domain and Lock node, with bulk requests of 100 and about 4 client connections.
+- **Logs.** Lock also checks every request's access token with jans-auth. On the test VM the jans-auth request log grew by more than 10 GB during the 2026-11-14 runs and filled the disk; on 2026-11-16 it grew by about 7.6 GB for about 64 000 requests. Size the log disks and log levels of both services for the request rate.
 
 **Diagnosing.** Set the Lock log level to `DEBUG` to see one line per request that uses the batch path (a single submission shows `size=1`):
 
