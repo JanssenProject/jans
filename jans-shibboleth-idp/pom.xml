@@ -66,16 +66,8 @@
     </scm>
 
     <modules>
-        <!-- <module>idp-conf</module>
-        <module>shib-jans-authn</module>
-        <module>webapp</module>
-        <module>keygenerator</module> -->
-        <module>kernel</module>
-        <module>adapter-kernel</module>
-        <module>trust-domain</module>
-        <module>trust-adapters</module>
-        <module>file-staging-domain</module>
-        <module>file-staging-adapters</module>
+       <module>adapter-kernel</module>
+       <module>kernel</module>
     </modules>
 
     <repositories>
