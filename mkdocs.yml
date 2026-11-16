@@ -505,7 +505,7 @@ nav:
           - Microsoft AKS: janssen-server/install/helm-install/prerequisites/microsoft-aks.md
           - Local (Minikube/MicroK8s): janssen-server/install/helm-install/prerequisites/local.md
           - Rancher Marketplace: janssen-server/install/helm-install/prerequisites/rancher.md
-        - Ingress Setup: janssen-server/install/helm-install/ingress-setup.md
+        - External Access: janssen-server/install/helm-install/external-access.md
         - Database Setup: janssen-server/install/helm-install/database-setup.md
         - Install Janssen: janssen-server/install/helm-install/install-janssen.md
         - Post-Installation: janssen-server/install/helm-install/post-install.md

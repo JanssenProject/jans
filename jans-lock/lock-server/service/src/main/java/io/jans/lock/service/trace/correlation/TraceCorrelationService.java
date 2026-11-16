@@ -176,6 +176,16 @@ public class TraceCorrelationService {
 		return new ChainPosition(chainIdentity, producerChain.getSequenceNumber());
 	}
 
+	/**
+	 * @return the producer-chain position the record claims in the request's evidence domain
+	 */
+	public ChainPosition positionOf(VerifiedAssertion verified, TraceRequestContext ctx) {
+		ParsedAssertion.ProducerChain producerChain = verified.getInputs().getChainPosition();
+		ChainIdentity chainIdentity = new ChainIdentity(ctx.getEvidenceDomainId(), producerChain.getProducerId(),
+				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
+		return new ChainPosition(chainIdentity, producerChain.getSequenceNumber());
+	}
+
 	private ChainRegistrationMode chainRegistrationMode() {
 		String configured = appConfiguration.getTraceConfiguration().getChainRegistrationMode();
 		ChainRegistrationMode mode = ChainRegistrationMode.fromString(configured);

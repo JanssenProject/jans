@@ -1,6 +1,6 @@
 ## Overview
 
-Docker Load Test image packaging for Janssen. This image can load test users to a janssen environment and can execute jmeter tests.
+Docker Load Test image packaging for Janssen. This image can load test users to a Janssen environment and can execute jmeter tests.
 
 ## Pre-requisites
 
@@ -170,7 +170,7 @@ cat << EOF > ropc_client.json
 EOF
 ```
 
-Run the follwing:
+Run the following:
 
 ```bash
 # add -noverify if your fqdn is not registered

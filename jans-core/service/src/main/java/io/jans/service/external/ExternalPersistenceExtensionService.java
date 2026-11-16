@@ -19,6 +19,7 @@ import io.jans.service.external.context.PersistenceExternalContext;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.custom.script.type.persistence.DummyPeristenceType;
 import io.jans.model.custom.script.type.persistence.PersistenceType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.extension.PersistenceExtension;
@@ -84,6 +85,11 @@ public class ExternalPersistenceExtensionService extends ExternalScriptService {
 		PersistenceExtension persistenceExtension = null;
 		if (isEnabled()) {
 			persistenceExtension = (PersistenceExtension) this.defaultExternalCustomScript.getExternalType();
+			// Script failed to load: fall back to built-in hashing instead of the pass-through dummy
+			if (persistenceExtension instanceof DummyPeristenceType) {
+				log.error("Persistence extension script is not loaded, using built-in password hashing");
+				persistenceExtension = null;
+			}
 		}
 
 		persistenceEntryManager.setPersistenceExtension(persistenceExtension);
