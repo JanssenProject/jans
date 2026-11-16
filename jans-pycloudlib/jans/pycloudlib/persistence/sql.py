@@ -950,6 +950,54 @@ class SqlClient(SqlSchemaMixin):
                 self.adapter.on_create_index_error(exc)
                 return
 
+    def alter_table(
+        self,
+        query: str,
+        table_name: str,
+        lock_timeout: int = 10,
+        retries: int = 3,
+    ) -> bool:
+        """Run an ``ALTER TABLE`` query with a bounded lock wait, retried on lock timeout.
+
+        Uses the same lock handling as ``create_index`` with names: the statement waits at most
+        ``lock_timeout`` seconds for a lock, the timeout is reset before the connection returns
+        to the pool, and the statement is retried ``retries`` times.
+
+        Args:
+            query: ``ALTER TABLE`` query.
+            table_name: Name of the table being altered.
+            lock_timeout: Maximum seconds to wait for a lock.
+            retries: Number of attempts.
+
+        Returns:
+            ``True`` if the query ran, ``False`` if every attempt timed out waiting for a lock;
+            a warning is logged and the next start tries again.
+
+        Raises:
+            DatabaseError: Any error other than a lock timeout, for the caller to handle.
+        """
+        retries = max(retries, 1)
+        for attempt in range(1, retries + 1):
+            try:
+                # no index is dropped (drop_first=False), so no index name is needed
+                self._run_index_ddl(query, table_name, "", lock_timeout, drop_first=False)
+                return True
+            except DatabaseError as exc:
+                if not self.adapter.is_lock_timeout(exc):
+                    raise
+                if attempt == retries:
+                    logger.warning(
+                        "could not lock %s to alter it after %s attempts; will retry on next start",
+                        table_name, retries,
+                    )
+                    return False
+                logger.warning(
+                    "could not lock %s to alter it (attempt %s of %s); retrying",
+                    table_name, attempt, retries,
+                )
+                time.sleep(attempt * 5)
+        return False
+
     def _run_index_ddl(
         self, query: str, table_name: str, index_name: str, lock_timeout: int, drop_first: bool,
     ) -> None:
