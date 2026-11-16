@@ -8,6 +8,7 @@ package io.jans.lock.service.trace.correlation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -254,15 +255,47 @@ public class TraceCorrelationService {
 	 */
 	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan,
 			Map<ChainPosition, List<StoredTraceRecord>> positionRows) {
+		afterInsert(inserted, plan, positionRows, Collections.<RecordIdentity>emptySet());
+	}
+
+	/**
+	 * Same as {@link #afterInsert(StoredTraceRecord, CorrelationPlan, Map)}, correlating
+	 * {@code inserted} as if the records in {@code hidden} were not stored yet.
+	 *
+	 * @param hidden records committed together with {@code inserted} and correlated after it (the later
+	 *               elements of one batch); they are left out of the rows, whether passed in
+	 *               {@code positionRows} or read here, as on the one-by-one path
+	 */
+	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan,
+			Map<ChainPosition, List<StoredTraceRecord>> positionRows, Set<RecordIdentity> hidden) {
 		ChainPosition position = plan.getPosition();
 		Map<ChainPosition, List<StoredTraceRecord>> rows = positionRows != null ? positionRows
 				: readNeighborhood(inserted, position);
+		if (rows != null && !hidden.isEmpty()) {
+			rows = withoutHidden(rows, position, hidden);
+		}
 		if (rows != null) {
 			correctOwnFlags(inserted, position, rows);
 		}
 		updateSuccessors(inserted, plan, rows);
 		updateEquivocation(inserted, plan, rows == null ? Collections.<StoredTraceRecord>emptyList()
 				: rowsAt(rows, position));
+	}
+
+	/** @return the rows of the neighborhood of {@code position} without the records in {@code hidden} */
+	private static Map<ChainPosition, List<StoredTraceRecord>> withoutHidden(
+			Map<ChainPosition, List<StoredTraceRecord>> rows, ChainPosition position, Set<RecordIdentity> hidden) {
+		Map<ChainPosition, List<StoredTraceRecord>> visible = new HashMap<>();
+		for (ChainPosition neighbor : ProducerChainRules.neighborhood(position)) {
+			List<StoredTraceRecord> kept = new ArrayList<>();
+			for (StoredTraceRecord row : rowsAt(rows, neighbor)) {
+				if (!hidden.contains(row.getIdentity())) {
+					kept.add(row);
+				}
+			}
+			visible.put(neighbor, kept);
+		}
+		return visible;
 	}
 
 	private void correctOwnFlags(StoredTraceRecord inserted, ChainPosition position,
