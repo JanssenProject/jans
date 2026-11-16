@@ -6,11 +6,18 @@
 
 package io.jans.lock.service.trace.testkit;
 
+import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.jans.lock.service.trace.TraceConstants;
+import io.jans.lock.trace.crypto.bc.CanonicalHashes;
 
 /**
  * Test kit entry point for building signed TRACE assertions: a thin fluent
@@ -67,6 +74,28 @@ public final class TraceRecordBuilder {
 	/** @return a fresh UUID v4 string, usable directly as {@code record_id} or a ULID-free substitute */
 	public static String freshRecordId() {
 		return UUID.randomUUID().toString();
+	}
+
+	/**
+	 * @return {@code count} signed authorization decisions of one producer chain, positions
+	 *         {@code 1..count}, each linked to the digest of the previous one (the first to the zero hash)
+	 */
+	public static List<String> linkedChain(KeyPair key, String producer, String kid, String instance, String chain,
+			int count) {
+		ObjectMapper mapper = new ObjectMapper();
+		List<String> jsons = new ArrayList<>(count);
+		String prevHash = TraceConstants.ZERO_HASH;
+		for (int seq = 1; seq <= count; seq++) {
+			String json = authorizationDecision().producer(producer).kid(kid).producerInstanceId(instance)
+					.producerChainId(chain).sequenceNumber(seq).prevRecordHash(prevHash).sign(key.getPrivate());
+			jsons.add(json);
+			try {
+				prevHash = CanonicalHashes.sha256PrefixedOfJcs(mapper.readTree(json));
+			} catch (java.io.IOException ex) {
+				throw new IllegalStateException(ex);
+			}
+		}
+		return jsons;
 	}
 
 	// -- field overrides ----------------------------------------------------------------------------

@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import io.jans.lock.service.trace.model.ChainIdentity;
+import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
 
@@ -26,6 +28,23 @@ import io.jans.lock.service.trace.model.StoredTraceRecord;
 public final class ProducerChainRules {
 
 	private ProducerChainRules() {
+	}
+
+	/**
+	 * @return the predecessor (only when {@code position} is not genesis), the position itself and
+	 *         its successor, in that order: the positions whose rows decide the flags of a record at
+	 *         {@code position} and of its successors
+	 */
+	public static List<ChainPosition> neighborhood(ChainPosition position) {
+		ChainIdentity chain = position.getChainIdentity();
+		long sequenceNumber = position.getSequenceNumber();
+		List<ChainPosition> positions = new ArrayList<>(3);
+		if (sequenceNumber > 1) {
+			positions.add(new ChainPosition(chain, sequenceNumber - 1));
+		}
+		positions.add(position);
+		positions.add(new ChainPosition(chain, sequenceNumber + 1));
+		return positions;
 	}
 
 	/**
