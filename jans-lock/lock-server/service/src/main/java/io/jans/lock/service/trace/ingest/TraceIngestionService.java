@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -364,7 +365,8 @@ public class TraceIngestionService {
 	 * provisional record, so the batch fails with {@code batch_plan_invalidated} and goes one by
 	 * one (step 8).</li>
 	 * <li>After the commit run {@code afterInsert} for each stored record with one shared read of the
-	 * predecessor, own and successor positions; on the post-commit pool when
+	 * predecessor, own and successor positions, in input order; each record sees the rows of the
+	 * batch's earlier records but not of its later ones, as on the one-by-one path. On the post-commit pool when
 	 * {@code postCommitCorrelationThreads} is set, so the outcomes are returned without waiting for
 	 * it. {@code afterInsert} corrects the stored record's own {@code coverage_gap} and
 	 * {@code chain_link_failure} and those of every successor now stored.</li>
@@ -830,7 +832,12 @@ public class TraceIngestionService {
 
 	private static final int POSITION_READ_ATTEMPTS = 3;
 
-	/** Best-effort: the commit already happened, so a failure here never changes an outcome. */
+	/**
+	 * Best-effort: the commit already happened, so a failure here never changes an outcome. Record i
+	 * is correlated as if the batch's later records were not stored yet, as on the one-by-one path,
+	 * both against the shared read and against the per-record read {@code afterInsert} does when
+	 * every attempt of the shared read failed.
+	 */
 	private void afterInsertBatch(List<BatchItem> items, List<StoredTraceRecord> records) {
 		Set<ChainPosition> positions = new LinkedHashSet<>();
 		for (BatchItem item : items) {
@@ -844,9 +851,14 @@ public class TraceIngestionService {
 				log.warn("TRACE batch afterInsert chain position read failed, attempt {}", attempt, ex);
 			}
 		}
+		Set<RecordIdentity> later = new HashSet<>();
+		for (StoredTraceRecord record : records) {
+			later.add(record.getIdentity());
+		}
 		for (int i = 0; i < items.size(); i++) {
+			later.remove(records.get(i).getIdentity());
 			try {
-				correlation.afterInsert(records.get(i), items.get(i).plan, rows);
+				correlation.afterInsert(records.get(i), items.get(i).plan, rows, later);
 			} catch (RuntimeException ex) {
 				log.error("TRACE batch afterInsert failed: inserted={}", records.get(i).getIdentity(), ex);
 			}
