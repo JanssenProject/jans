@@ -11,11 +11,11 @@ use std::error::Error as StdError;
 use std::fmt::{self, Display};
 
 pub(crate) use backoff::Backoff;
-#[cfg(not(target_arch = "wasm32"))]
-pub(crate) use backoff::MAX_EXPONENTIAL_DELAY;
 
-use reqwest::{RequestBuilder, StatusCode, Url};
+use reqwest::{StatusCode, Url};
 use thiserror::Error;
+
+use crate::common::retry::{Attempt, RetryError};
 
 /// Shows an error with its causes: `reqwest`'s own message leaves them out, so an
 /// invalid URL would read only "builder error".
@@ -130,18 +130,10 @@ impl FinalFailure {
     }
 }
 
-/// Error of [`Sender::send_with_retry`]: a `RetriesExhausted` holding a `404` cannot be built.
-#[derive(Debug, Error)]
+/// Error of [`crate::http::HttpClient`]'s retried requests: a `RetriesExhausted` holding a
+/// `404` cannot be built.
 #[allow(unreachable_pub)]
-pub enum SendError {
-    #[error(transparent)]
-    Final(FinalFailure),
-    #[error("{last} (gave up after {retries} retries)")]
-    RetriesExhausted {
-        retries: u32,
-        last: RetryableFailure,
-    },
-}
+pub type SendError = RetryError<RetryableFailure, FinalFailure>;
 
 impl SendError {
     fn status_code(&self) -> Option<StatusCode> {
@@ -203,105 +195,34 @@ pub enum ReadBodyError {
     TooLarge { limit: u64, read_so_far: u64 },
 }
 
-/// Sends an HTTP request with backoff retry logic.
-pub(crate) struct Sender {
-    backoff: Backoff,
-    /// When set, response bodies larger than this many bytes are rejected
-    /// before they're fully read into memory.
-    max_response_size: Option<u64>,
+/// One attempt of a retried request, sorted for [`crate::common::retry::retry`].
+pub(crate) fn attempt(
+    result: Result<reqwest::Response, reqwest::Error>,
+) -> Attempt<reqwest::Response, RetryableFailure, FinalFailure> {
+    // TODO: add optional debug-level logging hook here once a logger can be
+    //       passed in without pulling logging into this low-level crate.
+    match AttemptFailure::check(result) {
+        Ok(response) => Attempt::Done(response),
+        Err(AttemptFailure::Retryable(error)) => Attempt::Retryable {
+            error,
+            wait_at_least: None,
+        },
+        Err(AttemptFailure::Final(failure)) => Attempt::Final(failure),
+    }
 }
 
-impl Sender {
-    #[must_use]
-    pub(crate) fn new(backoff: Backoff) -> Self {
-        Self {
-            backoff,
-            max_response_size: None,
-        }
-    }
-
-    /// Builder-style setter for the response body size cap. `None` (the default)
-    /// disables the cap. Returns `Self` for chaining.
-    #[must_use]
-    pub(crate) fn with_max_response_size(mut self, max_response_size: Option<u64>) -> Self {
-        self.max_response_size = max_response_size;
-        self
-    }
-
-    /// Sends a request, retrying with backoff only network failures, `408`, `429` and
-    /// `5xx`. Any other `4xx`, an invalid URL or a refused redirect would fail the same
-    /// way again, so it returns at once instead of holding startup through the backoff.
-    ///
-    /// The `RequestBuilder` is re-created for each attempt because it cannot be reused.
-    pub(crate) async fn send_with_retry<F>(
-        &mut self,
-        mut request: F,
-    ) -> Result<reqwest::Response, SendError>
-    where
-        F: FnMut() -> RequestBuilder,
-    {
-        self.backoff.reset();
-        let mut retries = 0u32;
-
-        loop {
-            // TODO: add optional debug-level logging hook here once a logger can be
-            //       passed in without pulling logging into this low-level crate.
-            let last = match AttemptFailure::check(request().send().await) {
-                Ok(response) => return Ok(response),
-                Err(AttemptFailure::Final(failure)) => return Err(SendError::Final(failure)),
-                Err(AttemptFailure::Retryable(failure)) => failure,
-            };
-            if self.backoff.snooze().await.is_err() {
-                return Err(SendError::RetriesExhausted { retries, last });
-            }
-            retries += 1;
-        }
-    }
-
-    /// Sends an HTTP request a single time and deserializes the JSON response.
-    ///
-    /// Unlike [`Self::send`], this method performs **no retries** — useful for
-    /// non-idempotent requests (POST, PUT, PATCH, DELETE) where replaying the request
-    /// is unsafe.
-    pub(crate) async fn send_once<T, F>(&mut self, request: F) -> Result<T, HttpRequestError>
-    where
-        F: FnOnce() -> RequestBuilder,
-        T: serde::de::DeserializeOwned,
-    {
-        let response = AttemptFailure::check(request().send().await)?;
-        self.read_json(response).await
-    }
-
-    /// Sends an HTTP request with the retry rule of [`Self::send_with_retry`], then
-    /// deserializes the JSON response.
-    pub(crate) async fn send<T, F>(&mut self, request: F) -> Result<T, HttpRequestError>
-    where
-        F: FnMut() -> RequestBuilder,
-        T: serde::de::DeserializeOwned,
-    {
-        let response = self.send_with_retry(request).await?;
-        self.read_json(response).await
-    }
-
-    /// Sends an HTTP request with retry logic and returns the response body as raw bytes.
-    #[cfg(test)]
-    pub(crate) async fn send_bytes<F>(&mut self, request: F) -> Result<Vec<u8>, HttpRequestError>
-    where
-        F: FnMut() -> RequestBuilder,
-    {
-        let response = self.send_with_retry(request).await?;
-        read_body(response, self.max_response_size).await
-    }
-
-    async fn read_json<T>(&self, response: reqwest::Response) -> Result<T, HttpRequestError>
-    where
-        T: serde::de::DeserializeOwned,
-    {
-        let status = response.status();
-        let bytes = read_body(response, self.max_response_size).await?;
-        serde_json::from_slice::<T>(&bytes)
-            .map_err(|error| HttpRequestError::DeserializeJson { status, error })
-    }
+/// Reads a response body capped at `max_response_size` and deserializes it as JSON.
+pub(crate) async fn read_json<T>(
+    response: reqwest::Response,
+    max_response_size: Option<u64>,
+) -> Result<T, HttpRequestError>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let status = response.status();
+    let bytes = read_body(response, max_response_size).await?;
+    serde_json::from_slice::<T>(&bytes)
+        .map_err(|error| HttpRequestError::DeserializeJson { status, error })
 }
 
 /// [`read_response_capped`], keeping the status of the response in the error.

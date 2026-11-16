@@ -30,7 +30,7 @@ pub(crate) fn get_config(policy_source: PolicyStoreSource) -> BootstrapConfig {
         lock_config: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
-        http_client_config: crate::HttpClientConfig::default(),
+        http_client_config: crate::http::test_support::fast_retries(),
         trace_config: None,
     }
 }

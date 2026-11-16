@@ -17,8 +17,9 @@ use serde::Deserialize;
 use super::{
     Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus, retryable,
 };
+use crate::common::retry::MAX_EXPONENTIAL_DELAY;
 use crate::http::HttpClient;
-use crate::http_utils::{AttemptFailure, HttpRequestError, MAX_EXPONENTIAL_DELAY, ReadBodyError};
+use crate::http_utils::{AttemptFailure, HttpRequestError, ReadBodyError};
 
 /// Lock's TRACE bulk endpoint and the client that posts to it.
 pub(in crate::lock) struct RestTraceClient {

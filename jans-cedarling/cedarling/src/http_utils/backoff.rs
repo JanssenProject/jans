@@ -6,8 +6,7 @@
 use std::time::Duration;
 use tokio::time::sleep;
 
-/// The longest delay of [`Backoff::new_exponential`].
-pub(crate) const MAX_EXPONENTIAL_DELAY: Duration = Duration::from_secs(300);
+use crate::common::retry::MAX_EXPONENTIAL_DELAY;
 
 /// Implements a backoff strategy for retrying operations.
 pub(crate) struct Backoff {

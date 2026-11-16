@@ -5,11 +5,14 @@
 
 pub(crate) mod cache_headers;
 mod spawn_task;
+#[cfg(test)]
+pub(crate) mod test_support;
 
 pub use spawn_task::*;
 
+use crate::common::retry::{Backoff, RetryPolicy, retry};
 use crate::http_utils::{
-    AttemptFailure, Backoff, FinalFailure, HttpRequestError, RetryableFailure, Sender, read_body,
+    AttemptFailure, FinalFailure, HttpRequestError, RetryableFailure, attempt, read_body, read_json,
 };
 use cache_headers::CacheHeadersState;
 pub(crate) use reqwest::RequestBuilder;
@@ -23,18 +26,12 @@ use thiserror::Error;
 /// with retry logic using exponential backoff.
 ///
 /// GET requests are retried with backoff, up to a maximum number of times, when the
-/// failure may clear (see [`Sender::send_with_retry`]).
+/// failure may clear (see [`HttpClient::get_with_retry_with`]).
 ///
 /// Structure is thread safe, feel free to clone.
 #[derive(Debug, Clone)]
 pub(crate) struct HttpClient {
     pub(crate) raw_client: Client,
-    // used in non-test builds via create_sender()
-    #[allow(unused)]
-    retry_delay: Duration,
-    #[allow(unused)]
-    max_retries: u32,
-    max_response_size_bytes: Option<u64>,
     conf: HttpClientConfig,
 }
 
@@ -81,6 +78,16 @@ impl HttpClientConfig {
     /// Default response body cap (10 MB). Generous enough for the largest realistic
     /// JWKS / OIDC config / policy-store payload while still bounding memory use.
     pub const DEFAULT_MAX_RESPONSE_SIZE_BYTES: u64 = 10 * 1024 * 1024;
+}
+
+impl HttpClientConfig {
+    /// Retries a request `max_retries` times, the delay doubling from `retry_delay`.
+    pub(crate) fn retry_policy(&self) -> RetryPolicy {
+        RetryPolicy {
+            backoff: Backoff::exponential(self.retry_delay),
+            max_retries: self.max_retries,
+        }
+    }
 }
 
 impl Default for HttpClientConfig {
@@ -177,13 +184,7 @@ impl HttpClient {
 
         let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
-        Ok(Self {
-            raw_client,
-            retry_delay: conf.retry_delay,
-            max_retries: conf.max_retries,
-            max_response_size_bytes: conf.max_response_size_bytes,
-            conf,
-        })
+        Ok(Self { raw_client, conf })
     }
 
     /// A client with the same limits but without this client's default headers,
@@ -194,22 +195,6 @@ impl HttpClient {
     /// accepting invalid certificates) is not carried over.
     pub(crate) fn without_default_headers(&self) -> Result<Self, InitializeHttpClientError> {
         Self::new(self.conf)
-    }
-
-    /// Creates a new Sender with the configured backoff strategy.
-    pub(crate) fn create_sender(&self) -> Sender {
-        let backoff = {
-            #[cfg(not(test))]
-            {
-                Backoff::new_exponential(self.retry_delay, Some(self.max_retries))
-            }
-            // Faster backoff for tests, but still respects max_retries count.
-            #[cfg(test)]
-            {
-                Backoff::new_exponential(Duration::from_millis(10), Some(self.max_retries))
-            }
-        };
-        Sender::new(backoff).with_max_response_size(self.max_response_size_bytes)
     }
 
     /// Sends a GET request to the specified URI with retry logic. Returns the
@@ -226,9 +211,8 @@ impl HttpClient {
     where
         T: serde::de::DeserializeOwned,
     {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send(|| client.get(uri)).await
+        let response = self.get_with_retry(uri).await?;
+        read_json(response, self.conf.max_response_size_bytes).await
     }
 
     /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
@@ -239,9 +223,8 @@ impl HttpClient {
     /// so they can capture response headers alongside the body.
     #[cfg(test)]
     pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send_bytes(|| client.get(uri)).await
+        let response = self.get_with_retry(uri).await?;
+        self.read_response_capped(response).await
     }
 
     // Execute POST request
@@ -252,9 +235,8 @@ impl HttpClient {
         T: serde::de::DeserializeOwned,
         F: FnOnce(&Client) -> RequestBuilder,
     {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send_once(move || builder_fn(client)).await
+        let response = AttemptFailure::check(builder_fn(&self.raw_client).send().await)?;
+        read_json(response, self.conf.max_response_size_bytes).await
     }
 
     /// Sends a GET request with retry logic and returns the raw [`reqwest::Response`].
@@ -270,8 +252,11 @@ impl HttpClient {
         self.get_with_retry_with(uri, |request| request).await
     }
 
-    /// Sends a GET request with retry logic, allowing the caller to modify the
-    /// [`RequestBuilder`] before dispatch (e.g. to add custom headers).
+    /// Sends a GET request, letting the caller modify the [`RequestBuilder`] before
+    /// dispatch (e.g. to add custom headers). Only network failures, `408`, `429` and
+    /// `5xx` are retried: any other `4xx`, an invalid URL or a refused redirect would
+    /// fail the same way again, so it returns at once instead of holding startup
+    /// through the backoff.
     pub(crate) async fn get_with_retry_with<F>(
         &self,
         uri: &str,
@@ -280,10 +265,12 @@ impl HttpClient {
     where
         F: Fn(RequestBuilder) -> RequestBuilder,
     {
-        let mut sender = self.create_sender();
-        Ok(sender
-            .send_with_retry(|| f(self.raw_client.get(uri)))
-            .await?)
+        let response = retry(self.conf.retry_policy(), || {
+            let request = f(self.raw_client.get(uri));
+            async move { attempt(request.send().await) }
+        })
+        .await?;
+        Ok(response)
     }
 
     /// Fetches `uri` as raw bytes, honoring any previously captured cache
@@ -350,7 +337,7 @@ impl HttpClient {
         &self,
         response: reqwest::Response,
     ) -> Result<Vec<u8>, HttpClientError> {
-        read_body(response, self.max_response_size_bytes).await
+        read_body(response, self.conf.max_response_size_bytes).await
     }
 
     /// Sends a HEAD request and parses the response headers into a
@@ -449,7 +436,8 @@ mod test {
     const HTTP_CONF: HttpClientConfig = HttpClientConfig {
         max_retries: 3,
         request_timeout: Duration::from_millis(500),
-        retry_delay: Duration::from_secs(5),
+        // Short, so the retry tests finish in milliseconds.
+        retry_delay: Duration::from_millis(10),
         max_response_size_bytes: None,
     };
 
@@ -668,6 +656,46 @@ mod test {
                 "HTTP {status} must be sent once and retried 3 times, got: {err:?}"
             );
         }
+    }
+
+    #[tokio::test]
+    async fn retries_follow_the_configured_delay_and_count() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(503)
+            .expect(3)
+            .create_async()
+            .await;
+        let retry_delay = Duration::from_millis(60);
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 2,
+            retry_delay,
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+
+        let started = std::time::Instant::now();
+        let err = client
+            .get(&format!("{}/store", server.url()))
+            .await
+            .expect_err("a 503 that never clears must fail");
+
+        mock.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                HttpClientError::Send(SendError::RetriesExhausted { retries: 2, .. })
+            ),
+            "max_retries: 2 means 2 retries, got {err:?}"
+        );
+        let waited = retry_delay + retry_delay * 2;
+        assert!(
+            started.elapsed() >= waited,
+            "the retries wait the configured {retry_delay:?}, then twice that: at least \
+             {waited:?}, waited {:?}",
+            started.elapsed()
+        );
     }
 
     #[tokio::test]
