@@ -59,7 +59,8 @@ public final class Violations {
      *
      * <p>{@code dtoField} is the outermost segment of the reported field name; any location the
      * result already carries is nested under it, so a failure inside a nested request object reads
-     * as {@code assertion_consumer_service.location}.
+     * as {@code assertion_consumer_service.location}. A failure about the request as a whole is
+     * reported against the request root rather than nested under {@code dtoField}.
      */
     public <T> T take(Result<T> result, String dtoField) {
 
@@ -104,9 +105,16 @@ public final class Violations {
      * Combines the location callers supplied with the field the error itself names. The supplied
      * location is the outer part; a field the error names nests inside it, so a domain value that
      * failed inside a collection element reads as {@code attributes[2].display_name}. The two agree
-     * when a caller labelled the value it built directly, and then only one segment is emitted.
+     * when a caller labelled the value it built directly, and then only one segment is emitted. An
+     * error about the request as a whole is reported against the request root regardless of the
+     * supplied location.
      */
     private String fieldOf(DomainError error, FieldPath path) {
+
+        if (!translation.isFieldScoped(error)) {
+
+            return translation.fieldFor(error);
+        }
 
         String named = translation.fieldFor(error);
 
@@ -115,12 +123,26 @@ public final class Violations {
             return named;
         }
 
-        if (named.isEmpty() || path.getLeaf().equals(named)) {
+        if (named.isEmpty() || leafName(path).equals(named)) {
 
             return path.toString();
         }
 
         return path + "." + named;
+    }
+
+    /**
+     * The innermost field name without any collection index, for comparisons. A failure inside
+     * element {@code n} of a collection names the same field as the collection itself, so
+     * {@code attributes[3]} compares equal to a named field {@code attributes}; the reported path
+     * keeps the index either way.
+     */
+    private static String leafName(FieldPath path) {
+
+        String leaf = path.getLeaf();
+        int bracket = leaf.indexOf('[');
+
+        return bracket < 0 ? leaf : leaf.substring(0, bracket);
     }
 
     /**

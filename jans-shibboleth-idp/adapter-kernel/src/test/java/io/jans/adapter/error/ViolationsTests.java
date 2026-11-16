@@ -199,6 +199,34 @@ public class ViolationsTests {
     }
 
     @Test
+    @DisplayName("GIVEN a request-scoped failure WHEN recorded under a location THEN it is attributed to the request root")
+    public void aRequestScopedFailureIsAttributedToTheRequestRoot() {
+
+        Violations violations = collector();
+
+        violations.record(new RequestProblem(), FieldPath.of("metadata_source"));
+
+        assertThat(violations.asList())
+            .extracting(Violation::field)
+            .containsExactly("");
+    }
+
+    @Test
+    @DisplayName("GIVEN a failure naming a collection WHEN recorded under its indexed element THEN the index is kept and the name is not repeated")
+    public void anIndexedFieldNameIsNotRepeated() {
+
+        Violations violations = collector();
+
+        violations.record(
+            RequiredValueMissing.forField(Owner.class, "attributes"),
+            FieldPath.empty().prepend("mapped_attributes", 3));
+
+        assertThat(violations.asList())
+            .extracting(Violation::field)
+            .containsExactly("mapped_attributes[3]");
+    }
+
+    @Test
     @DisplayName("GIVEN no location at all WHEN recorded THEN the field the error names is used")
     public void anUnlocatedFailureUsesTheNameTheErrorCarries() {
 

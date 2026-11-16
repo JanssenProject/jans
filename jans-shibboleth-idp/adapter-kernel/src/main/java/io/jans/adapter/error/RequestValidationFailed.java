@@ -2,7 +2,6 @@ package io.jans.adapter.error;
 
 import io.jans.kernel.DomainError;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,7 +22,7 @@ public final class RequestValidationFailed extends DomainError {
             ? "Request validation failed: 1 invalid field"
             : String.format("Request validation failed: %d invalid fields", violations.size()));
 
-        this.violations = Collections.unmodifiableList(violations);
+        this.violations = List.copyOf(violations);
     }
 
     public static RequestValidationFailed with(List<Violation> violations) {
