@@ -202,9 +202,10 @@ public class SessionService {
                         "No " + SessionIdState.AUTHENTICATED + " session exists for sid '" + sid + "'!!!");
             }
 
+            // Revoke tokens first so a failed revocation leaves the session in place for a retry
+            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
             persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
             cacheService.remove(sessionToDelete.getDn());
-            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
 
         }
     }
@@ -227,9 +228,9 @@ public class SessionService {
             }
 
             sessionList.stream().forEach(session -> {
+                revokeSessionTokens(userDn, session.getDn());
                 persistenceEntryManager.remove(session.getDn(), SessionId.class);
                 cacheService.remove(session.getDn());
-                revokeSessionTokens(userDn, session.getDn());
             });
         }
     }
