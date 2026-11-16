@@ -39,7 +39,7 @@ impl Backoff {
         }
     }
 
-    /// Creates an fixed backoff strategy
+    /// Creates a fixed backoff strategy
     ///
     /// Set `max_attempts` to [`None`] to retry indefinitely.
     #[must_use]
@@ -52,7 +52,7 @@ impl Backoff {
         }
     }
 
-    /// Creates an fixed backoff strategy with the following configuratoin:
+    /// Creates a fixed backoff strategy with the following configuration:
     ///
     /// - `max_attempts`: `None` (retries indefinitely)
     /// - `base_delay`: `10` seconds (the delay before the first retry)

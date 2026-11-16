@@ -86,7 +86,7 @@ impl HttpClientConfig {
 impl Default for HttpClientConfig {
     fn default() -> Self {
         Self {
-            max_retries: 3,
+            max_retries: Self::DEFAULT_MAX_RETRIES,
             retry_delay: Self::DEFAULT_RETRY_DELAY,
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Self::DEFAULT_REQUEST_TIMEOUT,
@@ -267,8 +267,7 @@ impl HttpClient {
         &self,
         uri: &str,
     ) -> Result<reqwest::Response, HttpClientError> {
-        let mut sender = self.create_sender();
-        Ok(sender.send_with_retry(|| self.raw_client.get(uri)).await?)
+        self.get_with_retry_with(uri, |request| request).await
     }
 
     /// Sends a GET request with retry logic, allowing the caller to modify the
