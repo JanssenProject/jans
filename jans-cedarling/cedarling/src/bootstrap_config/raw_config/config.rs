@@ -663,8 +663,7 @@ impl BootstrapConfigRaw {
     ) -> Result<Self, BootstrapConfigLoadingError> {
         let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
             .as_object()
-            .map(std::borrow::ToOwned::to_owned)
-            .unwrap_or_default();
+            .map_or_else(serde_json::Map::new, std::borrow::ToOwned::to_owned);
 
         for (k, v) in get_cedarling_env_vars() {
             // update map with values from env variables

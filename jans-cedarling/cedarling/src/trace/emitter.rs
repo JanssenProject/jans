@@ -664,10 +664,9 @@ impl Emitter {
                     | PostBulkError::NotSent { .. }
                     | PostBulkError::UnreadableResponse { .. }),
                 ) => {
-                    let fix = err
-                        .refusal()
-                        .map(|refusal| format!("; {}", self.refusal_fix(refusal)))
-                        .unwrap_or_default();
+                    let fix = err.refusal().map_or_else(String::new, |refusal| {
+                        format!("; {}", self.refusal_fix(refusal))
+                    });
                     self.log(
                         LogLevel::ERROR,
                         None,

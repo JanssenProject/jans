@@ -766,8 +766,7 @@ fn create_trace_sink(
                 Ok(client) => trace_sink::TraceChannel::Grpc(client),
                 Err(err) => {
                     let cause = std::error::Error::source(&err)
-                        .map(|source| format!(": {source}"))
-                        .unwrap_or_default();
+                        .map_or_else(String::new, |source| format!(": {source}"));
                     warn(format!("{err}{cause}: TRACE records will not be sent"));
                     return Ok(None);
                 },
