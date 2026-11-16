@@ -37,7 +37,7 @@ import java.util.Objects;
 public final class Violations {
 
     private final ErrorTranslation translation;
-    private final List<Violation> violations = new ArrayList<>();
+    private final List<Violation> items = new ArrayList<>();
 
     private Violations(ErrorTranslation translation) {
 
@@ -97,7 +97,7 @@ public final class Violations {
 
         String field = fieldOf(error, path);
 
-        violations.add(new Violation(
+        items.add(new Violation(
             field, translation.codeFor(error), translation.messageFor(error, field)));
     }
 
@@ -176,17 +176,17 @@ public final class Violations {
 
     public boolean any() {
 
-        return !violations.isEmpty();
+        return !items.isEmpty();
     }
 
     public boolean isEmpty() {
 
-        return violations.isEmpty();
+        return items.isEmpty();
     }
 
     public List<Violation> asList() {
 
-        return Collections.unmodifiableList(new ArrayList<>(violations));
+        return Collections.unmodifiableList(new ArrayList<>(items));
     }
 
     /**
