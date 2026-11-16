@@ -1409,6 +1409,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#batchingestenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        batchIngestEnabled
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batchverifythreads" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        batchVerifyThreads
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cedarlingconfiguration" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1838,10 +1860,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#postcommitcorrelationthreads" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        postCommitCorrelationThreads
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#protectionmode" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
         protectionMode
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationbackoffms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationBackoffMs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationmaxbackoffms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationMaxBackoffMs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationretrylimit" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationRetryLimit
       </span>
     </span>
   </a>
@@ -2727,6 +2793,28 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#batchingestenabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        batchIngestEnabled
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batchverifythreads" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        batchVerifyThreads
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#cedarlingconfiguration" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -3156,10 +3244,54 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#postcommitcorrelationthreads" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        postCommitCorrelationThreads
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#protectionmode" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
         protectionMode
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationbackoffms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationBackoffMs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationmaxbackoffms" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationMaxBackoffMs
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rangeallocationretrylimit" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        rangeAllocationRetryLimit
       </span>
     </span>
   </a>
@@ -3548,6 +3680,16 @@
 <td><a href="#baseendpoint">Details</a></td>
 </tr>
 <tr>
+<td>batchIngestEnabled</td>
+<td>Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record</td>
+<td><a href="#batchingestenabled">Details</a></td>
+</tr>
+<tr>
+<td>batchVerifyThreads</td>
+<td>Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64</td>
+<td><a href="#batchverifythreads">Details</a></td>
+</tr>
+<tr>
 <td>cedarlingConfiguration</td>
 <td>Cedarling configuration</td>
 <td><a href="#cedarlingconfiguration">Details</a></td>
@@ -3743,13 +3885,33 @@
 <td><a href="#policyreleaseretentiondays">Details</a></td>
 </tr>
 <tr>
+<td>postCommitCorrelationThreads</td>
+<td>Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64</td>
+<td><a href="#postcommitcorrelationthreads">Details</a></td>
+</tr>
+<tr>
 <td>protectionMode</td>
 <td>Protection mode for the Lock server (OAuth or Cedarling)</td>
 <td><a href="#protectionmode">Details</a></td>
 </tr>
 <tr>
+<td>rangeAllocationBackoffMs</td>
+<td>Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default</td>
+<td><a href="#rangeallocationbackoffms">Details</a></td>
+</tr>
+<tr>
+<td>rangeAllocationMaxBackoffMs</td>
+<td>Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default</td>
+<td><a href="#rangeallocationmaxbackoffms">Details</a></td>
+</tr>
+<tr>
+<td>rangeAllocationRetryLimit</td>
+<td>Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default</td>
+<td><a href="#rangeallocationretrylimit">Details</a></td>
+</tr>
+<tr>
 <td>receiptAllocationRetryLimit</td>
-<td>Maximum retries when allocating a receipt-chain sequence number</td>
+<td>Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit</td>
 <td><a href="#receiptallocationretrylimit">Details</a></td>
 </tr>
 <tr>
@@ -3845,6 +4007,30 @@
 </li>
 <li>
 <p>Default value: None</p>
+</li>
+</ul>
+<h2 id="batchingestenabled">batchIngestEnabled<a class="headerlink" href="#batchingestenabled" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Write a bulk request, and a single submission, with one atomic database transaction when the store supports it; otherwise, or when disabled, each element is ingested one by one with about three commits per record</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
+<h2 id="batchverifythreads">batchVerifyThreads<a class="headerlink" href="#batchverifythreads" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 0</p>
 </li>
 </ul>
 <h2 id="cedarlingconfiguration">cedarlingConfiguration<a class="headerlink" href="#cedarlingconfiguration" title="Permanent link">#</a></h2>
@@ -4315,6 +4501,18 @@
 <p>Default value: 30</p>
 </li>
 </ul>
+<h2 id="postcommitcorrelationthreads">postCommitCorrelationThreads<a class="headerlink" href="#postcommitcorrelationthreads" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 0</p>
+</li>
+</ul>
 <h2 id="protectionmode">protectionMode<a class="headerlink" href="#protectionmode" title="Permanent link">#</a></h2>
 <ul>
 <li>
@@ -4327,10 +4525,46 @@
 <p>Default value: None</p>
 </li>
 </ul>
+<h2 id="rangeallocationbackoffms">rangeAllocationBackoffMs<a class="headerlink" href="#rangeallocationbackoffms" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 5</p>
+</li>
+</ul>
+<h2 id="rangeallocationmaxbackoffms">rangeAllocationMaxBackoffMs<a class="headerlink" href="#rangeallocationmaxbackoffms" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 250</p>
+</li>
+</ul>
+<h2 id="rangeallocationretrylimit">rangeAllocationRetryLimit<a class="headerlink" href="#rangeallocationretrylimit" title="Permanent link">#</a></h2>
+<ul>
+<li>
+<p>Description: Maximum attempts when reserving a contiguous receipt range for a batch (batchIngestEnabled is true) before the batch falls back to per-record ingest; 0 or less means the default</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: 32</p>
+</li>
+</ul>
 <h2 id="receiptallocationretrylimit">receiptAllocationRetryLimit<a class="headerlink" href="#receiptallocationretrylimit" title="Permanent link">#</a></h2>
 <ul>
 <li>
-<p>Description: Maximum retries when allocating a receipt-chain sequence number</p>
+<p>Description: Maximum attempts when claiming one receipt-chain sequence number for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -4503,7 +4737,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 21, 2026
+    November 15, 2026
   </span>
 
     
