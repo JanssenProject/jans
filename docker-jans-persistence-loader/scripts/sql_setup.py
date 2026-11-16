@@ -130,7 +130,10 @@ class SQLBackend:
                                 f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')"
                             )
                             try:
-                                self.client.create_index(column_query)
+                                if not self.client.alter_table(column_query, table_name):
+                                    # could not lock the table in time; the index needs the column,
+                                    # so leave both to the next start
+                                    continue
                             except OperationalError as exc:
                                 # re-raise exception if the code isn't one of the following code
                                 # 1060 - duplicate column error (e.g. added by another loader in the meantime)
