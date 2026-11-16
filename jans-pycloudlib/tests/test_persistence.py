@@ -708,3 +708,69 @@ def test_sql_client_run_index_ddl_invalidates_connection_when_reset_fails(monkey
     sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
 
     conn.invalidate.assert_called_once()
+
+
+def test_sql_client_alter_table_runs_with_lock_timeout(monkeypatch, sql_client):
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    calls = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: calls.append((a, kw)))
+
+    assert sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t", lock_timeout=7) is True
+    assert calls == [(("ALTER TABLE t ADD COLUMN c INT", "t", "", 7), {"drop_first": False})]
+
+
+def test_sql_client_alter_table_gives_up_after_retries(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    calls = []
+
+    def fake_run(*args, **kwargs):
+        calls.append(args)
+        exc = OperationalError("stmt", {}, Exception())
+        exc.orig = MSException(1205).orig
+        raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    # must not raise; the caller is told the statement did not run
+    assert sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t", retries=2) is False
+    assert len(calls) == 2
+
+
+def test_sql_client_alter_table_reraises_other_errors(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    calls = []
+
+    def fake_run(*args, **kwargs):
+        calls.append(args)
+        exc = OperationalError("stmt", {}, Exception())
+        exc.orig = MSException(1060).orig
+        raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    # e.g. 1060 (duplicate column) is left to the caller, without retries
+    with pytest.raises(OperationalError):
+        sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t")
+    assert len(calls) == 1
+
+
+def test_sql_client_alter_table_runs_at_least_once(monkeypatch, sql_client):
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    calls = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: calls.append(a))
+
+    assert sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t", retries=0) is True
+    assert len(calls) == 1
