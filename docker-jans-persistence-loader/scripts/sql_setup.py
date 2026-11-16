@@ -116,18 +116,32 @@ class SQLBackend:
                     # switch to virtual column instead
                     for i in range(4):
                         index_str_fmt = f"{column_name}_mem_idx_{i}"
-                        query = " ".join([
-                            f"ALTER TABLE {self.client.quoted_id(table_name)}",
-                            f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
-                            f", ADD INDEX {self.client.quoted_id(index_str_fmt)} ({self.client.quoted_id(index_str_fmt)})"
-                        ])
-                        try:
-                            self.client.create_index(query, table_name, index_str_fmt)
-                        except OperationalError as exc:
-                            # re-raise exception if the code isn't one of the following code
-                            # 1060 - duplicate column error
-                            if exc.orig.args[0] not in [1060]:
-                                raise exc
+
+                        # the index implies its virtual column; skip both without touching the table
+                        if self.client.get_index_state(table_name, index_str_fmt):
+                            continue
+
+                        # MySQL 5.7 adds a virtual column in place only when it is the sole change in
+                        # the ALTER TABLE; combined with ADD INDEX it may copy the table and block writers,
+                        # so the column and the index are added by separate statements
+                        if index_str_fmt not in column_mapping:
+                            column_query = (
+                                f"ALTER TABLE {self.client.quoted_id(table_name)} "
+                                f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')"
+                            )
+                            try:
+                                self.client.create_index(column_query)
+                            except OperationalError as exc:
+                                # re-raise exception if the code isn't one of the following code
+                                # 1060 - duplicate column error (e.g. added by another loader in the meantime)
+                                if exc.orig.args[0] not in [1060]:
+                                    raise exc
+
+                        query = (
+                            f"ALTER TABLE {self.client.quoted_id(table_name)} "
+                            f"ADD INDEX {self.client.quoted_id(index_str_fmt)} ({self.client.quoted_id(index_str_fmt)})"
+                        )
+                        self.client.create_index(query, table_name, index_str_fmt)
                 else:
                     for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                         index_str_fmt = Template(index_str).safe_substitute({
