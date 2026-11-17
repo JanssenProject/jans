@@ -109,9 +109,11 @@ where
     Fut: Future<Output = Attempt<T, R, F>>,
 {
     repeat(policy, attempt, |delay| async move {
+        // Cancellation wins a tie, so no attempt starts after it.
         tokio::select! {
-            () = sleep(delay) => Ok(()),
+            biased;
             () = cancel.cancelled() => Err(Cancelled),
+            () = sleep(delay) => Ok(()),
         }
     })
     .await
