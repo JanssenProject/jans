@@ -510,14 +510,18 @@ mod tests {
             let err = post(&lock)
                 .await
                 .expect_err("a refused request should be an error");
-            assert_eq!(
-                err,
-                PostBulkError::Rejected {
-                    status: RejectedStatus::Grpc(code),
-                    error: Some(error.to_string()),
-                    reason: Some(reason.to_string()),
-                },
-                "gRPC {code:?} should be Rejected with Lock's error and reason"
+            assert!(
+                matches!(
+                    &err,
+                    PostBulkError::Rejected {
+                        status: got_status,
+                        error: got_error,
+                        reason: got_reason,
+                    } if *got_status == RejectedStatus::Grpc(code)
+                        && *got_error == Some(error.to_string())
+                        && *got_reason == Some(reason.to_string())
+                ),
+                "gRPC {code:?} should be Rejected with Lock's error and reason, got {err:?}"
             );
         }
     }
@@ -561,14 +565,18 @@ mod tests {
         let err = post(&lock)
             .await
             .expect_err("an oversized message should be an error");
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Grpc(Code::ResourceExhausted),
-                error: None,
-                reason: None,
-            },
-            "the same bytes would be refused again, so they are not retried"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Grpc(Code::ResourceExhausted)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "the same bytes would be refused again, so they are not retried, got {err:?}"
         );
         assert_eq!(
             err.refusal(),
@@ -629,16 +637,18 @@ mod tests {
                 .post_bulk(&bulk_body())
                 .await
                 .expect_err("a proxy refusal should be an error");
-            assert_eq!(
-                err,
-                PostBulkError::Rejected {
-                    status: RejectedStatus::Http(
-                        StatusCode::from_u16(status).expect("valid status")
-                    ),
-                    error: None,
-                    reason: None,
-                },
-                "a proxy's HTTP {status} without grpc-status refuses the request, as over REST"
+            assert!(
+                matches!(
+                    &err,
+                    PostBulkError::Rejected {
+                        status: got_status,
+                        error: got_error,
+                        reason: got_reason,
+                    } if *got_status == RejectedStatus::Http(StatusCode::from_u16(status).expect("valid status"))
+                        && got_error.is_none()
+                        && got_reason.is_none()
+                ),
+                "a proxy's HTTP {status} without grpc-status refuses the request, as over REST, got {err:?}"
             );
         }
     }
@@ -691,14 +701,18 @@ mod tests {
         let err = post(&lock)
             .await
             .expect_err("a refused request should be an error");
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Grpc(Code::PermissionDenied),
-                error: None,
-                reason: None,
-            },
-            "a plain description is no Lock error"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Grpc(Code::PermissionDenied)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "a plain description is no Lock error, got {err:?}"
         );
     }
 
@@ -842,14 +856,18 @@ mod tests {
             .await
             .expect_err("UNAUTHENTICATED after reissue should be an error");
 
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Grpc(Code::Unauthenticated),
-                error: None,
-                reason: None,
-            },
-            "a second UNAUTHENTICATED is final"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Grpc(Code::Unauthenticated)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "a second UNAUTHENTICATED is final, got {err:?}"
         );
         token.assert_async().await;
         assert_eq!(
@@ -869,14 +887,18 @@ mod tests {
             .await
             .expect_err("a pre-issued token cannot be reissued");
 
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Grpc(Code::Unauthenticated),
-                error: None,
-                reason: None,
-            },
-            "UNAUTHENTICATED is final without a token source"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Grpc(Code::Unauthenticated)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "UNAUTHENTICATED is final without a token source, got {err:?}"
         );
         token.assert_async().await;
     }

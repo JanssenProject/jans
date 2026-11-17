@@ -48,9 +48,7 @@ impl RestTraceClient {
         let response = self.bulk_request(token, body).send().await.map_err(|err| {
             match AttemptFailure::from_send_error(err) {
                 AttemptFailure::Retryable(failure) => retryable(failure.to_string()),
-                AttemptFailure::Final(failure) => PostBulkError::NotSent {
-                    reason: failure.to_string(),
-                },
+                AttemptFailure::Final(failure) => PostBulkError::NotSent(failure),
             }
         })?;
         let status = response.status();
@@ -337,14 +335,18 @@ mod tests {
             .post_bulk(&bulk_body())
             .await
             .expect_err("a refusal with a body over the cap should be an error");
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Http(StatusCode::PAYLOAD_TOO_LARGE),
-                error: None,
-                reason: None,
-            },
-            "a refusal stays final when its body is over the cap; only the error body is lost"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Http(StatusCode::PAYLOAD_TOO_LARGE)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "a refusal stays final when its body is over the cap; only the error body is lost, got {err:?}"
         );
     }
 
@@ -478,7 +480,8 @@ mod tests {
         assert!(
             matches!(
                 err,
-                PostBulkError::NotSent { ref reason } if reason.contains("refusing redirect")
+                PostBulkError::NotSent(crate::http::FinalFailure::InvalidRequest(ref redirect))
+                    if redirect.is_redirect()
             ),
             "a refused redirect fails the same way every time, got {err:?}"
         );

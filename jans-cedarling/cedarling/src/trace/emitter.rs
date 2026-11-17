@@ -709,7 +709,12 @@ impl Emitter {
                     None,
                     format!("{err}; its {records} TRACE records are lost{fix}"),
                 );
-                self.count(EmitterEvent::Rejected, records);
+                // Lock never saw a request that could not be sent, so it refused nothing.
+                let event = match err {
+                    PostBulkError::NotSent(_) => EmitterEvent::Dropped,
+                    _ => EmitterEvent::Rejected,
+                };
+                self.count(event, records);
                 Sent::Lost { retry_after: None }
             },
             Err(RetryError::RetriesExhausted { last, .. }) => {
@@ -1110,6 +1115,8 @@ mod tests {
         RetryAfter(u64),
         /// The whole request refused, as Lock does with `403`.
         Rejected,
+        /// The request could not be sent at all, as with a refused redirect.
+        NotSent,
         /// Per record: `None` accepted, `Some(id)` rejected with that error id.
         PerRecord(Vec<Option<&'static str>>),
         /// The whole request refused with `400 invalid_request` and this reason.
@@ -1188,6 +1195,14 @@ mod tests {
                     error: Some("access_denied".to_string()),
                     reason: None,
                 }),
+                Reply::NotSent => Err(PostBulkError::NotSent(
+                    crate::http::FinalFailure::InvalidRequest(
+                        reqwest::Client::new()
+                            .get("not a url")
+                            .build()
+                            .expect_err("a relative URL cannot be built"),
+                    ),
+                )),
                 #[cfg(feature = "grpc")]
                 Reply::ResourceExhausted => Err(PostBulkError::Rejected {
                     status: RejectedStatus::Grpc(tonic::Code::ResourceExhausted),
@@ -2074,6 +2089,28 @@ mod tests {
             stats.get("trace.rejected"),
             Some(&1),
             "the record of the refused request"
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn a_request_that_cannot_be_sent_is_dropped_not_rejected() {
+        let lock = FakeLock::new([Reply::NotSent]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+
+        lock.bodies(1).await;
+        emitter.handle.shut_down().await;
+
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&1),
+            "a record whose request could not be sent is given up"
+        );
+        assert_eq!(
+            stats.get("trace.rejected").copied().unwrap_or(0),
+            0,
+            "Lock never saw the request, so it refused nothing"
         );
     }
 
