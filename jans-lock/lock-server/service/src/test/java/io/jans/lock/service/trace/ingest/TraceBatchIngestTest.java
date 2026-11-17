@@ -15,8 +15,10 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -24,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +40,7 @@ import io.jans.lock.service.trace.error.DuplicateEntryException;
 import io.jans.lock.service.trace.error.TraceConflictException;
 import io.jans.lock.service.trace.error.TraceStorageException;
 import io.jans.lock.service.trace.error.TraceValidationException;
+import io.jans.lock.service.trace.model.ChainPosition;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.RecordIdentity;
 import io.jans.lock.service.trace.model.StoredTraceRecord;
@@ -77,8 +81,20 @@ class TraceBatchIngestTest {
 
 		private volatile boolean everyAttempt;
 
+		/** The number of the next {@code findRecordsByChainPositions} calls that fail. */
+		private final AtomicInteger failChainPositionReads = new AtomicInteger();
+
 		CompetingStore(TraceKeys keys) {
 			super(keys);
+		}
+
+		@Override
+		public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+				Collection<ChainPosition> positions) {
+			if (failChainPositionReads.getAndUpdate(n -> n > 0 ? n - 1 : 0) > 0) {
+				throw new TraceStorageException("test_fail_chain_position_read", "Forced test failure");
+			}
+			return super.findRecordsByChainPositions(positions);
 		}
 
 		@Override
@@ -536,6 +552,67 @@ class TraceBatchIngestTest {
 		assertFalse(storedFlags(c.get(1)).isCoverageGap(), "corrected by the post-commit re-read");
 		assertFalse(storedFlags(c.get(1)).isChainLinkFailure());
 		assertDenseValidChain(2);
+	}
+
+	/** A record at position 2 of {@code c}'s chain that links to position 1 but is not {@code c.get(1)}. */
+	private String forkAtTwo(List<String> c) {
+		return TraceRecordBuilder.authorizationDecision().producerInstanceId(INSTANCE).producerChainId(CHAIN_1)
+				.sequenceNumber(2).prevRecordHash(digestOf(c.get(0))).sign(key.getPrivate());
+	}
+
+	/**
+	 * Every attempt of the batch's shared post-commit read fails, the per-record reads after it
+	 * succeed: they must not show a record the later elements of the batch stored.
+	 */
+	private void failSharedPostCommitRead() {
+		store.beforeBatchInsert = () -> store.failChainPositionReads.set(3);
+	}
+
+	@Test
+	void sharedReadFailureForkBeforeMatchingPredecessorBreaksStoredSuccessor() {
+		List<String> c = chain(CHAIN_1, 3);
+		node.ingest(c.get(0), node.ctx(DOMAIN));
+		node.ingest(c.get(2), node.ctx(DOMAIN));
+		failSharedPostCommitRead();
+
+		List<BatchOutcome> outcomes = submit(node, List.of(forkAtTwo(c), c.get(1)));
+
+		assertTrue(outcomes.get(0).isAccepted());
+		assertTrue(outcomes.get(1).isAccepted());
+		assertFalse(storedFlags(c.get(2)).isCoverageGap());
+		assertTrue(storedFlags(c.get(2)).isChainLinkFailure(),
+				"only the fork was there when the gap closed, as one by one");
+	}
+
+	@Test
+	void sharedReadFailureMatchingPredecessorBeforeForkLeavesStoredSuccessorLinked() {
+		List<String> c = chain(CHAIN_1, 3);
+		node.ingest(c.get(0), node.ctx(DOMAIN));
+		node.ingest(c.get(2), node.ctx(DOMAIN));
+		failSharedPostCommitRead();
+
+		List<BatchOutcome> outcomes = submit(node, List.of(c.get(1), forkAtTwo(c)));
+
+		assertTrue(outcomes.get(0).isAccepted());
+		assertTrue(outcomes.get(1).isAccepted());
+		assertFalse(storedFlags(c.get(2)).isCoverageGap());
+		assertFalse(storedFlags(c.get(2)).isChainLinkFailure(), "the matching predecessor was there first");
+	}
+
+	@Test
+	void sharedReadFailureSuccessorEarlierInBatchThenForkThenMatchingPredecessor() {
+		List<String> c = chain(CHAIN_1, 3);
+		node.ingest(c.get(0), node.ctx(DOMAIN));
+		failSharedPostCommitRead();
+
+		List<BatchOutcome> outcomes = submit(node, List.of(c.get(2), forkAtTwo(c), c.get(1)));
+
+		for (BatchOutcome outcome : outcomes) {
+			assertTrue(outcome.isAccepted());
+		}
+		assertFalse(storedFlags(c.get(2)).isCoverageGap());
+		assertTrue(storedFlags(c.get(2)).isChainLinkFailure(),
+				"the successor's own correction must not see the predecessors stored after it in the batch");
 	}
 
 	@Test

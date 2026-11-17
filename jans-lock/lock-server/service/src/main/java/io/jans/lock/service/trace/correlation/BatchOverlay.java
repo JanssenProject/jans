@@ -145,6 +145,11 @@ public final class BatchOverlay implements PlanLookup {
 		ChainPosition next = new ChainPosition(position.getChainIdentity(), position.getSequenceNumber() + 1);
 		List<Entry> successors = byPosition.get(next);
 		if (successors != null) {
+			List<StoredTraceRecord> predecessors = new ArrayList<>(atPosition.size() + 1);
+			for (Entry peer : atPosition) {
+				predecessors.add(peer.record);
+			}
+			predecessors.add(provisional);
 			for (Entry successor : successors) {
 				IngestionFlags flags = successor.record.getFlags();
 				boolean changed = false;
@@ -152,8 +157,8 @@ public final class BatchOverlay implements PlanLookup {
 					flags.setCoverageGap(false);
 					changed = true;
 				}
-				if (!flags.isChainLinkFailure() && ProducerChainRules
-						.successorLinkBroken(successor.record.getPrevRecordHash(), provisional.getContentDigest())) {
+				if (!flags.isChainLinkFailure() && ProducerChainRules.isChainLinkFailure(next.getSequenceNumber(),
+						predecessors, successor.record.getPrevRecordHash())) {
 					flags.setChainLinkFailure(true);
 					changed = true;
 				}

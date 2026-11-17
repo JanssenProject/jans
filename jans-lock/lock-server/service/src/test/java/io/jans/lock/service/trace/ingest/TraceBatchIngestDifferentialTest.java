@@ -7,6 +7,7 @@
 package io.jans.lock.service.trace.ingest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -177,8 +178,12 @@ public class TraceBatchIngestDifferentialTest {
 		return String.valueOf(outcome);
 	}
 
-	/** Runs {@code preload} through the single path on both stores, then {@code elements} each way, and compares. */
-	private void assertSameResult(List<String> preload, List<String> elements) {
+	/**
+	 * Runs {@code preload} through the single path on both stores, then {@code elements} each way, and compares.
+	 *
+	 * @return the outcomes of the batch path, equal to those of the one-by-one path
+	 */
+	private List<Object> assertSameResult(List<String> preload, List<String> elements) {
 		remember(preload);
 		remember(elements);
 		for (String json : preload) {
@@ -200,6 +205,30 @@ public class TraceBatchIngestDifferentialTest {
 			assertTrue(ingestBatchCalls() >= 1, "the batch path must have written the new records");
 		}
 		assertSameStore();
+		return actual;
+	}
+
+	/** The stored {@code chain_link_failure} of {@code json}'s record, after checking both stores agree. */
+	private boolean storedChainLinkFailure(String json) {
+		String recordId;
+		try {
+			recordId = MAPPER.readTree(json).path("record_id").asText();
+		} catch (Exception ex) {
+			throw new IllegalStateException(ex);
+		}
+		boolean expected = sequential.traceStore().findRecord(new RecordIdentity(sequentialDomain, PRODUCER, recordId))
+				.orElseThrow(AssertionError::new).getFlags().isChainLinkFailure();
+		boolean actual = batch.traceStore().findRecord(new RecordIdentity(batchDomain, PRODUCER, recordId))
+				.orElseThrow(AssertionError::new).getFlags().isChainLinkFailure();
+		assertEquals(expected, actual, "both paths store the same chain_link_failure");
+		return actual;
+	}
+
+	private static AcceptanceResult replayOf(Object outcome) {
+		assertTrue(outcome instanceof AcceptanceResult, () -> "expected a replay, got " + describe(outcome));
+		AcceptanceResult result = (AcceptanceResult) outcome;
+		assertTrue(result.isIdempotentReplay());
+		return result;
 	}
 
 	/** Record ids of every element, so the stores can be read through the {@code TraceStore} API alone. */
@@ -359,6 +388,51 @@ public class TraceBatchIngestDifferentialTest {
 		List<String> c = chain(CHAIN_1, 3);
 		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
 		assertSameResult(List.of(c.get(0), c.get(1)), List.of(fork, c.get(2)));
+	}
+
+	@Test
+	void forkNextToMatchingPredecessorLeavesStoredSuccessorLinked() {
+		List<String> c = chain(CHAIN_1, 3);
+		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
+		List<Object> outcomes = assertSameResult(List.of(c.get(0), c.get(1), c.get(2)), List.of(fork, c.get(2)));
+		assertFalse(storedChainLinkFailure(c.get(2)), "the stored predecessor still matches");
+		assertFalse(replayOf(outcomes.get(1)).isChainLinkFailureFlag());
+	}
+
+	@Test
+	void matchingPredecessorBeforeForkLeavesStoredSuccessorLinked() {
+		List<String> c = chain(CHAIN_1, 3);
+		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
+		List<Object> outcomes = assertSameResult(List.of(c.get(0), c.get(2)), List.of(c.get(1), fork, c.get(2)));
+		assertFalse(storedChainLinkFailure(c.get(2)));
+		assertFalse(replayOf(outcomes.get(2)).isChainLinkFailureFlag());
+	}
+
+	@Test
+	void forkBeforeMatchingPredecessorBreaksStoredSuccessor() {
+		List<String> c = chain(CHAIN_1, 3);
+		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
+		List<Object> outcomes = assertSameResult(List.of(c.get(0), c.get(2)), List.of(fork, c.get(1), c.get(2)));
+		assertTrue(storedChainLinkFailure(c.get(2)), "only the fork was there when the gap closed; the flag never clears");
+		assertTrue(replayOf(outcomes.get(2)).isChainLinkFailureFlag());
+	}
+
+	@Test
+	void successorEarlierInBatchThenForkThenMatchingPredecessor() {
+		List<String> c = chain(CHAIN_1, 3);
+		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
+		List<Object> outcomes = assertSameResult(List.of(c.get(0)), List.of(c.get(2), fork, c.get(1), c.get(2)));
+		assertTrue(storedChainLinkFailure(c.get(2)));
+		assertTrue(replayOf(outcomes.get(3)).isChainLinkFailureFlag());
+	}
+
+	@Test
+	void successorEarlierInBatchThenMatchingPredecessorThenFork() {
+		List<String> c = chain(CHAIN_1, 3);
+		String fork = record(CHAIN_1, 2, digestOf(c.get(0)));
+		List<Object> outcomes = assertSameResult(List.of(c.get(0)), List.of(c.get(2), c.get(1), fork, c.get(2)));
+		assertFalse(storedChainLinkFailure(c.get(2)));
+		assertFalse(replayOf(outcomes.get(3)).isChainLinkFailureFlag());
 	}
 
 	@Test
