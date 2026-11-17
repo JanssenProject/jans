@@ -1980,10 +1980,10 @@ mod tests {
         use crate::http::HttpClientError;
         use crate::http::{RetryableFailure, SendError};
 
-        // Port 1 is never listening, so the request fails before any response.
-        let transport = reqwest::get("http://127.0.0.1:1/store")
+        let closed = crate::http::test_support::ClosedPort::new();
+        let transport = reqwest::get(closed.url("/store"))
             .await
-            .expect_err("nothing listens on port 1");
+            .expect_err("the port refuses connections");
         let err = HttpClientError::Send(SendError::RetriesExhausted {
             retries: 3,
             last: RetryableFailure::Transport(transport),

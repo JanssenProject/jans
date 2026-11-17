@@ -530,19 +530,12 @@ mod test {
         mock_result.assert();
     }
 
-    /// A loopback port nothing listens on: binding and dropping a listener frees it.
-    fn closed_port_url() -> String {
-        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind a free port");
-        let addr = listener.local_addr().expect("local addr");
-        drop(listener);
-        format!("http://{addr}/")
-    }
-
     #[tokio::test]
     async fn connection_failure_is_retried_until_exhausted() {
+        let closed = super::test_support::ClosedPort::new();
         let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
         let err = client
-            .get(&closed_port_url())
+            .get(&closed.url("/"))
             .await
             .expect_err("nothing listens on the port");
 

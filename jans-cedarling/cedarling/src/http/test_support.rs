@@ -48,3 +48,33 @@ impl Response {
         serde_json::from_slice::<'a, T>(&self.body)
     }
 }
+
+/// A loopback port that refuses every connection for as long as it lives: bound
+/// but never listening. Binding and dropping a listener instead would free the
+/// port for the next test that binds `:0`, which then answers in its place.
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) struct ClosedPort {
+    /// Held only to keep the port reserved.
+    _socket: tokio::net::TcpSocket,
+    addr: std::net::SocketAddr,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl ClosedPort {
+    pub(crate) fn new() -> Self {
+        let socket = tokio::net::TcpSocket::new_v4().expect("a TCP socket can be created");
+        socket
+            .bind("127.0.0.1:0".parse().expect("a valid address"))
+            .expect("a free loopback port can be bound");
+        let addr = socket.local_addr().expect("a bound socket has an address");
+        Self {
+            _socket: socket,
+            addr,
+        }
+    }
+
+    /// `http://127.0.0.1:<port>` followed by `path`.
+    pub(crate) fn url(&self, path: &str) -> String {
+        format!("http://{}{path}", self.addr)
+    }
+}

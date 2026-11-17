@@ -335,17 +335,22 @@ mod tests {
 
     #[tokio::test]
     async fn connection_failure_is_retried_until_exhausted() {
-        // Binding and dropping a listener leaves a loopback port nothing listens on.
-        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("bind a free port");
-        let addr = listener.local_addr().expect("local addr");
-        drop(listener);
+        let closed = crate::http::test_support::ClosedPort::new();
         let log = memory_log();
-        let mut worker = rest_worker(&format!("http://{addr}/audit/log/bulk"), &log);
+        let mut worker = rest_worker(&closed.url("/audit/log/bulk"), &log);
         worker.buffer.push_back(sample_log_item());
 
         worker.flush(None).await;
 
-        assert_exhausted(&log.pop_logs());
+        let logs = log.pop_logs();
+        assert_exhausted(&logs);
+        assert!(
+            messages(&logs, "ERROR")
+                .iter()
+                .all(|error| error.contains("error sending request")),
+            "every attempt must fail on the connection, not on an answer: {:?}",
+            messages(&logs, "ERROR")
+        );
     }
 
     /// One ERROR per attempt, then the batch is dropped with a WARN.
