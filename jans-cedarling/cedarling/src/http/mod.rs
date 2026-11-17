@@ -387,7 +387,7 @@ pub(crate) enum HeadOutcome {
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
     use crate::http::cache_headers::CacheHeadersState;
-    use crate::http::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
+    use crate::http::{AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError};
     use crate::http::{HttpClient, HttpClientConfig, HttpClientError};
 
     use mockito::Server;
@@ -662,19 +662,17 @@ mod test {
             .await
             .expect_err("a URL without a scheme cannot be requested");
         let message = err.to_string();
-        let cause = std::error::Error::source(&err).map(ToString::to_string);
+        assert!(
+            message.contains("relative URL without a base"),
+            "the message carries the cause: {message}"
+        );
 
         let public = crate::HttpRequestError::from(err);
 
         assert_eq!(
             public.to_string(),
             message,
-            "the public error shows the same message"
-        );
-        assert_eq!(
-            std::error::Error::source(&public).map(ToString::to_string),
-            cause,
-            "the public error keeps the same cause"
+            "the public error shows the same message, cause included"
         );
         assert!(
             matches!(
@@ -717,6 +715,43 @@ mod test {
         let err = client.get(&url).await.expect_err("a 404 must fail");
 
         mock.assert_async().await;
+        assert_redacted(&err.to_string(), &format!("{}/store", server.url()));
+    }
+
+    #[tokio::test]
+    async fn body_read_error_names_the_redacted_url() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_query(mockito::Matcher::Any)
+            .with_status(200)
+            .with_body(vec![0u8; 4096])
+            .expect(1)
+            .create_async()
+            .await;
+        let client = HttpClient::new(HttpClientConfig {
+            max_response_size_bytes: Some(1024),
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+        let url = format!("{}/store?sig=abc#token-in-fragment", server.url());
+
+        let err = client
+            .get_bytes(&url)
+            .await
+            .expect_err("a body over the cap must fail");
+
+        mock.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                HttpClientError::ReadBody {
+                    error: ReadBodyError::TooLarge { .. },
+                    ..
+                }
+            ),
+            "expected a TooLarge read error, got {err:?}"
+        );
         assert_redacted(&err.to_string(), &format!("{}/store", server.url()));
     }
 

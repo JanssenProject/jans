@@ -5,6 +5,7 @@
 
 //! How a failed HTTP attempt is sorted, and the errors of the HTTP client.
 
+use std::borrow::Cow;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 
@@ -14,19 +15,54 @@ use thiserror::Error;
 use crate::common::retry::{Attempt, RetryError};
 
 /// Shows an error with its causes: `reqwest`'s own message leaves them out, so an
-/// invalid URL would read only "builder error".
+/// invalid URL would read only "builder error". Every URL in it is redacted: in
+/// the browser, the cause can be fetch's own message quoting the requested URL.
 pub(super) struct ErrorChain<'a>(&'a (dyn StdError + 'static));
 
 impl Display for ErrorChain<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)?;
+        write!(f, "{}", redact_urls(&self.0.to_string()))?;
         let mut source = self.0.source();
         while let Some(err) = source {
-            write!(f, ": {err}")?;
+            write!(f, ": {}", redact_urls(&err.to_string()))?;
             source = err.source();
         }
         Ok(())
     }
+}
+
+/// `text` with each URL that carries userinfo, a query or a fragment redacted.
+fn redact_urls(text: &str) -> String {
+    text.split_inclusive(char::is_whitespace)
+        .map(|word| {
+            let Some(scheme_end) = word.find("://") else {
+                return Cow::Borrowed(word);
+            };
+            let start = word[..scheme_end]
+                .rfind(|c: char| !(c.is_ascii_alphanumeric() || "+-.".contains(c)))
+                .map_or(0, |i| i + 1);
+            let end = word
+                .trim_end()
+                .trim_end_matches(['\'', '"', ')', ',', ';'])
+                .len();
+            match word.get(start..end).map(Url::parse) {
+                Some(Ok(url))
+                    if url.password().is_some()
+                        || !url.username().is_empty()
+                        || url.query().is_some()
+                        || url.fragment().is_some() =>
+                {
+                    Cow::Owned(format!(
+                        "{}{}{}",
+                        &word[..start],
+                        RedactedUrl::new(&url),
+                        &word[end..]
+                    ))
+                },
+                _ => Cow::Borrowed(word),
+            }
+        })
+        .collect()
 }
 
 /// A URL as an error message shows it: without userinfo, query or fragment, which
@@ -190,9 +226,10 @@ pub(crate) enum HttpClientError {
     /// A request sent once: a `POST`, or a probe that falls back on failure.
     #[error(transparent)]
     Attempt(#[from] AttemptFailure),
-    #[error("failed to read the HTTP {status} response body: {error}")]
+    #[error("failed to read the HTTP {status} response body from {url}: {error}")]
     ReadBody {
         status: StatusCode,
+        url: Box<RedactedUrl>,
         error: ReadBodyError,
     },
     #[error("failed to deserialize the HTTP {status} response body as JSON: {error}")]
@@ -265,4 +302,50 @@ pub(crate) fn attempt(
         },
         Err(AttemptFailure::Final(failure)) => Attempt::Final(failure),
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io;
+
+    use super::*;
+
+    #[test]
+    fn error_chain_redacts_urls_in_causes() {
+        // The cause reqwest keeps when the browser refuses to build a request.
+        let cause = io::Error::other(
+            "JsValue(TypeError: Failed to construct 'Request': Request cannot be \
+             constructed from a URL that includes credentials: \
+             https://alice:hunter2@lock.example.org/store.cjar?sig=abc#frag)",
+        );
+        let err = io::Error::other(InvalidUrl(cause));
+
+        let message = ErrorChain(&err).to_string();
+
+        for secret in ["alice", "hunter2", "sig=abc", "frag"] {
+            assert!(
+                !message.contains(secret),
+                "the error must not show `{secret}`: {message}"
+            );
+        }
+        assert!(
+            message.contains("https://lock.example.org/store.cjar)"),
+            "the error must still name where the request went: {message}"
+        );
+    }
+
+    #[test]
+    fn error_chain_keeps_urls_without_secrets() {
+        let err = io::Error::other("error sending request for url (http://127.0.0.1:1/x)");
+
+        assert_eq!(
+            ErrorChain(&err).to_string(),
+            "error sending request for url (http://127.0.0.1:1/x)",
+            "a URL with nothing to redact is shown as is"
+        );
+    }
+
+    #[derive(Debug, Error)]
+    #[error("builder error")]
+    struct InvalidUrl(#[source] io::Error);
 }

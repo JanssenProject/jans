@@ -7,7 +7,7 @@
 
 use bytes::Bytes;
 
-use super::failure::{HttpClientError, ReadBodyError, redacted};
+use super::failure::{HttpClientError, ReadBodyError, RedactedUrl, redacted};
 
 /// Reads a response body capped at `max_response_size` and deserializes it as JSON.
 pub(crate) async fn read_json<T>(
@@ -29,9 +29,11 @@ pub(crate) async fn read_body(
     max_response_size: Option<u64>,
 ) -> Result<Vec<u8>, HttpClientError> {
     let status = response.status();
+    // Taken before the body consumes the response, so the error names it.
+    let url = Box::new(RedactedUrl::new(response.url()));
     read_response_capped(response, max_response_size)
         .await
-        .map_err(|error| HttpClientError::ReadBody { status, error })
+        .map_err(|error| HttpClientError::ReadBody { status, url, error })
 }
 
 /// Reads a response body into memory, aborting with `TooLarge` when
@@ -187,6 +189,7 @@ mod tests {
                 HttpClientError::ReadBody {
                     status: StatusCode::OK,
                     error: ReadBodyError::Read(_),
+                    ..
                 }
             ),
             "a truncated body must be a ReadBody read error keeping the 200 status, got {err:?}",
