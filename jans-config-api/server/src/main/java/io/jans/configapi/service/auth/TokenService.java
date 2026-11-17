@@ -16,7 +16,6 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.util.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,9 +35,6 @@ public class TokenService {
 
     @Inject
     StaticConfiguration staticConfiguration;
-
-    @Inject
-    TokenStatusListService tokenStatusListService;
 
     public String getDnForTokenEntity(String tknCde) {
         String orgDn = organizationService.getDnForOrganization();
@@ -151,13 +147,6 @@ public class TokenService {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);
         }
 
-        // removal is the primary revocation, so it must not wait on the status list
-        boolean statusInvalidated = tokenStatusListService.invalidate(tokenEntity);
-        logger.debug("Token:{} invalidate status:{}", escapeLog(tknCde), statusInvalidated);
-        if (!statusInvalidated) {
-            throw new InternalServerErrorException(
-                    "Token removed but its status list entry could not be invalidated - " + tknCde);
-        }
         persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
     }
 
