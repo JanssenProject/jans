@@ -7,7 +7,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use chrono::Utc;
-use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
@@ -15,6 +14,7 @@ use super::health_registry::HealthRegistry;
 use super::transport::mapping::LockServerHealthEntry;
 use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
+use crate::async_sleep::Ticker;
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
 use crate::lock::health_registry::{HealthStatus, SystemHealth};
@@ -59,12 +59,10 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
     }
 
     async fn run(self, cancel_tkn: CancellationToken) {
-        let mut ticker = interval(self.interval);
-        ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        ticker.tick().await;
+        let mut ticker = Ticker::new(self.interval);
         loop {
             tokio::select! {
-                _ = ticker.tick() => {
+                () = ticker.tick() => {
                     self.send_health().await;
                 }
                 () = cancel_tkn.cancelled() => {

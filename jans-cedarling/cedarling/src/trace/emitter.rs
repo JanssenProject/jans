@@ -33,6 +33,7 @@ use super::ProducerId;
 use super::chain::{AppendError, ProducerChain};
 use super::record::RecordDraft;
 use super::status::EmitterEvent;
+use crate::async_sleep::sleep;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
@@ -418,7 +419,7 @@ impl Emitter {
             ),
         );
         tokio::select! {
-            () = tokio::time::sleep(delay) => {},
+            () = sleep(delay) => {},
             () = cancel.cancelled() => {},
         }
     }
@@ -1013,7 +1014,7 @@ impl Emitter {
     async fn pause(&self, mode: Mode<'_>) {
         if let Mode::Running(cancel) = mode {
             tokio::select! {
-                () = tokio::time::sleep(WORKER_HTTP_RETRY_DUR) => {},
+                () = sleep(WORKER_HTTP_RETRY_DUR) => {},
                 () = cancel.cancelled() => {},
             }
         }
@@ -1060,6 +1061,10 @@ async fn sign_batch_offloaded(
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
 ) -> Result<SignedBatch, SignTaskPanicked> {
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "TRACE is rejected on WASM before it starts"
+    )]
     tokio::task::spawn_blocking(move || {
         let results = drafts
             .iter()

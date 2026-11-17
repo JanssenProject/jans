@@ -20,6 +20,10 @@ where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "native branch of the cross-platform wrapper"
+    )]
     let handle = tokio::spawn(future);
     JoinHandle { handle }
 }

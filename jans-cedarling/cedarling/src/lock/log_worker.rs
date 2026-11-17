@@ -8,6 +8,7 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
+use crate::async_sleep::Ticker;
 use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
 
@@ -18,7 +19,6 @@ use std::collections::VecDeque;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
-use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 
 /// Responsible for sending logs to the lock server
@@ -61,9 +61,7 @@ where
         mut rx: mpsc::Receiver<AuditItem>,
         cancel_tkn: CancellationToken,
     ) {
-        let mut flush_tick = interval(self.audit_interval);
-        flush_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        flush_tick.tick().await;
+        let mut flush_tick = Ticker::new(self.audit_interval);
 
         loop {
             tokio::select! {
@@ -82,7 +80,7 @@ where
                 },
 
                 // Send logs to the server
-                _ = flush_tick.tick() => {
+                () = flush_tick.tick() => {
                     self.flush(Some(&cancel_tkn)).await;
                 },
 
