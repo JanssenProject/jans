@@ -3867,10 +3867,6 @@
             {
               "inum": "1800.03.1",
               "name": "https://jans.io/oauth/config/read-all"
-            },
-            {
-              "inum": "1800.03.2",
-              "name": "https://jans.io/oauth/config/write-all"
             }
           ]
         }

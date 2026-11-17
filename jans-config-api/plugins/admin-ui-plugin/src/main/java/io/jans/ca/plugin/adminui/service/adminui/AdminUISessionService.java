@@ -101,6 +101,18 @@ public class AdminUISessionService {
     }
 
     /**
+     * Removes the Admin UI session identified by the given session ID.
+     *
+     * @param sessionId the Admin UI session identifier
+     */
+    public void removeSession(String sessionId) {
+        AdminUISession session = getSession(sessionId);
+        if (session != null) {
+            persistenceEntryManager.remove(session);
+        }
+    }
+
+    /**
      * Updates the expiration time of an Admin UI session based on user activity.
      * <p>
      * After a successful login, an {@link AdminUISession} is persisted in the database

@@ -378,7 +378,8 @@ public class ClientsResource extends ConfigBaseResource {
         existingClient.setRegistrationAccessToken(registrationAccessToken);
 
         // ClientSecret encryption check
-        boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET);
+        boolean isClientSecretPresent = Jackson.isFieldPresent(jsonPatchString, CLIENT_SECRET)
+                || StringUtils.isNotBlank(existingClient.getClientSecret());
         logger.debug(" isFieldPresent - CLIENT_SECRET - isClientSecretPresent:{}", isClientSecretPresent);
 
         if (!isClientSecretPresent) {

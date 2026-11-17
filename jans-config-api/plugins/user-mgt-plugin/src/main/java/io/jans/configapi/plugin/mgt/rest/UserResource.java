@@ -70,7 +70,7 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
-    private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
+    private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_-]*$");
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };

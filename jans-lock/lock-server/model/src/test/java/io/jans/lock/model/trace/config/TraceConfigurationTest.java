@@ -153,6 +153,30 @@ class TraceConfigurationTest {
     }
 
     @Test
+    void testRangeAllocation_deserializeDefaultsAndFallbacks() throws Exception {
+        TraceConfiguration defaults = new TraceConfiguration();
+        assertEquals(32, defaults.getRangeAllocationRetryLimit());
+        assertEquals(5, defaults.getRangeAllocationBackoffMs());
+        assertEquals(250, defaults.getRangeAllocationMaxBackoffMs());
+
+        TraceConfiguration configured = mapper.readValue("{\"receiptAllocationRetryLimit\": 3,"
+                + " \"rangeAllocationRetryLimit\": 12, \"rangeAllocationBackoffMs\": 0,"
+                + " \"rangeAllocationMaxBackoffMs\": 40}", TraceConfiguration.class);
+        assertEquals(3, configured.getReceiptAllocationRetryLimit());
+        assertEquals(12, configured.getRangeAllocationRetryLimit());
+        assertEquals(0, configured.getRangeAllocationBackoffMs(), "0 disables the backoff");
+        assertEquals(40, configured.getRangeAllocationMaxBackoffMs());
+
+        configured.setRangeAllocationRetryLimit(-1);
+        configured.setRangeAllocationBackoffMs(-1);
+        configured.setRangeAllocationMaxBackoffMs(0);
+        assertEquals(TraceConfiguration.DEFAULT_RANGE_ALLOCATION_RETRY_LIMIT, configured.getRangeAllocationRetryLimit());
+        assertEquals(TraceConfiguration.DEFAULT_RANGE_ALLOCATION_BACKOFF_MS, configured.getRangeAllocationBackoffMs());
+        assertEquals(TraceConfiguration.DEFAULT_RANGE_ALLOCATION_MAX_BACKOFF_MS, configured.getRangeAllocationMaxBackoffMs());
+        assertEquals(3, configured.getReceiptAllocationRetryLimit());
+    }
+
+    @Test
     void testGetMaxBulkRequestBytes_configuredAboveCeiling_clampsToHardMax() {
         TraceConfiguration traceConfiguration = new TraceConfiguration();
         traceConfiguration.setMaxBulkRequestBytes(TraceConfiguration.HARD_MAX_BULK_REQUEST_BYTES + 1_000_000);
