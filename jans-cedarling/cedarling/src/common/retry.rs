@@ -65,13 +65,31 @@ pub(crate) enum Attempt<T, R, F> {
     Final(F),
 }
 
-/// Why [`retry`] gave up: a `RetriesExhausted` holds only a failure worth repeating.
+/// Why [`retry`] or [`retry_until_cancelled`] gave up: a `RetriesExhausted` holds
+/// only a failure worth repeating. `Cancelled` holds why a wait was cut short;
+/// [`retry`] never cuts one, so its `C` is [`Infallible`]: a `match` by value omits the
+/// arm, one by reference ends it with `match *never {}`.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum RetryError<R, F> {
+pub(crate) enum RetryError<R, F, C = Infallible> {
     #[error(transparent)]
     Final(F),
     #[error("{last} (gave up after {retries} retries)")]
     RetriesExhausted { retries: u32, last: R },
+    #[error("cancelled while waiting to retry")]
+    Cancelled(C),
+}
+
+impl<R, F> RetryError<R, F> {
+    /// The same failure, typed as one of [`retry_until_cancelled`], so a caller that
+    /// uses both can handle them in one `match`.
+    pub(crate) fn cancellable<C>(self) -> RetryError<R, F, C> {
+        match self {
+            Self::Final(error) => RetryError::Final(error),
+            Self::RetriesExhausted { retries, last } => {
+                RetryError::RetriesExhausted { retries, last }
+            },
+        }
+    }
 }
 
 /// Runs `attempt` until it is done or final, or until `policy.max_retries` retries
@@ -85,39 +103,16 @@ where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
 {
-    let Ok(result) = repeat(policy, attempt, |delay| async move {
+    repeat(policy, attempt, |delay| async move {
         sleep(delay).await;
-        Ok::<(), Infallible>(())
+        Ok(())
     })
-    .await;
-    result
+    .await
 }
 
-/// Why [`retry_until_cancelled`] gave up: [`RetryError`], or the caller stopped
-/// waiting for the next retry.
-#[derive(Debug, thiserror::Error)]
-pub(crate) enum RetryUntilCancelledError<R, F> {
-    #[error(transparent)]
-    Final(F),
-    #[error("{last} (gave up after {retries} retries)")]
-    RetriesExhausted { retries: u32, last: R },
-    #[error("cancelled while waiting to retry")]
-    Cancelled,
-}
-
-impl<R, F> From<RetryError<R, F>> for RetryUntilCancelledError<R, F> {
-    fn from(error: RetryError<R, F>) -> Self {
-        match error {
-            RetryError::Final(error) => Self::Final(error),
-            RetryError::RetriesExhausted { retries, last } => {
-                Self::RetriesExhausted { retries, last }
-            },
-        }
-    }
-}
-
-/// The wait of [`retry_until_cancelled`] was cut short.
-struct Cancelled;
+/// The caller stopped waiting for the next retry.
+#[derive(Debug)]
+pub(crate) struct Cancelled;
 
 /// [`retry`], giving up when `cancel` fires during a wait. An attempt already
 /// sent is let finish, so a request in flight is never cut off.
@@ -125,12 +120,12 @@ pub(crate) async fn retry_until_cancelled<T, R, F, Op, Fut>(
     policy: RetryPolicy,
     cancel: &CancellationToken,
     attempt: Op,
-) -> Result<T, RetryUntilCancelledError<R, F>>
+) -> Result<T, RetryError<R, F, Cancelled>>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
 {
-    let waited = repeat(policy, attempt, |delay| async move {
+    repeat(policy, attempt, |delay| async move {
         // Cancellation wins a tie, so no attempt starts after it.
         tokio::select! {
             biased;
@@ -138,46 +133,42 @@ where
             () = sleep(delay) => Ok(()),
         }
     })
-    .await;
-    match waited {
-        Ok(result) => result.map_err(Into::into),
-        Err(Cancelled) => Err(RetryUntilCancelledError::Cancelled),
-    }
+    .await
 }
 
 /// The loop of [`retry`] and [`retry_until_cancelled`], which differ only in how
 /// they wait.
-async fn repeat<T, R, F, E, Op, Fut, Wait, WaitFut>(
+async fn repeat<T, R, F, C, Op, Fut, Wait, WaitFut>(
     policy: RetryPolicy,
     mut attempt: Op,
     mut wait: Wait,
-) -> Result<Result<T, RetryError<R, F>>, E>
+) -> Result<T, RetryError<R, F, C>>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
     Wait: FnMut(Duration) -> WaitFut,
-    WaitFut: Future<Output = Result<(), E>>,
+    WaitFut: Future<Output = Result<(), C>>,
 {
     let mut retries = 0;
     loop {
         match attempt().await {
-            Attempt::Done(value) => return Ok(Ok(value)),
-            Attempt::Final(error) => return Ok(Err(RetryError::Final(error))),
+            Attempt::Done(value) => return Ok(value),
+            Attempt::Final(error) => return Err(RetryError::Final(error)),
             Attempt::Retryable {
                 error,
                 wait_at_least,
             } => {
                 if retries == policy.max_retries {
-                    return Ok(Err(RetryError::RetriesExhausted {
+                    return Err(RetryError::RetriesExhausted {
                         retries,
                         last: error,
-                    }));
+                    });
                 }
                 let delay = policy
                     .backoff
                     .delay(retries)
                     .max(wait_at_least.unwrap_or_default());
-                wait(delay).await?;
+                wait(delay).await.map_err(RetryError::Cancelled)?;
                 retries += 1;
             },
         }
@@ -325,7 +316,7 @@ mod tests {
             max_retries: 3,
         };
         let started = Instant::now();
-        let result: Result<(), RetryUntilCancelledError<(), ()>> =
+        let result: Result<(), RetryError<(), (), Cancelled>> =
             retry_until_cancelled(long_wait, &cancel, || async {
                 attempts.fetch_add(1, Ordering::SeqCst);
                 // Cancelled while this attempt is in flight: it still completes.
@@ -339,7 +330,7 @@ mod tests {
             .await;
 
         assert!(
-            matches!(result, Err(RetryUntilCancelledError::Cancelled)),
+            matches!(result, Err(RetryError::Cancelled(Cancelled))),
             "cancelled during the wait, got {result:?}"
         );
         assert_eq!(

@@ -38,7 +38,7 @@ use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
 use crate::common::retry::{
-    Attempt, Backoff, RetryPolicy, RetryUntilCancelledError, retry, retry_until_cancelled,
+    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
 };
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
@@ -692,13 +692,13 @@ impl Emitter {
                     backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
                     max_retries: 0,
                 };
-                retry(once, attempt).await.map_err(Into::into)
+                retry(once, attempt).await.map_err(RetryError::cancellable)
             },
         };
 
         match result {
             Ok(results) => Sent::Results(results),
-            Err(RetryUntilCancelledError::Final(err)) => {
+            Err(RetryError::Final(err)) => {
                 let fix = err.refusal().map_or_else(String::new, |refusal| {
                     format!("; {}", self.refusal_fix(refusal))
                 });
@@ -715,7 +715,7 @@ impl Emitter {
                 self.count(event, records);
                 Sent::Lost { retry_after: None }
             },
-            Err(RetryUntilCancelledError::RetriesExhausted { last, .. }) => {
+            Err(RetryError::RetriesExhausted { last, .. }) => {
                 let reason = match mode {
                     Mode::Running(_) => "retries exhausted",
                     Mode::Stopping => "Cedarling is shutting down",
@@ -732,7 +732,7 @@ impl Emitter {
                 };
                 Sent::Lost { retry_after }
             },
-            Err(RetryUntilCancelledError::Cancelled) => Sent::Interrupted,
+            Err(RetryError::Cancelled(Cancelled)) => Sent::Interrupted,
         }
     }
 

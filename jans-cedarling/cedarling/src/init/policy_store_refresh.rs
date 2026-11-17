@@ -900,6 +900,7 @@ fn classify_fetch_error(e: &crate::http::HttpClientError) -> Classified {
             ..
         }
         | HttpClientError::DeserializeJson { .. } => HTTP,
+        HttpClientError::Send(SendError::Cancelled(never)) => match *never {},
     }
 }
 
