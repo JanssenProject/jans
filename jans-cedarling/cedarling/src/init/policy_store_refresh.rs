@@ -1951,11 +1951,11 @@ mod tests {
 
         let final_status = || FinalFailure::Status {
             status: StatusCode::NOT_FOUND,
-            url: Box::new(store_url()),
+            url: Box::new(crate::http::RedactedUrl::new(&store_url())),
         };
         let retryable_status = || RetryableFailure::Status {
             status: StatusCode::SERVICE_UNAVAILABLE,
-            url: Box::new(store_url()),
+            url: Box::new(crate::http::RedactedUrl::new(&store_url())),
         };
         let cases = [
             HttpClientError::Send(SendError::Final(final_status())),

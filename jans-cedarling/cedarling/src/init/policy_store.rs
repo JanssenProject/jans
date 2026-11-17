@@ -57,11 +57,9 @@ pub enum PolicyStoreLoadError {
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_saphyr::Error),
     /// Failed to fetch the policy store from a URL, the Lock Server's or any other.
-    #[error("failed to fetch the policy store from '{url}': {error}")]
-    Fetch {
-        url: String,
-        error: HttpRequestError,
-    },
+    /// The HTTP error names the URL, without its credentials.
+    #[error("failed to fetch the policy store: {0}")]
+    Fetch(HttpRequestError),
     /// Invalid structure in the policy store.
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
@@ -297,10 +295,7 @@ async fn load_policy_store_from_uri(
     verifier: Option<&ArchiveVerifier>,
     options: LoadOptions,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let fetch_err = |error: HttpClientError| PolicyStoreLoadError::Fetch {
-        url: uri.to_string(),
-        error: error.into(),
-    };
+    let fetch_err = |error: HttpClientError| PolicyStoreLoadError::Fetch(error.into());
     let response = http_client.get_with_retry(uri).await.map_err(fetch_err)?;
 
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
@@ -862,8 +857,7 @@ mod test {
         assert!(
             matches!(
                 &err,
-                PolicyStoreLoadError::Fetch { url, error } if *url == uri
-                    && matches!(
+                PolicyStoreLoadError::Fetch(error) if matches!(
                         error.kind(),
                         HttpClientError::Send(SendError::Final(FinalFailure::Status {
                             status: reqwest::StatusCode::NOT_FOUND,
@@ -875,8 +869,8 @@ mod test {
         );
         let message = err.to_string();
         assert!(
-            message.contains(&uri) && message.contains("404 Not Found"),
-            "the message must name the URL and the status, got: {message}"
+            message.matches(uri.as_str()).count() == 1 && message.contains("404 Not Found"),
+            "the message must name the URL once and the status, got: {message}"
         );
         mock_endpoint.assert();
     }

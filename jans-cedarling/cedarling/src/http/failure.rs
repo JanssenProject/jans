@@ -29,6 +29,41 @@ impl Display for ErrorChain<'_> {
     }
 }
 
+/// A URL as an error message shows it: without userinfo, query or fragment, which
+/// can carry credentials (a token, a presigned URL's signature).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct RedactedUrl(Url);
+
+impl RedactedUrl {
+    pub(crate) fn new(url: &Url) -> Self {
+        let mut url = url.clone();
+        redact(&mut url);
+        Self(url)
+    }
+}
+
+impl Display for RedactedUrl {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Display::fmt(&self.0, f)
+    }
+}
+
+fn redact(url: &mut Url) {
+    // Both fail only for a URL without a host, which has no userinfo to remove.
+    url.set_username("").ok();
+    url.set_password(None).ok();
+    url.set_query(None);
+    url.set_fragment(None);
+}
+
+/// `err` with its URL redacted, since `reqwest` prints the URL in its message.
+pub(super) fn redacted(mut err: reqwest::Error) -> reqwest::Error {
+    if let Some(url) = err.url_mut() {
+        redact(url);
+    }
+    err
+}
+
 /// One attempt that got no usable response, sorted once by whether repeating can help.
 #[derive(Debug, Error)]
 pub(crate) enum AttemptFailure {
@@ -46,7 +81,10 @@ pub(crate) enum RetryableFailure {
     Transport(reqwest::Error),
     /// `408`, `429` or `5xx`.
     #[error("HTTP {status} from {url}")]
-    Status { status: StatusCode, url: Box<Url> },
+    Status {
+        status: StatusCode,
+        url: Box<RedactedUrl>,
+    },
 }
 
 /// A failure the same request repeats on every attempt.
@@ -57,7 +95,10 @@ pub(crate) enum FinalFailure {
     InvalidRequest(reqwest::Error),
     /// Any `4xx` other than `408` and `429`.
     #[error("HTTP {status} from {url}")]
-    Status { status: StatusCode, url: Box<Url> },
+    Status {
+        status: StatusCode,
+        url: Box<RedactedUrl>,
+    },
 }
 
 impl AttemptFailure {
@@ -73,6 +114,7 @@ impl AttemptFailure {
     }
 
     pub(crate) fn from_send_error(err: reqwest::Error) -> Self {
+        let err = redacted(err);
         if err.is_builder() || err.is_redirect() {
             Self::Final(FinalFailure::InvalidRequest(err))
         } else {
@@ -84,14 +126,18 @@ impl AttemptFailure {
     /// as often as from the server: both ask to repeat the request later.
     pub(crate) fn from_response(response: &reqwest::Response) -> Option<Self> {
         let status = response.status();
-        let url = Box::new(response.url().clone());
+        // Built only for a failure: a successful response needs no URL.
+        let url = || Box::new(RedactedUrl::new(response.url()));
         if status.is_server_error()
             || status == StatusCode::TOO_MANY_REQUESTS
             || status == StatusCode::REQUEST_TIMEOUT
         {
-            Some(Self::Retryable(RetryableFailure::Status { status, url }))
+            Some(Self::Retryable(RetryableFailure::Status {
+                status,
+                url: url(),
+            }))
         } else if status.is_client_error() {
-            Some(Self::Final(FinalFailure::Status { status, url }))
+            Some(Self::Final(FinalFailure::Status { status, url: url() }))
         } else {
             None
         }

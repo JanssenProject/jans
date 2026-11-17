@@ -7,7 +7,7 @@
 
 use bytes::Bytes;
 
-use super::failure::{HttpClientError, ReadBodyError};
+use super::failure::{HttpClientError, ReadBodyError, redacted};
 
 /// Reads a response body capped at `max_response_size` and deserializes it as JSON.
 pub(crate) async fn read_json<T>(
@@ -55,7 +55,11 @@ async fn read_response_capped(
 
     let mut chunks = Chunks::new(response);
     let mut buf: Vec<u8> = Vec::new();
-    while let Some(chunk) = chunks.next().await.map_err(ReadBodyError::Read)? {
+    while let Some(chunk) = chunks
+        .next()
+        .await
+        .map_err(|err| ReadBodyError::Read(redacted(err)))?
+    {
         if let Some(limit) = max_response_size {
             let new_len = (buf.len() as u64).saturating_add(chunk.len() as u64);
             if new_len > limit {

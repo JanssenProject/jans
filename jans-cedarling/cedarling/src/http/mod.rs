@@ -17,6 +17,9 @@ pub(crate) use body::read_body;
 use body::read_json;
 use cache_headers::CacheHeadersState;
 pub use failure::HttpRequestError;
+/// Tests outside `http` build status failures by hand.
+#[cfg(test)]
+pub(crate) use failure::RedactedUrl;
 use failure::attempt;
 pub(crate) use failure::{
     AttemptFailure, FinalFailure, HttpClientError, ReadBodyError, RetryableFailure, SendError,
@@ -680,6 +683,62 @@ mod test {
             ),
             "the crate can still sort the failure, got {public:?}"
         );
+    }
+
+    /// Userinfo, query and fragment can carry credentials, so error messages leave
+    /// them out and keep where the request went.
+    fn assert_redacted(message: &str, kept: &str) {
+        for secret in ["alice", "hunter2", "sig=", "token-in-fragment"] {
+            assert!(
+                !message.contains(secret),
+                "the error must not show `{secret}`: {message}"
+            );
+        }
+        assert!(
+            message.contains(kept),
+            "the error must still name `{kept}`: {message}"
+        );
+    }
+
+    #[tokio::test]
+    async fn status_error_redacts_the_url() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_query(mockito::Matcher::Any)
+            .with_status(404)
+            .expect(1)
+            .create_async()
+            .await;
+        let url = server.url().replacen("http://", "http://alice:hunter2@", 1)
+            + "/store?sig=abc#token-in-fragment";
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
+
+        let err = client.get(&url).await.expect_err("a 404 must fail");
+
+        mock.assert_async().await;
+        assert_redacted(&err.to_string(), &format!("{}/store", server.url()));
+    }
+
+    #[tokio::test]
+    async fn connection_error_redacts_the_url() {
+        let closed = super::test_support::ClosedPort::new();
+        let url = closed
+            .url("/store")
+            .replacen("http://", "http://alice:hunter2@", 1)
+            + "?sig=abc#token-in-fragment";
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+
+        let err = client
+            .get(&url)
+            .await
+            .expect_err("the port refuses connections");
+
+        assert_redacted(&err.to_string(), &closed.url("/store"));
     }
 
     #[tokio::test]
