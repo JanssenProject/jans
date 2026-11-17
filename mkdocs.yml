@@ -64,6 +64,7 @@ markdown_extensions:
     base_path:
       - docs
       - .
+      - ..
     check_paths: true
 
 nav:
