@@ -93,9 +93,31 @@ where
     result
 }
 
-/// The caller stopped waiting for the next retry.
-#[derive(Debug)]
-pub(crate) struct Cancelled;
+/// Why [`retry_until_cancelled`] gave up: [`RetryError`], or the caller stopped
+/// waiting for the next retry.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum RetryUntilCancelledError<R, F> {
+    #[error(transparent)]
+    Final(F),
+    #[error("{last} (gave up after {retries} retries)")]
+    RetriesExhausted { retries: u32, last: R },
+    #[error("cancelled while waiting to retry")]
+    Cancelled,
+}
+
+impl<R, F> From<RetryError<R, F>> for RetryUntilCancelledError<R, F> {
+    fn from(error: RetryError<R, F>) -> Self {
+        match error {
+            RetryError::Final(error) => Self::Final(error),
+            RetryError::RetriesExhausted { retries, last } => {
+                Self::RetriesExhausted { retries, last }
+            },
+        }
+    }
+}
+
+/// The wait of [`retry_until_cancelled`] was cut short.
+struct Cancelled;
 
 /// [`retry`], giving up when `cancel` fires during a wait. An attempt already
 /// sent is let finish, so a request in flight is never cut off.
@@ -103,12 +125,12 @@ pub(crate) async fn retry_until_cancelled<T, R, F, Op, Fut>(
     policy: RetryPolicy,
     cancel: &CancellationToken,
     attempt: Op,
-) -> Result<Result<T, RetryError<R, F>>, Cancelled>
+) -> Result<T, RetryUntilCancelledError<R, F>>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
 {
-    repeat(policy, attempt, |delay| async move {
+    let waited = repeat(policy, attempt, |delay| async move {
         // Cancellation wins a tie, so no attempt starts after it.
         tokio::select! {
             biased;
@@ -116,7 +138,11 @@ where
             () = sleep(delay) => Ok(()),
         }
     })
-    .await
+    .await;
+    match waited {
+        Ok(result) => result.map_err(Into::into),
+        Err(Cancelled) => Err(RetryUntilCancelledError::Cancelled),
+    }
 }
 
 /// The loop of [`retry`] and [`retry_until_cancelled`], which differ only in how
@@ -299,7 +325,7 @@ mod tests {
             max_retries: 3,
         };
         let started = Instant::now();
-        let result: Result<Result<(), RetryError<(), ()>>, Cancelled> =
+        let result: Result<(), RetryUntilCancelledError<(), ()>> =
             retry_until_cancelled(long_wait, &cancel, || async {
                 attempts.fetch_add(1, Ordering::SeqCst);
                 // Cancelled while this attempt is in flight: it still completes.
@@ -313,7 +339,7 @@ mod tests {
             .await;
 
         assert!(
-            matches!(result, Err(Cancelled)),
+            matches!(result, Err(RetryUntilCancelledError::Cancelled)),
             "cancelled during the wait, got {result:?}"
         );
         assert_eq!(

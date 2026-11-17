@@ -38,7 +38,7 @@ use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
 use crate::common::retry::{
-    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+    Attempt, Backoff, RetryPolicy, RetryUntilCancelledError, retry, retry_until_cancelled,
 };
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
@@ -684,10 +684,7 @@ impl Emitter {
                     backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
                     max_retries: self.max_retries,
                 };
-                match retry_until_cancelled(policy, cancel, attempt).await {
-                    Ok(result) => result,
-                    Err(Cancelled) => return Sent::Interrupted,
-                }
+                retry_until_cancelled(policy, cancel, attempt).await
             },
             // Each batch goes once, so stopping while Lock is down is quick.
             Mode::Stopping => {
@@ -695,13 +692,13 @@ impl Emitter {
                     backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
                     max_retries: 0,
                 };
-                retry(once, attempt).await
+                retry(once, attempt).await.map_err(Into::into)
             },
         };
 
         match result {
             Ok(results) => Sent::Results(results),
-            Err(RetryError::Final(err)) => {
+            Err(RetryUntilCancelledError::Final(err)) => {
                 let fix = err.refusal().map_or_else(String::new, |refusal| {
                     format!("; {}", self.refusal_fix(refusal))
                 });
@@ -718,7 +715,7 @@ impl Emitter {
                 self.count(event, records);
                 Sent::Lost { retry_after: None }
             },
-            Err(RetryError::RetriesExhausted { last, .. }) => {
+            Err(RetryUntilCancelledError::RetriesExhausted { last, .. }) => {
                 let reason = match mode {
                     Mode::Running(_) => "retries exhausted",
                     Mode::Stopping => "Cedarling is shutting down",
@@ -735,6 +732,7 @@ impl Emitter {
                 };
                 Sent::Lost { retry_after }
             },
+            Err(RetryUntilCancelledError::Cancelled) => Sent::Interrupted,
         }
     }
 

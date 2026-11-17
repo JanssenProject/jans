@@ -13,7 +13,7 @@ use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
 
 use crate::common::retry::{
-    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+    Attempt, Backoff, RetryPolicy, RetryUntilCancelledError, retry, retry_until_cancelled,
 };
 use std::collections::VecDeque;
 use std::sync::Arc;
@@ -145,29 +145,30 @@ where
         };
         let result = match cancel_tkn {
             Some(cancel) => retry_until_cancelled(policy, cancel, attempt).await,
-            None => Ok(retry(policy, attempt).await),
+            None => retry(policy, attempt).await.map_err(Into::into),
         };
 
         match result {
-            Ok(Ok(())) => logger.log_any(LockLogEntry::info(format!(
+            Ok(()) => logger.log_any(LockLogEntry::info(format!(
                 "sent {batch_size} {} entries to lock server",
                 self.kind,
             ))),
             // Repeating would get the same answer, and hold the channel meanwhile.
-            Ok(Err(RetryError::Final(err))) => logger.log_any(LockLogEntry::error(format!(
-                "dropping {batch_size} {} entries: {err}",
-                self.kind,
-            ))),
-            Ok(Err(RetryError::RetriesExhausted { .. })) => {
+            Err(RetryUntilCancelledError::Final(err)) => logger.log_any(LockLogEntry::error(
+                format!("dropping {batch_size} {} entries: {err}", self.kind),
+            )),
+            Err(RetryUntilCancelledError::RetriesExhausted { .. }) => {
                 logger.log_any(LockLogEntry::warn(format!(
                     "retries exhausted; dropping {batch_size} {} entries",
                     self.kind,
                 )));
             },
-            Err(Cancelled) => logger.log_any(LockLogEntry::warn(format!(
-                "cancellation requested during retry; dropping {batch_size} {} entries",
-                self.kind,
-            ))),
+            Err(RetryUntilCancelledError::Cancelled) => {
+                logger.log_any(LockLogEntry::warn(format!(
+                    "cancellation requested during retry; dropping {batch_size} {} entries",
+                    self.kind,
+                )));
+            },
         }
     }
 }
