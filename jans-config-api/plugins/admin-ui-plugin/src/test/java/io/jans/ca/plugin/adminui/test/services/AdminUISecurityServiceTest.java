@@ -519,21 +519,6 @@ public class AdminUISecurityServiceTest {
         System.arraycopy(zipBytes, targetCentralOffset + 16, zipBytes, entryCentralOffset + 16, 12);
     }
 
-    private int findLocalEntryOffset(byte[] zipBytes, String expectedName) {
-        byte[] expectedNameBytes = expectedName.getBytes(StandardCharsets.UTF_8);
-        for (int offset = 0; offset <= zipBytes.length - 30; offset++) {
-            if (readLittleEndianInt(zipBytes, offset) != 0x04034b50) {
-                continue;
-            }
-            int nameLength = readLittleEndianShort(zipBytes, offset + 26);
-            if (nameLength == expectedNameBytes.length
-                    && matches(zipBytes, offset + 30, expectedNameBytes)) {
-                return offset;
-            }
-        }
-        throw new AssertionError("Local ZIP entry not found: " + expectedName);
-    }
-
     private int findCentralEntryOffset(byte[] zipBytes, String expectedName) {
         byte[] expectedNameBytes = expectedName.getBytes(StandardCharsets.UTF_8);
         for (int offset = 0; offset <= zipBytes.length - 46; offset++) {

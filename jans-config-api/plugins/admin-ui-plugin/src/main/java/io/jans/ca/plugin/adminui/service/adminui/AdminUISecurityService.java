@@ -45,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -573,7 +574,7 @@ public class AdminUISecurityService {
     }
 
     private EntryValidation validateCentralDirectoryEntry(ZipFile zipFile, ZipEntry entry,
-            byte[] localDigest, String expectedDomain, long remaining) throws Exception {
+            byte[] localDigest, String expectedDomain, long remaining) throws NoSuchAlgorithmException, IOException, ApplicationException, URISyntaxException  {
         String entryName = entry.getName();
         String normalizedName = entryName.toLowerCase(Locale.ROOT);
         boolean legacyIssuerFile = !entry.isDirectory()
@@ -603,7 +604,7 @@ public class AdminUISecurityService {
     }
 
     private void validateIssuerDocument(byte[] content, boolean rootIssuersFile,
-            String expectedDomain, String entryName) throws Exception {
+            String expectedDomain, String entryName) throws ApplicationException, URISyntaxException {
         JSONObject issuerDoc = new JSONObject(new String(content, StandardCharsets.UTF_8));
         if (rootIssuersFile) {
             validateTrustedIssuersRootFile(issuerDoc, expectedDomain, entryName);
@@ -868,7 +869,9 @@ public class AdminUISecurityService {
             throws ApplicationException, URISyntaxException {
         String issuerDomain = endpoint == null ? null : new URI(endpoint).getHost();
         if (issuerDomain == null || !issuerDomain.equalsIgnoreCase(expectedDomain)) {
-            log.error("Trusted issuer endpoint host does not match Admin UI host: {}", escapeLog(entryName));
+            if(log.isErrorEnabled()) {
+                log.error("Trusted issuer endpoint host does not match Admin UI host: {}", escapeLog(entryName));
+            }
             throw new ApplicationException(
                     Response.Status.BAD_REQUEST.getStatusCode(),
                     ErrorResponse.POLICY_STORE_DOMAIN_NOT_MATCHING.getDescription()

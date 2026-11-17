@@ -34,6 +34,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.BeanUtilsBean;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -84,7 +85,8 @@ public class UserMgmtService {
     public static final String ADMIN_UI_ROLE = "jansAdminUIRole";
 
     /**
-     * Obtain the base Distinguished Name (DN) under which people (user) entries are stored.
+     * Obtain the base Distinguished Name (DN) under which people (user) entries are
+     * stored.
      *
      * @return the base DN for people entries
      */
@@ -95,22 +97,26 @@ public class UserMgmtService {
     /**
      * Builds and executes a paged user search based on the provided SearchRequest.
      *
-     * Constructs substring OR-filters from assertion values across displayName, description, mail, uid,
-     * givenName, middleName, nickname, sn, inum and mobile (mobile is treated as a multi-valued attribute),
-     * and combines them with per-field filters from the request's fieldValueMap (fields typed as `jsonb` and
-     * the mobile field are treated as multi-valued). The search is executed under the people base DN using
-     * the requested sorting and pagination. Inactive custom attributes are removed from resulting users
-     * before returning.
+     * Constructs substring OR-filters from assertion values across displayName,
+     * description, mail, uid, givenName, middleName, nickname, sn, inum and mobile
+     * (mobile is treated as a multi-valued attribute), and combines them with
+     * per-field filters from the request's fieldValueMap (fields typed as `jsonb`
+     * and the mobile field are treated as multi-valued). The search is executed
+     * under the people base DN using the requested sorting and pagination. Inactive
+     * custom attributes are removed from resulting users before returning.
      *
-     * @param searchRequest the search parameters including assertion values, field-value map, sorting and pagination
-     * @return a paged result of User objects whose custom attributes have been filtered to exclude inactive attributes
+     * @param searchRequest the search parameters including assertion values,
+     *                      field-value map, sorting and pagination
+     * @return a paged result of User objects whose custom attributes have been
+     *         filtered to exclude inactive attributes
      */
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
         return searchUsers(searchRequest, null);
     }
 
     /**
-     * Search users, optionally limited to the single entry identified by {@code restrictToInum}.
+     * Search users, optionally limited to the single entry identified by
+     * {@code restrictToInum}.
      *
      * @param searchRequest  the search parameters
      * @param restrictToInum when not blank, only the user with this inum can match
@@ -122,7 +128,8 @@ public class UserMgmtService {
                     getPeopleBaseDn());
         }
 
-        // Persistence backends treat a zero count as unlimited, so fetch one entry to get the total and drop it.
+        // Persistence backends treat a zero count as unlimited, so fetch one entry to
+        // get the total and drop it.
         boolean countOnly = searchRequest.getCount() != null && searchRequest.getCount() <= 0;
 
         boolean useLowercaseFilter = configurationService.isLowercaseFilter(userService.getPeopleBaseDn());
@@ -160,27 +167,13 @@ public class UserMgmtService {
 
         logger.debug("User pattern searchFilter:{}, searchRequest.getFieldValueMap():{}", searchFilter,
                 searchRequest.getFieldValueMap());
-        List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
 
-                logger.debug("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
-                String[] valueArr = new String[] { entry.getValue() };
-                String attributeType = this.getAttributeType(entry.getKey());
-                logger.trace("User field entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
-                Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
-                if ((entry.getKey() != null && entry.getKey().equalsIgnoreCase(MOBILE))
-                        || (attributeType != null && attributeType.equalsIgnoreCase("jsonb"))) {
-                    dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null).multiValued(3);
-                }
-
-                logger.debug("User dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
+        List<Filter> fieldValueFilters = getFieldValueFilters(searchRequest);
+        logger.debug("User pattern fieldValueFilters:{}", fieldValueFilters);
+        if (fieldValueFilters != null && fieldValueFilters.isEmpty()) {
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
-
         if (StringUtils.isNotBlank(restrictToInum)) {
             Filter inumEqualityFilter = Filter.createEqualityFilter(AttributeConstants.INUM, restrictToInum);
             searchFilter = searchFilter == null ? inumEqualityFilter
@@ -209,7 +202,8 @@ public class UserMgmtService {
      * Retrieve users matching the specified uid that are marked active.
      *
      * @param name the uid (login name) to search for
-     * @return the list of matching active User objects, or `null` if an error occurs
+     * @return the list of matching active User objects, or `null` if an error
+     *         occurs
      */
     public List<User> getUserByName(String name) {
         logger.info("Get user by name:{} ", name);
@@ -288,8 +282,8 @@ public class UserMgmtService {
         logger.debug("User before patch user:{}", user);
 
         // patch must not retarget the write to another entry
-        if (!StringUtils.equals(dnBeforePatch, user.getDn())
-                || !StringUtils.equals(inumBeforePatch, user.getAttribute("inum"))) {
+        if (!Strings.CI.equals(dnBeforePatch, user.getDn())
+                || !Strings.CI.equals(inumBeforePatch, user.getAttribute("inum"))) {
             throw new InvalidAttributeException("Changing 'dn' or 'inum' is not allowed");
         }
 
@@ -345,50 +339,6 @@ public class UserMgmtService {
             logger.error("Failed to load user entry", ex);
         }
         return result;
-    }
-
-    private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
-        logger.info("Custom Attributes to update for - user:{} ", user);
-
-        if (customAttributes == null || customAttributes.isEmpty()) {
-            return user;
-        }
-        // validate custom attribute validation
-        validateAttributes(customAttributes);
-
-        StringBuilder attributeAdded = new StringBuilder();
-        StringBuilder attributeEdited = new StringBuilder();
-        StringBuilder attributeDeleted = new StringBuilder();
-
-        for (CustomObjectAttribute attribute : customAttributes) {
-            CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
-            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
-
-            // add
-            if (existingAttribute == null) {
-                boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
-                        attribute.isMultiValued());
-                attributeAdded.append(attribute.getName()).append(",");
-                logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ",
-                        attribute.getName(), result);
-            }
-            // remove attribute
-            else if (attribute.getValue() == null || attribute.getValues() == null) {
-                user.removeAttribute(attribute.getName());
-                attributeDeleted.append(attribute.getName()).append(",");
-            }
-            // replace attribute
-            else {
-                existingAttribute.setMultiValued(attribute.isMultiValued());
-                existingAttribute.setValues(attribute.getValues());
-                attributeEdited.append(attribute.getName()).append(",");
-            }
-        }
-
-        logger.info(" *** Attribute added - {} {}", attributeAdded, "***");
-        logger.info(" *** Attribute edited - {} {}", attributeEdited, "***");
-        logger.info(" *** Attribute removed - {} {}", attributeDeleted, "***");
-        return user;
     }
 
     public List<User> excludeAttributes(List<User> users, String commaSeparatedString)
@@ -508,19 +458,9 @@ public class UserMgmtService {
         return missingAttributes.toString();
     }
 
-    private boolean isExcludedAttribute(List<String> excludeAttributes, String attribute) {
-        logger.debug(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
-
-        if (excludeAttributes == null || excludeAttributes.isEmpty()) {
-            return false;
-        }
-
-        return excludeAttributes.stream().anyMatch(e -> e.equals(attribute));
-    }
-
     public User parseBirthDateAttribute(User user) {
         logger.info("user:{}", user);
-        if (user!=null && user.getAttributeObjectValues(BIRTH_DATE) != null) {
+        if (user != null && user.getAttributeObjectValues(BIRTH_DATE) != null) {
             logger.info("user.getAttributeObjectValues(BIRTH_DATE):{}", user.getAttributeObjectValues(BIRTH_DATE));
             Optional<Object> optionalBithdate = user.getAttributeObjectValues(BIRTH_DATE).stream().findFirst();
 
@@ -533,7 +473,8 @@ public class UserMgmtService {
             if (date == null) {
                 date = persistenceEntryManager.decodeTime(null, optionalBithdate.get().toString());
             }
-            logger.info("date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}",date, user.getAttributeObjectValues(BIRTH_DATE));
+            logger.info("date:{}, user.getAttributeObjectValues(BIRTH_DATE):{}", date,
+                    user.getAttributeObjectValues(BIRTH_DATE));
             user.getCustomAttributes().remove(new CustomObjectAttribute(BIRTH_DATE));
             user.getCustomAttributes().add(new CustomObjectAttribute(BIRTH_DATE, date));
         }
@@ -676,14 +617,6 @@ public class UserMgmtService {
         return jansAttributeNameList;
     }
 
-    private String getDnForAttribute(String inum) {
-        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
-        if (StringHelper.isEmpty(inum)) {
-            return attributesDn;
-        }
-        return String.format("inum=%s,%s", inum, attributesDn);
-    }
-
     public void validateAttributes(List<CustomObjectAttribute> customAttributes) {
         if (customAttributes == null || customAttributes.isEmpty()) {
             return;
@@ -713,6 +646,49 @@ public class UserMgmtService {
             throw new InvalidAttributeException(sb.toString());
         }
 
+    }
+
+    public String getAttributeType(String attributeName) {
+        logger.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName,
+                getPersistenceType(), appConfiguration);
+        String type = null;
+        try {
+
+            logger.info(
+                    "attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}",
+                    attributeName,
+                    persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class, attributeName));
+            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
+                    attributeName);
+            logger.info("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
+
+            if (attributeType != null) {
+                type = attributeType.getType();
+            }
+        } catch (Exception ex) {
+            throw new InvalidAttributeException("(" + attributeName + ") is invalid");
+        }
+        return type;
+    }
+
+    /* Helper methods */
+
+    private String getDnForAttribute(String inum) {
+        String attributesDn = staticConfiguration.getBaseDn().getAttributes();
+        if (StringHelper.isEmpty(inum)) {
+            return attributesDn;
+        }
+        return String.format("inum=%s,%s", inum, attributesDn);
+    }
+
+    private boolean isExcludedAttribute(List<String> excludeAttributes, String attribute) {
+        logger.debug(" Is attribute:{} in excludeAttributeList:{} ", attribute, excludeAttributes);
+
+        if (excludeAttributes == null || excludeAttributes.isEmpty()) {
+            return false;
+        }
+
+        return excludeAttributes.stream().anyMatch(e -> e.equals(attribute));
     }
 
     private String validateCustomAttributes(CustomObjectAttribute customObjectAttribute,
@@ -749,7 +725,8 @@ public class UserMgmtService {
                 sb.append(",must be less than " + maxValue + " characters");
             }
 
-            // regexpValue; skipped for values already rejected so oversized input never reaches the regex engine
+            // regexpValue; skipped for values already rejected so oversized input never
+            // reaches the regex engine
             if (sb.length() == 0 && StringUtils.isNotBlank(regexpValue)) {
                 Pattern pattern = Pattern.compile(regexpValue);
                 Matcher matcher = pattern.matcher(attributeValue);
@@ -769,26 +746,75 @@ public class UserMgmtService {
         return sb.toString();
     }
 
-    public String getAttributeType(String attributeName) {
-        logger.info(" Validate attributeName:{}, getPersistenceType():{}, appConfiguration:{}", attributeName,
-                getPersistenceType(), appConfiguration);
-        String type = null;
-        try {
+    private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
+        logger.info("Custom Attributes to update for - user:{} ", user);
 
-            logger.info(
-                    "attributeName:{}, persistenceEntryManager.getAttributeType(ou=people,o=jans, User.class,attributeName)():{}",
-                    attributeName,
-                    persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class, attributeName));
-            AttributeType attributeType = persistenceEntryManager.getAttributeType("ou=people,o=jans", User.class,
-                    attributeName);
-            logger.info("\n attributeName:{}, attributeType():{}", attributeName, attributeType);
-
-            if (attributeType != null) {
-                type = attributeType.getType();
-            }
-        } catch (Exception ex) {
-            throw new InvalidAttributeException("(" + attributeName + ") is invalid");
+        if (customAttributes == null || customAttributes.isEmpty()) {
+            return user;
         }
-        return type;
+        // validate custom attribute validation
+        validateAttributes(customAttributes);
+
+        StringBuilder attributeAdded = new StringBuilder();
+        StringBuilder attributeEdited = new StringBuilder();
+        StringBuilder attributeDeleted = new StringBuilder();
+
+        for (CustomObjectAttribute attribute : customAttributes) {
+            CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
+            logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
+
+            // add
+            if (existingAttribute == null) {
+                boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
+                        attribute.isMultiValued());
+                attributeAdded.append(attribute.getName()).append(",");
+                logger.debug("Result of adding CustomAttributes attribute.getName():{} , result:{} ",
+                        attribute.getName(), result);
+            }
+            // remove attribute
+            else if (attribute.getValue() == null || attribute.getValues() == null) {
+                user.removeAttribute(attribute.getName());
+                attributeDeleted.append(attribute.getName()).append(",");
+            }
+            // replace attribute
+            else {
+                existingAttribute.setMultiValued(attribute.isMultiValued());
+                existingAttribute.setValues(attribute.getValues());
+                attributeEdited.append(attribute.getName()).append(",");
+            }
+        }
+
+        logger.info(" *** Attribute added - {} {}", attributeAdded, "***");
+        logger.info(" *** Attribute edited - {} {}", attributeEdited, "***");
+        logger.info(" *** Attribute removed - {} {}", attributeDeleted, "***");
+        return user;
     }
+
+    private List<Filter> getFieldValueFilters(SearchRequest searchRequest) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Search Users FieldValueFilters with searchRequest:{}", escapeLog(searchRequest));
+        }
+
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+
+                logger.debug("User entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+                String[] valueArr = new String[] { entry.getValue() };
+                String attributeType = this.getAttributeType(entry.getKey());
+                logger.trace("User field entry.getKey():{}, attributeType:{}", entry.getKey(), attributeType);
+                Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null);
+                if ((entry.getKey() != null && entry.getKey().equalsIgnoreCase(MOBILE))
+                        || (attributeType != null && attributeType.equalsIgnoreCase("jsonb"))) {
+                    dataFilter = Filter.createSubstringFilter(entry.getKey(), null, valueArr, null).multiValued(3);
+                }
+
+                logger.debug("User dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+        }
+
+        return fieldValueFilters;
+    }
+
 }

@@ -127,7 +127,9 @@ public class AcrsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.ACRS_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
-        log.info("ACRS details to  update - authenticationMethod:{}", escapeLog(authenticationMethod));
+        if(log.isInfoEnabled()) {
+            log.info("ACRS details to  update - authenticationMethod:{}", escapeLog(authenticationMethod));
+        }
 
         if (authenticationMethod == null || StringUtils.isBlank(authenticationMethod.getDefaultAcr())) {
             throwBadRequestException("Default authentication method should not be null or empty !");
@@ -144,8 +146,10 @@ public class AcrsResource extends ConfigBaseResource {
     }
 
     private void validateAuthenticationMethod(String authenticationMode) {
-        log.debug("authenticationMethod:{}, appConfiguration.isAcrValidationEnabled():{}", escapeLog(authenticationMode),
-                appConfiguration.isAcrValidationEnabled());
+        if(log.isDebugEnabled()) {
+            log.debug("authenticationMethod:{}, appConfiguration.isAcrValidationEnabled():{}", escapeLog(authenticationMode), appConfiguration.isAcrValidationEnabled());
+        }
+               
 
         // if authentication validation check is enabled then validate
         boolean isAcrValid = isAcrValid(authenticationMode);
@@ -159,8 +163,10 @@ public class AcrsResource extends ConfigBaseResource {
 
     private boolean isAcrValid(String authenticationMode) {
         boolean isValid = false;
-        log.info(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}",
-                escapeLog(authenticationMode), appConfiguration.getAcrExclusionList());
+        if(log.isInfoEnabled()) {
+            log.info(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}",escapeLog(authenticationMode), appConfiguration.getAcrExclusionList());
+        }
+                
 
         if (appConfiguration.getAcrExclusionList() != null
                 && appConfiguration.getAcrExclusionList().contains(authenticationMode)) {
@@ -202,7 +208,9 @@ public class AcrsResource extends ConfigBaseResource {
 
     public boolean isValidAgamaDeployment(String authenticationMode) {
         boolean isValid = false;
-        log.info(" Validate Agama ACR - authenticationMode:{},", escapeLog(authenticationMode));
+        if(log.isInfoEnabled()) {
+            log.info(" Validate Agama ACR - authenticationMode:{},", escapeLog(authenticationMode));
+        }
         if (StringUtils.isBlank(authenticationMode)) {
             return isValid;
         }
@@ -217,12 +225,16 @@ public class AcrsResource extends ConfigBaseResource {
             log.debug(" agamaDeploymentList:{},", agamaDeploymentList);
 
             Set<String> keys = getDirectLaunchFlows(agamaDeploymentList);
-            log.info("Final DirectLaunchFlows - keys:{}, authenticationMode:{}, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR):{} , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1:{}", keys, escapeLog(authenticationMode), authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
+            if(log.isInfoEnabled()) {
+                log.info("Final DirectLaunchFlows - keys:{}, authenticationMode:{}, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR):{} , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1:{}", keys, escapeLog(authenticationMode), authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
+            }
             String agamaAcr = authenticationMode;
             if (authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) > 0) {
                 agamaAcr = authenticationMode.substring(authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
             }
-            log.info(" agamaAcr:{},", escapeLog(agamaAcr));
+            if(log.isInfoEnabled()) {
+                log.info(" agamaAcr:{},", escapeLog(agamaAcr));
+            }
 
             if (!keys.isEmpty() && keys.contains(agamaAcr)) {
                 log.debug(" keys.contains(agamaAcr):{},", keys.contains(agamaAcr));

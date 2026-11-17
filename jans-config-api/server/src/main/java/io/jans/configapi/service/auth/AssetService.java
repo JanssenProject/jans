@@ -169,8 +169,7 @@ public class AssetService {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
-        if (documentStream != null && (this.getAssetMgtConfiguration() == null
-                || !this.getAssetMgtConfiguration().isAssetServerUploadEnabled())) {
+        if (documentStream != null && validateAssetMgtConfiguration()) {
             throw new InvalidAttributeException("Asset server upload is disabled!!!");
         }
 
@@ -345,6 +344,8 @@ public class AssetService {
         return readDocumentAsStream(asset.getFileName(), asset.getDocument());
 
     }
+    
+    /* Helper methods */
 
     private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
@@ -587,6 +588,12 @@ public class AssetService {
             return null;
         }
         return new ByteArrayInputStream(assetContent.getBytes());
+    }
+    
+    private boolean validateAssetMgtConfiguration() {        
+        log.debug("AssetMgtConfiguration():{}", this.getAssetMgtConfiguration());
+        return (this.getAssetMgtConfiguration() == null
+                || !this.getAssetMgtConfiguration().isAssetServerUploadEnabled());
     }
 
 }

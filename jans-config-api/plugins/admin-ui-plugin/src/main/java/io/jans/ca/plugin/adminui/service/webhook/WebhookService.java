@@ -426,7 +426,9 @@ public class WebhookService {
 
         Matcher origin = FIXED_ORIGIN_PREFIX.matcher(webhook.getUrl());
         if (!origin.find() || origin.group().contains("${")) {
-            log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", escapeLog(webhook.getDisplayName()), escapeLog(webhook.getInum()));
+            if(log.isErrorEnabled()) {
+                log.error("Webhook (Name: {}, Id: {}) URL has a shortcode in its scheme, host or port.", escapeLog(webhook.getDisplayName()), escapeLog(webhook.getInum()));
+            }
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_ORIGIN_NOT_FIXED.getDescription());
         }
     }

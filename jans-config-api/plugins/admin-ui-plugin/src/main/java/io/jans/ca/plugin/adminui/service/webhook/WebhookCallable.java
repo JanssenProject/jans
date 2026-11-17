@@ -67,11 +67,15 @@ public class WebhookCallable implements Callable<GenericResponse> {
                     response.getStatus() == Response.Status.CREATED.getStatusCode() ||
                     response.getStatus() == Response.Status.ACCEPTED.getStatusCode()) {
                 String responseData = response.readEntity(String.class);
-                log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), escapeLog(responseData));
+                if(log.isDebugEnabled()) {
+                    log.debug("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), escapeLog(responseData));
+                }
                 return CommonUtils.createGenericResponse(true, response.getStatus(), responseData, jsonNode);
             } else {
                 String responseData = response.readEntity(String.class);
-                log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), escapeLog(responseData));
+                if(log.isErrorEnabled()) {
+                    log.error("Webhook (Name: {}, Id: {}) responseData : {}", webhook.getDisplayName(), webhook.getInum(), escapeLog(responseData));
+                }
                 return CommonUtils.createGenericResponse(false, response.getStatus(), responseData, jsonNode);
             }
         } catch (Exception e) {

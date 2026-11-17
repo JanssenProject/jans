@@ -141,7 +141,9 @@ public class TokenService {
         }
 
         TokenEntity tokenEntity = this.getTokenEntityByCode(tknCde);
-        logger.debug("Token to be revoked identified by tknCde:{} found:{}", escapeLog(tknCde), tokenEntity != null);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Token to be revoked identified by tknCde:{} found:{}", escapeLog(tknCde), tokenEntity != null);
+        }
 
         if (tokenEntity == null) {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);

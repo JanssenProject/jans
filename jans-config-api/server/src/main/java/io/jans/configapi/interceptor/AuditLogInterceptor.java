@@ -84,9 +84,11 @@ public class AuditLogInterceptor {
                 String userInum = httpHeaders.getHeaderString("User-inum");
 
                 // Log request without data
-                AUDIT_LOG.error("User:{} {} {} using client:{} (unverified User-inum:{}, jans-client:{})",
-                        escapeLog(subject), getAction(method), escapeLog(getResource(uriInfo.getPath())),
-                        escapeLog(clientId), escapeLog(userInum), escapeLog(client));
+                if (AUDIT_LOG.isErrorEnabled()) {
+                    AUDIT_LOG.error("User:{} {} {} using client:{} (unverified User-inum:{}, jans-client:{})",
+                            escapeLog(subject), getAction(method), escapeLog(getResource(uriInfo.getPath())),
+                            escapeLog(clientId), escapeLog(userInum), escapeLog(client));
+                }
 
                 if (auditLogConf.isLogData()) {
                     // Log request data

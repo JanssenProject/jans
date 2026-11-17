@@ -276,7 +276,10 @@ public class BaseService {
 
         if (response.getStatus() == 200) {
             Optional<Map<String, Object>> entity = Optional.of(response.readEntity(Map.class));
-            log.info("Introspection response entity: {}", entity.get().toString());
+            if(log.isInfoEnabled()) {
+                    log.info("Introspection response entity: {}", entity.get());
+            }
+                    
             return entity;
         }
         return Optional.empty();

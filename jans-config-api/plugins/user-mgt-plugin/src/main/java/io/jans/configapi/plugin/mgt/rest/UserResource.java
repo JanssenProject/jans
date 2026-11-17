@@ -71,6 +71,7 @@ public class UserResource extends BaseResource {
     private static final String USER_PLACEHOLDER = "user:{}";
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
     private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_-]*$");
+    private static final String LOGGED_IN_USER = "Logged-in user{";
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
@@ -771,7 +772,7 @@ public class UserResource extends BaseResource {
         if (loggedInUser == null) {
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
+                            new StringBuilder(LOGGED_IN_USER).append(loggedInUserInum).append("} details missing")));
         }
 
         boolean isAdmin = isAdminUser(loggedInUserInum, loggedInUser);
@@ -800,7 +801,7 @@ public class UserResource extends BaseResource {
 
         // Return if logged-in user is updating own profile
         if (StringUtils.isNotBlank(candidateUserInum) && !loggedInUserInum.equals(candidateUserInum) && !isAdmin) {
-            StringBuilder errMsg = new StringBuilder("Logged-in user{").append(loggedInUserInum)
+            StringBuilder errMsg = new StringBuilder(LOGGED_IN_USER).append(loggedInUserInum)
                     .append("} has insufficient User role-permission, to view/update details of {")
                     .append(inumPathVariable).append("}");
             if (logger.isInfoEnabled()) {
@@ -830,7 +831,7 @@ public class UserResource extends BaseResource {
         if (loggedInUser == null) {
             throw new ApiApplicationException(Response.Status.BAD_REQUEST.getStatusCode(),
                     String.format(ApiErrorResponse.GENERAL_ERROR.getDescription(),
-                            new StringBuilder("Logged-in user{").append(loggedInUserInum).append("} details missing")));
+                            new StringBuilder(LOGGED_IN_USER).append(loggedInUserInum).append("} details missing")));
         }
         return isAdminUser(loggedInUserInum, loggedInUser) ? null : loggedInUserInum;
     }

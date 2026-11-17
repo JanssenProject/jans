@@ -116,14 +116,18 @@ public class SessionService {
     }
 
     public PagedResult<SessionId> searchSession(SearchRequest searchRequest) {
-        logger.info("Search Session with searchRequest:{}", escapeLog(searchRequest));
+        if (logger.isInfoEnabled()) {
+            logger.info("Search Session with searchRequest:{}", escapeLog(searchRequest));
+        }
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.info("Session Search with assertionValue:{}", escapeLog(assertionValue));
+                if (logger.isInfoEnabled()) {
+                    logger.info("Session Search with assertionValue:{}", escapeLog(assertionValue));
+                }
 
                 String[] targetArray = new String[] { assertionValue };
                 Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
@@ -139,7 +143,9 @@ public class SessionService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.debug("Session pattern searchFilter:{}", escapeLog(searchFilter));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Session pattern searchFilter:{}", escapeLog(searchFilter));
+        }
 
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
@@ -151,7 +157,9 @@ public class SessionService {
         searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                 Filter.createANDFilter(fieldValueFilters));
 
-        logger.info("Session searchFilter:{}", escapeLog(searchFilter));
+        if (logger.isInfoEnabled()) {
+            logger.info("Session searchFilter:{}", escapeLog(searchFilter));
+        }
 
         PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
                 SessionId.class, searchFilter, null, searchRequest.getSortBy(),
@@ -291,8 +299,9 @@ public class SessionService {
     }
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
-
-        logger.debug("Modify filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Modify filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        }
         if (fieldFilterDataList == null || fieldFilterDataList.isEmpty()) {
             return fieldFilterDataList;
         }
@@ -311,7 +320,9 @@ public class SessionService {
                 }
             }
         }
-        logger.info("After modification of session filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        if (logger.isInfoEnabled()) {
+            logger.info("After modification of session filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        }
         return fieldFilterDataList;
     }
 

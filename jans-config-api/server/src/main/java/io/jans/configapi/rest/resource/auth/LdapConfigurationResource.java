@@ -130,11 +130,15 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response addLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        logger.debug("LDAP configuration to be added - configId:{} ", escapeLog(ldapConfiguration.getConfigId()));
+        if(logger.isDebugEnabled()) {
+            logger.debug("LDAP configuration to be added - configId:{} ", escapeLog(ldapConfiguration.getConfigId()));
+        }
         // Ensure that an LDAP server with same name does not exists.
         try {
             ldapConfiguration = findLdapConfigurationByName(ldapConfiguration.getConfigId());
-            logger.error("Ldap Configuration with same name:{}  already exists!", escapeLog(ldapConfiguration.getConfigId()));
+            if(logger.isErrorEnabled()) {
+                logger.error("Ldap Configuration with same name:{}  already exists!", escapeLog(ldapConfiguration.getConfigId()));
+            }
 
             throw new NotAcceptableException(getNotAcceptableException(
                     "Ldap Configuration with same name - '" + ldapConfiguration.getConfigId() + "' already exists!"));
@@ -166,7 +170,9 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLdapConfiguration(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        logger.debug("LDAP configuration to be updated - configId:{}", escapeLog(ldapConfiguration.getConfigId()));
+        if(logger.isDebugEnabled()) {
+            logger.debug("LDAP configuration to be updated - configId:{}", escapeLog(ldapConfiguration.getConfigId()));
+        }
         findLdapConfigurationByName(ldapConfiguration.getConfigId());
         this.ldapConfigurationService.update(ldapConfiguration);
         return Response.ok(ldapConfiguration).build();
@@ -194,10 +200,14 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS } , groupScopes = {}, 
     superScopes = { ApiAccessConstants.DATABASE_LDAP_DELETE_ACCESS, ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
-        logger.debug("LDAP configuration to be deleted - name:{}", escapeLog(name));
+        if(logger.isDebugEnabled()) {
+            logger.debug("LDAP configuration to be deleted - name:{}", escapeLog(name));
+        }
         findLdapConfigurationByName(name);
 
-        logger.info("Deleting Ldap Configuration by name:{}", escapeLog(name));
+        if(logger.isInfoEnabled()) {
+            logger.info("Deleting Ldap Configuration by name:{}", escapeLog(name));
+        }
         this.ldapConfigurationService.remove(name);
         return Response.noContent().build();
     }
@@ -229,10 +239,14 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             ApiAccessConstants.DATABASE_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchLdapConfigurationByName(@Parameter(description = "Name of LDAP configuration") @PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {
-        logger.debug("LDAP configuration to be patched - name:{}", escapeLog(name));
+        if(logger.isDebugEnabled()) {
+            logger.debug("LDAP configuration to be patched - name:{}", escapeLog(name));
+        }
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
 
-        logger.info("Patch Ldap Configuration by name:{} ", escapeLog(name));
+        if(logger.isInfoEnabled()) {
+            logger.info("Patch Ldap Configuration by name:{} ", escapeLog(name));
+        }
         ldapConfiguration = Jackson.applyPatch(requestString, ldapConfiguration);
         this.ldapConfigurationService.update(ldapConfiguration);
         return Response.ok(ldapConfiguration).build();
@@ -261,7 +275,9 @@ public class LdapConfigurationResource extends ConfigBaseResource {
             ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.DATABASE_ADMIN_ACCESS,
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response testLdapConfigurationByName(@Valid @NotNull GluuLdapConfiguration ldapConfiguration) {
-        logger.debug("LDAP configuration to be tested - configId:{}", escapeLog(ldapConfiguration.getConfigId()));
+        if(logger.isDebugEnabled()) {
+            logger.debug("LDAP configuration to be tested - configId:{}", escapeLog(ldapConfiguration.getConfigId()));
+        }
 
         boolean status = connectionStatus.isUp(ldapConfiguration, isStoredConnection(ldapConfiguration));
         logger.info("LdapConfigurationResource:::testLdapConfigurationByName() - status:{}", status);
@@ -286,7 +302,9 @@ public class LdapConfigurationResource extends ConfigBaseResource {
         try {
             return this.ldapConfigurationService.findByName(name);
         } catch (NoSuchElementException ex) {
-            logger.error("Could not find Ldap Configuration by name '{}'", escapeLog(name), ex);
+            if(logger.isErrorEnabled()) {
+                logger.error("Could not find Ldap Configuration by name '{}'", escapeLog(name), ex);
+            }
             throw new NotFoundException(getNotFoundError("Ldap Configuration - '" + name + "'"));
         }
     }

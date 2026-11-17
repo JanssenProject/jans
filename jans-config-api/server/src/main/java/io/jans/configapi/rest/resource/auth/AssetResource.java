@@ -334,7 +334,9 @@ public class AssetResource extends ConfigBaseResource {
         // validation
         checkResourceNotNull(assetForm, ASSET_DATA_FORM);
         Document asset = assetForm.getDocument();
-        log.info(" Create asset:{} ", escapeLog(asset));
+        if(log.isInfoEnabled()) {
+            log.info(" Create asset:{} ", escapeLog(asset));
+        }
         checkResourceNotNull(asset, ASSET_DATA);
         checkNotNull(asset.getFileName(), "fileName");
         validateDocument(asset);
@@ -403,7 +405,9 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(assetForm, ASSET_DATA_FORM);
         Document asset = assetForm.getDocument();
         final String inum = asset.getInum();
-        log.debug(" Create asset:{} ", escapeLog(asset));
+        if(log.isDebugEnabled()) {
+            log.debug(" Create asset:{} ", escapeLog(asset));
+        }
         checkResourceNotNull(asset, ASSET_DATA);
         checkResourceNotNull(inum, ASSET_INUM);
         checkNotNull(asset.getFileName(), "fileName");
@@ -417,15 +421,21 @@ public class AssetResource extends ConfigBaseResource {
 
         // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
-        log.info(
+        if(log.isInfoEnabled()) { 
+            log.info(      
                 "Check if asset with inum different then:{} but with same name exist - asset.getDisplayName():{}, assets:{}",
                 escapeLog(inum), escapeLog(asset.getFileName()), assets);
+        }
         if (assets != null && !assets.isEmpty()) {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
                     .collect(Collectors.toList());
-            logger.info("Other asset with same name:{} are list:{}", escapeLog(asset.getFileName()), list);
+            if(log.isInfoEnabled()) {
+                log.info("Other asset with same name:{} are list:{}", escapeLog(asset.getFileName()), list);
+            }
             if (list != null && !list.isEmpty()) {
-                log.error("Another asset with same name:{}", escapeLog(asset.getFileName()));
+                if(log.isErrorEnabled()) {
+                    log.error("Another asset with same name:{}", escapeLog(asset.getFileName()));
+                }
                 throwBadRequestException(ASSET_NAME_CONFLICT,
                         String.format(ASSET_NAME_CONFLICT_MSG, asset.getFileName()));
             }

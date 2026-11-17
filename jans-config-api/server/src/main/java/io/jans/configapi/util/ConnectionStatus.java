@@ -44,9 +44,10 @@ public class ConnectionStatus {
      *                            configuration whose connection settings are unchanged
      */
     public boolean isUp(GluuLdapConfiguration ldapConfiguration, boolean decryptBindPassword) {
-        logger.info(" LDAP Connection Status parameters - configId:{}, bindDN:{}, useSSL:{}",
-                escapeLog(ldapConfiguration.getConfigId()), escapeLog(ldapConfiguration.getBindDN()),
-                ldapConfiguration.isUseSSL());
+        if (logger.isInfoEnabled()) {
+            logger.info(" LDAP Connection Status parameters - configId:{}, bindDN:{}, useSSL:{}",escapeLog(ldapConfiguration.getConfigId()), escapeLog(ldapConfiguration.getBindDN()),
+                    ldapConfiguration.isUseSSL());
+        } 
 
         Properties properties = new Properties();
         properties.setProperty("bindDN", StringUtils.defaultString(ldapConfiguration.getBindDN()));

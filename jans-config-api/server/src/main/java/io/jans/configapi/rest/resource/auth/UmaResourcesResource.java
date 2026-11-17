@@ -278,7 +278,9 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Path(ApiConstants.ID_PATH)
     public Response patchResource(@Parameter(description = "Resource description ID") @PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        logger.debug("Patch for  id:{} , pathString:{}", escapeLog(id), escapeLog(pathString));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Patch for  id:{} , pathString:{}", escapeLog(id), escapeLog(pathString));
+        }
         UmaResource existingResource = findOrThrow(id);
         final String dn = existingResource.getDn();
         final String existingId = existingResource.getId();
