@@ -90,6 +90,12 @@ public class Fido2Configuration {
 	private boolean fido2TraceIncludeAttestationDetail = false;
 	@DocProperty(description = "Lock Server TRACE ingestion endpoint (/api/v1/audit/trace). May default to the discovered Lock audit endpoint")
 	private String fido2TraceEndpoint;
+	@DocProperty(description = "Path to a BCFKS keystore file that holds the Ed25519 TRACE producer signing key. The key itself never appears in configuration")
+	private String fido2TraceKeyStorePath;
+	@DocProperty(description = "Alias of the Ed25519 signing key inside fido2TraceKeyStorePath")
+	private String fido2TraceKeyAlias;
+	@DocProperty(description = "Password of fido2TraceKeyStorePath (encrypted at rest, same as other client secrets)")
+	private String fido2TraceKeyStorePassword;
 
 	@DocProperty(description = "Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work", defaultValue = "false")
 	private boolean nativeReadinessEnabled = false;
@@ -352,6 +358,30 @@ public class Fido2Configuration {
 
 	public void setFido2TraceEndpoint(String fido2TraceEndpoint) {
 		this.fido2TraceEndpoint = fido2TraceEndpoint;
+	}
+
+	public String getFido2TraceKeyStorePath() {
+		return fido2TraceKeyStorePath;
+	}
+
+	public void setFido2TraceKeyStorePath(String fido2TraceKeyStorePath) {
+		this.fido2TraceKeyStorePath = fido2TraceKeyStorePath;
+	}
+
+	public String getFido2TraceKeyAlias() {
+		return fido2TraceKeyAlias;
+	}
+
+	public void setFido2TraceKeyAlias(String fido2TraceKeyAlias) {
+		this.fido2TraceKeyAlias = fido2TraceKeyAlias;
+	}
+
+	public String getFido2TraceKeyStorePassword() {
+		return fido2TraceKeyStorePassword;
+	}
+
+	public void setFido2TraceKeyStorePassword(String fido2TraceKeyStorePassword) {
+		this.fido2TraceKeyStorePassword = fido2TraceKeyStorePassword;
 	}
 
 	public boolean isNativeReadinessEnabled() {

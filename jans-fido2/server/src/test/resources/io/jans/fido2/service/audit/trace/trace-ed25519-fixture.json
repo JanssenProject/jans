@@ -1,0 +1,7 @@
+{
+  "seed": "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+  "record": {"producer":"jans-fido2","sequence_number":7,"ceremony_outcome":"SUCCESS","numbers":[4.5,1.0E30,1.0E-6,-0.5],"text":"café \"q\""},
+  "canonical": "{\"ceremony_outcome\":\"SUCCESS\",\"numbers\":[4.5,1e+30,0.000001,-0.5],\"producer\":\"jans-fido2\",\"sequence_number\":7,\"text\":\"café \\\"q\\\"\"}",
+  "jwk": {"kty": "OKP", "crv": "Ed25519", "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"},
+  "signature": "I5XbjI3D1n7PpwKdjKLtaRqNT5RxB-GOYD4R6TMmRYcfRoZT4lE0KWui81Pq5b-X0fpspiq1mr9QySsDRiYGCQ"
+}
