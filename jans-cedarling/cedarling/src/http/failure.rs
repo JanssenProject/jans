@@ -214,7 +214,6 @@ impl SendError {
         match self {
             Self::Final(failure) => failure.status_code(),
             Self::RetriesExhausted { last, .. } => last.status_code(),
-            Self::Cancelled(never) => match *never {},
         }
     }
 }

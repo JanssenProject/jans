@@ -13,7 +13,8 @@ use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
 
 use crate::common::retry::{
-    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+    Attempt, Backoff, RetryError, RetryPolicy, RetryUntilCancelledError, retry,
+    retry_until_cancelled,
 };
 use std::collections::VecDeque;
 use std::sync::Arc;
@@ -145,9 +146,7 @@ where
         };
         let result = match cancel_tkn {
             Some(cancel) => retry_until_cancelled(policy, cancel, attempt).await,
-            None => retry(policy, attempt)
-                .await
-                .map_err(RetryError::cancellable),
+            None => retry(policy, attempt).await.map_err(Into::into),
         };
 
         match result {
@@ -156,17 +155,19 @@ where
                 self.kind,
             ))),
             // Repeating would get the same answer, and hold the channel meanwhile.
-            Err(RetryError::Final(err)) => logger.log_any(LockLogEntry::error(format!(
-                "dropping {batch_size} {} entries: {err}",
-                self.kind
-            ))),
-            Err(RetryError::RetriesExhausted { .. }) => {
+            Err(RetryUntilCancelledError::GaveUp(RetryError::Final(err))) => {
+                logger.log_any(LockLogEntry::error(format!(
+                    "dropping {batch_size} {} entries: {err}",
+                    self.kind,
+                )));
+            },
+            Err(RetryUntilCancelledError::GaveUp(RetryError::RetriesExhausted { .. })) => {
                 logger.log_any(LockLogEntry::warn(format!(
                     "retries exhausted; dropping {batch_size} {} entries",
                     self.kind,
                 )));
             },
-            Err(RetryError::Cancelled(Cancelled)) => {
+            Err(RetryUntilCancelledError::Cancelled) => {
                 logger.log_any(LockLogEntry::warn(format!(
                     "cancellation requested during retry; dropping {batch_size} {} entries",
                     self.kind,

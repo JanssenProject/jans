@@ -38,7 +38,8 @@ use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
 use crate::common::retry::{
-    Attempt, Backoff, Cancelled, RetryError, RetryPolicy, retry, retry_until_cancelled,
+    Attempt, Backoff, RetryError, RetryPolicy, RetryUntilCancelledError, retry,
+    retry_until_cancelled,
 };
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
@@ -684,7 +685,11 @@ impl Emitter {
                     backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
                     max_retries: self.max_retries,
                 };
-                retry_until_cancelled(policy, cancel, attempt).await
+                match retry_until_cancelled(policy, cancel, attempt).await {
+                    Ok(results) => Ok(results),
+                    Err(RetryUntilCancelledError::GaveUp(error)) => Err(error),
+                    Err(RetryUntilCancelledError::Cancelled) => return Sent::Interrupted,
+                }
             },
             // Each batch goes once, so stopping while Lock is down is quick.
             Mode::Stopping => {
@@ -692,7 +697,7 @@ impl Emitter {
                     backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
                     max_retries: 0,
                 };
-                retry(once, attempt).await.map_err(RetryError::cancellable)
+                retry(once, attempt).await
             },
         };
 
@@ -732,7 +737,6 @@ impl Emitter {
                 };
                 Sent::Lost { retry_after }
             },
-            Err(RetryError::Cancelled(Cancelled)) => Sent::Interrupted,
         }
     }
 

@@ -6,7 +6,6 @@
 //! Repeating one request: how long to wait between attempts, and the one loop that
 //! decides whether to repeat. Callers sort each failure and keep their own logging.
 
-use std::convert::Infallible;
 use std::future::Future;
 use std::time::Duration;
 
@@ -65,31 +64,13 @@ pub(crate) enum Attempt<T, R, F> {
     Final(F),
 }
 
-/// Why [`retry`] or [`retry_until_cancelled`] gave up: a `RetriesExhausted` holds
-/// only a failure worth repeating. `Cancelled` holds why a wait was cut short;
-/// [`retry`] never cuts one, so its `C` is [`Infallible`]: a `match` by value omits the
-/// arm, one by reference ends it with `match *never {}`.
+/// Why [`retry`] gave up: a `RetriesExhausted` holds only a failure worth repeating.
 #[derive(Debug, thiserror::Error)]
-pub(crate) enum RetryError<R, F, C = Infallible> {
+pub(crate) enum RetryError<R, F> {
     #[error(transparent)]
     Final(F),
     #[error("{last} (gave up after {retries} retries)")]
     RetriesExhausted { retries: u32, last: R },
-    #[error("cancelled while waiting to retry")]
-    Cancelled(C),
-}
-
-impl<R, F> RetryError<R, F> {
-    /// The same failure, typed as one of [`retry_until_cancelled`], so a caller that
-    /// uses both can handle them in one `match`.
-    pub(crate) fn cancellable<C>(self) -> RetryError<R, F, C> {
-        match self {
-            Self::Final(error) => RetryError::Final(error),
-            Self::RetriesExhausted { retries, last } => {
-                RetryError::RetriesExhausted { retries, last }
-            },
-        }
-    }
 }
 
 /// Runs `attempt` until it is done or final, or until `policy.max_retries` retries
@@ -110,9 +91,15 @@ where
     .await
 }
 
-/// The caller stopped waiting for the next retry.
-#[derive(Debug)]
-pub(crate) struct Cancelled;
+/// Why [`retry_until_cancelled`] gave up.
+#[derive(Debug, thiserror::Error)]
+pub(crate) enum RetryUntilCancelledError<R, F> {
+    #[error(transparent)]
+    GaveUp(#[from] RetryError<R, F>),
+    /// The caller stopped waiting for the next retry.
+    #[error("cancelled while waiting to retry")]
+    Cancelled,
+}
 
 /// [`retry`], giving up when `cancel` fires during a wait. An attempt already
 /// sent is let finish, so a request in flight is never cut off.
@@ -120,7 +107,7 @@ pub(crate) async fn retry_until_cancelled<T, R, F, Op, Fut>(
     policy: RetryPolicy,
     cancel: &CancellationToken,
     attempt: Op,
-) -> Result<T, RetryError<R, F, Cancelled>>
+) -> Result<T, RetryUntilCancelledError<R, F>>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
@@ -129,7 +116,7 @@ where
         // Cancellation wins a tie, so no attempt starts after it.
         tokio::select! {
             biased;
-            () = cancel.cancelled() => Err(Cancelled),
+            () = cancel.cancelled() => Err(RetryUntilCancelledError::Cancelled),
             () = sleep(delay) => Ok(()),
         }
     })
@@ -138,22 +125,23 @@ where
 
 /// The loop of [`retry`] and [`retry_until_cancelled`], which differ only in how
 /// they wait.
-async fn repeat<T, R, F, C, Op, Fut, Wait, WaitFut>(
+async fn repeat<T, R, F, E, Op, Fut, Wait, WaitFut>(
     policy: RetryPolicy,
     mut attempt: Op,
     mut wait: Wait,
-) -> Result<T, RetryError<R, F, C>>
+) -> Result<T, E>
 where
     Op: FnMut() -> Fut,
     Fut: Future<Output = Attempt<T, R, F>>,
     Wait: FnMut(Duration) -> WaitFut,
-    WaitFut: Future<Output = Result<(), C>>,
+    E: From<RetryError<R, F>>,
+    WaitFut: Future<Output = Result<(), E>>,
 {
     let mut retries = 0;
     loop {
         match attempt().await {
             Attempt::Done(value) => return Ok(value),
-            Attempt::Final(error) => return Err(RetryError::Final(error)),
+            Attempt::Final(error) => return Err(RetryError::Final(error).into()),
             Attempt::Retryable {
                 error,
                 wait_at_least,
@@ -162,13 +150,14 @@ where
                     return Err(RetryError::RetriesExhausted {
                         retries,
                         last: error,
-                    });
+                    }
+                    .into());
                 }
                 let delay = policy
                     .backoff
                     .delay(retries)
                     .max(wait_at_least.unwrap_or_default());
-                wait(delay).await.map_err(RetryError::Cancelled)?;
+                wait(delay).await?;
                 retries += 1;
             },
         }
@@ -316,7 +305,7 @@ mod tests {
             max_retries: 3,
         };
         let started = Instant::now();
-        let result: Result<(), RetryError<(), (), Cancelled>> =
+        let result: Result<(), RetryUntilCancelledError<(), ()>> =
             retry_until_cancelled(long_wait, &cancel, || async {
                 attempts.fetch_add(1, Ordering::SeqCst);
                 // Cancelled while this attempt is in flight: it still completes.
@@ -330,7 +319,7 @@ mod tests {
             .await;
 
         assert!(
-            matches!(result, Err(RetryError::Cancelled(Cancelled))),
+            matches!(result, Err(RetryUntilCancelledError::Cancelled)),
             "cancelled during the wait, got {result:?}"
         );
         assert_eq!(
