@@ -68,7 +68,9 @@ public class ViolationWireFormatTests {
             Collections.singletonList(new Violation("uri", "invalid_uri_syntax", "bad")));
 
         assertThat(failure.getMessage()).isEqualTo("Request validation failed: 1 invalid field");
-        assertThatThrownBy(() -> failure.getViolations().add(new Violation("x", "y", "z")))
+        List<Violation> violations_in_failure = failure.getViolations();
+        Violation violation = new Violation("x","y","z");
+        assertThatThrownBy(() -> violations_in_failure.add(violation))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 

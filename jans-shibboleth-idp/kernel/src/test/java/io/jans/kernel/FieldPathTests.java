@@ -3,6 +3,8 @@ package io.jans.kernel;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -67,11 +69,15 @@ public class FieldPathTests {
     @DisplayName("GIVEN a blank or negative segment WHEN used THEN it is rejected as a programming error")
     public void rejectsUnusableSegments() {
 
-        assertThatThrownBy(() -> FieldPath.empty().prepend(" "))
+        FieldPath fieldpath_one = FieldPath.empty();
+
+        assertThatThrownBy(() -> fieldpath_one.prepend(" "))
             .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> FieldPath.empty().prepend(null))
+        FieldPath fieldpath_two = FieldPath.empty();
+        assertThatThrownBy(() -> fieldpath_two.prepend(null))
             .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> FieldPath.empty().prepend("attributes", -1))
+        FieldPath fieldpath_three = FieldPath.empty();
+        assertThatThrownBy(() -> fieldpath_three.prepend("attributes", -1))
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -80,8 +86,8 @@ public class FieldPathTests {
     public void segmentsAreNotModifiable() {
 
         FieldPath path = FieldPath.of("displayName");
-
-        assertThatThrownBy(() -> path.getSegments().add("injected"))
+        List<String> segments = path.getSegments();
+        assertThatThrownBy(() -> segments.add("injected"))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 }
