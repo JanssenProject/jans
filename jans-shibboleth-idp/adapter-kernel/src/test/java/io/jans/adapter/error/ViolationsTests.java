@@ -9,6 +9,8 @@ import io.jans.kernel.FieldPath;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -176,7 +178,7 @@ public class ViolationsTests {
 
         Violations violations = collector();
 
-        violations.record(
+        violations.register(
             RequiredValueMissing.forField(Owner.class, "displayName"),
             FieldPath.empty().prepend("attributes", 3));
 
@@ -204,7 +206,7 @@ public class ViolationsTests {
 
         Violations violations = collector();
 
-        violations.record(new RequestProblem(), FieldPath.of("metadata_source"));
+        violations.register(new RequestProblem(), FieldPath.of("metadata_source"));
 
         assertThat(violations.asList())
             .extracting(Violation::field)
@@ -217,7 +219,7 @@ public class ViolationsTests {
 
         Violations violations = collector();
 
-        violations.record(
+        violations.register(
             RequiredValueMissing.forField(Owner.class, "attributes"),
             FieldPath.empty().prepend("mapped_attributes", 3));
 
@@ -232,7 +234,7 @@ public class ViolationsTests {
 
         Violations violations = collector();
 
-        violations.record(RequiredValueMissing.of(Owner.class), FieldPath.empty());
+        violations.register(RequiredValueMissing.of(Owner.class), FieldPath.empty());
 
         assertThat(violations.asList()).extracting(Violation::field).containsExactly("mapped_owner");
     }
@@ -287,7 +289,8 @@ public class ViolationsTests {
     @DisplayName("GIVEN no violations WHEN a failure is demanded THEN the misuse is rejected")
     public void refusesToReportAFailureWithNoViolations() {
 
-        assertThatThrownBy(() -> collector().asFailure()).isInstanceOf(IllegalArgumentException.class);
+        Violations violations = collector();
+        assertThatThrownBy(() -> violations.asFailure()).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -297,7 +300,9 @@ public class ViolationsTests {
         Violations violations = collector();
         violations.take(Result.failure(new FieldProblem()), "uri");
 
-        assertThatThrownBy(() -> violations.asList().add(new Violation("x", "y", "z")))
+        List<Violation> violations_as_list = violations.asList();
+        Violation violation = new Violation("x","y","z");
+        assertThatThrownBy(() -> violations_as_list.add(violation))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 }

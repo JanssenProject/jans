@@ -108,8 +108,10 @@ public class ProblemWireFormatTests {
 
         Problem problem = Problem.of(400, "c", "T")
             .withViolations(List.of(new Violation("f", "c", "m")));
-
-        assertThatThrownBy(() -> problem.violations().add(new Violation("x", "y", "z")))
+        
+            List<Violation> violations = problem.violations();
+            Violation violation = new Violation("x","y","z");
+        assertThatThrownBy(() -> violations.add(violation))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 

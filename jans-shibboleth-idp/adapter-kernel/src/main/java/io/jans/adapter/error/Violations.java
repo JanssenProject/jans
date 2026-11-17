@@ -69,7 +69,7 @@ public final class Violations {
             return result.getValue();
         }
 
-        record(result.getError(), result.getPath().prepend(dtoField));
+        register(result.getError(), result.getPath().prepend(dtoField));
         return null;
     }
 
@@ -85,7 +85,7 @@ public final class Violations {
             return result.getValue();
         }
 
-        record(result.getError(), result.getPath());
+        register(result.getError(), result.getPath());
         return null;
     }
 
@@ -93,7 +93,7 @@ public final class Violations {
      * Records a failure against the request field it names. A field-scoped error with no resolvable
      * field, and any error describing the request as a whole, is recorded against the request root.
      */
-    public void record(DomainError error, FieldPath path) {
+    public void register(DomainError error, FieldPath path) {
 
         String field = fieldOf(error, path);
 
@@ -170,7 +170,7 @@ public final class Violations {
             return failed.propagate();
         }
 
-        record(error, failed.getPath());
+        register(error, failed.getPath());
         return asFailure();
     }
 
