@@ -11,6 +11,7 @@
 use std::fmt::Display;
 
 use async_trait::async_trait;
+use reqwest::StatusCode;
 use url::Url;
 
 use crate::app_types::{ApplicationName, PdpID};
@@ -104,7 +105,8 @@ pub(super) enum SendFailure {
     Final(FinalSend),
 }
 
-/// What the network or a failing Lock may answer differently next time.
+/// What the network or a failing Lock may answer differently next time. `401`
+/// is one: Lock refuses a client for a few seconds after registering it.
 #[derive(Debug, thiserror::Error)]
 pub(super) enum RetryableSend {
     #[error(transparent)]
@@ -112,10 +114,14 @@ pub(super) enum RetryableSend {
     #[cfg(feature = "grpc")]
     #[error("gRPC {:?}: {}", .0.code(), .0.message())]
     Grpc(tonic::Status),
+    /// Lock answered the gRPC call with `success = false`, which it also sends
+    /// when storing the batch failed.
+    #[cfg(feature = "grpc")]
+    #[error("Lock reported failure: {message}")]
+    Unsuccessful { message: String },
 }
 
-/// A refusal the same batch gets on every attempt. `401` is one: the token is
-/// fixed when the transport is built, so each attempt would send the same one.
+/// A refusal the same batch gets on every attempt.
 #[derive(Debug, thiserror::Error)]
 pub(super) enum FinalSend {
     #[error(transparent)]
@@ -123,16 +129,19 @@ pub(super) enum FinalSend {
     #[cfg(feature = "grpc")]
     #[error(transparent)]
     Grpc(GrpcRefusal),
-    /// Lock answered the gRPC call with `success = false`.
-    #[cfg(feature = "grpc")]
-    #[error("Lock reported failure: {message}")]
-    Unsuccessful { message: String },
 }
 
 impl From<AttemptFailure> for SendFailure {
     fn from(failure: AttemptFailure) -> Self {
         match failure {
             AttemptFailure::Retryable(failure) => Self::Retryable(RetryableSend::Http(failure)),
+            AttemptFailure::Final(FinalFailure::Status {
+                status: StatusCode::UNAUTHORIZED,
+                url,
+            }) => Self::Retryable(RetryableSend::Http(RetryableFailure::Status {
+                status: StatusCode::UNAUTHORIZED,
+                url,
+            })),
             AttemptFailure::Final(failure) => Self::Final(FinalSend::Http(failure)),
         }
     }
@@ -143,6 +152,11 @@ impl From<GrpcFailure> for SendFailure {
     fn from(failure: GrpcFailure) -> Self {
         match failure {
             GrpcFailure::Retryable(status) => Self::Retryable(RetryableSend::Grpc(status)),
+            GrpcFailure::Final(GrpcRefusal::Lock(status))
+                if status.code() == tonic::Code::Unauthenticated =>
+            {
+                Self::Retryable(RetryableSend::Grpc(status))
+            },
             GrpcFailure::Final(refusal) => Self::Final(FinalSend::Grpc(refusal)),
         }
     }
@@ -163,4 +177,37 @@ pub enum TransportError {
     #[error("failed to parse access token: {0}")]
     #[cfg(feature = "grpc")]
     InvalidAccessToken(#[from] tonic::metadata::errors::InvalidMetadataValue),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::http::RedactedUrl;
+
+    #[test]
+    fn unauthorized_is_retried() {
+        let url = Box::new(RedactedUrl::new(
+            &"https://lock.example.org/audit"
+                .parse()
+                .expect("a valid URL"),
+        ));
+        let failure = SendFailure::from(AttemptFailure::Final(FinalFailure::Status {
+            status: StatusCode::UNAUTHORIZED,
+            url,
+        }));
+        assert!(
+            matches!(failure, SendFailure::Retryable(_)),
+            "Lock answers 401 for a few seconds after registration, got {failure:?}"
+        );
+
+        #[cfg(feature = "grpc")]
+        {
+            let failure =
+                SendFailure::from(GrpcFailure::sort(tonic::Status::unauthenticated("not yet")));
+            assert!(
+                matches!(failure, SendFailure::Retryable(RetryableSend::Grpc(_))),
+                "UNAUTHENTICATED is gRPC's 401, got {failure:?}"
+            );
+        }
+    }
 }

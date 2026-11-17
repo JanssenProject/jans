@@ -284,7 +284,7 @@ mod tests {
 
     #[tokio::test]
     async fn refused_batch_is_dropped_after_one_request() {
-        for status in [400, 401, 403, 404, 413] {
+        for status in [400, 403, 404, 413] {
             let mut server = Server::new_async().await;
             let bulk = server
                 .mock("POST", "/audit/log/bulk")
@@ -331,6 +331,40 @@ mod tests {
 
         bulk.assert_async().await;
         assert_exhausted(&log.pop_logs());
+    }
+
+    /// Lock refuses a client for a few seconds after registering it.
+    #[tokio::test]
+    async fn unauthorized_batch_is_sent_again() {
+        let mut server = Server::new_async().await;
+        let refused = server
+            .mock("POST", "/audit/log/bulk")
+            .with_status(401)
+            .expect(1)
+            .create_async()
+            .await;
+        let accepted = server
+            .mock("POST", "/audit/log/bulk")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+        let log = memory_log();
+        let mut worker = rest_worker(&format!("{}/audit/log/bulk", server.url()), &log);
+        worker.buffer.push_back(sample_log_item());
+
+        worker.flush(None).await;
+
+        refused.assert_async().await;
+        accepted.assert_async().await;
+        let logs = log.pop_logs();
+        assert!(
+            messages(&logs, "ERROR")
+                .iter()
+                .all(|error| !error.contains("dropping")),
+            "a 401 must not drop the batch: {:?}",
+            messages(&logs, "ERROR")
+        );
     }
 
     #[tokio::test]

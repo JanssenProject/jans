@@ -26,7 +26,7 @@ use crate::{
             TelemetryEntry, audit_service_client::AuditServiceClient,
         },
         transport::{
-            AuditItem, AuditKind, AuditTransport, FinalSend, SendFailure, TransportError,
+            AuditItem, AuditKind, AuditTransport, RetryableSend, SendFailure, TransportError,
             mapping::{
                 self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
                 NothingToSend,
@@ -144,7 +144,7 @@ impl AuditTransport for GrpcTransport {
 
         let inner = result.map_err(GrpcFailure::sort)?.into_inner();
         if !inner.success {
-            return Err(SendFailure::Final(FinalSend::Unsuccessful {
+            return Err(SendFailure::Retryable(RetryableSend::Unsuccessful {
                 message: inner.message,
             }));
         }
@@ -576,9 +576,9 @@ mod test {
         assert!(
             matches!(
                 error,
-                SendFailure::Final(FinalSend::Unsuccessful { ref message }) if message == "Server error"
+                SendFailure::Retryable(RetryableSend::Unsuccessful { ref message }) if message == "Server error"
             ),
-            "success = false is Lock's answer to this batch, so it is final, got {error:?}",
+            "success = false may be Lock failing to store the batch, so it is retried, got {error:?}",
         );
     }
 
@@ -867,9 +867,9 @@ mod test {
         assert!(
             matches!(
                 error,
-                SendFailure::Final(FinalSend::Unsuccessful { ref message }) if message == "Server error"
+                SendFailure::Retryable(RetryableSend::Unsuccessful { ref message }) if message == "Server error"
             ),
-            "success = false is Lock's answer to this batch, so it is final, got {error:?}",
+            "success = false may be Lock failing to store the batch, so it is retried, got {error:?}",
         );
     }
 
@@ -1111,16 +1111,10 @@ mod test {
 
         #[tokio::test]
         async fn lock_refusal_is_sent_once() {
-            let cases: [(&str, Reply); 3] = [
+            let cases: [(&str, Reply); 2] = [
                 ("InvalidArgument", || Err(Status::invalid_argument("bad"))),
                 ("PermissionDenied", || {
                     Err(Status::permission_denied("missing scope"))
-                }),
-                ("success = false", || {
-                    Ok(AuditResponse {
-                        success: false,
-                        message: "refused".to_string(),
-                    })
                 }),
             ];
             for (name, reply) in cases {
@@ -1135,17 +1129,30 @@ mod test {
         }
 
         #[tokio::test]
-        async fn unavailable_is_retried() {
-            let calls = Arc::new(AtomicUsize::new(0));
-            let origin = lock(|| Err(Status::unavailable("restarting")), calls.clone()).await;
-
-            flush_one_entry(&origin).await;
-
-            assert_eq!(
-                calls.load(Ordering::SeqCst),
-                MAX_RETRIES + 1,
-                "UNAVAILABLE may clear, so it is sent once and retried {MAX_RETRIES} times"
-            );
+        async fn failure_that_may_clear_is_retried() {
+            let cases: [(&str, Reply); 3] = [
+                ("UNAVAILABLE", || Err(Status::unavailable("restarting"))),
+                // Lock refuses a client for a few seconds after registering it.
+                ("UNAUTHENTICATED", || {
+                    Err(Status::unauthenticated("unknown client"))
+                }),
+                // Lock also answers so when storing the batch failed.
+                ("success = false", || {
+                    Ok(AuditResponse {
+                        success: false,
+                        message: "Failed to persist bulk data".to_string(),
+                    })
+                }),
+            ];
+            for (name, reply) in cases {
+                let calls = Arc::new(AtomicUsize::new(0));
+                flush_one_entry(&lock(reply, calls.clone()).await).await;
+                assert_eq!(
+                    calls.load(Ordering::SeqCst),
+                    MAX_RETRIES + 1,
+                    "{name} may clear, so it is sent once and retried {MAX_RETRIES} times"
+                );
+            }
         }
 
         #[tokio::test]
