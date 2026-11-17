@@ -1,5 +1,5 @@
 ### Stage 1: Dependencies
-FROM ghcr.io/astral-sh/uv:0.11.7-python3.11-trixie-slim@sha256:449b0bec3684b2fdc2fd1303b054a53f76ea6727f3a9475d393a929dca97bc8a AS deps
+FROM ghcr.io/astral-sh/uv:0.13.9-python3.11-trixie-slim@sha256:839b8b68a4bf47933fbd4e64f2550fc6f36d7e15aceca8b1cc7e1ade1eb2f1c5 AS deps
 
 ENV PATH="/opt/venv/bin:${PATH}" \
     UV_PYTHON_DOWNLOADS=0 \
