@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -36,12 +37,15 @@ import jakarta.inject.Inject;
  * Business-level service over {@link TraceStore} for producer-key lookup with validity evaluation
  * and key registration/revocation (design §6).
  *
- * <p>The MVP does no caching: every {@link #resolveForVerification} call hits {@link TraceStore}
- * directly, so a revocation is visible on the very next request. The safe upgrade path, if the
- * per-request lookup cost ever matters, is a short-TTL cache keyed by
- * {@code (domainId, producerId, kid)} that is explicitly invalidated by {@link #revoke} — never a
- * cache that only expires on its own, since that would let a revoked key keep verifying for up to
- * the TTL.
+ * <p>There is no cache that outlives a request: every {@link #resolveForVerification} call hits
+ * {@link TraceStore} directly, so a revocation is visible on the very next request. A bulk request
+ * may share one read per key among its elements through {@link #newRequestKeys()}: the memo lives
+ * for that request only, keeps only keys that resolved successfully, and judges the validity window
+ * of every element again. A revocation made while a bulk request is being verified is seen by the next
+ * request. The safe upgrade path, if the lookup cost across requests ever matters, is a short-TTL
+ * cache keyed by {@code (domainId, producerId, kid)} that is explicitly invalidated by
+ * {@link #revoke} — never a cache that only expires on its own, since that would let a revoked key
+ * keep verifying for up to the TTL.
  *
  * @author Yuriy Movchan
  */
@@ -95,10 +99,39 @@ public class ProducerKeyRegistry {
 	 *                                  key is outside its validity window
 	 */
 	public ResolvedKey resolveForVerification(String domainId, String producerId, String kid, long nowMs) {
+		return judge(load(domainId, producerId, kid), nowMs);
+	}
+
+	/**
+	 * @return a key resolver for one bulk request: each {@code (domainId, producerId, kid)} that
+	 *         resolves successfully is read from {@link TraceStore} once, and every call judges the
+	 *         validity window at its own {@code nowMs} exactly as {@link #resolveForVerification}
+	 *         does. A key that fails is read again by the next call. Safe for concurrent use
+	 *         by the verification pool. Discard it when the request ends.
+	 */
+	public KeyResolver newRequestKeys() {
+		return new RequestKeys(this);
+	}
+
+	/**
+	 * The store read of {@link #resolveForVerification}, without any validity evaluation.
+	 *
+	 * @throws TraceValidationException {@code unknown_producer_key} with reason
+	 *                                  {@code key_not_registered} when no key is registered
+	 */
+	LoadedKey load(String domainId, String producerId, String kid) {
 		TraceProducerKeyEntry key = traceStore.findProducerKey(domainId, producerId, kid)
 				.orElseThrow(() -> new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY,
 						REASON_KEY_NOT_REGISTERED));
+		return new LoadedKey(domainId, producerId, kid, key);
+	}
 
+	/**
+	 * The judgement of {@link #resolveForVerification}: the validity window at {@code nowMs}, then
+	 * the stored JWK, in that order.
+	 */
+	ResolvedKey judge(LoadedKey loaded, long nowMs) {
+		TraceProducerKeyEntry key = loaded.entry;
 		if (nowMs < key.getValidFromMs()) {
 			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_NOT_YET_VALID);
 		}
@@ -108,20 +141,28 @@ public class ProducerKeyRegistry {
 		if (key.getRevokedAtMs() != null && nowMs >= key.getRevokedAtMs()) {
 			throw new TraceValidationException(TraceErrorResponseType.KEY_NOT_VALID, REASON_REVOKED);
 		}
+		return new ResolvedKey(key, verificationKey(loaded));
+	}
 
-		TraceVerificationKey verificationKey;
+	/** Parses the stored JWK once per loaded key; a failure is not kept and is thrown again next time. */
+	private TraceVerificationKey verificationKey(LoadedKey loaded) {
+		TraceVerificationKey parsed = loaded.verificationKey;
+		if (parsed != null) {
+			return parsed;
+		}
 		try {
-			verificationKey = cryptoProvider.parseKey(key.getPublicKeyJwk());
+			parsed = cryptoProvider.parseKey(loaded.entry.getPublicKeyJwk());
 		} catch (TraceCryptoException ex) {
 			if (TraceCryptoException.REASON_CRYPTO_UNAVAILABLE.equals(ex.getReason())) {
 				throw ex;
 			}
-			log.error("Stored producer key is unusable: domainId={}, producerId={}, kid={}, reason={}", domainId,
-					producerId, kid, ex.getReason());
+			log.error("Stored producer key is unusable: domainId={}, producerId={}, kid={}, reason={}",
+					loaded.domainId, loaded.producerId, loaded.kid, ex.getReason());
 			throw new TraceValidationException(TraceErrorResponseType.UNKNOWN_PRODUCER_KEY, REASON_STORED_KEY_UNUSABLE,
 					ex);
 		}
-		return new ResolvedKey(key, verificationKey);
+		loaded.verificationKey = parsed;
+		return parsed;
 	}
 
 	/**
@@ -259,6 +300,110 @@ public class ProducerKeyRegistry {
 
 		boolean authorizes(String eventKind) {
 			return eventKind != null && getAuthorizedEventKinds().contains(eventKind);
+		}
+
+	}
+
+	/**
+	 * Resolves the key that verifies one record, with the contract of
+	 * {@link ProducerKeyRegistry#resolveForVerification}: the same result and the same failures for
+	 * the same stored key and {@code nowMs}.
+	 */
+	@FunctionalInterface
+	public interface KeyResolver {
+
+		ResolvedKey resolve(String domainId, String producerId, String kid, long nowMs);
+
+	}
+
+	/** A stored key as read, before any validity evaluation. */
+	static final class LoadedKey {
+
+		private final String domainId;
+
+		private final String producerId;
+
+		private final String kid;
+
+		private final TraceProducerKeyEntry entry;
+
+		/** Set after the first successful parse; a benign race parses the same JWK twice. */
+		private volatile TraceVerificationKey verificationKey;
+
+		LoadedKey(String domainId, String producerId, String kid, TraceProducerKeyEntry entry) {
+			this.domainId = domainId;
+			this.producerId = producerId;
+			this.kid = kid;
+			this.entry = Objects.requireNonNull(entry, "entry");
+		}
+
+	}
+
+	/**
+	 * The memo of one bulk request. A key is kept only after it resolved successfully once: a missing
+	 * key, a key outside its validity window, an unusable stored key or a store failure propagates to
+	 * the element that asked and is looked up again by the next element, as without the memo. A kept
+	 * key is judged again on every call with the caller's {@code nowMs}. Concurrent callers for the
+	 * same key wait for one read.
+	 */
+	static final class RequestKeys implements KeyResolver {
+
+		private final ProducerKeyRegistry registry;
+
+		private final ConcurrentHashMap<KeyId, LoadedKey> loaded = new ConcurrentHashMap<>();
+
+		RequestKeys(ProducerKeyRegistry registry) {
+			this.registry = registry;
+		}
+
+		@Override
+		public ResolvedKey resolve(String domainId, String producerId, String kid, long nowMs) {
+			KeyId id = new KeyId(domainId, producerId, kid);
+			LoadedKey known = loaded.get(id);
+			if (known != null) {
+				return registry.judge(known, nowMs);
+			}
+			ResolvedKey[] first = new ResolvedKey[1];
+			LoadedKey key = loaded.computeIfAbsent(id, absent -> {
+				LoadedKey read = registry.load(domainId, producerId, kid);
+				first[0] = registry.judge(read, nowMs);
+				return read;
+			});
+			return first[0] != null ? first[0] : registry.judge(key, nowMs);
+		}
+
+	}
+
+	private static final class KeyId {
+
+		private final String domainId;
+
+		private final String producerId;
+
+		private final String kid;
+
+		KeyId(String domainId, String producerId, String kid) {
+			this.domainId = domainId;
+			this.producerId = producerId;
+			this.kid = kid;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof KeyId)) {
+				return false;
+			}
+			KeyId that = (KeyId) other;
+			return Objects.equals(domainId, that.domainId) && Objects.equals(producerId, that.producerId)
+					&& Objects.equals(kid, that.kid);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(domainId, producerId, kid);
 		}
 
 	}
