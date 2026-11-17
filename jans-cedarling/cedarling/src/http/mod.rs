@@ -40,6 +40,8 @@ use thiserror::Error;
 pub(crate) struct HttpClient {
     pub(crate) raw_client: Client,
     conf: HttpClientConfig,
+    /// Whether a retried request repeats a `401`, see [`HttpClient::retrying_unauthorized`].
+    retry_unauthorized: bool,
 }
 
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
@@ -191,7 +193,21 @@ impl HttpClient {
 
         let raw_client = builder.build().map_err(InitializeHttpClientError)?;
 
-        Ok(Self { raw_client, conf })
+        Ok(Self {
+            raw_client,
+            conf,
+            retry_unauthorized: false,
+        })
+    }
+
+    /// This client, with a `401` on a retried request repeated like a `5xx`. For a
+    /// client carrying Lock's token: Lock refuses a client for a few seconds after
+    /// registering it.
+    pub(crate) fn retrying_unauthorized(self) -> Self {
+        Self {
+            retry_unauthorized: true,
+            ..self
+        }
     }
 
     /// A client with the same limits but without this client's default headers,
@@ -252,7 +268,7 @@ impl HttpClient {
     {
         let response = retry(self.conf.retry_policy(), || {
             let request = f(self.raw_client.get(uri));
-            async move { attempt(request.send().await) }
+            async move { attempt(request.send().await, self.retry_unauthorized) }
         })
         .await?;
         Ok(response)
@@ -581,6 +597,57 @@ mod test {
                 "HTTP {status} would be answered the same way again, got: {err:?}"
             );
         }
+    }
+
+    /// Lock refuses a client for a few seconds after registering it, so a client
+    /// carrying its token repeats a `401`; a `403` stays final.
+    #[tokio::test]
+    async fn client_retrying_unauthorized_repeats_only_401() {
+        let mut server = Server::new_async().await;
+        let refused = server
+            .mock("GET", "/store")
+            .with_status(401)
+            .expect(1)
+            .create_async()
+            .await;
+        let accepted = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+        let forbidden = server
+            .mock("GET", "/forbidden")
+            .with_status(403)
+            .expect(1)
+            .create_async()
+            .await;
+        let client = HttpClient::new(HTTP_CONF)
+            .expect("Should create HttpClient.")
+            .retrying_unauthorized();
+
+        client
+            .get(&format!("{}/store", server.url()))
+            .await
+            .expect("the request after the 401 succeeds");
+        let err = client
+            .get(&format!("{}/forbidden", server.url()))
+            .await
+            .expect_err("a 403 must fail");
+
+        refused.assert_async().await;
+        accepted.assert_async().await;
+        forbidden.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                HttpClientError::Send(SendError::Final(FinalFailure::Status {
+                    status: StatusCode::FORBIDDEN,
+                    ..
+                }))
+            ),
+            "only a 401 is repeated, got: {err:?}"
+        );
     }
 
     #[tokio::test]

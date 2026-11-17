@@ -724,7 +724,7 @@ fn policy_store_http_client(
         reqwest::Client::builder().default_headers(headers),
         config.http_client_config,
     )?;
-    Ok(Some(client))
+    Ok(Some(client.retrying_unauthorized()))
 }
 
 /// Spawn the background policy-store refresh worker if the source is a remote

@@ -115,7 +115,7 @@ pub(crate) enum RetryableFailure {
     /// Connect, timeout or dropped connection.
     #[error("{}", ErrorChain(.0))]
     Transport(reqwest::Error),
-    /// `408`, `429` or `5xx`.
+    /// `408`, `429` or `5xx`, or a `401` from a client that repeats it.
     #[error("HTTP {status} from {url}")]
     Status {
         status: StatusCode,
@@ -288,14 +288,26 @@ pub(crate) enum ReadBodyError {
     TooLarge { limit: u64, read_so_far: u64 },
 }
 
-/// One attempt of a retried request, sorted for [`crate::common::retry::retry`].
+/// One attempt of a retried request, sorted for [`crate::common::retry::retry`];
+/// a `401` is repeated when `retry_unauthorized`.
 pub(crate) fn attempt(
     result: Result<reqwest::Response, reqwest::Error>,
+    retry_unauthorized: bool,
 ) -> Attempt<reqwest::Response, RetryableFailure, FinalFailure> {
     // TODO: add optional debug-level logging hook here once a logger can be
     //       passed in without pulling logging into this low-level crate.
     match AttemptFailure::check(result) {
         Ok(response) => Attempt::Done(response),
+        Err(AttemptFailure::Final(FinalFailure::Status {
+            status: StatusCode::UNAUTHORIZED,
+            url,
+        })) if retry_unauthorized => Attempt::Retryable {
+            error: RetryableFailure::Status {
+                status: StatusCode::UNAUTHORIZED,
+                url,
+            },
+            wait_at_least: None,
+        },
         Err(AttemptFailure::Retryable(error)) => Attempt::Retryable {
             error,
             wait_at_least: None,
