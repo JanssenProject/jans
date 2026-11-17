@@ -14,7 +14,7 @@ use crate::http::HttpClient;
 use crate::jwt::log_entry::JwtLogEntry;
 use crate::log::Logger;
 
-use super::http_utils::{GetFromUrl, HttpError};
+use super::fetch::{GetFromUrl, HttpError};
 use jsonwebtoken::jwk::{Jwk, KeyAlgorithm};
 use jsonwebtoken::{Algorithm, DecodingKey};
 use serde::Deserialize;
@@ -337,7 +337,7 @@ mod test {
     use std::time::Duration;
 
     use super::*;
-    use crate::jwt::http_utils::OpenIdConfig;
+    use crate::jwt::fetch::OpenIdConfig;
     use crate::{
         http::{HttpClient, HttpClientConfig},
         jwt::test_utils::{MockServer, generate_jwks, generate_keypair_hs256},

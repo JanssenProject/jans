@@ -835,7 +835,7 @@ mod test {
     #[tokio::test]
     async fn fetch_failure_names_the_url_and_the_http_cause() {
         use crate::http::HttpClientError;
-        use crate::http_utils::{FinalFailure, SendError};
+        use crate::http::{FinalFailure, SendError};
 
         let mut mock_server = Server::new_async().await;
         let mock_endpoint = mock_server

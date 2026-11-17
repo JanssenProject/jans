@@ -851,9 +851,7 @@ fn fetch_error(
 /// network error, and a body cut short has its own bucket.
 fn classify_fetch_error(e: &crate::http::HttpClientError) -> (&'static str, RefreshOutcome) {
     use crate::http::HttpClientError;
-    use crate::http_utils::{
-        AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError,
-    };
+    use crate::http::{AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError};
 
     const HTTP: (&str, RefreshOutcome) = ("HTTP error", RefreshOutcome::HttpError);
     const NETWORK: (&str, RefreshOutcome) = ("network error", RefreshOutcome::NetworkError);
@@ -1948,7 +1946,7 @@ mod tests {
     #[test]
     fn classify_failure_statuses_route_to_http_error() {
         use crate::http::HttpClientError;
-        use crate::http_utils::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
+        use crate::http::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
         use reqwest::StatusCode;
 
         let final_status = || FinalFailure::Status {
@@ -1980,7 +1978,7 @@ mod tests {
     #[tokio::test]
     async fn classify_transport_failure_routes_to_network_error() {
         use crate::http::HttpClientError;
-        use crate::http_utils::{RetryableFailure, SendError};
+        use crate::http::{RetryableFailure, SendError};
 
         // Port 1 is never listening, so the request fails before any response.
         let transport = reqwest::get("http://127.0.0.1:1/store")
@@ -2000,7 +1998,7 @@ mod tests {
     #[test]
     fn classify_invalid_request_routes_to_http_error() {
         use crate::http::HttpClientError;
-        use crate::http_utils::{FinalFailure, SendError};
+        use crate::http::{FinalFailure, SendError};
 
         let builder = reqwest::Client::new()
             .get("not a url")

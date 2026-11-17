@@ -22,7 +22,6 @@ mod common;
 mod context_data_api;
 mod entity_builder;
 mod http;
-mod http_utils;
 mod init;
 mod jwt;
 mod lock;

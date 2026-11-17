@@ -19,7 +19,7 @@ use super::{
 };
 use crate::common::retry::MAX_EXPONENTIAL_DELAY;
 use crate::http::HttpClient;
-use crate::http_utils::{AttemptFailure, HttpRequestError, ReadBodyError};
+use crate::http::{AttemptFailure, HttpRequestError, ReadBodyError};
 
 /// Lock's TRACE bulk endpoint and the client that posts to it.
 pub(in crate::lock) struct RestTraceClient {

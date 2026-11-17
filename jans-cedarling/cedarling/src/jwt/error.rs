@@ -5,7 +5,7 @@
 
 use crate::jwt::trusted_issuers_loader::TrustedIssuerLoaderError;
 
-use super::http_utils::HttpError;
+use super::fetch::HttpError;
 use super::key_service;
 use super::status_list::UpdateStatusListError;
 use super::validation::ValidateJwtError;

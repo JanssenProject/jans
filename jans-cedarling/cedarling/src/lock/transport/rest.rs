@@ -12,8 +12,8 @@ use serde::Serialize;
 use url::Url;
 
 use crate::{
+    http::AttemptFailure,
     http::HttpClient,
-    http_utils::AttemptFailure,
     lock::{
         LockLogEntry,
         transport::{
@@ -110,7 +110,7 @@ mod test {
     use reqwest::StatusCode;
 
     use crate::HttpClientConfig;
-    use crate::http_utils::{FinalFailure, RetryableFailure};
+    use crate::http::{FinalFailure, RetryableFailure};
     use crate::lock::transport::{FinalSend, RetryableSend};
 
     use super::*;

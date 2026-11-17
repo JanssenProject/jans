@@ -6,8 +6,8 @@
 //! This module is responsible for Cedarling's Dynamic Client Registration (DCR) at startup.
 
 use super::{init_http_client, lock_config::Url};
+use crate::http::HttpRequestError;
 use crate::http::{HttpClient, is_secure_transport};
-use crate::http_utils::HttpRequestError;
 use crate::{HttpClientConfig, app_types::PdpID, http::InitializeHttpClientError};
 use serde::Deserialize;
 use serde_json::json;

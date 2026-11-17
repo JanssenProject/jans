@@ -3,7 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+mod body;
 pub(crate) mod cache_headers;
+mod failure;
 mod spawn_task;
 #[cfg(test)]
 pub(crate) mod test_support;
@@ -11,10 +13,13 @@ pub(crate) mod test_support;
 pub use spawn_task::*;
 
 use crate::common::retry::{Backoff, RetryPolicy, retry};
-use crate::http_utils::{
-    AttemptFailure, FinalFailure, HttpRequestError, RetryableFailure, attempt, read_body, read_json,
-};
+pub(crate) use body::read_body;
+use body::read_json;
 use cache_headers::CacheHeadersState;
+use failure::attempt;
+pub(crate) use failure::{
+    AttemptFailure, FinalFailure, HttpRequestError, ReadBodyError, RetryableFailure, SendError,
+};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
 #[cfg(test)]
@@ -418,14 +423,14 @@ impl Response {
     }
 }
 
-/// Error type for the [`HttpClient`] - re-export from [`http_utils`] for compatibility
+/// Error type of [`HttpClient`].
 pub(crate) type HttpClientError = HttpRequestError;
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
     use crate::http::cache_headers::CacheHeadersState;
+    use crate::http::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
     use crate::http::{HttpClient, HttpClientConfig, HttpClientError};
-    use crate::http_utils::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
 
     use mockito::Server;
     use reqwest::StatusCode;
@@ -1191,7 +1196,7 @@ mod test {
             matches!(
                 err,
                 HttpClientError::ReadBody {
-                    error: crate::http_utils::ReadBodyError::TooLarge { limit: 1024, .. },
+                    error: crate::http::ReadBodyError::TooLarge { limit: 1024, .. },
                     ..
                 }
             ),

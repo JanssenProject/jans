@@ -8,8 +8,8 @@
 
 use std::str::FromStr;
 
+use crate::http::HttpRequestError;
 use crate::http::{HttpClient, InitializeHttpClientError};
-use crate::http_utils::HttpRequestError;
 use serde::{Deserialize, Deserializer, de};
 
 #[derive(Debug, Deserialize, PartialEq, Clone)]

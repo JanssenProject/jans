@@ -14,7 +14,7 @@ use async_trait::async_trait;
 use url::Url;
 
 use crate::app_types::{ApplicationName, PdpID};
-use crate::http_utils::{AttemptFailure, FinalFailure, RetryableFailure};
+use crate::http::{AttemptFailure, FinalFailure, RetryableFailure};
 #[cfg(feature = "grpc")]
 use crate::lock::grpc_failure::{GrpcFailure, GrpcRefusal};
 use crate::lock::health_registry::SystemHealth;
