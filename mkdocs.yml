@@ -693,7 +693,7 @@ site_name: Janssen Documentation
 site_url: https://docs.jans.io
 theme:
   variant: classic
-  custom_dir: docs\overrides
+  custom_dir: docs/overrides
   favicon: assets/janssen_project_favicon_transparent_50px_50px.ico
   features:
   - navigation.tracking
