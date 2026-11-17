@@ -73,7 +73,7 @@ pub(crate) enum AttemptFailure {
     Final(FinalFailure),
 }
 
-/// A failure the same request may not repeat: the network or the server may recover.
+/// A failure that may not happen again: the network or the server may recover.
 #[derive(Debug, Error)]
 pub(crate) enum RetryableFailure {
     /// Connect, timeout or dropped connection.

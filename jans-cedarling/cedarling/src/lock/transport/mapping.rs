@@ -198,11 +198,13 @@ impl TryFrom<&AuditItem> for LockServerHealthEntry {
     }
 }
 
-/// No entry of a batch maps, so there is no request to make.
+/// A batch with no entry to send, so there is no request to make.
 #[derive(Debug, thiserror::Error)]
-#[error("none of the {count} entries could be mapped; nothing to send")]
-pub(in crate::lock) struct NothingToSend {
-    pub(in crate::lock) count: usize,
+pub(in crate::lock) enum NothingToSend {
+    #[error("the batch is empty; nothing to send")]
+    Empty,
+    #[error("none of the {count} entries could be mapped; nothing to send")]
+    NoneMapped { count: usize },
 }
 
 /// Map a batch of typed audit items into the Lock Server wire format
@@ -214,6 +216,9 @@ where
     T: TryFrom<&'a AuditItem>,
     <T as TryFrom<&'a AuditItem>>::Error: std::fmt::Display,
 {
+    if entries.is_empty() {
+        return Err(NothingToSend::Empty);
+    }
     let mapped: Vec<T> = entries
         .iter()
         .enumerate()
@@ -228,7 +233,7 @@ where
         .collect();
 
     if mapped.is_empty() {
-        return Err(NothingToSend {
+        return Err(NothingToSend::NoneMapped {
             count: entries.len(),
         });
     }
@@ -559,7 +564,7 @@ mod test {
         let err = map_entries::<LockServerLogEntry>(&items, |_| {})
             .expect_err("all-malformed batch must fail");
         assert!(
-            matches!(err, NothingToSend { count: 1 }),
+            matches!(err, NothingToSend::NoneMapped { count: 1 }),
             "the one malformed entry leaves nothing to send, got {err:?}"
         );
     }

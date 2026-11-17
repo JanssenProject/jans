@@ -159,7 +159,9 @@ mod test {
         let mut server = Server::new_async().await;
         let mock = mock_log_endpoint(&mut server);
 
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
+        let endpoint: Url = format!("{}/audit/log/bulk", server.url())
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_log_item()];
@@ -173,18 +175,17 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_empty() {
         let server = Server::new_async().await;
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
+        let endpoint: Url = format!("{}/audit/log/bulk", server.url())
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let err = transport
             .prepare(&[], &AuditKind::Log(endpoint))
             .expect_err("an empty batch has nothing to send");
         assert!(
-            matches!(
-                err,
-                RestPrepareError::NothingToSend(NothingToSend { count: 0 })
-            ),
-            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+            matches!(err, RestPrepareError::NothingToSend(NothingToSend::Empty)),
+            "expected NothingToSend::Empty, got {err:?}"
         );
     }
 
@@ -197,7 +198,9 @@ mod test {
             .with_body("Internal Server Error")
             .create();
 
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
+        let endpoint: Url = format!("{}/audit/log/bulk", server.url())
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_log_item()];
@@ -227,7 +230,9 @@ mod test {
             .with_body("Bad Request")
             .create();
 
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
+        let endpoint: Url = format!("{}/audit/log/bulk", server.url())
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_log_item()];
@@ -250,7 +255,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_network_failure() {
-        let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
+        let endpoint: Url = "http://localhost:1/invalid".parse().expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_log_item()];
@@ -269,7 +274,9 @@ mod test {
 
     #[tokio::test]
     async fn test_send_logs_all_invalid_dropped() {
-        let endpoint: Url = "http://localhost:8080/audit/log/bulk".parse().unwrap();
+        let endpoint: Url = "http://localhost:8080/audit/log/bulk"
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![malformed_log_item()];
@@ -280,9 +287,9 @@ mod test {
         assert!(
             matches!(
                 err,
-                RestPrepareError::NothingToSend(NothingToSend { count: 1 })
+                RestPrepareError::NothingToSend(NothingToSend::NoneMapped { count: 1 })
             ),
-            "expected NothingToSend {{ count: 1 }}, got {err:?}"
+            "expected NothingToSend::NoneMapped {{ count: 1 }}, got {err:?}"
         );
     }
 
@@ -291,7 +298,9 @@ mod test {
         let mut server = Server::new_async().await;
         let mock = mock_log_endpoint(&mut server);
 
-        let endpoint: Url = format!("{}/audit/log/bulk", server.url()).parse().unwrap();
+        let endpoint: Url = format!("{}/audit/log/bulk", server.url())
+            .parse()
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         // Send 1000 entries
@@ -354,18 +363,15 @@ mod test {
         let server = Server::new_async().await;
         let endpoint: Url = format!("{}/audit/health/bulk", server.url())
             .parse()
-            .unwrap();
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let err = transport
             .prepare(&[], &AuditKind::Health(endpoint))
             .expect_err("an empty batch has nothing to send");
         assert!(
-            matches!(
-                err,
-                RestPrepareError::NothingToSend(NothingToSend { count: 0 })
-            ),
-            "expected NothingToSend {{ count: 0 }}, got {err:?}"
+            matches!(err, RestPrepareError::NothingToSend(NothingToSend::Empty)),
+            "expected NothingToSend::Empty, got {err:?}"
         );
     }
 
@@ -380,7 +386,7 @@ mod test {
 
         let endpoint: Url = format!("{}/audit/health/bulk", server.url())
             .parse()
-            .unwrap();
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_health_item()];
@@ -412,7 +418,7 @@ mod test {
 
         let endpoint: Url = format!("{}/audit/health/bulk", server.url())
             .parse()
-            .unwrap();
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_health_item()];
@@ -435,7 +441,7 @@ mod test {
 
     #[tokio::test]
     async fn test_send_health_network_failure() {
-        let endpoint: Url = "http://localhost:1/invalid".parse().unwrap();
+        let endpoint: Url = "http://localhost:1/invalid".parse().expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = vec![sample_health_item()];
@@ -459,7 +465,7 @@ mod test {
 
         let endpoint: Url = format!("{}/audit/health/bulk", server.url())
             .parse()
-            .unwrap();
+            .expect("a valid URL");
         let transport = RestTransport::new(create_test_client(), None);
 
         let entries = (0..1000).map(|_| sample_health_item()).collect::<Vec<_>>();
