@@ -23,8 +23,6 @@ pub(crate) use failure::{
 };
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
-#[cfg(test)]
-use serde::Deserialize;
 use std::time::Duration;
 use thiserror::Error;
 
@@ -203,34 +201,12 @@ impl HttpClient {
         Self::new(self.conf)
     }
 
-    /// Sends a GET request to the specified URI with retry logic. Returns the
-    /// response body wrapped in [`Response`], which the caller can then
-    /// deserialize. Test-only: production callers use [`Self::get_with_retry`]
-    /// or [`Self::get_json`].
-    #[cfg(test)]
-    pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        let body = self.get_bytes(uri).await?;
-        Ok(Response { body })
-    }
-
     pub(crate) async fn get_json<T>(&self, uri: &str) -> Result<T, HttpClientError>
     where
         T: serde::de::DeserializeOwned,
     {
         let response = self.get_with_retry(uri).await?;
         read_json(response, self.conf.max_response_size_bytes).await
-    }
-
-    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
-    ///
-    /// This method will attempt to fetch the resource up to the configured `max_retries`,
-    /// with exponential backoff between each attempt. Useful for fetching binary content
-    /// like archive files. Test-only: production callers use [`Self::get_with_retry`]
-    /// so they can capture response headers alongside the body.
-    #[cfg(test)]
-    pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
-        let response = self.get_with_retry(uri).await?;
-        self.read_response_capped(response).await
     }
 
     // Execute POST request
@@ -247,7 +223,7 @@ impl HttpClient {
 
     /// Sends a GET request with retry logic and returns the raw [`reqwest::Response`].
     ///
-    /// Unlike `get`, `get_json`, or `get_bytes`, this method gives the caller access to
+    /// Unlike `get_json`, this method gives the caller access to
     /// response headers and lets them decide how to consume the body. Use it when you
     /// need to inspect headers (e.g. `Cache-Control`, `Content-Type`) before reading
     /// the payload.
@@ -403,25 +379,6 @@ pub(crate) enum HeadOutcome {
     Headers(CacheHeadersState),
     /// Server explicitly rejected HEAD (`405` / `501`).
     NotSupported,
-}
-
-/// Wrapper around a response body — lets callers defer JSON deserialization
-/// to a stage where they hold the response. Returned by [`HttpClient::get`].
-/// Test-only.
-#[cfg(test)]
-#[derive(Debug)]
-pub(crate) struct Response {
-    body: Vec<u8>,
-}
-
-#[cfg(test)]
-impl Response {
-    pub(crate) fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
-    where
-        T: Deserialize<'a>,
-    {
-        serde_json::from_slice::<'a, T>(&self.body)
-    }
 }
 
 #[cfg(all(test, not(target_arch = "wasm32")))]
