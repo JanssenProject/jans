@@ -1,0 +1,156 @@
+{
+  "execution_authority": "https://gateway.example.org",
+  "client_id": "trace-generator-client",
+  "traffic": {
+    "seed": 7,
+    "train_executions": 200,
+    "test_executions": 40,
+    "anomalies": 6,
+    "pause_millis": 300,
+    "deny_rate": 0.03,
+    "cross_team_rate": 0.1
+  },
+  "customers": 20,
+  "workloads": [
+    "billing",
+    "payments",
+    "search",
+    "ledger",
+    "gateway"
+  ],
+  "environments": [
+    "staging",
+    "prod"
+  ],
+  "actions": {
+    "Deploy": {
+      "action": "AcmeOps::Action::\"Deploy\"",
+      "resource": {
+        "cedar_entity_mapping": {
+          "entity_type": "AcmeOps::Resource",
+          "id": "workload-none-${environment}-${workload}"
+        },
+        "kind": "workload",
+        "customer": "none",
+        "environment": "${environment}",
+        "workload": "${workload}"
+      },
+      "context": {
+        "ticket_customer": "none",
+        "ticket_assignee": "${given_name}",
+        "change_approved": "${is_prod}",
+        "change_workload": "${workload}",
+        "human_on_call": "${is_prod}",
+        "suspicious": false
+      },
+      "deny_context": {
+        "change_workload": "other-workload"
+      }
+    },
+    "ReadCustomer": {
+      "action": "AcmeOps::Action::\"ReadCustomer\"",
+      "resource": {
+        "cedar_entity_mapping": {
+          "entity_type": "AcmeOps::Resource",
+          "id": "customer-record-${customer}-prod-none"
+        },
+        "kind": "customer-record",
+        "customer": "${customer}",
+        "environment": "prod",
+        "workload": "none"
+      },
+      "context": {
+        "ticket_customer": "${customer}",
+        "ticket_assignee": "${given_name}",
+        "change_approved": false,
+        "change_workload": "none",
+        "human_on_call": false,
+        "suspicious": false
+      },
+      "deny_context": {
+        "ticket_assignee": "someone-else"
+      }
+    }
+  },
+  "team_actions": {
+    "ops": "Deploy",
+    "support": "ReadCustomer"
+  },
+  "anomaly": {
+    "team": "ops",
+    "action": "ReadCustomer"
+  },
+  "users": [
+    {
+      "given_name": "Alice",
+      "inum": "inum-alice",
+      "roles": [
+        "admin"
+      ],
+      "team": "ops"
+    },
+    {
+      "given_name": "Carol",
+      "inum": "inum-carol",
+      "roles": [
+        "admin",
+        "sre"
+      ],
+      "team": "ops"
+    },
+    {
+      "given_name": "Erin",
+      "inum": "inum-erin",
+      "roles": [
+        "admin"
+      ],
+      "team": "ops"
+    },
+    {
+      "given_name": "Gina",
+      "inum": "inum-gina",
+      "roles": [
+        "admin"
+      ],
+      "team": "ops"
+    },
+    {
+      "given_name": "Hank",
+      "inum": "inum-hank",
+      "roles": [
+        "admin"
+      ],
+      "team": "ops"
+    },
+    {
+      "given_name": "Bob",
+      "inum": "inum-bob",
+      "roles": [],
+      "team": "support"
+    },
+    {
+      "given_name": "Dave",
+      "inum": "inum-dave",
+      "roles": [],
+      "team": "support"
+    },
+    {
+      "given_name": "Ivy",
+      "inum": "inum-ivy",
+      "roles": [],
+      "team": "support"
+    },
+    {
+      "given_name": "Jack",
+      "inum": "inum-jack",
+      "roles": [],
+      "team": "support"
+    },
+    {
+      "given_name": "Kim",
+      "inum": "inum-kim",
+      "roles": [],
+      "team": "support"
+    }
+  ]
+}

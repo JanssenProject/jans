@@ -1,0 +1,72 @@
+namespace Jans {
+  type Url = {
+    host: String,
+    path: String,
+    protocol: String
+  };
+}
+
+namespace Acme {
+  entity TrustedIssuer = {
+    issuer_entity_id: Jans::Url
+  };
+}
+
+namespace AcmeOps {
+  entity Access_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: Acme::TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: String,
+    iat?: Long,
+    sub?: String,
+    scope?: Set<String>
+  } tags Set<String>;
+  entity id_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: Acme::TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: Set<String>,
+    iat?: Long,
+    sub?: String
+  } tags Set<String>;
+  entity Userinfo_token = {
+    token_type?: String,
+    jti?: String,
+    iss?: Acme::TrustedIssuer,
+    exp?: Long,
+    validated_at?: Long,
+    aud?: String,
+    iat?: Long,
+    sub?: String,
+    given_name?: String,
+    role?: Set<String>
+  } tags Set<String>;
+
+  entity Agent = { acting_for: String, role: String, on_call: Bool, trusted: Bool };
+  entity Resource = { kind: String, customer: String, environment: String, workload: String };
+
+  type TokensContext = {
+    acme_access_token?: Access_token,
+    acme_id_token?: id_token,
+    acme_userinfo_token?: Userinfo_token,
+    total_token_count: Long
+  };
+  type RequestContext = {
+    ticket_customer: String,
+    ticket_assignee: String,
+    change_approved: Bool,
+    change_workload: String,
+    human_on_call: Bool,
+    suspicious: Bool,
+    tokens?: TokensContext
+  };
+
+  action "ReadCustomer" appliesTo { principal: [Agent], resource: [Resource], context: RequestContext };
+  action "ExportCustomers" appliesTo { principal: [Agent], resource: [Resource], context: RequestContext };
+  action "Deploy" appliesTo { principal: [Agent], resource: [Resource], context: RequestContext };
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API-Facade-Plugin" parallel="false">
+
+    <test name="TraceGenerator" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.facade.generate.TraceGeneratorTest" />
+            <class name="io.jans.configapi.plugin.facade.generate.TraceCollectorTest" />
+        </classes>
+    </test>
+
+    <test name="FacadeJobService" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.facade.service.FacadeJobServiceTest" />
+        </classes>
+    </test>
+
+</suite>

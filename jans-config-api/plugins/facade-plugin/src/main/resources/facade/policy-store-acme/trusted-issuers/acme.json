@@ -1,0 +1,22 @@
+{
+  "name": "Acme",
+  "description": "Acme identity provider",
+  "openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
+  "token_metadata": {
+    "access_token": {
+      "trusted": true,
+      "entity_type_name": "AcmeOps::Access_token",
+      "token_id": "jti"
+    },
+    "id_token": {
+      "trusted": true,
+      "entity_type_name": "AcmeOps::id_token",
+      "token_id": "jti"
+    },
+    "userinfo_token": {
+      "trusted": true,
+      "entity_type_name": "AcmeOps::Userinfo_token",
+      "token_id": "jti"
+    }
+  }
+}

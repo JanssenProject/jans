@@ -1,0 +1,11 @@
+{
+  "cedar_version": "4.0.0",
+  "policy_store": {
+    "id": "b5d5520247b69d9c14a7fbbdc6ee8a3f",
+    "name": "acme-ops-agent",
+    "description": "Govern an AI ops agent's customer reads, exports, and deployments with Cedarling.",
+    "version": "1.2.0",
+    "created_date": "2026-10-28T00:00:00Z",
+    "updated_date": "2026-10-28T12:00:00Z"
+  }
+}

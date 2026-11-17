@@ -24,6 +24,7 @@
                 <module>lock-plugin</module>
                 <module>shibboleth-plugin</module>
                 <module>metric-plugin</module>
+                <module>facade-plugin</module>
         </modules>
 
         <dependencies>

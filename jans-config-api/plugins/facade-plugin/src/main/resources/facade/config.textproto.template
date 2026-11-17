@@ -1,0 +1,99 @@
+embedding_dims: 32
+scoring_function: SF_OMDOT
+action_embeddings_transformations: TR_SOFTPLUS
+action_embeddings_transformations: TR_L2_NORMALIZED
+context_embeddings_transformations: TR_SOFTPLUS
+context_embeddings_transformations: TR_L2_NORMALIZED
+token_embedding_name_to_config {
+  key: "action_principal"
+  value {
+    dimensions: 16
+    num_oov_indices: 1
+  }
+}
+token_embedding_name_to_config {
+  key: "context_principal"
+  value {
+    dimensions: 16
+    num_oov_indices: 1
+  }
+}
+context_architecture {
+  concatenate_then_snn {
+${context_segments}
+    snn {
+      layer_sizes: 24
+    }
+  }
+}
+action_name_to_architecture {
+  key: "capability_use"
+  value {
+    concatenate_then_snn {
+      segment_reductions {
+        segment_weight_scaling: WS_IDENTITY
+        segment_weight_normalization: WN_L2
+        token_embedding_name: "action_principal"
+        token_feature_name: "capability_use/prin/t"
+        intensity_feature_name: "capability_use/prin/w"
+      }
+      snn {
+        layer_sizes: 24
+      }
+    }
+  }
+}
+training_hyperparameters {
+  batch_size: 100
+  training_examples: ${training_examples}
+  dropout_tokens: 0.05
+  dropout_neurons: 0.05
+  optimizer {
+    adam_w {
+      weight_decay: 0.0004
+      beta_1: 0.9
+      beta_2: 0.999
+      epsilon: 1e-07
+      global_clipnorm: 10
+    }
+  }
+  learning_rate_schedule {
+    one_cycle {
+      peak_learning_rate: 0.001
+      learning_rate_rampup_factor: 917.7064
+      learning_rate_rampdown_factor: 6626420000.0
+      rampup: 0.12393822
+      interpolation: I_LINEAR
+    }
+  }
+  loss_function {
+    pairwise_huber {
+      soft_margin: 0.05
+      hard_margin: 0.02
+      norm_push: 1.0
+    }
+  }
+  synthetic_positives_strategy {
+    random_sample_within_minibatch {
+      contrastive_scores_per_query: 4
+      positive_instances_weight_factor: 1.0
+    }
+  }
+  action_name_to_loss_weight {
+    key: "capability_use"
+    value: 1.0
+  }
+  evaluation {
+    examples_per_training_epoch: 5000
+    batch_size: 1000
+    examples_per_evaluation_epoch: 5000
+    metrics_fpr_thresholds: 1.0
+    metrics_fpr_thresholds: 0.1
+    metrics_fpr_thresholds: 0.01
+    synthetic_positives {
+      contrastive_scores_per_query: 1
+      positive_instances_weight_factor: 1.0
+    }
+  }
+}
+principal_feature_name: "p"

@@ -1,0 +1,29 @@
+model_version: 1
+action_sources {
+  type: "capability_use"
+  max_history_keys_per_day: -1
+  history_duration {
+    seconds: ${history_seconds}
+  }
+  action_deduplication_period {
+    seconds: ${dedup_seconds}
+  }
+  max_values_per_feature: 1000
+  min_values_per_feature: 1
+}
+context_sources {
+  type: "trace_peer"
+  context_lookback {
+    seconds: ${lookback_seconds}
+  }
+${peer_feature_configs}
+}
+dataset_parameters {
+  snapshot_period {
+    seconds: ${snapshot_seconds}
+  }
+  snapshot_time_offset {
+  }
+  max_num_actions_per_contextualized_actions: 1000
+  max_num_contextualized_actions_per_principal_snapshot: 100
+}
