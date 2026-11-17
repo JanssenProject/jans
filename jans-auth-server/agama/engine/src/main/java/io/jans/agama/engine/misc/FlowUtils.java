@@ -57,7 +57,7 @@ public class FlowUtils {
         Map<String, Object> result = new HashMap<>();
         if (map != null) {
             
-            for(String key : map.keySet()) {
+            for (String key : map.keySet()) {
                 String[] list = map.get(key);
                 result.put(key, list.length == 1 ? list[0] : Arrays.asList(list));
             }
