@@ -7,31 +7,31 @@
 
 use bytes::Bytes;
 
-use super::failure::{HttpRequestError, ReadBodyError};
+use super::failure::{HttpClientError, ReadBodyError};
 
 /// Reads a response body capped at `max_response_size` and deserializes it as JSON.
 pub(crate) async fn read_json<T>(
     response: reqwest::Response,
     max_response_size: Option<u64>,
-) -> Result<T, HttpRequestError>
+) -> Result<T, HttpClientError>
 where
     T: serde::de::DeserializeOwned,
 {
     let status = response.status();
     let bytes = read_body(response, max_response_size).await?;
     serde_json::from_slice::<T>(&bytes)
-        .map_err(|error| HttpRequestError::DeserializeJson { status, error })
+        .map_err(|error| HttpClientError::DeserializeJson { status, error })
 }
 
 /// [`read_response_capped`], keeping the status of the response in the error.
 pub(crate) async fn read_body(
     response: reqwest::Response,
     max_response_size: Option<u64>,
-) -> Result<Vec<u8>, HttpRequestError> {
+) -> Result<Vec<u8>, HttpClientError> {
     let status = response.status();
     read_response_capped(response, max_response_size)
         .await
-        .map_err(|error| HttpRequestError::ReadBody { status, error })
+        .map_err(|error| HttpClientError::ReadBody { status, error })
 }
 
 /// Reads a response body into memory, aborting with `TooLarge` when
@@ -180,7 +180,7 @@ mod tests {
         assert!(
             matches!(
                 err,
-                HttpRequestError::ReadBody {
+                HttpClientError::ReadBody {
                     status: StatusCode::OK,
                     error: ReadBodyError::Read(_),
                 }

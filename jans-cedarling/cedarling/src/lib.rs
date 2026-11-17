@@ -73,7 +73,7 @@ pub use common::policy_store::validate::{
     Diagnostic, LevelResult, ValidateInfraError, ValidationReport,
 };
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
-pub use http::HttpClientConfig;
+pub use http::{HttpClientConfig, HttpRequestError};
 use init::ServiceFactory;
 use init::policy_store::{LoadOptions, LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{

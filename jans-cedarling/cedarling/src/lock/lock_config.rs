@@ -75,7 +75,10 @@ impl LockConfig {
         lock_config_url: &url::Url,
         http_client: &HttpClient,
     ) -> Result<Self, GetLockConfigError> {
-        let config: LockConfig = http_client.get_json(lock_config_url.as_ref()).await?;
+        let config: LockConfig = http_client
+            .get_json(lock_config_url.as_ref())
+            .await
+            .map_err(HttpRequestError::from)?;
         Ok(config)
     }
 }

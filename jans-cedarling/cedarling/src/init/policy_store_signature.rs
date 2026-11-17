@@ -14,8 +14,7 @@ use sigstore_verifier::{
 };
 
 use crate::bootstrap_config::{PolicyStoreSignature, SigstoreSigner};
-use crate::http::{HttpClient, HttpClientError};
-use crate::http::{HttpRequestError, ReadBodyError};
+use crate::http::{HttpClient, HttpClientError, HttpRequestError, ReadBodyError};
 
 /// Bundles are a few KB; anything near this is not a bundle.
 const MAX_BUNDLE_BYTES: u64 = 1024 * 1024;
@@ -31,7 +30,7 @@ pub enum SignatureError {
     BundleFetch {
         location: String,
         #[source]
-        source: HttpClientError,
+        source: HttpRequestError,
     },
     /// The policy store is not a `.cjar` archive, so it cannot carry a signature.
     #[error(
@@ -217,15 +216,15 @@ fn default_bundle_location(store_location: &str) -> String {
 
 /// Transport and HTTP failures stay typed so refresh can count them as network errors.
 async fn fetch_bundle(http: &HttpClient, url: &str) -> Result<Vec<u8>, SignatureError> {
-    let fetch_err = |source| SignatureError::BundleFetch {
+    let fetch_err = |source: HttpClientError| SignatureError::BundleFetch {
         location: url.to_string(),
-        source,
+        source: source.into(),
     };
     let response = http.get_with_retry(url).await.map_err(fetch_err)?;
     crate::http::read_body(response, Some(MAX_BUNDLE_BYTES))
         .await
         .map_err(|error| match error {
-            HttpRequestError::ReadBody {
+            HttpClientError::ReadBody {
                 error: ReadBodyError::TooLarge { .. },
                 ..
             } => SignatureError::Bundle {
@@ -463,7 +462,7 @@ mod tests {
             matches!(
                 err,
                 SignatureError::BundleFetch { ref source, .. }
-                    if source.status_code() == Some(reqwest::StatusCode::NOT_FOUND)
+                    if source.kind().status_code() == Some(reqwest::StatusCode::NOT_FOUND)
             ),
             "expected a 404 bundle fetch error, got {err:?}"
         );

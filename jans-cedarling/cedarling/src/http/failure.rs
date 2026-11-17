@@ -31,8 +31,7 @@ impl Display for ErrorChain<'_> {
 
 /// One attempt that got no usable response, sorted once by whether repeating can help.
 #[derive(Debug, Error)]
-#[allow(unreachable_pub)]
-pub enum AttemptFailure {
+pub(crate) enum AttemptFailure {
     #[error(transparent)]
     Retryable(RetryableFailure),
     #[error(transparent)]
@@ -41,8 +40,7 @@ pub enum AttemptFailure {
 
 /// A failure the same request may not repeat: the network or the server may recover.
 #[derive(Debug, Error)]
-#[allow(unreachable_pub)]
-pub enum RetryableFailure {
+pub(crate) enum RetryableFailure {
     /// Connect, timeout or dropped connection.
     #[error("{}", ErrorChain(.0))]
     Transport(reqwest::Error),
@@ -53,8 +51,7 @@ pub enum RetryableFailure {
 
 /// A failure the same request repeats on every attempt.
 #[derive(Debug, Error)]
-#[allow(unreachable_pub)]
-pub enum FinalFailure {
+pub(crate) enum FinalFailure {
     /// A request that cannot be built (invalid URL) or a redirect that is refused.
     #[error("invalid request: {}", ErrorChain(.0))]
     InvalidRequest(reqwest::Error),
@@ -128,8 +125,7 @@ impl FinalFailure {
 
 /// Error of [`crate::http::HttpClient`]'s retried requests: a `RetriesExhausted` holding a
 /// `404` cannot be built.
-#[allow(unreachable_pub)]
-pub type SendError = RetryError<RetryableFailure, FinalFailure>;
+pub(crate) type SendError = RetryError<RetryableFailure, FinalFailure>;
 
 impl SendError {
     fn status_code(&self) -> Option<StatusCode> {
@@ -141,8 +137,7 @@ impl SendError {
 }
 
 #[derive(Debug, Error)]
-#[allow(unreachable_pub)]
-pub enum HttpRequestError {
+pub(crate) enum HttpClientError {
     /// A request that is retried.
     #[error(transparent)]
     Send(#[from] SendError),
@@ -161,10 +156,30 @@ pub enum HttpRequestError {
     },
 }
 
+/// Why an HTTP request failed, as Cedarling's public errors carry it. Only its
+/// message and cause are public, so the cases it holds can change without
+/// changing the public API.
+#[derive(Debug, Error)]
+#[error(transparent)]
+pub struct HttpRequestError(HttpClientError);
+
 impl HttpRequestError {
+    /// The failure, for code inside the crate that sorts it.
+    pub(crate) fn kind(&self) -> &HttpClientError {
+        &self.0
+    }
+}
+
+impl From<HttpClientError> for HttpRequestError {
+    fn from(error: HttpClientError) -> Self {
+        Self(error)
+    }
+}
+
+impl HttpClientError {
     /// The status of the last response, `None` when no response arrived.
     #[must_use]
-    pub fn status_code(&self) -> Option<StatusCode> {
+    pub(crate) fn status_code(&self) -> Option<StatusCode> {
         match self {
             Self::Send(err) => err.status_code(),
             Self::Attempt(failure) => failure.status_code(),
@@ -175,8 +190,7 @@ impl HttpRequestError {
 
 /// Error of [`read_response_capped`].
 #[derive(Debug, Error)]
-#[allow(unreachable_pub)]
-pub enum ReadBodyError {
+pub(crate) enum ReadBodyError {
     #[error("{}", ErrorChain(.0))]
     Read(reqwest::Error),
     // Names the property so an operator can tell which knob to raise, whichever

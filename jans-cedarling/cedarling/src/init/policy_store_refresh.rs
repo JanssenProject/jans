@@ -815,9 +815,9 @@ fn bundle_hash_note(bundle_hash: Option<jans_trace_core::Digest>) -> String {
 fn classify_parse_error(e: &PolicyStoreLoadError) -> (RefreshOutcome, &'static str) {
     match e {
         PolicyStoreLoadError::Signature(SignatureError::BundleFetch { source, .. })
-            if source.status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
+            if source.kind().status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
         {
-            let (kind, outcome) = classify_fetch_error(source);
+            let (kind, outcome) = classify_fetch_error(source.kind());
             (outcome, kind)
         },
         PolicyStoreLoadError::Signature(_) => {

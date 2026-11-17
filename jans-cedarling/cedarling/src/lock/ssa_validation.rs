@@ -72,7 +72,7 @@
 //! before performing Dynamic Client Registration. The validated SSA JWT
 //! is then included in the DCR request to the Identity Provider.
 
-use crate::http::HttpRequestError;
+use crate::http::HttpClientError;
 use crate::{
     http::HttpClient,
     jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
@@ -434,7 +434,7 @@ pub(crate) enum SsaValidationError {
 
     /// Failed to fetch JWKS due to network or HTTP errors
     #[error("failed to fetch JWKS (network/HTTP error): {0}")]
-    JwksFetchError(HttpRequestError),
+    JwksFetchError(HttpClientError),
 
     /// Missing key ID (kid) in JWT header
     #[error("missing key ID (kid) in JWT header")]

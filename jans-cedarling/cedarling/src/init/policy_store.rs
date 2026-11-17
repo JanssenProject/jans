@@ -18,7 +18,7 @@ use crate::common::policy_store::migration::MigrationError;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
-use crate::http::{HttpClient, HttpClientError};
+use crate::http::{HttpClient, HttpClientError, HttpRequestError};
 
 use super::policy_store_signature::{
     ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
@@ -58,7 +58,10 @@ pub enum PolicyStoreLoadError {
     ParseYaml(#[from] serde_saphyr::Error),
     /// Failed to fetch the policy store from a URL, the Lock Server's or any other.
     #[error("failed to fetch the policy store from '{url}': {error}")]
-    Fetch { url: String, error: HttpClientError },
+    Fetch {
+        url: String,
+        error: HttpRequestError,
+    },
     /// Invalid structure in the policy store.
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
@@ -294,9 +297,9 @@ async fn load_policy_store_from_uri(
     verifier: Option<&ArchiveVerifier>,
     options: LoadOptions,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let fetch_err = |error| PolicyStoreLoadError::Fetch {
+    let fetch_err = |error: HttpClientError| PolicyStoreLoadError::Fetch {
         url: uri.to_string(),
-        error,
+        error: error.into(),
     };
     let response = http_client.get_with_retry(uri).await.map_err(fetch_err)?;
 
@@ -859,13 +862,14 @@ mod test {
         assert!(
             matches!(
                 &err,
-                PolicyStoreLoadError::Fetch {
-                    url,
-                    error: HttpClientError::Send(SendError::Final(FinalFailure::Status {
-                        status: reqwest::StatusCode::NOT_FOUND,
-                        ..
-                    })),
-                } if *url == uri
+                PolicyStoreLoadError::Fetch { url, error } if *url == uri
+                    && matches!(
+                        error.kind(),
+                        HttpClientError::Send(SendError::Final(FinalFailure::Status {
+                            status: reqwest::StatusCode::NOT_FOUND,
+                            ..
+                        }))
+                    )
             ),
             "expected a Fetch error with the URL and the 404, got {err:?}"
         );
@@ -1262,7 +1266,7 @@ mod signature_tests {
             matches!(
                 err,
                 PolicyStoreLoadError::Signature(SignatureError::BundleFetch { ref source, .. })
-                    if source.status_code() == Some(reqwest::StatusCode::NOT_FOUND)
+                    if source.kind().status_code() == Some(reqwest::StatusCode::NOT_FOUND)
             ),
             "expected a 404 bundle fetch error, got {err:?}"
         );

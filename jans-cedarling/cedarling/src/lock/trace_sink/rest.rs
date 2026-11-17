@@ -19,7 +19,7 @@ use super::{
 };
 use crate::common::retry::MAX_EXPONENTIAL_DELAY;
 use crate::http::HttpClient;
-use crate::http::{AttemptFailure, HttpRequestError, ReadBodyError};
+use crate::http::{AttemptFailure, HttpClientError, ReadBodyError};
 
 /// Lock's TRACE bulk endpoint and the client that posts to it.
 pub(in crate::lock) struct RestTraceClient {
@@ -73,13 +73,13 @@ impl RestTraceClient {
             .await
             .map_err(|err| match err {
                 // Lock processed the request; its answer would be over the cap again.
-                HttpRequestError::ReadBody {
+                HttpClientError::ReadBody {
                     error: ReadBodyError::TooLarge { .. },
                     ..
                 } if status == StatusCode::MULTI_STATUS => PostBulkError::UnreadableResponse {
                     reason: format!("HTTP 207 body: {err}"),
                 },
-                HttpRequestError::ReadBody {
+                HttpClientError::ReadBody {
                     error: ReadBodyError::TooLarge { .. },
                     ..
                 } => PostBulkError::Rejected {

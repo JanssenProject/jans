@@ -67,8 +67,7 @@ pub(crate) enum Attempt<T, R, F> {
 
 /// Why [`retry`] gave up: a `RetriesExhausted` holds only a failure worth repeating.
 #[derive(Debug, thiserror::Error)]
-#[allow(unreachable_pub)]
-pub enum RetryError<R, F> {
+pub(crate) enum RetryError<R, F> {
     #[error(transparent)]
     Final(F),
     #[error("{last} (gave up after {retries} retries)")]

@@ -6,8 +6,8 @@
 //! This module is responsible for Cedarling's Dynamic Client Registration (DCR) at startup.
 
 use super::{init_http_client, lock_config::Url};
-use crate::http::HttpRequestError;
 use crate::http::{HttpClient, is_secure_transport};
+use crate::http::{HttpClientError, HttpRequestError};
 use crate::{HttpClientConfig, app_types::PdpID, http::InitializeHttpClientError};
 use serde::Deserialize;
 use serde_json::json;
@@ -42,7 +42,7 @@ pub(super) async fn register_client(
     let oidc: OpenidConfig = client
         .get_json(oidc_endpoint.0.as_str())
         .await
-        .map_err(ClientRegistrationError::GetOpenidConfig)?;
+        .map_err(|err| ClientRegistrationError::GetOpenidConfig(err.into()))?;
     // Checked before any request: the SSA and the client secret go to these endpoints.
     let registration_endpoint =
         CredentialEndpoint::new("registration_endpoint", oidc.registration_endpoint.0)?;
@@ -73,7 +73,7 @@ pub(super) async fn register_client(
                 .body(dcr_body.to_string())
         })
         .await
-        .map_err(ClientRegistrationError::RegisterLockClient)?;
+        .map_err(|err| ClientRegistrationError::RegisterLockClient(err.into()))?;
 
     let source = TokenSource {
         token_endpoint,
@@ -83,7 +83,7 @@ pub(super) async fn register_client(
     };
     let access_token = request_access_token(&client, &source)
         .await
-        .map_err(ClientRegistrationError::GetAccessToken)?;
+        .map_err(|err| ClientRegistrationError::GetAccessToken(err.into()))?;
 
     Ok(ClientCredentials {
         access_token,
@@ -96,7 +96,7 @@ pub(super) async fn register_client(
 pub(super) async fn request_access_token(
     http: &HttpClient,
     source: &TokenSource,
-) -> Result<String, HttpRequestError> {
+) -> Result<String, HttpClientError> {
     let form_data = [
         ("grant_type", "client_credentials"),
         ("scope", source.scope.as_str()),

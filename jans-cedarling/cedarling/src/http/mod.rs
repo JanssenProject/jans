@@ -16,9 +16,10 @@ use crate::common::retry::{Backoff, RetryPolicy, retry};
 pub(crate) use body::read_body;
 use body::read_json;
 use cache_headers::CacheHeadersState;
+pub use failure::HttpRequestError;
 use failure::attempt;
 pub(crate) use failure::{
-    AttemptFailure, FinalFailure, HttpRequestError, ReadBodyError, RetryableFailure, SendError,
+    AttemptFailure, FinalFailure, HttpClientError, ReadBodyError, RetryableFailure, SendError,
 };
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
@@ -423,9 +424,6 @@ impl Response {
     }
 }
 
-/// Error type of [`HttpClient`].
-pub(crate) type HttpClientError = HttpRequestError;
-
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
     use crate::http::cache_headers::CacheHeadersState;
@@ -700,6 +698,37 @@ mod test {
             "the retries wait the configured {retry_delay:?}, then twice that: at least \
              {waited:?}, waited {:?}",
             started.elapsed()
+        );
+    }
+
+    #[tokio::test]
+    async fn public_error_keeps_the_message_and_cause() {
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
+        let err = client
+            .get_bytes("0.0.0.0")
+            .await
+            .expect_err("a URL without a scheme cannot be requested");
+        let message = err.to_string();
+        let cause = std::error::Error::source(&err).map(ToString::to_string);
+
+        let public = crate::HttpRequestError::from(err);
+
+        assert_eq!(
+            public.to_string(),
+            message,
+            "the public error shows the same message"
+        );
+        assert_eq!(
+            std::error::Error::source(&public).map(ToString::to_string),
+            cause,
+            "the public error keeps the same cause"
+        );
+        assert!(
+            matches!(
+                public.kind(),
+                HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+            ),
+            "the crate can still sort the failure, got {public:?}"
         );
     }
 
