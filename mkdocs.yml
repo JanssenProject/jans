@@ -9,8 +9,10 @@ extra:
     title: Cookie consent
     description: >-
       This site uses Scarf and Reo.dev to measure documentation traffic and to
-      understand which content is most useful, so we can improve the docs. These
-      analytics cookies are only set with your consent. Essential cookies needed
+      understand which content is most useful, so we can improve the docs. If you
+      accept, Reo.dev and its third-party partners also collect device and network
+      data to identify the company you visit from. These analytics cookies are only
+      set with your consent. Essential cookies needed
       for the site to function are always active. For details on how your data is
       handled, see the
       <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.
