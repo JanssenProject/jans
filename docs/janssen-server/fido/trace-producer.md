@@ -9,21 +9,11 @@ tags:
 
 # TRACE Producer
 
-The planned TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome
+The TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome
 that has a session, to the Lock Server. Each record is signed and hash-chained. The chain lets a reader detect a
 gap or an altered record between records it has seen. It cannot by itself show that the newest records are
 missing: detecting tail loss needs an independently trusted checkpoint or an expected chain head. This page
-covers the planned configuration properties and what a record contains.
-
-!!! note "Status"
-    This is planned behavior, not yet available. The properties are added in
-    [#15680](https://github.com/JanssenProject/jans/pull/15680) and take effect only after that PR and the
-    follow-up work tracked in [#15275](https://github.com/JanssenProject/jans/issues/15275) (record emission,
-    signing, and transport) are merged. Until then, setting `fido2TraceEnabled` to `true` does not change behavior.
-
-    **Lock dependency:** the producer's key must be registered on Lock with `FIDO_CEREMONY` in its
-    `authorized_event_kinds`. The current Lock Server does not define that event kind, so delivery will fail
-    until Lock adds support for it.
+covers the configuration properties and what a record contains.
 
 ## Configuration
 
@@ -32,15 +22,15 @@ All properties are set in the `fido2Configuration` object, the same place as the
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `fido2TraceEnabled` | Boolean | `false` | Planned. Master switch. When `false`, nothing is emitted. |
-| `fido2TraceProducerId` | String | derived | Planned. Stable producer ID. Leave empty to derive it from the server ID and version; the derived value can change on upgrade, so set an explicit ID for continuity. |
-| `fido2TraceChainGenesis` | String | `first_observed` | Planned. `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
-| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Planned. Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
-| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Planned. Include optional signed attestation and MDS trust detail in each record. |
-| `fido2TraceEndpoint` | String | discovered | Planned. Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace`. |
-| `fido2TraceKeyStorePath` | String | — | Planned. Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration. |
-| `fido2TraceKeyAlias` | String | — | Planned. Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
-| `fido2TraceKeyStorePassword` | String | — | Planned. Keystore password, encrypted at rest like other client secrets. |
+| `fido2TraceEnabled` | Boolean | `false` | Master switch. When `false`, nothing is emitted. |
+| `fido2TraceProducerId` | String | derived | Stable producer ID. Leave empty to derive it from the server ID and version; the derived value can change on upgrade, so set an explicit ID for continuity. |
+| `fido2TraceChainGenesis` | String | `first_observed` | `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
+| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
+| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Include optional signed attestation and MDS trust detail in each record. |
+| `fido2TraceEndpoint` | String | discovered | Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace`. |
+| `fido2TraceKeyStorePath` | String | — | Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration. |
+| `fido2TraceKeyAlias` | String | — | Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
+| `fido2TraceKeyStorePassword` | String | — | Keystore password, encrypted at rest like other client secrets. |
 
 The TRACE properties are separate from the `lockAudit*` properties. Enabling one does not enable the other.
 
@@ -126,16 +116,13 @@ disk, and renames it over the old one. It writes the next state before it return
   with `coverage_gap_flag`, and the chain continues after it.
 - A lost or corrupt state file starts a new chain. Records already sent on the old chain remain valid.
 
-The state file path is part of the emission work tracked in [#15280](https://github.com/JanssenProject/jans/issues/15280).
-Until that work is merged, the chain state class does not run in the server.
 
 ### Interaction with chain genesis
 
 - With `fido2TraceChainGenesis` set to `first_observed`, a new chain starts with a genesis record that Lock accepts
   and registers. This is the normal case after a restart without usable state.
 - With `pre_registered`, Lock must know the new chain before its first record is accepted. A restart that opens a new
-  chain therefore needs that chain registered first. The procedure is covered in the pre-registered genesis runbook,
-  which is tracked separately.
+  chain therefore needs that chain registered first. The procedure is covered in the pre-registered genesis runbook.
 
 See [Chain registration modes](../lock/trace.md#chain-registration-modes) for how Lock treats genesis records.
 
@@ -185,8 +172,7 @@ openssl pkey -pubin -in trace-producer.pem -outform DER | tail -c 32 | base64 | 
 ```
 
 Register the result with `{"kty": "OKP", "crv": "Ed25519", "x": "<output>"}` as described in
-[Register a key](../lock/trace.md#register-a-key). Lock does not yet define the `FIDO_CEREMONY` event kind, so
-registration with that kind cannot succeed until Lock adds it.
+[Register a key](../lock/trace.md#register-a-key).
 
 ### Rotating the signing key
 
