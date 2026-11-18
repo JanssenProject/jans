@@ -12,6 +12,7 @@ use std::sync::Arc;
 use crate::authz::metrics::MetricsCollector;
 use crate::authz::{Authz, AuthzConfig};
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
+use crate::common::cedar_schema::CedarSchema;
 use crate::common::policy_store::PolicyStoreWithID;
 use crate::context_data_api::DataStore;
 use crate::entity_builder::EntityBuilder;
@@ -62,7 +63,10 @@ pub(crate) async fn build_authz(
         ),
     };
 
-    let schema = policy_store.schema.as_ref().map(|s| &s.validator_schema);
+    let schema = policy_store
+        .schema
+        .as_ref()
+        .map(CedarSchema::validator_schema);
     let entity_builder = Arc::new(
         EntityBuilder::new(
             &policy_store.token_types,

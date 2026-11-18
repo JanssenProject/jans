@@ -9,7 +9,9 @@
 
 use super::super::archive_handler::{ArchiveLimits, ArchiveVfs};
 use super::super::entity_parser::EntityParser;
-use super::super::errors::{CedarParseErrorDetail, PolicyStoreError, ValidationError};
+use super::super::errors::{
+    CedarParseErrorDetail, CedarSchemaErrorType, PolicyStoreError, ValidationError,
+};
 use super::super::formats::v1::trusted_issuer::IssuerParser;
 use super::super::formats::{ReadOptions, ReadStoreError};
 use super::super::migration::MigrationError;
@@ -1804,13 +1806,13 @@ fn test_load_schema_from_schemas_directory_deterministic_order() {
     // Files in non-alphabetical order in the VFS
     vfs.create_file(
         "schemas/z_last.cedarschema",
-        b"namespace Z { entity ZEntity; }",
+        b"namespace Z { entity ZEntity",
     )
     .unwrap();
 
     vfs.create_file(
         "schemas/a_first.cedarschema",
-        b"namespace A { entity AEntity; }",
+        b"namespace A { entity AEntity",
     )
     .unwrap();
 
@@ -1820,19 +1822,18 @@ fn test_load_schema_from_schemas_directory_deterministic_order() {
     )
     .unwrap();
 
-    let result = read_v0_files(&vfs, ".", true).expect("Should succeed");
-
-    let parsed_schema = result
-        .schema
-        .as_ref()
-        .expect("Schema should be present for deterministic order test");
-    let fragment = parsed_schema.get_fragment();
-    let json_str = fragment.clone().to_json_string().expect("json");
-    let a_pos = json_str.find("AEntity").expect("Should find AEntity");
-    let z_pos = json_str.find("ZEntity").expect("Should find ZEntity");
+    // Both files are broken, so the reported file shows which one was read first.
+    let err = read_v0_files(&vfs, ".", true).expect_err("broken schema files should fail to load");
     assert!(
-        a_pos < z_pos,
-        "a_first.cedarschema should come before z_last.cedarschema (sorted by filename)"
+        matches!(
+            &err,
+            PolicyStoreError::CedarSchemaError {
+                file,
+                err: CedarSchemaErrorType::ParseError(_),
+            } if file == "a_first.cedarschema"
+        ),
+        "a_first.cedarschema should be read before z_last.cedarschema (sorted by filename), \
+         got: {err:?}"
     );
 }
 
