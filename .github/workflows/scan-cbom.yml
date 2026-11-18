@@ -1,0 +1,232 @@
+name: "Scan: CBOM"
+
+# Cryptographic bill of materials (CycloneDX 1.6).
+#   source: cbomkit (Java/Python/Go code) + Cedarling's Cargo.lock crypto crates.
+#           Signed and attached to the release as jans-cbom.json.
+#   images: cbomkit-theia over the published images (certs, keys, OpenSSL and
+#           java.security config). Manual runs only; workflow artifact, not a
+#           release asset, until reviewed.
+on:
+  push:
+    tags:
+      - 'v**'
+      - 'nightly'
+  workflow_dispatch:
+    inputs:
+      scan_images:
+        description: 'Also scan published container images'
+        type: boolean
+        default: true
+      image_tag:
+        description: 'Image tag to scan'
+        type: string
+        default: '0.0.0-nightly'
+
+permissions:
+  contents: read
+
+env:
+  # cedarling-java and jans-trace-java need the Rust native libs; they are thin
+  # bindings, so modules that depend on them pull the published jars instead.
+  MAVEN_MODULES: 'jans-bom jans-orm jans-core agama jans-auth-server jans-lock/lock-server jans-fido2 jans-scim jans-link jans-config-api jans-casa'
+
+jobs:
+  source-cbom:
+    if: github.repository == 'JanssenProject/jans'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      packages: read  # io.jans artifacts from GitHub Packages Maven
+    env:
+      JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      MAVEN_OPTS: -Xmx5g -Dhttp.keepAlive=false
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+      with:
+        distribution: temurin
+        java-version: '17'
+
+    # The scanner resolves crypto API calls against compiled classes and
+    # dependency jars. It runs in a container that only sees the workspace, so
+    # the local Maven repo has to live there.
+    - name: Build Java modules
+      run: |
+        set -euo pipefail
+        for m in ${MAVEN_MODULES}; do
+          echo "::group::${m}"
+          mvn -B -ntp -s .github/maven-settings.xml \
+            -Dmaven.repo.local="${GITHUB_WORKSPACE}/.cbom-m2" \
+            -Dmaven.test.skip=true \
+            -f "${m}" install
+          echo "::endgroup::"
+        done
+
+    - name: Generate source CBOM
+      id: cbom
+      uses: docker://ghcr.io/cbomkit/cbomkit-action@sha256:47c2505267dc5f055152616ffa0d0076b7d0824fe9e0de670b572d1ebad2fc4b # v2.3.0
+      env:
+        CBOMKIT_LANGUAGES: java, python, go
+
+    - name: Upload source CBOM
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: source-cbom
+        path: ${{ steps.cbom.outputs.pattern }}
+        if-no-files-found: error
+
+  image-cbom:
+    if: github.repository == 'JanssenProject/jans' && github.event_name == 'workflow_dispatch' && inputs.scan_images
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        sparse-checkout: .github/workflows/scripts
+
+    - name: Set up Go
+      uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6.4.0
+      with:
+        go-version: '1.26'
+        cache: false
+
+    - name: Install cbomkit-theia
+      run: go install github.com/cbomkit/cbomkit-theia@dcd95ac86d1cbe6e867ff3ee059b9ef77bac6a59 # v1.1.2
+
+    # theia may echo scanned file contents to stderr and run logs are public,
+    # so stderr is discarded. OS/library CA bundles are skipped: they are base
+    # image trust anchors, not Janssen crypto, and are ~99% of the output.
+    - name: Scan image
+      env:
+        IMAGE_TAG: ${{ inputs.image_tag }}
+        IMAGE: ${{ matrix.image }}
+      run: |
+        set -euo pipefail
+        if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
+          echo "Invalid image_tag" >&2; exit 1
+        fi
+        REF="ghcr.io/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/${IMAGE}:${IMAGE_TAG}"
+        if ! "$(go env GOPATH)/bin/cbomkit-theia" image "${REF}" \
+            --log-level fatal \
+            -p certificates,secrets,opensslconf,problematicca \
+            --ignore '**/cacert.pem,**/cert.pem,**/ca-certificates.crt,**/ca-bundle.crt,**/roots.pem,**/certs/**' \
+            > raw.json 2>/dev/null; then
+          echo "::error::cbomkit-theia failed on ${REF}"; exit 1
+        fi
+        python3 .github/workflows/scripts/cbom.py gate raw.json "image-${IMAGE}.cbom.json"
+
+    - name: Upload image CBOM
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: image-cbom-${{ matrix.image }}
+        path: image-${{ matrix.image }}.cbom.json
+        if-no-files-found: error
+
+  publish:
+    needs: [source-cbom, image-cbom]
+    if: always() && needs.source-cbom.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # cosign keyless signing
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        sparse-checkout: |
+          .github/workflows/scripts
+          jans-cedarling/Cargo.lock
+        sparse-checkout-cone-mode: false
+
+    - name: Download source CBOM
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        name: source-cbom
+        path: source
+
+    - name: Resolve version
+      id: ver
+      run: |
+        if [[ "${GITHUB_REF_NAME}" == "nightly" || "${GITHUB_REF_TYPE}" != "tag" ]]; then
+          echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
+        else
+          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Build jans-cbom.json
+      env:
+        VERSION: ${{ steps.ver.outputs.version }}
+      run: |
+        set -euo pipefail
+        S=.github/workflows/scripts/cbom.py
+        python3 "$S" rust jans-cedarling/Cargo.lock rust.json
+        python3 "$S" merge janssen "${VERSION}" jans-cbom.json source/cbom.json rust.json
+        python3 "$S" gate jans-cbom.json
+
+    - name: Download image CBOMs
+      if: needs.image-cbom.result == 'success'
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        pattern: image-cbom-*
+        path: images
+        merge-multiple: true
+
+    - name: Build jans-image-cbom.json
+      if: needs.image-cbom.result == 'success'
+      env:
+        VERSION: ${{ steps.ver.outputs.version }}
+      run: python3 .github/workflows/scripts/cbom.py merge janssen-images "${VERSION}" jans-image-cbom.json images/*.json
+
+    - name: Upload merged CBOMs
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: jans-cbom
+        path: jans-*cbom.json
+
+    - name: Install Cosign
+      if: github.event_name == 'push'
+      uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+
+    - name: Sign CBOM
+      if: github.event_name == 'push'
+      run: cosign sign-blob --yes --bundle jans-cbom.json.bundle jans-cbom.json
+
+    - name: Upload CBOM to the release
+      if: github.event_name == 'push'
+      env:
+        GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
+      run: |
+        for i in $(seq 1 20); do
+          gh release view "${GITHUB_REF_NAME}" -R "${GITHUB_REPOSITORY}" > /dev/null 2>&1 && break
+          if [ "$i" -eq 20 ]; then
+            echo "Release ${GITHUB_REF_NAME} not found after 20 attempts." >&2
+            exit 1
+          fi
+          echo "Release ${GITHUB_REF_NAME} not found yet (attempt ${i}/20); retrying in 15s."
+          sleep 15
+        done
+        gh release upload "${GITHUB_REF_NAME}" jans-cbom.json jans-cbom.json.bundle -R "${GITHUB_REPOSITORY}" --clobber
