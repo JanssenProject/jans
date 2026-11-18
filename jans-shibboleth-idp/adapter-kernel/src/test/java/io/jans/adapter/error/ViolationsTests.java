@@ -97,14 +97,14 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a translation WHEN none is supplied THEN the misuse is rejected")
-    public void requiresATranslation() {
+    void requiresATranslation() {
 
         assertThatThrownBy(() -> Violations.create(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
     @DisplayName("GIVEN a successful value WHEN taken THEN it is returned and nothing is recorded")
-    public void takingASuccessRecordsNothing() {
+    void takingASuccessRecordsNothing() {
 
         Violations violations = collector();
 
@@ -117,7 +117,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a failed value WHEN taken THEN null is returned and the field is recorded")
-    public void takingAFailureRecordsTheField() {
+    void takingAFailureRecordsTheField() {
 
         Violations violations = collector();
 
@@ -132,7 +132,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN several failures WHEN collected THEN all are reported in one failure")
-    public void everyFailureIsReportedTogether() {
+    void everyFailureIsReportedTogether() {
 
         Violations violations = collector();
 
@@ -150,7 +150,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN one failure WHEN reported THEN the count reads as singular")
-    public void oneFailureReadsAsSingular() {
+    void oneFailureReadsAsSingular() {
 
         Violations violations = collector();
         violations.take(Result.failure(new FieldProblem()), "uri");
@@ -160,7 +160,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a nested location WHEN taken under an outer field THEN the path nests")
-    public void nestedLocationsNestUnderTheOuterField() {
+    void nestedLocationsNestUnderTheOuterField() {
 
         Violations violations = collector();
 
@@ -174,7 +174,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN an error naming a field WHEN recorded under a location THEN the name nests inside")
-    public void aNamedFieldNestsInsideTheSuppliedLocation() {
+    void aNamedFieldNestsInsideTheSuppliedLocation() {
 
         Violations violations = collector();
 
@@ -189,7 +189,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a location that already names the field WHEN recorded THEN it is not repeated")
-    public void anAgreedFieldIsNotRepeated() {
+    void anAgreedFieldIsNotRepeated() {
 
         Violations violations = collector();
 
@@ -202,7 +202,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a request-scoped failure WHEN recorded under a location THEN it is attributed to the request root")
-    public void aRequestScopedFailureIsAttributedToTheRequestRoot() {
+    void aRequestScopedFailureIsAttributedToTheRequestRoot() {
 
         Violations violations = collector();
 
@@ -215,7 +215,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a failure naming a collection WHEN recorded under its indexed element THEN the index is kept and the name is not repeated")
-    public void anIndexedFieldNameIsNotRepeated() {
+    void anIndexedFieldNameIsNotRepeated() {
 
         Violations violations = collector();
 
@@ -230,7 +230,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN no location at all WHEN recorded THEN the field the error names is used")
-    public void anUnlocatedFailureUsesTheNameTheErrorCarries() {
+    void anUnlocatedFailureUsesTheNameTheErrorCarries() {
 
         Violations violations = collector();
 
@@ -241,7 +241,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a field-scoped failure WHEN completed THEN it becomes a violation")
-    public void completeWithTranslatesFieldScopedFailures() {
+    void completeWithTranslatesFieldScopedFailures() {
 
         Violations violations = collector();
 
@@ -256,7 +256,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a failure about the whole request WHEN completed THEN it passes through untouched")
-    public void completeWithPassesRequestScopedFailuresThrough() {
+    void completeWithPassesRequestScopedFailuresThrough() {
 
         Violations violations = collector();
         DomainError error = new RequestProblem();
@@ -269,7 +269,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a request-scoped failure WHEN rejected THEN its path survives the re-typing")
-    public void rejectedPreservesThePathOfAPassedThroughFailure() {
+    void rejectedPreservesThePathOfAPassedThroughFailure() {
 
         Result<Integer> rejected = collector()
             .rejected(Result.<String>failure(new RequestProblem(), FieldPath.of("metadata_source")));
@@ -280,14 +280,14 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN a success WHEN completed THEN it is returned unchanged")
-    public void completeWithPassesSuccessThrough() {
+    void completeWithPassesSuccessThrough() {
 
         assertThat(collector().completeWith(Result.success("ok")).getValue()).isEqualTo("ok");
     }
 
     @Test
     @DisplayName("GIVEN no violations WHEN a failure is demanded THEN the misuse is rejected")
-    public void refusesToReportAFailureWithNoViolations() {
+    void refusesToReportAFailureWithNoViolations() {
 
         Violations violations = collector();
         assertThatThrownBy(violations::asFailure).isInstanceOf(IllegalArgumentException.class);
@@ -295,7 +295,7 @@ public class ViolationsTests {
 
     @Test
     @DisplayName("GIVEN collected violations WHEN the list is read THEN it cannot be modified")
-    public void theReportedListIsNotModifiable() {
+    void theReportedListIsNotModifiable() {
 
         Violations violations = collector();
         violations.take(Result.failure(new FieldProblem()), "uri");

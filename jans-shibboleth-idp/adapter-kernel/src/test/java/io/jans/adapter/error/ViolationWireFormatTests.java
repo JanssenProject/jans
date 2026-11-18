@@ -23,7 +23,7 @@ public class ViolationWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a violation WHEN serialised THEN it carries exactly field, code and message")
-    public void serialisesToThePublishedNames() throws Exception {
+    void serialisesToThePublishedNames() throws Exception {
 
         String json = JSON.writeValueAsString(
             new Violation("display_name", "required_value_missing", "'display_name' is required"));
@@ -36,7 +36,7 @@ public class ViolationWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a validation failure WHEN its violations are serialised THEN order is preserved")
-    public void violationsSerialiseAsAnOrderedArray() throws Exception {
+    void violationsSerialiseAsAnOrderedArray() throws Exception {
 
         List<Violation> violations = Arrays.asList(
             new Violation("entity_id", "required_value_missing", "'entity_id' is required"),
@@ -50,19 +50,19 @@ public class ViolationWireFormatTests {
 
     @Test
     @DisplayName("GIVEN two violations with the same parts WHEN compared THEN they are equal")
-    public void violationsAreValues() {
+    void violationsAreValues() {
 
         Violation one = new Violation("uri", "invalid_uri_syntax", "bad");
         Violation other = new Violation("uri", "invalid_uri_syntax", "bad");
 
-        assertThat(one).isEqualTo(other);
-        assertThat(one).hasSameHashCodeAs(other);
-        assertThat(one).isNotEqualTo(new Violation("base_url", "invalid_uri_syntax", "bad"));
+        assertThat(one).isEqualTo(other)
+            .hasSameHashCodeAs(other)
+            .isNotEqualTo(new Violation("base_url", "invalid_uri_syntax", "bad"));
     }
 
     @Test
     @DisplayName("GIVEN a validation failure WHEN built THEN it holds an unmodifiable list and counts fields")
-    public void carriesAnUnmodifiableList() {
+    void carriesAnUnmodifiableList() {
 
         RequestValidationFailed failure = RequestValidationFailed.with(
             Collections.singletonList(new Violation("uri", "invalid_uri_syntax", "bad")));
@@ -76,7 +76,7 @@ public class ViolationWireFormatTests {
 
     @Test
     @DisplayName("GIVEN no violations WHEN a validation failure is built THEN the misuse is rejected")
-    public void refusesToDescribeNothing() {
+    void refusesToDescribeNothing() {
 
         assertThatThrownBy(() -> RequestValidationFailed.with(Collections.emptyList()))
             .isInstanceOf(IllegalArgumentException.class);

@@ -61,8 +61,8 @@ public class FieldPathTests {
         FieldPath one = FieldPath.of("metadataSource", "validUntil");
         FieldPath other = FieldPath.of("validUntil").prepend("metadataSource");
 
-        assertThat(one).isEqualTo(other);
-        assertThat(one).hasSameHashCodeAs(other);
+        assertThat(one).isEqualTo(other)
+            .hasSameHashCodeAs(other);
     }
 
     @Test

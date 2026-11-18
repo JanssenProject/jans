@@ -115,13 +115,13 @@ public class ResultTests {
     void propagatingASuccessIsRejected() {
 
         Result<String> result = Result.success("ok");
-        assertThatThrownBy(() -> result.propagate())
+        assertThatThrownBy(() -> result::propagate)
             .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     @DisplayName("GIVEN a failure built with an explicit path WHEN inspected THEN it carries that path")
-    public void failureAcceptsAnExplicitPath() {
+    void failureAcceptsAnExplicitPath() {
 
         Result<String> result = Result.failure(new TestError("boom"), FieldPath.of("metadataSource", "uri"));
 

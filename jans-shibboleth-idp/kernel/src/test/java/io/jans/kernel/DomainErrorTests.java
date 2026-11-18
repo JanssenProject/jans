@@ -22,7 +22,7 @@ public class DomainErrorTests {
 
     @Test
     @DisplayName("GIVEN a DomainError subclass WHEN inspected THEN message and toString agree")
-    public void exposesMessageContract() {
+    void exposesMessageContract() {
 
         DomainError error = new TestError("something went wrong");
 
@@ -32,7 +32,7 @@ public class DomainErrorTests {
 
     @Test
     @DisplayName("GIVEN RequiredValueMissing WHEN created for a field THEN it is a DomainError naming that field")
-    public void requiredValueMissingNamesField() {
+    void requiredValueMissingNamesField() {
 
         RequiredValueMissing error = RequiredValueMissing.forField(TestOwner.class, "displayName");
 
@@ -45,7 +45,7 @@ public class DomainErrorTests {
 
     @Test
     @DisplayName("GIVEN a single-field type WHEN its value is missing THEN the error names the type and no field")
-    public void requiredValueMissingNamesOwningTypeAlone() {
+    void requiredValueMissingNamesOwningTypeAlone() {
 
         RequiredValueMissing error = RequiredValueMissing.of(TestOwner.class);
 
@@ -57,7 +57,7 @@ public class DomainErrorTests {
 
     @Test
     @DisplayName("GIVEN forField WHEN given a blank field name THEN it rejects the call in favour of of(Class)")
-    public void requiredValueMissingRejectsBlankFieldName() {
+    void requiredValueMissingRejectsBlankFieldName() {
 
         assertThatThrownBy(() -> RequiredValueMissing.forField(TestOwner.class, " "))
             .isInstanceOf(IllegalArgumentException.class)
