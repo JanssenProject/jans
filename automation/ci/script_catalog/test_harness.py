@@ -145,6 +145,13 @@ class LoadCheckTest(unittest.TestCase):
         self.assertEqual(fake.store, {})
         self.assertEqual(r.scripts, [])
 
+    def test_unobservable_service_never_passes(self):
+        script = next(s for s in catalog.discover() if s.script_type == "config_api_auth")
+        report = run.Report()
+        with mock.patch("time.sleep"):
+            run.load_check(run.Run(FakeAio({}), report), [script])
+        self.assertEqual(report.cases[0][2], "skip")
+
     def test_failed_delete_is_kept_for_cleanup(self):
         fake = FakeAio({})
         r = run.Run(fake, run.Report())
@@ -166,13 +173,15 @@ class LoginFlowTest(unittest.TestCase):
     """aio.login against scripted responses: only an explicit refusal may read as a denied login."""
 
     def flow(self, *responses, direct=False):
-        script = list(responses)
+        script, self.requests = list(responses), []
+        requests = self.requests
 
         class FakeBrowser:
             def __init__(self, _ssl):
                 pass
 
-            def request(self, method, url, **_):
+            def request(self, method, url, form=None, **_):
+                requests.append((method, form or {}))
                 status, body, location = script.pop(0)
                 return aio.Response(status, {"Location": location} if location else {}, body, url)
 
@@ -196,6 +205,8 @@ class LoginFlowTest(unittest.TestCase):
         with self.assertRaises(aio.LoginFlowError) as e:
             self.flow((200, LOGIN_PAGE, None), (503, "busy", None))
         self.assertTrue(e.exception.credentials_sent)
+        method, form = self.requests[-1]
+        self.assertEqual((method, form.get("loginForm:username"), form.get("loginForm:password")), ("POST", "u", "p"))
 
     def test_lock_probe_raises_on_any_5xx(self):
         with self.assertRaises(aio.LoginFlowError):

@@ -121,7 +121,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     
                     unlock_and_authenticate = False
 
-                    object_from_store = cacheService.get(None, "lock_user_" + user_name)
+                    object_from_store = cacheService.get("lock_user_" + user_name)
                     if object_from_store is None:
                         # Object in cache was expired. We need to unlock user
                         print "Basic (lock account). User locking details for user '%s' not exists" % user_name

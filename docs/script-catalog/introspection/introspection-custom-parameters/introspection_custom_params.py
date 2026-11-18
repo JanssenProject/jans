@@ -53,7 +53,8 @@ class Introspection(IntrospectionType):
             return True
 
         # Return the public sid, never the session DN/id which equals the browser SSO cookie.
-        # accumulate, not put: Jython binds a str to put(String, Collection) and emits a char array.
+        # remove + accumulate: put() emits a Jython str as a char array; another script may have set sid
+        responseAsJsonObject.remove("sid")
         responseAsJsonObject.accumulate("sid", session.getOutsideSid())
 
         sessionAttributes = session.getSessionAttributes()

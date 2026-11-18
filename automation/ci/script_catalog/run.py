@@ -205,6 +205,8 @@ def load_check(run, scripts, cls="ScriptCatalog.load"):
             run.report.add(cls, s.rel, "fail", f"{svc} did not reload scripts", started=t)
             continue
         status, msg = classify(s, traces.get(inum))
+        if status == "pass" and svc not in SENTINEL_TYPE:
+            status, msg = "skip", f"no load error, but {svc} exposes no reload signal, so a clean load is unverified"
         if s.rel in manifest.KNOWN_BROKEN:
             if status == "fail" and "failed to load" in msg:
                 status, msg = "skip", "known broken: " + manifest.KNOWN_BROKEN[s.rel]
