@@ -115,7 +115,7 @@ public class ResultTests {
     void propagatingASuccessIsRejected() {
 
         Result<String> result = Result.success("ok");
-        assertThatThrownBy(() -> result::propagate)
+        assertThatThrownBy(result::propagate)
             .isInstanceOf(IllegalStateException.class);
     }
 

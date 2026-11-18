@@ -3,6 +3,8 @@ package io.jans.adapter.error;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.DisplayName;
@@ -27,9 +29,9 @@ public class ViolationWireFormatTests {
 
         String json = JSON.writeValueAsString(
             new Violation("display_name", "required_value_missing", "'display_name' is required"));
-
-        assertThat(json).isEqualTo(
-            "{\"field\":\"display_name\","
+        
+        JsonNode actualTree = JSON.readTree(json);
+        JsonNode expectedTree = JSON.readTree("{\"field\":\"display_name\","
                 + "\"code\":\"required_value_missing\","
                 + "\"message\":\"'display_name' is required\"}");
     }
@@ -43,9 +45,11 @@ public class ViolationWireFormatTests {
             new Violation("valid_until", "invalid_timestamp_syntax", "'valid_until' is bad"));
 
         String json = JSON.writeValueAsString(RequestValidationFailed.with(violations).getViolations());
-
-        assertThat(json).startsWith("[{\"field\":\"entity_id\"")
-            .contains("{\"field\":\"valid_until\"");
+        List<Violation> actualViolations = JSON.readValue(json,new TypeReference<List<Violation>>() {});
+        assertThat(actualViolations).containsExactly(
+            new Violation("entity_id", "required_value_missing", "'entity_id' is required"),
+            new Violation("valid_until", "invalid_timestamp_syntax", "'valid_until' is bad")
+        );
     }
 
     @Test
