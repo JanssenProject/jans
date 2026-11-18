@@ -14,18 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,7 +46,11 @@ class TraceChainStateTest {
     private static final String NODE = "node-a";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final String HASH_A = "sha256:" + "a".repeat(64);
+    private static final String MAX_SEQUENCE = "9007199254740991";
+
     private static PrivateKey ed25519Key;
+    private static PublicKey ed25519Public;
 
     @TempDir
     Path dir;
@@ -51,6 +60,7 @@ class TraceChainStateTest {
         SecurityProviderUtility.installBCProvider(true);
         KeyPair pair = KeyPairGenerator.getInstance("Ed25519", SecurityProviderUtility.getBCProvider()).generateKeyPair();
         ed25519Key = pair.getPrivate();
+        ed25519Public = pair.getPublic();
     }
 
     private static ObjectNode unsignedRecord() {
@@ -228,6 +238,171 @@ class TraceChainStateTest {
         ObjectNode reissued = signNew(restarted);
         assertEquals(3, seq(reissued));
         assertEquals(hashOf(second), reissued.get("producer_chain").get("prev_record_hash").asText());
+    }
+
+    @Test
+    void retryAfterFailedWriteOnSameInstanceReissuesTheSequence() {
+        Path file = dir.resolve("chain.json");
+        AtomicBoolean failWrites = new AtomicBoolean(false);
+        TraceChainState.StateWriter flaky = (target, bytes) -> writeOrFail(failWrites, target, bytes);
+        TraceChainState state = new TraceChainState(file, NODE, new TraceSigner(ed25519Key), flaky);
+        signNew(state);
+        ObjectNode second = signNew(state);
+
+        failWrites.set(true);
+        assertThrows(IllegalStateException.class, () -> signNew(state));
+
+        failWrites.set(false);
+        ObjectNode retried = signNew(state);
+        assertEquals(3, seq(retried));
+        assertEquals(hashOf(second), retried.get("producer_chain").get("prev_record_hash").asText());
+        assertEquals(4, state.getNextSequence());
+    }
+
+    @Test
+    void returnedRecordsVerifyAndTamperingBreaksTheLink() throws Exception {
+        TraceChainState state = open(dir.resolve("chain.json"));
+        ObjectNode first = signNew(state);
+        ObjectNode second = signNew(state);
+
+        assertTrue(verifies(first));
+        assertTrue(verifies(second));
+        assertEquals(hashOf(first), second.get("producer_chain").get("prev_record_hash").asText());
+
+        // Change record_id and keep the old signature: verification fails and the link no longer matches.
+        ObjectNode tampered = first.deepCopy();
+        tampered.put("record_id", UUID.randomUUID().toString());
+        assertFalse(verifies(tampered));
+        assertNotEquals(hashOf(tampered), second.get("producer_chain").get("prev_record_hash").asText());
+    }
+
+    @Test
+    void concatenatedSnapshotsAreTreatedAsMalformed() throws IOException {
+        Path file = dir.resolve("chain.json");
+        TraceChainState original = open(file);
+        signNew(original);
+        signNew(original);
+        byte[] snapshot = Files.readAllBytes(file);
+        byte[] twice = new byte[snapshot.length * 2];
+        System.arraycopy(snapshot, 0, twice, 0, snapshot.length);
+        System.arraycopy(snapshot, 0, twice, snapshot.length, snapshot.length);
+        Files.write(file, twice);
+
+        TraceChainState restarted = open(file);
+        ObjectNode genesis = signNew(restarted);
+
+        assertNotEquals(original.getChainId(), restarted.getChainId());
+        assertEquals(1, seq(genesis));
+        assertNull(genesis.get("producer_chain").get("chain_link"));
+    }
+
+    @Test
+    void unreadableStateFileIsReportedAndLeftInPlace() throws IOException {
+        // A directory where the state file should be: it exists but cannot be read as a file.
+        Path file = dir.resolve("chain.json");
+        Files.createDirectories(file);
+
+        assertThrows(IllegalStateException.class, () -> open(file));
+        assertTrue(Files.isDirectory(file));
+    }
+
+    @Test
+    void malformedSnapshotsStartANewChainLinkedToTheSavedId() throws IOException {
+        String[][] cases = {
+                {"\"chain-old\"", "2.5", "\"" + HASH_A + "\""},
+                {"\"chain-old\"", "9007199254740993", "\"" + HASH_A + "\""},
+                {"\"chain-old\"", "9007199254740992", "\"" + HASH_A + "\""},
+                {"\"chain-old\"", "2", "\"" + TraceChainState.ZERO_HASH + "\""},
+                {"\"chain-old\"", "1", "\"" + HASH_A + "\""},
+                {"\"chain-old\"", "0", "\"" + HASH_A + "\""},
+        };
+        for (int i = 0; i < cases.length; i++) {
+            Path file = dir.resolve("case-" + i + ".json");
+            writeRaw(file, savedJson(cases[i][0], cases[i][1], cases[i][2]));
+
+            TraceChainState state = open(file);
+            ObjectNode genesis = signNew(state);
+
+            assertNotEquals("chain-old", state.getChainId(), "case " + i);
+            assertEquals(1, seq(genesis), "case " + i);
+            assertEquals(TraceChainState.ZERO_HASH, genesis.get("producer_chain").get("prev_record_hash").asText());
+            assertEquals("chain-old", genesis.get("producer_chain").get("chain_link")
+                    .get("prev_producer_chain_id").asText(), "case " + i);
+        }
+    }
+
+    @Test
+    void invalidPriorChainIdIsNeverWrittenAsALink() throws IOException {
+        // Malformed state with an empty saved id.
+        Path emptyId = dir.resolve("empty-id.json");
+        writeRaw(emptyId, savedJson("\"\"", "5", "\"" + HASH_A + "\""));
+        assertNull(signNew(open(emptyId)).get("producer_chain").get("chain_link"));
+
+        // Malformed state with an unpaired surrogate in the saved id.
+        Path surrogateId = dir.resolve("surrogate-id.json");
+        writeRaw(surrogateId, savedJson("\"\\uD800\"", "5", "\"" + HASH_A + "\""));
+        assertNull(signNew(open(surrogateId)).get("producer_chain").get("chain_link"));
+
+        // Usable state whose chain_link_previous is empty: the genesis of the resumed chain carries no link.
+        Path emptyLink = dir.resolve("empty-link.json");
+        writeRaw(emptyLink, "{\"node_id\":\"" + NODE + "\",\"producer_chain_id\":\"chain-x\",\"next_sequence\":1,"
+                + "\"prev_record_hash\":\"" + TraceChainState.ZERO_HASH + "\",\"chain_link_previous\":\"\"}");
+        ObjectNode genesis = signNew(open(emptyLink));
+        assertEquals("chain-x", genesis.get("producer_chain").get("producer_chain_id").asText());
+        assertNull(genesis.get("producer_chain").get("chain_link"));
+    }
+
+    @Test
+    void nearLimitSequenceIsResumedAndExhaustedChainStartsALinkedChain() throws IOException {
+        Path file = dir.resolve("chain.json");
+        writeRaw(file, savedJson("\"chain-old\"", MAX_SEQUENCE, "\"" + HASH_A + "\""));
+
+        TraceChainState state = open(file);
+        ObjectNode last = signNew(state);
+        ObjectNode genesis = signNew(state);
+        ObjectNode second = signNew(state);
+
+        assertEquals(9007199254740991L, seq(last));
+        assertEquals("chain-old", last.get("producer_chain").get("producer_chain_id").asText());
+        assertEquals(1, seq(genesis));
+        assertNotEquals("chain-old", genesis.get("producer_chain").get("producer_chain_id").asText());
+        assertEquals("chain-old",
+                genesis.get("producer_chain").get("chain_link").get("prev_producer_chain_id").asText());
+        assertEquals(2, seq(second));
+        assertEquals(hashOf(genesis), second.get("producer_chain").get("prev_record_hash").asText());
+    }
+
+    @Test
+    void failedMoveRemovesTempFileAndKeepsTheTarget() throws IOException {
+        // A non-empty directory at the target makes the move fail.
+        Path target = dir.resolve("chain.json");
+        Files.createDirectories(target);
+        Files.write(target.resolve("keep.txt"), "x".getBytes(StandardCharsets.UTF_8));
+
+        assertThrows(IOException.class, () -> TraceChainState.writeAtomically(target, new byte[] {1, 2, 3}));
+
+        try (Stream<Path> entries = Files.list(dir)) {
+            assertEquals(0, entries.filter(p -> p.getFileName().toString().endsWith(".tmp")).count());
+        }
+        assertTrue(Files.exists(target.resolve("keep.txt")));
+    }
+
+    private static void writeRaw(Path file, String json) throws IOException {
+        Files.write(file, json.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static String savedJson(String chainIdJson, String nextJson, String prevJson) {
+        return "{\"node_id\":\"" + NODE + "\",\"producer_chain_id\":" + chainIdJson + ",\"next_sequence\":" + nextJson
+                + ",\"prev_record_hash\":" + prevJson + "}";
+    }
+
+    private boolean verifies(ObjectNode signed) throws Exception {
+        ObjectNode unsigned = signed.deepCopy();
+        unsigned.remove("signature");
+        Signature verifier = Signature.getInstance("Ed25519", SecurityProviderUtility.getBCProvider());
+        verifier.initVerify(ed25519Public);
+        verifier.update(TraceCanonicalizer.canonicalBytes(unsigned));
+        return verifier.verify(Base64.getUrlDecoder().decode(signed.get("signature").asText()));
     }
 
     private static long seq(ObjectNode signed) {

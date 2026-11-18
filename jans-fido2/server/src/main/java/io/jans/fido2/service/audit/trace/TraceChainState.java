@@ -9,17 +9,19 @@ package io.jans.fido2.service.audit.trace;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 
 /**
  * Per-node TRACE hash chain: producer_chain_id, sequence_number and prev_record_hash.
@@ -36,10 +38,20 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * <p>The first record of a chain has sequence_number 1 and the all-zero prev_record_hash. Lock rejects any other
  * genesis position. Restart resumes the saved chain when its state is usable. Otherwise it starts a new chain with
  * a new producer_chain_id and, if the previous chain id for this node is still known, a chain_link on its genesis.
+ *
+ * <p>Sequence numbers never exceed {@code 2^53 - 1}, the JSON safe-integer limit that Lock accepts. When a chain is
+ * exhausted, the next record starts a new chain linked to it.
+ *
+ * <p>Single owner: one instance must own a given state file for its lifetime. Two live instances on the same file
+ * can each resume the same snapshot and sign the same sequence numbers for different records. The class does not
+ * take a file lock; the server wiring (#15280) must create exactly one instance per state file.
  */
 public final class TraceChainState {
 
     static final String ZERO_HASH = "sha256:" + "0".repeat(64);
+
+    /** Largest sequence_number Lock accepts: 2^53 - 1. */
+    static final long MAX_SEQUENCE = (1L << 53) - 1;
 
     private static final String PRODUCER_CHAIN = "producer_chain";
     private static final String PRODUCER_CHAIN_ID = "producer_chain_id";
@@ -54,6 +66,9 @@ public final class TraceChainState {
 
     private static final Pattern SHA256_PREFIXED = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final ObjectMapper MAPPER = new ObjectMapper();
+    /** Rejects concatenated snapshots: trailing content after the first JSON value is an error. */
+    private static final ObjectMapper STATE_READER = new ObjectMapper()
+            .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
 
     /** Writes the state file. Replaceable in tests to simulate a failed or interrupted write. */
     interface StateWriter {
@@ -101,6 +116,10 @@ public final class TraceChainState {
      * @throws IllegalStateException if signing or persisting fails; the chain does not advance
      */
     public synchronized ObjectNode signAndAdvance(ObjectNode unsigned) {
+        if (nextSequence > MAX_SEQUENCE) {
+            // Exhausted: the last record of the old chain was signed at MAX_SEQUENCE. Start a linked chain first.
+            startChain(chainId);
+        }
         ObjectNode signed = unsigned.deepCopy();
         signed.remove(SIGNATURE);
         ObjectNode chain = chainOf(signed);
@@ -147,24 +166,38 @@ public final class TraceChainState {
             chainId = text(saved, PRODUCER_CHAIN_ID);
             nextSequence = saved.get(NEXT_SEQUENCE).asLong();
             prevRecordHash = text(saved, PREV_RECORD_HASH);
-            chainLinkPrevious = text(saved, CHAIN_LINK_PREVIOUS);
+            chainLinkPrevious = validChainIdOrNull(text(saved, CHAIN_LINK_PREVIOUS));
             return;
         }
         // Unusable state: start a new chain. Link to the previous one only when it is still known for this node.
-        String previous = sameNode ? text(saved, PRODUCER_CHAIN_ID) : null;
-        chainId = "chain-" + UUID.randomUUID();
+        startChain(sameNode ? validChainIdOrNull(text(saved, PRODUCER_CHAIN_ID)) : null);
+    }
+
+    /** Starts a new chain at sequence 1 and persists it before memory changes. */
+    private void startChain(String previous) {
+        String newChainId = "chain-" + UUID.randomUUID();
+        persist(newChainId, 1, ZERO_HASH, previous);
+        chainId = newChainId;
         nextSequence = 1;
         prevRecordHash = ZERO_HASH;
         chainLinkPrevious = previous;
-        persist(chainId, nextSequence, prevRecordHash, chainLinkPrevious);
     }
 
+    /**
+     * @return the saved state, or null when there is no file (absence) or its contents are malformed
+     * @throws IllegalStateException when the file exists but cannot be read; the file is left untouched
+     */
     private JsonNode readSaved() {
+        byte[] bytes;
         try {
-            if (!Files.exists(stateFile)) {
-                return null;
-            }
-            return MAPPER.readTree(Files.readAllBytes(stateFile));
+            bytes = Files.readAllBytes(stateFile);
+        } catch (NoSuchFileException e) {
+            return null;
+        } catch (IOException e) {
+            throw new IllegalStateException("TRACE chain state could not be read; the file was left unchanged", e);
+        }
+        try {
+            return STATE_READER.readTree(bytes);
         } catch (IOException | RuntimeException e) {
             return null;
         }
@@ -174,13 +207,33 @@ public final class TraceChainState {
         String id = text(saved, PRODUCER_CHAIN_ID);
         JsonNode next = saved.get(NEXT_SEQUENCE);
         String prev = text(saved, PREV_RECORD_HASH);
-        if (id == null || id.isEmpty() || next == null || !next.canConvertToLong() || next.asLong() < 1) {
+        if (validChainIdOrNull(id) == null || !isValidSequence(next)) {
             return false;
         }
         if (prev == null || !SHA256_PREFIXED.matcher(prev).matches()) {
             return false;
         }
-        return next.asLong() != 1 || ZERO_HASH.equals(prev);
+        // The zero hash is the prev_record_hash of a genesis record, and only of one.
+        return (next.asLong() == 1) == ZERO_HASH.equals(prev);
+    }
+
+    /** A sequence is an integral JSON number in [1, MAX_SEQUENCE]. */
+    private static boolean isValidSequence(JsonNode next) {
+        return next != null && next.isIntegralNumber() && next.canConvertToLong()
+                && next.asLong() >= 1 && next.asLong() <= MAX_SEQUENCE;
+    }
+
+    /** @return the id when it is non-empty and encodes as canonical JSON (no unpaired surrogate), otherwise null */
+    private static String validChainIdOrNull(String id) {
+        if (id == null || id.isEmpty()) {
+            return null;
+        }
+        try {
+            TraceCanonicalizer.canonicalBytes(TextNode.valueOf(id));
+            return id;
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static String text(JsonNode node, String field) {
@@ -208,14 +261,38 @@ public final class TraceChainState {
         Path dir = target.toAbsolutePath().getParent();
         Files.createDirectories(dir);
         Path tmp = Files.createTempFile(dir, target.getFileName().toString(), ".tmp");
-        try (FileChannel channel = FileChannel.open(tmp, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            channel.write(ByteBuffer.wrap(bytes));
-            channel.force(true);
-        }
         try {
+            try (FileChannel channel = FileChannel.open(tmp, StandardOpenOption.WRITE,
+                    StandardOpenOption.TRUNCATE_EXISTING)) {
+                ByteBuffer buffer = ByteBuffer.wrap(bytes);
+                while (buffer.hasRemaining()) {
+                    channel.write(buffer);
+                }
+                channel.force(true);
+            }
+            // No non-atomic fallback: if the move is not atomic, the error propagates and the target is untouched.
             Files.move(tmp, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (AtomicMoveNotSupportedException e) {
-            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException | RuntimeException e) {
+            try {
+                Files.deleteIfExists(tmp);
+            } catch (IOException cleanupFailure) {
+                e.addSuppressed(cleanupFailure);
+            }
+            throw e;
+        }
+        syncDirectory(dir);
+    }
+
+    /**
+     * Best-effort: forces the directory entry so the rename survives power loss. Opening a directory for force is not
+     * supported on Windows, so there this step is skipped and the stronger guarantee does not hold. The rename has
+     * already happened when this runs, so a failure here is not reported.
+     */
+    private static void syncDirectory(Path dir) {
+        try (FileChannel channel = FileChannel.open(dir, StandardOpenOption.READ)) {
+            channel.force(true);
+        } catch (IOException e) {
+            // Not supported on this platform, or the directory could not be synced. Nothing to undo.
         }
     }
 }
