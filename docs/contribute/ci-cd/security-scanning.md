@@ -26,20 +26,26 @@ output, and where results land, then describes the pen-test that correlates them
 `scan-cbom.yml` produces a cryptographic bill of materials (CycloneDX 1.6) for
 post-quantum readiness reviews.
 
-- **Source** (tag `v**`/`nightly`): builds the Maven modules, then
+- **Source** (after each tag-push "Build: Publish" succeeds, or dispatch): builds
+  the Maven modules, then
   [cbomkit-action](https://github.com/cbomkit/cbomkit-action) scans Java, Python
   and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
   so `scripts/cbom.py rust` maps the crypto crates in `jans-cedarling/Cargo.lock`
   to the algorithms they provide. Both merge into `jans-cbom.json`, which is
-  cosign-signed and attached to the release.
+  cosign-signed and attached to the release, unless the tag has since moved to
+  another commit or the release already has the pair.
 - **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
   scans each published image for certificates, keys, secrets and OpenSSL config.
-  OS and library CA bundles are skipped. Output is a workflow artifact
-  (`jans-image-cbom.json`), not a release asset, until reviewed.
+  Base-image CA trust stores are skipped; Janssen certs under `/etc/certs` are
+  not. Each finding carries a `jans:image` property with the image digest. Output
+  is a workflow artifact (`jans-image-cbom.json`), not a release asset, until
+  reviewed.
 
 `scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
-fails the job if it finds private keys, secret keys, passwords, credentials or
-tokens, printing only the type and file path. theia stderr is discarded because
+fails the job if it finds private keys, secret or generic keys, passwords,
+credentials or tokens, at any nesting depth, printing only the type, finding name
+(e.g. `generic-api-key`) and file path. The gitleaks false positive on the stock
+JDK `java.security` is allowed. theia stderr is discarded because
 it can echo scanned file contents into the public run log.
 
 ## Pen-test (DAST)
