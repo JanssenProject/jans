@@ -201,6 +201,14 @@ class LoginFlowTest(unittest.TestCase):
         with self.assertRaises(aio.LoginFlowError):
             self.flow((503, "busy", None), direct=True)
 
+    def test_access_denied_callback_is_a_denial(self):
+        self.assertIsNone(self.flow((200, LOGIN_PAGE, None), (302, "", CALLBACK + "?error=access_denied")))
+
+    def test_other_callbacks_are_not_a_denial(self):
+        for query in ("?error=server_error", "?state=x"):
+            with self.assertRaises(aio.LoginFlowError):
+                self.flow((302, "", CALLBACK + query), direct=True)
+
     def test_unrecognized_page_is_not_a_denial(self):
         with self.assertRaises(aio.LoginFlowError):
             self.flow((200, LOGIN_PAGE, None), (200, "<html>maintenance</html>", None))

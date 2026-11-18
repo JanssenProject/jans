@@ -111,28 +111,35 @@ class Run:
         return out
 
     def await_reload(self, services, timeout=360):
-        """Block until each service has run a reload pass over everything created so far.
+        """Block until each service has finished a reload pass over everything created so far.
 
-        A broken sentinel per service reports a load error once that service's reload pass reaches
-        it; the remaining scripts are then read until two snapshots one reload apart agree, so slow
-        init() calls later in the same pass are not mistaken for clean loads.
+        A broken sentinel reports a load error once a pass reaches it, and that pass also holds every
+        script created before it. Passes never overlap (CustomScriptManager.isActive), so a second
+        sentinel, created after the first one errors, can only error in a later pass: by then the pass
+        with the scripts under test has finished, wherever they sat in it.
         """
-        sentinels = {}
+        created, stalled = [], set()
         if set(services) - set(SENTINEL_TYPE):
             time.sleep(2 * RELOAD_INTERVAL + 10)
-        for svc in set(services) & set(SENTINEL_TYPE):
-            sentinels[svc] = self.aio.create_script(self.name("sentinel"), SENTINEL_TYPE[svc], "python",
-                                                    SENTINEL_BODY)["inum"]
-            self.scripts.append(sentinels[svc])
-        deadline, pending = time.time() + timeout, dict(sentinels)
-        while pending and time.time() < deadline:
-            time.sleep(10)
-            for svc, inum in list(pending.items()):
-                if self.errors([inum])[inum]:
-                    del pending[svc]
-        if self.delete(sentinels.values()):
-            raise RuntimeError("reload sentinel could not be removed; later checks would see its error")
-        return set(pending)
+        deadline = time.time() + timeout
+        try:
+            for _wave in range(2):
+                pending = {}
+                for svc in set(services) & set(SENTINEL_TYPE) - stalled:
+                    pending[svc] = self.aio.create_script(self.name("sentinel"), SENTINEL_TYPE[svc], "python",
+                                                          SENTINEL_BODY)["inum"]
+                    self.scripts.append(pending[svc])
+                    created.append(pending[svc])
+                while pending and time.time() < deadline:
+                    time.sleep(10)
+                    for svc, inum in list(pending.items()):
+                        if self.errors([inum])[inum]:
+                            del pending[svc]
+                stalled |= set(pending)
+        finally:
+            if self.delete(created):
+                raise RuntimeError("reload sentinel could not be removed; later checks would see its error")
+        return stalled
 
     def settle(self, inums, rounds=4):
         snap = self.errors(inums)
@@ -385,12 +392,16 @@ def main():
         report.add("ScriptCatalog.harness", "run", "fail", f"{type(e).__name__}: {e}", traceback.format_exc())
     finally:
         if run:
-            run.delete(list(run.scripts))
+            left = run.delete(list(run.scripts))
             for inum in run.users:
                 try:
                     run.aio.delete_user(inum)
                 except Exception as e:  # noqa: BLE001
                     log(f"cleanup: could not delete user {inum}: {e}")
+                    left.append(inum)
+            if left:
+                report.add("ScriptCatalog.harness", "cleanup", "fail",
+                           f"{len(left)} test script(s)/user(s) could not be removed", "\n".join(left))
         report.write(out)
         log(f"report: {out} ({len(report.cases)} cases)")
     return 0

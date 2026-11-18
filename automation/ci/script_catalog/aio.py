@@ -21,6 +21,10 @@ class HttpError(Exception):
         self.status, self.body = status, body
 
 
+# Callback errors that mean the end-user was not authenticated (OpenID Connect Core 3.1.2.6).
+AUTHN_DENIED = {"access_denied", "login_required", "interaction_required", "account_selection_required"}
+
+
 class LoginFlowError(Exception):
     """The login flow ended somewhere other than a code, an error redirect, or a re-shown login form.
 
@@ -203,10 +207,12 @@ class Aio:
                     code = q.get("code", [None])[0]
                     if code:
                         self._verifiers[code] = verifier
-                    else:
-                        print(f"[script-catalog] authorize via {acr} ended with {q.get('error')} "
-                              f"{q.get('error_description')}", flush=True)
-                    return code
+                        return code
+                    error = q.get("error", [None])[0]
+                    if error in AUTHN_DENIED:
+                        return None
+                    raise LoginFlowError(f"authorize via {acr} ended with {error} {q.get('error_description')}",
+                                         "loginForm" in submitted)
                 r = b.request("GET", loc)
                 continue
             sent = "loginForm" in submitted
