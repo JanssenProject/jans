@@ -360,7 +360,7 @@ Janssen Config API endpoints are OAuth protected. It supports basic token as wel
 
 ### Invoking API using curl
 
-Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
+Janssen Config API has [REST endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) and can be invoked using curl.
 
 #### Prerequisites
 
@@ -371,7 +371,7 @@ You will need:
 
 #### Steps
 
- * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
+ * Refer to [API documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-config-api/docs/jans-config-api-swagger.yaml) to know the endpoint path and required OAuth scopes to access that 
  endpoint. Example: Attribute Endpoint.
 
     ![image](../../../assets/jans-attribute.png)
