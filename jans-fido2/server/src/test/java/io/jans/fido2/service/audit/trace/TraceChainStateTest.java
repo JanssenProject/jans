@@ -30,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -301,8 +302,15 @@ class TraceChainStateTest {
         // A directory where the state file should be: it exists but cannot be read as a file.
         Path file = dir.resolve("chain.json");
         Files.createDirectories(file);
+        AtomicInteger writes = new AtomicInteger();
+        TraceChainState.StateWriter counting = (target, bytes) -> {
+            writes.incrementAndGet();
+            TraceChainState.writeAtomically(target, bytes);
+        };
 
-        assertThrows(IllegalStateException.class, () -> open(file));
+        assertThrows(IllegalStateException.class,
+                () -> new TraceChainState(file, NODE, new TraceSigner(ed25519Key), counting));
+        assertEquals(0, writes.get());
         assertTrue(Files.isDirectory(file));
     }
 
