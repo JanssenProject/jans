@@ -58,7 +58,7 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
 | **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Workloads and agents whose identity the host system already established, service-to-service with upstream verification, custom auth flows |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
-| **Recommended for** | Most production deployments | Production deployments where authentication is handled outside Cedarling; prototyping without an IDP |
+| **Recommended for** | Most production deployments | Production deployments where authorization inputs are provided by the client application; prototyping without an IDP |
 
 ## Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
 
