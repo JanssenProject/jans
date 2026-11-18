@@ -35,11 +35,12 @@ def log(msg):
     print(f"[script-catalog] {msg}", flush=True)
 
 
-_XML_INVALID = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ufffe\uffff]")
+# Characters XML 1.0 forbids, shown as \xNN so the report stays parseable.
+_XML_INVALID = {c: f"\\x{c:02x}" for c in [*range(0x09), 0x0b, 0x0c, *range(0x0e, 0x20), 0xfffe, 0xffff]}
 
 
 def xml_text(s):
-    return _XML_INVALID.sub(lambda m: f"\\x{ord(m.group()):02x}", s or "")
+    return (s or "").translate(_XML_INVALID)
 
 
 class Report:
