@@ -186,7 +186,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Quick Start](https://docs.jans.io/v2.6.1/janssen-server/install/docker-install/quick-start/index.md)
 - [Helm Deployments](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/index.md)
 - [Database Setup](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/database-setup/index.md)
-- [Ingress Setup](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/ingress-setup/index.md)
+- [External Access & Traffic Management](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/ingress-setup/index.md)
 - [Install Janssen](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/install-janssen/index.md)
 - [Post-Installation](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/post-install/index.md)
 - [Amazon EKS](https://docs.jans.io/v2.6.1/janssen-server/install/helm-install/prerequisites/amazon-eks/index.md)

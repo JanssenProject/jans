@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -71,6 +70,29 @@
 
     
     
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
+  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
+    https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
+    https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.bolddesk.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+"><script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+
   </head>
   
   
@@ -1259,7 +1281,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 </ol>
 <p>!!! Note To make sure <code>super_gluu</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "super_gluu".</p>
 <h3 id="make-sign-in-with-super-gluu-script-as-default-authentication-script">Make Sign-in with Super-Gluu Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-super-gluu-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v2.6.1/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>sg-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -1275,8 +1297,8 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 <div class="highlight"><pre><span></span><code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm?response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin&amp;client_id=&lt;replace_with_inum_client_id&gt;&amp;scope=openid+profile+email+user_name&amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
 </code></pre></div></p>
 <h3 id="customizations-to-super-gluu-login-pages">Customizations to Super Gluu Login Pages<a class="headerlink" href="#customizations-to-super-gluu-login-pages" title="Permanent link">#</a></h3>
-<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/v2.6.1/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
-<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/v2.6.1/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
+<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
+<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
 <h3 id="self-service">Self-service<a class="headerlink" href="#self-service" title="Permanent link">#</a></h3>
 <p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>.</p>
 <h3 id="manual-device-management">Manual Device Management<a class="headerlink" href="#manual-device-management" title="Permanent link">#</a></h3>
@@ -1422,7 +1444,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 
 
 <h4>Cookie consent</h4>
-<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. If you accept, Reo.dev and its third-party partners also collect device and network data to identify the company you visit from. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
 <input class="md-toggle" type="checkbox" id="__settings" >
 <div class="md-consent__settings">
   <ul class="task-list">
