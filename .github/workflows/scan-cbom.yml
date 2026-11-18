@@ -7,10 +7,11 @@ name: "Scan: CBOM"
 #           java.security config). Manual runs only; workflow artifact, not a
 #           release asset, until reviewed.
 on:
-  push:
-    tags:
-      - 'v**'
-      - 'nightly'
+  # After a tag-push publish, so the io.jans nightly/release jars (incl.
+  # cedarling-java) are redeployed and stable while this resolves them.
+  workflow_run:
+    workflows: ["Build: Publish"]
+    types: [completed]
   workflow_dispatch:
     inputs:
       scan_images:
@@ -32,7 +33,9 @@ env:
 
 jobs:
   source-cbom:
-    if: github.repository == 'JanssenProject/jans'
+    if: >-
+      github.repository == 'JanssenProject/jans' && (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-latest
     timeout-minutes: 240
     permissions:
@@ -49,6 +52,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
     - name: Set up JDK 17
       uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
@@ -72,16 +77,19 @@ jobs:
         done
 
     - name: Generate source CBOM
-      id: cbom
       uses: docker://ghcr.io/cbomkit/cbomkit-action@sha256:47c2505267dc5f055152616ffa0d0076b7d0824fe9e0de670b572d1ebad2fc4b # v2.3.0
       env:
         CBOMKIT_LANGUAGES: java, python, go
+
+    # Gate before upload: artifacts of a public repo are downloadable by anyone.
+    - name: Gate source CBOM
+      run: python3 .github/workflows/scripts/cbom.py gate cbom/cbom.json source-cbom.json
 
     - name: Upload source CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: source-cbom
-        path: ${{ steps.cbom.outputs.pattern }}
+        path: source-cbom.json
         if-no-files-found: error
 
   image-cbom:
@@ -113,8 +121,9 @@ jobs:
       run: go install github.com/cbomkit/cbomkit-theia@dcd95ac86d1cbe6e867ff3ee059b9ef77bac6a59 # v1.1.2
 
     # theia may echo scanned file contents to stderr and run logs are public,
-    # so stderr is discarded. OS/library CA bundles are skipped: they are base
-    # image trust anchors, not Janssen crypto, and are ~99% of the output.
+    # so stderr is discarded. Base-image CA trust stores are skipped: they are
+    # not Janssen crypto and are ~99% of the output. Janssen certs/keys under
+    # /etc/certs stay in scope.
     - name: Scan image
       env:
         IMAGE_TAG: ${{ inputs.image_tag }}
@@ -124,14 +133,25 @@ jobs:
         if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
           echo "Invalid image_tag" >&2; exit 1
         fi
-        REF="ghcr.io/$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/${IMAGE}:${IMAGE_TAG}"
+        REPO_PATH="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/${IMAGE}"
+        NAME="ghcr.io/${REPO_PATH}"
+        TOKEN="$(curl -sSf "https://ghcr.io/token?scope=repository:${REPO_PATH}:pull" | jq -r .token)"
+        DIGEST="$(curl -sSfI -H "Authorization: Bearer ${TOKEN}" \
+          -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json' \
+          "https://ghcr.io/v2/${REPO_PATH}/manifests/${IMAGE_TAG}" | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
+        if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+          echo "::error::cannot resolve ${NAME}:${IMAGE_TAG}"; exit 1
+        fi
+        REF="${NAME}@${DIGEST}"
+        echo "Scanning ${NAME}:${IMAGE_TAG} (${DIGEST})"
         if ! "$(go env GOPATH)/bin/cbomkit-theia" image "${REF}" \
             --log-level fatal \
             -p certificates,secrets,opensslconf,problematicca \
-            --ignore '**/cacert.pem,**/cert.pem,**/ca-certificates.crt,**/ca-bundle.crt,**/roots.pem,**/certs/**' \
+            --ignore '**/cacert.pem,**/ca-certificates.crt,**/ca-bundle.crt,**/roots.pem,**/etc/ssl*/cert.pem,**/etc/ssl*/certs/**,**/usr/share/ca-certificates/**,**/etc/pki/ca-trust/**' \
             > raw.json 2>/dev/null; then
           echo "::error::cbomkit-theia failed on ${REF}"; exit 1
         fi
+        python3 .github/workflows/scripts/cbom.py label raw.json "${REF}"
         python3 .github/workflows/scripts/cbom.py gate raw.json "image-${IMAGE}.cbom.json"
 
     - name: Upload image CBOM
@@ -141,13 +161,10 @@ jobs:
         path: image-${{ matrix.image }}.cbom.json
         if-no-files-found: error
 
-  publish:
-    needs: [source-cbom, image-cbom]
-    if: always() && needs.source-cbom.result == 'success'
+  image-publish:
+    needs: image-cbom
+    if: always() && needs.image-cbom.result != 'skipped' && needs.image-cbom.result != 'cancelled'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write  # cosign keyless signing
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -157,6 +174,45 @@ jobs:
     - name: Checkout
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
+        sparse-checkout: .github/workflows/scripts
+
+    - name: Download image CBOMs
+      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+      with:
+        pattern: image-cbom-*
+        path: images
+        merge-multiple: true
+
+    - name: Build jans-image-cbom.json
+      env:
+        IMAGE_TAG: ${{ inputs.image_tag }}
+      run: python3 .github/workflows/scripts/cbom.py merge janssen-images "${IMAGE_TAG}" jans-image-cbom.json images/*.json
+
+    - name: Upload merged image CBOM
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: jans-image-cbom
+        path: jans-image-cbom.json
+
+  publish:
+    needs: source-cbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # cosign keyless signing
+    env:
+      RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+      with:
+        egress-policy: audit
+
+    - name: Checkout
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        ref: ${{ env.HEAD_SHA }}
         sparse-checkout: |
           .github/workflows/scripts
           jans-cedarling/Cargo.lock
@@ -171,10 +227,10 @@ jobs:
     - name: Resolve version
       id: ver
       run: |
-        if [[ "${GITHUB_REF_NAME}" == "nightly" || "${GITHUB_REF_TYPE}" != "tag" ]]; then
-          echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
+        if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" && "${RELEASE_TAG}" =~ ^v[0-9] ]]; then
+          echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
         else
-          echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
         fi
 
     - name: Build jans-cbom.json
@@ -184,49 +240,61 @@ jobs:
         set -euo pipefail
         S=.github/workflows/scripts/cbom.py
         python3 "$S" rust jans-cedarling/Cargo.lock rust.json
-        python3 "$S" merge janssen "${VERSION}" jans-cbom.json source/cbom.json rust.json
+        python3 "$S" merge janssen "${VERSION}" jans-cbom.json source/source-cbom.json rust.json
         python3 "$S" gate jans-cbom.json
 
-    - name: Download image CBOMs
-      if: needs.image-cbom.result == 'success'
-      uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
-      with:
-        pattern: image-cbom-*
-        path: images
-        merge-multiple: true
-
-    - name: Build jans-image-cbom.json
-      if: needs.image-cbom.result == 'success'
-      env:
-        VERSION: ${{ steps.ver.outputs.version }}
-      run: python3 .github/workflows/scripts/cbom.py merge janssen-images "${VERSION}" jans-image-cbom.json images/*.json
-
-    - name: Upload merged CBOMs
+    - name: Upload merged CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: jans-cbom
-        path: jans-*cbom.json
+        path: jans-cbom.json
+
+    # nightly is re-tagged daily; a late or re-run scan must not overwrite the
+    # newer commit's CBOM.
+    - name: Check release tag still points at scanned commit
+      id: tag
+      if: github.event_name == 'workflow_run'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        if [[ ! "${RELEASE_TAG}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "Invalid release tag" >&2; exit 1
+        fi
+        TAG_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)"
+        if [[ "${TAG_SHA}" != "${HEAD_SHA}" ]]; then
+          echo "::notice::${RELEASE_TAG} moved to ${TAG_SHA}; skipping release upload for ${HEAD_SHA}"
+          echo "upload=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "upload=true" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Install Cosign
-      if: github.event_name == 'push'
+      if: steps.tag.outputs.upload == 'true'
       uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
 
     - name: Sign CBOM
-      if: github.event_name == 'push'
+      if: steps.tag.outputs.upload == 'true'
       run: cosign sign-blob --yes --bundle jans-cbom.json.bundle jans-cbom.json
 
     - name: Upload CBOM to the release
-      if: github.event_name == 'push'
+      if: steps.tag.outputs.upload == 'true'
       env:
         GH_TOKEN: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN || secrets.MOAUTO_WORKFLOW_TOKEN }}
       run: |
         for i in $(seq 1 20); do
-          gh release view "${GITHUB_REF_NAME}" -R "${GITHUB_REPOSITORY}" > /dev/null 2>&1 && break
+          gh release view "${RELEASE_TAG}" -R "${GITHUB_REPOSITORY}" > /dev/null 2>&1 && break
           if [ "$i" -eq 20 ]; then
-            echo "Release ${GITHUB_REF_NAME} not found after 20 attempts." >&2
+            echo "Release ${RELEASE_TAG} not found after 20 attempts." >&2
             exit 1
           fi
-          echo "Release ${GITHUB_REF_NAME} not found yet (attempt ${i}/20); retrying in 15s."
+          echo "Release ${RELEASE_TAG} not found yet (attempt ${i}/20); retrying in 15s."
           sleep 15
         done
-        gh release upload "${GITHUB_REF_NAME}" jans-cbom.json jans-cbom.json.bundle -R "${GITHUB_REPOSITORY}" --clobber
+        have=$(gh release view "${RELEASE_TAG}" -R "${GITHUB_REPOSITORY}" --json assets \
+          --jq '[.assets[].name | select(. == "jans-cbom.json" or . == "jans-cbom.json.bundle")] | length')
+        # Keep an existing complete pair on re-runs; only replace a partial one.
+        if [ "${have}" = "2" ]; then
+          echo "::notice::jans-cbom.json already on ${RELEASE_TAG}; leaving it"
+          exit 0
+        fi
+        gh release upload "${RELEASE_TAG}" jans-cbom.json jans-cbom.json.bundle -R "${GITHUB_REPOSITORY}" --clobber

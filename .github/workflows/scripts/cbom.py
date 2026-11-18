@@ -3,6 +3,7 @@
 
   cbom.py rust CARGO_LOCK OUT          crypto crates in a Cargo.lock -> CBOM
   cbom.py merge NAME VERSION OUT IN... merge CBOMs into one
+  cbom.py label IN REF                 tag every finding with the scanned image
   cbom.py gate IN [OUT]                strip key values, fail on secret material
 """
 import json
@@ -28,7 +29,9 @@ RUST_CRATES = {
 RUST_PROTOCOLS = {"rustls": [("TLSv1.2", "1.2"), ("TLSv1.3", "1.3")]}
 RUST_PROVIDERS = {"ring", "aws-lc-rs"}
 
-BLOCKED = {"private-key", "secret-key", "shared-secret", "seed", "password", "credential", "token"}
+BLOCKED = {"private-key", "secret-key", "shared-secret", "seed", "password", "credential", "token", "key"}
+# gitleaks generic-api-key false positive on stock JDK config (no value is captured).
+ALLOWED = {("key", "generic-api-key", "/conf/security/java.security")}
 
 
 def bom(components, dependencies, meta_component=None):
@@ -51,11 +54,13 @@ def rust(lock_path, out):
     with open(lock_path, "rb") as f:
         packages = tomllib.load(f).get("package", [])
     components, dependencies, assets = [], [], {}
-    for pkg in sorted(packages, key=lambda p: (p["name"], p["version"])):
-        name, version = pkg["name"], pkg["version"]
+    for pkg in sorted(packages, key=lambda p: (p["name"], p["version"], p.get("source", ""))):
+        name, version, source = pkg["name"], pkg["version"], pkg.get("source", "")
         if name not in RUST_CRATES and name not in RUST_PROTOCOLS and name not in RUST_PROVIDERS:
             continue
         ref = f"pkg:cargo/{name}@{version}"
+        if source.startswith("git+"):
+            ref += "?vcs_url=" + source.split("#")[0]
         components.append({"type": "library", "bom-ref": ref, "name": name, "version": version, "purl": ref})
         provides = []
         for algo, props in RUST_CRATES.get(name, []):
@@ -80,7 +85,9 @@ def merge(name, version, out, inputs):
     for path in inputs:
         with open(path) as f:
             doc = json.load(f)
-        for c in doc.get("components", []):
+        root = (doc.get("metadata") or {}).get("component")
+        # Keep each input's root so its dependency edges still resolve.
+        for c in ([root] if root and root.get("bom-ref") else []) + doc.get("components", []):
             ref = c.get("bom-ref")
             if ref and ref in seen:
                 continue
@@ -97,19 +104,43 @@ def merge(name, version, out, inputs):
     write(out, bom(components, list(deps.values()), meta))
 
 
+def walk(components):
+    for c in components:
+        yield c
+        yield from walk(c.get("components", []))
+
+
+def label(path, image):
+    with open(path) as f:
+        doc = json.load(f)
+    for c in doc.get("components", []):
+        c.setdefault("properties", []).append({"name": "jans:image", "value": image})
+    name, _, digest = image.partition("@")
+    doc.setdefault("metadata", {})["component"] = {"type": "container", "bom-ref": image,
+                                                   "name": name, "version": digest or name}
+    write(path, doc)
+
+
+def allowed(kind, name, locs):
+    return bool(locs) and all(
+        any(kind == a and name == n and loc.endswith(sfx) for a, n, sfx in ALLOWED) for loc in locs)
+
+
 def gate(path, out=None):
     with open(path) as f:
         doc = json.load(f)
     blocked = []
-    for c in doc.get("components", []):
+    root = (doc.get("metadata") or {}).get("component")
+    for c in walk(([root] if root else []) + doc.get("components", [])):
         rcm = (c.get("cryptoProperties") or {}).get("relatedCryptoMaterialProperties")
         if not rcm:
             continue
         # Never publish key material, even public keys: bulky and unneeded for an inventory.
         rcm.pop("value", None)
-        if rcm.get("type") in BLOCKED:
-            locs = [o.get("location") for o in (c.get("evidence") or {}).get("occurrences", [])]
-            blocked.append(f"{rcm['type']}: {c.get('name')} at {', '.join(filter(None, locs)) or 'unknown'}")
+        locs = [o.get("location") or "" for o in (c.get("evidence") or {}).get("occurrences", [])]
+        kind = rcm.get("type")
+        if kind in BLOCKED and not allowed(kind, c.get("name"), locs):
+            blocked.append(f"{kind}: {c.get('name')} at {', '.join(filter(None, locs)) or 'unknown'}")
     write(out or path, doc)
     if blocked:
         print(f"::error::{len(blocked)} secret crypto material finding(s); not publishing", file=sys.stderr)
@@ -131,6 +162,8 @@ if __name__ == "__main__":
         rust(*args)
     elif cmd == "merge":
         merge(args[0], args[1], args[2], args[3:])
+    elif cmd == "label":
+        label(*args)
     elif cmd == "gate":
         gate(*args)
     else:
