@@ -31,15 +31,19 @@ post-quantum readiness reviews.
   [cbomkit-action](https://github.com/cbomkit/cbomkit-action) scans Java, Python
   and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
   so `scripts/cbom.py rust` maps the crypto crates in `jans-cedarling/Cargo.lock`
-  to the algorithms they provide. Both merge into `jans-cbom.json`, which is
-  cosign-signed and attached to the release, unless the tag has since moved to
-  another commit or the release already has the pair.
+  to the algorithms they provide. Both merge into `jans-cbom.json`, stamped with
+  the scanned commit (`jans:commit`). After a tag-push publish it is
+  cosign-signed and attached to the release, unless the tag has since moved or
+  the release already holds a complete pair for that commit. A manual run only
+  uploads an unsigned `jans-cbom` workflow artifact.
 - **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
   scans each published image for certificates, keys, secrets and OpenSSL config.
   Base-image CA trust stores are skipped; Janssen certs under `/etc/certs` are
-  not. Each finding carries a `jans:image` property with the image digest. Output
-  is a workflow artifact (`jans-image-cbom.json`), not a release asset, until
-  reviewed.
+  not. Each platform of a multi-arch image is scanned by its own digest, and each
+  finding carries `jans:image` and `jans:platform` properties. Output is a
+  workflow artifact (`jans-image-cbom`), not a release asset, until reviewed. If
+  any image fails, the artifact is `jans-image-cbom-partial` and lists the
+  missing images in `jans:missing-images`.
 
 `scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
 fails the job if it finds private keys, secret or generic keys, passwords,
