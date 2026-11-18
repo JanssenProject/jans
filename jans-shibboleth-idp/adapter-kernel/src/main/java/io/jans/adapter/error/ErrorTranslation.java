@@ -84,10 +84,10 @@ public interface ErrorTranslation {
      */
     default Problem problemFor(DomainError error) {
 
-        if (error instanceof RequestValidationFailed) {
+        if (error instanceof RequestValidationFailed requestValidationFailed) {
 
             return KernelErrorCodes.VALIDATION_FAILED.toProblem()
-                .withViolations(((RequestValidationFailed) error).getViolations());
+                .withViolations(requestValidationFailed.getViolations());
         }
 
         ProblemTranslation translation = translationFor(error);

@@ -44,8 +44,8 @@ public class ViolationWireFormatTests {
 
         String json = JSON.writeValueAsString(RequestValidationFailed.with(violations).getViolations());
 
-        assertThat(json).startsWith("[{\"field\":\"entity_id\"");
-        assertThat(json).contains("{\"field\":\"valid_until\"");
+        assertThat(json).startsWith("[{\"field\":\"entity_id\"")
+            .contains("{\"field\":\"valid_until\"");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ViolationWireFormatTests {
         Violation other = new Violation("uri", "invalid_uri_syntax", "bad");
 
         assertThat(one).isEqualTo(other);
-        assertThat(one.hashCode()).isEqualTo(other.hashCode());
+        assertThat(one).hasSameHashCodeAs(other);
         assertThat(one).isNotEqualTo(new Violation("base_url", "invalid_uri_syntax", "bad"));
     }
 
@@ -68,9 +68,9 @@ public class ViolationWireFormatTests {
             Collections.singletonList(new Violation("uri", "invalid_uri_syntax", "bad")));
 
         assertThat(failure.getMessage()).isEqualTo("Request validation failed: 1 invalid field");
-        List<Violation> violations_in_failure = failure.getViolations();
+        List<Violation> violationList = failure.getViolations();
         Violation violation = new Violation("x","y","z");
-        assertThatThrownBy(() -> violations_in_failure.add(violation))
+        assertThatThrownBy(() -> violationList.add(violation))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 

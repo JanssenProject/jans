@@ -25,7 +25,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a problem with no optional parts WHEN serialised THEN only the required fields appear")
-    public void omitsEveryAbsentOptionalField() throws Exception {
+    void omitsEveryAbsentOptionalField() throws Exception {
 
         String json = JSON.writeValueAsString(
             Problem.of(404, "trust_relationship_not_found", "Trust relationship not found"));
@@ -37,7 +37,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a code WHEN the problem is built THEN type is that code under the shared namespace")
-    public void derivesTheTypeUriFromTheCode() {
+    void derivesTheTypeUriFromTheCode() {
 
         Problem problem = Problem.of(400, "required_value_missing", "Required value missing");
 
@@ -48,7 +48,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN an explicit type WHEN supplied THEN it is kept rather than derived")
-    public void keepsAnExplicitTypeOutsideTheNamespace() {
+    void keepsAnExplicitTypeOutsideTheNamespace() {
 
         Problem problem = new Problem(
             "https://example.org/problems/custom", "Custom", 418, null, null, "custom", List.of());
@@ -58,7 +58,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN violations WHEN attached THEN they serialise under the shared Violation shape")
-    public void carriesViolationsInTheSharedShape() throws Exception {
+    void carriesViolationsInTheSharedShape() throws Exception {
 
         Problem problem = Problem.of(400, "required_value_missing", "Required value missing")
             .withDetail("display_name is required")
@@ -80,7 +80,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a validation failure WHEN rendered THEN its violations reach the problem unchanged")
-    public void rendersAValidationFailure() {
+    void rendersAValidationFailure() {
 
         RequestValidationFailed failure = RequestValidationFailed.with(
             List.of(new Violation("uri", "invalid_uri_syntax", "'uri' is not a valid URI")));
@@ -94,7 +94,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN no violations WHEN inspected THEN the list is empty rather than null")
-    public void violationsAreNeverNull() {
+    void violationsAreNeverNull() {
 
         Problem problem = new Problem(null, "Title", 500, null, null, "code", null);
 
@@ -104,7 +104,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN attached violations WHEN read THEN the list cannot be modified")
-    public void violationsAreNotModifiable() {
+    void violationsAreNotModifiable() {
 
         Problem problem = Problem.of(400, "c", "T")
             .withViolations(List.of(new Violation("f", "c", "m")));
@@ -117,7 +117,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a missing required field WHEN built THEN the misuse is rejected")
-    public void refusesToBuildWithoutTheRequiredFields() {
+    void refusesToBuildWithoutTheRequiredFields() {
 
         assertThatThrownBy(() -> Problem.of(400, null, "Title")).isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> Problem.of(400, "code", null)).isInstanceOf(NullPointerException.class);
@@ -125,7 +125,7 @@ public class ProblemWireFormatTests {
 
     @Test
     @DisplayName("GIVEN a serialised problem WHEN read back THEN it round-trips")
-    public void roundTrips() throws Exception {
+    void roundTrips() throws Exception {
 
         Problem problem = Problem.of(409, "operation_forbidden_from_status", "Operation forbidden")
             .withDetail("not allowed while ACTIVE")

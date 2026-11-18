@@ -22,7 +22,7 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a success WHEN inspected THEN it carries the value and getError throws")
-    public void successCarriesValue() {
+    void successCarriesValue() {
 
         Result<String> result = Result.success("ok");
 
@@ -34,7 +34,7 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a failure WHEN inspected THEN it carries the error and getValue throws")
-    public void failureCarriesError() {
+    void failureCarriesError() {
 
         DomainError error = new TestError("boom");
 
@@ -48,7 +48,7 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a kernel error WHEN carried by Result THEN it is exposed as a DomainError")
-    public void carriesKernelError() {
+    void carriesKernelError() {
 
         Result<String> result = Result.failure(RequiredValueMissing.forField(TestOwner.class, "name"));
 
@@ -58,7 +58,7 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a failure no caller has located WHEN inspected THEN its path is empty")
-    public void failureStartsWithoutALocation() {
+    void failureStartsWithoutALocation() {
 
         Result<String> result = Result.failure(new TestError("boom"));
 
@@ -67,29 +67,29 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a failure WHEN composing callers name their segments THEN the path grows outward")
-    public void composingCallersAccumulateThePath() {
+    void composingCallersAccumulateThePath() {
 
         Result<String> result = Result.<String>failure(new TestError("boom"))
             .at("validUntil")
             .at("metadataSource");
 
-        assertThat(result.getPath().toString()).isEqualTo("metadataSource.validUntil");
+        assertThat(result.getPath()).hasToString("metadataSource.validUntil");
     }
 
     @Test
     @DisplayName("GIVEN a failure inside a collection WHEN located by index THEN the element is addressable")
-    public void locatesCollectionElements() {
+    void locatesCollectionElements() {
 
         Result<String> result = Result.<String>failure(new TestError("boom"))
             .at("displayName")
             .at("attributes", 2);
 
-        assertThat(result.getPath().toString()).isEqualTo("attributes[2].displayName");
+        assertThat(result.getPath()).hasToString("attributes[2].displayName");
     }
 
     @Test
     @DisplayName("GIVEN a success WHEN located THEN it is returned unchanged so the call composes inline")
-    public void locatingASuccessIsANoOp() {
+    void locatingASuccessIsANoOp() {
 
         Result<String> success = Result.success("ok");
 
@@ -99,7 +99,7 @@ public class ResultTests {
 
     @Test
     @DisplayName("GIVEN a located failure WHEN propagated to the caller's type THEN error and path both survive")
-    public void propagatePreservesErrorAndPath() {
+    void propagatePreservesErrorAndPath() {
 
         DomainError error = new TestError("boom");
 
@@ -107,14 +107,15 @@ public class ResultTests {
 
         assertThat(propagated.isFailure()).isTrue();
         assertThat(propagated.getError()).isSameAs(error);
-        assertThat(propagated.getPath().toString()).isEqualTo("displayName");
+        assertThat(propagated.getPath()).hasToString("displayName");
     }
 
     @Test
     @DisplayName("GIVEN a success WHEN propagated as a failure THEN the misuse is rejected")
-    public void propagatingASuccessIsRejected() {
+    void propagatingASuccessIsRejected() {
 
-        assertThatThrownBy(() -> Result.success("ok").propagate())
+        Result<String> result = Result.success("ok");
+        assertThatThrownBy(() -> result.propagate())
             .isInstanceOf(IllegalStateException.class);
     }
 
@@ -124,6 +125,6 @@ public class ResultTests {
 
         Result<String> result = Result.failure(new TestError("boom"), FieldPath.of("metadataSource", "uri"));
 
-        assertThat(result.getPath().toString()).isEqualTo("metadataSource.uri");
+        assertThat(result.getPath()).hasToString("metadataSource.uri");
     }
 }

@@ -27,7 +27,7 @@ public class DomainErrorTests {
         DomainError error = new TestError("something went wrong");
 
         assertThat(error.getMessage()).isEqualTo("something went wrong");
-        assertThat(error.toString()).isEqualTo(error.getMessage());
+        assertThat(error).hasToString(error.getMessage());
     }
 
     @Test

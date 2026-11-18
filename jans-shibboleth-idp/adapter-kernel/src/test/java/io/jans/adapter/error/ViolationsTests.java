@@ -275,7 +275,7 @@ public class ViolationsTests {
             .rejected(Result.<String>failure(new RequestProblem(), FieldPath.of("metadata_source")));
 
         assertThat(rejected.getError()).isInstanceOf(RequestProblem.class);
-        assertThat(rejected.getPath().toString()).isEqualTo("metadata_source");
+        assertThat(rejected.getPath()).hasToString("metadata_source");
     }
 
     @Test
@@ -290,7 +290,7 @@ public class ViolationsTests {
     public void refusesToReportAFailureWithNoViolations() {
 
         Violations violations = collector();
-        assertThatThrownBy(() -> violations.asFailure()).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(violations::asFailure).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -300,9 +300,9 @@ public class ViolationsTests {
         Violations violations = collector();
         violations.take(Result.failure(new FieldProblem()), "uri");
 
-        List<Violation> violations_as_list = violations.asList();
+        List<Violation> violationList = violations.asList();
         Violation violation = new Violation("x","y","z");
-        assertThatThrownBy(() -> violations_as_list.add(violation))
+        assertThatThrownBy(() -> violationList.add(violation))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 }
