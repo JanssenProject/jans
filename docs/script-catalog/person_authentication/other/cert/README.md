@@ -25,6 +25,10 @@ The module has a few properties:
 5) credentials_file - Patch to file with reCAPTCHA credentials.
    Example: '/etc/certs/cert_credentials.json'
 
+6) trust_client_cert_header - Read the client certificate from the `X-ClientCert` header. Enable only behind a trusted proxy that verifies the client certificate and overwrites this header; deployments that rely on the header must set it before upgrading.
+   Allowed values: true/false
+   Default value: false
+
 ## Generating Certificates Without Configuration
 
 ### 1. Generate a certificate authority (CA) cert.

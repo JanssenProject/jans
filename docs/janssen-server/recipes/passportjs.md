@@ -58,7 +58,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
 
    You need to use Salt File `/etc/jans/conf/salt` as a secret key. You will get this salt file after Jans intallation. Jans [interception script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) uses this same file for decryption.
 
-1. Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like `/google/:token`. `google` is provider id in [providers_json_file](#add-passport-social-script). `token` is the same token which we created in above step.
+1. Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like `/google/:token`. `google` is provider id in [providers_json_file](#add-passport-social-script). `token` is the same token which we created in above step. Verify it and store its `jwt` claim in `req.session.passportRequestId` for the `request_id` claim below.
 
 1. After authentication Passport Project has to send encoded userinfo data to Jans `https://<your.jans.server.com>/jans-auth/postlogin.htm`. Below is the Node JS code sample to send POST request with data to Jans Post Login Endpoint.
 
@@ -111,6 +111,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
        jti: uuidv4(),
        exp: now / 1000 + 30,
        iat: now,
+       request_id: req.session.passportRequestId, // `jwt` claim of the token received in the auth request
        data: encrypt(user)
      }, privateKey, defaultRpOptions)
    
@@ -176,6 +177,7 @@ The custom script has the following properties:
 | passport_fqdn | Passport FQDN e.g. `https://your-passport.com` |
 | passport_token_endpoint_path | It will use `passport_fqdn` as a prefix so just add path. e.g. `/passport/token`. Jans request this endpoint to get token for next auth request [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py). Check [Step-1](#setup-passport-js-project) in Setup Passport section to make token endpoint. |
 | passport_auth_endpoint_path | It will use `passport_fqdn` as a prefix so just add path. e.g. `/passport/auth`. Jans request this endpoint to initiate auth request [here](../../script-catalog/person_authentication/passport/passport-social-jans-script.py). Check [Step-2](#setup-passport-js-project) in Setup Passport section to make passport auth endpoint. Jans will append provider and token during auth request e.g. If you have added google provider with id `google` in `providers_json_file` then jans request will be look like `https://your-passport.com/passport/auth/google/<token>`. |
+| require_request_binding | Optional, default `false`. When `true`, reject user JWTs without a `request_id` claim. The script always rejects a `request_id` that does not match the `jwt` claim of the token issued for the current browser session. |
 
 > Note: After adding and enabling successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://your-jans-server.com/.well-known/openid-configuration. Find `"acr_values_supported"` and you should see `passport-social`.
 

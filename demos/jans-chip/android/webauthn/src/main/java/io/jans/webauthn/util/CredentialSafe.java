@@ -4,6 +4,7 @@ import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyInfo;
 import android.security.keystore.KeyProperties;
+import android.security.keystore.StrongBoxUnavailableException;
 import android.support.annotation.NonNull;
 
 import java.io.ByteArrayOutputStream;
@@ -108,14 +109,15 @@ public class CredentialSafe {
                 .setUserAuthenticationRequired(this.authenticationRequired) // fingerprint or similar
                 .setUserConfirmationRequired(false) // TODO: Decide if we support Android Trusted Confirmations
                 .setInvalidatedByBiometricEnrollment(false)
-                //.setIsStrongBoxBacked(this.strongboxRequired)
+                .setIsStrongBoxBacked(this.strongboxRequired)
                 .build();
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_TYPE);
             keyPairGenerator.initialize(spec);
             KeyPair keyPair = keyPairGenerator.generateKeyPair();
             return keyPair;
-        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException
+                | StrongBoxUnavailableException e) {
             throw new VirgilException("couldn't generate key pair: " + e.toString());
         }
     }
