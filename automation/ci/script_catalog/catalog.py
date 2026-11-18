@@ -27,15 +27,16 @@ class CatalogScript:
     language: str
     script_type: str = None
     candidates: list = field(default_factory=list)
+    root: Path = CATALOG
 
     @property
     def rel(self):
-        return self.path.relative_to(CATALOG).as_posix()
+        return self.path.relative_to(self.root).as_posix()
 
     @property
     def key(self):
         """Same key persistence-loader/jans-linux-setup derive for scripts.ldif placeholders."""
-        rel = self.path.relative_to(CATALOG)
+        rel = self.path.relative_to(self.root)
         ext_type = rel.parent.as_posix().lower().replace(os.path.sep, "_").replace("-", "_")
         return f"{ext_type}_{self.path.stem.lower()}"
 
@@ -73,7 +74,7 @@ def discover(catalog=CATALOG, types=None):
         if not p.is_file() or p.suffix.lower() not in (".py", ".java"):
             continue
         lang = "python" if p.suffix.lower() == ".py" else "java"
-        s = CatalogScript(path=p, language=lang)
+        s = CatalogScript(path=p, language=lang, root=Path(catalog))
         top = p.relative_to(catalog).parts[0]
         s.script_type, s.candidates = resolve_type(p.read_text(encoding="utf-8"), lang, top, types)
         out.append(s)

@@ -194,6 +194,8 @@ class Aio:
                     return code
                 r = b.request("GET", loc)
                 continue
+            if r.status >= 400:
+                raise HttpError(r.status, r.body, r.url)
             forms = parse_forms(r.body)
             if "loginForm" in forms and "loginForm" not in submitted:
                 f = forms["loginForm"]

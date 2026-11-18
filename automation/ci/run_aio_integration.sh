@@ -235,6 +235,7 @@ FROM local/persistence-loader:ci
 COPY static/rdbm /app/static/rdbm
 COPY templates/test /app/templates/test
 COPY schema/jans_test_schema.json /app/templates/test/
+COPY templates/scripts.ldif /app/templates/
 EOF
   # The loader seeds custom scripts from docs/script-catalog at JANS_SOURCE_VERSION; ship this
   # checkout's catalog instead so the AIO runs the scripts under test.

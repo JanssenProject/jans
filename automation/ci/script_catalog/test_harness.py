@@ -67,6 +67,30 @@ class ClassifyTest(unittest.TestCase):
         self.assertEqual(run.classify(self.script("other.py"), trace)[0], "skip")
 
 
+class ReportTest(unittest.TestCase):
+    def test_control_characters_stay_parseable(self):
+        import tempfile, xml.etree.ElementTree as ET
+        from pathlib import Path
+        report = run.Report()
+        report.add("C", "n\x1b", "fail", "bad\x1b[0m", "trace\x00")
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d) / "r.xml"
+            report.write(out)
+            self.assertEqual(ET.parse(out).find("testcase/failure").get("message"), "bad\\x1b[0m")
+
+
+class DiscoverRootTest(unittest.TestCase):
+    def test_rel_and_key_follow_the_discovery_root(self):
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as d:
+            f = Path(d) / "token_exchange" / "Tx.java"
+            f.parent.mkdir()
+            f.write_text("public class TokenExchange implements TokenExchangeType {}")
+            s = catalog.discover(d)[0]
+            self.assertEqual((s.rel, s.key), ("token_exchange/Tx.java", "token_exchange_tx"))
+
+
 class FormParserTest(unittest.TestCase):
     def test_jsf_login_form(self):
         html = """<form id="loginForm" name="loginForm" method="post" action="/jans-auth/login.htm">
@@ -87,6 +111,7 @@ class FakeAio:
 
     def __init__(self, traces):
         self.traces, self.store, self.ids = traces, {}, itertools.count()
+        self.undeletable = set()
 
     def create_script(self, name, script_type, language, body, **_):
         inum = f"I{next(self.ids)}"
@@ -99,6 +124,8 @@ class FakeAio:
         return self.store[inum]
 
     def delete_script(self, inum):
+        if inum in self.undeletable:
+            raise aio.HttpError(503, "busy", inum)
         self.store.pop(inum, None)
 
 
@@ -117,6 +144,16 @@ class LoadCheckTest(unittest.TestCase):
         self.assertEqual(statuses, {ok.rel: "pass", broken.rel: "fail", known.rel: "skip"})
         self.assertEqual(fake.store, {})
         self.assertEqual(r.scripts, [])
+
+    def test_failed_delete_is_kept_for_cleanup(self):
+        fake = FakeAio({})
+        r = run.Run(fake, run.Report())
+        inum = fake.create_script("x", "introspection", "python", "")["inum"]
+        r.scripts.append(inum)
+        fake.undeletable.add(inum)
+        with mock.patch("time.sleep"):
+            self.assertEqual(r.delete([inum]), [inum])
+        self.assertEqual(r.scripts, [inum])
 
 
 if __name__ == "__main__":

@@ -27,11 +27,19 @@ SENTINEL_TYPE = {"jans-auth": "introspection", "jans-scim": "scim", "jans-fido2"
 SENTINEL_BODY = "this is not valid python (\n"
 INIT_FAILED = "Using default external type class"
 TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange"
+CLIENT_AUTHN = "client_authn/ClientAuthn.java"
 FORGED_ID_TOKEN, FORGED_DEVICE_SECRET = "not-a-jwt", "not-a-device-secret"
 
 
 def log(msg):
     print(f"[script-catalog] {msg}", flush=True)
+
+
+_XML_INVALID = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ufffe\uffff]")
+
+
+def xml_text(s):
+    return _XML_INVALID.sub(lambda m: f"\\x{ord(m.group()):02x}", s or "")
 
 
 class Report:
@@ -47,7 +55,8 @@ class Report:
                            failures=str(sum(c[2] == "fail" for c in self.cases)),
                            skipped=str(sum(c[2] == "skip" for c in self.cases)))
         for cls, name, status, message, detail, secs in self.cases:
-            tc = ET.SubElement(suite, "testcase", classname=cls, name=name, time=f"{secs:.1f}")
+            message, detail = xml_text(message), xml_text(detail)
+            tc = ET.SubElement(suite, "testcase", classname=xml_text(cls), name=xml_text(name), time=f"{secs:.1f}")
             if status == "fail":
                 ET.SubElement(tc, "failure", message=message[:500]).text = detail or message
             elif status == "skip":
@@ -75,14 +84,23 @@ class Run:
         self.scripts.append(created["inum"])
         return created
 
-    def delete(self, inums):
+    def delete(self, inums, attempts=3):
+        """Forget an inum only once config-api confirms it is gone; returns the ones still present."""
+        left = []
         for inum in inums:
-            try:
-                self.aio.delete_script(inum)
-            except Exception as e:  # noqa: BLE001 - cleanup is best-effort
-                log(f"cleanup: could not delete script {inum}: {e}")
-            if inum in self.scripts:
-                self.scripts.remove(inum)
+            for i in range(attempts):
+                try:
+                    self.aio.delete_script(inum)
+                    if inum in self.scripts:
+                        self.scripts.remove(inum)
+                    break
+                except Exception as e:  # noqa: BLE001 - cleanup is best-effort
+                    if i == attempts - 1:
+                        log(f"cleanup: could not delete script {inum}: {e}")
+                        left.append(inum)
+                    else:
+                        time.sleep(5)
+        return left
 
     def errors(self, inums):
         out = {}
@@ -184,7 +202,8 @@ def load_check(run, scripts, cls="ScriptCatalog.load"):
             else:
                 log(f"{s.rel} is listed in KNOWN_BROKEN but now loads; remove it from manifest.py")
         run.report.add(cls, s.rel, status, msg, traces.get(inum) or "", t)
-    run.delete(list(created))
+    if run.delete(list(created)):
+        raise RuntimeError(f"{cls} scripts could not be removed; later checks would not be isolated")
 
 
 def by_rel(scripts, rel):
@@ -264,10 +283,10 @@ def behavior_tests(run, scripts):
         r = wait_for(lambda: (lambda r: r if r.status == 200 and "key_from_script" in r.body else None)(
             aio.token_request(client, good)), timeout=120)
         assert r, "a valid native-SSO exchange never succeeded through the token-exchange script"
-        bad = dict(good, subject_token=FORGED_ID_TOKEN, actor_token=FORGED_DEVICE_SECRET)
-        r = aio.token_request(client, bad)
-        assert r.status in (400, 401) and "access_token" not in r.body, \
-            f"forged subject/actor tokens were exchanged (HTTP {r.status}): built-in validation is skipped"
+        for field, forged in (("subject_token", FORGED_ID_TOKEN), ("actor_token", FORGED_DEVICE_SECRET)):
+            r = aio.token_request(client, dict(good, **{field: forged}))
+            assert r.status in (400, 401) and "access_token" not in r.body, \
+                f"forged {field} was exchanged (HTTP {r.status}): built-in validation is skipped"
 
     def basic_lock():
         lock_uid, lock_inum = new_user("lock")
@@ -287,7 +306,7 @@ def behavior_tests(run, scripts):
 def client_authn_test(run, scripts):
     """Last: while enabled, any request without Basic auth (config-api's own calls included) gets 401."""
     aio, t = run.aio, time.time()
-    rel = "client_authn/ClientAuthn.java"
+    rel = CLIENT_AUTHN
     basic_client = aio.register_client(grant_types=["authorization_code", "client_credentials"])
     post_client = aio.register_client(grant_types=["authorization_code", "client_credentials"],
                                       token_endpoint_auth_method="client_secret_post")
@@ -340,8 +359,13 @@ def main():
 
         load_check(run, batch)
         behavior_tests(run, scripts)
-        run.delete(list(run.scripts))
+        if run.delete(list(run.scripts)):
+            raise RuntimeError("behavior-test scripts could not be removed; isolated checks would not be isolated")
         load_check(run, isolated["persistence_extension"])
+        for s in isolated["client_authn"]:
+            if s.rel != CLIENT_AUTHN:
+                load_check(run, [s])
+        # Last but one: a config_api_auth script that fails to load denies every config-api call, cleanup too.
         load_check(run, isolated["config_api_auth"])
         client_authn_test(run, scripts)
     except Exception as e:  # noqa: BLE001 - a harness crash must still leave a failing report
