@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.querydsl.core.types.OrderSpecifier;
 
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
@@ -120,6 +121,24 @@ public interface SqlOperationService extends PersistenceOperationService {
 	 */
 	Map<String, List<AttributeData>> lookupByKeys(String objectClass, Collection<String> keys, String... attributes)
 			throws SearchException, EntryConvertationException;
+
+	/**
+	 * Reads one entry by key with {@code SELECT ... FOR UPDATE}; the row stays locked until the current
+	 * transaction ends.
+	 *
+	 * @return attributes of the entry, or {@code null} when no row has the key
+	 * @throws IllegalStateException no transaction is active on the calling thread
+	 */
+	List<AttributeData> lookupForUpdate(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException;
+
+	/**
+	 * Runs {@code callback} in one transaction on one pooled connection bound to the calling thread.
+	 * Every operation of this service on that thread joins it. A nested call joins the outer transaction.
+	 * Commits when the callback returns, rolls back when it throws, and rethrows the callback exception.
+	 */
+	<T> T executeInTransaction(TransactionCallback<T> callback) throws Exception;
+
+	boolean isInTransaction();
 
     <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope,
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
