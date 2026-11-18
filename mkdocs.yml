@@ -608,7 +608,7 @@ nav:
   - Tutorials:
     - Getting Started: cedarling/tutorials/cedarling-getting-started.md
     - C: cedarling/tutorials/c.md
-    - Javascript: cedarling/tutorials/javascript.md
+    - JavaScript (WASM): cedarling/tutorials/javascript.md
     - Python: cedarling/tutorials/python.md
     - Rust: cedarling/tutorials/rust.md
     - Golang: cedarling/tutorials/go.md
