@@ -3,7 +3,8 @@
 
   cbom.py rust CARGO_LOCK OUT          crypto crates in a Cargo.lock -> CBOM
   cbom.py merge NAME VERSION OUT IN... merge CBOMs into one
-  cbom.py label IN REF                 tag every finding with the scanned image
+  cbom.py label IN REF [PLATFORM]      tag every finding with the scanned image
+  cbom.py stamp IN NAME=VALUE...       set metadata properties
   cbom.py gate IN [OUT]                strip key values, fail on secret material
 """
 import json
@@ -81,26 +82,26 @@ def rust(lock_path, out):
 
 
 def merge(name, version, out, inputs):
-    components, seen, deps = [], set(), {}
+    # Allocated first so an input root carrying the same ref is not duplicated.
+    aggregate = f"pkg:github/JanssenProject/jans@{version}#{name}"
+    components, seen, deps = [], {aggregate}, {}
     for path in inputs:
         with open(path) as f:
             doc = json.load(f)
         root = (doc.get("metadata") or {}).get("component")
         # Keep each input's root so its dependency edges still resolve.
         for c in ([root] if root and root.get("bom-ref") else []) + doc.get("components", []):
-            ref = c.get("bom-ref")
-            if ref and ref in seen:
+            key = c.get("bom-ref") or json.dumps(c, sort_keys=True)
+            if key in seen:
                 continue
-            if ref:
-                seen.add(ref)
+            seen.add(key)
             components.append(c)
         for d in doc.get("dependencies", []):
             cur = deps.setdefault(d["ref"], {"ref": d["ref"]})
             for key in ("dependsOn", "provides"):
                 if d.get(key):
                     cur[key] = sorted(set(cur.get(key, [])) | set(d[key]))
-    meta = {"type": "application", "bom-ref": f"pkg:github/JanssenProject/jans@{version}",
-            "name": name, "version": version}
+    meta = {"type": "application", "bom-ref": aggregate, "name": name, "version": version}
     write(out, bom(components, list(deps.values()), meta))
 
 
@@ -110,14 +111,27 @@ def walk(components):
         yield from walk(c.get("components", []))
 
 
-def label(path, image):
+def label(path, image, platform=None):
     with open(path) as f:
         doc = json.load(f)
+    props = [{"name": "jans:image", "value": image}]
+    if platform:
+        props.append({"name": "jans:platform", "value": platform})
     for c in doc.get("components", []):
-        c.setdefault("properties", []).append({"name": "jans:image", "value": image})
+        c.setdefault("properties", []).extend(props)
     name, _, digest = image.partition("@")
-    doc.setdefault("metadata", {})["component"] = {"type": "container", "bom-ref": image,
-                                                   "name": name, "version": digest or name}
+    doc.setdefault("metadata", {})["component"] = {"type": "container", "bom-ref": image, "name": name,
+                                                   "version": digest or name, "properties": props}
+    write(path, doc)
+
+
+def stamp(path, pairs):
+    with open(path) as f:
+        doc = json.load(f)
+    new = dict(p.split("=", 1) for p in pairs)
+    meta = doc.setdefault("metadata", {})
+    meta["properties"] = [p for p in meta.get("properties", []) if p.get("name") not in new] + [
+        {"name": k, "value": v} for k, v in new.items()]
     write(path, doc)
 
 
@@ -164,6 +178,8 @@ if __name__ == "__main__":
         merge(args[0], args[1], args[2], args[3:])
     elif cmd == "label":
         label(*args)
+    elif cmd == "stamp":
+        stamp(args[0], args[1:])
     elif cmd == "gate":
         gate(*args)
     else:

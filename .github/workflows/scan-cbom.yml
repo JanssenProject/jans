@@ -82,8 +82,17 @@ jobs:
         CBOMKIT_LANGUAGES: java, python, go
 
     # Gate before upload: artifacts of a public repo are downloadable by anyone.
+    # cbomkit reads GITHUB_SHA/GITHUB_REF_NAME, which point at the default branch
+    # on workflow_run; record the commit actually scanned.
     - name: Gate source CBOM
-      run: python3 .github/workflows/scripts/cbom.py gate cbom/cbom.json source-cbom.json
+      env:
+        HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        SCAN_REF: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+      run: |
+        set -euo pipefail
+        S=.github/workflows/scripts/cbom.py
+        python3 "$S" gate cbom/cbom.json source-cbom.json
+        python3 "$S" stamp source-cbom.json "commit=${HEAD_SHA}" "revision=${SCAN_REF}" "jans:commit=${HEAD_SHA}"
 
     - name: Upload source CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -92,14 +101,24 @@ jobs:
         path: source-cbom.json
         if-no-files-found: error
 
-  image-cbom:
+  images:
     if: github.repository == 'JanssenProject/jans' && github.event_name == 'workflow_dispatch' && inputs.scan_images
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    outputs:
+      list: ${{ steps.list.outputs.list }}
+    steps:
+    - name: Image list
+      id: list
+      run: echo 'list=["auth-server","cloudtools","config-api","configurator","fido2","persistence-loader","scim","loadtesting-jmeter","link","casa","all-in-one","shibboleth","cedarling-flask-sidecar","cedarling-opa"]' >> "$GITHUB_OUTPUT"
+
+  image-cbom:
+    needs: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
-        image: ["auth-server", "cloudtools", "config-api", "configurator", "fido2", "persistence-loader", "scim", "loadtesting-jmeter", "link", "casa", "all-in-one", "shibboleth", "cedarling-flask-sidecar", "cedarling-opa"]
+        image: ${{ fromJSON(needs.images.outputs.list) }}
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
@@ -123,7 +142,8 @@ jobs:
     # theia may echo scanned file contents to stderr and run logs are public,
     # so stderr is discarded. Base-image CA trust stores are skipped: they are
     # not Janssen crypto and are ~99% of the output. Janssen certs/keys under
-    # /etc/certs stay in scope.
+    # /etc/certs stay in scope. theia loads one platform per ref, so each
+    # platform of a multi-arch index is scanned by its own digest.
     - name: Scan image
       env:
         IMAGE_TAG: ${{ inputs.image_tag }}
@@ -133,26 +153,44 @@ jobs:
         if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
           echo "Invalid image_tag" >&2; exit 1
         fi
+        S=.github/workflows/scripts/cbom.py
         REPO_PATH="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/${IMAGE}"
         NAME="ghcr.io/${REPO_PATH}"
         TOKEN="$(curl -sSf "https://ghcr.io/token?scope=repository:${REPO_PATH}:pull" | jq -r .token)"
-        DIGEST="$(curl -sSfI -H "Authorization: Bearer ${TOKEN}" \
+        curl -sSf -D headers.txt -o manifest.json -H "Authorization: Bearer ${TOKEN}" \
           -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json' \
-          "https://ghcr.io/v2/${REPO_PATH}/manifests/${IMAGE_TAG}" | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
+          "https://ghcr.io/v2/${REPO_PATH}/manifests/${IMAGE_TAG}"
+        DIGEST="$(tr -d '\r' < headers.txt | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
         if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
           echo "::error::cannot resolve ${NAME}:${IMAGE_TAG}"; exit 1
         fi
-        REF="${NAME}@${DIGEST}"
-        echo "Scanning ${NAME}:${IMAGE_TAG} (${DIGEST})"
-        if ! "$(go env GOPATH)/bin/cbomkit-theia" image "${REF}" \
-            --log-level fatal \
-            -p certificates,secrets,opensslconf,problematicca \
-            --ignore '**/cacert.pem,**/ca-certificates.crt,**/ca-bundle.crt,**/roots.pem,**/etc/ssl*/cert.pem,**/etc/ssl*/certs/**,**/usr/share/ca-certificates/**,**/etc/pki/ca-trust/**' \
-            > raw.json 2>/dev/null; then
-          echo "::error::cbomkit-theia failed on ${REF}"; exit 1
-        fi
-        python3 .github/workflows/scripts/cbom.py label raw.json "${REF}"
-        python3 .github/workflows/scripts/cbom.py gate raw.json "image-${IMAGE}.cbom.json"
+        # Index: one entry per runnable platform (attestations are unknown/unknown).
+        jq -r --arg d "$DIGEST" 'if .manifests then .manifests[]
+            | select(.platform.os != "unknown")
+            | "\(.digest) \(.platform.os)/\(.platform.architecture)\(if .platform.variant then "/" + .platform.variant else "" end)"
+          else "\($d) single" end' manifest.json > targets.txt
+        mkdir -p scans
+        n=0
+        while read -r d platform; do
+          n=$((n + 1))
+          REF="${NAME}@${d}"
+          echo "Scanning ${NAME}:${IMAGE_TAG} ${platform} (${d})"
+          if ! "$(go env GOPATH)/bin/cbomkit-theia" image "${REF}" \
+              --log-level fatal \
+              -p certificates,secrets,opensslconf,problematicca \
+              --ignore '**/cacert.pem,**/ca-certificates.crt,**/ca-bundle.crt,**/roots.pem,**/etc/ssl*/cert.pem,**/etc/ssl*/certs/**,**/usr/share/ca-certificates/**,**/etc/pki/ca-trust/**' \
+              < /dev/null > "raw-${n}.json" 2>/dev/null; then
+            echo "::error::cbomkit-theia failed on ${REF}"; exit 1
+          fi
+          if [ "$platform" = "single" ]; then
+            python3 "$S" label "raw-${n}.json" "${REF}"
+          else
+            python3 "$S" label "raw-${n}.json" "${REF}" "${platform}"
+          fi
+          python3 "$S" gate "raw-${n}.json" "scans/${n}.json"
+        done < targets.txt
+        python3 "$S" merge "${IMAGE}" "${IMAGE_TAG}" "image-${IMAGE}.cbom.json" scans/*.json
+        python3 "$S" stamp "image-${IMAGE}.cbom.json" "jans:image-index=${NAME}@${DIGEST}"
 
     - name: Upload image CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -162,7 +200,7 @@ jobs:
         if-no-files-found: error
 
   image-publish:
-    needs: image-cbom
+    needs: [images, image-cbom]
     if: always() && needs.image-cbom.result != 'skipped' && needs.image-cbom.result != 'cancelled'
     runs-on: ubuntu-latest
     steps:
@@ -184,14 +222,28 @@ jobs:
         merge-multiple: true
 
     - name: Build jans-image-cbom.json
+      id: merge
       env:
         IMAGE_TAG: ${{ inputs.image_tag }}
-      run: python3 .github/workflows/scripts/cbom.py merge janssen-images "${IMAGE_TAG}" jans-image-cbom.json images/*.json
+        IMAGES: ${{ needs.images.outputs.list }}
+      run: |
+        set -euo pipefail
+        S=.github/workflows/scripts/cbom.py
+        missing="$(echo "$IMAGES" | jq -r '.[]' | while read -r i; do
+          [ -f "images/image-${i}.cbom.json" ] || echo "$i"; done | paste -sd, -)"
+        python3 "$S" merge janssen-images "${IMAGE_TAG}" jans-image-cbom.json images/*.json
+        if [ -n "$missing" ]; then
+          echo "::warning::partial image CBOM; missing: ${missing}"
+          python3 "$S" stamp jans-image-cbom.json "jans:missing-images=${missing}"
+          echo "name=jans-image-cbom-partial" >> "$GITHUB_OUTPUT"
+        else
+          echo "name=jans-image-cbom" >> "$GITHUB_OUTPUT"
+        fi
 
     - name: Upload merged image CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
-        name: jans-image-cbom
+        name: ${{ steps.merge.outputs.name }}
         path: jans-image-cbom.json
 
   publish:
@@ -241,6 +293,7 @@ jobs:
         S=.github/workflows/scripts/cbom.py
         python3 "$S" rust jans-cedarling/Cargo.lock rust.json
         python3 "$S" merge janssen "${VERSION}" jans-cbom.json source/source-cbom.json rust.json
+        python3 "$S" stamp jans-cbom.json "jans:commit=${HEAD_SHA}"
         python3 "$S" gate jans-cbom.json
 
     - name: Upload merged CBOM
@@ -291,10 +344,15 @@ jobs:
           sleep 15
         done
         have=$(gh release view "${RELEASE_TAG}" -R "${GITHUB_REPOSITORY}" --json assets \
-          --jq '[.assets[].name | select(. == "jans-cbom.json" or . == "jans-cbom.json.bundle")] | length')
-        # Keep an existing complete pair on re-runs; only replace a partial one.
+          --jq '[.assets[] | select(.state == "uploaded") | .name | select(. == "jans-cbom.json" or . == "jans-cbom.json.bundle")] | length')
+        # Keep a complete pair for this same commit on re-runs; replace a partial
+        # pair or one left from an earlier commit of a re-released tag.
         if [ "${have}" = "2" ]; then
-          echo "::notice::jans-cbom.json already on ${RELEASE_TAG}; leaving it"
-          exit 0
+          existing=$(gh release download "${RELEASE_TAG}" -R "${GITHUB_REPOSITORY}" -p jans-cbom.json -O - \
+            | jq -r '.metadata.properties[]? | select(.name == "jans:commit") | .value')
+          if [ "${existing}" = "${HEAD_SHA}" ]; then
+            echo "::notice::jans-cbom.json for ${HEAD_SHA} already on ${RELEASE_TAG}; leaving it"
+            exit 0
+          fi
         fi
         gh release upload "${RELEASE_TAG}" jans-cbom.json jans-cbom.json.bundle -R "${GITHUB_REPOSITORY}" --clobber
