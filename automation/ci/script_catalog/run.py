@@ -18,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import manifest  # noqa: E402
-from aio import Aio, HttpError, jwt_claims  # noqa: E402
+from aio import Aio, HttpError, LoginFlowError, jwt_claims  # noqa: E402
 from catalog import REPO, discover  # noqa: E402
 
 RELOAD_INTERVAL = 30  # CustomScriptManager.DEFAULT_INTERVAL
@@ -212,6 +212,17 @@ def by_rel(scripts, rel):
     return next(s for s in scripts if s.rel == rel)
 
 
+def retrying_login(aio, client, acr, username, pwd, scope="openid profile"):
+    """One readiness attempt: a 5xx before the credentials are posted is retried by the caller; after, never."""
+    try:
+        return aio.login(client, acr, username, pwd, scope)
+    except LoginFlowError as e:
+        if e.credentials_sent or not e.status or e.status < 500:
+            raise
+        log(f"login via {acr}: HTTP {e.status} before credentials were sent, retrying")
+        return None
+
+
 def wait_for(fn, timeout=240, step=10):
     """Poll fn until it returns a truthy value; scripts become active on the next reload pass."""
     deadline = time.time() + timeout
@@ -256,15 +267,7 @@ def behavior_tests(run, scripts):
     uid, _ = new_user("intro")
 
     def login_code(client, acr, username, pwd, scope="openid profile"):
-        def attempt():
-            try:
-                return aio.login(client, acr, username, pwd, scope)
-            except HttpError as e:
-                if e.status < 500:
-                    raise
-                log(f"login via {acr}: HTTP {e.status}, retrying")
-                return None
-        return wait_for(attempt)
+        return wait_for(lambda: retrying_login(aio, client, acr, username, pwd, scope))
 
     def introspection_sid():
         client = aio.register_client(introspection_script_dns=[intro_py["dn"]])

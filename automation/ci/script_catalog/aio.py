@@ -21,6 +21,17 @@ class HttpError(Exception):
         self.status, self.body = status, body
 
 
+class LoginFlowError(Exception):
+    """The login flow ended somewhere other than a code, an error redirect, or a re-shown login form.
+
+    credentials_sent tells callers whether a retry could repeat an attempt the server already counted.
+    """
+
+    def __init__(self, message, credentials_sent, status=None):
+        super().__init__(message)
+        self.credentials_sent, self.status = credentials_sent, status
+
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
         return None
@@ -169,7 +180,11 @@ class Aio:
         return r.json()
 
     def login(self, client, acr, username, password, scope="openid profile"):
-        """Authorization code flow through the JSF login (and consent) pages; returns the code or None."""
+        """Authorization code flow through the JSF login (and consent) pages.
+
+        Returns the code, or None when the server refuses: an error redirect or the login form shown again
+        after the credentials were posted. Anything else raises LoginFlowError.
+        """
         b = Browser(self.ssl)
         redirect = client["redirect_uris"][0]
         verifier = secrets.token_urlsafe(48)
@@ -194,8 +209,9 @@ class Aio:
                     return code
                 r = b.request("GET", loc)
                 continue
+            sent = "loginForm" in submitted
             if r.status >= 400:
-                raise HttpError(r.status, r.body, r.url)
+                raise LoginFlowError(f"HTTP {r.status} from {r.url}: {r.body[:300]}", sent, r.status)
             forms = parse_forms(r.body)
             if "loginForm" in forms and "loginForm" not in submitted:
                 f = forms["loginForm"]
@@ -207,10 +223,12 @@ class Aio:
                 # allowButton is an h:commandLink: JS posts its client id as both name and value
                 fields = dict(f["fields"], **{"authorizeForm:allowButton": "authorizeForm:allowButton"})
                 submitted.add("authorizeForm")
-            else:
+            elif "loginForm" in forms:
                 return None
+            else:
+                raise LoginFlowError(f"unrecognized page at {r.url} (HTTP {r.status})", sent, r.status)
             r = b.request("POST", urllib.parse.urljoin(r.url, f["action"]), form=fields)
-        return None
+        raise LoginFlowError("login flow did not finish within 15 steps", "loginForm" in submitted)
 
     def token_request(self, client, form, auth="basic"):
         headers = {}

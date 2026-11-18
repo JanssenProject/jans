@@ -156,5 +156,59 @@ class LoadCheckTest(unittest.TestCase):
         self.assertEqual(r.scripts, [inum])
 
 
+
+LOGIN_PAGE = """<form id="loginForm" method="post" action="/jans-auth/login.htm">
+  <input type="hidden" name="jakarta.faces.ViewState" value="1:2" /></form>"""
+CALLBACK = "https://aio.example.org/cb"
+
+
+class LoginFlowTest(unittest.TestCase):
+    """aio.login against scripted responses: only an explicit refusal may read as a denied login."""
+
+    def flow(self, *responses, direct=False):
+        script = list(responses)
+
+        class FakeBrowser:
+            def __init__(self, _ssl):
+                pass
+
+            def request(self, method, url, **_):
+                status, body, location = script.pop(0)
+                return aio.Response(status, {"Location": location} if location else {}, body, url)
+
+        client = aio.Aio.__new__(aio.Aio)
+        client.ssl, client._verifiers = None, {}
+        client.discovery = {"authorization_endpoint": "https://aio.example.org/authorize"}
+        with mock.patch.object(aio, "Browser", FakeBrowser):
+            login = client.login if direct else lambda *a: run.retrying_login(client, *a)
+            return login({"client_id": "c", "redirect_uris": [CALLBACK]}, "acr", "u", "p")
+
+    def test_code_is_returned(self):
+        self.assertEqual(self.flow((200, LOGIN_PAGE, None), (302, "", CALLBACK + "?code=abc")), "abc")
+
+    def test_login_form_shown_again_is_a_denial(self):
+        self.assertIsNone(self.flow((200, LOGIN_PAGE, None), (200, LOGIN_PAGE, None)))
+
+    def test_5xx_before_credentials_is_retryable(self):
+        self.assertIsNone(self.flow((503, "busy", None)))
+
+    def test_5xx_after_credentials_is_not_retried(self):
+        with self.assertRaises(aio.LoginFlowError) as e:
+            self.flow((200, LOGIN_PAGE, None), (503, "busy", None))
+        self.assertTrue(e.exception.credentials_sent)
+
+    def test_lock_probe_raises_on_any_5xx(self):
+        with self.assertRaises(aio.LoginFlowError):
+            self.flow((503, "busy", None), direct=True)
+
+    def test_unrecognized_page_is_not_a_denial(self):
+        with self.assertRaises(aio.LoginFlowError):
+            self.flow((200, LOGIN_PAGE, None), (200, "<html>maintenance</html>", None))
+
+    def test_endless_redirects_are_not_a_denial(self):
+        with self.assertRaises(aio.LoginFlowError):
+            self.flow(*[(302, "", "https://aio.example.org/loop")] * 16)
+
+
 if __name__ == "__main__":
     unittest.main()
