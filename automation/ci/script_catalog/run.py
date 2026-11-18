@@ -27,6 +27,7 @@ SENTINEL_TYPE = {"jans-auth": "introspection", "jans-scim": "scim", "jans-fido2"
 SENTINEL_BODY = "this is not valid python (\n"
 INIT_FAILED = "Using default external type class"
 TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange"
+FORGED_ID_TOKEN, FORGED_DEVICE_SECRET = "not-a-jwt", "not-a-device-secret"
 
 
 def log(msg):
@@ -263,7 +264,7 @@ def behavior_tests(run, scripts):
         r = wait_for(lambda: (lambda r: r if r.status == 200 and "key_from_script" in r.body else None)(
             aio.token_request(client, good)), timeout=120)
         assert r, "a valid native-SSO exchange never succeeded through the token-exchange script"
-        bad = dict(good, subject_token="not-a-token", actor_token="not-a-device-secret")
+        bad = dict(good, subject_token=FORGED_ID_TOKEN, actor_token=FORGED_DEVICE_SECRET)
         r = aio.token_request(client, bad)
         assert r.status in (400, 401) and "access_token" not in r.body, \
             f"forged subject/actor tokens were exchanged (HTTP {r.status}): built-in validation is skipped"

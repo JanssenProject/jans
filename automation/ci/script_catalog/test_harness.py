@@ -1,7 +1,7 @@
 """Offline checks for the script-catalog harness: python3 -m unittest discover -s automation/ci/script_catalog"""
 import itertools
 import unittest
-from unittest import mock
+import unittest.mock as mock
 
 import aio
 import catalog
