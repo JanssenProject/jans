@@ -227,11 +227,9 @@ public class BaseService {
                         dcrResponse.setClientSecret(entity.getString("client_secret"));
                         dcrResponse.setOpHost(issuer);
                         dcrResponse.setHardwareId(hardwareId);
-                        if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                        } else if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
-                        }
+                        dcrResponse.setScanHostname(issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)
+                                ? AppConstants.SCAN_DEV_SERVER
+                                : AppConstants.SCAN_PROD_SERVER);
                         return dcrResponse;
                     }
                     jsonString = httpService.getContent(httpEntity);

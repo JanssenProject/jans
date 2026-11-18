@@ -71,7 +71,7 @@ public class Util {
                 .map(String.class::cast).collect(Collectors.toList())));
         }
 
-        return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)
+        return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(String.class::cast)
                 .collect(Collectors.toList());
     }
 
