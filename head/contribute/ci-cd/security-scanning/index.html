@@ -1449,6 +1449,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cbom" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        CBOM
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pen-test-dast" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1754,6 +1765,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#cbom" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        CBOM
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pen-test-dast" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1999,6 +2021,13 @@ output, and where results land, then describes the pen-test that correlates them
 <td>release assets</td>
 </tr>
 <tr>
+<td>CBOM (cbomkit)</td>
+<td><code>scan-cbom.yml</code></td>
+<td>crypto algorithms, protocols, certs, keys</td>
+<td>signed CycloneDX 1.6 JSON</td>
+<td>release asset <code>jans-cbom.json</code>; image CBOM workflow artifact only</td>
+</tr>
+<tr>
 <td>Pen-test (DAST)</td>
 <td><code>scan-pentest.yml</code></td>
 <td>live endpoints</td>
@@ -2007,6 +2036,39 @@ output, and where results land, then describes the pen-test that correlates them
 </tr>
 </tbody>
 </table>
+<h2 id="cbom">CBOM<a class="headerlink" href="#cbom" title="Permanent link">#</a></h2>
+<p><code>scan-cbom.yml</code> produces a cryptographic bill of materials (CycloneDX 1.6) for
+post-quantum readiness reviews.</p>
+<ul>
+<li><strong>Source</strong> (after each tag-push "Build: Publish" succeeds, or dispatch): builds
+  the Maven modules, then
+  <a href="https://github.com/cbomkit/cbomkit-action">cbomkit-action</a> scans Java, Python
+  and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
+  so <code>scripts/cbom.py rust</code> maps the crypto crates in <code>jans-cedarling/Cargo.lock</code>
+  to the algorithms they provide. Both merge into <code>jans-cbom.json</code>, stamped with
+  the scanned commit (<code>jans:commit</code>). After a tag-push publish it is
+  cosign-signed and attached to the release, unless the tag has since moved or
+  the release already holds a complete pair for that commit. A manual run only
+  uploads an unsigned <code>jans-cbom</code> workflow artifact.</li>
+<li><strong>Images</strong> (manual dispatch only): <a href="https://github.com/cbomkit/cbomkit-theia">cbomkit-theia</a>
+  scans each published image for certificates, keys, secrets and OpenSSL config.
+  Base-image CA trust stores are skipped; Janssen certs under <code>/etc/certs</code> are
+  not. Image digests are resolved once per run, so a partial re-run scans the
+  same images. Each platform of a multi-arch image is scanned by its own digest.
+  Every finding carries <code>jans:image</code>; findings from multi-platform scans also
+  carry <code>jans:platform</code>, and each container component records its
+  <code>jans:image-index</code>. Output is a workflow artifact (<code>jans-image-cbom</code>), not a
+  release asset, until reviewed. If some images fail, the artifact is
+  <code>jans-image-cbom-partial</code> and lists them in <code>jans:missing-images</code>. If none
+  succeed, no artifact is produced and <code>image-publish</code> fails at "Build
+  jans-image-cbom.json".</li>
+</ul>
+<p><code>scripts/cbom.py gate</code> runs on every CBOM before upload. It strips key values and
+fails the job if it finds private keys, secret or generic keys, passwords,
+credentials or tokens, at any nesting depth, printing only the type, finding name
+(e.g. <code>generic-api-key</code>) and file path. The gitleaks false positive on the stock
+JDK <code>java.security</code> is allowed. theia stderr is discarded because
+it can echo scanned file contents into the public run log.</p>
 <h2 id="pen-test-dast">Pen-test (DAST)<a class="headerlink" href="#pen-test-dast" title="Permanent link">#</a></h2>
 <p><code>scan-pentest.yml</code> is dispatched by "Build: Docker Images" at the release ref once
 the images are published for a nightly or tagged (<code>v**</code>) release — so it scans the
@@ -2147,7 +2209,7 @@ defaults.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    September 14, 2026
+    November 18, 2026
   </span>
 
     

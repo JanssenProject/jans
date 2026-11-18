@@ -12,7 +12,43 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
+| CBOM (cbomkit) | `scan-cbom.yml` | crypto algorithms, protocols, certs, keys | signed CycloneDX 1.6 JSON | release asset `jans-cbom.json`; image CBOM workflow artifact only |
 | Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | workflow artifact only — CONFIDENTIAL, not attached to the public release |
+
+## CBOM
+
+`scan-cbom.yml` produces a cryptographic bill of materials (CycloneDX 1.6) for
+post-quantum readiness reviews.
+
+- **Source** (after each tag-push "Build: Publish" succeeds, or dispatch): builds
+  the Maven modules, then
+  [cbomkit-action](https://github.com/cbomkit/cbomkit-action) scans Java, Python
+  and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
+  so `scripts/cbom.py rust` maps the crypto crates in `jans-cedarling/Cargo.lock`
+  to the algorithms they provide. Both merge into `jans-cbom.json`, stamped with
+  the scanned commit (`jans:commit`). After a tag-push publish it is
+  cosign-signed and attached to the release, unless the tag has since moved or
+  the release already holds a complete pair for that commit. A manual run only
+  uploads an unsigned `jans-cbom` workflow artifact.
+- **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
+  scans each published image for certificates, keys, secrets and OpenSSL config.
+  Base-image CA trust stores are skipped; Janssen certs under `/etc/certs` are
+  not. Image digests are resolved once per run, so a partial re-run scans the
+  same images. Each platform of a multi-arch image is scanned by its own digest.
+  Every finding carries `jans:image`; findings from multi-platform scans also
+  carry `jans:platform`, and each container component records its
+  `jans:image-index`. Output is a workflow artifact (`jans-image-cbom`), not a
+  release asset, until reviewed. If some images fail, the artifact is
+  `jans-image-cbom-partial` and lists them in `jans:missing-images`. If none
+  succeed, no artifact is produced and `image-publish` fails at "Build
+  jans-image-cbom.json".
+
+`scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
+fails the job if it finds private keys, secret or generic keys, passwords,
+credentials or tokens, at any nesting depth, printing only the type, finding name
+(e.g. `generic-api-key`) and file path. The gitleaks false positive on the stock
+JDK `java.security` is allowed. theia stderr is discarded because
+it can echo scanned file contents into the public run log.
 
 ## Pen-test (DAST)
 
