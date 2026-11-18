@@ -51,6 +51,13 @@ class InMemoryTraceStoreTest extends TraceStoreContractTest {
 		return new InMemoryTraceStore();
 	}
 
+	@Override
+	protected TraceStore createNonAtomicStore() {
+		InMemoryTraceStore nonAtomic = new InMemoryTraceStore();
+		nonAtomic.setAtomicIngestSupported(false);
+		return nonAtomic;
+	}
+
 	private StoredTraceRecord newRecord(String producerId, String recordId, long seq) {
 		RecordIdentity identity = new RecordIdentity(DOMAIN, producerId, recordId);
 		ExecutionIdentity execution = new ExecutionIdentity(DOMAIN, "authority-1", "exec-1");

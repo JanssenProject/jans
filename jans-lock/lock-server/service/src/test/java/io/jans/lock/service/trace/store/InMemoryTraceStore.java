@@ -95,6 +95,12 @@ public class InMemoryTraceStore implements TraceStore {
 
 	private final AtomicBoolean failAfterNextInsertRecord = new AtomicBoolean(false);
 
+	private final AtomicBoolean failNextInsertIngestBatch = new AtomicBoolean(false);
+
+	private final AtomicInteger ingestBatches = new AtomicInteger();
+
+	private volatile boolean atomicIngestSupported = true;
+
 	private volatile Runnable beforeInsertRecord;
 
 	private volatile CountDownLatch insertRecordBarrier;
@@ -185,6 +191,16 @@ public class InMemoryTraceStore implements TraceStore {
 				.unmodifiableList(recordsByKey.values().stream().map(StoredTraceRecord::copy).collect(Collectors.toList()));
 	}
 
+	/**
+	 * @return a snapshot of every receipt row, ordered by domain and receipt sequence
+	 */
+	public List<TraceReceiptEntry> receiptSnapshot() {
+		return receiptsByKey.values().stream().map(InMemoryTraceStore::copyOf)
+				.sorted(Comparator.comparing(TraceReceiptEntry::getDomainId)
+						.thenComparingLong(TraceReceiptEntry::getReceiptSeq))
+				.collect(Collectors.toList());
+	}
+
 	// -- records --------------------------------------------------------------------------------
 
 	@Override
@@ -199,7 +215,10 @@ public class InMemoryTraceStore implements TraceStore {
 		awaitInsertRecordBarrier();
 
 		String key = traceKeys.recordKey(stored.getIdentity());
-		StoredTraceRecord existing = recordsByKey.putIfAbsent(key, stored.copy());
+		StoredTraceRecord existing;
+		synchronized (this) {
+			existing = recordsByKey.putIfAbsent(key, stored.copy());
+		}
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
@@ -324,6 +343,33 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
+	public Map<RecordIdentity, StoredTraceRecord> findRecords(Collection<RecordIdentity> identities) {
+		Map<RecordIdentity, StoredTraceRecord> result = new LinkedHashMap<>();
+		for (RecordIdentity identity : identities) {
+			StoredTraceRecord found = recordsByKey.get(traceKeys.recordKey(identity));
+			if (found != null) {
+				result.putIfAbsent(identity, found.copy());
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+			Collection<ChainPosition> positions) {
+		Map<ChainPosition, List<StoredTraceRecord>> result = new LinkedHashMap<>();
+		for (ChainPosition position : positions) {
+			if (!result.containsKey(position)) {
+				List<StoredTraceRecord> found = findRecordsByChainPosition(position);
+				if (!found.isEmpty()) {
+					result.put(position, found);
+				}
+			}
+		}
+		return result;
+	}
+
+	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
 		String targetKey = traceKeys.tokenKey(domainId, token);
 		return recordsByKey.values().stream()
@@ -349,10 +395,99 @@ public class InMemoryTraceStore implements TraceStore {
 
 		String key = traceKeys.receiptKey(row.getDomainId(), row.getReceiptSeq());
 		row.setId(key);
-		TraceReceiptEntry existing = receiptsByKey.putIfAbsent(key, copyOf(row));
+		TraceReceiptEntry existing;
+		synchronized (this) {
+			existing = receiptsByKey.putIfAbsent(key, copyOf(row));
+		}
 		if (existing != null) {
 			throw new DuplicateEntryException(key);
 		}
+	}
+
+	@Override
+	public boolean isAtomicIngestSupported() {
+		return atomicIngestSupported;
+	}
+
+	/**
+	 * Atomic like the SQL store: every receipt position and record identity is checked against the
+	 * stored rows and against the rest of the batch before anything is written. Single-row inserts
+	 * and {@link #findReceiptHead} take the same monitor, so no row can win a race between the
+	 * check and the publication, and no head read sees a batch half published.
+	 */
+	@Override
+	public synchronized void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
+			throws DuplicateEntryException, TraceStorageException {
+		if (!atomicIngestSupported) {
+			throw new UnsupportedOperationException("Atomic ingest batch is not supported by this store");
+		}
+		ingestBatches.incrementAndGet();
+		if (failNextInsertIngestBatch.getAndSet(false)) {
+			throw new TraceStorageException("test_fail_next_insert_ingest_batch", "Forced test failure");
+		}
+		// a fault armed for the per-record writes also fails the atomic batch; it stays armed (not
+		// consumed) so the per-record fallback meets it, as it would on a store that is really failing
+		if (failNextInsertRecord.get() || failAfterNextInsertRecord.get() || failNextInsertReceipt.get()) {
+			throw new TraceStorageException("test_armed_single_write_fault", "Forced test failure");
+		}
+
+		Map<String, TraceReceiptEntry> receiptRows = new LinkedHashMap<>();
+		for (TraceReceiptEntry receipt : receipts) {
+			String key = traceKeys.receiptKey(receipt.getDomainId(), receipt.getReceiptSeq());
+			if (receiptsByKey.containsKey(key) || receiptRows.containsKey(key)) {
+				throw new DuplicateEntryException(key);
+			}
+			receipt.setId(key);
+			receiptRows.put(key, copyOf(receipt));
+		}
+		Map<String, StoredTraceRecord> recordRows = new LinkedHashMap<>();
+		for (StoredTraceRecord record : records) {
+			String key = traceKeys.recordKey(record.getIdentity());
+			if (recordsByKey.containsKey(key) || recordRows.containsKey(key)) {
+				throw new DuplicateEntryException(key);
+			}
+			recordRows.put(key, record.copy());
+		}
+
+		List<String> insertedReceipts = new ArrayList<>(receiptRows.size());
+		List<String> insertedRecords = new ArrayList<>(recordRows.size());
+		String conflict = null;
+		for (Map.Entry<String, TraceReceiptEntry> row : receiptRows.entrySet()) {
+			if (receiptsByKey.putIfAbsent(row.getKey(), row.getValue()) != null) {
+				conflict = row.getKey();
+				break;
+			}
+			insertedReceipts.add(row.getKey());
+		}
+		if (conflict == null) {
+			for (Map.Entry<String, StoredTraceRecord> row : recordRows.entrySet()) {
+				if (recordsByKey.putIfAbsent(row.getKey(), row.getValue()) != null) {
+					conflict = row.getKey();
+					break;
+				}
+				insertedRecords.add(row.getKey());
+			}
+		}
+		if (conflict != null) {
+			insertedReceipts.forEach(receiptsByKey::remove);
+			insertedRecords.forEach(recordsByKey::remove);
+			throw new DuplicateEntryException(conflict);
+		}
+	}
+
+	/** Makes {@link #isAtomicIngestSupported()} report {@code supported}; the default is {@code true}. */
+	public void setAtomicIngestSupported(boolean supported) {
+		this.atomicIngestSupported = supported;
+	}
+
+	/** The next {@link #insertIngestBatch} call throws {@link TraceStorageException} and stores nothing. */
+	public void failNextInsertIngestBatch() {
+		failNextInsertIngestBatch.set(true);
+	}
+
+	/** @return how many {@link #insertIngestBatch} calls reached the store */
+	public int getIngestBatches() {
+		return ingestBatches.get();
 	}
 
 	@Override
@@ -385,7 +520,7 @@ public class InMemoryTraceStore implements TraceStore {
 	}
 
 	@Override
-	public Optional<ReceiptHead> findReceiptHead(String domainId) {
+	public synchronized Optional<ReceiptHead> findReceiptHead(String domainId) {
 		return receiptsByKey.values().stream().filter(r -> r.getDomainId().equals(domainId))
 				.max(Comparator.comparingLong(TraceReceiptEntry::getReceiptSeq))
 				.map(r -> new ReceiptHead(r.getReceiptSeq(), r.getReceiptHash()));

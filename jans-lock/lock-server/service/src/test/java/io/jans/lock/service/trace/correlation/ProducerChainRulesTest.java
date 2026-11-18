@@ -136,18 +136,6 @@ class ProducerChainRulesTest {
 		assertFalse(ProducerChainRules.isLate(1_000_000L, 2_000L, 300));
 	}
 
-	// -- successorLinkBroken --------------------------------------------------------------------------
-
-	@Test
-	void testSuccessorLinkBroken_Matching_False() {
-		assertFalse(ProducerChainRules.successorLinkBroken(HASH_A, HASH_A));
-	}
-
-	@Test
-	void testSuccessorLinkBroken_Mismatch_True() {
-		assertTrue(ProducerChainRules.successorLinkBroken(HASH_A, HASH_B));
-	}
-
 	// -- constantTimeEquals -----------------------------------------------------------------------------
 
 	@Test

@@ -25,6 +25,7 @@ import jakarta.ws.rs.ext.Provider;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,6 +102,16 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
                 return;
             }
 
+            if (configApiSessionService.isUjwtExpired(ujwtOptional.get(), new Date())) {
+                String sessionId = cookies.get(ADMIN_UI_SESSION_ID).getValue();
+                configApiSessionService.removeSession(sessionId);
+                log.debug("User-info JWT expired for Admin UI session.");
+                if (!isExcludedPath(requestContext)) {
+                    abortWithException(requestContext, Response.Status.FORBIDDEN, "User-info JWT expired for Admin UI session.");
+                }
+                return;
+            }
+
             initializeAdminUIConfiguration();
             if (auiConfiguration == null) {
                 log.warn("Admin UI configuration could not be initialized. Skipping token injection.");
@@ -131,7 +142,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * `@return` true if the cookies map is non-null and contains the Admin UI session cookie
      */
     private boolean hasAdminUISessionCookie(Map<String, Cookie> cookies) {
-        return cookies != null &&  cookies.containsKey(ADMIN_UI_SESSION_ID);
+        return cookies != null && cookies.containsKey(ADMIN_UI_SESSION_ID);
     }
 
     /**
@@ -239,7 +250,7 @@ public class AdminUICookieFilter implements ContainerRequestFilter {
      * @return an Optional containing the ujwt string from the persisted Admin UI session, or Optional.empty() if the cookie or session is not present
      */
     private Optional<String> fetchUJWTFromAdminUISession(Map<String, Cookie> cookies) {
-        if(!hasAdminUISessionCookie(cookies)) {
+        if (!hasAdminUISessionCookie(cookies)) {
             return Optional.empty();
         }
         log.debug("Found a Admin UI session cookie in request header.");

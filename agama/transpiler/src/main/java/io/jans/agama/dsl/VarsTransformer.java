@@ -92,7 +92,10 @@ public class VarsTransformer {
         int i, j = 0;
         
         i = str.indexOf("." + EVAL_SYMBOL);
-        if (i == -1) return str;
+        if (i == -1) {
+            return str;
+        }
+
         
         do {
             sb.append(str.substring(j, i));
@@ -132,7 +135,10 @@ public class VarsTransformer {
         int i, j = -1;
         
         i = str.indexOf(".\"");
-        if (i == -1) return str;
+        if (i == -1) {
+            return str;
+        }
+
 
         do {
             sb.append(str.substring(j + 1, i));
@@ -158,7 +164,10 @@ public class VarsTransformer {
         int i, j = 0;
         
         i = str.indexOf("[");
-        if (i == -1) return str;
+        if (i == -1) {
+            return str;
+        }
+
         
         do {
             sb.append(str.substring(j, i + 1));
