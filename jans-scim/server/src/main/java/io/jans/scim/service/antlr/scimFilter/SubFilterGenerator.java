@@ -46,6 +46,15 @@ public class SubFilterGenerator {
      */
     public Pair<Filter, String> build(String subAttribute, String attribute, String compValue, Type attrType,
                                       CompValueType type, ScimOperator operator, Boolean multiValued) {
+        return build(subAttribute, attribute, compValue, attrType, type, operator, multiValued, true);
+    }
+
+    /**
+     * Same as the overload without caseExact. When caseExact is false, equality comparisons on single-valued
+     * string attributes are case-insensitive (non-LDAP backends only; LDAP matching rules already ignore case).
+     */
+    public Pair<Filter, String> build(String subAttribute, String attribute, String compValue, Type attrType,
+                                      CompValueType type, ScimOperator operator, Boolean multiValued, boolean caseExact) {
     
         log.debug("Preparing subfilter with attribute={}, subAttribute={}, compValue={}, attrType={}, multiValued={}",
         	attribute, subAttribute, compValue, attrType, multiValued);
@@ -67,7 +76,7 @@ public class SubFilterGenerator {
             }
         } else if (Type.STRING.equals(attrType) || Type.REFERENCE.equals(attrType)) {
             compValue = compValue.substring(1, compValue.length() - 1);     //Drop double quotes
-            filth = getSubFilterString(subAttribute, attribute, StringEscapeUtils.unescapeJson(compValue), operator, multiValued);
+            filth = getSubFilterString(subAttribute, attribute, StringEscapeUtils.unescapeJson(compValue), operator, multiValued, caseExact);
 
         } else if (Type.INTEGER.equals(attrType) || Type.DECIMAL.equals(attrType)) {
             filth = getSubFilterNumeric(subAttribute, attribute, compValue, operator, attrType, multiValued);
@@ -86,7 +95,7 @@ public class SubFilterGenerator {
 
     }
 
-    private Filter getSubFilterString(String subAttribute, String attribute, String value, ScimOperator operator, Boolean multivalued) {
+    private Filter getSubFilterString(String subAttribute, String attribute, String value, ScimOperator operator, Boolean multivalued, boolean caseExact) {
 
         Filter subfilter = null;
         log.trace("getSubFilterString");
@@ -97,9 +106,12 @@ public class SubFilterGenerator {
                 if (subAttribute == null) {
                     //attribute=value
                     //attribute="value"
-                    subfilter = Filter.createEqualityFilter(//Filter.createLowercaseFilter(attribute), 
-                    		//ldapBackend ? value : value.toLowerCase()
-                    		attribute, value).multiValued(multivalued);
+                    if (!caseExact && !ldapBackend && Boolean.FALSE.equals(multivalued)) {
+                        subfilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(attribute),
+                                value.toLowerCase()).multiValued(multivalued);
+                    } else {
+                        subfilter = Filter.createEqualityFilter(attribute, value).multiValued(multivalued);
+                    }
                 } else {
                     //attribute=*"subattribute":"value"*
                     //attribute LIKE "%\"subAttribute\":\"value\"%"
