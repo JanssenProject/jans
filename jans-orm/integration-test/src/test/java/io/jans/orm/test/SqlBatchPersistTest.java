@@ -59,17 +59,12 @@ import io.jans.orm.test.model.VersionedTestEntry;
  * Atomic batch insert ({@code persistBatch}) and multi-get ({@code findByDns}) of the SQL backend
  * against a real database.
  *
- * <p>Commit counting uses PostgreSQL statistics: {@code pg_stat_database.xact_commit} (all committed
- * transactions of the database, read-only autocommit statements included) and the next transaction id
- * {@code txid_snapshot_xmax(txid_current_snapshot())}, which advances once per write transaction.
- * PostgreSQL 15+ flushes backend statistics to shared memory at most once per second and an idle
- * backend can delay it up to 10 s, so {@code xact_commit} is read after {@link #STATS_SETTLE_MILLIS}.
- * The database is shared with other services of the stand, so both counters get commits of other
- * sessions. An idle window of the same length is measured first and subtracted; the remaining
- * variation of that noise, the pool validation query and the probe itself are covered by
- * {@link #WRITE_NOISE_TOLERANCE} and {@link #XACT_NOISE_TOLERANCE}. The write transaction count is the
- * exact signal (1 for the batch, one per entry for single persist); {@code xact_commit} also counts
- * read-only statements of other sessions, so the batch is only required to commit less than single persist.</p>
+ * <p>Commit counting is PostgreSQL only. Rows inserted by one transaction share its {@code xmin}, so the
+ * distinct {@code xmin} of the inserted rows is the exact transaction count (1 for the batch, one per entry
+ * for single persist), unaffected by other sessions of the shared stand. Database-wide counters
+ * ({@code pg_stat_database.xact_commit} and {@code txid_snapshot_xmax(txid_current_snapshot())}) are only
+ * reported, as they include commits of other sessions; {@code xact_commit} is read after
+ * {@link #STATS_SETTLE_MILLIS} because PostgreSQL 15+ flushes backend statistics lazily.</p>
  *
  * @author Yuriy Movchan Date: 11/12/2026
  */
@@ -82,13 +77,6 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 	private static final String VERSION_TEST_BASE_DN = "ou=version_test,o=jans";
 	private static final String BINARY_BASE_DN = "ou=binary,o=jans";
 
-	/** Write transactions of other sessions tolerated per measurement (jans-dev: 0-1 per 11 s window) */
-	private static final int WRITE_NOISE_TOLERANCE = 10;
-	/**
-	 * Read-only commits of other sessions tolerated per measurement on top of the idle-window baseline
-	 * (jans-dev: 16-34 per 11 s window, so the baseline varies by up to about 20)
-	 */
-	private static final int XACT_NOISE_TOLERANCE = 30;
 	private static final long STATS_SETTLE_MILLIS = 11000L;
 
 	private String marker;
@@ -412,18 +400,8 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 		LOG.info(report);
 		System.out.println("SqlBatchPersistTest.oneCommitPerBatch: " + report);
 
-		assertTrue(batchWriteTransactions >= 1 && batchWriteTransactions - noiseWriteTransactions <= 1 + WRITE_NOISE_TOLERANCE, report);
-		assertTrue(singlesWriteTransactions >= count, report);
-
-		// Rows inserted by one transaction share its xmin: exact per-batch count, immune to other sessions
-		assertEquals(countInsertTransactions(sqlEntryManager, batch), 1L, report);
-		assertEquals(countInsertTransactions(sqlEntryManager, singles), (long) count, report);
-
-		// xact_commit noise is bursty on a busy stand (CI AIO: 8 idle, 47 extra in the batch window), so
-		// it gets no absolute bound for the batch
-		long singlesXactExcess = singlesXactCommits - noiseXactCommits;
-		assertTrue(batchXactCommits >= 1 && batchXactCommits < singlesXactCommits, report);
-		assertTrue(singlesXactExcess >= count - XACT_NOISE_TOLERANCE, report);
+		assertEquals(insertTransactions(sqlEntryManager, batch), new long[] { count, 1 }, "rows, transactions of persistBatch; " + report);
+		assertEquals(insertTransactions(sqlEntryManager, singles), new long[] { count, count }, "rows, transactions of single persist; " + report);
 	}
 
 	@Test
@@ -585,17 +563,18 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 		}
 	}
 
-	private long countInsertTransactions(SqlEntryManager sqlEntryManager, List<SessionId> sessions) throws Exception {
+	/** Rows found and distinct inserting transactions (xmin) of the given sessions */
+	private long[] insertTransactions(SqlEntryManager sqlEntryManager, List<SessionId> sessions) throws Exception {
 		String[] ids = sessions.stream().map(SessionId::getId).toArray(String[]::new);
 		String schema = sqlEntryManager.getOperationService().getConnectionProvider().getSchemaName();
 		String table = (schema == null ? "" : "\"" + schema + "\".") + "\"jansSessId\"";
 		try (Connection connection = sqlEntryManager.getOperationService().getConnection();
 				PreparedStatement statement = connection.prepareStatement(
-						"SELECT count(DISTINCT xmin::text) FROM " + table + " WHERE doc_id = ANY(?)")) {
+						"SELECT count(*), count(DISTINCT xmin::text) FROM " + table + " WHERE doc_id = ANY(?)")) {
 			statement.setArray(1, connection.createArrayOf("varchar", ids));
 			try (ResultSet resultSet = statement.executeQuery()) {
 				assertTrue(resultSet.next());
-				return resultSet.getLong(1);
+				return new long[] { resultSet.getLong(1), resultSet.getLong(2) };
 			}
 		}
 	}
