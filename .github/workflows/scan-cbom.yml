@@ -98,6 +98,17 @@ jobs:
             -f "$m" org.codehaus.mojo:versions-maven-plugin:2.16.2:set \
             -DnewVersion="${RELEASE_TAG#v}" -DgenerateBackupPoms=false || true
         done
+        # Publisher tolerates per-module set failures; a release scan must not
+        # silently fall back to nightly, so verify every module took the version.
+        for m in ${MAVEN_MODULES}; do
+          v="$(mvn -B -q -ntp -s .github/maven-settings.xml \
+            -Dmaven.repo.local="${GITHUB_WORKSPACE}/.cbom-m2" \
+            -f "$m" org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate \
+            -Dexpression=project.version -DforceStdout)"
+          if [[ "$v" != "${RELEASE_TAG#v}" ]]; then
+            echo "::error::${m} version is ${v}, expected ${RELEASE_TAG#v}" >&2; exit 1
+          fi
+        done
 
     # The scanner resolves crypto API calls against compiled classes and
     # dependency jars. It runs in a container that only sees the workspace, so
