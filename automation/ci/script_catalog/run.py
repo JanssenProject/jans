@@ -316,18 +316,19 @@ def behavior_tests(run, scripts):
         assert login_code(client, lock_acr, lock_uid, password), f"{lock_acr} login with the right password failed"
         for _ in range(3):
             assert not aio.login(client, lock_acr, lock_uid, "wrong-" + password), "wrong password accepted"
-        status = (aio.get_user(lock_inum) or {}).get("jansStatus")
-        assert status == "inactive", f"jansStatus={status!r} after 3 failed logins, expected 'inactive'"
+        status = (aio.get_user(lock_inum) or {}).get("status")
+        assert status == "inactive", f"status={status!r} after 3 failed logins, expected 'inactive'"
         assert not aio.login(client, lock_acr, lock_uid, password), "locked account still logs in"
 
     def basic_lock_keeps_disabled():
         off_uid, off_inum = new_user("lockoff", status="inactive")
+        assert (aio.get_user(off_inum) or {}).get("status") == "inactive", "user was not created inactive"
         client = aio.register_client()
         for _ in range(4):
             assert not aio.login(client, lock_acr, off_uid, "wrong-" + password), "wrong password accepted"
         assert not aio.login(client, lock_acr, off_uid, password), "admin-disabled account logs in"
-        status = (aio.get_user(off_inum) or {}).get("jansStatus")
-        assert status == "inactive", f"jansStatus={status!r}: logins reactivated an admin-disabled account"
+        status = (aio.get_user(off_inum) or {}).get("status")
+        assert status == "inactive", f"status={status!r}: logins reactivated an admin-disabled account"
 
     behavior(run, "ScriptCatalog.behavior", "introspection_custom_params.py returns public sid", introspection_sid)
     behavior(run, "ScriptCatalog.behavior", "TokenExchange.java keeps built-in validation", token_exchange)

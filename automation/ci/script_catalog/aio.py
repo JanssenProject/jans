@@ -162,7 +162,7 @@ class Aio:
     def create_user(self, uid, password, status="active"):
         return self.api("POST", "/mgt/configuser", {
             "userId": uid, "mail": f"{uid}@example.org", "displayName": uid, "givenName": uid,
-            "jansStatus": status, "userPassword": password,
+            "status": status, "userPassword": password,
             "customAttributes": [{"name": "sn", "multiValued": False, "values": [uid]}]})
 
     def get_user(self, inum):
