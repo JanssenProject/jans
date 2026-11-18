@@ -15,6 +15,7 @@ import static org.testng.Assert.fail;
 
 import java.security.SecureRandom;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -414,8 +415,12 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 		assertTrue(batchWriteTransactions >= 1 && batchWriteTransactions - noiseWriteTransactions <= 1 + WRITE_NOISE_TOLERANCE, report);
 		assertTrue(singlesWriteTransactions >= count, report);
 
+		// Rows inserted by one transaction share its xmin: exact per-batch count, immune to other sessions
+		assertEquals(countInsertTransactions(sqlEntryManager, batch), 1L, report);
+		assertEquals(countInsertTransactions(sqlEntryManager, singles), (long) count, report);
+
 		// xact_commit noise is bursty on a busy stand (CI AIO: 8 idle, 47 extra in the batch window), so
-		// it gets no absolute bound for the batch; the write transaction asserts above are the exact signal
+		// it gets no absolute bound for the batch
 		long singlesXactExcess = singlesXactCommits - noiseXactCommits;
 		assertTrue(batchXactCommits >= 1 && batchXactCommits < singlesXactCommits, report);
 		assertTrue(singlesXactExcess >= count - XACT_NOISE_TOLERANCE, report);
@@ -577,6 +582,21 @@ public class SqlBatchPersistTest extends BaseOrmTest {
 						+ "FROM pg_stat_database WHERE datname = current_database()")) {
 			assertTrue(resultSet.next());
 			return new long[] { resultSet.getLong(1), resultSet.getLong(2) };
+		}
+	}
+
+	private long countInsertTransactions(SqlEntryManager sqlEntryManager, List<SessionId> sessions) throws Exception {
+		String[] ids = sessions.stream().map(SessionId::getId).toArray(String[]::new);
+		String schema = sqlEntryManager.getOperationService().getConnectionProvider().getSchemaName();
+		String table = (schema == null ? "" : "\"" + schema + "\".") + "\"jansSessId\"";
+		try (Connection connection = sqlEntryManager.getOperationService().getConnection();
+				PreparedStatement statement = connection.prepareStatement(
+						"SELECT count(DISTINCT xmin::text) FROM " + table + " WHERE doc_id = ANY(?)")) {
+			statement.setArray(1, connection.createArrayOf("varchar", ids));
+			try (ResultSet resultSet = statement.executeQuery()) {
+				assertTrue(resultSet.next());
+				return resultSet.getLong(1);
+			}
 		}
 	}
 
