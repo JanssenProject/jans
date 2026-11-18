@@ -126,10 +126,9 @@ public class AuditLogInterceptor {
 
                 Object obj = ctxParameters[i];
                 if (obj != null && !isAuthorizationParameter(parameters[i]) && !isTokenCodeParameter(parameters[i])
-                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)) {
-                    if(AUDIT_LOG.isErrorEnabled()) {
-                        AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
-                    }
+                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)
+                        && AUDIT_LOG.isErrorEnabled()) {
+                    AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
                 }
             }
         }
