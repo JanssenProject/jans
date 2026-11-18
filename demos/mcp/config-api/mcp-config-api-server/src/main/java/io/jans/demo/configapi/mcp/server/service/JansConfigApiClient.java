@@ -8,17 +8,22 @@ import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.time.Duration;
 import java.util.List;
 
@@ -31,6 +36,8 @@ public class JansConfigApiClient {
     private final ObjectMapper objectMapper;
     private final String accessToken;
     private final boolean devMode;
+
+    private static final String CA_CERT_FILE_ENV = "JANS_CA_CERT_FILE";
 
     public JansConfigApiClient(String baseUrl, String accessToken, boolean devMode) {
         this.baseUrl = baseUrl;
@@ -49,22 +56,15 @@ public class JansConfigApiClient {
                     .connectTimeout(Duration.ofSeconds(10));
 
             if (devMode) {
-                // DEVELOPMENT MODE: Trust all SSL certificates (for self-signed certs)
-                logger.warn("WARNING: Running in DEV mode - SSL certificate validation is DISABLED");
+                // DEVELOPMENT MODE: trust only the CA / self-signed certificate supplied in JANS_CA_CERT_FILE
+                String caCertFile = System.getenv(CA_CERT_FILE_ENV);
+                if (caCertFile == null || caCertFile.isEmpty()) {
+                    throw new IllegalStateException(CA_CERT_FILE_ENV
+                            + " environment variable is required in DEV mode (PEM certificate of the Janssen server or its CA)");
+                }
+                logger.warn("WARNING: Running in DEV mode - trusting certificates from {}", caCertFile);
 
-                TrustManager[] trustAllCerts = new TrustManager[] {
-                        new X509TrustManager() {
-                            public X509Certificate[] getAcceptedIssuers() {
-                                return new X509Certificate[0];
-                            }
-
-                            public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                            }
-
-                            public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                            }
-                        }
-                };
+                TrustManager[] trustManagers = loadTrustManagers(Path.of(caCertFile));
 
                 SSLContext sslContext;
                 try {
@@ -73,7 +73,7 @@ public class JansConfigApiClient {
                     logger.warn("TLSv1.3 not available, falling back to TLSv1.2");
                     sslContext = SSLContext.getInstance("TLSv1.2");
                 }
-                sslContext.init(null, trustAllCerts, new SecureRandom());
+                sslContext.init(null, trustManagers, new SecureRandom());
 
                 // Explicitly restrict to modern TLS protocols
                 javax.net.ssl.SSLParameters sslParams = new javax.net.ssl.SSLParameters();
@@ -90,6 +90,24 @@ public class JansConfigApiClient {
         } catch (Exception e) {
             throw new RuntimeException("Failed to create HTTP client", e);
         }
+    }
+
+    private static TrustManager[] loadTrustManagers(Path certFile) throws Exception {
+        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        trustStore.load(null, null);
+        CertificateFactory factory = CertificateFactory.getInstance("X.509");
+        try (InputStream in = Files.newInputStream(certFile)) {
+            int i = 0;
+            for (Certificate cert : factory.generateCertificates(in)) {
+                trustStore.setCertificateEntry("dev-ca-" + i++, cert);
+            }
+            if (i == 0) {
+                throw new IllegalStateException("No certificates found in " + certFile);
+            }
+        }
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStore);
+        return tmf.getTrustManagers();
     }
 
     /**

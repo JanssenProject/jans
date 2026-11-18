@@ -103,14 +103,14 @@ Following sample code snippet shows how to work backwards from an AccessToken to
                 print "Introspection. Failed to load session DN"
                 return True
 
-            # Return session_id
-            responseAsJsonObject.accumulate("session_id", sessionDn)
-
             sessionIdService = CdiUtil.bean(SessionIdService)
-            session = sessionIdService.getSessionById(sessionDn, False)
+            session = sessionIdService.getSessionByDn(sessionDn, False)
             if session is None:
                 print "Introspection. Failed to load session '%s'" % sessionDn
                 return True
+
+            # Return the public sid, never the session DN/id which equals the browser SSO cookie
+            responseAsJsonObject.put("sid", session.getOutsideSid())
 
             sessionAttributes = session.getSessionAttributes()
             if sessionAttributes is None:
@@ -211,15 +211,15 @@ Following sample code snippet shows how to work backwards from an AccessToken to
                 return true;
             }
 
-            // Return session_id
-            response.accumulate("session_id", sessionDn);
-
             SessionIdService sessionIdService = CdiUtil.bean(SessionIdService.class);
-            SessionId session = sessionIdService.getSessionById(sessionDn, false);
+            SessionId session = sessionIdService.getSessionByDn(sessionDn, false);
             if(session == null) {
                 scriptLogger.info("Introspection Java script. Failed to load session");
                 return true;
             }
+
+            // Return the public sid, never the session DN/id which equals the browser SSO cookie
+            response.put("sid", session.getOutsideSid());
 
             Map<String, String> sessionAttributes = session.getSessionAttributes();
             if(sessionAttributes == null) {

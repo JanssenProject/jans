@@ -55,7 +55,7 @@ public class ManagedBeanService {
             }
         }
         if (beanClass != null) {
-            qualifiers.remove(new AnnotationLiteral<Any>() {});
+            qualifiers.remove(new AnnotationLiteral<Any>() { });
             logger.debug("Qualifiers found in class {}: {}", beanClass.getSimpleName(), qualifiers);
         }
         return new Pair<>(beanClass, qualifiers);
