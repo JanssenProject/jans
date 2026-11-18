@@ -1,5 +1,6 @@
 """Minimal stdlib client for the AIO: config-api, dynamic registration and the JSF login flow."""
 import base64
+import hashlib
 import http.cookiejar
 import json
 import secrets
@@ -106,6 +107,7 @@ class Aio:
         self.http = Browser(self.ssl)
         self.client_id, self.client_secret = client_id, client_secret
         self._token, self._token_exp = None, 0
+        self._verifiers = {}
         self.discovery = self.http.request("GET", self.base + "/.well-known/openid-configuration").json()
 
     # ---- config-api ----------------------------------------------------------------------------------
@@ -170,10 +172,12 @@ class Aio:
         """Authorization code flow through the JSF login (and consent) pages; returns the code or None."""
         b = Browser(self.ssl)
         redirect = client["redirect_uris"][0]
+        verifier = secrets.token_urlsafe(48)
+        challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
         url = self.discovery["authorization_endpoint"] + "?" + urllib.parse.urlencode({
             "response_type": "code", "client_id": client["client_id"], "redirect_uri": redirect,
             "scope": scope, "acr_values": acr, "state": secrets.token_hex(8),
-            "nonce": secrets.token_hex(8)})
+            "nonce": secrets.token_hex(8), "code_challenge": challenge, "code_challenge_method": "S256"})
         r = b.request("GET", url)
         submitted = set()
         for _ in range(15):
@@ -181,7 +185,13 @@ class Aio:
                 loc = urllib.parse.urljoin(r.url, r.location)
                 if loc.startswith(redirect):
                     q = urllib.parse.parse_qs(urllib.parse.urlparse(loc).query)
-                    return q.get("code", [None])[0]
+                    code = q.get("code", [None])[0]
+                    if code:
+                        self._verifiers[code] = verifier
+                    else:
+                        print(f"[script-catalog] authorize via {acr} ended with {q.get('error')} "
+                              f"{q.get('error_description')}", flush=True)
+                    return code
                 r = b.request("GET", loc)
                 continue
             forms = parse_forms(r.body)
@@ -211,7 +221,8 @@ class Aio:
 
     def code_to_tokens(self, client, code):
         r = self.token_request(client, {"grant_type": "authorization_code", "code": code,
-                                        "redirect_uri": client["redirect_uris"][0]})
+                                        "redirect_uri": client["redirect_uris"][0],
+                                        "code_verifier": self._verifiers.pop(code, "")})
         if r.status != 200:
             raise HttpError(r.status, r.body, r.url)
         return r.json()

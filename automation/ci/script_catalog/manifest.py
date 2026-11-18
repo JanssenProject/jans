@@ -22,6 +22,8 @@ NOT_INSTALLED = {
 # Scripts that do not load on the current server. A test reports them skipped; if one starts loading,
 # drop it from here so a later regression fails.
 KNOWN_BROKEN = {
+    "fido2_extension/Fido2ExtensionSample.py": "imports io.jans.fido2.model.u2f.error (package no longer exists)",
+    "scim/sample-script/custom_scim_handler.java": "imports io.jans.scim.model.GluuGroup (class no longer exists)",
     "authorization_challenge/multi_step/AuthorizationChallenge.java": "references undefined variable authorizationChallengeSessionObject",
     "introspection/introspection-custom-parameters/introspection_custom_params.java": "imports io.jans.as.server.model.common.SessionId (moved to io.jans.as.common.model.session)",
     "application_session/sample-script/SampleScript.py": "imports io.jans.as.model.ldap.TokenEntity, which no longer exists",
