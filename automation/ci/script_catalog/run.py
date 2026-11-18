@@ -267,9 +267,9 @@ def behavior_tests(run, scripts):
     assert not stalled, "jans-auth did not reload the behavior-test scripts"
     time.sleep(RELOAD_INTERVAL + 5)
 
-    def new_user(label, status="active"):
+    def new_user(label):
         uid = f"ci{run.tag}{label}"
-        user = aio.create_user(uid, password, status)
+        user = aio.create_user(uid, password)
         run.users.append(user["inum"])
         return uid, user["inum"]
 
@@ -325,7 +325,8 @@ def behavior_tests(run, scripts):
         assert status == "active", f"status={status!r} after lock expiry, expected 'active'"
 
     def basic_lock_keeps_disabled():
-        off_uid, off_inum = new_user("lockoff", status="inactive")
+        off_uid, off_inum = new_user("lockoff")
+        aio.set_user_status(off_inum, "inactive")
         assert (aio.get_user(off_inum) or {}).get("status") == "inactive", "user was not created inactive"
         client = aio.register_client()
         for _ in range(4):

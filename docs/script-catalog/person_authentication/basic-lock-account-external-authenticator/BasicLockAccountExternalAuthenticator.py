@@ -217,13 +217,22 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return updated_user
 
-    def getLockTime(self, count_attribute_value):
+    # Marker is locked:<lock time>:<updatedAt as stored by the lock write>, both epoch millis
+    def parseLockMarker(self, count_attribute_value):
         if count_attribute_value is None or not count_attribute_value.startswith(LOCK_MARKER_PREFIX):
             return None
+        parts = count_attribute_value[len(LOCK_MARKER_PREFIX):].split(":")
         try:
-            return long(count_attribute_value[len(LOCK_MARKER_PREFIX):])
+            return [long(part) for part in parts] if len(parts) == 2 else None
         except ValueError:
             return None
+
+    def getLockTime(self, count_attribute_value):
+        marker = self.parseLockMarker(count_attribute_value)
+        return None if marker is None else marker[0]
+
+    def lockMarker(self, locked_at, updated_at):
+        return "%s%d:%d" % (LOCK_MARKER_PREFIX, locked_at.getTime(), updated_at.getTime())
 
     def lockUser(self, user_name):
         if StringHelper.isEmpty(user_name):
@@ -242,12 +251,21 @@ class PersonAuthentication(PersonAuthenticationType):
             return
 
         # Status and marker go in one write, so a lock never exists without its marker. merge, not
-        # updateUser: updatedAt must equal the marker time, and updateUser would overwrite it
+        # updateUser: it would overwrite the updatedAt the marker records
+        entryManager = CdiUtil.bean(PersistenceEntryManager)
         locked_at = Date()
         find_user_by_uid.setStatus(GluuStatus.INACTIVE)
         find_user_by_uid.setUpdatedAt(locked_at)
-        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, LOCK_MARKER_PREFIX + str(locked_at.getTime()))
-        CdiUtil.bean(PersistenceEntryManager).merge(find_user_by_uid)
+        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, self.lockMarker(locked_at, locked_at))
+        entryManager.merge(find_user_by_uid)
+
+        # The backend may store updatedAt rounded or shifted: record it as read back. updatedAt is
+        # unchanged on the read-back object, so this write keeps it
+        stored = userService.getUser(user_name)
+        stored_at = None if stored is None else stored.getUpdatedAt()
+        if stored_at is not None and stored_at.getTime() != locked_at.getTime():
+            userService.setCustomAttribute(stored, self.invalidLoginCountAttribute, self.lockMarker(locked_at, stored_at))
+            entryManager.merge(stored)
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
 
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
@@ -269,11 +287,12 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Basic (lock account). Unlock user. Lock of user '%s' changed, not unlocking" % user_name
             return False
 
-        # lockUser sets updatedAt to the marker time; every UserService.updateUser (config-api, SCIM,
-        # admin UI) stamps a new one, so any other value means the user was changed while locked
+        # The marker records updatedAt as the lock stored it; every UserService.updateUser (config-api,
+        # SCIM, admin UI) stamps a new one, so any other value means the user was changed while locked
         updated_at = find_user_by_uid.getUpdatedAt()
-        if updated_at is None or updated_at.getTime() != self.getLockTime(expected_marker):
-            print "Basic (lock account). Unlock user. User '%s' was modified after the lock, not unlocking" % user_name
+        expected_updated_at = self.parseLockMarker(expected_marker)[1]
+        if updated_at is None or updated_at.getTime() != expected_updated_at:
+            print "Basic (lock account). Unlock user. User '%s' was modified after the lock (updatedAt '%s', lock wrote '%s'), not unlocking" % (user_name, None if updated_at is None else updated_at.getTime(), expected_updated_at)
             return False
 
         find_user_by_uid.setStatus(GluuStatus.ACTIVE)

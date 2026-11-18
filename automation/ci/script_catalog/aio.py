@@ -159,11 +159,16 @@ class Aio:
     def delete_script(self, inum):
         self.api("DELETE", f"/api/v1/config/scripts/{inum}", ok=(200, 204, 404))
 
-    def create_user(self, uid, password, status="active"):
+    def create_user(self, uid, password):
         return self.api("POST", "/mgt/configuser", {
             "userId": uid, "mail": f"{uid}@example.org", "displayName": uid, "givenName": uid,
-            "status": status, "userPassword": password,
+            "status": "active", "userPassword": password,
             "customAttributes": [{"name": "sn", "multiValued": False, "values": [uid]}]})
+
+    def set_user_status(self, inum, status):
+        """Admin status change; create always stores active (UserService.addUser)."""
+        patch = json.dumps([{"op": "replace", "path": "/status", "value": status}])
+        return self.api("PATCH", f"/mgt/configuser/{inum}", {"jsonPatchString": patch})
 
     def get_user(self, inum):
         return self.api("GET", f"/mgt/configuser/{inum}")
