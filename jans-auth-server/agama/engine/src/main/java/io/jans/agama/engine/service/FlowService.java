@@ -389,7 +389,7 @@ public class FlowService {
         params[0] = wrapListOrMap(configs);
         
         if (strParams != null) {
-            Map<String, Object> map = mapper.readValue(strParams, new TypeReference<Map<String, Object>>(){});
+            Map<String, Object> map = mapper.readValue(strParams, new TypeReference<Map<String, Object>>() { });
             for (int i = 1; i < params.length; i++) {
                 params[i] = map.get(inputs.get(i - 1));
             }
