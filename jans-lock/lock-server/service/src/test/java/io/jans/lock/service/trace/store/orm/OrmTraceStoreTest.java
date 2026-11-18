@@ -50,6 +50,11 @@ class OrmTraceStoreTest extends TraceStoreContractTest {
 	}
 
 	@Override
+	protected TraceStore createNonAtomicStore() {
+		return OrmTraceStores.create(FakeEntryManagerBehavior.createWithoutAtomicBatch());
+	}
+
+	@Override
 	protected StoredTraceRecord newRecord(String producerId, String recordId, String execAuthority, String execId,
 			String chainProducerId, String chainInstanceId, String chainId, long seq, long receiptSeq,
 			List<TokenRef> tokenRefs) {

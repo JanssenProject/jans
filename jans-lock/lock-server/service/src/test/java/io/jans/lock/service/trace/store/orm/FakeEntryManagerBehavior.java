@@ -52,7 +52,9 @@ import io.jans.orm.search.filter.Filter;
  * {@code EQUALITY} (including the {@code multiValued()} marker used for
  * {@code jansTraceCapKeys}/{@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
  * reflecting on each entity's {@code @AttributeName} fields, and applying the entity's
- * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does.
+ * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does. The atomic
+ * batch API is emulated too: {@code persistBatch} stores every entry or none and reports the first
+ * duplicate DN like SQL, {@code findByDns} returns copies of the found entries.
  *
  * <p>Not a general-purpose ORM fake: it only supports the filter shapes and method overloads
  * {@code OrmTraceStore} actually issues.
@@ -74,6 +76,16 @@ final class FakeEntryManagerBehavior {
 	private boolean caseInsensitiveDomain;
 
 	private Runnable afterPolicyBatch;
+
+	private boolean atomicBatchSupported = true;
+
+	/** Like {@link #create()}, but the manager has no atomic batch, as on a non-SQL backend. */
+	static PersistenceEntryManager createWithoutAtomicBatch() {
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		behavior.atomicBatchSupported = false;
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
+	}
 
 	static void afterNextPolicyBatch(PersistenceEntryManager manager, Runnable action) {
 		BY_MOCK.get(manager).afterPolicyBatch = action;
@@ -218,6 +230,44 @@ final class FakeEntryManagerBehavior {
 
 		when(mock.countEntries(anyString(), any(Class.class), any(Filter.class)))
 				.thenAnswer(inv -> matchAll(inv, -1).size());
+
+		when(mock.isAtomicBatchSupported()).thenAnswer(inv -> atomicBatchSupported);
+		when(mock.isAtomicBatchSupported(anyString())).thenAnswer(inv -> atomicBatchSupported);
+
+		doAnswer(inv -> {
+			if (!atomicBatchSupported) {
+				throw new io.jans.orm.exception.UnsupportedOperationException("persistBatch is not supported");
+			}
+			List<Object> entries = inv.getArgument(0);
+			// Like the SQL transaction: the first duplicate DN (stored or earlier in the batch) rolls back everything
+			Map<Class<?>, java.util.Set<String>> batchDns = new HashMap<>();
+			for (Object entity : entries) {
+				String dn = dnOf(entity);
+				if (storeFor(entity.getClass()).containsKey(dn)
+						|| !batchDns.computeIfAbsent(entity.getClass(), c -> new java.util.HashSet<>()).add(dn)) {
+					throw new EntryPersistenceException("Failed to persist batch of " + entries.size() + " entries",
+							new io.jans.orm.exception.operation.DuplicateEntryException(dn));
+				}
+			}
+			for (Object entity : entries) {
+				initVersionIfNeeded(entity);
+				storeFor(entity.getClass()).put(dnOf(entity), entity);
+			}
+			return null;
+		}).when(mock).persistBatch(any());
+
+		when(mock.findByDns(any(Class.class), any())).thenAnswer(inv -> {
+			Class<?> entryClass = inv.getArgument(0);
+			java.util.Collection<String> dns = inv.getArgument(1);
+			Map<String, Object> result = new LinkedHashMap<>();
+			for (String dn : dns) {
+				Object entity = storeFor(entryClass).get(dn);
+				if (entity != null && !result.containsKey(dn)) {
+					result.put(dn, shallowCopy(entity));
+				}
+			}
+			return result;
+		});
 	}
 
 	/**

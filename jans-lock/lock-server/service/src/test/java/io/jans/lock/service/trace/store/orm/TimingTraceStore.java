@@ -165,6 +165,27 @@ public class TimingTraceStore implements TraceStore {
 	}
 
 	@Override
+	public Map<RecordIdentity, StoredTraceRecord> findRecords(Collection<RecordIdentity> identities) {
+		long start = System.nanoTime();
+		try {
+			return delegate.findRecords(identities);
+		} finally {
+			record("findRecords", start);
+		}
+	}
+
+	@Override
+	public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+			Collection<ChainPosition> positions) {
+		long start = System.nanoTime();
+		try {
+			return delegate.findRecordsByChainPositions(positions);
+		} finally {
+			record("findRecordsByChainPositions", start);
+		}
+	}
+
+	@Override
 	public List<StoredTraceRecord> findRecordsByToken(String domainId, TokenRef token) {
 		long start = System.nanoTime();
 		try {
@@ -203,6 +224,22 @@ public class TimingTraceStore implements TraceStore {
 			delegate.insertReceipt(row);
 		} finally {
 			record("insertReceipt", start);
+		}
+	}
+
+	@Override
+	public boolean isAtomicIngestSupported() {
+		return delegate.isAtomicIngestSupported();
+	}
+
+	@Override
+	public void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
+			throws DuplicateEntryException, TraceStorageException {
+		long start = System.nanoTime();
+		try {
+			delegate.insertIngestBatch(receipts, records);
+		} finally {
+			record("insertIngestBatch", start);
 		}
 	}
 
@@ -458,6 +495,23 @@ public class TimingTraceStore implements TraceStore {
 				sum += stats.totalNanos();
 			}
 			return sum;
+		}
+
+		/** @return one snapshot with the calls and nanos of every method added up over {@code snapshots} */
+		public static Snapshot sum(List<Snapshot> snapshots) {
+			Map<String, long[]> totals = new TreeMap<>();
+			for (Snapshot snapshot : snapshots) {
+				for (MethodStats stats : snapshot.methods()) {
+					long[] total = totals.computeIfAbsent(stats.method(), name -> new long[2]);
+					total[0] += stats.calls();
+					total[1] += stats.totalNanos();
+				}
+			}
+			List<MethodStats> merged = new ArrayList<>();
+			for (Map.Entry<String, long[]> entry : totals.entrySet()) {
+				merged.add(new MethodStats(entry.getKey(), entry.getValue()[0], entry.getValue()[1]));
+			}
+			return new Snapshot(merged);
 		}
 
 		/** @return the stats of {@code method}, or {@code null} when it was never called */
