@@ -99,11 +99,18 @@ model to return `{ "findings": [...] }`, then parses `.content[0].text`. Set
 `PENTEST_AI_MODEL` / `PENTEST_AI_API_VERSION` repository variables to override the
 defaults.
 
-To read a report, download `pentest-report` from the run and decrypt it:
+To read a report, download it (`gh run download` unpacks the artifact ZIP; from
+the browser, unzip it first) and decrypt it with age 1.3.0 or later:
 
 ```bash
+gh run download RUN_ID -R JanssenProject/jans -n pentest-report
 age -d -i key.txt pentest-report.tar.gz.age | tar xz
 ```
 
-Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid); store the
-whole file as `PENTEST_AGE_KEY` and keep a copy with the security team.
+Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid, also age
+1.3.0+; CI pins 1.3.2); store the whole file as `PENTEST_AGE_KEY` and keep a copy
+with the security team. AIO startup output goes to `startup.log` inside the
+encrypted `pentest-aio-logs-*` artifact, not the run log.
+
+If a backend's raw output cannot be decrypted, a release run fails; a manual run
+warns and reports the remaining backend.
