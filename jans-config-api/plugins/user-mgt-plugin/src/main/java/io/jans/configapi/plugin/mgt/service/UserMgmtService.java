@@ -170,7 +170,7 @@ public class UserMgmtService {
 
         List<Filter> fieldValueFilters = getFieldValueFilters(searchRequest);
         logger.debug("User pattern fieldValueFilters:{}", fieldValueFilters);
-        if (fieldValueFilters != null && fieldValueFilters.isEmpty()) {
+        if (fieldValueFilters.isEmpty()) {
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }

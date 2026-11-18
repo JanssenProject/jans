@@ -278,8 +278,10 @@ public class DataUtil {
 
     public static List<Filter> createFilter(List<FieldFilterData> fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
-        logger.info("Create ORM Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
+        if(logger.isInfoEnabled()) {
+            logger.info("Create ORM Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
                 escapeLog(fieldFilterData), primaryKey, persistenceEntryManager);
+        }
         List<Filter> filters = new ArrayList<>();
 
         if (fieldFilterData == null || fieldFilterData.isEmpty()) {
@@ -287,7 +289,9 @@ public class DataUtil {
         }
 
         for (FieldFilterData entry : fieldFilterData) {
-            logger.info("FieldFilterData entry:{}", escapeLog(entry));
+            if(logger.isInfoEnabled()) {
+                logger.info("FieldFilterData entry:{}", escapeLog(entry));
+            }
             if (entry == null || entry.getField() == null
                     || !FILTER_FIELD_PATTERN.matcher(entry.getField()).matches()) {
                 throw new BadRequestException("Invalid search field");
@@ -315,10 +319,14 @@ public class DataUtil {
                 dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
             }
             filters.add(dataFilter);
-            logger.info("dataFilter:{}", escapeLog(dataFilter));
+            if(logger.isInfoEnabled()) {
+                logger.info("dataFilter:{}", escapeLog(dataFilter));
+            }
 
         }
-        logger.info("Final Filters for  fieldFilterData - filters:{}", escapeLog(filters));
+        if(logger.isInfoEnabled()) {
+            logger.info("Final Filters for  fieldFilterData - filters:{}", escapeLog(filters));
+        }
         return filters;
     }
 

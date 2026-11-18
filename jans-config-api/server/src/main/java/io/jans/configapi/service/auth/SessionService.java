@@ -175,7 +175,7 @@ public class SessionService {
 
     }
 
-    public void revokeSessionTokens(String id, String sessionDn) {
+    public void revokeSessionTokens(String sessionDn) {
         logger.info("Revoke session tokens for sessionDn:{}", sessionDn);
         String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
         List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
@@ -211,7 +211,7 @@ public class SessionService {
             }
 
             // Revoke tokens first so a failed revocation leaves the session in place for a retry
-            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
+            revokeSessionTokens(sessionToDelete.getDn());
             persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
             cacheService.remove(sessionToDelete.getDn());
 
@@ -236,7 +236,7 @@ public class SessionService {
             }
 
             sessionList.stream().forEach(session -> {
-                revokeSessionTokens(userDn, session.getDn());
+                revokeSessionTokens(session.getDn());
                 persistenceEntryManager.remove(session.getDn(), SessionId.class);
                 cacheService.remove(session.getDn());
             });

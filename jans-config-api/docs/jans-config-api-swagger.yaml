@@ -15697,15 +15697,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string

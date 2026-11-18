@@ -12,20 +12,14 @@ import io.jans.service.net.BaseHttpService;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.util.StringHelper;
 
-import java.io.File;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,13 +28,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.SSLContext;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -51,11 +42,8 @@ import org.apache.logging.log4j.Logger;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -65,17 +53,13 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
-import org.apache.http.ssl.TrustStrategy;
 
 @ApplicationScoped
 public class ConfigHttpService extends BaseHttpService implements Serializable {
@@ -251,9 +235,11 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
             Map<String, String> parameters) {
 
         // header values are not logged: Authorization carries the caller's bearer token
-        log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(redactUri(requestUri)),
+        if(log.isInfoEnabled()) {
+            log.info("requestUri:{}, headerNames:{}, parameters:{}", escapeLog(redactUri(requestUri)),
                 headers != null ? escapeLog(headers.keySet()) : null,
                 parameters != null ? escapeLog(parameters.keySet()) : null);
+        }
 
         if (parameters != null && !parameters.isEmpty()) {
             StringBuilder query = new StringBuilder();
@@ -269,7 +255,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.debug("Final requestUri:{}", escapeLog(redactUri(requestUri)));
+            if(log.isDebugEnabled()) {
+                log.debug("Final requestUri:{}", escapeLog(redactUri(requestUri)));
+            }
         }
 
         HttpGet httpGet = new HttpGet(requestUri);
@@ -379,7 +367,9 @@ public class ConfigHttpService extends BaseHttpService implements Serializable {
                 }
             }
             requestUri = requestUri + query.toString();
-            log.debug("Final Delete requestUri:{}", escapeLog(redactUri(requestUri)));
+            if(log.isDebugEnabled()) {
+                log.debug("Final Delete requestUri:{}", escapeLog(redactUri(requestUri)));
+            }
         }
 
         HttpDelete httpDelete = new HttpDelete(requestUri);
