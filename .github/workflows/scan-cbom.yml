@@ -38,29 +38,44 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-latest
     timeout-minutes: 240
-    # Join "Build: Publish"'s group for this tag so its next run (which deletes
-    # and redeploys 0.0.0-nightly, incl. cedarling-java) waits for this build.
-    concurrency:
-      group: ${{ github.event_name == 'workflow_run' && format('build-publish-refs/tags/{0}', github.event.workflow_run.head_branch) || format('scan-cbom-{0}', github.run_id) }}
-      cancel-in-progress: false
+    outputs:
+      current: ${{ steps.after.outputs.current }}
     permissions:
       contents: read
       packages: read  # io.jans artifacts from GitHub Packages Maven
     env:
       JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       MAVEN_OPTS: -Xmx5g -Dhttp.keepAlive=false
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
     - name: Harden Runner
       uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
       with:
         egress-policy: audit
 
+    # A newer publish of this tag moves the tag before it deletes and redeploys
+    # 0.0.0-nightly (incl. cedarling-java). If the tag still points at the
+    # scanned commit before and after Maven resolves dependencies, no such
+    # publish overlapped the build. On a move, that publish triggers its own scan.
+    - name: Check tag before build
+      id: before
+      run: |
+        if [[ "${GITHUB_EVENT_NAME}" != "workflow_run" ]]; then echo "current=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+        if [[ ! "${RELEASE_TAG}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then echo "Invalid release tag" >&2; exit 1; fi
+        TAG_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)"
+        if [[ "${TAG_SHA}" == "${HEAD_SHA}" ]]; then echo "current=true" >> "$GITHUB_OUTPUT"
+        else echo "::notice::${RELEASE_TAG} moved to ${TAG_SHA}; skipping superseded scan of ${HEAD_SHA}"; fi
+
     - name: Checkout
+      if: steps.before.outputs.current == 'true'
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
-        ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+        ref: ${{ env.HEAD_SHA }}
 
     - name: Set up JDK 17
+      if: steps.before.outputs.current == 'true'
       uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
       with:
         distribution: temurin
@@ -69,7 +84,7 @@ jobs:
     # Same rewrite "Build: Publish" applies, so a release build resolves that
     # release's io.jans jars (incl. cedarling-java), not 0.0.0-nightly.
     - name: Set release version in poms
-      if: github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v')
+      if: steps.before.outputs.current == 'true' && github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v')
       env:
         RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
       run: |
@@ -88,6 +103,7 @@ jobs:
     # dependency jars. It runs in a container that only sees the workspace, so
     # the local Maven repo has to live there.
     - name: Build Java modules
+      if: steps.before.outputs.current == 'true'
       run: |
         set -euo pipefail
         for m in ${MAVEN_MODULES}; do
@@ -99,7 +115,17 @@ jobs:
           echo "::endgroup::"
         done
 
+    - name: Check tag after build
+      id: after
+      if: steps.before.outputs.current == 'true'
+      run: |
+        if [[ "${GITHUB_EVENT_NAME}" != "workflow_run" ]]; then echo "current=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+        TAG_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)"
+        if [[ "${TAG_SHA}" == "${HEAD_SHA}" ]]; then echo "current=true" >> "$GITHUB_OUTPUT"
+        else echo "::notice::${RELEASE_TAG} moved to ${TAG_SHA} during build; dropping scan of ${HEAD_SHA}"; fi
+
     - name: Generate source CBOM
+      if: steps.after.outputs.current == 'true'
       uses: docker://ghcr.io/cbomkit/cbomkit-action@sha256:47c2505267dc5f055152616ffa0d0076b7d0824fe9e0de670b572d1ebad2fc4b # v2.3.0
       env:
         CBOMKIT_LANGUAGES: java, python, go
@@ -108,6 +134,7 @@ jobs:
     # cbomkit reads GITHUB_SHA/GITHUB_REF_NAME, which point at the default branch
     # on workflow_run; record the commit actually scanned.
     - name: Gate source CBOM
+      if: steps.after.outputs.current == 'true'
       env:
         HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         SCAN_REF: ${{ github.event.workflow_run.head_branch || github.ref_name }}
@@ -118,6 +145,7 @@ jobs:
         python3 "$S" stamp source-cbom.json "commit=${HEAD_SHA}" "revision=${SCAN_REF}" "jans:commit=${HEAD_SHA}"
 
     - name: Upload source CBOM
+      if: steps.after.outputs.current == 'true'
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         name: source-cbom
@@ -271,6 +299,7 @@ jobs:
 
   publish:
     needs: source-cbom
+    if: needs.source-cbom.outputs.current == 'true'
     runs-on: ubuntu-latest
     # Serialize release writes per tag; this workflow is the only writer of the pair.
     concurrency:
@@ -383,4 +412,25 @@ jobs:
             exit 0
           fi
         fi
-        gh release upload "${RELEASE_TAG}" jans-cbom.json jans-cbom.json.bundle -R "${GITHUB_REPOSITORY}" --clobber
+        # Upload under staging names, then retire the old pair and rename, so a
+        # failed upload never removes the published pair.
+        set -euo pipefail
+        API="repos/${GITHUB_REPOSITORY}/releases"
+        rid="$(gh api "${API}/tags/${RELEASE_TAG}" --jq .id)"
+        asset_ids() { gh api --paginate "${API}/${rid}/assets" --jq ".[] | select(.name == \"$1\") | .id"; }
+        for n in jans-cbom.next.json jans-cbom.next.json.bundle; do
+          for id in $(asset_ids "$n"); do gh api -X DELETE "${API}/assets/${id}"; done
+        done
+        cp jans-cbom.json jans-cbom.next.json
+        cp jans-cbom.json.bundle jans-cbom.next.json.bundle
+        gh release upload "${RELEASE_TAG}" jans-cbom.next.json jans-cbom.next.json.bundle -R "${GITHUB_REPOSITORY}"
+        new="$(gh api --paginate "${API}/${rid}/assets" \
+          --jq '[.[] | select(.state == "uploaded" and (.name == "jans-cbom.next.json" or .name == "jans-cbom.next.json.bundle"))] | length')"
+        if [ "${new}" != "2" ]; then echo "::error::staged CBOM pair not uploaded" >&2; exit 1; fi
+        for n in jans-cbom.json jans-cbom.json.bundle; do
+          for id in $(asset_ids "$n"); do gh api -X DELETE "${API}/assets/${id}"; done
+        done
+        for n in jans-cbom.json jans-cbom.json.bundle; do
+          id="$(asset_ids "${n/jans-cbom./jans-cbom.next.}")"
+          gh api -X PATCH "${API}/assets/${id}" -f name="${n}" --silent
+        done
