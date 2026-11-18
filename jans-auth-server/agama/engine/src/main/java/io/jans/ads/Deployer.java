@@ -458,7 +458,7 @@ public class Deployer {
 
                     projectsFinishTimes.remove(prjId);
                     purge(basePaths, null);
-                } catch(IOException e) {
+                } catch (IOException e) {
                     logger.error(e.getMessage());
                 }
 
@@ -492,7 +492,7 @@ public class Deployer {
         //Do safe source file removal, see jans#9153
         try {
             purge(null, toRemove);
-        } catch(IOException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
         }
 

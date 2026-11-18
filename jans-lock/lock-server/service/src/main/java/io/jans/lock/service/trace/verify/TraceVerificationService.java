@@ -93,8 +93,30 @@ public class TraceVerificationService {
 	 *                                  field-name-only reason
 	 */
 	public VerifiedAssertion verify(InputStream body, TraceRequestContext ctx) {
+		return verify(body, ctx, keyRegistry::resolveForVerification);
+	}
+
+	/**
+	 * @return a key memo for one bulk request, to pass to
+	 *         {@link #verify(InputStream, TraceRequestContext, ProducerKeyRegistry.KeyResolver)} for
+	 *         each of its records; see {@link ProducerKeyRegistry#newRequestKeys()}
+	 */
+	public ProducerKeyRegistry.KeyResolver newRequestKeys() {
+		return keyRegistry.newRequestKeys();
+	}
+
+	/**
+	 * {@link #verify(InputStream, TraceRequestContext)} with the key resolution of step 6 delegated to
+	 * {@code keys}. The bulk path passes {@link #newRequestKeys()} so that a key is
+	 * read once per request; the validity window is still judged for every record at
+	 * {@code ctx.receivedAtMs}, and every error id and reason is the same.
+	 *
+	 * @param keys resolves the producer key with the contract of
+	 *             {@link ProducerKeyRegistry#resolveForVerification}
+	 */
+	public VerifiedAssertion verify(InputStream body, TraceRequestContext ctx, ProducerKeyRegistry.KeyResolver keys) {
 		try {
-			return doVerify(body, ctx);
+			return doVerify(body, ctx, keys);
 		} catch (TraceValidationException ex) {
 			log.info("TRACE assertion rejected: error={}, reason={}", ex.getErrorId().getParameter(), ex.getReason());
 			throw ex;
@@ -108,7 +130,7 @@ public class TraceVerificationService {
 		}
 	}
 
-	private VerifiedAssertion doVerify(InputStream body, TraceRequestContext ctx) {
+	private VerifiedAssertion doVerify(InputStream body, TraceRequestContext ctx, ProducerKeyRegistry.KeyResolver keys) {
 		// 1. Fail closed before touching the body.
 		cryptoProvider.requireAvailable();
 
@@ -125,8 +147,8 @@ public class TraceVerificationService {
 		CorrelationInputs inputs = eventKindRegistry.validate(parsed);
 
 		// 6. Key resolution and validity at the receipt instant.
-		ProducerKeyRegistry.ResolvedKey key = keyRegistry.resolveForVerification(ctx.getEvidenceDomainId(),
-				parsed.getProducer(), parsed.getKid(), ctx.getReceivedAtMs());
+		ProducerKeyRegistry.ResolvedKey key = keys.resolve(ctx.getEvidenceDomainId(), parsed.getProducer(),
+				parsed.getKid(), ctx.getReceivedAtMs());
 
 		// 6b. The key must be authorized for this event kind; no crypto has run yet.
 		keyRegistry.requireEventKindAuthorized(key, parsed.getEventKind());

@@ -110,9 +110,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.encode_test_passwords()
 
-        if Config.installed_instance:
-            base.current_app.ConfigApiInstaller.prepare_scope_list()
-
         Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
 

@@ -11,9 +11,12 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +33,14 @@ import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryDeleteException;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.impl.GenericKeyConverter;
 import io.jans.orm.impl.model.ParsedKey;
+import io.jans.orm.impl.model.PreparedInsert;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
@@ -51,6 +57,7 @@ import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.model.BatchInsert;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
@@ -174,6 +181,140 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
     	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
 
+    	List<AttributeData> resultAttributes = toSqlInsertAttributes(baseObjectClass, attributes);
+
+        // Persist entry
+        try {
+        	BatchInsert insert = toSqlInsert(dn, baseObjectClass, resultAttributes);
+
+            boolean result = getOperationService().addEntry(insert.getKey(), baseObjectClass, insert.getAttributes());
+            if (!result) {
+                throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
+            }
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn), ex);
+        }
+    }
+
+    /**
+     * The SQL backend writes the batch in one transaction with one commit.
+     */
+    @Override
+    public boolean isAtomicBatchSupported() {
+        return true;
+    }
+
+    /**
+     * Inserts all entries in one database transaction. Each entry is mapped as {@link #persist(Object)}
+     * maps it; consecutive entries of the same table and columns go to the database as one JDBC batch.
+     *
+     * @throws InvalidArgumentException more than {@link SqlOperationService#MAX_BATCH_INSERT_SIZE} entries
+     */
+    @Override
+    public void persistBatch(List<?> entries) {
+        if (entries == null) {
+            throw new MappingException("Entries to persist are null");
+        }
+        if (entries.isEmpty()) {
+            return;
+        }
+        if (entries.size() > SqlOperationService.MAX_BATCH_INSERT_SIZE) {
+            throw new InvalidArgumentException(String.format("Batch of %d entries exceeds the maximum of %d entries",
+                    entries.size(), SqlOperationService.MAX_BATCH_INSERT_SIZE));
+        }
+
+        // Map every entry before the first database call: a mapping error stores nothing
+        List<BatchInsert> inserts = new ArrayList<>(entries.size());
+        for (Object entry : entries) {
+            PreparedInsert preparedInsert = prepareInsert(entry);
+            String dn = preparedInsert.getDn();
+            String baseObjectClass = getBaseObjectClassForDataOperation(preparedInsert.getObjectClasses());
+
+            List<AttributeData> resultAttributes = toSqlInsertAttributes(baseObjectClass, preparedInsert.getAttributes());
+            try {
+                inserts.add(toSqlInsert(dn, baseObjectClass, resultAttributes));
+            } catch (Exception ex) {
+                throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn), ex);
+            }
+        }
+
+        try {
+            getOperationService().addEntriesInTransaction(inserts);
+        } catch (DuplicateEntryException ex) {
+            throw new EntryPersistenceException(String.format("Failed to persist batch of %d entries: %s", inserts.size(), ex.getMessage()), ex);
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to persist batch of %d entries", inserts.size()), ex);
+        }
+    }
+
+    /**
+     * Reads the entries with {@code WHERE doc_id IN (...)}, at most
+     * {@link SqlOperationService#LOOKUP_BY_KEYS_CHUNK_SIZE} DNs per statement, and maps them as
+     * {@code find} does.
+     */
+    @Override
+    public <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns) {
+        if (dns == null) {
+            throw new MappingException("DNs to find entries are null");
+        }
+
+        Map<String, String> keysByDn = new LinkedHashMap<>();
+        for (String dn : dns) {
+            if (StringHelper.isEmpty(dn)) {
+                throw new MappingException("DN to find entry is null");
+            }
+            if (!keysByDn.containsKey(dn)) {
+                keysByDn.put(dn, toSQLKey(dn).getKey());
+            }
+        }
+
+        if (keysByDn.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+
+        checkEntryClass(entryClass, true);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
+        String baseObjectClass = getBaseObjectClassForDataOperation(getTypeObjectClasses(entryClass));
+
+        Map<String, List<AttributeData>> attributesByKey;
+        try {
+            attributesByKey = getOperationService().lookupByKeys(baseObjectClass, new LinkedHashSet<>(keysByDn.values()),
+                    toInternalAttributes(baseObjectClass, ldapReturnAttributes));
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find %d entries by DNs", keysByDn.size()), ex);
+        }
+
+        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<>();
+        for (Map.Entry<String, String> keyByDn : keysByDn.entrySet()) {
+            List<AttributeData> attributes = attributesByKey.get(keyByDn.getValue());
+            if (attributes != null) {
+                entriesAttributes.put(keyByDn.getKey(), new ArrayList<>(attributes));
+            }
+        }
+
+        Map<String, T> result = new LinkedHashMap<>();
+        if (entriesAttributes.isEmpty()) {
+            return result;
+        }
+
+        // createEntities sets the @DN property to the map key, which is the DN as passed
+        Map<String, T> entriesByDn = new HashMap<>();
+        for (T entry : createEntities(entryClass, propertiesAnnotations, entriesAttributes)) {
+            entriesByDn.put(String.valueOf(getDNValue(entry, entryClass)), entry);
+        }
+
+        for (String dn : entriesAttributes.keySet()) {
+            T entry = entriesByDn.get(dn);
+            if (entry != null) {
+                result.put(dn, entry);
+            }
+        }
+
+        return result;
+    }
+
+    private List<AttributeData> toSqlInsertAttributes(String baseObjectClass, List<AttributeData> attributes) {
     	ArrayList<AttributeData> resultAttributes = new ArrayList<>(attributes.size() + 1);
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -211,19 +352,18 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             }
         }
 
-        // Persist entry
-        try {
-        	ParsedKey parsedKey = toSQLKey(dn);
-            resultAttributes.add(new AttributeData(SqlOperationService.DN, dn));
-            resultAttributes.add(new AttributeData(SqlOperationService.DOC_ID, parsedKey.getKey()));
+        return resultAttributes;
+    }
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), baseObjectClass, resultAttributes);
-            if (!result) {
-                throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
-            }
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn), ex);
-        }
+    private BatchInsert toSqlInsert(String dn, String baseObjectClass, List<AttributeData> resultAttributes) {
+    	ParsedKey parsedKey = toSQLKey(dn);
+
+    	List<AttributeData> insertAttributes = new ArrayList<>(resultAttributes.size() + 2);
+    	insertAttributes.addAll(resultAttributes);
+    	insertAttributes.add(new AttributeData(SqlOperationService.DN, dn));
+    	insertAttributes.add(new AttributeData(SqlOperationService.DOC_ID, parsedKey.getKey()));
+
+    	return new BatchInsert(dn, parsedKey.getKey(), baseObjectClass, insertAttributes);
     }
 
     @Override

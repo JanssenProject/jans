@@ -5,16 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.security.PublicKey;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +20,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -79,25 +75,6 @@ class AssertionFormatProcessorTest {
 	private HexUtilService hexUtilService;
 
 
-	// TODO: registration data is null 
-	/*Test
-	void process_happyPath_success() throws IOException {
-		String base64AuthenticatorData = "base64AuthenticatorData_test";
-		String signature = "signature_test";
-		String clientDataJson = "clientDataJson_test";
-		Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
-		Fido2AuthenticationData authenticationEntity = mock(Fido2AuthenticationData.class);
-
-		when(authenticatorDataParser.parseAssertionData(any(String.class))).thenReturn(mock(AuthData.class));
-		when(dataMapperService.cborReadTree(any())).thenReturn(mock(JsonNode.class));
-		when(coseService.createUncompressedPointFromCOSEPublicKey(any())).thenReturn(mock(PublicKey.class));
-
-		appleAssertionFormatProcessor.process(base64AuthenticatorData, signature, clientDataJson, registration,
-				authenticationEntity);
-		
-		verify(authenticatorDataVerifier).verifyAssertionSignature(any(), any(), any(), any(), anyInt());
-		verify(log, times(2)).debug(anyString());
-	}*/
 
     @Test
     void process_ifVerifyCounterThrowError_fido2CompromisedDevice() {
@@ -113,12 +90,10 @@ class AssertionFormatProcessorTest {
 
         Fido2CompromisedDevice ex = assertThrows(Fido2CompromisedDevice.class, () -> appleAssertionFormatProcessor.process(base64AuthenticatorData, signature, clientDataJson, registration, authenticationEntity));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Fido2 Exception");
+        assertEquals("Fido2 Exception", ex.getMessage());
 
-        //TODO: this check doesnt make sense right, everthing is null
-        //verify(log).info(contains("User verification option"), eq(UserVerification.discouraged));
-        verifyNoInteractions(dataMapperService, coseService, hexUtilService, authenticatorDataVerifier);
-        //verifyNoMoreInteractions(log);
+        verify(authenticatorDataVerifier).verifyAssertionSignature(any(), any(), any(), any(), anyInt());
+        verifyNoInteractions(hexUtilService);
     }
 
     @Test
@@ -135,11 +110,9 @@ class AssertionFormatProcessorTest {
 
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> appleAssertionFormatProcessor.process(base64AuthenticatorData, signature, clientDataJson, registration, authenticationEntity));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Failed to check assertion");
+        assertEquals("Failed to check assertion", ex.getMessage());
 
-        //verify(log).info(contains("User verification option"), eq(UserVerification.discouraged));
         verifyNoInteractions(coseService, hexUtilService, authenticatorDataVerifier);
-        //verifyNoMoreInteractions(log);
     }
     
     

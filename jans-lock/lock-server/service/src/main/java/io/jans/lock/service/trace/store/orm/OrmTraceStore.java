@@ -9,9 +9,12 @@ package io.jans.lock.service.trace.store.orm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,6 +51,7 @@ import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.sql.operation.SqlOperationService;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -74,6 +78,11 @@ public class OrmTraceStore implements TraceStore {
 	private static final String ATTR_RECEIPT_SEQ = "jansTraceReceiptSeq";
 
 	private static final int RECEIPT_LOOKUP_BATCH = 100;
+
+	static final int CHAIN_POSITION_LOOKUP_BATCH = 100;
+
+	/** Rows (receipts plus records) one {@code insertIngestBatch} may write: the ORM batch guard. */
+	public static final int MAX_INGEST_BATCH_ROWS = SqlOperationService.MAX_BATCH_INSERT_SIZE;
 
 	private static final int POLICY_SCAN_BATCH = 100;
 	private static final String ATTR_RECEIPT_HASH = "jansTraceReceiptHash";
@@ -145,15 +154,24 @@ public class OrmTraceStore implements TraceStore {
 
 	// -- duplicate-safe insert -------------------------------------------
 
+	/*
+	 * On SQL the unique key decides, so there is no read before the insert: a duplicate is reported as an
+	 * ORM DuplicateEntryException cause. Other backends can overwrite an existing entry on insert
+	 * (Couchbase upsert, Spanner insert-or-update), so they keep the read before the insert. A failed
+	 * insert without the duplicate cause re-checks the DN to tell a duplicate from a storage error.
+	 */
 	private <T> void duplicateSafeInsert(String dn, Class<T> entityClass, T entity, String key)
 			throws DuplicateEntryException, TraceStorageException {
-		if (persistenceEntryManager.contains(dn, entityClass)) {
+		boolean insertRejectsDuplicates = PersistenceEntryManager.PERSITENCE_TYPES.sql.name()
+				.equals(persistenceEntryManager.getPersistenceType(dn));
+		if (!insertRejectsDuplicates && persistenceEntryManager.contains(dn, entityClass)) {
 			throw new DuplicateEntryException(key);
 		}
 		try {
 			persistenceEntryManager.persist(entity);
 		} catch (EntryPersistenceException e) {
-			if (persistenceEntryManager.contains(dn, entityClass)) {
+			if ((e.getCause() instanceof io.jans.orm.exception.operation.DuplicateEntryException)
+					|| persistenceEntryManager.contains(dn, entityClass)) {
 				throw new DuplicateEntryException(key, "Entry already exists: " + key, e);
 			}
 			throw new TraceStorageException("persist_failed",
@@ -269,6 +287,69 @@ public class OrmTraceStore implements TraceStore {
 				Filter.createEqualityFilter(ATTR_DOMAIN_ID, position.getChainIdentity().getDomainId()),
 				Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, key));
 		return toStoredList(position.getChainIdentity().getDomainId(), persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class, filter));
+	}
+
+	@Override
+	public Map<RecordIdentity, StoredTraceRecord> findRecords(Collection<RecordIdentity> identities) {
+		Map<String, RecordIdentity> identitiesByDn = new LinkedHashMap<>();
+		for (RecordIdentity identity : identities) {
+			identitiesByDn.putIfAbsent(TraceKeys.recordDn(baseDn(), traceKeys.recordKey(identity)), identity);
+		}
+		if (identitiesByDn.isEmpty()) {
+			return new LinkedHashMap<>();
+		}
+		Map<String, TraceRecordEntry> found;
+		try {
+			found = persistenceEntryManager.findByDns(TraceRecordEntry.class, identitiesByDn.keySet());
+		} catch (BasePersistenceException e) {
+			throw new TraceStorageException("read_failed", "Failed to read " + identitiesByDn.size() + " records", e);
+		}
+		Map<RecordIdentity, StoredTraceRecord> result = new LinkedHashMap<>();
+		for (Map.Entry<String, RecordIdentity> entry : identitiesByDn.entrySet()) {
+			TraceRecordEntry entity = found.get(entry.getKey());
+			RecordIdentity identity = entry.getValue();
+			if (entity != null && identity.getDomainId().equals(entity.getDomainId())) {
+				result.put(identity, TraceEntityMapper.toStoredTraceRecord(entity));
+			}
+		}
+		return result;
+	}
+
+	/*
+	 * One OR query over the indexed chain position key per chunk. The key embeds the domain, so no
+	 * domain filter is needed; the exact position derived from each row decides where it belongs,
+	 * which also drops rows a case-insensitive collation matched for another spelling of the domain.
+	 */
+	@Override
+	public Map<ChainPosition, List<StoredTraceRecord>> findRecordsByChainPositions(
+			Collection<ChainPosition> positions) {
+		List<ChainPosition> distinct = new ArrayList<>(new LinkedHashSet<>(positions));
+		Map<ChainPosition, List<StoredTraceRecord>> result = new LinkedHashMap<>();
+		for (int from = 0; from < distinct.size(); from += CHAIN_POSITION_LOOKUP_BATCH) {
+			List<ChainPosition> chunk = distinct.subList(from,
+					Math.min(distinct.size(), from + CHAIN_POSITION_LOOKUP_BATCH));
+			Set<ChainPosition> requested = new LinkedHashSet<>(chunk);
+			List<Filter> keyFilters = chunk.stream()
+					.map(position -> Filter.createEqualityFilter(ATTR_CHAIN_POS_KEY, traceKeys.chainPositionKey(position)))
+					.collect(Collectors.toList());
+			List<TraceRecordEntry> entities;
+			try {
+				entities = persistenceEntryManager.findEntries(recordsBase(), TraceRecordEntry.class,
+						Filter.createORFilter(keyFilters));
+			} catch (BasePersistenceException e) {
+				throw new TraceStorageException("read_failed",
+						"Failed to read records at " + chunk.size() + " chain positions", e);
+			}
+			for (TraceRecordEntry entity : entities) {
+				StoredTraceRecord stored = TraceEntityMapper.toStoredTraceRecord(entity);
+				if (requested.contains(stored.getChainPosition())) {
+					result.computeIfAbsent(stored.getChainPosition(), p -> new ArrayList<>()).add(stored);
+				}
+			}
+		}
+		Comparator<StoredTraceRecord> byReceipt = Comparator.comparingLong(r -> r.getReceipt().getReceiptSequence());
+		result.values().forEach(list -> list.sort(byReceipt));
+		return result;
 	}
 
 	@Override
@@ -401,6 +482,79 @@ public class OrmTraceStore implements TraceStore {
 		entity.setId(key);
 		entity.setDn(dn);
 		duplicateSafeInsert(dn, TraceReceiptEntry.class, entity, key);
+	}
+
+	@Override
+	public boolean isAtomicIngestSupported() {
+		return persistenceEntryManager.isAtomicBatchSupported(recordsBase())
+				&& persistenceEntryManager.isAtomicBatchSupported(receiptsBase());
+	}
+
+	/*
+	 * No read before and none after: the unique key of every row is the compare-and-swap, and the
+	 * ORM rolls the whole transaction back on the first duplicate.
+	 */
+	@Override
+	public void insertIngestBatch(List<TraceReceiptEntry> receipts, List<StoredTraceRecord> records)
+			throws DuplicateEntryException, TraceStorageException {
+		if (!isAtomicIngestSupported()) {
+			throw new UnsupportedOperationException("Atomic ingest batch is not supported by this persistence backend");
+		}
+		int size = receipts.size() + records.size();
+		if (size == 0) {
+			return;
+		}
+		String domainId = !receipts.isEmpty() ? receipts.get(0).getDomainId()
+				: records.get(0).getIdentity().getDomainId();
+		if (size > MAX_INGEST_BATCH_ROWS) {
+			log.warn("TRACE ingest batch rejected: domain={}, size={}, reason=batch_too_large", domainId, size);
+			throw new TraceStorageException("batch_too_large",
+					"Ingest batch of " + size + " rows exceeds the limit of " + MAX_INGEST_BATCH_ROWS);
+		}
+
+		String baseDn = baseDn();
+		Map<String, String> keysByDn = new LinkedHashMap<>();
+		List<Object> entities = new ArrayList<>(size);
+		for (TraceReceiptEntry receipt : receipts) {
+			String key = traceKeys.receiptKey(receipt.getDomainId(), receipt.getReceiptSeq());
+			String dn = TraceKeys.receiptDn(baseDn, key);
+			receipt.setId(key);
+			receipt.setDn(dn);
+			keysByDn.putIfAbsent(dn, key);
+			entities.add(receipt);
+		}
+		for (StoredTraceRecord record : records) {
+			String key = traceKeys.recordKey(record.getIdentity());
+			String dn = TraceKeys.recordDn(baseDn, key);
+			keysByDn.putIfAbsent(dn, key);
+			entities.add(TraceEntityMapper.toEntity(record, dn, traceKeys));
+		}
+
+		try {
+			persistenceEntryManager.persistBatch(entities);
+		} catch (EntryPersistenceException e) {
+			io.jans.orm.exception.operation.DuplicateEntryException duplicate = duplicateCause(e);
+			if (duplicate != null) {
+				String key = duplicate.getDn() == null ? null : keysByDn.get(duplicate.getDn());
+				log.debug("TRACE ingest batch rejected: domain={}, size={}, reason=duplicate", domainId, size);
+				throw new DuplicateEntryException(key, "Ingest batch contains an existing entry"
+						+ (key == null ? "" : ": " + key), e);
+			}
+			log.warn("TRACE ingest batch failed: domain={}, size={}, reason=persist_failed", domainId, size);
+			throw new TraceStorageException("persist_failed", "Failed to persist ingest batch of " + size + " rows", e);
+		} catch (io.jans.orm.exception.UnsupportedOperationException e) {
+			throw new UnsupportedOperationException("Atomic ingest batch is not supported by this persistence backend", e);
+		} catch (BasePersistenceException e) {
+			log.warn("TRACE ingest batch failed: domain={}, size={}, reason=persist_failed", domainId, size);
+			throw new TraceStorageException("persist_failed", "Failed to persist ingest batch of " + size + " rows", e);
+		}
+	}
+
+	private static io.jans.orm.exception.operation.DuplicateEntryException duplicateCause(EntryPersistenceException e) {
+		Throwable cause = e.getCause();
+		return cause instanceof io.jans.orm.exception.operation.DuplicateEntryException
+				? (io.jans.orm.exception.operation.DuplicateEntryException) cause
+				: null;
 	}
 
 	@Override

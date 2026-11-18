@@ -21,6 +21,8 @@ import org.apache.commons.io.IOUtils;
  */
 public final class CompressionHelper {
 
+    public static final int DEFAULT_MAX_INFLATED_SIZE = 16 * 1024 * 1024;
+
     private CompressionHelper() { }
 
     public static byte[] deflate(byte[] data, boolean nowrap) throws IOException {
@@ -44,17 +46,28 @@ public final class CompressionHelper {
     }
 
     public static byte[] inflate(byte[] data, boolean nowrap) throws IOException, DataFormatException {
+        return inflate(data, nowrap, DEFAULT_MAX_INFLATED_SIZE);
+    }
+
+    public static byte[] inflate(byte[] data, boolean nowrap, int maxInflatedSize) throws IOException, DataFormatException {
         Inflater inflater = new Inflater(nowrap);
         inflater.setInput(data);
 
-        ByteArrayOutputStream os = new ByteArrayOutputStream(data.length);
+        ByteArrayOutputStream os = new ByteArrayOutputStream(Math.min(data.length, maxInflatedSize));
         try {
             byte[] buffer = new byte[1024];
             while (!inflater.finished()) {
                 int count = inflater.inflate(buffer);
+                if ((count == 0) && !inflater.finished()) {
+                    throw new DataFormatException("Incomplete compressed data");
+                }
+                if (os.size() + count > maxInflatedSize) {
+                    throw new DataFormatException("Inflated data exceeds limit of " + maxInflatedSize + " bytes");
+                }
                 os.write(buffer, 0, count);
             }
         } finally {
+            inflater.end();
             IOUtils.closeQuietly(os);
         }
 

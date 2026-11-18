@@ -416,7 +416,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
     public int clientPeriodicUpdateTimerInterval = 3;
 
-    @DocProperty(description = "The lifetime of the Authorization Code")
+    @DocProperty(description = "The authorization code lifetime in seconds. Values that are zero, negative, or greater than 600 use the 600-second maximum", defaultValue = "60")
     private int authorizationCodeLifetime;
 
     @DocProperty(description = "The lifetime of the Refresh Token")

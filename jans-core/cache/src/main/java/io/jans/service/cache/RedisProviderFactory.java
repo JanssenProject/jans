@@ -7,11 +7,15 @@
 package io.jans.service.cache;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 import java.io.FileInputStream;
@@ -70,22 +74,47 @@ public final class RedisProviderFactory {
     }
 
     public static SSLSocketFactory createSslSocketFactory(RedisConfiguration redisConfiguration) throws Exception {
-        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        trustStore.load(new FileInputStream(redisConfiguration.getSslTrustStoreFilePath()),
-                redisConfiguration.getSslTrustStorePassword().toCharArray());
         TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trustManagerFactory.init(trustStore);
+        if (StringUtils.isNotBlank(redisConfiguration.getSslTrustStoreFilePath())) {
+            trustManagerFactory.init(loadKeyStore(redisConfiguration.getSslTrustStoreFilePath(), redisConfiguration.getSslTrustStorePassword()));
+        } else {
+            trustManagerFactory.init((KeyStore) null);
+        }
 
-        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-        keyStore.load(new FileInputStream(redisConfiguration.getSslKeyStoreFilePath()),
-                redisConfiguration.getSslKeyStorePassword().toCharArray());
-        KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(keyStore, redisConfiguration.getSslKeyStorePassword().toCharArray());
+        KeyManager[] keyManagers = null;
+        if (StringUtils.isNotBlank(redisConfiguration.getSslKeyStoreFilePath())) {
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(loadKeyStore(redisConfiguration.getSslKeyStoreFilePath(), redisConfiguration.getSslKeyStorePassword()),
+                    toCharArray(redisConfiguration.getSslKeyStorePassword()));
+            keyManagers = keyManagerFactory.getKeyManagers();
+        }
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
+        sslContext.init(keyManagers, trustManagerFactory.getTrustManagers(), new SecureRandom());
 
         return sslContext.getSocketFactory();
+    }
+
+    public static SSLParameters createSslParameters() {
+        SSLParameters sslParameters = new SSLParameters();
+        sslParameters.setEndpointIdentificationAlgorithm("HTTPS");
+        return sslParameters;
+    }
+
+    public static HostnameVerifier createHostnameVerifier() {
+        return new DefaultHostnameVerifier();
+    }
+
+    private static KeyStore loadKeyStore(String path, String password) throws Exception {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        try (FileInputStream is = new FileInputStream(path)) {
+            keyStore.load(is, toCharArray(password));
+        }
+        return keyStore;
+    }
+
+    private static char[] toCharArray(String password) {
+        return password == null ? null : password.toCharArray();
     }
 
     public static void setSSLSystemProperties(RedisConfiguration redisConfiguration) {

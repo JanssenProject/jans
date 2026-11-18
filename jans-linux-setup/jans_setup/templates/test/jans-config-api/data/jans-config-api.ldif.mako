@@ -1,9 +1,9 @@
-dn: inum=%(jca_test_client_id)s,ou=clients,o=jans
+dn: inum=${jca_test_client_id},ou=clients,o=jans
 objectClass: jansClnt
 objectClass: top
 del: FALSE
 displayName: Jans Config Api Client
-inum: %(jca_test_client_id)s
+inum: ${jca_test_client_id}
 jansAccessTknAsJwt: FALSE
 jansAccessTknSigAlg: RS256
 jansAppTyp: web
@@ -13,7 +13,7 @@ jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessT
  eousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionR
  equired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGather
  ingScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
-jansClntSecret: %(jca_test_client_encoded_pw)s
+jansClntSecret: ${jca_test_client_encoded_pw}
 jansDisabled: FALSE
 jansGrantTyp: authorization_code
 jansGrantTyp: client_credentials
@@ -27,4 +27,6 @@ jansRptAsJwt: FALSE
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
 jansTrustedClnt: FALSE
-%(config_api_scopes)s
+% for scope in config_api_scopes:
+jansScope: ${scope}
+% endfor

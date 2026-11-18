@@ -3,8 +3,10 @@ package io.jans.saml.metadata.parser;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -59,10 +61,20 @@ public class SAMLMetadataParser  {
 
         try {
             final Validator validator = schema.newValidator();
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            validator.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             validator.validate(new StreamSource(metadatafile));
 
             final DocumentBuilderFactory docbuilderfactory = DocumentBuilderFactory.newInstance();
             docbuilderfactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",false);
+            docbuilderfactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            docbuilderfactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            docbuilderfactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            docbuilderfactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            docbuilderfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            docbuilderfactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            docbuilderfactory.setXIncludeAware(false);
+            docbuilderfactory.setExpandEntityReferences(false);
             docbuilderfactory.setSchema(schema);
             docbuilderfactory.setNamespaceAware(true);
             final DocumentBuilder docbuilder = docbuilderfactory.newDocumentBuilder();
@@ -72,10 +84,10 @@ public class SAMLMetadataParser  {
 
             if(XPathUtils.entityDescriptorIsDocumentRoot(xpath,doc)) {
                 Node entitydescnode = XPathUtils.entityDescriptorFromParentNode(xpath, doc);
-                parseEntityDescriptor(xpath,entitydescnode,builder.entityDescriptor());
+                parseEntityDescriptor(xpath,entitydescnode,builder.entityDescriptor(),null);
             }else {
                 Node entitiesdescnode = XPathUtils.entitiesDescriptorFromParentNode(xpath, doc);
-                flattenEntitiesDescriptor(xpath, entitiesdescnode,builder);
+                flattenEntitiesDescriptor(xpath, entitiesdescnode,builder,null);
             }
 
             return builder.build();
@@ -87,26 +99,40 @@ public class SAMLMetadataParser  {
     }
 
     private final void flattenEntitiesDescriptor(final XPath xpath, 
-        final Node entitiescdescriptor, final SAMLMetadataBuilder builder) throws XPathExpressionException {
-        
+        final Node entitiescdescriptor, final SAMLMetadataBuilder builder, final Date inheritedValidUntil) throws XPathExpressionException {
+
+        // Children of an EntitiesDescriptor may not outlive its validUntil
+        final Date validUntil = earliest(inheritedValidUntil, XPathUtils.validUntilAttributeValue(xpath, entitiescdescriptor));
+
         NodeList entitydescriptorlist  = XPathUtils.entityDescriptorListFromParentNode(xpath, entitiescdescriptor);
         for(int i=0; i < entitydescriptorlist.getLength(); i++) {
-            parseEntityDescriptor(xpath,entitydescriptorlist.item(i),builder.entityDescriptor());
+            parseEntityDescriptor(xpath,entitydescriptorlist.item(i),builder.entityDescriptor(),validUntil);
         }
 
         NodeList entitiesdescriptorlist = XPathUtils.entitiesDescriptorListFromParentNode(xpath, entitiescdescriptor);
         for(int i=0; i< entitiesdescriptorlist.getLength(); i++) {
-            flattenEntitiesDescriptor(xpath,entitiesdescriptorlist.item(i), builder);
+            flattenEntitiesDescriptor(xpath,entitiesdescriptorlist.item(i), builder, validUntil);
         }
     }
 
+    private static Date earliest(final Date first, final Date second) {
+
+        if(first == null) {
+            return second;
+        }
+        if(second == null) {
+            return first;
+        }
+        return first.before(second) ? first : second;
+    }
+
     private final void parseEntityDescriptor(final XPath xpath, 
-        final Node node,final EntityDescriptorBuilder builder) throws XPathExpressionException {
+        final Node node,final EntityDescriptorBuilder builder, final Date inheritedValidUntil) throws XPathExpressionException {
 
         builder.id(XPathUtils.idAttributeValue(xpath,node))
                .entityId(XPathUtils.entityIDAttributeValue(xpath,node))
                .cacheDuration(XPathUtils.cacheDurationAttributeValue(xpath, node))
-               .validUntil(XPathUtils.validUntilAttributeValue(xpath, node));
+               .validUntil(earliest(inheritedValidUntil, XPathUtils.validUntilAttributeValue(xpath, node)));
         
         NodeList spssodescriptorslist = XPathUtils.roleDescriptorFromParentNode(
                 XPathUtils.RoleDescriptorNodeType.SPSSO_DESCRIPTOR_NODE, xpath, node);

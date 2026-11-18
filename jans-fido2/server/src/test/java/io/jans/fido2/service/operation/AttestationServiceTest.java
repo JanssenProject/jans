@@ -8,6 +8,7 @@ package io.jans.fido2.service.operation;
 
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +42,7 @@ import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -121,6 +123,7 @@ class AttestationServiceTest {
 		registrationData.setUsername("alice");
 		Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
 		when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+		when(registrationEntry.getRegistrationStatus()).thenReturn(Fido2RegistrationStatus.pending);
 		when(registrationPersistenceService.findByChallenge("challenge123")).thenReturn(List.of(registrationEntry));
 
 		return registrationEntry;
@@ -134,6 +137,14 @@ class AttestationServiceTest {
 		return attestationResult;
 	}
 
+	@BeforeEach
+	void allowInterceptionHooks() {
+		when(externalFido2InterceptionService.registerAttestationStart(any(), any())).thenReturn(true);
+		when(externalFido2InterceptionService.registerAttestationFinish(any(), any())).thenReturn(true);
+		when(externalFido2InterceptionService.verifyAttestationStart(any(), any())).thenReturn(true);
+		when(externalFido2InterceptionService.verifyAttestationFinish(any(), any())).thenReturn(true);
+	}
+
 	/**
 	 * The regression case: a failure raised after the in-memory status is set to {@code registered}
 	 * but before {@code registrationPersistenceService.update()} runs (simulated here via
@@ -144,13 +155,14 @@ class AttestationServiceTest {
 	 */
 	@Test
 	void verify_ifFailureOccursAfterStatusSetButBeforePersistence_collectsADenyLockAuditEvent() {
-		Fido2RegistrationEntry registrationEntry = stubHappyPathThroughStatusSet();
+		stubHappyPathThroughStatusSet();
 		when(registrationPersistenceService.getPublicKeyIdHash(any())).thenThrow(new RuntimeException("boom"));
 
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(RuntimeException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(RuntimeException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(registrationPersistenceService, never()).update(any());
@@ -175,7 +187,8 @@ class AttestationServiceTest {
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(RuntimeException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(RuntimeException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(registrationPersistenceService).update(registrationEntry);
@@ -200,7 +213,8 @@ class AttestationServiceTest {
 		try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
 			mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-			assertThrows(Fido2NativeFailureException.class, () -> attestationService.verify(attestationResult()));
+			AttestationResult attestation = attestationResult();
+			assertThrows(Fido2NativeFailureException.class, () -> attestationService.verify(attestation));
 		}
 
 		verify(metricService).recordPasskeyRegistrationFailure(eq("alice"), any(), anyLong(),

@@ -7,8 +7,11 @@
 package io.jans.orm.hybrid.impl;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.event.DeleteNotifier;
+import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.KeyConversionException;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.operation.ConfigurationException;
@@ -416,6 +420,96 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
 
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dnValue);
     	persistenceEntryManager.persist(entry);
+	}
+
+	/**
+	 * True only when every configured backend has an atomic batch. Use
+	 * {@link #isAtomicBatchSupported(String)} for the backend of a given DN.
+	 */
+	@Override
+	public boolean isAtomicBatchSupported() {
+		if (persistenceEntryManagers == null || persistenceEntryManagers.isEmpty()) {
+			return false;
+		}
+
+		for (PersistenceEntryManager persistenceEntryManager : persistenceEntryManagers.values()) {
+			if (!persistenceEntryManager.isAtomicBatchSupported()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean isAtomicBatchSupported(String primaryKey) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+		return persistenceEntryManager.isAtomicBatchSupported(primaryKey);
+	}
+
+	/**
+	 * Delegates the batch to the backend of the entries' DNs. All entries must map to the same backend:
+	 * one transaction cannot span several databases.
+	 *
+	 * @throws InvalidArgumentException entries map to different backends; nothing is stored
+	 */
+	@Override
+	public void persistBatch(List<?> entries) {
+		if (entries == null) {
+			throw new MappingException("Entries to persist are null");
+		}
+		if (entries.isEmpty()) {
+			return;
+		}
+
+		PersistenceEntryManager batchEntryManager = null;
+		String batchDn = null;
+		for (Object entry : entries) {
+			if (entry == null) {
+				throw new MappingException("Entry to persist is null");
+			}
+
+			Object dnValue = getDNValue(entry, entry.getClass());
+			PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dnValue);
+			if (batchEntryManager == null) {
+				batchEntryManager = persistenceEntryManager;
+				batchDn = dnValue.toString();
+			} else if (batchEntryManager != persistenceEntryManager) {
+				throw new InvalidArgumentException(String.format(
+						"Hybrid atomic batch across persistence backends is impossible: entry '%s' maps to '%s', entry '%s' maps to '%s'",
+						batchDn, batchEntryManager.getPersistenceType(), dnValue, persistenceEntryManager.getPersistenceType()));
+			}
+		}
+
+		batchEntryManager.persistBatch(entries);
+	}
+
+	@Override
+	public <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns) {
+		if (dns == null) {
+			throw new MappingException("DNs to find entries are null");
+		}
+
+		Map<PersistenceEntryManager, List<String>> dnsByEntryManager = new LinkedHashMap<>();
+		for (String dn : dns) {
+			PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
+			dnsByEntryManager.computeIfAbsent(persistenceEntryManager, key -> new ArrayList<>()).add(dn);
+		}
+
+		Map<String, T> found = new HashMap<>();
+		for (Entry<PersistenceEntryManager, List<String>> dnsEntry : dnsByEntryManager.entrySet()) {
+			found.putAll(dnsEntry.getKey().findByDns(entryClass, dnsEntry.getValue()));
+		}
+
+		Map<String, T> result = new LinkedHashMap<>();
+		for (String dn : dns) {
+			T entry = found.get(dn);
+			if (entry != null) {
+				result.put(dn, entry);
+			}
+		}
+
+		return result;
 	}
 
 	@Override

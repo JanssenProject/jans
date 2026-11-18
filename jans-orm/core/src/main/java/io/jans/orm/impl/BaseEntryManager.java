@@ -55,6 +55,7 @@ import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.UnsupportedOperationException;
 import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.extension.PersistenceExtension;
+import io.jans.orm.impl.model.PreparedInsert;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
@@ -129,6 +130,20 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	@Override
 	public void persist(Object entry) {
+		PreparedInsert preparedInsert = prepareInsert(entry);
+
+		persist(preparedInsert.getDn(), preparedInsert.getObjectClasses(), preparedInsert.getAttributes(),
+				preparedInsert.getExpiration());
+	}
+
+	/**
+	 * Maps an entry for insert exactly as {@link #persist(Object)} does: checks the entry class,
+	 * initializes the {@code @Version} property when needed (mutating {@code entry}), reads the DN and
+	 * expiration and builds the attribute list with object classes. Backends reuse it for batch inserts.
+	 *
+	 * @throws MappingException {@code entry} is {@code null} or cannot be mapped
+	 */
+	protected PreparedInsert prepareInsert(Object entry) {
 		if (entry == null) {
 			throw new MappingException("Entry to persist is null");
 		}
@@ -154,7 +169,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			LOG.debug(String.format("LDAP attributes for persist: %s", maskSensetiveData(attributes)));
 		}
 
-		persist(dnValue.toString(), objectClasses, attributes, expirationValue);
+		return new PreparedInsert(dnValue.toString(), objectClasses, attributes, expirationValue);
 	}
 
 	protected abstract void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration);

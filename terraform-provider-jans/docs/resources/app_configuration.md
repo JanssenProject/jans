@@ -181,10 +181,10 @@ resource "jans_app_configuration" "global" {
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
-- `grant_types_supported` (List of String) A list of the OAuth 2.0 Grant Type values that this OP supports. One of"none", "authorization_code", 
+- `grant_types_supported` (List of String) A list of the OAuth 2.0 Grant Type values that this OP supports. One of "none", "authorization_code",
                                                         "client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
                                                         "urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
-                                                        "urn:openid:params:grant-type:ciba".
+                                                        "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:jwt-bearer".
 - `grant_types_supported_by_dynamic_registration` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
                                                         registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
                                                         'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.

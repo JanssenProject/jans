@@ -611,10 +611,10 @@ func resourceAppConfiguration() *schema.Resource {
 			"grant_types_supported": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Description: `A list of the OAuth 2.0 Grant Type values that this OP supports. One of"none", "authorization_code", 
+				Description: `A list of the OAuth 2.0 Grant Type values that this OP supports. One of "none", "authorization_code",
                                                         "client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
                                                         "urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
-                                                        "urn:openid:params:grant-type:ciba".`,
+                                                        "urn:openid:params:grant-type:ciba", "urn:ietf:params:oauth:grant-type:jwt-bearer".`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
@@ -630,6 +630,7 @@ func resourceAppConfiguration() *schema.Resource {
 							"urn:ietf:params:oauth:grant-type:token-exchange",
 							"urn:ietf:params:oauth:grant-type:uma-ticket",
 							"urn:openid:params:grant-type:ciba",
+							"urn:ietf:params:oauth:grant-type:jwt-bearer",
 						}
 
 						return validateEnum(v, enums)

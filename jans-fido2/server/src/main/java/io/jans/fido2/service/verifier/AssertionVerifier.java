@@ -104,10 +104,6 @@ public class AssertionVerifier {
         byte[] clientDataHash = digestUtilService.sha256Digest(base64Service.urlDecode(clientDataJson));
  
         try {
-            int counter = authenticatorDataParser.parseCounter(authData.getCounters());
-            commonVerifiers.verifyCounter(registration.getCounter(), counter);
-            registration.setCounter(counter);
-
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
@@ -118,6 +114,11 @@ public class AssertionVerifier {
             }
 
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey,  registration.getSignatureAlgorithm());
+
+            // Counter is trusted only after the signature covering it has been verified
+            int counter = authenticatorDataParser.parseCounter(authData.getCounters());
+            commonVerifiers.verifyCounter(registration.getCounter(), counter);
+            registration.setCounter(counter);
            
         } catch (Fido2CompromisedDevice ex) {
         	throw ex;

@@ -58,7 +58,7 @@ public class AgamaPersistenceService {
                 frEqFilter(sessionId), new String[]{ FlowRun.ATTR_NAMES.STATUS }, 1).get(0);
 
             return fr.getStatus();
-        } catch(Exception e) {
+        } catch (Exception e) {
             return null;
         }
 
@@ -73,7 +73,7 @@ public class AgamaPersistenceService {
             logger.debug("Saving current flow's status");
             pfr.setStatus(fst);
             entryManager.merge(pfr);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
 
@@ -103,7 +103,7 @@ public class AgamaPersistenceService {
                ProtoFlow.class, filth, new String[]{ Flow.ATTR_NAMES.QNAME }, 1);
             return results.size() == 1;
              
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
             logger.warn("Flow '{}' does not seem to exist!", flowName);
             return false;
@@ -149,7 +149,7 @@ public class AgamaPersistenceService {
             }
             
             return fls.get(0);
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
 
@@ -162,7 +162,7 @@ public class AgamaPersistenceService {
         try {
             fr = entryManager.findEntries(AGAMA_FLOWRUNS_BASE, FlowRun.class, frEqFilter(sessionId),
                     new String[] { "agFlowEncCont", "jansCustomMessage" }, 1).get(0);
-        } catch(Exception e) {
+        } catch (Exception e) {
             return null;
         }
 
