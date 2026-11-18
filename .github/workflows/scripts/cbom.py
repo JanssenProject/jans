@@ -3,7 +3,7 @@
 
   cbom.py rust CARGO_LOCK OUT          crypto crates in a Cargo.lock -> CBOM
   cbom.py merge NAME VERSION OUT IN... merge CBOMs into one
-  cbom.py label IN REF [PLATFORM]      tag every finding with the scanned image
+  cbom.py label IN REF [PLATFORM] [INDEX]  tag every finding with the scanned image
   cbom.py stamp IN NAME=VALUE...       set metadata properties
   cbom.py gate IN [OUT]                strip key values, fail on secret material
 """
@@ -89,7 +89,7 @@ def rust(lock_path, out):
 def merge(name, version, out, inputs):
     # Allocated first so an input root carrying the same ref is not duplicated.
     aggregate = f"pkg:github/JanssenProject/jans@{version}#{name}"
-    components, seen, deps = [], {aggregate}, {}
+    components, seen, deps, by_ref = [], {aggregate}, {}, {}
     for path in inputs:
         with open(path) as f:
             doc = json.load(f)
@@ -98,8 +98,15 @@ def merge(name, version, out, inputs):
         for c in ([root] if root and root.get("bom-ref") else []) + doc.get("components", []):
             key = c.get("bom-ref") or json.dumps(c, sort_keys=True)
             if key in seen:
+                # Same finding from another input (e.g. platform): keep its provenance too.
+                kept = by_ref.get(key)
+                if kept is not None:
+                    props = kept.setdefault("properties", [])
+                    props.extend(p for p in c.get("properties", []) if p not in props)
                 continue
             seen.add(key)
+            if c.get("bom-ref"):
+                by_ref[key] = c
             components.append(c)
         for d in doc.get("dependencies", []):
             cur = deps.setdefault(d["ref"], {"ref": d["ref"]})
@@ -116,17 +123,23 @@ def walk(components):
         yield from walk(c.get("components", []))
 
 
-def label(path, image, platform=None):
+def label(path, image, platform="", index=""):
     with open(path) as f:
         doc = json.load(f)
     props = [{"name": "jans:image", "value": image}]
     if platform:
         props.append({"name": "jans:platform", "value": platform})
-    for c in doc.get("components", []):
+    for c in walk(doc.get("components", [])):
         c.setdefault("properties", []).extend(props)
+    meta = doc.setdefault("metadata", {})
+    old = meta.get("component")
+    if old and old.get("bom-ref"):
+        # Keep the scanner's root so its dependency edges still resolve.
+        doc["components"].append(old)
     name, _, digest = image.partition("@")
-    doc.setdefault("metadata", {})["component"] = {"type": "container", "bom-ref": image, "name": name,
-                                                   "version": digest or name, "properties": props}
+    container = {"type": "container", "bom-ref": image, "name": name, "version": digest or name,
+                 "properties": props + ([{"name": "jans:image-index", "value": index}] if index else [])}
+    meta["component"] = container
     write(path, doc)
 
 

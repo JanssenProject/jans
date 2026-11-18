@@ -84,12 +84,13 @@ jobs:
     # Same rewrite "Build: Publish" applies, so a release build resolves that
     # release's io.jans jars (incl. cedarling-java), not 0.0.0-nightly.
     - name: Set release version in poms
-      if: steps.before.outputs.current == 'true' && github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v')
+      if: steps.before.outputs.current == 'true' && github.event_name == 'workflow_run' && github.event.workflow_run.head_branch != 'nightly'
       env:
         RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
       run: |
         set -euo pipefail
-        if [[ ! "${RELEASE_TAG}" =~ ^v[0-9][A-Za-z0-9._-]*$ ]]; then
+        # Same tag rules and version mapping as "Build: Publish".
+        if [[ ! "${RELEASE_TAG}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
           echo "Invalid release tag" >&2; exit 1
         fi
         for m in ${MAVEN_MODULES}; do
@@ -131,7 +132,8 @@ jobs:
           # A newer publish deleting 0.0.0-nightly mid-build fails resolution;
           # that is a superseded scan, not a build failure.
           if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" ]] && \
-             [[ "$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)" != "${HEAD_SHA}" ]]; then
+             LOOKUP_SHA="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)" && \
+             [[ "${LOOKUP_SHA}" =~ ^[0-9a-f]{40}$ && "${LOOKUP_SHA}" != "${HEAD_SHA}" ]]; then
             echo "::notice::${RELEASE_TAG} moved during build; dropping superseded scan"
             exit 0
           fi
@@ -180,10 +182,36 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       list: ${{ steps.list.outputs.list }}
+      digests: ${{ steps.list.outputs.digests }}
     steps:
-    - name: Image list
+    # Digests are resolved once so a partial re-run scans the same images.
+    - name: Resolve image digests
       id: list
-      run: echo 'list=["auth-server","cloudtools","config-api","configurator","fido2","persistence-loader","scim","loadtesting-jmeter","link","casa","all-in-one","shibboleth","cedarling-flask-sidecar","cedarling-opa"]' >> "$GITHUB_OUTPUT"
+      env:
+        IMAGE_TAG: ${{ inputs.image_tag }}
+      run: |
+        set -euo pipefail
+        if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
+          echo "Invalid image_tag" >&2; exit 1
+        fi
+        LIST='["auth-server","cloudtools","config-api","configurator","fido2","persistence-loader","scim","loadtesting-jmeter","link","casa","all-in-one","shibboleth","cedarling-flask-sidecar","cedarling-opa"]'
+        OWNER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+        digests='{}'
+        for i in $(echo "$LIST" | jq -r '.[]'); do
+          REPO_PATH="${OWNER}/${i}"
+          TOKEN="$(curl -sSf "https://ghcr.io/token?scope=repository:${REPO_PATH}:pull" | jq -r .token || true)"
+          d="$(curl -sSfI -H "Authorization: Bearer ${TOKEN}" \
+            -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json' \
+            "https://ghcr.io/v2/${REPO_PATH}/manifests/${IMAGE_TAG}" \
+            | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}' || true)"
+          if [[ "$d" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            digests="$(echo "$digests" | jq -c --arg k "$i" --arg v "$d" '. + {($k): $v}')"
+          else
+            echo "::warning::cannot resolve ghcr.io/${REPO_PATH}:${IMAGE_TAG}"
+          fi
+        done
+        echo "list=${LIST}" >> "$GITHUB_OUTPUT"
+        echo "digests=${digests}" >> "$GITHUB_OUTPUT"
 
   image-cbom:
     needs: images
@@ -222,22 +250,19 @@ jobs:
       env:
         IMAGE_TAG: ${{ inputs.image_tag }}
         IMAGE: ${{ matrix.image }}
+        DIGEST: ${{ fromJSON(needs.images.outputs.digests)[matrix.image] }}
       run: |
         set -euo pipefail
-        if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9_.-]{1,128}$ ]]; then
-          echo "Invalid image_tag" >&2; exit 1
+        if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+          echo "::error::no resolved digest for ${IMAGE}:${IMAGE_TAG}"; exit 1
         fi
         S=.github/workflows/scripts/cbom.py
         REPO_PATH="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')/${IMAGE}"
         NAME="ghcr.io/${REPO_PATH}"
         TOKEN="$(curl -sSf "https://ghcr.io/token?scope=repository:${REPO_PATH}:pull" | jq -r .token)"
-        curl -sSf -D headers.txt -o manifest.json -H "Authorization: Bearer ${TOKEN}" \
+        curl -sSf -o manifest.json -H "Authorization: Bearer ${TOKEN}" \
           -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json' \
-          "https://ghcr.io/v2/${REPO_PATH}/manifests/${IMAGE_TAG}"
-        DIGEST="$(tr -d '\r' < headers.txt | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
-        if [[ ! "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
-          echo "::error::cannot resolve ${NAME}:${IMAGE_TAG}"; exit 1
-        fi
+          "https://ghcr.io/v2/${REPO_PATH}/manifests/${DIGEST}"
         # Index: one entry per runnable platform (attestations are unknown/unknown).
         jq -r --arg d "$DIGEST" 'if .manifests then .manifests[]
             | select(.platform.os != "unknown")
@@ -256,15 +281,11 @@ jobs:
               < /dev/null > "raw-${n}.json" 2>/dev/null; then
             echo "::error::cbomkit-theia failed on ${REF}"; exit 1
           fi
-          if [ "$platform" = "single" ]; then
-            python3 "$S" label "raw-${n}.json" "${REF}"
-          else
-            python3 "$S" label "raw-${n}.json" "${REF}" "${platform}"
-          fi
+          [ "$platform" = "single" ] && platform=""
+          python3 "$S" label "raw-${n}.json" "${REF}" "${platform}" "${NAME}@${DIGEST}"
           python3 "$S" gate "raw-${n}.json" "scans/${n}.json"
         done < targets.txt
         python3 "$S" merge "${IMAGE}" "${IMAGE_TAG}" "image-${IMAGE}.cbom.json" scans/*.json
-        python3 "$S" stamp "image-${IMAGE}.cbom.json" "jans:image-index=${NAME}@${DIGEST}"
 
     - name: Upload image CBOM
       uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -359,7 +380,7 @@ jobs:
     - name: Resolve version
       id: ver
       run: |
-        if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" && "${RELEASE_TAG}" =~ ^v[0-9] ]]; then
+        if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" && "${RELEASE_TAG}" != "nightly" ]]; then
           echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
         else
           echo "version=0.0.0-nightly" >> "$GITHUB_OUTPUT"
@@ -441,6 +462,7 @@ jobs:
         API="repos/${GITHUB_REPOSITORY}/releases"
         rid="$(gh api "${API}/tags/${RELEASE_TAG}" --jq .id)"
         asset_ids() { gh api --paginate "${API}/${rid}/assets" --jq ".[] | select(.name == \"$1\") | .id"; }
+        retry() { for t in 1 2 3 4 5; do "$@" && return 0; sleep $((t * 5)); done; return 1; }
         for n in jans-cbom.next.json jans-cbom.next.json.bundle; do
           for id in $(asset_ids "$n"); do gh api -X DELETE "${API}/assets/${id}"; done
         done
@@ -450,10 +472,12 @@ jobs:
         new="$(gh api --paginate --slurp "${API}/${rid}/assets" \
           | jq '[.[][] | select(.state == "uploaded" and (.name == "jans-cbom.next.json" or .name == "jans-cbom.next.json.bundle"))] | length')"
         if [ "${new}" != "2" ]; then echo "::error::staged CBOM pair not uploaded" >&2; exit 1; fi
+        # Promote from the verified staged IDs, retrying each call, so a transient
+        # error cannot leave only half of the canonical pair.
+        staged_json="$(asset_ids jans-cbom.next.json)"
+        staged_bundle="$(asset_ids jans-cbom.next.json.bundle)"
         for n in jans-cbom.json jans-cbom.json.bundle; do
-          for id in $(asset_ids "$n"); do gh api -X DELETE "${API}/assets/${id}"; done
+          for id in $(asset_ids "$n"); do retry gh api -X DELETE "${API}/assets/${id}"; done
         done
-        for n in jans-cbom.json jans-cbom.json.bundle; do
-          id="$(asset_ids "${n/jans-cbom./jans-cbom.next.}")"
-          gh api -X PATCH "${API}/assets/${id}" -f name="${n}" --silent
-        done
+        retry gh api -X PATCH "${API}/assets/${staged_json}" -f name=jans-cbom.json --silent
+        retry gh api -X PATCH "${API}/assets/${staged_bundle}" -f name=jans-cbom.json.bundle --silent
