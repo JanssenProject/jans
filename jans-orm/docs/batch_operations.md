@@ -9,6 +9,13 @@ default void persistBatch(List<?> entries);
 default <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns);
 ```
 
+### When to use
+
+Use `persistBatch` for many inserts that must commit together, such as the receipt rows and record rows of one
+Lock TRACE bulk request. It is not a general transaction API: it only inserts, it cannot update, delete or
+read inside the transaction, and the batch is the only unit of atomicity. For inserts that can succeed or fail
+one by one, use `persist`.
+
 ### SQL only
 
 Only the SQL backend implements `persistBatch` for real. On LDAP, Couchbase and Spanner
@@ -56,7 +63,7 @@ The fallback is not atomic. Use it only when the caller can handle a partial wri
 - **Size limit.** A batch has at most `SqlOperationService.MAX_BATCH_INSERT_SIZE` (1000) entries; a larger
   batch is rejected with `InvalidArgumentException` before any database call. All mapped entries and
   their converted values stay in memory until the commit, and the transaction keeps its row locks until
-  then, so keep batches small (Lock uses at most 100 records per bulk request).
+  then, so keep batches small (Lock limits a bulk request to `maxBulkRecords` records, 100 by default).
 - **Duplicates.** A unique key violation is SQLState `23505` on PostgreSQL and SQLState `23000` with
   error code `1062` on MySQL/MariaDB. It applies to an existing row and to the same DN twice in one
   batch. `DuplicateEntryException.getDn()` is the failing DN when the driver message names the

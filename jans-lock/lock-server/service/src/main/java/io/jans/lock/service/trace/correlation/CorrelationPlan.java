@@ -39,17 +39,30 @@ public final class CorrelationPlan {
 
 	private final List<StoredTraceRecord> successors;
 
+	private final List<StoredTraceRecord> positionRows;
+
 	private final List<String> warnings;
 
 	public CorrelationPlan(IngestionFlags flags, ChainPosition position, ExecutionIdentity execution,
 			List<String> tokenKeys, List<RecordIdentity> equivocationPeers,
 			List<StoredTraceRecord> successors, List<String> warnings) {
+		this(flags, position, execution, tokenKeys, equivocationPeers, successors, Collections.emptyList(), warnings);
+	}
+
+	/**
+	 * @param positionRows the records at {@code position} when the plan was made; a successor's
+	 *                     link is judged against them when the rows after the insert cannot be read
+	 */
+	public CorrelationPlan(IngestionFlags flags, ChainPosition position, ExecutionIdentity execution,
+			List<String> tokenKeys, List<RecordIdentity> equivocationPeers, List<StoredTraceRecord> successors,
+			List<StoredTraceRecord> positionRows, List<String> warnings) {
 		this.flags = new IngestionFlags(Objects.requireNonNull(flags, "flags"));
 		this.position = Objects.requireNonNull(position, "position");
 		this.execution = Objects.requireNonNull(execution, "execution");
 		this.tokenKeys = unmodifiable(tokenKeys);
 		this.equivocationPeers = unmodifiable(equivocationPeers);
 		this.successors = unmodifiable(successors);
+		this.positionRows = unmodifiable(positionRows);
 		this.warnings = unmodifiable(warnings);
 	}
 
@@ -90,6 +103,11 @@ public final class CorrelationPlan {
 	 */
 	public List<StoredTraceRecord> getSuccessors() {
 		return successors;
+	}
+
+	/** @return the records at {@link #getPosition()} when the plan was made */
+	public List<StoredTraceRecord> getPositionRows() {
+		return positionRows;
 	}
 
 	/**
