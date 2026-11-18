@@ -18,7 +18,7 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
-| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | workflow artifact only — CONFIDENTIAL, not attached to the public release |
+| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | age-encrypted workflow artifact only — CONFIDENTIAL, not attached to the public release |
 
 ## Pen-test (DAST)
 
@@ -73,16 +73,20 @@ Flow:
    assessment-coverage table (findings per dimension), a findings register (with a
    Backend column), detailed write-ups with recommendations for medium+ findings,
    and appendices for run metadata and the SBOM component inventory. All formats
-   are uploaded **only** as a workflow artifact (30-day retention) — the report is
-   CONFIDENTIAL and is never attached to the public release; GitHub Actions
-   artifacts restrict access to users with repository access. The PDF and a link to
-   the run are also posted to Zulip (`#bot_reporter`, topic `pen-test`) when
-   `ZULIP_API_KEY` is set.
+   are uploaded **only** as an age-encrypted workflow artifact
+   (`pentest-report.tar.gz.age`, 30-day retention) — the report is CONFIDENTIAL and
+   is never attached to the public release. Artifacts and run logs of a public repo
+   are readable by any signed-in GitHub user, so raw scanner output and target logs
+   are encrypted too, and scanner stdout goes to files inside them, not the log. The
+   PDF and a link to the run are also posted to Zulip (`#bot_reporter`, topic
+   `pen-test`) when `ZULIP_API_KEY` is set.
 
 ### Configuration
 
 | Secret / Var | Required | Use |
 |---|---|---|
+| `PENTEST_AGE_KEY` (secret) | **required** | age identity; artifacts are encrypted to its public key. Without it the run fails before scanning |
+| `PENTEST_AGE_RECIPIENTS` (var) | optional | extra age recipients, one per line; must be the same kind as the key (PQ or classic) |
 | `PENTEST_AI_ENDPOINT` (secret) | optional | Messages API URL, e.g. `https://api.anthropic.com/v1/messages`; step skipped if unset |
 | `PENTEST_AI_TOKEN` (secret) | optional | API key, sent as the `x-api-key` header |
 | `PENTEST_AI_MODEL` (var) | optional | model id (default `claude-opus-5`) |
@@ -94,3 +98,12 @@ ingested context as a single user message with a system prompt instructing the
 model to return `{ "findings": [...] }`, then parses `.content[0].text`. Set
 `PENTEST_AI_MODEL` / `PENTEST_AI_API_VERSION` repository variables to override the
 defaults.
+
+To read a report, download `pentest-report` from the run and decrypt it:
+
+```bash
+age -d -i key.txt pentest-report.tar.gz.age | tar xz
+```
+
+Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid); store the
+whole file as `PENTEST_AGE_KEY` and keep a copy with the security team.
