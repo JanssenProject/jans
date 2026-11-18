@@ -19,6 +19,8 @@ from java.lang import System
 
 # Written to the invalid-login count attribute by lockUser: only inactive users carrying it are unlocked
 LOCK_MARKER_PREFIX = "locked:"
+# Max gap between the marker time and the updatedAt that updateUser stamps on the lock write
+LOCK_WRITE_SLACK_MILLIS = 5000
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -91,7 +93,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 
             if logged_in:
-                self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
+                self.setInvalidLoginCount(user_name, StringHelper.toString(0))
             else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
                 userSatus = self.getUserStatus(user_name)
@@ -114,7 +116,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     logged_in = authenticationService.authenticate(user_name, user_password)
                     if not logged_in:
-                        self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(1))
+                        self.setInvalidLoginCount(user_name, StringHelper.toString(1))
                         if self.maximumInvalidLoginAttemps == 1:
                             self.lockUser(user_name)
                     return logged_in
@@ -127,7 +129,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     print "Remaining login count attempts '%s' for user '%s'" % ( remainingAttempts, user_name )
 
-                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(countInvalidLogin))
+                    self.setInvalidLoginCount(user_name, StringHelper.toString(countInvalidLogin))
                     if remainingAttempts > 0 and userSatus == "active":
                         facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
 
@@ -193,7 +195,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return attribute_value
 
-    def setUserAttributeValue(self, user_name, attribute_name, attribute_value):
+    def setInvalidLoginCount(self, user_name, count):
         if StringHelper.isEmpty(user_name):
             return None
 
@@ -202,11 +204,17 @@ class PersonAuthentication(PersonAuthenticationType):
         find_user_by_uid = userService.getUser(user_name)
         if find_user_by_uid is None:
             return None
-        
-        userService.setCustomAttribute(find_user_by_uid, attribute_name, attribute_value)
+
+        # A concurrent request may have locked the user since the caller read it: keep that lock's marker
+        current = userService.getCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute)
+        if find_user_by_uid.getStatus() == GluuStatus.INACTIVE and current is not None and self.getLockTime(current.getValue()) is not None:
+            print "Basic (lock account). Set invalid login count. User '%s' is locked, count not updated" % user_name
+            return None
+
+        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, count)
         updated_user = userService.updateUser(find_user_by_uid)
 
-        print "Basic (lock account). Set user attribute. User's '%s' attribute '%s' value is '%s'" % (user_name, attribute_name, attribute_value)
+        print "Basic (lock account). Set invalid login count. User '%s' count is '%s'" % (user_name, count)
 
         return updated_user
 
@@ -257,6 +265,13 @@ class PersonAuthentication(PersonAuthenticationType):
         current_marker = None if current is None else current.getValue()
         if find_user_by_uid.getStatus() != GluuStatus.INACTIVE or current_marker != expected_marker:
             print "Basic (lock account). Unlock user. Lock of user '%s' changed, not unlocking" % user_name
+            return False
+
+        # Every UserService.updateUser (config-api, SCIM, admin UI) stamps updatedAt, and the script does
+        # not write a locked user, so a later updatedAt means an administrator changed the user while locked
+        updated_at = find_user_by_uid.getUpdatedAt()
+        if updated_at is None or abs(updated_at.getTime() - self.getLockTime(expected_marker)) > LOCK_WRITE_SLACK_MILLIS:
+            print "Basic (lock account). Unlock user. User '%s' was modified after the lock, not unlocking" % user_name
             return False
 
         find_user_by_uid.setStatus(GluuStatus.ACTIVE)

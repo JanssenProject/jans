@@ -325,9 +325,9 @@ def behavior_tests(run, scripts):
         client = aio.register_client()
         for _ in range(4):
             assert not aio.login(client, lock_acr, off_uid, "wrong-" + password), "wrong password accepted"
-        status = (aio.get_user(off_inum) or {}).get("jansStatus")
-        assert status == "inactive", f"jansStatus={status!r}: failed logins reactivated an admin-disabled account"
         assert not aio.login(client, lock_acr, off_uid, password), "admin-disabled account logs in"
+        status = (aio.get_user(off_inum) or {}).get("jansStatus")
+        assert status == "inactive", f"jansStatus={status!r}: logins reactivated an admin-disabled account"
 
     behavior(run, "ScriptCatalog.behavior", "introspection_custom_params.py returns public sid", introspection_sid)
     behavior(run, "ScriptCatalog.behavior", "TokenExchange.java keeps built-in validation", token_exchange)
