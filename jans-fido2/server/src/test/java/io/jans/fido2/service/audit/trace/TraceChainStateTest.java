@@ -54,15 +54,26 @@ class TraceChainStateTest {
     }
 
     private static ObjectNode unsignedRecord() {
-        ObjectNode record = MAPPER.createObjectNode();
-        record.put("record_id", UUID.randomUUID().toString());
-        record.put("ceremony_outcome", "SUCCESS");
-        record.putObject("producer_chain").put("producer_id", "fido2-test");
-        return record;
+        ObjectNode payload = MAPPER.createObjectNode();
+        payload.put("record_id", UUID.randomUUID().toString());
+        payload.put("ceremony_outcome", "SUCCESS");
+        payload.putObject("producer_chain").put("producer_id", "fido2-test");
+        return payload;
+    }
+
+    private static ObjectNode signNew(TraceChainState state) {
+        return state.signAndAdvance(unsignedRecord());
     }
 
     private static String hashOf(ObjectNode signed) {
         return TraceHashes.sha256Prefixed(TraceCanonicalizer.canonicalBytes(signed));
+    }
+
+    private static void writeOrFail(AtomicBoolean failWrites, Path target, byte[] bytes) throws IOException {
+        if (failWrites.get()) {
+            throw new IOException("simulated crash during write");
+        }
+        TraceChainState.writeAtomically(target, bytes);
     }
 
     private TraceChainState open(Path file) {
@@ -73,7 +84,7 @@ class TraceChainStateTest {
     void firstRecordIsGenesisWithZeroPrevHash() {
         TraceChainState state = open(dir.resolve("chain.json"));
 
-        ObjectNode signed = state.signAndAdvance(unsignedRecord());
+        ObjectNode signed = signNew(state);
 
         ObjectNode chain = (ObjectNode) signed.get("producer_chain");
         assertEquals(1, chain.get("sequence_number").asLong());
@@ -103,7 +114,7 @@ class TraceChainStateTest {
         try {
             List<Future<ObjectNode>> futures = new ArrayList<>();
             for (int i = 0; i < total; i++) {
-                futures.add(pool.submit(() -> state.signAndAdvance(unsignedRecord())));
+                futures.add(pool.submit(() -> signNew(state)));
             }
             List<ObjectNode> bySequence = new ArrayList<>();
             for (Future<ObjectNode> f : futures) {
@@ -113,10 +124,10 @@ class TraceChainStateTest {
 
             String expectedPrev = TraceChainState.ZERO_HASH;
             for (int i = 0; i < total; i++) {
-                ObjectNode record = bySequence.get(i);
-                assertEquals(i + 1, seq(record));
-                assertEquals(expectedPrev, record.get("producer_chain").get("prev_record_hash").asText());
-                expectedPrev = hashOf(record);
+                ObjectNode signed = bySequence.get(i);
+                assertEquals(i + 1, seq(signed));
+                assertEquals(expectedPrev, signed.get("producer_chain").get("prev_record_hash").asText());
+                expectedPrev = hashOf(signed);
             }
             assertEquals(total + 1, state.getNextSequence());
         } finally {
@@ -130,11 +141,11 @@ class TraceChainStateTest {
         TraceChainState first = open(file);
         ObjectNode last = null;
         for (int i = 0; i < 3; i++) {
-            last = first.signAndAdvance(unsignedRecord());
+            last = signNew(first);
         }
 
         TraceChainState restarted = open(file);
-        ObjectNode next = restarted.signAndAdvance(unsignedRecord());
+        ObjectNode next = signNew(restarted);
 
         assertEquals(first.getChainId(), restarted.getChainId());
         assertEquals(4, seq(next));
@@ -148,7 +159,7 @@ class TraceChainStateTest {
         Files.write(file, "not json".getBytes("UTF-8"));
 
         TraceChainState state = open(file);
-        ObjectNode signed = state.signAndAdvance(unsignedRecord());
+        ObjectNode signed = signNew(state);
 
         assertEquals(1, seq(signed));
         assertEquals(TraceChainState.ZERO_HASH, signed.get("producer_chain").get("prev_record_hash").asText());
@@ -159,7 +170,7 @@ class TraceChainStateTest {
     void unusableStateStartsNewChainAndLinksToPreviousChain() throws IOException {
         Path file = dir.resolve("chain.json");
         TraceChainState original = open(file);
-        original.signAndAdvance(unsignedRecord());
+        signNew(original);
         String oldChainId = original.getChainId();
 
         // Same node, but the stored hash is malformed, so the state cannot be resumed.
@@ -168,8 +179,8 @@ class TraceChainStateTest {
         Files.write(file, MAPPER.writeValueAsBytes(broken));
 
         TraceChainState restarted = open(file);
-        ObjectNode genesis = restarted.signAndAdvance(unsignedRecord());
-        ObjectNode second = restarted.signAndAdvance(unsignedRecord());
+        ObjectNode genesis = signNew(restarted);
+        ObjectNode second = signNew(restarted);
 
         assertNotEquals(oldChainId, restarted.getChainId());
         assertEquals(1, seq(genesis));
@@ -182,18 +193,18 @@ class TraceChainStateTest {
     void signerFailureLeavesStateUnchanged() {
         Path file = dir.resolve("chain.json");
         TraceChainState good = open(file);
-        ObjectNode genesis = good.signAndAdvance(unsignedRecord());
+        ObjectNode genesis = signNew(good);
         String chainId = good.getChainId();
 
         // An RSA key cannot sign Ed25519, so the signer throws.
         PrivateKey rsa = rsaKey();
         TraceChainState failing = new TraceChainState(file, NODE, new TraceSigner(rsa));
-        assertThrows(IllegalStateException.class, () -> failing.signAndAdvance(unsignedRecord()));
+        assertThrows(IllegalStateException.class, () -> signNew(failing));
         assertEquals(2, failing.getNextSequence());
 
         // Restart from disk: the chain is still at sequence 2 and links to the genesis record.
         TraceChainState restarted = open(file);
-        ObjectNode next = restarted.signAndAdvance(unsignedRecord());
+        ObjectNode next = signNew(restarted);
         assertEquals(chainId, restarted.getChainId());
         assertEquals(2, seq(next));
         assertEquals(hashOf(genesis), next.get("producer_chain").get("prev_record_hash").asText());
@@ -203,29 +214,24 @@ class TraceChainStateTest {
     void persistFailureReleasesNoRecordAndRestartReissuesTheSequence() {
         Path file = dir.resolve("chain.json");
         AtomicBoolean failWrites = new AtomicBoolean(false);
-        TraceChainState.StateWriter flaky = (target, bytes) -> {
-            if (failWrites.get()) {
-                throw new IOException("simulated crash during write");
-            }
-            TraceChainState.writeAtomically(target, bytes);
-        };
+        TraceChainState.StateWriter flaky = (target, bytes) -> writeOrFail(failWrites, target, bytes);
         TraceChainState state = new TraceChainState(file, NODE, new TraceSigner(ed25519Key), flaky);
-        state.signAndAdvance(unsignedRecord());
-        ObjectNode second = state.signAndAdvance(unsignedRecord());
+        signNew(state);
+        ObjectNode second = signNew(state);
 
         failWrites.set(true);
-        assertThrows(IllegalStateException.class, () -> state.signAndAdvance(unsignedRecord()));
+        assertThrows(IllegalStateException.class, () -> signNew(state));
         assertEquals(3, state.getNextSequence());
 
         // After restart the same sequence number is produced again, and it links to record 2.
         TraceChainState restarted = open(file);
-        ObjectNode reissued = restarted.signAndAdvance(unsignedRecord());
+        ObjectNode reissued = signNew(restarted);
         assertEquals(3, seq(reissued));
         assertEquals(hashOf(second), reissued.get("producer_chain").get("prev_record_hash").asText());
     }
 
-    private static long seq(ObjectNode record) {
-        return record.get("producer_chain").get("sequence_number").asLong();
+    private static long seq(ObjectNode signed) {
+        return signed.get("producer_chain").get("sequence_number").asLong();
     }
 
     private static PrivateKey rsaKey() {

@@ -41,6 +41,17 @@ public final class TraceChainState {
 
     static final String ZERO_HASH = "sha256:" + "0".repeat(64);
 
+    private static final String PRODUCER_CHAIN = "producer_chain";
+    private static final String PRODUCER_CHAIN_ID = "producer_chain_id";
+    private static final String SEQUENCE_NUMBER = "sequence_number";
+    private static final String PREV_RECORD_HASH = "prev_record_hash";
+    private static final String CHAIN_LINK = "chain_link";
+    private static final String PREV_PRODUCER_CHAIN_ID = "prev_producer_chain_id";
+    private static final String SIGNATURE = "signature";
+    private static final String NODE_ID = "node_id";
+    private static final String NEXT_SEQUENCE = "next_sequence";
+    private static final String CHAIN_LINK_PREVIOUS = "chain_link_previous";
+
     private static final Pattern SHA256_PREFIXED = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -85,24 +96,24 @@ public final class TraceChainState {
      * prev_record_hash, and chain_link on a genesis record when known) and signature. The caller's producer_id and
      * producer_instance_id are kept.
      *
-     * @param record unsigned record; it is not modified
+     * @param unsigned unsigned record; it is not modified
      * @return a signed copy of the record
      * @throws IllegalStateException if signing or persisting fails; the chain does not advance
      */
-    public synchronized ObjectNode signAndAdvance(ObjectNode record) {
-        ObjectNode signed = record.deepCopy();
-        signed.remove("signature");
-        ObjectNode chain = signed.with("producer_chain");
-        chain.put("producer_chain_id", chainId);
-        chain.put("sequence_number", nextSequence);
-        chain.put("prev_record_hash", prevRecordHash);
+    public synchronized ObjectNode signAndAdvance(ObjectNode unsigned) {
+        ObjectNode signed = unsigned.deepCopy();
+        signed.remove(SIGNATURE);
+        ObjectNode chain = chainOf(signed);
+        chain.put(PRODUCER_CHAIN_ID, chainId);
+        chain.put(SEQUENCE_NUMBER, nextSequence);
+        chain.put(PREV_RECORD_HASH, prevRecordHash);
         if (nextSequence == 1 && chainLinkPrevious != null) {
-            chain.putObject("chain_link").put("prev_producer_chain_id", chainLinkPrevious);
+            chain.putObject(CHAIN_LINK).put(PREV_PRODUCER_CHAIN_ID, chainLinkPrevious);
         } else {
-            chain.remove("chain_link");
+            chain.remove(CHAIN_LINK);
         }
 
-        signed.put("signature", signer.sign(signed));
+        signed.put(SIGNATURE, signer.sign(signed));
         String digest = TraceHashes.sha256Prefixed(TraceCanonicalizer.canonicalBytes(signed));
 
         // Persist first. Memory advances only after the file is written.
@@ -123,18 +134,24 @@ public final class TraceChainState {
         return nextSequence;
     }
 
+    /** Returns the producer_chain object of the record, creating it when absent or not an object. */
+    private static ObjectNode chainOf(ObjectNode record) {
+        JsonNode existing = record.get(PRODUCER_CHAIN);
+        return existing instanceof ObjectNode ? (ObjectNode) existing : record.putObject(PRODUCER_CHAIN);
+    }
+
     private void load() {
         JsonNode saved = readSaved();
-        boolean sameNode = saved != null && nodeId.equals(text(saved, "node_id"));
+        boolean sameNode = saved != null && nodeId.equals(text(saved, NODE_ID));
         if (sameNode && isUsable(saved)) {
-            chainId = text(saved, "producer_chain_id");
-            nextSequence = saved.get("next_sequence").asLong();
-            prevRecordHash = text(saved, "prev_record_hash");
-            chainLinkPrevious = text(saved, "chain_link_previous");
+            chainId = text(saved, PRODUCER_CHAIN_ID);
+            nextSequence = saved.get(NEXT_SEQUENCE).asLong();
+            prevRecordHash = text(saved, PREV_RECORD_HASH);
+            chainLinkPrevious = text(saved, CHAIN_LINK_PREVIOUS);
             return;
         }
         // Unusable state: start a new chain. Link to the previous one only when it is still known for this node.
-        String previous = sameNode ? text(saved, "producer_chain_id") : null;
+        String previous = sameNode ? text(saved, PRODUCER_CHAIN_ID) : null;
         chainId = "chain-" + UUID.randomUUID();
         nextSequence = 1;
         prevRecordHash = ZERO_HASH;
@@ -154,9 +171,9 @@ public final class TraceChainState {
     }
 
     private static boolean isUsable(JsonNode saved) {
-        String id = text(saved, "producer_chain_id");
-        JsonNode next = saved.get("next_sequence");
-        String prev = text(saved, "prev_record_hash");
+        String id = text(saved, PRODUCER_CHAIN_ID);
+        JsonNode next = saved.get(NEXT_SEQUENCE);
+        String prev = text(saved, PREV_RECORD_HASH);
         if (id == null || id.isEmpty() || next == null || !next.canConvertToLong() || next.asLong() < 1) {
             return false;
         }
@@ -173,12 +190,12 @@ public final class TraceChainState {
 
     private void persist(String chain, long next, String prev, String link) {
         ObjectNode state = MAPPER.createObjectNode();
-        state.put("node_id", nodeId);
-        state.put("producer_chain_id", chain);
-        state.put("next_sequence", next);
-        state.put("prev_record_hash", prev);
+        state.put(NODE_ID, nodeId);
+        state.put(PRODUCER_CHAIN_ID, chain);
+        state.put(NEXT_SEQUENCE, next);
+        state.put(PREV_RECORD_HASH, prev);
         if (link != null) {
-            state.put("chain_link_previous", link);
+            state.put(CHAIN_LINK_PREVIOUS, link);
         }
         try {
             writer.write(stateFile, MAPPER.writeValueAsBytes(state));
