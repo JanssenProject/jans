@@ -68,7 +68,7 @@ public class Util {
 
         if(log.isInfoEnabled()) {
             log.info("final tokenized list:{}", escapeLog(Collections.list(new StringTokenizer(str, tokenizer)).stream()
-                .map(token -> (String) token).collect(Collectors.toList())));
+                .map(String.class::cast).collect(Collectors.toList())));
         }
 
         return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)

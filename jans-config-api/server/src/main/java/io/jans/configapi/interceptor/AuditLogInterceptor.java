@@ -72,12 +72,14 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             String method = request.getMethod();
-            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}, ignoreAnnotation(method, auditLogConf):{}", method, ignoreHttpMethod(method, auditLogConf), ignoreAnnotation(method, auditLogConf));
+            LOG.trace(" method:{}, ignoreMethod(method, auditLogConf):{}, ignoreAnnotation(method, auditLogConf):{}",
+                    method, ignoreHttpMethod(method, auditLogConf), ignoreAnnotation(method, auditLogConf));
 
             // Log if enabled
             if (auditLogConf.isEnabled() && !ignoreHttpMethod(method, auditLogConf)) {
 
-                // Actor comes from the validated token; caller-supplied headers are recorded as unverified labels
+                // Actor comes from the validated token; caller-supplied headers are recorded as
+                // unverified labels
                 String subject = getRequestAttribute(request, ApiConstants.AUTHENTICATED_SUBJECT_ATTRIBUTE);
                 String clientId = getRequestAttribute(request, ApiConstants.AUTHENTICATED_CLIENT_ATTRIBUTE);
                 String client = httpHeaders.getHeaderString("jans-client");
@@ -126,10 +128,9 @@ public class AuditLogInterceptor {
 
                 Object obj = ctxParameters[i];
                 if (obj != null && !isAuthorizationParameter(parameters[i]) && !isTokenCodeParameter(parameters[i])
-                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)) {
-                    if(AUDIT_LOG.isErrorEnabled()) {
-                        AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
-                    }
+                        && !containsSensitiveData(obj) && !ignoreObject(propertyName, obj, auditLogConf)
+                        && AUDIT_LOG.isErrorEnabled()) {
+                    AUDIT_LOG.error("{}:{}", propertyName, escapeLog(obj));
                 }
             }
         }
@@ -174,8 +175,8 @@ public class AuditLogInterceptor {
     }
 
     private boolean ignoreAnnotation(String resourceMethod, AuditLogConf auditLogConf) {
-        LOG.trace("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}",
-                resourceMethod, auditLogConf);
+        LOG.trace("Checking if resource method to be ignored - resourceMethod:{}, auditLogConf:{}", resourceMethod,
+                auditLogConf);
 
         if (StringUtils.isBlank(resourceMethod) || auditLogConf == null || auditLogConf.getIgnoreAnnotation() == null
                 || auditLogConf.getIgnoreAnnotation().isEmpty()) {
@@ -195,8 +196,9 @@ public class AuditLogInterceptor {
             return false;
         }
 
-        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream().filter(e -> (e!=null && e.getName()!=null && e.getName().equalsIgnoreCase(objectName)))
-                .findFirst().orElse(null);
+        ObjectDetails objectDetails = auditLogConf.getIgnoreObjectMapping().stream()
+                .filter(e -> (e != null && e.getName() != null && e.getName().equalsIgnoreCase(objectName))).findFirst()
+                .orElse(null);
 
         if (objectDetails == null) {
             return false;
