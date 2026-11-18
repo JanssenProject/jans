@@ -18,7 +18,7 @@ Workflows are named `<domain>-<purpose>.yml` with a matching `name:` field:
 |---|---|
 | `build-` | produce/publish artifacts (Maven, containers, packages, docs, sandbox) |
 | `test-` | acceptance/integration/unit tests |
-| `scan-` | security & quality scanning (CodeQL, Sonar, Scorecard, Dependency Review, SBOM, pen-test) |
+| `scan-` | security & quality scanning (CodeQL, Sonar, Scorecard, Dependency Review, SBOM, CBOM, pen-test) |
 | `release-` | release orchestration (bump/tag, backport, crates.io) |
 | `ci-` / `lint-` | PR gate checks and linters |
 | `ops-` | repository automation and housekeeping |

@@ -47,6 +47,7 @@ One row per workflow under `.github/workflows/`. See
 | `scan-sonar.yml` | push/PR, dispatch | SonarCloud quality/security scan per module. |
 | `scan-scorecard.yml` | push main, weekly | OpenSSF Scorecard. |
 | `scan-sbom.yml` | tag `v**`/`nightly` | enriched SBOM + compliance reports to release assets. |
+| `scan-cbom.yml` | tag `v**`/`nightly`, dispatch | signed CBOM (crypto inventory) to release assets; image CBOM on dispatch. |
 | `scan-pentest.yml` | dispatch from `build-docker-images` at the nightly/`v**` ref (with that ref's AIO image), or manual | full DAST pen-test against the live AIO for each persistence backend (MYSQL, PGSQL); one consolidated report (report-only). |
 
 ## Ops

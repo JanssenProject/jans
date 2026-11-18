@@ -18,7 +18,29 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
+| CBOM (cbomkit) | `scan-cbom.yml` | crypto algorithms, protocols, certs, keys | signed CycloneDX 1.6 JSON | release asset `jans-cbom.json`; image CBOM workflow artifact only |
 | Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | workflow artifact only — CONFIDENTIAL, not attached to the public release |
+
+## CBOM
+
+`scan-cbom.yml` produces a cryptographic bill of materials (CycloneDX 1.6) for
+post-quantum readiness reviews.
+
+- **Source** (tag `v**`/`nightly`): builds the Maven modules, then
+  [cbomkit-action](https://github.com/cbomkit/cbomkit-action) scans Java, Python
+  and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
+  so `scripts/cbom.py rust` maps the crypto crates in `jans-cedarling/Cargo.lock`
+  to the algorithms they provide. Both merge into `jans-cbom.json`, which is
+  cosign-signed and attached to the release.
+- **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
+  scans each published image for certificates, keys, secrets and OpenSSL config.
+  OS and library CA bundles are skipped. Output is a workflow artifact
+  (`jans-image-cbom.json`), not a release asset, until reviewed.
+
+`scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
+fails the job if it finds private keys, secret keys, passwords, credentials or
+tokens, printing only the type and file path. theia stderr is discarded because
+it can echo scanned file contents into the public run log.
 
 ## Pen-test (DAST)
 
