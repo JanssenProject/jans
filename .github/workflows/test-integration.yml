@@ -447,6 +447,21 @@ jobs:
           scp -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -r "root@$IP:/root/jans/test-reports" ./ || true
           scp -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -r "root@$IP:/root/jans/aio-logs" ./ || true
 
+      # The gate passes on any non-empty, non-failing result set, so a lost catalog report must fail here.
+      - name: Require script-catalog report
+        if: always() && steps.catalog.outputs.run == 'true'
+        run: |
+          python3 - <<'PY'
+          import sys, xml.etree.ElementTree as ET
+          path = "test-reports/script-catalog-TEST-ScriptCatalog.xml"
+          try:
+              cases = ET.parse(path).getroot().iter("testcase")
+              if next(cases, None) is None:
+                  sys.exit(f"::error::{path} has no test cases")
+          except (OSError, ET.ParseError) as e:
+              sys.exit(f"::error::script-catalog report missing or unreadable: {e}")
+          PY
+
       # First matrix leg only (both build the same artifacts), and non-PR only: a PR's cache is
       # scoped to its own ref, so it would evict in-use entries while being readable by nothing.
       - name: Collect build caches from the VM

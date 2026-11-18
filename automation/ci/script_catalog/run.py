@@ -130,7 +130,8 @@ class Run:
             for svc, inum in list(pending.items()):
                 if self.errors([inum])[inum]:
                     del pending[svc]
-        self.delete(sentinels.values())
+        if self.delete(sentinels.values()):
+            raise RuntimeError("reload sentinel could not be removed; later checks would see its error")
         return set(pending)
 
     def settle(self, inums, rounds=4):
@@ -255,7 +256,15 @@ def behavior_tests(run, scripts):
     uid, _ = new_user("intro")
 
     def login_code(client, acr, username, pwd, scope="openid profile"):
-        return wait_for(lambda: aio.login(client, acr, username, pwd, scope))
+        def attempt():
+            try:
+                return aio.login(client, acr, username, pwd, scope)
+            except HttpError as e:
+                if e.status < 500:
+                    raise
+                log(f"login via {acr}: HTTP {e.status}, retrying")
+                return None
+        return wait_for(attempt)
 
     def introspection_sid():
         client = aio.register_client(introspection_script_dns=[intro_py["dn"]])
