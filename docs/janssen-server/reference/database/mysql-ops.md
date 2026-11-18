@@ -34,6 +34,15 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 * c. Ensure you restart services after DB schema modification
 
 
+### Add user version column on upgrade
+User updates are versioned through the `jansVersion` column of `jansPerson`. Container and Kubernetes
+deployments add it automatically through the persistence loader. On a VM install, add it before
+upgrading the Janssen services:
+```
+ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `jansVersion` BIGINT NULL DEFAULT NULL;
+```
+Existing rows keep a `NULL` version until their next update.
+
 ### Add user in Jans admin group
 
 * Search for inum of `JansGrp`
