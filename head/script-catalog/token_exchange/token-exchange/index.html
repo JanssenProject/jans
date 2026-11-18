@@ -3728,12 +3728,14 @@ interface. This interface extends the base custom script type with methods speci
 <span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">ScriptTokenExchangeControl</span><span class="p">.</span><span class="na">fail</span><span class="p">();</span>
 <span class="w">        </span><span class="p">}</span>
 
-<span class="w">        </span><span class="c1">// user identified by request information or otherwise null</span>
-<span class="w">        </span><span class="n">User</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">User</span><span class="p">();</span>
+<span class="w">        </span><span class="c1">// user identified by request information or otherwise null (null means user is taken from validated session)</span>
+<span class="w">        </span><span class="n">User</span><span class="w"> </span><span class="n">user</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span>
 
+<span class="w">        </span><span class="c1">// Built-in validation of subject_token/actor_token/session stays enabled. Call setSkipBuiltinValidation(true)</span>
+<span class="w">        </span><span class="c1">// only if the validations above fully authenticate the subject and set the user.</span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ScriptTokenExchangeControl</span>
 <span class="w">                </span><span class="p">.</span><span class="na">ok</span><span class="p">()</span>
-<span class="w">                </span><span class="p">.</span><span class="na">setSkipBuiltinValidation</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">// this skip build-in validations of all parameters that come</span>
+<span class="w">                </span><span class="p">.</span><span class="na">setSkipBuiltinValidation</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
 <span class="w">                </span><span class="p">.</span><span class="na">setUser</span><span class="p">(</span><span class="n">user</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}</span>
 

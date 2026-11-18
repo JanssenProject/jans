@@ -81,6 +81,12 @@ class PersonAuthentication(PersonAuthenticationType):
         self.map_user_cert = StringHelper.toBoolean(configurationAttributes.get("map_user_cert").getValue2(), False)
         print "Cert. Initialization. map_user_cert: '%s'" % self.map_user_cert
 
+        # Enable only behind a TLS-terminating proxy that verifies the client cert and overwrites this header
+        self.trust_client_cert_header = False
+        if configurationAttributes.containsKey("trust_client_cert_header"):
+            self.trust_client_cert_header = StringHelper.toBoolean(configurationAttributes.get("trust_client_cert_header").getValue2(), False)
+        print "Cert. Initialization. trust_client_cert_header: '%s'" % self.trust_client_cert_header
+
         self.enabled_recaptcha = self.initRecaptcha(configurationAttributes)
         print "Cert. Initialization. enabled_recaptcha: '%s'" % self.enabled_recaptcha
 
@@ -244,7 +250,9 @@ class PersonAuthentication(PersonAuthenticationType):
             request = externalContext.getRequest()
 
             # Try to get certificate from header X-ClientCert
-            clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
+            clientCertificate = None
+            if self.trust_client_cert_header:
+                clientCertificate = externalContext.getRequestHeaderMap().get("X-ClientCert")
             if clientCertificate is not None:
                 x509Certificate = self.certFromPemString(clientCertificate)
                 identity.setWorkingParameter("cert_x509",  self.certToString(x509Certificate))

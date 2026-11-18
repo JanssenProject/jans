@@ -889,7 +889,7 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <p>You need to use Salt File <code>/etc/jans/conf/salt</code> as a secret key. You will get this salt file after Jans intallation. Jans <a href="../../../script-catalog/person_authentication/passport/passport-social-jans-script.py">interception script</a> uses this same file for decryption.</p>
 <ol>
 <li>
-<p>Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like <code>/google/:token</code>. <code>google</code> is provider id in <a href="#add-passport-social-script">providers_json_file</a>. <code>token</code> is the same token which we created in above step.</p>
+<p>Create auth request endpoints which will be request by User on Jans auth login page. For Example: Suppose you have added google strategy in your passport project. In that case you can make a endpoint like <code>/google/:token</code>. <code>google</code> is provider id in <a href="#add-passport-social-script">providers_json_file</a>. <code>token</code> is the same token which we created in above step. Verify it and store its <code>jwt</code> claim in <code>req.session.passportRequestId</code> for the <code>request_id</code> claim below.</p>
 </li>
 <li>
 <p>After authentication Passport Project has to send encoded userinfo data to Jans <code>https://&lt;your.jans.server.com&gt;/jans-auth/postlogin.htm</code>. Below is the Node JS code sample to send POST request with data to Jans Post Login Endpoint.</p>
@@ -941,6 +941,7 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <span class="w">    </span><span class="nx">jti</span><span class="o">:</span><span class="w"> </span><span class="nx">uuidv4</span><span class="p">(),</span>
 <span class="w">    </span><span class="nx">exp</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mf">30</span><span class="p">,</span>
 <span class="w">    </span><span class="nx">iat</span><span class="o">:</span><span class="w"> </span><span class="nx">now</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">request_id</span><span class="o">:</span><span class="w"> </span><span class="nx">req</span><span class="p">.</span><span class="nx">session</span><span class="p">.</span><span class="nx">passportRequestId</span><span class="p">,</span><span class="w"> </span><span class="c1">// `jwt` claim of the token received in the auth request</span>
 <span class="w">    </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="nx">encrypt</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span>
 <span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="nx">privateKey</span><span class="p">,</span><span class="w"> </span><span class="nx">defaultRpOptions</span><span class="p">)</span>
 
@@ -1018,6 +1019,10 @@ Check <a href="../../../script-catalog/person_authentication/passport/passport-s
 <tr>
 <td>passport_auth_endpoint_path</td>
 <td>It will use <code>passport_fqdn</code> as a prefix so just add path. e.g. <code>/passport/auth</code>. Jans request this endpoint to initiate auth request <a href="../../../script-catalog/person_authentication/passport/passport-social-jans-script.py">here</a>. Check <a href="#setup-passport-js-project">Step-2</a> in Setup Passport section to make passport auth endpoint. Jans will append provider and token during auth request e.g. If you have added google provider with id <code>google</code> in <code>providers_json_file</code> then jans request will be look like <code>https://your-passport.com/passport/auth/google/&lt;token&gt;</code>.</td>
+</tr>
+<tr>
+<td>require_request_binding</td>
+<td>Optional, default <code>false</code>. When <code>true</code>, reject user JWTs without a <code>request_id</code> claim. The script always rejects a <code>request_id</code> that does not match the <code>jwt</code> claim of the token issued for the current browser session.</td>
 </tr>
 </tbody>
 </table>
@@ -1149,7 +1154,7 @@ nualRv0U2Y5EYkekj180KnAR
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 17, 2025
+    November 18, 2026
   </span>
 
     
