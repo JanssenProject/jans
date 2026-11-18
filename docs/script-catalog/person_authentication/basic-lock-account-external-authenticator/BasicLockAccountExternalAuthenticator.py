@@ -15,12 +15,11 @@ from io.jans.model import GluuStatus
 from io.jans.orm.exception import AuthenticationException
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
-from java.lang import System
+from io.jans.orm import PersistenceEntryManager
+from java.util import Date
 
 # Written to the invalid-login count attribute by lockUser: only inactive users carrying it are unlocked
 LOCK_MARKER_PREFIX = "locked:"
-# Max gap between the marker time and the updatedAt that updateUser stamps on the lock write
-LOCK_WRITE_SLACK_MILLIS = 5000
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -105,7 +104,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         print "Basic (lock account). User '%s' is inactive and was not locked by this script" % user_name
                         return False
 
-                    locked_for = (System.currentTimeMillis() - locked_at) / 1000
+                    locked_for = (Date().getTime() - locked_at) / 1000
                     if locked_for < self.lockExpirationTime:
                         print "Basic (lock account). User '%s' is locked for '%s' more seconds" % ( user_name, self.lockExpirationTime - locked_for )
                         return False
@@ -242,10 +241,13 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Basic (lock account). Lock user. User '%s' locked already" % user_name
             return
 
-        # Status and marker go in one update, so a lock never exists without its marker
+        # Status and marker go in one write, so a lock never exists without its marker. merge, not
+        # updateUser: updatedAt must equal the marker time, and updateUser would overwrite it
+        locked_at = Date()
         find_user_by_uid.setStatus(GluuStatus.INACTIVE)
-        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, LOCK_MARKER_PREFIX + str(System.currentTimeMillis()))
-        userService.updateUser(find_user_by_uid)
+        find_user_by_uid.setUpdatedAt(locked_at)
+        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, LOCK_MARKER_PREFIX + str(locked_at.getTime()))
+        CdiUtil.bean(PersistenceEntryManager).merge(find_user_by_uid)
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
 
         print "Basic (lock account). Lock user. User '%s' locked" % user_name
@@ -267,10 +269,10 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Basic (lock account). Unlock user. Lock of user '%s' changed, not unlocking" % user_name
             return False
 
-        # Every UserService.updateUser (config-api, SCIM, admin UI) stamps updatedAt, and the script does
-        # not write a locked user, so a later updatedAt means an administrator changed the user while locked
+        # lockUser sets updatedAt to the marker time; every UserService.updateUser (config-api, SCIM,
+        # admin UI) stamps a new one, so any other value means the user was changed while locked
         updated_at = find_user_by_uid.getUpdatedAt()
-        if updated_at is None or abs(updated_at.getTime() - self.getLockTime(expected_marker)) > LOCK_WRITE_SLACK_MILLIS:
+        if updated_at is None or updated_at.getTime() != self.getLockTime(expected_marker):
             print "Basic (lock account). Unlock user. User '%s' was modified after the lock, not unlocking" % user_name
             return False
 
