@@ -16,3 +16,6 @@ This module has 2 properties:
    Default value: 3
 3) lock_expiration_time - Specify the time in seconds when lock will be expired
    Default value: 180
+
+While an account is locked, `invalid_login_count_attribute` holds `locked:<epoch millis>` instead of a count.
+The script only unlocks inactive accounts carrying this marker, so accounts disabled by an administrator stay disabled.

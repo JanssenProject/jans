@@ -159,10 +159,10 @@ class Aio:
     def delete_script(self, inum):
         self.api("DELETE", f"/api/v1/config/scripts/{inum}", ok=(200, 204, 404))
 
-    def create_user(self, uid, password):
+    def create_user(self, uid, password, status="active"):
         return self.api("POST", "/mgt/configuser", {
             "userId": uid, "mail": f"{uid}@example.org", "displayName": uid, "givenName": uid,
-            "jansStatus": "active", "userPassword": password,
+            "jansStatus": status, "userPassword": password,
             "customAttributes": [{"name": "sn", "multiValued": False, "values": [uid]}]})
 
     def get_user(self, inum):
