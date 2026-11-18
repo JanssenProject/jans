@@ -39,11 +39,15 @@ post-quantum readiness reviews.
 - **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
   scans each published image for certificates, keys, secrets and OpenSSL config.
   Base-image CA trust stores are skipped; Janssen certs under `/etc/certs` are
-  not. Each platform of a multi-arch image is scanned by its own digest, and each
-  finding carries `jans:image` and `jans:platform` properties. Output is a
-  workflow artifact (`jans-image-cbom`), not a release asset, until reviewed. If
-  any image fails, the artifact is `jans-image-cbom-partial` and lists the
-  missing images in `jans:missing-images`.
+  not. Image digests are resolved once per run, so a partial re-run scans the
+  same images. Each platform of a multi-arch image is scanned by its own digest.
+  Every finding carries `jans:image`; findings from multi-platform scans also
+  carry `jans:platform`, and each container component records its
+  `jans:image-index`. Output is a workflow artifact (`jans-image-cbom`), not a
+  release asset, until reviewed. If some images fail, the artifact is
+  `jans-image-cbom-partial` and lists them in `jans:missing-images`. If none
+  succeed, no artifact is produced and `image-publish` fails at "Build
+  jans-image-cbom.json".
 
 `scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
 fails the job if it finds private keys, secret or generic keys, passwords,
