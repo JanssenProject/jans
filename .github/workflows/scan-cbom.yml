@@ -66,6 +66,24 @@ jobs:
         distribution: temurin
         java-version: '17'
 
+    # Same rewrite "Build: Publish" applies, so a release build resolves that
+    # release's io.jans jars (incl. cedarling-java), not 0.0.0-nightly.
+    - name: Set release version in poms
+      if: github.event_name == 'workflow_run' && startsWith(github.event.workflow_run.head_branch, 'v')
+      env:
+        RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+      run: |
+        set -euo pipefail
+        if [[ ! "${RELEASE_TAG}" =~ ^v[0-9][A-Za-z0-9._-]*$ ]]; then
+          echo "Invalid release tag" >&2; exit 1
+        fi
+        for m in ${MAVEN_MODULES}; do
+          mvn -B -ntp -s .github/maven-settings.xml \
+            -Dmaven.repo.local="${GITHUB_WORKSPACE}/.cbom-m2" \
+            -f "$m" org.codehaus.mojo:versions-maven-plugin:2.16.2:set \
+            -DnewVersion="${RELEASE_TAG#v}" -DgenerateBackupPoms=false || true
+        done
+
     # The scanner resolves crypto API calls against compiled classes and
     # dependency jars. It runs in a container that only sees the workspace, so
     # the local Maven repo has to live there.
@@ -263,6 +281,7 @@ jobs:
       id-token: write  # cosign keyless signing
     env:
       RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+      SCAN_REF: ${{ github.event.workflow_run.head_branch || github.ref_name }}
       HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
     - name: Harden Runner
@@ -302,7 +321,7 @@ jobs:
         S=.github/workflows/scripts/cbom.py
         python3 "$S" rust jans-cedarling/Cargo.lock rust.json
         python3 "$S" merge janssen "${VERSION}" jans-cbom.json source/source-cbom.json rust.json
-        python3 "$S" stamp jans-cbom.json "jans:commit=${HEAD_SHA}"
+        python3 "$S" stamp jans-cbom.json "commit=${HEAD_SHA}" "revision=${SCAN_REF}" "jans:commit=${HEAD_SHA}"
         python3 "$S" gate jans-cbom.json
 
     - name: Upload merged CBOM
