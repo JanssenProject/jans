@@ -15,6 +15,22 @@
 ">
 {% endblock %}
 
+{% block extrahead %}
+{{ super() }}
+{#- Bump when the consent text changes materially: earlier answers are dropped so
+    the banner (which only shows with no stored answer) asks again. -#}
+<script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+{% endblock %}
+
 {% block outdated %}
   You're not viewing the latest version.
   <a href="{{ '../' ~ base_url }}">
