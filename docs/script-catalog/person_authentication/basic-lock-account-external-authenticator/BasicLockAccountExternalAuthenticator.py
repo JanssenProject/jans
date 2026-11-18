@@ -247,7 +247,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # Write the lock record first: an inactive user without it is treated as an expired lock and unlocked
         object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
 
-        cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+        cacheService.put(self.lockExpirationTime, "lock_user_"+user_name, object_to_store)
 
         find_user_by_uid.setStatus(GluuStatus.INACTIVE)
         userService.updateUser(find_user_by_uid)
@@ -267,7 +267,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
-        cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+        cacheService.put(self.lockExpirationTime, "lock_user_"+user_name, object_to_store)
 
         find_user_by_uid.setStatus(GluuStatus.ACTIVE)
         userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)

@@ -52,8 +52,9 @@ class Introspection(IntrospectionType):
             print "Introspection. Failed to load session '%s'" % sessionDn
             return True
 
-        # Return the public sid, never the session DN/id which equals the browser SSO cookie
-        responseAsJsonObject.put("sid", session.getOutsideSid())
+        # Return the public sid, never the session DN/id which equals the browser SSO cookie.
+        # accumulate, not put: Jython binds a str to put(String, Collection) and emits a char array.
+        responseAsJsonObject.accumulate("sid", session.getOutsideSid())
 
         sessionAttributes = session.getSessionAttributes()
         if sessionAttributes is None:
