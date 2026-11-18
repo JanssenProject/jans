@@ -103,8 +103,9 @@ To read a report, download it (`gh run download` unpacks the artifact ZIP; from
 the browser, unzip it first) and decrypt it with age 1.3.0 or later:
 
 ```bash
-gh run download RUN_ID -R JanssenProject/jans -n pentest-report
-age -d -i key.txt pentest-report.tar.gz.age | tar xz
+mkdir "report-RUN_ID" && cd "report-RUN_ID" && \
+  gh run download RUN_ID -R JanssenProject/jans -n pentest-report && \
+  age -d -i ../key.txt pentest-report.tar.gz.age | tar xz
 ```
 
 Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid, also age
@@ -112,5 +113,6 @@ Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid, also age
 with the security team. AIO startup output goes to `startup.log` inside the
 encrypted `pentest-aio-logs-*` artifact, not the run log.
 
-If a backend's raw output cannot be decrypted, a release run fails; a manual run
-warns and reports the remaining backend.
+If a backend uploaded raw output that cannot be downloaded or decrypted, a
+release run fails; a manual run warns and reports the remaining backend. A
+backend with no scanner output uploads nothing and is not counted.
