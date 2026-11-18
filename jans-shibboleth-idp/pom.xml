@@ -110,7 +110,7 @@
             </dependency>
 
             <dependency>
-                <groupId>org.junit</groupId>
+                <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-params</artifactId>
                 <version>${junit-jupiter-params.version}</version>
             </dependency>
