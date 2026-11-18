@@ -117,14 +117,26 @@ jobs:
       if: steps.before.outputs.current == 'true'
       run: |
         set -euo pipefail
-        for m in ${MAVEN_MODULES}; do
-          echo "::group::${m}"
-          mvn -B -ntp -s .github/maven-settings.xml \
-            -Dmaven.repo.local="${GITHUB_WORKSPACE}/.cbom-m2" \
-            -Dmaven.test.skip=true \
-            -f "${m}" install
-          echo "::endgroup::"
-        done
+        build() {
+          for m in ${MAVEN_MODULES}; do
+            echo "::group::${m}"
+            mvn -B -ntp -s .github/maven-settings.xml \
+              -Dmaven.repo.local="${GITHUB_WORKSPACE}/.cbom-m2" \
+              -Dmaven.test.skip=true \
+              -f "${m}" install || { echo "::endgroup::"; return 1; }
+            echo "::endgroup::"
+          done
+        }
+        if ! build; then
+          # A newer publish deleting 0.0.0-nightly mid-build fails resolution;
+          # that is a superseded scan, not a build failure.
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_run" ]] && \
+             [[ "$(gh api "repos/${GITHUB_REPOSITORY}/commits/${RELEASE_TAG}" --jq .sha)" != "${HEAD_SHA}" ]]; then
+            echo "::notice::${RELEASE_TAG} moved during build; dropping superseded scan"
+            exit 0
+          fi
+          exit 1
+        fi
 
     - name: Check tag after build
       id: after
@@ -435,8 +447,8 @@ jobs:
         cp jans-cbom.json jans-cbom.next.json
         cp jans-cbom.json.bundle jans-cbom.next.json.bundle
         gh release upload "${RELEASE_TAG}" jans-cbom.next.json jans-cbom.next.json.bundle -R "${GITHUB_REPOSITORY}"
-        new="$(gh api --paginate "${API}/${rid}/assets" \
-          --jq '[.[] | select(.state == "uploaded" and (.name == "jans-cbom.next.json" or .name == "jans-cbom.next.json.bundle"))] | length')"
+        new="$(gh api --paginate --slurp "${API}/${rid}/assets" \
+          | jq '[.[][] | select(.state == "uploaded" and (.name == "jans-cbom.next.json" or .name == "jans-cbom.next.json.bundle"))] | length')"
         if [ "${new}" != "2" ]; then echo "::error::staged CBOM pair not uploaded" >&2; exit 1; fi
         for n in jans-cbom.json jans-cbom.json.bundle; do
           for id in $(asset_ids "$n"); do gh api -X DELETE "${API}/assets/${id}"; done
