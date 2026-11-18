@@ -38,6 +38,11 @@ jobs:
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-latest
     timeout-minutes: 240
+    # Join "Build: Publish"'s group for this tag so its next run (which deletes
+    # and redeploys 0.0.0-nightly, incl. cedarling-java) waits for this build.
+    concurrency:
+      group: ${{ github.event_name == 'workflow_run' && format('build-publish-refs/tags/{0}', github.event.workflow_run.head_branch) || format('scan-cbom-{0}', github.run_id) }}
+      cancel-in-progress: false
     permissions:
       contents: read
       packages: read  # io.jans artifacts from GitHub Packages Maven
@@ -249,6 +254,10 @@ jobs:
   publish:
     needs: source-cbom
     runs-on: ubuntu-latest
+    # Serialize release writes per tag; this workflow is the only writer of the pair.
+    concurrency:
+      group: scan-cbom-release-${{ github.event.workflow_run.head_branch || github.run_id }}
+      cancel-in-progress: false
     permissions:
       contents: read
       id-token: write  # cosign keyless signing

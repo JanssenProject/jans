@@ -11,6 +11,7 @@ import json
 import sys
 import tomllib
 import uuid
+from urllib.parse import quote
 from datetime import datetime, timezone
 
 # cbomkit has no Rust scanner. Map the crypto crates Cedarling resolves to the
@@ -29,6 +30,8 @@ RUST_CRATES = {
 }
 RUST_PROTOCOLS = {"rustls": [("TLSv1.2", "1.2"), ("TLSv1.3", "1.3")]}
 RUST_PROVIDERS = {"ring", "aws-lc-rs"}
+
+CRATES_IO = {"registry+https://github.com/rust-lang/crates.io-index", "sparse+https://index.crates.io/"}
 
 BLOCKED = {"private-key", "secret-key", "shared-secret", "seed", "password", "credential", "token", "key"}
 # gitleaks generic-api-key false positive on stock JDK config (no value is captured).
@@ -61,7 +64,9 @@ def rust(lock_path, out):
             continue
         ref = f"pkg:cargo/{name}@{version}"
         if source.startswith("git+"):
-            ref += "?vcs_url=" + source.split("#")[0]
+            ref += "?vcs_url=" + quote(source.split("#")[0], safe="")
+        elif source and source not in CRATES_IO:
+            ref += "?repository_url=" + quote(source.split("+", 1)[-1], safe="")
         components.append({"type": "library", "bom-ref": ref, "name": name, "version": version, "purl": ref})
         provides = []
         for algo, props in RUST_CRATES.get(name, []):
