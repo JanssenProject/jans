@@ -34,6 +34,8 @@ public class ViolationWireFormatTests {
         JsonNode expectedTree = JSON.readTree("{\"field\":\"display_name\","
                 + "\"code\":\"required_value_missing\","
                 + "\"message\":\"'display_name' is required\"}");
+        
+        assertThat(actualTree).isEqualTo(expectedTree);
     }
 
     @Test
