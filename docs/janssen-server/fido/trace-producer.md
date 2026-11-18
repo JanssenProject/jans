@@ -62,6 +62,83 @@ Each record is a `FIDO_CEREMONY` event.
 Records do not contain policy decisions, invocations, or capability IDs. TRACE records describe what happened
 in a ceremony, and they do not affect how the ceremony is decided.
 
+## Chains
+
+Each FIDO Server node keeps its own chain. A chain is a sequence of signed records that share one
+`producer_chain_id`. Each record carries:
+
+- `producer_chain.producer_chain_id`: the chain the record belongs to.
+- `producer_chain.sequence_number`: the position in the chain. The first record is `1`, and each record after it is
+  one higher.
+- `producer_chain.prev_record_hash`: the hash of the previous record in the same chain. The first record has the
+  all-zero sentinel, `sha256:` followed by 64 zeros.
+- `producer_chain.chain_link` (genesis only): an object with `prev_producer_chain_id`, which names the chain this one
+  follows after a restart. Only the first record of a chain can carry it.
+
+### Hash input
+
+`prev_record_hash` is `sha256:` followed by the lowercase hex SHA-256 of the RFC 8785 (JCS) canonical form of the
+previous record, including its `signature`. Hash the signed record, not the unsigned one. This is the same digest
+Lock calls `content_digest`, so a producer and Lock compute the same value for each record.
+
+### Restart
+
+On startup a node resumes its existing chain when the saved state is usable: it belongs to this node and holds a
+chain id, a next sequence number of at least 1, and a well-formed previous hash. The node then continues with the
+next sequence number and the saved previous hash.
+
+When the state is missing, corrupt, malformed, or belongs to another node, the node starts a new chain:
+
+- It gets a new `producer_chain_id`, and its first record has `sequence_number` 1 and the zero sentinel.
+- If the previous chain id for this node is still known, the genesis record carries `chain_link` pointing to it.
+  If it is not known, for example after the state file is corrupted, the new genesis has no `chain_link`.
+
+```mermaid
+flowchart LR
+    subgraph A["Chain A (before restart)"]
+        A1["seq 1, genesis"] --> A2["seq 2"] --> A3["seq 3"]
+    end
+    subgraph B["Chain B (after state is lost)"]
+        B1["seq 1, genesis<br/>chain_link: prev_producer_chain_id = A"] --> B2["seq 2"]
+    end
+    A3 -. "restart without usable state" .-> B1
+```
+
+Lock checks only the shape of `chain_link`, and only on a genesis record. It does not check the link against chain A.
+The link is therefore a claim in the signed record, not something Lock has verified.
+
+### Clusters
+
+Each node has its own chain, so N nodes produce N independent chains. Lock verifies each chain on its own: gaps,
+broken `prev_record_hash` links, and conflicting records at the same position (equivocation) are reported per chain.
+
+Each node needs its own state file. Do not copy one node's state file to another node. The copy names a different
+node, so the receiving node rejects it and starts a new chain. Two running nodes that write to the same state file
+would produce records with the same sequence numbers, which Lock reports as equivocation.
+
+### Where state lives and what a crash loses
+
+The producer keeps its chain state in a small file, written atomically: it writes a temporary file, flushes it to
+disk, and renames it over the old one. It writes the next state before it returns a signed record, so:
+
+- A crash before the state is written loses nothing that was sent. The next start reissues the same sequence number.
+- A crash after the state is written but before the record is sent leaves a gap in the sequence. Lock reports the gap
+  with `coverage_gap_flag`, and the chain continues after it.
+- A lost or corrupt state file starts a new chain. Records already sent on the old chain remain valid.
+
+The state file path is part of the emission work tracked in [#15280](https://github.com/JanssenProject/jans/issues/15280).
+Until that work is merged, the chain state class does not run in the server.
+
+### Interaction with chain genesis
+
+- With `fido2TraceChainGenesis` set to `first_observed`, a new chain starts with a genesis record that Lock accepts
+  and registers. This is the normal case after a restart without usable state.
+- With `pre_registered`, Lock must know the new chain before its first record is accepted. A restart that opens a new
+  chain therefore needs that chain registered first. The procedure is covered in the pre-registered genesis runbook,
+  which is tracked separately.
+
+See [Chain registration modes](../lock/trace.md#chain-registration-modes) for how Lock treats genesis records.
+
 ## Signing
 
 A record is signed as follows:
