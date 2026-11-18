@@ -376,19 +376,15 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			throw new MappingException("Entry should has setter for property " + versionPropertyName);
 		}
 
-		Object expectedVersionObject = versionGetter.get(entry);
-		if (expectedVersionObject == null) {
-			throw new MappingException(String.format(
-					"Entry '%s' @Version field must be initialized -- call persist() or find() first", entryClass));
-		}
-
 		Class<?> parameterType = ReflectHelper.getSetterType(versionSetter);
 		if (!(parameterType.equals(Long.class) || parameterType.equals(Long.TYPE))) {
 			throw new MappingException(String.format(
 					"Entry '%s' @Version field must be Long/long", entryClass));
 		}
 
-		long expectedVersionValue = ((Long) expectedVersionObject).longValue();
+		// Null means the stored entry has no version yet (written before the class got @Version, or by
+		// a class without it): the CAS then expects the attribute to be absent
+		Long expectedVersionValue = (Long) versionGetter.get(entry);
 
 		boolean forceUpdate = isUseEntryForceUpdate(entryClass);
 		if (forceUpdate) {
@@ -424,14 +420,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		String versionAttributeName = getVersionAttributeName(entryClass, versionPropertyName, propertiesAnnotations);
 
-		long newVersionValue = expectedVersionValue + 1;
+		long newVersionValue = (expectedVersionValue == null ? 0L : expectedVersionValue.longValue()) + 1;
 		applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue);
 
 		boolean updated = mergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
-				versionAttributeName, Long.valueOf(expectedVersionValue), Long.valueOf(newVersionValue));
+				versionAttributeName, expectedVersionValue, Long.valueOf(newVersionValue));
 
 		if (!updated) {
-			throw new VersionMismatchException(dnValue.toString(), Long.valueOf(expectedVersionValue));
+			throw new VersionMismatchException(dnValue.toString(), expectedVersionValue);
 		}
 
 		if (isValidateAfterUpdate()) {
@@ -464,7 +460,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	}
 
 	/**
-	 * Per-backend hook for {@link #updateWithVersion(Object)}. Concrete with a default throw (not
+	 * Per-backend hook for {@link #updateWithVersion(Object)}. A null {@code expectedVersionValue} must
+	 * match only an entry that has no stored version attribute. Concrete with a default throw (not
 	 * abstract) so every existing backend subclass keeps compiling before its own CAS support lands.
 	 */
 	protected boolean mergeWithVersion(String dn, String[] objectClasses,

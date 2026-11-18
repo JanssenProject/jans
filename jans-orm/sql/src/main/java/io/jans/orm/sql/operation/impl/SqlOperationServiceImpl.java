@@ -460,8 +460,9 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 			Predicate docIdPredicate = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
 					Expressions.constant(key));
-			Predicate versionPredicate = ExpressionUtils.eq(Expressions.path(Object.class, versionAttributeName),
-					Expressions.constant(expectedVersionValue));
+			Path<Object> versionPath = Expressions.path(Object.class, versionAttributeName);
+			Predicate versionPredicate = (expectedVersionValue == null) ? ExpressionUtils.isNull(versionPath)
+					: ExpressionUtils.eq(versionPath, Expressions.constant(expectedVersionValue));
 			Predicate whereExp = ExpressionUtils.allOf(docIdPredicate, versionPredicate);
 
 			long rowInserted = sqlUpdateQuery.where(whereExp).execute();

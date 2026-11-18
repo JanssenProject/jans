@@ -7,6 +7,7 @@
 package io.jans.orm.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -102,15 +103,37 @@ public class BaseEntryManagerVersionTest {
 	}
 
 	@Test
-	public void updateWithVersionWithNullVersionFieldThrowsMappingException() {
+	public void updateWithVersionWithNullVersionExpectsAbsentVersionAndStoresOne() {
 		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(new AttributeData("uid", "same"))));
 
 		VersionedEntry entry = new VersionedEntry();
 		entry.setDn("o=test");
 		entry.setUid("same");
 		entry.setVersion(null);
 
-		assertThrows(MappingException.class, () -> entryManager.updateWithVersion(entry));
+		entryManager.updateWithVersion(entry);
+
+		assertNull(entryManager.lastExpectedVersionValue);
+		assertEquals(Long.valueOf(1L), entryManager.lastNewVersionValue);
+		assertEquals(Long.valueOf(1L), entry.getVersion());
+	}
+
+	@Test
+	public void updateWithVersionWithNullVersionOnStaleReadThrowsVersionMismatchException() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.mergeWithVersionResult = false;
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(new AttributeData("uid", "same"))));
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("same");
+		entry.setVersion(null);
+
+		VersionMismatchException ex = assertThrows(VersionMismatchException.class,
+				() -> entryManager.updateWithVersion(entry));
+		assertNull(ex.getExpectedVersion());
+		assertNull(entry.getVersion());
 	}
 
 	@Test

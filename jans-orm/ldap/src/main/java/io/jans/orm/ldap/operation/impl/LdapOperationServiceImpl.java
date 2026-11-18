@@ -746,7 +746,9 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
         // Filter.createEqualityFilter() RFC-4515-escapes the assertion value for us, so this is
         // safe even if the version type ever changes to something needing escaping.
-        Filter assertionFilter = Filter.createEqualityFilter(versionAttributeName, String.valueOf(expectedVersionValue));
+        Filter assertionFilter = (expectedVersionValue == null)
+                ? Filter.createNOTFilter(Filter.createPresenceFilter(versionAttributeName))
+                : Filter.createEqualityFilter(versionAttributeName, String.valueOf(expectedVersionValue));
 
         ModifyRequest modifyRequest = new ModifyRequest(dn, modifications);
         modifyRequest.addControl(new AssertionRequestControl(assertionFilter));
