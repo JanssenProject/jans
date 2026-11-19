@@ -6,6 +6,8 @@
 #[cfg(test)]
 use std::collections::{BTreeMap, BTreeSet};
 
+#[cfg(test)]
+use cedar_policy_core::validator::ValidatorActionId;
 use cedar_policy_core::validator::ValidatorSchema;
 #[cfg(test)]
 use cedar_policy_core::validator::types::{Attributes, Type};
@@ -56,6 +58,9 @@ struct ActionShape {
     context: Option<Type>,
     principals: BTreeSet<String>,
     resources: BTreeSet<String>,
+    /// Actions that are members of this action group, directly or transitively; Cedar
+    /// builds action ancestry from it.
+    descendants: BTreeSet<String>,
 }
 
 #[cfg(test)]
@@ -85,6 +90,12 @@ impl SchemaShape {
                     context: validator.context_type(action.as_ref()).cloned(),
                     principals: names(schema.principals_for_action(action)),
                     resources: names(schema.resources_for_action(action)),
+                    descendants: validator
+                        .get_action_id(action.as_ref())
+                        .into_iter()
+                        .flat_map(ValidatorActionId::descendants)
+                        .map(ToString::to_string)
+                        .collect(),
                 };
                 (action.to_string(), shape)
             })
@@ -173,6 +184,33 @@ mod tests {
                 "a different {label} should make schemas compare unequal"
             );
         }
+    }
+
+    const GROUPED_SCHEMA: &str = r#"
+        namespace Jans {
+            entity User;
+            action "view";
+            action "edit";
+            action "read" in ["view", "edit"] appliesTo { principal: [User], resource: [User] };
+        }
+    "#;
+
+    #[test]
+    fn schema_shape_ignores_action_membership_order() {
+        assert_eq!(
+            shape(GROUPED_SCHEMA),
+            shape(&GROUPED_SCHEMA.replace(r#"["view", "edit"]"#, r#"["edit", "view"]"#)),
+            "the order of action groups in `in [...]` should not affect comparison"
+        );
+    }
+
+    #[test]
+    fn schema_shape_differs_when_action_membership_differs() {
+        assert_ne!(
+            shape(GROUPED_SCHEMA),
+            shape(&GROUPED_SCHEMA.replace(r#"["view", "edit"]"#, r#"["view"]"#)),
+            "removing an action from an action group should make schemas compare unequal"
+        );
     }
 
     #[test]
