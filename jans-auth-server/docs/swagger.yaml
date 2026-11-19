@@ -267,11 +267,14 @@ paths:
                 $ref: '#/components/schemas/AttestationResponse'
         400:
           description: invalid_challenge (with reason and, except for challenge_in_progress, a fresh challenge), invalid_request,
-            unsupported_evidence_format or evidence_too_large.
+            invalid_client, unsupported_evidence_format or evidence_too_large.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttestationError'
+                oneOf:
+                  - $ref: '#/components/schemas/AttestationInvalidChallengeError'
+                  - $ref: '#/components/schemas/AttestationChallengeInProgressError'
+                  - $ref: '#/components/schemas/AttestationRequestError'
         403:
           description: The attestation feature flag is disabled.
         503:
@@ -5370,8 +5373,7 @@ components:
         attested_key:
           description: Public JWK of the key to attest, or its RFC 7638 SHA-256 thumbprint.
           oneOf:
-            - type: object
-              additionalProperties: true
+            - $ref: '#/components/schemas/AttestationPublicJwk'
             - type: string
           example: {"kty": "EC", "crv": "P-256", "x": "f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU", "y": "x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0"}
         client_id:
@@ -5383,6 +5385,10 @@ components:
           description: Defaults to enroll without client_id, issue with client_id.
     AttestationChallengeResponse:
       type: object
+      required:
+        - challenge_id
+        - nonce
+        - expires_in
       properties:
         challenge_id:
           type: string
@@ -5391,6 +5397,8 @@ components:
           description: Base64url, 256 random bits. The hardware evidence must carry it.
         expires_in:
           type: integer
+          description: Seconds from this response until the challenge expires. The challenge lifetime
+            (attestationChallengeLifetimeSeconds) starts when the challenge is issued.
           example: 300
         evidence_formats_supported:
           type: array
@@ -5420,14 +5428,21 @@ components:
         attested_key:
           description: Public JWK (or thumbprint) of the attested key. Must match the challenge key.
           oneOf:
-            - type: object
-              additionalProperties: true
+            - $ref: '#/components/schemas/AttestationPublicJwk'
             - type: string
         client_id:
           type: string
           description: Required when the challenge was issued for a client; must equal it.
     AttestationResponse:
       type: object
+      required:
+        - attestation_id
+        - status
+        - attested_jkt
+        - appraised_at
+        - expires_at
+        - key_binding_strength
+        - reasons
       properties:
         attestation_id:
           type: string
@@ -5448,9 +5463,11 @@ components:
         appraised_at:
           type: integer
           format: int64
+          description: Time of the appraisal, in seconds since the Unix epoch (UTC).
         expires_at:
           type: integer
           format: int64
+          description: Time after which the verdict is no longer valid, in seconds since the Unix epoch (UTC).
         verifier:
           type: string
         verifier_result_digest:
@@ -5490,9 +5507,84 @@ components:
           type: string
         expires_in:
           type: integer
+          description: Seconds from this response until the fresh challenge expires.
         attestation_id:
           type: string
           description: Assessment recording the outage (verifier_unavailable only).
+    AttestationRequestError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum: [invalid_request, invalid_client, unsupported_evidence_format, evidence_too_large]
+        error_description:
+          type: string
+    AttestationInvalidChallengeError:
+      type: object
+      description: The challenge is unknown, used or expired. A fresh challenge for the same key and client is returned.
+      required:
+        - error
+        - reason
+        - challenge_id
+        - nonce
+        - expires_in
+      properties:
+        error:
+          type: string
+          enum: [invalid_challenge]
+        error_description:
+          type: string
+        reason:
+          type: string
+          enum: [challenge_unknown, challenge_used, challenge_expired]
+        challenge_id:
+          type: string
+        nonce:
+          type: string
+        expires_in:
+          type: integer
+          description: Seconds from this response until the fresh challenge expires.
+        evidence_formats_supported:
+          type: array
+          items:
+            type: string
+    AttestationChallengeInProgressError:
+      type: object
+      description: Another request is appraising the challenge. No fresh challenge is returned, so a replay cannot obtain nonces.
+      required:
+        - error
+        - reason
+      properties:
+        error:
+          type: string
+          enum: [invalid_challenge]
+        error_description:
+          type: string
+        reason:
+          type: string
+          enum: [challenge_in_progress]
+    AttestationPublicJwk:
+      type: object
+      description: Public JWK. Private key members (d, p, q, dp, dq, qi, oth) and symmetric keys (kty oct, member k) are rejected.
+      required:
+        - kty
+      properties:
+        kty:
+          type: string
+          enum: [EC, RSA, OKP]
+      additionalProperties: true
+      not:
+        anyOf:
+          - required: [d]
+          - required: [p]
+          - required: [q]
+          - required: [dp]
+          - required: [dq]
+          - required: [qi]
+          - required: [oth]
+          - required: [k]
     ErrorResponse:
       required:
         - error
