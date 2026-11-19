@@ -126,6 +126,10 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
         TokenTypeHint tth = TokenTypeHint.getByValue(tokenTypeHint);
         boolean isAll = Constants.ALL.equalsIgnoreCase(tokenString) && appConfiguration.getAllowAllValueForRevokeEndpoint();
         if (isAll) {
+            if (sessionClient == null || sessionClient.getClient() == null) {
+                log.trace("Revoke of all tokens requires authenticated client. Skip revoking.");
+                return response(builder, oAuth2AuditLog);
+            }
             removeAllTokens(tth, executionContext);
             return response(builder, oAuth2AuditLog);
         }
@@ -201,6 +205,9 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
 
         List<TokenEntity> tokensToRemove = new ArrayList<>();
         for (TokenEntity token : tokens) {
+            if (!clientId.equals(token.getClientId())) {
+                continue;
+            }
             if (tth == null ||
                     (tth == TokenTypeHint.ACCESS_TOKEN && token.getTokenTypeEnum() == TokenType.ACCESS_TOKEN) ||
                     (tth == TokenTypeHint.TX_TOKEN && token.getTokenTypeEnum() == TokenType.TX_TOKEN) ||

@@ -67,9 +67,10 @@
                 </div>
             </h:panelGroup>
         </div>
+        <input type="hidden" id="storedRepositoryPath" value="#{identity.getWorkingParameter('github_repository_Path')}" />
         <script type="text/javascript">
             $(document).ready(function () {
-                var repositoryPath = '${identity.getWorkingParameter('github_repository_Path')}';
+                var repositoryPath = document.getElementById("storedRepositoryPath").value;
                 document.getElementById("GithubDetailsForm:repositoryPath").value = repositoryPath;
             });
           </script>

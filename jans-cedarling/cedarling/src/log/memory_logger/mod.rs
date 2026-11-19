@@ -160,12 +160,20 @@ impl LogWriter for MemoryLogger {
     }
 }
 
+impl MemoryLogger {
+    /// Locks the storage with expired entries purged, so reads that bypass
+    /// sparkv's per-key expiry check (drain, keys, index lookups) honor `log_ttl`.
+    fn live_storage(&self) -> std::sync::MutexGuard<'_, BTreeSparKV<serde_json::Value>> {
+        let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+        storage.clear_expired();
+        storage
+    }
+}
+
 // Implementation of LogStorage
 impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<serde_json::Value> {
-        self.storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.live_storage()
             .drain()
             .map(|(_k, value)| value)
             .collect()
@@ -180,25 +188,18 @@ impl LogStorage for MemoryLogger {
     }
 
     fn get_log_ids(&self) -> Vec<String> {
-        self.storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
-            .get_keys()
+        self.live_storage().get_keys()
     }
 
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
-        self.storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.live_storage()
             .get_by_index_key(tag)
             .map(std::borrow::ToOwned::to_owned)
             .collect()
     }
 
     fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
-        self.storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.live_storage()
             .get_by_index_key(request_id)
             .map(std::borrow::ToOwned::to_owned)
             .collect()
@@ -211,9 +212,7 @@ impl LogStorage for MemoryLogger {
     ) -> Vec<serde_json::Value> {
         let key = composite_key(request_id, tag);
 
-        self.storage
-            .lock()
-            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+        self.live_storage()
             .get_by_index_key(&key)
             .map(std::borrow::ToOwned::to_owned)
             .collect()

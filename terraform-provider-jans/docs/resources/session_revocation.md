@@ -115,7 +115,6 @@ provider "jans" {
   url           = "https://moabu-noble-sawfish.gluu.info"
   client_id     = var.client_id
   client_secret = var.client_secret
-  insecure_client = true  # Only for development/testing
 }
 
 # Example 1: Revoke sessions for a specific user

@@ -29,10 +29,12 @@ import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -97,6 +99,14 @@ class AssertionServiceTest {
     private HttpServletResponse httpResponse;
 
     private final ObjectMapper mapper = new ObjectMapper();
+
+    @BeforeEach
+    void allowInterceptionHooks() {
+        when(externalFido2InterceptionService.authenticateAssertionStart(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.authenticateAssertionFinish(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.verifyAssertionStart(any(), any())).thenReturn(true);
+        when(externalFido2InterceptionService.verifyAssertionFinish(any(), any())).thenReturn(true);
+    }
 
     /**
      * CONF-09: the clientData challenge must be explicitly compared to the issued challenge.
@@ -347,7 +357,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(challengedResult));
         }
 
         assertEquals(Fido2AuthenticationStatus.failed, authData.getStatus());
@@ -389,7 +400,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(challengedResult));
         }
 
         assertEquals("Couldn't find the key by PublicKeyId", authData.getErrorReason());
@@ -417,7 +429,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(RuntimeException.class, () -> assertionService.verify(challengedResult));
         }
 
         assertEquals("Unknown error", authData.getErrorReason());
@@ -445,7 +458,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(challengedResult));
         }
 
         verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(), any(), any(), any());
@@ -506,8 +520,9 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
+            AssertionResult challengedResult = assertionResultWithChallenge();
             WebApplicationException ex = assertThrows(WebApplicationException.class,
-                    () -> assertionService.verify(assertionResultWithChallenge()));
+                    () -> assertionService.verify(challengedResult));
             assertEquals(400, ex.getResponse().getStatus());
         }
 
@@ -541,7 +556,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(challengedResult));
         }
 
         verify(authenticationPersistenceService, never()).update(any());
@@ -578,6 +594,7 @@ class AssertionServiceTest {
         registrationData.setUsername("alice");
         Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
         when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationEntry.getRegistrationStatus()).thenReturn(Fido2RegistrationStatus.registered);
         when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
 
         // Fails after authenticationPersistenceService.update() has already returned successfully.
@@ -587,7 +604,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(RuntimeException.class, () -> assertionService.verify(challengedResult));
         }
 
         verify(authenticationPersistenceService).update(entry);
@@ -621,6 +639,7 @@ class AssertionServiceTest {
         registrationData.setUsername("alice");
         Fido2RegistrationEntry registrationEntry = mock(Fido2RegistrationEntry.class);
         when(registrationEntry.getRegistrationData()).thenReturn(registrationData);
+        when(registrationEntry.getRegistrationStatus()).thenReturn(Fido2RegistrationStatus.registered);
         when(registrationPersistenceService.findByPublicKeyId(any(), any())).thenReturn(Optional.of(registrationEntry));
 
         doThrow(new Fido2NativeFailureException(NativeFailureDiagnostic.JFS_RPID_HASH_MISMATCH, "Hashes don't match"))
@@ -629,7 +648,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(Fido2NativeFailureException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(Fido2NativeFailureException.class, () -> assertionService.verify(challengedResult));
         }
 
         verify(metricService).recordPasskeyAuthenticationFailure(eq("alice"), any(), anyLong(),
@@ -658,7 +678,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(Fido2RuntimeException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(Fido2RuntimeException.class, () -> assertionService.verify(challengedResult));
         }
 
         ArgumentCaptor<LockAuditEvent> captor = ArgumentCaptor.forClass(LockAuditEvent.class);
@@ -688,7 +709,8 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
-            assertThrows(WebApplicationException.class, () -> assertionService.verify(assertionResultWithChallenge()));
+            AssertionResult challengedResult = assertionResultWithChallenge();
+            assertThrows(WebApplicationException.class, () -> assertionService.verify(challengedResult));
         }
 
         assertEquals(Fido2AuthenticationStatus.failed, authData.getStatus());
@@ -744,8 +766,9 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
+            AssertionResult challengedResult = assertionResultWithChallenge();
             WebApplicationException ex = assertThrows(WebApplicationException.class,
-                    () -> assertionService.verify(assertionResultWithChallenge()));
+                    () -> assertionService.verify(challengedResult));
             // The client still sees the rejection, not the persistence failure.
             assertEquals(400, ex.getResponse().getStatus());
         }
@@ -773,8 +796,9 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
+            AssertionResult challengedResult = assertionResultWithChallenge();
             WebApplicationException ex = assertThrows(WebApplicationException.class,
-                    () -> assertionService.verify(assertionResultWithChallenge()));
+                    () -> assertionService.verify(challengedResult));
             assertEquals(400, ex.getResponse().getStatus());
         }
 
@@ -803,8 +827,9 @@ class AssertionServiceTest {
         try (MockedStatic<CommonUtilService> mockedStatic = mockStatic(CommonUtilService.class)) {
             mockedStatic.when(() -> CommonUtilService.toJsonNode(any())).thenReturn(mapper.createObjectNode());
 
+            AssertionResult challengedResult = assertionResultWithChallenge();
             WebApplicationException ex = assertThrows(WebApplicationException.class,
-                    () -> assertionService.verify(assertionResultWithChallenge()));
+                    () -> assertionService.verify(challengedResult));
             assertEquals(499, ex.getResponse().getStatus());
         }
     }

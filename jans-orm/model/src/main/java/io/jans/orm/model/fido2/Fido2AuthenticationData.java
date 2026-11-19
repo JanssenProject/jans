@@ -149,10 +149,12 @@ public class Fido2AuthenticationData extends Fido2Data {
 
 	@Override
 	public String toString() {
-		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", origin=" + origin + ", userId="
+		String value = "Fido2AuthenticationData [id=" + id + ", username=" + username + ", origin=" + origin + ", userId="
 				+ userId + ", challenge=" + challenge + ", credId=" + credId + ", assertionRequest=" + assertionRequest
 				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
 				+ ", status=" + status + ", rpId=" + rpId + ", errorReason=" + errorReason + ", errorCategory="
 				+ errorCategory + "]";
+		// Fields carry client-supplied data; neutralize control chars and Unicode line/paragraph separators to keep log lines intact
+		return value.replaceAll("[\\p{Cc}\\p{Zl}\\p{Zp}]", " ");
 	}
 }

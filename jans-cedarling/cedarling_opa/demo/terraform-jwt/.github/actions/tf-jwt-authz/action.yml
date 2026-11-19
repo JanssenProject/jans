@@ -15,7 +15,8 @@ inputs:
     description: >
       Terraform sub-command (and any extra flags) to authorize and run.
       For gated commands use e.g. "plan", "apply -auto-approve", "destroy -auto-approve".
-      Non-auth commands (init, fmt, validate) are forwarded to Terraform directly.
+      init, fmt, validate, version, output, show, providers and graph are forwarded
+      to Terraform directly; other sub-commands are rejected.
     required: true
   opa_policy_path:
     description: 'OPA policy path to query, appended to /v1/data/ (default: infra/terraform_jwt)'
@@ -71,17 +72,87 @@ runs:
         OPA_POLICY_PATH: ${{ inputs.opa_policy_path }}
       run: |
         # ── Map sub-command → Cedar action ────────────────────────────────────
-        TF_SUBCOMMAND=$(echo "${TF_COMMAND}" | awk '{print $1}')
+        # Parse once; the same argument vector is authorized and executed.
+        read -r -d '' -a TF_ARGS <<< "${TF_COMMAND}" || true
+        TF_SUBCOMMAND=""
+        DESTROY_FLAG=""
+        PLAN_FILE=""
+        CHDIR_ARG=""
+        SKIP_VALUE=""
+        for arg in "${TF_ARGS[@]}"; do
+          # Terraform reads `-var x=1` as one option, so its value is neither a plan file nor a flag.
+          # List only options that take a value: a boolean one here would hide the next argument.
+          if [[ -n "${SKIP_VALUE}" ]]; then
+            SKIP_VALUE=""
+            continue
+          fi
+          if [[ -n "${TF_SUBCOMMAND}" ]]; then
+            case "${arg/#--/-}" in
+              -backup|-generate-config-out|-lock-timeout|-out|-parallelism|-replace|-state|-state-out|-target|-var|-var-file)
+                SKIP_VALUE="yes"
+                continue
+                ;;
+            esac
+          fi
+          case "${arg}" in
+            -destroy|--destroy) DESTROY_FLAG="yes" ;;
+            -destroy=*|--destroy=*)
+              # Terraform parses booleans with Go's strconv.ParseBool, so fail closed on anything but false
+              case "${arg#*=}" in
+                0|f|F|false|FALSE|False) ;;
+                *) DESTROY_FLAG="yes" ;;
+              esac
+              ;;
+            -chdir=*) CHDIR_ARG="${arg}" ;;
+            -*)
+              if [[ -z "${TF_SUBCOMMAND}" ]]; then
+                echo "::error::Only -chdir= may precede the Terraform sub-command, got '${arg}'."
+                exit 1
+              fi
+              ;;
+            *)
+              if [[ -z "${TF_SUBCOMMAND}" ]]; then
+                TF_SUBCOMMAND="${arg}"
+              elif [[ -z "${PLAN_FILE}" ]]; then
+                PLAN_FILE="${arg}"
+              fi
+              ;;
+          esac
+        done
         case "${TF_SUBCOMMAND}" in
           plan)    CEDAR_ACTION="Plan" ;;
           apply)   CEDAR_ACTION="Apply" ;;
           destroy) CEDAR_ACTION="Destroy" ;;
+          init|fmt|validate|version|output|show|providers|graph)
+            # Read-only or local-only commands: no authorization check.
+            exec terraform "${TF_ARGS[@]}"
+            ;;
           *)
-            # No authorization check for init, fmt, validate, output, etc.
-            # shellcheck disable=SC2086
-            exec terraform ${TF_COMMAND}
+            echo "::error::'terraform ${TF_SUBCOMMAND}' is not supported by this action."
+            echo "::error::Gated: plan, apply, destroy. Ungated: init, fmt, validate, version, output, show, providers, graph."
+            exit 1
             ;;
         esac
+        # `plan -destroy` / `apply -destroy` destroy infrastructure, so they need Destroy.
+        if [[ -n "${DESTROY_FLAG}" ]]; then
+          CEDAR_ACTION="Destroy"
+        fi
+        # Terraform appends TF_CLI_ARGS and TF_CLI_ARGS_<command> to the arguments, so
+        # they could add -destroy after authorization. Refuse them instead of parsing them.
+        for var in TF_CLI_ARGS TF_CLI_ARGS_plan TF_CLI_ARGS_apply TF_CLI_ARGS_destroy; do
+          if [[ -n "${!var:-}" ]]; then
+            echo "::error::${var} is set; unset it and pass the arguments in terraform_command."
+            exit 1
+          fi
+        done
+        # A saved plan keeps its own mode, so `apply <plan>` that deletes resources needs Destroy.
+        # Fail closed: anything not confirmed delete-free is treated as Destroy.
+        if [[ "${CEDAR_ACTION}" == "Apply" && -n "${PLAN_FILE}" ]]; then
+          if ! terraform ${CHDIR_ARG:+"${CHDIR_ARG}"} show -json "${PLAN_FILE}" 2>/dev/null \
+            | jq -e 'any(.resource_changes[]?.change.actions[]?; . == "delete") | not' >/dev/null 2>&1; then
+            CEDAR_ACTION="Destroy"
+          fi
+        fi
 
         # ── Decode JWT claims for display (Cedarling verifies the signature) ──
         JWT_PAYLOAD_B64=$(echo "${TF_JWT}" | cut -d'.' -f2)
@@ -141,8 +212,7 @@ runs:
           echo "tf-jwt-authz: ALLOWED"
           [[ -n "${REASONS}" ]] && echo "  Granted by Cedar policy: ${REASONS}"
           echo ""
-          # shellcheck disable=SC2086
-          exec terraform ${TF_COMMAND}
+          exec terraform "${TF_ARGS[@]}"
         else
           echo "::error::tf-jwt-authz: DENIED"
           echo "::error::The pipeline is not permitted to run 'terraform ${TF_SUBCOMMAND}' on workspace '${TF_WORKSPACE}'."

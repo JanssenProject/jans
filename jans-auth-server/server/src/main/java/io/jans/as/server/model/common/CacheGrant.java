@@ -10,6 +10,7 @@ import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.util.TokenHashUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.enterprise.inject.Instance;
@@ -37,6 +38,7 @@ public class CacheGrant implements Serializable {
     private String nonce;
     private String codeChallenge;
     private String codeChallengeMethod;
+    private String dpopJkt;
     private String redirectUri;
     private String ephemeralSub;
     private String claims;
@@ -74,6 +76,7 @@ public class CacheGrant implements Serializable {
         acrValues = grant.getAcrValues();
         codeChallenge = grant.getCodeChallenge();
         codeChallengeMethod = grant.getCodeChallengeMethod();
+        dpopJkt = grant.getDpopJkt();
         redirectUri = grant.getRedirectUri();
         claims = grant.getClaims();
         sessionDn = grant.getSessionDn();
@@ -249,6 +252,14 @@ public class CacheGrant implements Serializable {
         this.codeChallengeMethod = codeChallengeMethod;
     }
 
+    public String getDpopJkt() {
+        return dpopJkt;
+    }
+
+    public void setDpopJkt(String dpopJkt) {
+        this.dpopJkt = dpopJkt;
+    }
+
     public String getClaims() {
         return claims;
     }
@@ -290,6 +301,7 @@ public class CacheGrant implements Serializable {
         grant.setClaims(claims);
         grant.setEphemeralSub(ephemeralSub);
         grant.setAuthorizationChallenge(isAuthorizationChallenge);
+        grant.setDpopJkt(dpopJkt);
 
         return grant;
     }
@@ -339,7 +351,8 @@ public class CacheGrant implements Serializable {
         if (StringUtils.isBlank(code)) {
             return grantId;
         }
-        return code;
+        // same representation as TokenEntity.authorizationCode, so grant cleanup can evict it without the raw code
+        return TokenHashUtil.hash(code);
     }
 
     public String getAuthReqId() {

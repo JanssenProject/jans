@@ -9,6 +9,9 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.uma.service import UmaPctService
 from java.lang import Throwable
 
+def escapeLog(value):
+    return value.replace("\r", "\\r").replace("\n", "\\n")
+
 class UmaClaimsGathering(UmaClaimsGatheringType):
 
     def __init__(self, currentTimeMillis):
@@ -41,7 +44,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         if step == 1:
             if (context.getPageClaims().containsKey("country")):
                 country = context.getPageClaims().get("country")
-                print "Country: " + country
+                print "Country: " + escapeLog(country)
 
                 context.putClaim("country", country)
                 return True
@@ -52,7 +55,7 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
         elif step == 2:
             if (context.getPageClaims().containsKey("city")):
                 city = context.getPageClaims().get("city")
-                print "City: " + city
+                print "City: " + escapeLog(city)
 
                 context.putClaim("city", city)
                 print "Claims-Gathering. 'city' is not provided on step 2."
@@ -98,11 +101,11 @@ class UmaClaimsGathering(UmaClaimsGatheringType):
                 pct = CdiUtil.bean(UmaPctService).getByCode(pctCode[0])
 
                 country = pct.getClaims().getClaimAsString("country")
-                print "Country from pct: " + country
+                print "Country from pct: " + escapeLog(country)
                 context.putClaim("country", country)
 
                 city = pct.getClaims().getClaimAsString("city")
-                print "City from pct: " + city
+                print "City from pct: " + escapeLog(city)
                 context.putClaim("city", city)
 
                 stepsCount = 2

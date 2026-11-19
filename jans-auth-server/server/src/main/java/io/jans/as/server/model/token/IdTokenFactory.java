@@ -485,11 +485,12 @@ public class IdTokenFactory {
 
         final Client client = grant.getClient();
 
-        JsonWebResponse jwr = jwrService.createJwr(client);
+        final String signingKid = client.getAttributes().getIdTokenSigningKid();
+        JsonWebResponse jwr = jwrService.createJwr(client, signingKid);
         fillClaims(jwr, grant, authorizationCode, accessToken, refreshToken, executionContext);
         if (log.isTraceEnabled())
             log.trace("Created claims for id_token, claims: {}", jwr.getClaims().toJsonString());
-        return jwrService.encode(jwr, client);
+        return jwrService.encode(jwr, client, signingKid);
     }
 
     private boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
@@ -510,7 +511,7 @@ public class IdTokenFactory {
 
             if (scope != null && scope.getClaims() != null) {
                 for (String claimDn : scope.getClaims()) {
-                    if (jansAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                    if (jansAttribute.getDn().equalsIgnoreCase(claimDn)) {
                         return true;
                     }
                 }

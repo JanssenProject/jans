@@ -64,6 +64,7 @@ public class FilterListener extends ScimFilterBaseListener {
             Attribute attrAnnot = IntrospectUtil.getFieldAnnotation(path, resourceClass, Attribute.class);
             String ldapAttribute = null;
             boolean isNested = false;
+            boolean caseExact = true;
             Boolean multiValued = false;
 
             if (attrAnnot == null) {
@@ -78,6 +79,7 @@ public class FilterListener extends ScimFilterBaseListener {
                 }
             } else {
                 attrType = attrAnnot.type();
+                caseExact = attrAnnot.isCaseExact();
                 Pair<String, Boolean> pair = FilterUtil.getLdapAttributeOfResourceAttribute(path, resourceClass);
                 ldapAttribute = pair.getFirst();
                 isNested = pair.getSecond();
@@ -106,7 +108,7 @@ public class FilterListener extends ScimFilterBaseListener {
                 error = FilterUtil.checkFilterConsistency(path, attrType, type, operator);
                 if (error == null) {
                     Pair<Filter, String> subf = subFilterGenerator
-                            .build(subattr, ldapAttribute, isPrRule ? null : compValueCtx.getText(), attrType, type, operator, multiValued);
+                            .build(subattr, ldapAttribute, isPrRule ? null : compValueCtx.getText(), attrType, type, operator, multiValued, caseExact);
                     Filter subFilth = subf.getFirst();
                     error = subf.getSecond();
 

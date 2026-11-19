@@ -50,11 +50,18 @@ const generatedFallbackWasmUrl =
   "new URL('cedarling_wasm_bg.wasm', import.meta.url)";
 const runtimeOnlyFallbackWasmUrl =
   "new URL(['cedarling_wasm_bg', 'wasm'].join('.'), import.meta.url)";
+const explicitWasmInputRequired = `(() => {
+        throw new TypeError('Manual WASM initialization requires an explicit module_or_path');
+    })()`;
 
 function generatedGlue({
   ignoreFallbackWasmUrl = false,
+  requireExplicitWasmInput = false,
   allowsRuntimeCompilation = true,
 } = {}) {
+  if (ignoreFallbackWasmUrl && requireExplicitWasmInput) {
+    throw new TypeError("WASM fallback options are mutually exclusive");
+  }
   return {
     name: "cedarling-generated-glue",
     setup(esbuild) {
@@ -77,13 +84,15 @@ function generatedGlue({
               ? realmNeutralModuleCheck
               : moduleOnlyRealmNeutralCheck,
           );
-          if (ignoreFallbackWasmUrl) {
+          if (ignoreFallbackWasmUrl || requireExplicitWasmInput) {
             if (!contents.includes(generatedFallbackWasmUrl)) {
               throw new Error("Generated glue changed its default WASM URL");
             }
             contents = contents.replace(
               generatedFallbackWasmUrl,
-              runtimeOnlyFallbackWasmUrl,
+              requireExplicitWasmInput
+                ? explicitWasmInputRequired
+                : runtimeOnlyFallbackWasmUrl,
             );
           }
           return {
@@ -177,6 +186,17 @@ const publicDeclarations = [
   "manual.d.ts",
   "wasm.d.ts",
 ];
+const manualDeclaration = `import type { InitInput, InitOutput } from "./generated.js";
+export * from "./generated.js";
+
+type ManualInitInput = InitInput | Promise<InitInput>;
+
+declare function initWasm(
+  module_or_path: { module_or_path: ManualInitInput } | ManualInitInput,
+): Promise<InitOutput>;
+
+export default initWasm;
+`;
 
 async function rewriteDeclaration(name) {
   const path = join(declarations, name);
@@ -274,7 +294,7 @@ await build({
   platform: "neutral",
   mainFields: ["module", "main"],
   target: "es2022",
-  plugins: [generatedGlue()],
+  plugins: [generatedGlue({ requireExplicitWasmInput: true })],
   sourcemap: true,
   metafile: true,
 });
@@ -368,10 +388,7 @@ await Promise.all([
   ),
 ]);
 await Promise.all([
-  writeFile(
-    join(declarations, "manual.d.ts"),
-    'export * from "./generated.js";\nexport { default } from "./generated.js";\n',
-  ),
+  writeFile(join(declarations, "manual.d.ts"), manualDeclaration),
   writeFile(
     join(declarations, "wasm.d.ts"),
     "declare const wasmUrl: string;\nexport default wasmUrl;\n",

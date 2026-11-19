@@ -112,6 +112,8 @@ public class TocService {
 
 	private static final String RETRY_AFTER_HEADER = "Retry-After";
 
+	private static final String MDS_TOCS_FOLDER = "mdsTocsFolder";
+
 	/** {@link HttpURLConnection} has no constant for 429 (Too Many Requests). */
 	private static final int HTTP_TOO_MANY_REQUESTS = 429;
 
@@ -402,7 +404,7 @@ public class TocService {
 		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 
 		try {
-			Document mdsDocument = dbDocumentService.getDocumentByDisplayName("mdsTocsFolder");
+			Document mdsDocument = dbDocumentService.getDocumentByDisplayName(MDS_TOCS_FOLDER);
 			Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, mdsDocument.getDocument());
 			log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(), result.getFirst());
 
@@ -652,7 +654,19 @@ public class TocService {
 			throw new Fido2RuntimeException(
 					"Fido2 MDS cert and TOC properties are not set, the downloaded TOC can't be verified");
 		}
-		parseTOC(mdsTocRootCertsFolder, encodedToc);
+		LocalDate cachedNextUpdate = cachedTocNextUpdate();
+		Pair<LocalDate, Map<String, JsonNode>> parsedToc = parseTOC(mdsTocRootCertsFolder, encodedToc);
+		LocalDate tocNextUpdate = parsedToc.getFirst();
+		if (tocNextUpdate != null && tocNextUpdate.isBefore(LocalDate.now())) {
+			// An expired blob is still better than none (FIDO may publish late), but it must not roll
+			// back a newer cached TOC, e.g. when replayed by a mirror
+			if (cachedNextUpdate != null && tocNextUpdate.isBefore(cachedNextUpdate)) {
+				nextUpdate = cachedNextUpdate;
+				throw new Fido2RuntimeException("The downloaded MDS TOC expired on " + tocNextUpdate
+						+ " and is older than the cached one");
+			}
+			log.warn("The downloaded MDS TOC expired on {}, using it until a newer one is published", tocNextUpdate);
+		}
 	}
 
 	/**
@@ -771,6 +785,24 @@ public class TocService {
 		}
 	}
 
+	// After a restart nothing is loaded in memory yet, so fall back to the date stored with the cached TOC
+	private LocalDate cachedTocNextUpdate() {
+		if (nextUpdate != null) {
+			return nextUpdate;
+		}
+		try {
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(appConfiguration.getFido2Configuration().getMdsTocsFolder());
+			if (documents == null || documents.isEmpty()) {
+				return null;
+			}
+			String description = documents.get(0).getDescription();
+			return (description == null || MDS_TOCS_FOLDER.equals(description)) ? null : stringToLocalDate(description);
+		} catch (Exception e) {
+			log.debug("No persisted MDS TOC date available: {}", e.getMessage());
+			return null;
+		}
+	}
+
 	public LocalDate getNextUpdateDate() {
 
 		try {
@@ -778,7 +810,7 @@ public class TocService {
 			String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
 
 			Document document = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder).get(0);
-			return (document.getDescription() == null || "mdsTocsFolder".equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
+			return (document.getDescription() == null || MDS_TOCS_FOLDER.equals(document.getDescription())) ? null : stringToLocalDate(document.getDescription());
 
 		} catch (Exception e) {
 			log.error("Failed to get nextUpdateDate of the MDS from jansDocument ", e);

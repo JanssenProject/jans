@@ -36,8 +36,8 @@ public final class ClaimDefinitionBuilder {
         try {
             return Util.createJsonMapper().readValue(json, ClaimDefinitionList.class);
         } catch (IOException e) {
-            LOG.error("Failed to parse claim definition json: " + json, e);
-            throw new RuntimeException("Failed to parse claim definition json: " + json, e);
+            LOG.error("Failed to parse claim definition json", e);
+            throw new RuntimeException("Failed to parse claim definition json", e);
         }
     }
 }

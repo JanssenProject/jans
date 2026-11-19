@@ -1077,12 +1077,8 @@ public class SessionIdService {
             return false;
         }
 
-        for (String scope : scopes) {
-            if (!existingScopes.contains(scope)) {
-                return false;
-            }
-        }
-        return true;
+        final Set<String> existing = Sets.newHashSet(StringUtils.split(existingScopes));
+        return existing.containsAll(scopes);
     }
 
     public void externalEvent(SessionEvent event) {

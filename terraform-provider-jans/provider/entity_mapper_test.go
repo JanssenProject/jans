@@ -590,3 +590,80 @@ func TestPruneUndeclaredKeepsDeclaredZeroValue(t *testing.T) {
 		t.Error("Declared empty attestation_mode was dropped")
 	}
 }
+
+func TestDecoderKeepsUndeclaredSliceElemFields(t *testing.T) {
+
+	type ldapConfig struct {
+		ConfigId string `schema:"config_id"`
+		BindDN   string `schema:"bind_dn"`
+		UseSSL   bool   `schema:"use_ssl"`
+	}
+
+	type testCase struct {
+		Configs []ldapConfig `schema:"configs"`
+	}
+
+	entity := testCase{
+		Configs: []ldapConfig{
+			{ConfigId: "a", BindDN: "cn=a", UseSSL: true},
+			{ConfigId: "b", BindDN: "cn=b", UseSSL: true},
+		},
+	}
+
+	declared := map[string]any{"configs": []any{
+		map[string]any{"config_id": "b", "bind_dn": "cn=b2"},
+		map[string]any{"config_id": "c", "bind_dn": "cn=c"},
+	}}
+
+	getter := func(key string) (any, bool) {
+		val, ok := declared[key]
+		return val, ok
+	}
+
+	if err := decoder(getter, &entity); err != nil {
+		t.Fatal(err)
+	}
+
+	expected := testCase{
+		Configs: []ldapConfig{
+			{ConfigId: "b", BindDN: "cn=b2", UseSSL: true},
+			{ConfigId: "c", BindDN: "cn=c"},
+		},
+	}
+
+	if diff := cmp.Diff(expected, entity); diff != "" {
+		t.Errorf("Got different entity after merge: %s", diff)
+	}
+}
+
+func TestPathConfigState(t *testing.T) {
+
+	cfg := cty.ObjectVal(map[string]cty.Value{
+		"bool_attr":  cty.False,
+		"unset_attr": cty.NullVal(cty.Bool),
+		"complex_attr": cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{
+			"sub_bool_attr":  cty.False,
+			"sub_unset_attr": cty.NullVal(cty.Bool),
+		})}),
+	})
+
+	testCases := []struct {
+		path     string
+		expected configState
+	}{
+		{"bool_attr", configSet},
+		{"unset_attr", configNull},
+		{"complex_attr.0.sub_bool_attr", configSet},
+		{"complex_attr.0.sub_unset_attr", configNull},
+		{"complex_attr.1.sub_bool_attr", configNull},
+		{"missing", configUnavailable},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.path, func(t *testing.T) {
+			if got := pathConfigState(cfg, tc.path); got != tc.expected {
+				t.Errorf("Got %d, expected %d", got, tc.expected)
+			}
+		})
+	}
+}

@@ -3,6 +3,7 @@ import sys
 import argparse
 import json
 import base64
+import shutil
 import tempfile
 
 from collections import OrderedDict
@@ -46,7 +47,8 @@ with open('schema/mapping.json') as f:
 mapping['objectClass']['gluuCustomPerson'] = 'jansCustomPerson'
 
 #escape base64 encoded fields
-b64_escaped_file = ldif_file +'.b64'
+work_dir = tempfile.mkdtemp()
+b64_escaped_file = os.path.join(work_dir, 'in.b64')
 with open(b64_escaped_file, 'w') as w, open(ldif_file) as ldif_fd:
     for l in ldif_fd:
         n = l.find('::')
@@ -88,7 +90,7 @@ for k in opendj_types:
 ldif_parser = myLdifParser(b64_escaped_file)
 ldif_parser.parse()
 
-b64_escaped_out_file = out_file + '.b64'
+b64_escaped_out_file = os.path.join(work_dir, 'out.b64')
 with open(b64_escaped_out_file, 'wb') as out_ldif:
 
     ldif_writer = LDIFWriter(out_ldif, cols=10000)
@@ -171,8 +173,7 @@ with open(out_file, 'w') as w, open(b64_escaped_out_file) as b64_fd:
         w.write(l)
 
 
-os.remove(b64_escaped_file)
-os.remove(b64_escaped_out_file)
+shutil.rmtree(work_dir)
 
 
 

@@ -9,7 +9,7 @@ import (
 
 type ScopeAttribute struct {
 	SpontaneousClientScopes     []string `schema:"spontaneous_client_scopes" json:"spontaneousClientScopes,omitempty"`
-	ShowInConfigurationEndpoint bool     `schema:"show_in_configuration_endpoint" json:"showInConfigurationEndpoint,omitempty"`
+	ShowInConfigurationEndpoint bool     `schema:"show_in_configuration_endpoint" json:"showInConfigurationEndpoint"`
 }
 
 type Scope struct {

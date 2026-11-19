@@ -462,7 +462,7 @@ public class AppInitializer {
         PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
 
         List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs, persistenceEntryManagerFactory.getPersistenceType());
-        log.trace("Attempting to create LDAP auth PersistenceEntryManager with properties: {}", persistenceAuthProperties);
+        log.trace("Attempting to create {} LDAP auth PersistenceEntryManager(s)", persistenceAuthProperties.size());
 
         for (int i = 0; i < persistenceAuthProperties.size(); i++) {
             PersistenceEntryManager persistenceAuthEntryManager =

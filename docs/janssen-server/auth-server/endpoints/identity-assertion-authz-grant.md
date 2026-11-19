@@ -141,7 +141,6 @@ grant_type=urn:ietf:params:oauth:grant-type:token-exchange
 | Value | Description |
 |---|---|
 | `urn:ietf:params:oauth:token-type:id_token` | OIDC ID token (most common) |
-| `urn:ietf:params:oauth:token-type:saml2` | SAML 2.0 assertion |
 | `urn:ietf:params:oauth:token-type:refresh_token` | Refresh token (for SAML-first deployments) |
 
 **Response:**

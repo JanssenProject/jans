@@ -67,7 +67,7 @@ public class DpopServiceTest {
         when(appConfiguration.getDpopUseNonce()).thenReturn(true);
 
         final String nonce = UUID.randomUUID().toString();
-        when(cacheService.get(nonce)).thenReturn(nonce);
+        when(cacheService.get("dpop_nonce_" + nonce)).thenReturn(nonce);
 
         dpopService.validateDpopNonce(nonce);
     }

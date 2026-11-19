@@ -98,6 +98,8 @@ public class RegisterRequest extends BaseRequest {
     private List<String> rptClaimsScriptDns;
     private List<String> ropcScriptDns;
     private Boolean runIntrospectionScriptBeforeJwtCreation;
+    private String accessTokenSigningKid;
+    private String idTokenSigningKid;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
     private String subjectIdentifierAttribute;
@@ -297,6 +299,22 @@ public class RegisterRequest extends BaseRequest {
 
     public void setAdditionalAudience(List<String> additionalAudience) {
         this.additionalAudience = additionalAudience;
+    }
+
+    public String getAccessTokenSigningKid() {
+        return accessTokenSigningKid;
+    }
+
+    public void setAccessTokenSigningKid(String accessTokenSigningKid) {
+        this.accessTokenSigningKid = accessTokenSigningKid;
+    }
+
+    public String getIdTokenSigningKid() {
+        return idTokenSigningKid;
+    }
+
+    public void setIdTokenSigningKid(String idTokenSigningKid) {
+        this.idTokenSigningKid = idTokenSigningKid;
     }
 
     public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
@@ -2022,6 +2040,8 @@ public class RegisterRequest extends BaseRequest {
         result.setRptClaimsScriptDns(extractListByKey(requestObject, RPT_CLAIMS_SCRIPT_DNS.toString()));
         result.setRopcScriptDns(extractListByKey(requestObject, ROPC_SCRIPT_DNS.toString()));
         result.setRunIntrospectionScriptBeforeJwtCreation(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString()));
+        result.setAccessTokenSigningKid(requestObject.optString(ACCESS_TOKEN_SIGNING_KID.toString(), null));
+        result.setIdTokenSigningKid(requestObject.optString(ID_TOKEN_SIGNING_KID.toString(), null));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
@@ -2361,6 +2381,12 @@ public class RegisterRequest extends BaseRequest {
         applyArray(function, RPT_CLAIMS_SCRIPT_DNS, rptClaimsScriptDns);
         applyArray(function, ROPC_SCRIPT_DNS, ropcScriptDns);
 
+        if (StringUtils.isNotBlank(accessTokenSigningKid)) {
+            function.apply(ACCESS_TOKEN_SIGNING_KID.toString(), accessTokenSigningKid);
+        }
+        if (StringUtils.isNotBlank(idTokenSigningKid)) {
+            function.apply(ID_TOKEN_SIGNING_KID.toString(), idTokenSigningKid);
+        }
         if (runIntrospectionScriptBeforeJwtCreation != null) {
             function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
         }

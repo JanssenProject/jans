@@ -148,6 +148,7 @@ func resourceCustomUser() *schema.Resource {
 			},
 			"user_password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "User password",
 			},

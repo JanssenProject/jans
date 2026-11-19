@@ -23,7 +23,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
 - `CN_CONFIG_CONSUL_SCHEME`: supported Consul scheme (`http` or `https`).
-- `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not (default to `false`).
+- `CN_CONFIG_CONSUL_VERIFY`: whether to verify cert or not when using `https` scheme (default to `true`; set to `false` only for development).
 - `CN_CONFIG_CONSUL_CACERT_FILE`: path to Consul CA cert file (default to `/etc/certs/consul_ca.crt`). This file will be used if it exists and `CN_CONFIG_CONSUL_VERIFY` set to `true`.
 - `CN_CONFIG_CONSUL_CERT_FILE`: path to Consul cert file (default to `/etc/certs/consul_client.crt`).
 - `CN_CONFIG_CONSUL_KEY_FILE`: path to Consul key file (default to `/etc/certs/consul_client.key`).
@@ -61,6 +61,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `lock`, `jans-link`, `metric`, `shibboleth`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_BASE_URL`: Base URL of token server (default to empty).
+- `CN_TOKEN_SERVER_CERT_FINGERPRINT`: Expected SHA-256 fingerprint of the token server certificate downloaded at startup (default to empty, which disables pinning).
 - `CN_TOKEN_SERVER_CERT_FILE`: Path to token server certificate (default to `/etc/certs/token_server.crt`).
 - `CN_ADMIN_UI_PLUGIN_LOGGERS`: Custom logging configuration for AdminUI plugin in JSON-string format with hash type (see [Configure plugin loggers](#configure-plugin-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
@@ -79,6 +80,8 @@ The following environment variables are supported by the container:
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
 - `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
+- `CN_SSL_CERT_VERIFY`: Verify the certificate chain and hostname when downloading the SSL cert from the server (default to `false`).
+- `CN_SSL_CERT_FINGERPRINT`: Expected SHA-256 fingerprint (hex, colons optional) of the SSL cert downloaded from the server; startup fails on mismatch (default to empty, which disables pinning).
 
 ### Configure app loggers
 

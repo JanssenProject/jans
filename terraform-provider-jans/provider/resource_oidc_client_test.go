@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/jans/terraform-provider-jans/jans"
@@ -93,7 +94,7 @@ func TestReourceOidcClient_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(client, newClient); diff != "" {
+	if diff := cmp.Diff(client, newClient, cmpopts.IgnoreUnexported(jans.OidcClient{})); diff != "" {
 		t.Errorf("Got different client after mapping: %s", diff)
 	}
 }
@@ -127,7 +128,7 @@ resource "jans_oidc_client" "test" {
 	token_endpoint_auth_method						= "client_secret_basic"
 	application_type 											= "web"
 	display_name 													= "SCIM client"
-	client_secret 												= "SEw7VOX8m9ah"
+	client_secret 												= "SEw7VOX8m9ah" // # gitleaks:allow
 	front_channel_logout_uri 							= "https://jans.io/logout"
 	front_channel_logout_session_required = false
 	redirect_uris 												= ["https://jans.io/.well-known/scim-configuration"]

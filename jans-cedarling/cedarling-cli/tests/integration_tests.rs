@@ -4,6 +4,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use assert_cmd::Command;
+use predicates::prelude::*;
 
 #[test]
 fn test_integration_pass() {
@@ -103,6 +104,27 @@ fn test_validate_strict_fails_on_unknown_fields() {
         .stdout(predicates::str::contains(
             "2 unknown field(s) with --strict",
         ));
+}
+
+#[test]
+fn test_validate_escapes_control_characters_from_store() {
+    let mut cmd = Command::cargo_bin("cedarling-cli").unwrap();
+    cmd.env("CEDARLING_JWT_SIG_VALIDATION", "disabled")
+        .arg("--no-color")
+        .arg("--policy-store")
+        .arg(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/tests/v2_store_control_chars"
+        ))
+        .arg("validate");
+
+    cmd.assert()
+        .success()
+        .stdout(predicates::str::contains(
+            r"unknown field `Acme::Access_token.x\u{1b}[2Jvendor\u{202e}` is ignored",
+        ))
+        .stdout(predicates::str::contains("\u{1b}").not())
+        .stdout(predicates::str::contains("\u{202e}").not());
 }
 
 #[test]

@@ -31,10 +31,13 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * @author Javier Rojas Blum
@@ -106,8 +109,10 @@ public class RedirectionUriService {
             String sectorIdentifierUri = client.getSectorIdentifierUri();
             String[] redirectUris = client.getRedirectUris();
 
-            if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-                redirectUris = getSectorRedirectUris(sectorIdentifierUri).toArray(new String[0]);
+            if (StringUtils.isNotBlank(sectorIdentifierUri) && redirectUris != null) {
+                // sector document constrains, but never extends, the client's own registered redirect uris
+                final List<String> sectorRedirectUris = getSectorRedirectUris(sectorIdentifierUri);
+                redirectUris = Arrays.stream(redirectUris).filter(sectorRedirectUris::contains).toArray(String[]::new);
             }
 
             if (StringUtils.isBlank(redirectionUri) && redirectUris != null && redirectUris.length == 1) {
@@ -151,7 +156,67 @@ public class RedirectionUriService {
             return false;
         }
         final String redirectUrisRegex = client.getAttributes().getRedirectUrisRegex();
-        return StringUtils.isNotBlank(redirectUrisRegex) && redirectUri.matches(redirectUrisRegex);
+        if (StringUtils.isBlank(redirectUrisRegex) || redirectUri == null) {
+            return false;
+        }
+        try {
+            return Pattern.compile(redirectUrisRegex).matcher(new BoundedCharSequence(redirectUri, REGEX_MAX_CHAR_ACCESSES)).matches();
+        } catch (RegexBudgetExceededException e) {
+            log.warn("redirect_uris_regex evaluation exceeded budget, clientId = {}", client.getClientId());
+            return false;
+        } catch (PatternSyntaxException e) {
+            log.warn("Invalid redirect_uris_regex, clientId = {}", client.getClientId());
+            return false;
+        }
+    }
+
+    private static final long REGEX_MAX_CHAR_ACCESSES = 1_000_000L;
+
+    private static class RegexBudgetExceededException extends RuntimeException {
+        RegexBudgetExceededException() {
+            super(null, null, false, false);
+        }
+    }
+
+    /**
+     * Client-supplied regex runs on a backtracking engine; cap the work per evaluation so a
+     * pathological expression cannot pin a request thread.
+     */
+    private static class BoundedCharSequence implements CharSequence {
+        private final CharSequence inner;
+        private final long[] budget;
+
+        BoundedCharSequence(CharSequence inner, long budget) {
+            this(inner, new long[]{budget});
+        }
+
+        private BoundedCharSequence(CharSequence inner, long[] budget) {
+            this.inner = inner;
+            this.budget = budget;
+        }
+
+        @Override
+        public char charAt(int index) {
+            if (--budget[0] < 0) {
+                throw new RegexBudgetExceededException();
+            }
+            return inner.charAt(index);
+        }
+
+        @Override
+        public int length() {
+            return inner.length();
+        }
+
+        @Override
+        public CharSequence subSequence(int start, int end) {
+            return new BoundedCharSequence(inner.subSequence(start, end), budget);
+        }
+
+        @Override
+        public String toString() {
+            return inner.toString();
+        }
     }
 
     public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {

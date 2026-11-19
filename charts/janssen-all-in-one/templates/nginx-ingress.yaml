@@ -63,7 +63,7 @@ metadata:
 {{ toYaml (index .Values "auth-server" "ingress" "deviceCodeLabels") | indent 4 }}
 {{- end }}
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/device_authorization.htm
 {{- if index .Values "auth-server" "ingress" "deviceCodeAdditionalAnnotations" }}

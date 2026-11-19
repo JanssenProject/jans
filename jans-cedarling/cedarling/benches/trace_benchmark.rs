@@ -179,6 +179,7 @@ fn trace_config() -> TraceConfig {
         ),
         signing_kid: None,
         endpoint: TraceEndpoint::Discovered,
+        transport: cedarling::LockTransport::Rest,
         bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
         bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
     }
@@ -203,7 +204,6 @@ fn bootstrap_config(lock: Option<LockServiceConfig>, trace: bool) -> BootstrapCo
             ..Default::default()
         },
         lock_config: lock,
-        max_base64_size: None,
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
         http_client_config: HttpClientConfig::default(),

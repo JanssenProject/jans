@@ -16,6 +16,7 @@ use url::Url;
 use crate::{
     LogLevel, LogWriter,
     async_sleep::sleep,
+    common::issuer_utils::IssClaim,
     http::HttpClient,
     jwt::{
         IssuerConfig, TokenCache,
@@ -28,7 +29,7 @@ use crate::{
     log::Logger,
 };
 
-use super::{StatusList, StatusListJwt, StatusListJwtStr, UpdateStatusListError};
+use super::{StatusList, StatusListJwt, StatusListJwtStr, UnboundReason, UpdateStatusListError};
 
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
@@ -40,6 +41,7 @@ struct StatusListUpdateCtx {
     /// `ttl`, this value is used directly.
     refresh_interval_max: Duration,
     status_list_url: Url,
+    iss: IssClaim,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<JwtValidator>,
     status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
@@ -58,12 +60,41 @@ pub(crate) struct InitForIssArgs<'a> {
     pub cancel_tkn: CancellationToken,
 }
 
+/// Floor for an issuer-requested `ttl`, so `ttl: 0` cannot turn the refresh
+/// worker into a busy loop.
+const MIN_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
+
 /// Resolve effective refresh interval as `min(jwt_ttl, refresh_interval_max)`,
-/// or `refresh_interval_max` when the JWT omits `ttl`.
+/// or `refresh_interval_max` when the JWT omits `ttl`. Never below
+/// [`MIN_REFRESH_INTERVAL`] unless the configured max itself is lower.
 fn effective_refresh_interval(jwt_ttl_secs: Option<u64>, max: Duration) -> Duration {
     match jwt_ttl_secs {
-        Some(t) => Duration::from_secs(t).min(max),
+        Some(t) => Duration::from_secs(t).max(MIN_REFRESH_INTERVAL).min(max),
         None => max,
+    }
+}
+
+/// Per the status list spec, `sub` is the status list's own URI; `iss`, when
+/// present, must be the issuer whose endpoint served it.
+///
+/// `sub` must equal the URI exactly, as the spec requires: parsing already
+/// ignores host case and a default port, and a trailing slash or a query names
+/// another URI.
+fn check_bound_to(
+    jwt: &StatusListJwt,
+    iss: &IssClaim,
+    status_list_url: &Url,
+) -> Result<(), UnboundReason> {
+    if !Url::parse(&jwt.sub).is_ok_and(|sub| sub == *status_list_url) {
+        return Err(UnboundReason::Sub {
+            found: jwt.sub.clone(),
+        });
+    }
+    match &jwt.iss {
+        Some(jwt_iss) if jwt_iss != iss => Err(UnboundReason::Iss {
+            found: jwt_iss.clone(),
+        }),
+        _ => Ok(()),
     }
 }
 
@@ -126,6 +157,15 @@ impl StatusListCache {
         let decoding_key = key_service.get_key(&decoding_key_info);
 
         let decoded_jwt_iss = decoded_jwt.iss();
+        // The response must not pick another trusted issuer's validator.
+        if let Some(decoded) = decoded_jwt_iss.as_ref().filter(|decoded| **decoded != iss) {
+            return Err(UpdateStatusListError::UnboundStatusList {
+                url: status_list_url.to_string(),
+                reason: UnboundReason::Iss {
+                    found: decoded.clone(),
+                },
+            });
+        }
         // get validator
         let validator_key = ValidatorInfo {
             iss: decoded_jwt_iss.as_ref(),
@@ -143,6 +183,12 @@ impl StatusListCache {
             .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
             .try_into()
             .map_err(DecodeJwtError::DeserializeClaims)?;
+        check_bound_to(&status_list_jwt, &iss, status_list_url).map_err(|reason| {
+            UpdateStatusListError::UnboundStatusList {
+                url: status_list_url.to_string(),
+                reason,
+            }
+        })?;
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -157,6 +203,7 @@ impl StatusListCache {
             ttl,
             refresh_interval_max,
             status_list_url: status_list_url.clone(),
+            iss: iss.clone(),
             decoding_key,
             validator,
             status_lists: self.status_lists.clone(),
@@ -194,6 +241,7 @@ where
         mut ttl,
         refresh_interval_max,
         status_list_url,
+        iss,
         decoding_key,
         validator,
         status_lists,
@@ -262,6 +310,16 @@ where
                 continue;
             },
         };
+        if let Err(reason) = check_bound_to(&status_list_jwt, &iss, &status_list_url) {
+            handle_err(
+                "bind the updated status list JWT",
+                &UpdateStatusListError::UnboundStatusList {
+                    url: status_list_url.to_string(),
+                    reason,
+                },
+            );
+            continue;
+        }
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
         ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
@@ -303,6 +361,107 @@ mod test {
     use crate::jwt::test_utils::MockServer;
     use std::collections::HashSet;
     use std::time::Duration;
+
+    const BOUND_LIST_URL: &str = "https://idp.example.com/statuslist/1";
+
+    fn status_list_jwt(sub: &str, iss: Option<&str>) -> StatusListJwt {
+        serde_json::from_value(serde_json::json!({
+            "sub": sub,
+            "iss": iss,
+            "iat": 1,
+            "status_list": { "bits": 1, "lst": "eNrbuRgAAhcBXQ" },
+        }))
+        .expect("status list JWT claims should deserialize")
+    }
+
+    fn bound_url() -> Url {
+        Url::parse(BOUND_LIST_URL).expect("valid status list URL")
+    }
+
+    #[test]
+    fn status_list_from_another_uri_is_not_bound() {
+        let jwt = status_list_jwt(
+            "https://idp.example.com/statuslist/2",
+            Some("https://idp.example.com"),
+        );
+
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err("a status list whose sub names another list must not be used for this URI");
+        assert!(
+            matches!(&reason, UnboundReason::Sub { found } if found == "https://idp.example.com/statuslist/2"),
+            "the mismatch must name the received sub, got: {reason:?}"
+        );
+    }
+
+    #[test]
+    fn trailing_slash_sub_is_not_bound() {
+        let jwt = status_list_jwt(
+            "https://idp.example.com/statuslist/1/",
+            Some("https://idp.example.com"),
+        );
+
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err(
+            "the spec requires sub to equal the list URI, so a trailing slash is another URI",
+        );
+        assert!(
+            matches!(reason, UnboundReason::Sub { .. }),
+            "the mismatch must be reported on sub, got: {reason:?}"
+        );
+    }
+
+    #[test]
+    fn status_list_from_another_issuer_is_not_bound() {
+        let jwt = status_list_jwt(BOUND_LIST_URL, Some("https://attacker.example.com"));
+
+        let reason = check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect_err("a status list issued by another issuer must not be used for this issuer");
+        assert!(
+            matches!(&reason, UnboundReason::Iss { found } if found.as_str() == "https://attacker.example.com"),
+            "the mismatch must name the received iss, got: {reason:?}"
+        );
+    }
+
+    #[test]
+    fn status_list_without_iss_is_bound_by_sub() {
+        let jwt = status_list_jwt(BOUND_LIST_URL, None);
+
+        check_bound_to(
+            &jwt,
+            &IssClaim::new("https://idp.example.com"),
+            &bound_url(),
+        )
+        .expect("iss is optional in a status list JWT, so a matching sub alone must bind it");
+    }
+
+    #[test]
+    fn zero_ttl_is_floored() {
+        let max = Duration::from_secs(300);
+        assert_eq!(
+            effective_refresh_interval(Some(0), max),
+            MIN_REFRESH_INTERVAL
+        );
+        assert_eq!(
+            effective_refresh_interval(Some(0), Duration::from_millis(200)),
+            Duration::from_millis(200)
+        );
+        assert_eq!(
+            effective_refresh_interval(Some(60), max),
+            Duration::from_secs(60)
+        );
+    }
 
     #[tokio::test]
     async fn keep_status_list_updated() {

@@ -166,7 +166,7 @@ class SetupUtils(Crypto64):
 
         return inFilePathText
 
-    def writeFile(self, outFilePath, text, backup=True):
+    def writeFile(self, outFilePath, text, backup=True, mode=None):
         self.logIt("Writing file %s" % outFilePath)
 
         dir_name = os.path.dirname(outFilePath)
@@ -177,8 +177,15 @@ class SetupUtils(Crypto64):
         if backup:
             self.backupFile(outFilePath, cur_content=text)
         try:
-            with open(outFilePath, 'w') as w:
-                w.write(text)
+            if mode is None:
+                with open(outFilePath, 'w') as w:
+                    w.write(text)
+            else:
+                # create with restrictive mode so secrets are never readable in between
+                fd = os.open(outFilePath, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode)
+                os.fchmod(fd, mode)
+                with os.fdopen(fd, 'w') as w:
+                    w.write(text)
         except Exception:
             self.logIt("Error writing %s" % inFilePathText, True)
 
@@ -471,14 +478,18 @@ class SetupUtils(Crypto64):
                 full_output_file = Path(Config.output_dir, rp)
 
                 if not full_output_dir.exists():
-                    full_output_dir.mkdir(parents=True, exist_ok=True)
+                    full_output_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
                 if full_output_file.suffix == MAKO_TEMPLATE_SUFFIX:
                     full_output_file = full_output_file.with_suffix('')
 
                 rendered_text = self.render_template(te.as_posix())
                 self.logIt("Writing rendered template {}".format(full_output_file))
-                full_output_file.write_text(rendered_text)
+                # rendered test data carries client secrets and database credentials
+                fd = os.open(full_output_file.as_posix(), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+                os.fchmod(fd, 0o600)
+                with os.fdopen(fd, 'w') as w:
+                    w.write(rendered_text)
 
     def render_template(self, tmp_fn, pystring=False, rendering_dict=None):
         template_text = self.readFile(tmp_fn)

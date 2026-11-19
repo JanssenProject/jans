@@ -35,7 +35,13 @@ public class OpenIdConnectDiscoveryRequest extends BaseRequest {
         if (resource.startsWith("=") || resource.startsWith("@") || resource.startsWith("!")) { // XRI
             throw new UnsupportedOperationException("XRI is not supported"); // TODO: Add support for XRI
         } else if (resource.contains("@")) { // email
-            this.host = resource.substring(resource.indexOf("@") + 1);
+            String authority = resource.substring(resource.indexOf("@") + 1);
+            URI uri = new URI("https://" + authority);
+            if (uri.getHost() == null || !authority.equals(uri.getRawAuthority()) || uri.getRawUserInfo() != null
+                    || StringUtils.isNotEmpty(uri.getRawPath()) || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+                throw new IllegalArgumentException("Invalid host in resource");
+            }
+            this.host = authority;
         } else {
             if (!resource.contains("://")) {
                 // If the user input Identifier does not have an RFC 3986 "scheme" portion,

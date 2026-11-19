@@ -1,4 +1,5 @@
 import os
+import re
 import time
 import pprint
 import inspect
@@ -9,6 +10,8 @@ from setup_app.static import InstallTypes
 from setup_app.utils import base
 
 OPENBANKING_PROFILE = 'openbanking'
+
+SECRET_NAME_RE = re.compile(r'(pass|_pw(_|$)|pwd|secret|salt|token|private_key|credential)', re.IGNORECASE)
 
 LEGACY_NAMES = {
     'noPrompt': 'no_prompt',
@@ -78,19 +81,27 @@ class Config(metaclass=_ConfigMeta):
         return getattr(cls, attr) if hasattr(cls, attr) else default
 
     @classmethod
+    def redact(cls, obj, name=''):
+        if isinstance(obj, dict):
+            return {k: cls.redact(v, str(k)) for k, v in obj.items()}
+        if obj and isinstance(obj, str) and SECRET_NAME_RE.search(name):
+            return '[REDACTED]'
+        return obj
+
+    @classmethod
     def dump(cls, dump_file=False):
-        if cls.dump_config_on_error:
+        if not cls.get('dump_config_on_error'):
             return
 
         myDict = {}
         for obj_name, obj in inspect.getmembers(cls):
             obj_name = str(obj_name)
             if not obj_name.startswith('__') and obj_name not in LEGACY_NAMES and (not callable(obj)):
-                myDict[obj_name] = obj
+                myDict[obj_name] = cls.redact(obj, obj_name)
 
         if dump_file:
             fn = os.path.join(cls.install_dir, 'config-'+time.ctime().replace(' ', '-'))
-            with open(fn, 'w') as w:
+            with os.fdopen(os.open(fn, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), 'w') as w:
                 w.write(pprint.pformat(myDict, indent=2))
         else:
             pp = pprint.PrettyPrinter(indent=2)

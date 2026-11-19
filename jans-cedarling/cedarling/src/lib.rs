@@ -76,7 +76,7 @@ pub use common::policy_store::validate::{
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
 pub use http::HttpClientConfig;
 use init::ServiceFactory;
-use init::policy_store::{LoadedPolicyStore, load_policy_store};
+use init::policy_store::{LoadOptions, LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
     AuthzRebuilder, PolicyStoreRefreshHandle, RefreshSource, RefreshWorkerSeed, WorkerContext,
     spawn_refresh_worker,
@@ -249,7 +249,13 @@ impl Cedarling {
             config.lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
-            config.trace_config.as_ref().map(|trace| &trace.endpoint),
+            config
+                .trace_config
+                .as_ref()
+                .map(|trace| crate::lock::TraceRoute {
+                    endpoint: &trace.endpoint,
+                    transport: trace.transport,
+                }),
         )
         .await?;
         let log = initialized.log;
@@ -542,16 +548,16 @@ impl Cedarling {
     /// Register (or clear) the [`CustomTokenProcessor`] used to validate non-JWT
     /// tokens (opaque tokens, API keys, vendor formats).
     pub fn set_custom_token_processor(&self, processor: Option<Arc<dyn CustomTokenProcessor>>) {
+        let jwt_service = self.authz.load().clone_jwt_service();
+        // Custom entries are keyed by the processor's address. Clearing before the
+        // swap drops entries left by a processor that is gone and whose address the
+        // new one may reuse; clearing after drops the replaced processor's
+        // entries, so its stale identity metadata is not served until the TTL
+        // lapses. JWT entries stay: they are processor-independent.
+        jwt_service.clear_custom_token_cache();
         self.custom_token_processor
             .store(processor.map(|p| Arc::new(CustomTokenProcessorHolder(p))));
-        // Purge cached custom-token verdicts. Custom entries key only on
-        // mapping+payload, so a result from the previous processor would
-        // otherwise be served (with its stale identity metadata) until the
-        // cache TTL lapses. JWT entries stay: they are processor-independent.
-        self.authz
-            .load()
-            .clone_jwt_service()
-            .clear_custom_token_cache();
+        jwt_service.clear_custom_token_cache();
     }
 
     /// Closes the connections to the Lock Server and pushes all available logs.
@@ -607,13 +613,27 @@ async fn perform_bootstrap_load(
         Option<http::HttpClient>,
         LoadedPolicyStore,
     );
+    if config.default_entities_limits().is_count_unlimited() {
+        log.log_any(
+            LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+                LogLevel::WARN,
+                None,
+            ))
+            .set_message(
+                "CEDARLING_MAX_DEFAULT_ENTITIES=0 turns the default entities limit off; \
+                     the policy store is not bounded by it"
+                    .to_string(),
+            ),
+        );
+    }
+
     let raw_load: Result<RawLoad, ServiceConfigError> = async {
         let http_client = http::HttpClient::new(config.http_client_config)?;
         let policy_store_http_client = policy_store_http_client(config, log)?;
         let loaded = load_policy_store(
             &config.policy_store_config,
             policy_store_http_client.as_ref().unwrap_or(&http_client),
-            config.authorization_config.strict_schema_validation,
+            config.read_options(),
         )
         .await?;
         Ok((http_client, policy_store_http_client, loaded))
@@ -759,8 +779,7 @@ fn maybe_spawn_refresh_worker(
         initial_body_hash: seed.body_hash,
         initial_validators: seed.validators,
         initial_format: seed.format,
-        strict_schema_validation: config.authorization_config.strict_schema_validation,
-        archive_limits: config.policy_store_config.archive_limits(),
+        load_options: LoadOptions::new(&config.policy_store_config, config.read_options()),
         verifier: ArchiveVerifier::from_config(&config.policy_store_config.signature),
     };
     Some(Arc::new(spawn_refresh_worker(ctx)))
@@ -1012,17 +1031,28 @@ impl Cedarling {
     /// without initializing the authorization engine. Never returns Err for
     /// validation failures — those land in the returned report; only
     /// returns Err for underlying I/O or network failures.
+    ///
+    /// Takes the whole bootstrap config so the store is held to the same
+    /// default-entity limits as `Cedarling::new` would apply.
     #[allow(clippy::too_many_lines)]
     pub async fn validate_policy_store(
-        config: &PolicyStoreConfig,
-        http_config: &crate::http::HttpClientConfig,
+        bootstrap: &BootstrapConfig,
     ) -> Result<ValidationReport, ValidateInfraError> {
+        let config = &bootstrap.policy_store_config;
+
         // 1. Build a fresh HttpClient
-        let http_client = crate::http::HttpClient::new(*http_config)?;
+        let http_client = crate::http::HttpClient::new(bootstrap.http_client_config)?;
 
         // 2. Call load_policy_store
-        let load_result =
-            crate::init::policy_store::load_policy_store(config, &http_client, false).await;
+        let load_result = crate::init::policy_store::load_policy_store(
+            config,
+            &http_client,
+            crate::common::policy_store::formats::ReadOptions {
+                strict_schema_validation: false,
+                entity_limits: bootstrap.default_entities_limits(),
+            },
+        )
+        .await;
 
         match load_result {
             Err(e) => {
@@ -1095,30 +1125,17 @@ impl Cedarling {
                 // Parse succeeded! Now run schema and metadata independently.
 
                 // Schema Level
-                let schema_res = if let Some(schema) = &loaded.store.store.schema {
-                    let validator = cedar_policy::Validator::new(schema.schema.clone());
-                    let result = validator.validate(
+                let schema_validation = match &loaded.store.store.schema {
+                    Some(schema) => validate_schema(
+                        schema.schema.clone(),
                         loaded.store.store.policies.get_set(),
-                        cedar_policy::ValidationMode::Strict,
-                    );
-                    if result.validation_passed() {
-                        LevelResult::Ok
-                    } else {
-                        let errors = result
-                            .validation_errors()
-                            .map(|e| Diagnostic {
-                                file: e.policy_id().to_string(),
-                                line: None,
-                                column: None,
-                                message: e.to_string(),
-                            })
-                            .collect();
-                        LevelResult::Failed { errors }
-                    }
-                } else {
-                    LevelResult::Skipped {
-                        reason: "no schema present".into(),
-                    }
+                    ),
+                    None => SchemaValidation {
+                        result: LevelResult::Skipped {
+                            reason: "no schema present".into(),
+                        },
+                        warnings: Vec::new(),
+                    },
                 };
 
                 // Metadata Level
@@ -1164,11 +1181,12 @@ impl Cedarling {
                         column: None,
                         message: warning.to_string(),
                     })
+                    .chain(schema_validation.warnings)
                     .collect();
 
                 Ok(ValidationReport {
                     parse: LevelResult::Ok,
-                    schema: schema_res,
+                    schema: schema_validation.result,
                     metadata: metadata_res,
                     warnings,
                     unknown_fields: loaded
@@ -1180,5 +1198,58 @@ impl Cedarling {
                 })
             },
         }
+    }
+}
+
+/// Outcome of checking the policies against the schema: the level result plus
+/// Cedar's non-fatal findings, which belong in the report's `warnings`.
+#[cfg(feature = "tools")]
+struct SchemaValidation {
+    result: LevelResult,
+    warnings: Vec<Diagnostic>,
+}
+
+/// Validates `policies` against `schema` in strict mode.
+///
+/// Cedar reports some real problems only as warnings, such as a policy whose
+/// action can never apply to its principal and resource types, so they are kept
+/// rather than dropped when validation passes.
+#[cfg(feature = "tools")]
+fn validate_schema(
+    schema: cedar_policy::Schema,
+    policies: &cedar_policy::PolicySet,
+) -> SchemaValidation {
+    let result = cedar_policy::Validator::new(schema)
+        .validate(policies, cedar_policy::ValidationMode::Strict);
+
+    let warnings = result
+        .validation_warnings()
+        .map(|w| Diagnostic {
+            file: w.policy_id().to_string(),
+            line: None,
+            column: None,
+            message: w.to_string(),
+        })
+        .collect();
+
+    let level = if result.validation_passed() {
+        LevelResult::Ok
+    } else {
+        LevelResult::Failed {
+            errors: result
+                .validation_errors()
+                .map(|e| Diagnostic {
+                    file: e.policy_id().to_string(),
+                    line: None,
+                    column: None,
+                    message: e.to_string(),
+                })
+                .collect(),
+        }
+    };
+
+    SchemaValidation {
+        result: level,
+        warnings,
     }
 }

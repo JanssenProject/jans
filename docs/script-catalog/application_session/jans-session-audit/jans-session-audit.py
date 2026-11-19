@@ -376,7 +376,7 @@ class ApplicationSession(ApplicationSessionType):
                 try:
                     attr_value = getattr(session, attr_key)
                     self.logOut("DEBUG","ApplicationSession.generateJansData(): attr_key = {}, attr_value = {}".format(attr_key, attr_value))
-                    jans_data += ',"%s": "%s"' % (attr_name, attr_value.replace('"','\\"') if (attr_value and isinstance(attr_value, str)) else str(attr_value).replace('"','\\"'))
+                    jans_data += ',"%s": %s' % (attr_name, json.dumps(u"%s" % attr_value))
                 except Exception as ex:
                     self.logOut("ERROR","ApplicationSession.generateJansData(): Errror: ex = {}".format(ex))
                     jans_data += ',"%s": "%s"' % (attr_name, "None")
@@ -416,7 +416,7 @@ class ApplicationSession(ApplicationSessionType):
                     cust_attr_value = session_cust_attributes[cust_attr_key]
                     self.logOut("DEBUG","ApplicationSession.generateJansData(): cust_attr_key = {}, cust_attr_name = {}, cust_attr_value = {}".format(cust_attr_key, cust_attr_name, cust_attr_value))
                     self.logOut("DEBUG","ApplicationSession.generateJansData(): type(cust_attr_value) = {}".format(type(cust_attr_value)))
-                    jans_data += ',"%s": "%s"' % (cust_attr_name, cust_attr_value.replace('"','\\"') if (cust_attr_value and isinstance(cust_attr_value, str)) else str(cust_attr_value).replace('"','\\"'))
+                    jans_data += ',"%s": %s' % (cust_attr_name, json.dumps(u"%s" % cust_attr_value))
                 except Exception as ex:
                     self.logOut("ERROR","ApplicationSession.generateJansData(): Error: ex = {}".format(ex))
                     jans_data += ',"%s": "%s"' % (cust_attr_name, "None")
@@ -455,5 +455,5 @@ class ApplicationSession(ApplicationSessionType):
     def logOut(self, level, out_data):
         curr_log_level = ApplicationSession.logLevelToInt(level)
         if (curr_log_level <= self.log_level):
-            print(out_data)
+            print(out_data.replace("\r", "\\r").replace("\n", "\\n"))
         return

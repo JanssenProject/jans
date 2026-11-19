@@ -1,4 +1,5 @@
 import asyncio
+import copy
 from collections import OrderedDict
 from functools import partial
 from typing import Any
@@ -349,7 +350,14 @@ class Plugin(DialogUtils):
 
             fido2_static['rp'].append(rp)
 
-        fido2_config['fido2Configuration'] = fido2_static
+        # Start from the loaded configuration so settings this screen does not show
+        # (e.g. a global attestationMode) are not reset to their defaults.
+        loaded_config = copy.deepcopy(self.data)
+        loaded_static = loaded_config.get('fido2Configuration') or {}
+        loaded_static.update(fido2_static)
+        loaded_config.update(fido2_config)
+        loaded_config['fido2Configuration'] = loaded_static
+        fido2_config = loaded_config
 
         async def coroutine():
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}

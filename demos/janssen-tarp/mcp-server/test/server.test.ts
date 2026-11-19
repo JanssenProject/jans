@@ -142,6 +142,16 @@ describe("health & metadata", () => {
     assert.equal(res.status, 200);
     assert.equal(body.status, "healthy");
   });
+
+  it("rejects requests from web page origins", async () => {
+    const res = await fetch(`${baseUrl}/api/keys`, { headers: { Origin: "https://evil.example.org" } });
+    assert.equal(res.status, 403);
+  });
+
+  it("accepts requests from browser extension origins", async () => {
+    const res = await fetch(`${baseUrl}/health`, { headers: { Origin: "chrome-extension://abcdefghijklmnop" } });
+    assert.equal(res.status, 200);
+  });
 });
 
 describe("MCP transport", () => {

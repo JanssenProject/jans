@@ -4,14 +4,17 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use cedarling_cli::cli::{Cli, Command};
+use cedarling_cli::output::Untrusted;
 use cedarling_cli::{authorize, config, test, validate};
 use clap::Parser;
 
-fn exit_on_error<T, E: std::fmt::Debug>(result: Result<T, E>) -> T {
+/// Prints the error and its causes on one line, without a backtrace: the causes
+/// may quote policy store content, which is escaped as a whole.
+fn exit_on_error<T>(result: anyhow::Result<T>) -> T {
     match result {
         Ok(v) => v,
         Err(e) => {
-            eprintln!("Error: {e:?}");
+            eprintln!("Error: {}", Untrusted(&format!("{e:#}")));
             std::process::exit(2);
         },
     }
@@ -32,7 +35,9 @@ async fn main() {
             exit_on_error(test::runner::run(bootstrap_config, test_file).await)
         },
         Command::Authorize(args) => exit_on_error(authorize::run(bootstrap_config, args).await),
-        Command::Validate { strict } => exit_on_error(validate::run(bootstrap_config, strict).await),
+        Command::Validate { strict } => {
+            exit_on_error(validate::run(bootstrap_config, strict).await)
+        },
     };
 
     std::process::exit(code);

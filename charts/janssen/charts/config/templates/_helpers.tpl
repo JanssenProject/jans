@@ -107,6 +107,13 @@ Create AWS config.
 {{- end }}
 
 {{/*
+Admin password; required unless a custom configurator schema secret is used.
+*/}}
+{{- define "config.adminPassword" -}}
+{{- required "config.adminPassword is required: set a strong admin password for the UI" .Values.adminPassword -}}
+{{- end -}}
+
+{{/*
 Obfuscate configuration schema (only if configuration key is available)
 */}}
 {{- define "config.prepareSchema" }}
@@ -124,7 +131,7 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $configmapSchema "init_keys_exp" (index .Values "global" "auth-server-key-rotation" "initKeysLife") }}
 
 {{- $secretSchema := dict }}
-{{- $_ := set $secretSchema "admin_password" .Values.adminPassword }}
+{{- $_ := set $secretSchema "admin_password" (include "config.adminPassword" .) }}
 {{- $_ := set $secretSchema "redis_password" .Values.redisPassword }}
 {{- if or ( eq .Values.global.cnPersistenceType "sql" ) ( eq .Values.global.cnPersistenceType "hybrid" ) }}
 {{- $_ := set $secretSchema "sql_password" .Values.configmap.cnSqldbUserPassword }}

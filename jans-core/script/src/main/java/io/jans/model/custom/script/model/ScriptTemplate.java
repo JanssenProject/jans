@@ -33,7 +33,7 @@ public enum ScriptTemplate {
             "        return None\n" +
             "\n" +
             "    def authenticate(self, configurationAttributes, requestParameters, step):\n" +
-            "        return True\n" +
+            "        return False\n" +
             "\n" +
             "    def prepareForStep(self, configurationAttributes, requestParameters, step):\n" +
             "        return True\n" +

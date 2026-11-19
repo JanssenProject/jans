@@ -7,7 +7,10 @@ package io.jans.orm.couchbase.impl;
 
 import java.nio.file.FileSystems;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -42,6 +45,11 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
 
     public static final String PERSISTENCE_TYPE = PersistenceEntryManager.PERSITENCE_TYPES.couchbase.name();
     public static final String PROPERTIES_FILE = "jans-couchbase%s.properties";
+
+    private static final String[] SECURITY_PROPERTY_KEYS = { "ssl.trustStore.enable", "ssl.trustStore.file",
+            "ssl.trustStore.pin", "ssl.trustStore.type", "tls.enable" };
+
+    private final Object environmentLock = new Object();
 
     private ClusterEnvironment clusterEnvironment;
 
@@ -122,6 +130,29 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
         this.clusterEnvironment = clusterEnvironmentBuilder.build();
 	}
 
+    /*
+     * Values follow SECURITY_PROPERTY_KEYS order. Booleans are normalized to the defaults used by initInternal(),
+     * and trust store settings are ignored when the trust store is disabled
+     */
+    private static List<String> effectiveSecuritySettings(Properties properties) {
+        boolean useSSL = Boolean.parseBoolean(properties.getProperty("ssl.trustStore.enable"));
+
+        List<String> settings = new ArrayList<String>(SECURITY_PROPERTY_KEYS.length);
+        for (String key : SECURITY_PROPERTY_KEYS) {
+            if ("ssl.trustStore.enable".equals(key)) {
+                settings.add(String.valueOf(useSSL));
+            } else if (!useSSL) {
+                settings.add(null);
+            } else if ("tls.enable".equals(key)) {
+                settings.add(String.valueOf(Boolean.parseBoolean(properties.getProperty(key))));
+            } else {
+                settings.add(properties.getProperty(key));
+            }
+        }
+
+        return settings;
+    }
+
     @Override
     public String getPersistenceType() {
         return PERSISTENCE_TYPE;
@@ -146,13 +177,34 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
     public CouchbaseEntryManager createEntryManager(Properties conf) {
 		Properties entryManagerConf = PropertiesHelper.filterProperties(conf, "#");
 
-		// Allow proper initialization
-		if (this.couchbaseConnectionProperties == null) {
-			this.couchbaseConnectionProperties = entryManagerConf;
+		// Selection, comparison and initialization must be atomic: the cluster environment is shared
+		synchronized (environmentLock) {
+			boolean selected = false;
+			if (this.couchbaseConnectionProperties == null) {
+				this.couchbaseConnectionProperties = entryManagerConf;
+				selected = true;
+			} else {
+				// The cluster environment is shared, so a later manager cannot change its TLS settings
+				List<String> sharedSettings = effectiveSecuritySettings(this.couchbaseConnectionProperties);
+				List<String> requestedSettings = effectiveSecuritySettings(entryManagerConf);
+				for (int i = 0; i < SECURITY_PROPERTY_KEYS.length; i++) {
+					if (!Objects.equals(sharedSettings.get(i), requestedSettings.get(i))) {
+						throw new ConfigurationException(String.format("Couchbase property '%s' differs from the one used to create the shared environment", SECURITY_PROPERTY_KEYS[i]));
+					}
+				}
+			}
+
+			try {
+				init();
+			} catch (RuntimeException ex) {
+				if (selected && !isInitialized()) {
+					// Do not keep properties of an environment that was never created: a retry may use corrected ones
+					this.couchbaseConnectionProperties = null;
+				}
+				throw ex;
+			}
 		}
 
-    	init();
-    	
     	if (!isInitialized()) {
             throw new ConfigurationException("Failed to create Couchbase environment!");
     	}

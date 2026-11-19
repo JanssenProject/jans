@@ -186,6 +186,24 @@ func resourceScope() *schema.Resource {
 	return r
 }
 
+// applyShowInConfigurationEndpointDefault keeps the server default (true) for an
+// undeclared show_in_configuration_endpoint, since false is now sent explicitly.
+func applyShowInConfigurationEndpointDefault(d *schema.ResourceData, scope *jans.Scope) {
+
+	rawConfig := d.GetRawConfig()
+	if attrConfigState(rawConfig, "attributes") == configSet {
+		attrs := rawConfig.GetAttr("attributes")
+		if attrs.IsKnown() && attrs.LengthInt() > 0 {
+			elem := attrs.AsValueSlice()[0]
+			if attrConfigState(elem, "show_in_configuration_endpoint") != configNull {
+				return
+			}
+		}
+	}
+
+	scope.Attributes.ShowInConfigurationEndpoint = true
+}
+
 func resourceScopeCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 
 	c := meta.(*jans.Client)
@@ -194,6 +212,7 @@ func resourceScopeCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	if err := fromSchemaResource(d, &scope); err != nil {
 		return diag.FromErr(err)
 	}
+	applyShowInConfigurationEndpointDefault(d, &scope)
 
 	tflog.Debug(ctx, "Creating new Scope")
 	newScope, err := c.CreateScope(ctx, &scope)
@@ -236,6 +255,7 @@ func resourceScopeUpdate(ctx context.Context, d *schema.ResourceData, meta any) 
 	if err := fromSchemaResource(d, &scope); err != nil {
 		return diag.FromErr(err)
 	}
+	applyShowInConfigurationEndpointDefault(d, &scope)
 	tflog.Debug(ctx, "Updating Scope", map[string]interface{}{"inum": scope.Inum})
 	if _, err := c.UpdateScope(ctx, &scope); err != nil {
 		return diag.FromErr(err)

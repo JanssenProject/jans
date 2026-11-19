@@ -81,6 +81,7 @@ func resourcePostgresConfiguration() *schema.Resource {
                         },
                         "auth_user_password": {
                                 Type:        schema.TypeString,
+				Sensitive:   true,
                                 Optional:    true,
                                 Description: "Password for authenticating.",
                         },
@@ -144,6 +145,7 @@ func resourceRedisConfiguration() *schema.Resource {
                         },
                         "password": {
                                 Type:        schema.TypeString,
+				Sensitive:   true,
                                 Optional:    true,
                                 Description: "Password for authenticating.",
                         },
@@ -159,6 +161,7 @@ func resourceRedisConfiguration() *schema.Resource {
                         },
                         "ssl_trust_store_password": {
                                 Type:        schema.TypeString,
+				Sensitive:   true,
                                 Optional:    true,
                                 Description: "SSL trust store password.",
                         },
@@ -169,6 +172,7 @@ func resourceRedisConfiguration() *schema.Resource {
                         },
                         "ssl_key_store_password": {
                                 Type:        schema.TypeString,
+				Sensitive:   true,
                                 Optional:    true,
                                 Description: "SSL key store password.",
                         },

@@ -1028,8 +1028,14 @@ mod tests {
             "payloadHash": {"algorithm":"sha256","value": sha256_hex(payload_bytes)},
             "signatures": [{"signature": b64(b"logged-sig"), "verifier": b64(der_to_pem(&cert.der).as_bytes())}]
         }));
-        let err = verify_dsse_body(&body, &cert, &b64(b"bundle-sig"), envelope_json, payload_bytes)
-            .expect_err("DSSE signature mismatch must be rejected");
+        let err = verify_dsse_body(
+            &body,
+            &cert,
+            &b64(b"bundle-sig"),
+            envelope_json,
+            payload_bytes,
+        )
+        .expect_err("DSSE signature mismatch must be rejected");
         assert!(
             matches!(err, SigstoreVerificationError::RekorInconsistency { .. }),
             "DSSE signature mismatch must be a RekorInconsistency, got {err:?}"

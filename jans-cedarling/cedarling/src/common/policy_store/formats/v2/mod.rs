@@ -13,6 +13,7 @@ use metadata::MetadataDoc;
 use trusted_issuers::TrustedIssuersDoc;
 
 use super::{Files, Layout, ParseStoreError, ReadStoreError, StoreContent};
+use crate::common::default_entities_limits::DefaultEntitiesLimits;
 use crate::common::policy_store::PolicyStore;
 use crate::common::policy_store::loader::StoreFs;
 use crate::common::policy_store::manager::{ConversionError, PolicyStoreManager};
@@ -116,6 +117,7 @@ fn parse(
 /// Converts a v2 store into the runtime store and its metadata.
 pub(crate) fn into_runtime(
     doc: PolicyStoreDoc,
+    entity_limits: DefaultEntitiesLimits,
 ) -> Result<(PolicyStore, PolicyStoreMetadata), ParseStoreError> {
     let metadata = metadata::into_runtime(doc.metadata)?;
     let token_types = doc
@@ -126,6 +128,7 @@ pub(crate) fn into_runtime(
         &doc.content,
         metadata.policy_store.version.clone(),
         token_types,
+        entity_limits,
     )?;
     Ok((store, metadata))
 }
@@ -191,7 +194,8 @@ mod tests {
         );
         assert!(warnings.is_empty(), "nothing should be ignored");
 
-        let (store, metadata) = into_runtime(doc).expect("golden v2 store should convert");
+        let (store, metadata) = into_runtime(doc, DefaultEntitiesLimits::default())
+            .expect("golden v2 store should convert");
         assert_eq!(
             metadata.policy_store.name, "Golden v2",
             "metadata name mismatch"
@@ -217,7 +221,8 @@ mod tests {
     #[test]
     fn missing_file_means_no_trusted_issuers() {
         let (doc, _) = read_store(&[]).expect("a store without trusted-issuers.json should read");
-        let (store, _) = into_runtime(doc).expect("it should convert");
+        let (store, _) =
+            into_runtime(doc, DefaultEntitiesLimits::default()).expect("it should convert");
         assert!(
             store.token_types.jwt_issuers().is_empty()
                 && store.token_types.get("Acme::Access_token").is_none(),
@@ -246,7 +251,8 @@ mod tests {
             ],
             "both leftover directories should be reported"
         );
-        let (store, _) = into_runtime(doc).expect("it should convert");
+        let (store, _) =
+            into_runtime(doc, DefaultEntitiesLimits::default()).expect("it should convert");
         assert!(
             store.token_types.jwt_issuers().contains_key("Acme")
                 && !store.token_types.jwt_issuers().contains_key("Old"),
@@ -280,7 +286,8 @@ mod tests {
         )])
         .expect("each entry is valid on its own");
 
-        let err = into_runtime(doc).expect_err("colliding context.tokens keys must be rejected");
+        let err = into_runtime(doc, DefaultEntitiesLimits::default())
+            .expect_err("colliding context.tokens keys must be rejected");
         assert!(
             matches!(
                 &err,

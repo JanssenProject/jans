@@ -142,6 +142,8 @@ public class RegisterJsonService {
         Util.addToJSONObjectIfNotNull(responseJsonObject, REQUIRE_PKCE.toString(), client.getAttributes().getRequirePkce());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_AS_JWT.toString(), client.isAccessTokenAsJwt());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_ALG.toString(), client.getAccessTokenSigningAlg());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_SIGNING_KID.toString(), client.getAttributes().getAccessTokenSigningKid());
+        Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_SIGNING_KID.toString(), client.getAttributes().getIdTokenSigningKid());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ACCESS_TOKEN_LIFETIME.toString(), client.getAccessTokenLifetime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, ID_TOKEN_LIFETIME.toString(), client.getAttributes().getIdTokenLifetime());
         Util.addToJSONObjectIfNotNull(responseJsonObject, TX_TOKEN_LIFETIME.toString(), client.getAttributes().getTxTokenLifetime());

@@ -230,7 +230,17 @@ public class PolicyDownloadService {
 	}
 
 	private List<LoadedPolicySource> loadJsonPolicyFromResponse(HttpResponse httpResponse, String policyStoreUri) throws IOException {
-		String policyJson = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+		byte[] body;
+		try (InputStream is = httpResponse.getEntity().getContent()) {
+			body = is.readNBytes(MAX_ARCHIVE_BYTES + 1);
+		}
+
+		if (body.length > MAX_ARCHIVE_BYTES) {
+			log.error("Policy store from URI {} exceeds {} bytes", policyStoreUri, MAX_ARCHIVE_BYTES);
+			return Collections.emptyList();
+		}
+
+		String policyJson = new String(body, StandardCharsets.UTF_8);
 		JsonNode policyStoreJson = parsePolicyJson(policyStoreUri, policyJson);
 		boolean valid = policyStoreJson != null; 
 

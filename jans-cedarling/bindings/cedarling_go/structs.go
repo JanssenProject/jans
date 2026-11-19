@@ -21,12 +21,12 @@ type CedarEntityMapping struct {
 
 // MarshalJSON flattens Payload into the top-level JSON object.
 func (e EntityData) MarshalJSON() ([]byte, error) {
-	m := map[string]any{
-		"cedar_entity_mapping": e.CedarMapping,
-	}
+	m := make(map[string]any, len(e.Payload)+1)
 	for k, v := range e.Payload {
 		m[k] = v
 	}
+	// Set last so Payload cannot override the entity identity
+	m["cedar_entity_mapping"] = e.CedarMapping
 	return json.Marshal(m)
 }
 

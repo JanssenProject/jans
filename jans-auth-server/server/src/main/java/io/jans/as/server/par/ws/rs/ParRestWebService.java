@@ -140,6 +140,7 @@ public class ParRestWebService {
             clientId = getClientId(clientId, requestObject);
 
             Client client = authorizeRestWebServiceValidator.validateClient(clientId, state, true);
+            parValidator.validateClientMatchesAuthenticatedClient(client, state);
 
             redirectUri = getRedirectUri(redirectUri, requestObject);
             redirectUri = authorizeRestWebServiceValidator.validateRedirectUri(client, redirectUri, state, null, httpRequest, AuthorizeErrorResponseType.INVALID_REQUEST);

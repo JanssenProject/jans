@@ -18,6 +18,8 @@ import java.util.zip.InflaterInputStream;
  */
 public class StatusList {
 
+    public static final int DEFAULT_MAX_DECODED_BYTES = 64 * 1024 * 1024;
+
     private BitSet list;
     private final int bits;
     private final int divisor;
@@ -26,14 +28,21 @@ public class StatusList {
     private int size;
 
     public StatusList(int bits) {
+        if (bits != 1 && bits != 2 && bits != 4 && bits != 8) {
+            throw new IllegalArgumentException("Unsupported status list bits: " + bits);
+        }
         this.divisor = 8 / bits;
         this.list = new BitSet(bits);
         this.bits = bits;
     }
 
     public static StatusList fromEncoded(String encoded, int bits) throws IOException {
+        return fromEncoded(encoded, bits, DEFAULT_MAX_DECODED_BYTES);
+    }
+
+    public static StatusList fromEncoded(String encoded, int bits, int maxDecodedBytes) throws IOException {
         StatusList newList = new StatusList(bits);
-        newList.decode(encoded);
+        newList.decode(encoded, maxDecodedBytes);
         return newList;
     }
 
@@ -67,9 +76,13 @@ public class StatusList {
     }
 
     public void decode(String input) throws IOException {
+        decode(input, DEFAULT_MAX_DECODED_BYTES);
+    }
+
+    public void decode(String input, int maxDecodedBytes) throws IOException {
         byte[] zipped = Base64.getUrlDecoder().decode(input + "=".repeat((4 - input.length() % 4) % 4));
 //        System.out.println("decode - zipped: " + new String(zipped));
-        byte[] bytes = decompress(zipped);
+        byte[] bytes = decompress(zipped, maxDecodedBytes);
         this.list = BitSet.valueOf(bytes);
         this.size = bytes.length * divisor;
     }
@@ -172,7 +185,7 @@ public class StatusList {
         return outputStream.toByteArray();
     }
 
-    private static byte[] decompress(byte[] data) throws IOException {
+    private static byte[] decompress(byte[] data, int maxDecodedBytes) throws IOException {
         try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
              InflaterInputStream inflaterInputStream = new InflaterInputStream(byteArrayInputStream);
              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -180,6 +193,9 @@ public class StatusList {
             byte[] buffer = new byte[1024];
             int len;
             while ((len = inflaterInputStream.read(buffer)) > 0) {
+                if (byteArrayOutputStream.size() + len > maxDecodedBytes) {
+                    throw new IOException("Decoded status list exceeds " + maxDecodedBytes + " bytes");
+                }
                 byteArrayOutputStream.write(buffer, 0, len);
             }
             return byteArrayOutputStream.toByteArray();

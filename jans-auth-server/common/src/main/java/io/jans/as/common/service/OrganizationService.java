@@ -34,6 +34,7 @@ public abstract class OrganizationService extends io.jans.service.OrganizationSe
      * @param organization Organization
      */
     public void updateOrganization(GluuOrganization organization) {
+        organization.setDn(getDnForOrganization());
         ldapEntryManager.merge(organization);
     }
 

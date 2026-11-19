@@ -43,6 +43,8 @@ public class JwtSigner {
     private final AppConfiguration appConfiguration;
     private final JSONWebKeySet webKeys;
 
+    private String signingKid;
+
     private Jwt jwt;
 
     public JwtSigner(AppConfiguration appConfiguration, JSONWebKeySet webKeys, SignatureAlgorithm signatureAlgorithm, String audience) {
@@ -100,6 +102,11 @@ public class JwtSigner {
     }
 
     private String getKid() throws CryptoProviderException {
+        if (StringUtils.isNotBlank(signingKid)) {
+            log.trace("Use explicit signing kid: {}", signingKid);
+            return signingKid;
+        }
+
         final String staticKid = appConfiguration.getStaticKid();
         if (StringUtils.isNotBlank(staticKid)) {
             log.trace("Use staticKid: {}", staticKid);
@@ -127,6 +134,14 @@ public class JwtSigner {
 
     public SignatureAlgorithm getSignatureAlgorithm() {
         return signatureAlgorithm;
+    }
+
+    public String getSigningKid() {
+        return signingKid;
+    }
+
+    public void setSigningKid(String signingKid) {
+        this.signingKid = signingKid;
     }
 
     public void setCryptoProvider(AbstractCryptoProvider cryptoProvider) {

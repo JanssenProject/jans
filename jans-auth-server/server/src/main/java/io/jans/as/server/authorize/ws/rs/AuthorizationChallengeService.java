@@ -7,6 +7,7 @@ import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizationChallengeResponse;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
@@ -37,6 +38,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl.getGenericRequestMap;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
@@ -123,7 +125,7 @@ public class AuthorizationChallengeService {
 
             authzRequest.setAuthorizationChallengeSessionObject(session);
             if (session != null) {
-                log.trace("prepareAuthzRequest - sessionAttributes {}, id {}", session.getAttributes().getAttributes(), session.getId());
+                log.trace("prepareAuthzRequest - sessionAttribute keys {}, id {}", session.getAttributes().getAttributes().keySet(), session.getId());
                 final Map<String, String> attributes = session.getAttributes().getAttributes();
 
                 final String clientId = attributes.get("client_id");
@@ -168,6 +170,15 @@ public class AuthorizationChallengeService {
         authorizationChallengeValidator.validateAccess(client);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
         authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
+
+        if (StringUtils.isNotBlank(authzRequest.getCodeChallenge())
+                && CodeVerifier.CodeChallengeMethod.fromString(authzRequest.getCodeChallengeMethod()) != CodeVerifier.CodeChallengeMethod.S256) {
+            log.debug("PKCE code_challenge_method is invalid: {} (only S256 is allowed).", escapeLog(authzRequest.getCodeChallengeMethod()));
+            throw new WebApplicationException(errorResponseFactory
+                    .newErrorResponse(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "PKCE code_challenge_method must be S256"))
+                    .build());
+        }
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setSessionId(sessionUser);

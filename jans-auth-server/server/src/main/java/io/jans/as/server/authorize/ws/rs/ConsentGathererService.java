@@ -332,9 +332,9 @@ public class ConsentGathererService {
         return external.getCustomScriptConfigurationByName(scriptName);
     }
 
-    public boolean isConsentGathered() {
+    public boolean isConsentGathered(String clientId) {
         final HttpServletRequest httpRequest = (HttpServletRequest) externalContext.getRequest();
-        return sessionService.isSessionStateAuthenticated(httpRequest);
+        return sessionService.isSessionStateAuthenticated(httpRequest, clientId);
     }
 
     public ConsentGatheringContext getContext() {

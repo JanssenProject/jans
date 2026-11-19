@@ -123,7 +123,13 @@ public class CorsFilter extends AbstractCorsFilter {
             throws IOException, ServletException {
     	List<String> clientAuthorizedOrigins = null;
 
-        if (StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {
+        final HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        final String authorizationHeader = httpServletRequest.getHeader("Authorization");
+        // authenticated Basic client of a token request takes precedence over a client_id parameter
+        final boolean basicTokenRequest = httpServletRequest.getRequestURI().endsWith("/token")
+                && authorizationHeader != null && authorizationHeader.startsWith("Basic ");
+
+        if (!basicTokenRequest && StringHelper.isNotEmpty(servletRequest.getParameter("client_id"))) {
             String clientId = servletRequest.getParameter("client_id");
             Client client = clientService.getClient(clientId);
             if (client != null) {
@@ -132,29 +138,23 @@ public class CorsFilter extends AbstractCorsFilter {
                     clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
                 }
             }
-        } else {
-            final HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-            String header = httpRequest.getHeader("Authorization");
-            if (httpRequest.getRequestURI().endsWith("/token")) {
-                if (header != null && header.startsWith("Basic ")) {
-                    String base64Token = header.substring(6);
-                    String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
+        } else if (basicTokenRequest) {
+            String base64Token = authorizationHeader.substring(6);
+            String token = new String(Base64.decodeBase64(base64Token), StandardCharsets.UTF_8);
 
-                    String username = "";
-                    int delim = token.indexOf(":");
+            String username = "";
+            int delim = token.indexOf(":");
 
-                    if (delim != -1) {
-                        username = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
-                    }
+            if (delim != -1) {
+                username = URLDecoder.decode(token.substring(0, delim), Util.UTF8_STRING_ENCODING);
+            }
 
-                    Client client = clientService.getClient(username);
+            Client client = clientService.getClient(username);
 
-                    if (client != null) {
-                        String[] authorizedOriginsArray = client.getAuthorizedOrigins();
-                        if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
-                            clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
-                        }
-                    }
+            if (client != null) {
+                String[] authorizedOriginsArray = client.getAuthorizedOrigins();
+                if (authorizedOriginsArray != null && authorizedOriginsArray.length > 0) {
+                    clientAuthorizedOrigins = Arrays.asList(authorizedOriginsArray);
                 }
             }
         }

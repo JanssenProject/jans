@@ -34,7 +34,7 @@ In addition to being a library, the Cedarling is an embeddable Policy Decision P
 which includes an in-memory cache to enable efficient logging. It connects to a Policy
 Repository to obtain its policies. Enterprises may also want to connect the Cedarling to a
 Janssen Lock Server, the evidence collector, to centralize decision logs (records of allowed or
-denied access to a capability) and, when [TRACE](./reference/cedarling-properties.md#trace-properties)
+denied access to a capability) and, when [TRACE](./reference/cedarling-trace.md)
 is enabled, signed evidence of each decision whose request carries a TRACE context. Lock Server
 can enable enterprises to perform threat detection and stream the logs to a SIEM or ITDR.
 
@@ -113,7 +113,7 @@ The following diagram is a high-level picture of the Cedarling components:
 * **Cedar Engine** is a recent release of the Rust Cedar Engine, thanks to Amazon. It
   returns the decision and diagnostics.
 * **Observability** records decision and system logs and metrics. With
-  [TRACE](./reference/cedarling-properties.md#trace-properties) enabled, it also signs a
+  [TRACE](./reference/cedarling-trace.md) enabled, it also signs a
   record, as evidence, of each decision whose request carries a
   [TRACE context](./reference/cedarling-authz.md#authorize-options-and-trace-context). In enterprise deployments, the optional
   **Lock Server** is the evidence collector: it receives logs, telemetry, and evidence

@@ -105,7 +105,7 @@ Optional:
 - `client_id_issued_at` (String)
 - `client_name` (String) The client name.
 - `client_name_localized` (Map of String)
-- `client_secret` (String) The client secret.  The client MAY omit the parameter if the client secret is an empty string.
+- `client_secret` (String, Sensitive) The client secret.  The client MAY omit the parameter if the client secret is an empty string.
 - `client_secret_expires_at` (String)
 - `client_uri` (String) URL of the home page of the Client. The value of this field must point to a valid Web page.
 - `client_uri_localized` (Map of String)
@@ -150,7 +150,7 @@ Optional:
 - `post_logout_redirect_uris` (List of String) Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has 
                                                 been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]
 - `refresh_token_lifetime` (Number) Specifies the Client-specific refresh token expiration. Example: 100000000
-- `registration_access_token` (String)
+- `registration_access_token` (String, Sensitive) Sent on create and update when set; leave unset to keep the server-issued token.
 - `request_object_encryption_alg` (String) JWE alg algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
 - `request_object_encryption_enc` (String) JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
 - `request_object_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.

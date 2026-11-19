@@ -6,6 +6,8 @@
 
 package io.jans.lock.service.ws.rs.trace;
 
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,6 +62,8 @@ import io.jans.lock.service.trace.identity.SubmitterIdentity;
 import io.jans.lock.service.trace.identity.SubmitterIdentityService;
 import io.jans.lock.service.trace.identity.TraceRequestContext;
 import io.jans.lock.service.trace.ingest.AcceptanceResult;
+import io.jans.lock.service.trace.ingest.BatchElement;
+import io.jans.lock.service.trace.ingest.BatchOutcome;
 import io.jans.lock.service.trace.ingest.TraceIngestionService;
 import io.jans.lock.service.trace.model.IngestionFlags;
 import io.jans.lock.service.trace.model.PolicyRecordQuery;
@@ -168,7 +172,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			SubmitterIdentity identity = submitterIdentityService.resolve(currentRequest());
 			TraceRequestContext context = evidenceDomainResolver.resolve(identity);
 
-			AcceptanceResult result = ingestionService.ingest(body, context);
+			AcceptanceResult result = useBatchPath(appConfiguration.getTraceConfiguration())
+					? ingestionService.ingestAsBatch(body, context)
+					: ingestionService.ingest(body, context);
 
 			response = Response.status(Response.Status.ACCEPTED)
 					.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
@@ -198,9 +204,14 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 			List<ElementIdentifiers> identifiers = scanElementIdentifiers(elements, config);
 			requireSingleProducer(identifiers);
 
-			List<TraceBulkResultEntry> results = new ArrayList<>(elements.size());
-			for (int index = 0; index < elements.size(); index++) {
-				results.add(ingestOne(index, elements.get(index), identifiers.get(index), context));
+			List<TraceBulkResultEntry> results;
+			if (useBatchPath(config)) {
+				results = ingestBatch(elements, identifiers, context);
+			} else {
+				results = new ArrayList<>(elements.size());
+				for (int index = 0; index < elements.size(); index++) {
+					results.add(ingestOne(index, elements.get(index), identifiers.get(index), context));
+				}
 			}
 
 			TraceBulkIngestionResponse dto = new TraceBulkIngestionResponse();
@@ -223,7 +234,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE record, recordId: {}", recordId);
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving TRACE record, recordId: {}", escapeLog(recordId));
+			}
 			checkEnabled();
 			requireMaxLength(recordId, MAX_RECORD_ID_LENGTH, FIELD_RECORD_ID);
 
@@ -247,8 +260,10 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
-					policyStoreId, policyStoreVersion, bundleHash);
+			if (log.isDebugEnabled()) {
+				log.debug("Searching TRACE records, policyStoreId: {}, policyStoreVersion: {}, bundleHash: {}",
+						escapeLog(policyStoreId), escapeLog(policyStoreVersion), escapeLog(bundleHash));
+			}
 			checkEnabled();
 			checlStart(start);
 			requireCountInRange(count);
@@ -304,7 +319,9 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 
 		Response response = null;
 		try {
-			log.debug("Retrieving TRACE execution, traceExecutionId: {}", traceExecutionId);
+			if (log.isDebugEnabled()) {
+				log.debug("Retrieving TRACE execution, traceExecutionId: {}", escapeLog(traceExecutionId));
+			}
 			checkEnabled();
 			checlStart(start);
 			requireMaxLength(traceExecutionId, MAX_EXECUTION_ID_LENGTH, "trace_execution_id");
@@ -340,6 +357,10 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 		if (!appConfiguration.getTraceConfiguration().isEnabled()) {
 			throw new TraceValidationException(TraceErrorResponseType.INVALID_REQUEST, REASON_TRACE_DISABLED);
 		}
+	}
+
+	private boolean useBatchPath(TraceConfiguration config) {
+		return config.isBatchIngestEnabled() && ingestionService.isBatchIngestAvailable();
 	}
 
 	private TraceRequestContext resolveContext() {
@@ -385,19 +406,62 @@ public class TraceRestWebServiceImpl extends BaseResource implements TraceRestWe
 	 */
 	private TraceBulkResultEntry ingestOne(int index, String elementRaw, ElementIdentifiers identifiers,
 			TraceRequestContext context) {
-		TraceBulkResultEntry entry = new TraceBulkResultEntry();
-		entry.setIndex(index);
 		try {
 			InputStream slice = new ByteArrayInputStream(elementRaw.getBytes(StandardCharsets.UTF_8));
-			AcceptanceResult result = ingestionService.ingest(slice, context);
-			entry.setAccepted(true);
-			applyAcceptance(entry, toResponse(result));
+			return acceptedEntry(index, ingestionService.ingest(slice, context));
 		} catch (RuntimeException ex) {
-			entry.setAccepted(false);
-			entry.setProducerId(identifiers.producer);
-			entry.setRecordId(identifiers.recordId);
-			entry.setError(toErrorDto(ex));
+			return rejectedEntry(index, identifiers, ex);
 		}
+	}
+
+	/**
+	 * Ingests all elements with one {@code ingestBatch} call and maps each outcome exactly as
+	 * {@link #ingestOne} maps the result or failure of a single element. A failure of the call itself
+	 * (the service reports per-element failures as outcomes) becomes the failure of every element.
+	 */
+	private List<TraceBulkResultEntry> ingestBatch(List<String> elements, List<ElementIdentifiers> identifiers,
+			TraceRequestContext context) {
+		List<BatchElement> batch = new ArrayList<>(elements.size());
+		for (int index = 0; index < elements.size(); index++) {
+			batch.add(new BatchElement(index, elements.get(index).getBytes(StandardCharsets.UTF_8)));
+		}
+
+		List<BatchOutcome> outcomes = null;
+		RuntimeException failure = null;
+		try {
+			outcomes = ingestionService.ingestBatch(batch, context);
+		} catch (RuntimeException ex) {
+			failure = ex;
+		}
+
+		List<TraceBulkResultEntry> results = new ArrayList<>(elements.size());
+		for (int index = 0; index < elements.size(); index++) {
+			if (outcomes == null) {
+				results.add(rejectedEntry(index, identifiers.get(index), failure));
+			} else if (outcomes.get(index).isAccepted()) {
+				results.add(acceptedEntry(index, outcomes.get(index).getResult()));
+			} else {
+				results.add(rejectedEntry(index, identifiers.get(index), outcomes.get(index).getError()));
+			}
+		}
+		return results;
+	}
+
+	private TraceBulkResultEntry acceptedEntry(int index, AcceptanceResult result) {
+		TraceBulkResultEntry entry = new TraceBulkResultEntry();
+		entry.setIndex(index);
+		entry.setAccepted(true);
+		applyAcceptance(entry, toResponse(result));
+		return entry;
+	}
+
+	private TraceBulkResultEntry rejectedEntry(int index, ElementIdentifiers identifiers, RuntimeException ex) {
+		TraceBulkResultEntry entry = new TraceBulkResultEntry();
+		entry.setIndex(index);
+		entry.setAccepted(false);
+		entry.setProducerId(identifiers.producer);
+		entry.setRecordId(identifiers.recordId);
+		entry.setError(toErrorDto(ex));
 		return entry;
 	}
 

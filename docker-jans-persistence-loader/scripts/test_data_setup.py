@@ -12,8 +12,8 @@ image from ``jans-linux-setup/jans_setup/templates/test`` (see the Dockerfile).
 Notes:
 
 * The auth and jans-lock test-client secrets are derived deterministically as
-  ``<inum>-<host-label>`` (matching ``crypto64.encode_test_passwords`` in
-  jans-linux-setup) so the test-suite can recompute them without a shared secret.
+  ``<inum>-<host-label>`` so the CI test-suite can recompute them without a shared
+  secret; this loader is CI-only and must never be enabled on a reachable deployment.
 * The config-api test client is handled by ``docker-jans-config-api`` bootstrap
   (which pins it via ``CN_CONFIG_API_TEST_CLIENT_*`` and grants it every scope on
   upgrade), so no config-api test data is loaded here.

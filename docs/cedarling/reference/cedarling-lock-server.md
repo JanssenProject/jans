@@ -10,7 +10,7 @@ For a Cedarling client to communicate with the Lock Server, it has to perform [D
 
 By default, clients cannot obtain the necessary scopes to interact with the lock server. Additional configuration is required on both the Auth Server and the client.
 
-> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](./cedarling-properties.md#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds** — WASM targets must use the SSA → DCR flow.
+> **Alternative (native targets only, primarily for testing):** If you already have a pre-issued access token (e.g., provisioned externally or minted for a test setup), you can skip the DCR flow entirely by setting [`CEDARLING_LOCK_ACCESS_TOKEN_JWT`](./cedarling-properties.md#lock-server-integration-properties). This is mainly intended to simplify the bootstrap flow during testing and local development; in that case, the Auth Server setup below is not required. This property is **not available on WASM builds**: WASM targets must use the SSA and DCR flow.
 
 This guide will walk you through the following setup processes:
 
@@ -54,110 +54,7 @@ Next, configure an [*interception script*](../../janssen-server/developer/script
 In your server, create a script file at `/opt/jans/jetty/jans-auth/custom/script/add_cedarling_scopes.py` with the following content:
 
 ```py
-from io.jans.model.custom.script.type.client import ClientRegistrationType
-from io.jans.service.cdi.util import CdiUtil
-from io.jans.orm.util import ArrayHelper
-from io.jans.as.server.service import ScopeService
-from io.jans.as.model.util import JwtUtil
-
-class ClientRegistration(ClientRegistrationType):
-    def __init__(self, currentTimeMillis):
-        self.currentTimeMillis = currentTimeMillis
-
-    def init(self, customScript, configurationAttributes):
-        print "Cedarling Client registration. Initialization"
-        
-        if (not configurationAttributes.containsKey("jwks_uri")):
-            print "Cedarling Client registration. Initialization failed. Property jwks_uri is not specified"
-            return False
-        else:
-            self.jwks_uri = configurationAttributes.get("jwks_uri").getValue2()
-
-        if (not configurationAttributes.containsKey("scope_list")):
-            print "Cedarling Client registration. Initialization failed. Property scope_list is not specified"
-            return False
-        else:
-            self.scope_list = configurationAttributes.get("scope_list").getValue2().split(" ")
-
-        if (not configurationAttributes.containsKey("trigger_scope")):
-            print "Cedarling Client registration. Initialization failed. Property trigger_scope is not specified"
-            return False
-        else:
-            self.trigger_scope = configurationAttributes.get("trigger_scope").getValue2()
-        
-        # used to check if the scopes we're adding exists in the AS
-        self.scopeService = CdiUtil.bean(ScopeService)
-
-        print "Cedarling Client registration. Initialized successfully"
-        return True   
-
-    def destroy(self, configurationAttributes):
-        print "Cedarling Client registration. Destroy"
-        print "Cedarling Client registration. Destroyed successfully"
-        return True   
-
-    def createClient(self, context):
-        print "Cedarling Client registration. createClient"
-
-        # Check if the request has an SSA
-        registerRequest = context.getRegisterRequest()
-        ssa = registerRequest.getSoftwareStatement()
-        if ssa == "":
-            print "Cedarling Client registration. No SSA provided, defaulting"
-            return True
-
-        # Check if the request has a trigger_scope (this is set as 'cedarling' by default) in the request.
-        # The trigger_scope is used to determine if we should add the scopes needed by Cedarling to the
-        # registering client.
-        # request_scopes = ArrayHelper.toString(registerRequest.getScope())
-        request_scopes = registerRequest.getScope()
-        if self.trigger_scope not in request_scopes:
-            print "Cedarling Client registration. the scope '%s' was not included in the request, defaulting" % self.trigger_scope
-            return True
-
-        # add cedarling scopes
-        client = context.getClient()
-        scopes = client.getScopes()
-        for scope in self.scope_list:
-            foundScope = self.scopeService.getScopeById(scope)
-            if foundScope is None:
-                print "did not find scope '%s' in the AS" % scope
-                return False
-            if len(scopes) == 0:
-                scopes = [foundScope.getDn()]
-            else:
-                scopes = ArrayHelper.addItemToStringArray(scopes, foundScope.getDn())
-
-        client.setScopes(scopes)
-
-        print "Cedarling Client registration. added Cedarling scopes"
-        return True
-
-    def updateClient(self, context):
-        print "Cedarling Client registration. UpdateClient method"
-        pass
-
-    def getApiVersion(self):
-        return 11
-
-    def getSoftwareStatementHmacSecret(self, context):
-        return ""
-
-    def getSoftwareStatementJwks(self, context):
-        print "SSA Cedarling Client registration. getting jwks from '%s'" %  self.jwks_uri
-        jwks = JwtUtil.getJSONWebKeys(self.jwks_uri)
-        if jwks is None:
-            print "SSA Cedarling Client registration. jwks not found"
-        return jwks.toString()
-
-    def modifyPutResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyReadResponse(self, responseAsJsonObject, executionContext):
-        return False
-
-    def modifyPostResponse(self, responseAsJsonObject, executionContext):
-        return False
+--8<-- "jans-cedarling/lock-server-script/add_cedarling_scopes.py"
 ```
 
 * *you can also find a copy of this script in [jans/jans-cedarling/lock-server-script/add_cedarling_scopes.py](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/add_cedarling_scopes.py)*.
@@ -165,45 +62,12 @@ class ClientRegistration(ClientRegistrationType):
 Next, create a JSON file named `script_schema.json` with the following content:
 
 ```json
-{
-  "name": "add_cedarling_scopes",
-  "aliases": null,
-  "description": "A DCR script that adds the required scopes by a client to interact with the lock server",
-  "scriptType": "client_registration",
-  "programmingLanguage": "python",
-  "moduleProperties": [],
-  "configurationProperties": [
-        {
-                "value1": "jwks_uri",
-                "value2": "https://demoexample.jans.io/jans-auth/restv1/jwks",
-                "hide": false,
-                "description": "JWKS URI used for the SSA validation"
-        },
-        {
-                "value1": "scope_list",
-                "value2": "https://jans.io/oauth/lock/log.write https://jans.io/oauth/lock/health.write https://jans.io/oauth/lock/telemetry.write https://jans.io/oauth/lock/policy.readonly",
-                "hide": false,
-                "description": "space-separated scopes that will be added by the script"
-        },
-        {
-                "value1": "trigger_scope",
-                "value2": "cedarling",
-                "hide": false,
-                "description": "the scope that must be present for the script to run"
-        }
-  ],
-  "level": 100,
-  "revision": 0,
-  "enabled": true,
-  "scriptError": null,
-  "modified": false,
-  "internal": false,
-  "locationType": "file",
-  "locationPath": "add_cedarling_scopes.py"
-}
+--8<-- "jans-cedarling/lock-server-script/script_schema.json"
 ```
 
 * *you can also find a copy of this schema in [jans/jans-cedarling/lock-server-script/script_schema.json](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/lock-server-script/script_schema.json)*.
+
+The script adds the scopes only to clients that register with an SSA. A JWT that is not an SSA, such as an `id_token`, gets no scopes, and neither does an SSA from this Auth Server that it does not know or that is in the `REVOKED` or `EXPIRED` state. Set `ssa_issuer` to the `iss` of your SSAs to accept SSAs from that issuer only; leave it empty to accept any issuer whose signature verifies against `jwks_uri`.
 
 > Note:
 >
@@ -248,25 +112,7 @@ A successful response will contain the following scopes:
 
 ## Client Setup
 
-To enable Lock Server integration in the Cedarling client, configure the appropriate [bootstrap properties](./cedarling-properties.md).
-
-Here's a table of the available properties:
-
-| Property | Description | Allowed Values | Default |
-| --- | --- | --- | --- |
-| `CEDARLING_LOCK` | Toggles the all the Lock Server integration features. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` | URI to fetch Lock Server metadata (`.well-known/lock-server-configuration`). Required if `CEDARLING_LOCK` is `enabled`. | String | `""` |
-| `CEDARLING_LOCK_DYNAMIC_CONFIGURATION` (WIP) | Toggles listening for Server-Sent Events (SSE) config updates. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_SSA_JWT` | SSA JWT used for DCR. This is required if you followed the [auth server setup](#auth-server-setup). | String | `""` |
-| `CEDARLING_LOCK_ACCESS_TOKEN_JWT` | Pre-issued access token for Lock Server authentication. When set, **bypasses the SSA → DCR → access token flow entirely**. **Primarily intended for testing / local development** to simplify the bootstrap flow; may also be used when token issuance is managed externally or DCR is unavailable. If both this and `CEDARLING_LOCK_SSA_JWT` are set, this property takes precedence. **Not available on WASM builds.** | String | `""` |
-| `CEDARLING_LOCK_LOG_INTERVAL` | Frequency (in seconds) of sending log messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_HEALTH_INTERVAL` (WIP) | Frequency (in seconds) of sending health messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_TELEMETRY_INTERVAL` (WIP) | Frequency (in seconds) of sending telemetry messages to the Lock Server. `0` disables transmission. | uint | `0` |
-| `CEDARLING_LOCK_LISTEN_SSE` (WIP) | Toggles listening for updates from the Lock Server via SSE. | `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_ACCEPT_INVALID_CERTS` | Allows connection to servers with invalid certificates (for testing purposes only; not available for WASM builds).| `enabled`, `disabled` | `disabled` |
-| `CEDARLING_LOCK_TRANSPORT` | The transport type to use for communication with the Lock Server. The gRPC transport requires compiling Cedarling with the `grpc` feature enabled. | `rest`, `grpc` | `rest` |
-| `CEDARLING_LOCK_LOG_CHANNEL_CAPACITY` | Channel capacity for buffering log entries before sending to the Lock Server. Higher values allow more buffering when the server is slow, but increase memory usage. | uint | `100` |
-| `CEDARLING_LOCK_LOG_MAX_RETRIES` | Maximum number of retry attempts for sending logs to the Lock Server. Uses exponential backoff. | uint | `5` |
+To enable Lock Server integration in the Cedarling client, set `CEDARLING_LOCK` to `enabled`, `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` to the Lock Server `.well-known/lock-server-configuration`, and `CEDARLING_LOCK_SSA_JWT` to the SSA created in [Auth Server Setup](#auth-server-setup). All Lock properties are described in [Lock Server integration properties](./cedarling-properties.md#lock-server-integration-properties).
 
 ## Loading Policy Stores from Lock Server
 

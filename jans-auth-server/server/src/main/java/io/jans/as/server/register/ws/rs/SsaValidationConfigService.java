@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,8 @@ import static io.jans.as.model.util.StringUtils.implode;
 @Stateless
 @Named
 public class SsaValidationConfigService {
+
+    private static final long SSA_CLOCK_SKEW_MILLIS = 60_000L;
 
     @Inject
     private AppConfiguration appConfiguration;
@@ -150,8 +153,21 @@ public class SsaValidationConfigService {
         return jwks;
     }
 
+    public static void validateSsaTimeClaims(Jwt ssa) throws InvalidJwtException {
+        final long now = System.currentTimeMillis();
+        final Date exp = ssa.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME);
+        if (exp != null && exp.getTime() + SSA_CLOCK_SKEW_MILLIS < now) {
+            throw new InvalidJwtException("Software statement has expired.");
+        }
+        final Date nbf = ssa.getClaims().getClaimAsDate(JwtClaimName.NOT_BEFORE);
+        if (nbf != null && nbf.getTime() - SSA_CLOCK_SKEW_MILLIS > now) {
+            throw new InvalidJwtException("Software statement is not yet valid.");
+        }
+    }
+
     public JSONObject validateSsaForBuiltIn(Jwt ssa) throws InvalidJwtException {
         log.debug("Validating ssa with softwareStatementValidationType=builtin validation ...");
+        validateSsaTimeClaims(ssa);
 
         final List<SsaValidationConfig> byIssuer = getByIssuer(ssa, SsaValidationType.SSA);
         final SignatureAlgorithm signatureAlgorithm = ssa.getHeader().getSignatureAlgorithm();

@@ -63,8 +63,9 @@ func NewCedarling(bootstrap_config map[string]any) (*Cedarling, error) {
 	return instance, nil
 }
 
-// Creates cedarling instance from environment variables. If bootstrap configuration is provided,
-// they will override the corresponding environment variables.
+// Creates cedarling instance from environment variables merged with the optional bootstrap
+// configuration. Environment variables (CEDARLING_*) take precedence over the corresponding
+// bootstrap configuration values, including security settings such as CEDARLING_JWT_SIG_VALIDATION.
 func NewCedarlingWithEnv(bootstrap_config *map[string]any) (*Cedarling, error) {
 	instance_id, err := internal.NewInstanceWithEnv(bootstrap_config)
 	if err != nil {

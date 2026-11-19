@@ -59,6 +59,12 @@ public abstract class MetricService implements Serializable {
 
     private static final int DEFAULT_METRIC_REPORTER_INTERVAL = 60;
 
+    private static final int MAX_PERIOD_MONTHS = 240;
+
+    private static final int MAX_REGISTERED_METRICS = 1000;
+
+    private static final String OVERFLOW_METRIC_SUB_TYPE = "other";
+
     private static final DateTimeFormatter PERIOD_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMM").withZone(ZoneOffset.UTC);
 
     private MetricRegistry metricRegistry;
@@ -319,6 +325,14 @@ public abstract class MetricService implements Serializable {
     }
 
     private Set<String> getBaseDnForPeriod(String applicationType, Date startDate, Date endDate) {
+        Calendar calMinStart = Calendar.getInstance();
+        calMinStart.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calMinStart.setTime(endDate);
+        calMinStart.add(Calendar.MONTH, -MAX_PERIOD_MONTHS);
+        if (startDate.before(calMinStart.getTime())) {
+            startDate = calMinStart.getTime();
+        }
+
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getTimeZone("UTC"));
         cal.setTime(startDate);
@@ -393,6 +407,10 @@ public abstract class MetricService implements Serializable {
 
     private MetricRegistration register(MetricTypeDeclaration metricType, String metricSubType) {
         MetricRegistration metricRegistration = new MetricRegistration(metricType, metricSubType);
+        if ((metricSubType != null) && !registeredMetrics.containsKey(metricRegistration.getRegistryName())
+                && (registeredMetrics.size() >= MAX_REGISTERED_METRICS)) {
+            metricRegistration = new MetricRegistration(metricType, OVERFLOW_METRIC_SUB_TYPE);
+        }
 
         MetricRegistration existingRegistration = registeredMetrics.putIfAbsent(metricRegistration.getRegistryName(), metricRegistration);
 

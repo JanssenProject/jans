@@ -7,5 +7,6 @@
 pub mod authorize;
 pub mod cli;
 pub mod config;
+pub mod output;
 pub mod test;
 pub mod validate;

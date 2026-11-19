@@ -341,7 +341,6 @@ public class SessionId implements Deletable, Serializable {
         sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
         sb.append(", sessionAttributes=").append(sessionAttributes);
         sb.append(", persisted=").append(persisted);
-        sb.append(", deviceSecrets=").append(deviceSecrets);
         sb.append("}");
         return sb.toString();
     }

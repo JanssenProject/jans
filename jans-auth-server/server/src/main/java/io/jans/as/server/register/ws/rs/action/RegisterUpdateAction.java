@@ -9,6 +9,7 @@ package io.jans.as.server.register.ws.rs.action;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -41,8 +42,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_KID;
 import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNING_KID;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -130,16 +136,23 @@ public class RegisterUpdateAction {
                 registerValidator.validateRequestObject(requestParams, softwareStatement, httpRequest);
             }
 
-            final RegisterRequest request = RegisterRequest.fromJson(requestParams);
+            // use merged object so software_statement values take precedence over outer metadata
+            final RegisterRequest request = RegisterRequest.fromJson(requestObject);
 
             validateRedirectUris(request);
             validateCiba(request);
             validateSubjectType(request);
+            registerValidator.validatePasswordGrantType(request);
+            registerParamsValidator.validateAlgorithms(request);
 
             final Client client = clientService.getClient(clientId, accessToken);
             validateClientNotNull(client);
+            validateSubjectIdentifierAttribute(request, client);
+            final boolean redirectUrisChanged = isRedirectUrisChanged(request, client);
 
             registerService.updateClientFromRequestObject(client, request, true);
+
+            validateSigningKids(client);
 
             if (requestObject.has(BACKCHANNEL_LOGOUT_URI.toString())
                     && StringUtils.isBlank(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()))) {
@@ -147,6 +160,7 @@ public class RegisterUpdateAction {
             }
 
             validateEphemeralSubjectTypeBackchannelLogout(client);
+            validateBackchannelLogoutUri(request, client, redirectUrisChanged);
 
             boolean updateClient = true;
             if (externalDynamicClientRegistrationService.isEnabled()) {
@@ -199,12 +213,64 @@ public class RegisterUpdateAction {
         throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, RegisterErrorResponseType.INVALID_TOKEN, "The Access Token is not valid for the Client ID.");
     }
 
+    private void validateSigningKids(Client client) {
+        try {
+            registerParamsValidator.validateSigningKid(client.getAttributes().getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
+            registerParamsValidator.validateSigningKid(client.getAttributes().getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
+    }
+
     private void validateEphemeralSubjectTypeBackchannelLogout(Client client) {
         try {
             registerValidator.validateEphemeralSubjectTypeBackchannelLogout(client);
         } catch (WebApplicationException e) {
             clientService.removeFromCache(client); // discard in-memory changes
             throw e;
+        }
+    }
+
+    private static boolean isRedirectUrisChanged(RegisterRequest request, Client client) {
+        final List<String> requested = request.getRedirectUris();
+        if (requested == null || requested.isEmpty()) {
+            return false;
+        }
+        final String[] stored = client.getRedirectUris();
+        return !new HashSet<>(requested).equals(stored != null ? new HashSet<>(Arrays.asList(stored)) : new HashSet<>());
+    }
+
+    private void validateBackchannelLogoutUri(RegisterRequest request, Client client, boolean redirectUrisChanged) {
+        try {
+            final String[] redirectUris = client.getRedirectUris();
+            final List<String> redirectUriList = redirectUris != null ? Arrays.asList(redirectUris) : new ArrayList<>();
+            if (StringUtils.isNotBlank(request.getBackchannelLogoutUri())) {
+                registerParamsValidator.validateLogoutUri(request.getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
+            } else if (redirectUrisChanged) {
+                // stored logout uri is kept, so it must still fit the new redirect_uris
+                registerParamsValidator.validateLogoutUri(client.getAttributes().getBackchannelLogoutUri(), redirectUriList, errorResponseFactory);
+            }
+        } catch (WebApplicationException e) {
+            clientService.removeFromCache(client); // discard in-memory changes
+            throw e;
+        }
+    }
+
+    private void validateSubjectIdentifierAttribute(RegisterRequest request, Client client) {
+        final RegisterRequest effective = new RegisterRequest();
+        effective.setSubjectIdentifierAttribute(request.getSubjectIdentifierAttribute());
+        effective.setRedirectUrisRegex(request.getRedirectUrisRegex());
+        // partial updates may omit subject_type, so fall back to the stored one
+        effective.setSubjectType(request.getSubjectType() != null ? request.getSubjectType() : client.getSubjectType());
+        registerValidator.validateSubjectIdentifierAttribute(effective);
+
+        // a stored attribute is kept when the request omits it, so it must stay paired with a public subject type
+        if (StringUtils.isBlank(request.getSubjectIdentifierAttribute())
+                && StringUtils.isNotBlank(client.getAttributes().getPublicSubjectIdentifierAttribute())
+                && effective.getSubjectType() != SubjectType.PUBLIC) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE, "The custom subject identifier requires public subject type.");
         }
     }
 

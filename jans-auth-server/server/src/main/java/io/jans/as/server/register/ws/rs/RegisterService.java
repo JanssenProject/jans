@@ -292,6 +292,12 @@ public class RegisterService {
         if (requestObject.getRopcScriptDns() != null) {
             client.getAttributes().setRopcScripts(requestObject.getRopcScriptDns());
         }
+        if (requestObject.getAccessTokenSigningKid() != null) {
+            client.getAttributes().setAccessTokenSigningKid(StringUtils.defaultIfBlank(requestObject.getAccessTokenSigningKid(), null));
+        }
+        if (requestObject.getIdTokenSigningKid() != null) {
+            client.getAttributes().setIdTokenSigningKid(StringUtils.defaultIfBlank(requestObject.getIdTokenSigningKid(), null));
+        }
         if (requestObject.getRunIntrospectionScriptBeforeJwtCreation() != null) {
             client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(requestObject.getRunIntrospectionScriptBeforeJwtCreation());
         }

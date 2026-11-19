@@ -744,6 +744,10 @@ public class Authenticator {
                 sessionId.getState());
         // IMPORTANT : authenticate by session id only if state of session is authenticated!
         if (SessionIdState.AUTHENTICATED == sessionId.getState()) {
+            if (sessionIdService.isExpired(sessionId)) {
+                logger.debug("Session {} exceeded its absolute lifetime, rejecting authentication.", sessionIdentifier);
+                return false;
+            }
             final User user = authenticationService.getUserOrRemoveSession(sessionId);
             if (user != null) {
                 try {

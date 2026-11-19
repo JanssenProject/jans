@@ -123,8 +123,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             tempaccess_token = servletRequest.getParameter("access_token");
             if ((tempaccess_token != null) && (xfapiinteractionid != null)) {
                 if (tempaccess_token.startsWith("Bearer")) {
-                    log.info("FAPI: Authorization Bearer Token from qeury ********************************************* {}", tempaccess_token);
-                    log.info("FAPI: Bearler Token is not allowed.**********************************************************************.");
+                                        log.info("FAPI: Bearler Token is not allowed.**********************************************************************.");
                     httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "Bearer token in query is disallowed");
                 } else
                     httpResponse.sendError(httpResponse.SC_BAD_REQUEST, "token in query is disallowed");
@@ -134,7 +133,6 @@ public class FapiOpenIdConfiguration extends HttpServlet {
             String clientCertAsPem = CoreCertUtil.getClientCert(servletRequest).getCert();
             if (clientCertAsPem != null) {
                 log.info("FAPI: clientCertAsPem found*****************************************");
-                log.info("FAPI: clientCertAsPem found*****************************************" + clientCertAsPem);
             } else
                 log.info("FAPI: No clientCertAsPem *****************************************");
 

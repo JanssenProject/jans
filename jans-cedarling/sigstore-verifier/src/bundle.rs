@@ -299,16 +299,10 @@ impl ParsedBundle {
         self.0
             .verification_material
             .x509_certificate_chain
-            .as_ref()
-            .map(|chain| {
-                chain
-                    .certificates
-                    .iter()
-                    .skip(1)
-                    .map(|c| c.raw_bytes.as_str())
-                    .collect()
-            })
-            .unwrap_or_default()
+            .iter()
+            .flat_map(|chain| chain.certificates.iter().skip(1))
+            .map(|c| c.raw_bytes.as_str())
+            .collect()
     }
 
     /// Returns the signature (base64-encoded) from the bundle.

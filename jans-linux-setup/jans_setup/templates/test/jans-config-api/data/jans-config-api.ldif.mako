@@ -1,0 +1,32 @@
+dn: inum=${jca_test_client_id},ou=clients,o=jans
+objectClass: jansClnt
+objectClass: top
+del: FALSE
+displayName: Jans Config Api Client
+inum: ${jca_test_client_id}
+jansAccessTknAsJwt: FALSE
+jansAccessTknSigAlg: RS256
+jansAppTyp: web
+jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeAccessT
+ okenAsJwtCreationAndIncludeClaims":false,"keepClientAuthorizationAfterExpir
+ ation":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontan
+ eousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionR
+ equired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGather
+ ingScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
+jansClntSecret: ${jca_test_client_encoded_pw}
+jansDisabled: FALSE
+jansGrantTyp: authorization_code
+jansGrantTyp: client_credentials
+jansGrantTyp: refresh_token
+jansIdTknSignedRespAlg: RS256
+jansInclClaimsInIdTkn: FALSE
+jansLogoutSessRequired: FALSE
+jansPersistClntAuthzs: TRUE
+jansRespTyp: code
+jansRptAsJwt: FALSE
+jansSubjectTyp: pairwise
+jansTknEndpointAuthMethod: client_secret_basic
+jansTrustedClnt: FALSE
+% for scope in config_api_scopes:
+jansScope: ${scope}
+% endfor

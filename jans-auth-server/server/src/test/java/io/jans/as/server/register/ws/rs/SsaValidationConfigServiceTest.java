@@ -138,7 +138,9 @@ public class SsaValidationConfigServiceTest {
 
         when(cryptoProvider.verifySignature(any(), any(), any(), any(), any(), any())).thenReturn(true);
 
-        final JSONObject result = ssaValidationConfigService.validateSsaForBuiltIn(Jwt.parseOrThrow(jwt));
+        final Jwt ssa = Jwt.parseOrThrow(jwt);
+        ssa.getClaims().removeClaim("exp");
+        final JSONObject result = ssaValidationConfigService.validateSsaForBuiltIn(ssa);
         assertEquals(result.get("scope"), "my_read my_write");
         assertEquals(result.get("claims"), "test_exp test_iat");
     }
@@ -151,11 +153,20 @@ public class SsaValidationConfigServiceTest {
         when(cryptoProvider.verifySignature(any(), any(), any(), any(), any(), any())).thenReturn(true);
 
         final Jwt jwt = Jwt.parseOrThrow(jwtString);
+        jwt.getClaims().removeClaim("exp");
         final Object scope = jwt.getClaims().getClaim("scope");
         final Object claims = jwt.getClaims().getClaim("claims");
 
         final JSONObject result = ssaValidationConfigService.validateSsaForBuiltIn(jwt);
         assertEquals(result.get("scope"), scope);
         assertEquals(result.get("claims"), claims);
+    }
+
+    @Test(expectedExceptions = InvalidJwtException.class)
+    public void validateSsaForBuiltIn_whenSsaExpired_shouldFail() throws InvalidJwtException {
+        // jwt with iss=jans-auth, exp in the past
+        String jwt = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJqYW5zLWF1dGgiLCJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsInNjb3BlIjoic2NvcGUxIHNjb3BlMiIsImNsYWltcyI6ImNsYWltMSBjbGFpbTIiLCJpYXQiOjE2Njk4MDY3NjMsImV4cCI6MTY2OTgxMDM2M30.nR3LURANa5YAxOcLRdeFh0YjHbNA6roIUOhDfvhNeAw";
+
+        ssaValidationConfigService.validateSsaForBuiltIn(Jwt.parseOrThrow(jwt));
     }
 }

@@ -1,4 +1,6 @@
+import atexit
 import contextlib
+import tempfile
 import warnings
 import sys
 import os
@@ -80,11 +82,13 @@ class DBUtils:
                         Config.rdbm_db,
                 )
 
+        rootcert_fn = self.get_rdbm_rootcert_fn()
+
         if Config.rdbm_type == 'mysql':
             bind_uri += '?charset=utf8mb4'
-            connect_args = {'ssl':{'verify_mode': None}}
+            connect_args = {'ssl': {'ca': rootcert_fn}} if rootcert_fn else {'ssl':{'verify_mode': None}}
         else:
-            connect_args = {}
+            connect_args = {'sslmode': 'verify-full', 'sslrootcert': rootcert_fn} if rootcert_fn else {}
 
         try:
             self.engine = sqlalchemy.create_engine(bind_uri, connect_args=connect_args)
@@ -109,6 +113,24 @@ class DBUtils:
                 base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e)), True)
             return False, e
 
+
+    def get_rdbm_rootcert_fn(self):
+        rootcert = Config.get('rdbm_sslrootcert')
+        if not rootcert:
+            return None
+
+        if getattr(self, '_rdbm_rootcert', None) != rootcert or not os.path.exists(self._rdbm_rootcert_fn):
+            old_fn = getattr(self, '_rdbm_rootcert_fn', None)
+            if old_fn and os.path.exists(old_fn):
+                os.remove(old_fn)
+            fd, fn = tempfile.mkstemp(prefix='jans-rdbm-ca-', suffix='.pem')
+            atexit.register(lambda p=fn: os.path.exists(p) and os.remove(p))
+            with os.fdopen(fd, 'w') as w:
+                w.write(rootcert)
+            self._rdbm_rootcert = rootcert
+            self._rdbm_rootcert_fn = fn
+
+        return self._rdbm_rootcert_fn
 
     def set_mysql_version(self):
         # are we on MariDB?

@@ -22,7 +22,7 @@ resource "jans_smtp_configuration" "global" {
   from_email_address                   = "noreply@example.com"
   requires_authentication              = true
   smtp_authentication_account_username = "smtp-user"
-  smtp_authentication_account_password = "smtp-password"
+  smtp_authentication_account_password = var.smtp_password
 
   lifecycle {
     ignore_changes = [smtp_authentication_account_password]

@@ -33,7 +33,7 @@ public class EncryptionService {
     }
 
 	public String encrypt(String unencryptedString) throws EncryptionException {
-		return encryptionService.decrypt(unencryptedString);
+		return encryptionService.encrypt(unencryptedString);
 	}
 
 	public Properties decryptProperties(Properties connectionProperties) {

@@ -484,10 +484,11 @@ where
             .archive
             .lock()
             .map_err(|e| std::io::Error::other(format!("archive mutex poisoned: {e}")))?;
-        let mut seen = std::collections::HashSet::new();
-        let mut entry_paths = Vec::new();
+        // Child name -> index into `entries`; directory status is derived in this single pass
+        // (a child is a directory when any member path continues past it).
+        let mut seen: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+        let mut entries: Vec<DirEntry> = Vec::new();
 
-        // First pass: collect all unique entry paths
         for i in 0..archive.len() {
             let file = archive.by_index(i).map_err(|e| {
                 std::io::Error::other(format!("Failed to read archive entry {i}: {e}"))
@@ -506,14 +507,19 @@ where
                 };
 
                 // Get the immediate child name (first component)
-                let child_name = if let Some(slash_pos) = relative.find('/') {
-                    &relative[..slash_pos]
-                } else {
-                    relative
+                let (child_name, is_dir) = match relative.find('/') {
+                    Some(slash_pos) => (&relative[..slash_pos], true),
+                    None => (relative, false),
                 };
 
-                // Skip empty names and deduplicate
-                if child_name.is_empty() || !seen.insert(child_name.to_string()) {
+                if child_name.is_empty() {
+                    continue;
+                }
+
+                if let Some(&idx) = seen.get(child_name) {
+                    if is_dir {
+                        entries[idx].is_dir = true;
+                    }
                     continue;
                 }
 
@@ -524,21 +530,13 @@ where
                     format!("{prefix}{child_name}")
                 };
 
-                entry_paths.push((child_name.to_string(), entry_path));
+                seen.insert(child_name.to_string(), entries.len());
+                entries.push(DirEntry {
+                    name: child_name.to_string(),
+                    path: entry_path,
+                    is_dir,
+                });
             }
-        }
-
-        // Second pass: check if each path is a directory
-        let mut entries = Vec::new();
-        for (name, entry_path) in entry_paths {
-            let entry_path_normalized = Self::normalize_path(&entry_path);
-            let is_directory = Self::is_directory_locked(&mut archive, &entry_path_normalized);
-
-            entries.push(DirEntry {
-                name,
-                path: entry_path,
-                is_dir: is_directory,
-            });
         }
 
         Ok(entries)

@@ -11,6 +11,7 @@ import java.sql.DatabaseMetaData;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.querydsl.core.types.OrderSpecifier;
 
@@ -28,6 +29,7 @@ import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
+import io.jans.orm.sql.model.BatchInsert;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
@@ -72,7 +74,31 @@ public interface SqlOperationService extends PersistenceOperationService {
 
     SqlConnectionProvider getConnectionProvider();
 
+    /**
+     * Maximum number of entries in one {@link #addEntriesInTransaction(List)} call. The whole batch,
+     * with all converted attribute values, is held in memory until the commit.
+     */
+    int MAX_BATCH_INSERT_SIZE = 1000;
+
+    /**
+     * Maximum number of keys in one {@code WHERE doc_id IN (...)} statement of {@link #lookupByKeys}.
+     */
+    int LOOKUP_BY_KEYS_CHUNK_SIZE = 500;
+
     boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException;
+
+    /**
+     * Inserts all entries in one database transaction on one pooled connection: one commit for the
+     * whole batch, or a rollback and nothing stored. Consecutive entries with the same table and
+     * columns are sent as one JDBC batch. Values are converted exactly as {@link #addEntry} converts them.
+     *
+     * @throws DuplicateEntryException a unique key is violated (an existing DN or the same DN twice in
+     *         the batch); {@code getDn()} is the failing DN when the driver reports the key, otherwise
+     *         the message names the batch index range of the failing statement
+     * @throws PersistenceException any other failure, with the cause
+     * @throws io.jans.orm.exception.InvalidArgumentException more than {@link #MAX_BATCH_INSERT_SIZE} entries
+     */
+    void addEntriesInTransaction(List<BatchInsert> inserts) throws DuplicateEntryException, PersistenceException;
 
     boolean updateEntry(String key, String objectClass, List<AttributeDataModification> mods) throws UnsupportedOperationException, PersistenceException;
 
@@ -85,6 +111,15 @@ public interface SqlOperationService extends PersistenceOperationService {
 	boolean deleteRecursively(String key, String objectClass) throws EntryNotFoundException, SearchException;
 
 	List<AttributeData> lookup(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException;
+
+	/**
+	 * Reads entries by key with {@code WHERE doc_id IN (...)}, at most {@link #LOOKUP_BY_KEYS_CHUNK_SIZE}
+	 * keys per statement, grouped by table. Attributes are converted exactly as {@link #lookup} converts them.
+	 *
+	 * @return attributes of the found entries keyed by {@code doc_id}; missing keys are absent
+	 */
+	Map<String, List<AttributeData>> lookupByKeys(String objectClass, Collection<String> keys, String... attributes)
+			throws SearchException, EntryConvertationException;
 
     <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope,
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,

@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import ssl
 import typing as _t
 import warnings
 import weakref
@@ -33,6 +34,7 @@ from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 from pymysql.err import ProgrammingError
 
+from jans.pycloudlib._fs import open_private
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import get_password_from_file
@@ -350,9 +352,19 @@ class MysqlAdapter(CloudSqlConnectorMixin):
                 opts["ssl"]["ca"] = os.environ.get("CN_SQL_SSL_CACERT_FILE", "/etc/certs/sql_cacert.pem")
                 opts["ssl"]["cert"] = os.environ.get("CN_SQL_SSL_CERT_FILE", "/etc/certs/sql_client_cert.pem")
                 opts["ssl"]["key"] = os.environ.get("CN_SQL_SSL_KEY_FILE", "/etc/certs/sql_client_key.pem")
-            elif ssl_mode == "REQUIRED":
+            elif ssl_mode != "PREFERRED":
+                # a non-empty mapping makes PyMySQL require TLS; an empty one keeps its plaintext fallback
                 opts["ssl"]["check_hostname"] = False
         return opts
+
+    @property
+    def tls_required(self) -> bool:
+        """Whether the connection must be encrypted (TLS enabled and mode is not `PREFERRED`)."""
+        if self.cloudsql_connector_enabled:
+            return False
+        ssl_enabled = as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false"))
+        ssl_mode = os.environ.get("CN_SQL_SSL_MODE", "REQUIRED")
+        return ssl_enabled and ssl_mode != "PREFERRED"
 
     def upsert_query(self, table: Table, column_mapping: dict[str, _t.Any], update_mapping: dict[str, _t.Any]) -> _t.Any:
         return mysql_insert(table).values(column_mapping).on_duplicate_key_update(update_mapping)
@@ -595,6 +607,8 @@ class SqlClient(SqlSchemaMixin):
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
                 event.listen(self._engine, "first_connect", preconfigure_simple_json)
+                if getattr(self.adapter, "tls_required", False):
+                    event.listen(self._engine, "connect", ensure_mysql_tls)
             else:
                 event.listen(self._engine, "connect", set_postgres_search_path)
 
@@ -771,7 +785,9 @@ class SqlClient(SqlSchemaMixin):
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
-        return f"{self.adapter.quote_char}{identifier}{self.adapter.quote_char}"
+        q = self.adapter.quote_char
+        escaped = identifier.replace(q, q * 2)
+        return f"{q}{escaped}{q}"
 
     def row_exists(self, table_name: str, id_: str) -> bool:
         """Check whether a row is exist."""
@@ -1126,7 +1142,7 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
     with open(src) as f:
         txt = f.read()
 
-    with open(dest, "w") as f:
+    with open_private(dest) as f:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         db_name = os.environ.get("CN_SQL_DB_NAME", "jans")
         server_time_zone = os.environ.get("CN_SQL_DB_TIMEZONE", "UTC")
@@ -1148,8 +1164,12 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
         }
         f.write(rendered_txt)
 
-    # Set restrictive permissions to protect embedded credentials (if any)
-    os.chmod(dest, 0o600)
+
+def ensure_mysql_tls(dbapi_connection, connection_record):
+    # PyMySQL silently stays on plaintext when the server does not offer TLS
+    if not isinstance(getattr(dbapi_connection, "_sock", None), ssl.SSLSocket):
+        dbapi_connection.close()
+        raise RuntimeError("TLS is required but the MySQL connection is not encrypted")
 
 
 def set_mysql_strict_mode(dbapi_connection, connection_record):

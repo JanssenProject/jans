@@ -49,11 +49,13 @@ public class CryptoProviderFactory {
                 StringUtils.isNotBlank(keyStoreProvider.getDnName()) &&
                 keyStoreProvider.getKeyStoreFile().equals(configuration.getKeyStoreFile()) &&
                 keyStoreProvider.getKeyStoreSecret().equals(configuration.getKeyStoreSecret()) &&
-                keyStoreProvider.getDnName().equals(configuration.getDnName())) {
+                keyStoreProvider.getDnName().equals(configuration.getDnName()) &&
+                keyStoreProvider.isRejectNoneAlg() == Boolean.TRUE.equals(configuration.getRejectJwtWithNoneAlg()) &&
+                keyStoreProvider.getKeySelectionStrategy() == configuration.getKeySelectionStrategy()) {
             return keyStoreProvider;
         }
 
-        keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), configuration.getRejectJwtWithNoneAlg(), configuration.getKeySelectionStrategy());
+        keyStoreProvider = new AuthCryptoProvider(configuration.getKeyStoreFile(), configuration.getKeyStoreSecret(), configuration.getDnName(), Boolean.TRUE.equals(configuration.getRejectJwtWithNoneAlg()), configuration.getKeySelectionStrategy());
         return keyStoreProvider;
     }
 

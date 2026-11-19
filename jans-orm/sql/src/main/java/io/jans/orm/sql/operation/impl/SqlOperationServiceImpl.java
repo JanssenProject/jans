@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
+import com.querydsl.sql.Configuration;
 import com.querydsl.sql.RelationalPathBase;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
@@ -50,6 +52,7 @@ import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 
+import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
@@ -71,6 +74,7 @@ import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
+import io.jans.orm.sql.model.BatchInsert;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.JsonString;
 import io.jans.orm.sql.model.SearchReturnDataType;
@@ -102,6 +106,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private PersistenceExtension persistenceExtension;
 
 	private SQLQueryFactory sqlQueryFactory;
+
+	private volatile Configuration transactionConfiguration;
 
 	private String schemaName;
 
@@ -186,41 +192,221 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = addEntryImpl(tableMapping, key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, attributes);
+        OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, getAttributeNames(attributes));
         
         return result;
     }
 
 	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
 		try {
-			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
-
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
 
-			for (AttributeData attribute : attributes) {
-				AttributeType attributeType = getAttributeType(columTypes, attribute);
-				if (attributeType == null) {
-		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
-				}
+			appendInsertValues(sqlInsertQuery, tableMapping, attributes);
 
-				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
-
-				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
-					sqlInsertQuery.columns(Expressions.path(Object.class, attribute.getName()));
-					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
-				} else {
-					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
-					sqlInsertQuery.values(convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
-				}
-			}
-			
 			long rowInserted = sqlInsertQuery.execute();
 
 			return rowInserted == 1;
         } catch (QueryException ex) {
+        	if (SqlBatchExceptionMapper.isUniqueViolation(ex)) {
+        		String dn = getDnAttributeValue(attributes, key);
+        		throw new DuplicateEntryException(dn, "Entry already exists: " + dn, ex);
+        	}
+
             throw new PersistenceException("Failed to add entry", ex);
         }
+	}
+
+	private String getDnAttributeValue(Collection<AttributeData> attributes, String key) {
+		for (AttributeData attribute : attributes) {
+			if (StringHelper.equalsIgnoreCase(SqlOperationService.DN, attribute.getName()) && (attribute.getValue() != null)) {
+				return attribute.getValue().toString();
+			}
+		}
+
+		return key;
+	}
+
+	/**
+	 * Adds the columns and converted values of one row to an insert clause. Shared by the
+	 * autocommit insert and the batch insert so both convert values the same way.
+	 */
+	private void appendInsertValues(SQLInsertClause sqlInsertQuery, TableMapping tableMapping, Collection<AttributeData> attributes) throws PersistenceException {
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+
+		for (AttributeData attribute : attributes) {
+			AttributeType attributeType = getAttributeType(columTypes, attribute);
+			if (attributeType == null) {
+	            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+			}
+
+			boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
+
+			if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+				sqlInsertQuery.columns(Expressions.path(Object.class, attribute.getName()));
+				sqlInsertQuery.values(convertValueToDbJson(attribute.getValues(), attribute.getJsonValue()));
+			} else {
+				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
+				sqlInsertQuery.values(convertValueToDbColumn(tableMapping, attributeType, attribute.getValue()));
+			}
+		}
+	}
+
+	@Override
+	public void addEntriesInTransaction(List<BatchInsert> inserts) throws DuplicateEntryException, PersistenceException {
+		if ((inserts == null) || inserts.isEmpty()) {
+			return;
+		}
+		if (inserts.size() > MAX_BATCH_INSERT_SIZE) {
+			throw new InvalidArgumentException(String.format("Batch insert of %d entries exceeds the maximum of %d entries",
+					inserts.size(), MAX_BATCH_INSERT_SIZE));
+		}
+
+		Instant startTime = OperationDurationUtil.instance().now();
+
+		List<InsertGroup> groups = groupInserts(inserts);
+		addEntriesInTransactionImpl(inserts, groups);
+
+		Duration duration = OperationDurationUtil.instance().duration(startTime);
+		OperationDurationUtil.instance().logDebug("SQL operation: add_batch, duration: {}, entries: {}, statements: {}", duration, inserts.size(), groups.size());
+	}
+
+	private void addEntriesInTransactionImpl(List<BatchInsert> inserts, List<InsertGroup> groups) throws PersistenceException {
+		Connection connection;
+		try {
+			connection = connectionProvider.getConnection();
+		} catch (RuntimeException ex) {
+			throw new PersistenceException("Failed to get connection for batch insert", ex);
+		}
+
+		boolean restoreAutoCommit = false;
+		boolean transactionStarted = false;
+		boolean transactionFinished = false;
+		Throwable failure = null;
+		InsertGroup currentGroup = null;
+		try {
+			restoreAutoCommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			transactionStarted = true;
+
+			// Without SQLCloseListener: the clauses must not close the transaction connection
+			SQLQueryFactory transactionQueryFactory = new SQLQueryFactory(getTransactionConfiguration(), () -> connection);
+			for (InsertGroup group : groups) {
+				currentGroup = group;
+
+				RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(group.tableMapping);
+				SQLInsertClause sqlInsertQuery = transactionQueryFactory.insert(tableRelationalPath);
+				for (int i = group.fromIndex; i <= group.toIndex; i++) {
+					appendInsertValues(sqlInsertQuery, group.tableMapping, inserts.get(i).getAttributes());
+					sqlInsertQuery.addBatch();
+				}
+
+				long rowsInserted = sqlInsertQuery.execute();
+				int expectedRows = group.toIndex - group.fromIndex + 1;
+				// Negative sum: the driver reports Statement.SUCCESS_NO_INFO for batch rows
+				if ((rowsInserted >= 0) && (rowsInserted != expectedRows)) {
+					throw new PersistenceException(String.format("Failed to add batch entries %d..%d: %d rows inserted instead of %d",
+							group.fromIndex, group.toIndex, rowsInserted, expectedRows));
+				}
+			}
+
+			currentGroup = null;
+			connection.commit();
+			transactionFinished = true;
+		} catch (Exception ex) {
+			failure = ex;
+			int fromIndex = currentGroup == null ? 0 : currentGroup.fromIndex;
+			int toIndex = currentGroup == null ? inserts.size() - 1 : currentGroup.toIndex;
+
+			throw SqlBatchExceptionMapper.map(ex, inserts, fromIndex, toIndex);
+		} catch (Error ex) {
+			failure = ex;
+			throw ex;
+		} finally {
+			if (transactionStarted && !transactionFinished) {
+				transactionFinished = rollback(connection, failure);
+			}
+			// After a failed rollback the transaction state is unknown: leave it to the pool,
+			// setAutoCommit(true) would commit an open transaction
+			if (restoreAutoCommit && (!transactionStarted || transactionFinished)) {
+				try {
+					connection.setAutoCommit(true);
+				} catch (SQLException ex) {
+					LOG.error("Failed to restore auto commit after batch insert", ex);
+				}
+			}
+			try {
+				connection.close();
+			} catch (SQLException ex) {
+				LOG.error("Failed to return connection to pool after batch insert", ex);
+			}
+		}
+	}
+
+	private boolean rollback(Connection connection, Throwable failure) {
+		try {
+			connection.rollback();
+			return true;
+		} catch (SQLException ex) {
+			LOG.error("Failed to roll back batch insert transaction", ex);
+			if (failure != null) {
+				failure.addSuppressed(ex);
+			}
+			return false;
+		}
+	}
+
+	/*
+	 * Group consecutive entries with the same table and the same columns. QueryDSL prepares one
+	 * statement per distinct SQL text, so a group is one JDBC batch and list order is kept.
+	 */
+	private List<InsertGroup> groupInserts(List<BatchInsert> inserts) {
+		List<InsertGroup> groups = new ArrayList<>();
+
+		InsertGroup currentGroup = null;
+		for (int i = 0; i < inserts.size(); i++) {
+			BatchInsert insert = inserts.get(i);
+			if (insert == null) {
+				throw new MappingException(String.format("Batch entry %d is null", i));
+			}
+
+			TableMapping tableMapping = connectionProvider.getTableMappingByKey(insert.getKey(), insert.getObjectClass());
+			List<String> columns = getAttributeNames(insert.getAttributes());
+
+			if ((currentGroup != null) && StringHelper.equals(currentGroup.tableMapping.getTableName(), tableMapping.getTableName())
+					&& currentGroup.columns.equals(columns)) {
+				currentGroup.toIndex = i;
+			} else {
+				currentGroup = new InsertGroup(tableMapping, columns, i);
+				groups.add(currentGroup);
+			}
+		}
+
+		return groups;
+	}
+
+	private Configuration getTransactionConfiguration() {
+		Configuration configuration = this.transactionConfiguration;
+		if (configuration == null) {
+			configuration = new Configuration(connectionProvider.getSqlTemplates());
+			this.transactionConfiguration = configuration;
+		}
+
+		return configuration;
+	}
+
+	private static final class InsertGroup {
+		private final TableMapping tableMapping;
+		private final List<String> columns;
+		private final int fromIndex;
+		private int toIndex;
+
+		private InsertGroup(TableMapping tableMapping, List<String> columns, int fromIndex) {
+			this.tableMapping = tableMapping;
+			this.columns = columns;
+			this.fromIndex = fromIndex;
+			this.toIndex = fromIndex;
+		}
 	}
 
     @Override
@@ -231,7 +417,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = updateEntryImpl(tableMapping, key, mods);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, describeModifications(mods));
 
         return result;
     }
@@ -261,7 +447,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         boolean result = updateEntryWithVersionImpl(tableMapping, key, mods, versionAttributeName, expectedVersionValue);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, mods);
+        OperationDurationUtil.instance().logDebug("SQL operation: modify_with_version, duration: {}, table: {}, key: {}, mods: {}", duration, tableMapping.getTableName(), key, describeModifications(mods));
 
         return result;
 	}
@@ -442,6 +628,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 			Predicate whereExp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
 					Expressions.constant(key));
+			validateSelectAttributes(tableMapping, attributes);
 			Expression<?> attributesExp = buildSelectAttributes(attributes);
 
 			SQLQuery<?> sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath)
@@ -458,6 +645,56 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 
 		throw new SearchException(String.format("Failed to lookup entry by key: '%s'", key));
+	}
+
+	@Override
+	public Map<String, List<AttributeData>> lookupByKeys(String objectClass, Collection<String> keys, String... attributes)
+			throws SearchException, EntryConvertationException {
+		Instant startTime = OperationDurationUtil.instance().now();
+
+		Map<String, TableMapping> tableMappings = new LinkedHashMap<>();
+		Map<String, List<String>> keysByTable = new LinkedHashMap<>();
+		for (String key : keys) {
+			TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+			tableMappings.putIfAbsent(tableMapping.getTableName(), tableMapping);
+			keysByTable.computeIfAbsent(tableMapping.getTableName(), tableName -> new ArrayList<>()).add(key);
+		}
+
+		Map<String, List<AttributeData>> result = new HashMap<>();
+		for (Map.Entry<String, List<String>> tableKeys : keysByTable.entrySet()) {
+			lookupByKeysImpl(tableMappings.get(tableKeys.getKey()), tableKeys.getValue(), result, attributes);
+		}
+
+		Duration duration = OperationDurationUtil.instance().duration(startTime);
+		OperationDurationUtil.instance().logDebug("SQL operation: lookup_by_keys, duration: {}, tables: {}, keys: {}, found: {}, attributes: {}",
+				duration, keysByTable.keySet(), keys.size(), result.size(), attributes);
+
+		return result;
+	}
+
+	private void lookupByKeysImpl(TableMapping tableMapping, List<String> keys, Map<String, List<AttributeData>> result,
+			String... attributes) throws SearchException, EntryConvertationException {
+		RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+		validateSelectAttributes(tableMapping, attributes);
+		Expression<?> attributesExp = buildSelectAttributes(attributes);
+
+		for (int start = 0; start < keys.size(); start += LOOKUP_BY_KEYS_CHUNK_SIZE) {
+			List<String> chunkKeys = keys.subList(start, Math.min(start + LOOKUP_BY_KEYS_CHUNK_SIZE, keys.size()));
+			Predicate whereExp = ExpressionUtils.in(Expressions.stringPath(SqlOperationService.DOC_ID), chunkKeys);
+
+			try {
+				SQLQuery<?> sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+				try (ResultSet resultSet = sqlSelectQuery.getResults()) {
+					while (resultSet.next()) {
+						String docId = resultSet.getString(SqlOperationService.DOC_ID);
+						result.put(docId, readAttributeDataRow(tableMapping, resultSet, true));
+					}
+				}
+			} catch (SQLException | QueryException ex) {
+				throw new SearchException(String.format("Failed to lookup entries by %d keys in table '%s'", chunkKeys.size(),
+						tableMapping.getTableName()), ex);
+			}
+		}
 	}
 
 	@Override
@@ -485,6 +722,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
         RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 
+		validateSelectAttributes(tableMapping, attributes);
+		validateOrderBy(tableMapping, orderBy);
 		Expression<?> attributesExp = buildSelectAttributes(attributes);
 
         List<EntryData> searchResultList = new LinkedList<EntryData>();
@@ -718,7 +957,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
         String[] results = new String[passwords.length];
         for (int i = 0; i < passwords.length; i++) {
-			if (isSkipHashed && (PasswordEncryptionHelper.findAlgorithmString(passwords[i]) != null)) {
+			if (isSkipHashed && isPreHashedPassword(passwords[i])) {
 				// Skip password hashing only if password has prefix {alg} and defined with @Password(skipHashed = false)
 				results[i] = passwords[i];
 				continue;
@@ -744,6 +983,17 @@ public class SqlOperationServiceImpl implements SqlOperationService {
             	return null;
             }
 
+            return readAttributeDataRow(tableMapping, resultSet, skipDn);
+        } catch (SQLException ex) {
+        	throw new EntryConvertationException("Failed to convert entry!", ex);
+        }
+    }
+
+    /*
+     * Converts the current row of the result set
+     */
+    private List<AttributeData> readAttributeDataRow(TableMapping tableMapping, ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
+        try {
             List<AttributeData> result = new ArrayList<AttributeData>();
 	        int columnsCount = resultSet.getMetaData().getColumnCount();
 	        for (int i = 1; i <= columnsCount; i++) {
@@ -922,6 +1172,37 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	@Override
 	public boolean isSupportObjectClass(String objectClass) {
 		return true;
+	}
+
+	private void validateSelectAttributes(TableMapping tableMapping, String ... attributes) throws SearchException {
+		if (ArrayHelper.isEmpty(attributes) || ((attributes.length == 1) && StringHelper.isEmpty(attributes[0]))) {
+			return;
+		}
+
+		for (String attribute : attributes) {
+			validateColumnName(tableMapping, attribute);
+		}
+	}
+
+	private void validateOrderBy(TableMapping tableMapping, OrderSpecifier<?>[] orderBy) throws SearchException {
+		if (orderBy == null) {
+			return;
+		}
+
+		for (OrderSpecifier<?> orderSpecifier : orderBy) {
+			Expression<?> target = orderSpecifier.getTarget();
+			if (!(target instanceof Path)) {
+				throw new SearchException(String.format("Unsupported order by expression '%s'", target));
+			}
+			validateColumnName(tableMapping, ((Path<?>) target).getMetadata().getName());
+		}
+	}
+
+	private void validateColumnName(TableMapping tableMapping, String columnName) throws SearchException {
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+		if ((columnName == null) || (columTypes == null) || !columTypes.containsKey(columnName.toLowerCase())) {
+			throw new SearchException(String.format("Column '%s' is undefined", columnName));
+		}
 	}
 
 	private Expression<?> buildSelectAttributes(String ... attributes) {
@@ -1316,6 +1597,37 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	@Override
 	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
 		return connectionProvider.getTableColumnsMap();
+	}
+
+	private boolean isPreHashedPassword(String password) {
+		if (persistenceExtension != null) {
+			// Extension may use its own hash format
+			return PasswordEncryptionHelper.findAlgorithmString(password) != null;
+		}
+
+		// Unknown {prefix} would be stored and later compared as plaintext
+		return PasswordEncryptionHelper.findAlgorithm(password) != null;
+	}
+
+	private static List<String> getAttributeNames(Collection<AttributeData> attributes) {
+		List<String> names = new ArrayList<String>();
+		if (attributes != null) {
+			for (AttributeData attribute : attributes) {
+				names.add(attribute.getName());
+			}
+		}
+		return names;
+	}
+
+	private static List<String> describeModifications(List<AttributeDataModification> mods) {
+		List<String> descriptions = new ArrayList<String>();
+		if (mods != null) {
+			for (AttributeDataModification mod : mods) {
+				AttributeData attribute = mod.getAttribute() != null ? mod.getAttribute() : mod.getOldAttribute();
+				descriptions.add(mod.getModificationType() + ":" + (attribute == null ? null : attribute.getName()));
+			}
+		}
+		return descriptions;
 	}
 
 }
