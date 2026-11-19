@@ -42473,6 +42473,16 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 * c. Ensure you restart services after DB schema modification
 
 
+### Add user version column on upgrade
+User updates are versioned through the `jansVersion` column of `jansPerson`. Container and Kubernetes
+deployments add it automatically through the persistence loader. On a VM install, add it before
+upgrading the Janssen services:
+```
+ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `jansVersion` BIGINT NULL DEFAULT NULL;
+```
+Existing rows keep a `NULL` version until their next update. Manual `UPDATE` statements on `jansPerson`
+should also set `jansVersion = COALESCE(jansVersion, 0) + 1`, so concurrent versioned writes notice the change.
+
 ### Add user in Jans admin group
 
 * Search for inum of `JansGrp`
@@ -42488,7 +42498,7 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
 In this example we are going to update one user's email address.
 
 * Search for existing email address: `use jansdb; select * from jansPerson where uid='testUser'\G;`
-* Modify it: `use jansdb; update jansPerson set mail='newEmail@gluu.org' where uid='testUser';`
+* Modify it: `use jansdb; update jansPerson set mail='newEmail@gluu.org', jansVersion=COALESCE(jansVersion, 0) + 1 where uid='testUser';`
 ### **Search user** :
 
 * `use jansdb; select * from jansPerson where uid='admin'\G;`
@@ -44301,6 +44311,19 @@ You can also specify additional constraints, defaults, or other attributes for t
 ALTER TABLE "jansPerson"
 ADD COLUMN membership_level VARCHAR DEFAULT 'Basic';
 ```
+
+## Add user version column on upgrade
+
+User updates are versioned through the `jansVersion` column of `jansPerson`. Container and Kubernetes
+deployments add it automatically through the persistence loader. On a VM install, add it before
+upgrading the Janssen services:
+
+```
+ALTER TABLE "jansPerson" ADD COLUMN "jansVersion" BIGINT;
+```
+
+Existing rows keep a `NULL` version until their next update. Manual `UPDATE` statements on `jansPerson`
+should also set `"jansVersion" = COALESCE("jansVersion", 0) + 1`, so concurrent versioned writes notice the change.
 
 ## Output column data into txt
 
@@ -79460,6 +79483,26 @@ This module has 2 properties:
    Default value: 3
 3) lock_expiration_time - Specify the time in seconds when lock will be expired
    Default value: 180
+
+While an account is locked, `invalid_login_count_attribute` holds `locked:<epoch millis>:<jansVersion>` instead of a
+count, where `jansVersion` is the user version the lock wrote. The script only unlocks inactive accounts whose marker
+and version are unchanged since the lock, so accounts disabled or edited by an administrator stay locked.
+
+On backends with versioned updates, the script's user writes are compare-and-set on `jansVersion`: a counter, lock
+or unlock write that races a write which advances `jansVersion` re-reads the user and decides again instead of
+overwriting it. Janssen's own user writers (auth server, Config API, SCIM, Casa, Jans Link) all advance `jansVersion`.
+Custom entity classes or direct database updates on `jansPerson` must advance it too, or the script and unlock cannot
+see their changes.
+
+Other writers update users with `merge`, which checks only the version it reads itself, not the one their own earlier
+read saw. An update read before a lock and saved after it (for example an in-flight Config API PATCH) can therefore
+write the status it read and reactivate the account early.
+
+Counter and lock writes fall back to a plain update on backends without versioned updates; unlock does not, so such
+accounts must be reactivated by an administrator.
+
+Upgrade note: accounts locked by a previous version of this script have no marker and are not unlocked when their
+lock expires. An administrator must reactivate them.
 
 This is person authentication module for Jans-Auth which allows Jans/Flex to use multiple backends for user authentication.
 
