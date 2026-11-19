@@ -75,7 +75,7 @@ public class TemplatingService {
 
         try {
             fmConfig.setDirectoryForTemplateLoading(Paths.get(econf.getRootDir()).toFile());
-        } catch(IOException e) {
+        } catch (IOException e) {
             logger.error("Error configuring directory for UI templates: {}", e.getMessage());
             throw new RuntimeException(e);
         }

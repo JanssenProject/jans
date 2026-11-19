@@ -46,14 +46,16 @@ class Introspection(IntrospectionType):
             print "Introspection. Failed to load session DN"
             return True
 
-        # Return session_id
-        responseAsJsonObject.accumulate("session_id", sessionDn)
-
         sessionIdService = CdiUtil.bean(SessionIdService)
-        session = sessionIdService.getSessionById(sessionDn, False)
+        session = sessionIdService.getSessionByDn(sessionDn, False)
         if session is None:
             print "Introspection. Failed to load session '%s'" % sessionDn
             return True
+
+        # Return the public sid, never the session DN/id which equals the browser SSO cookie.
+        # remove + accumulate: put() emits a Jython str as a char array; another script may have set sid
+        responseAsJsonObject.remove("sid")
+        responseAsJsonObject.accumulate("sid", session.getOutsideSid())
 
         sessionAttributes = session.getSessionAttributes()
         if sessionAttributes is None:

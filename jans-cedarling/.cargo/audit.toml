@@ -16,9 +16,15 @@
 # Accepted risk: in production these curves only verify ECDSA signatures over
 # public data with public keys (JWT and sigstore verification); ECDSA signing
 # happens in tests only, and TRACE records are signed with ed25519-dalek.
+#
+# RUSTSEC-2026-0543: chrono is unmaintained (not a vulnerability; all versions
+# affected). cedar-policy-core 4.15.0 (latest) depends on chrono, so it cannot
+# leave the dependency tree until Cedar drops it. Revisit on each cedar-policy
+# upgrade.
 ignore = [
     "RUSTSEC-2023-0071",
     "RUSTSEC-2026-0194",
     "RUSTSEC-2026-0195",
     "RUSTSEC-2026-0387",
+    "RUSTSEC-2026-0543",
 ]

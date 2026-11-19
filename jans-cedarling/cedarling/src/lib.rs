@@ -1127,30 +1127,17 @@ impl Cedarling {
                 // Parse succeeded! Now run schema and metadata independently.
 
                 // Schema Level
-                let schema_res = if let Some(schema) = &loaded.store.store.schema {
-                    let validator = cedar_policy::Validator::new(schema.schema.clone());
-                    let result = validator.validate(
+                let schema_validation = match &loaded.store.store.schema {
+                    Some(schema) => validate_schema(
+                        schema.schema.clone(),
                         loaded.store.store.policies.get_set(),
-                        cedar_policy::ValidationMode::Strict,
-                    );
-                    if result.validation_passed() {
-                        LevelResult::Ok
-                    } else {
-                        let errors = result
-                            .validation_errors()
-                            .map(|e| Diagnostic {
-                                file: e.policy_id().to_string(),
-                                line: None,
-                                column: None,
-                                message: e.to_string(),
-                            })
-                            .collect();
-                        LevelResult::Failed { errors }
-                    }
-                } else {
-                    LevelResult::Skipped {
-                        reason: "no schema present".into(),
-                    }
+                    ),
+                    None => SchemaValidation {
+                        result: LevelResult::Skipped {
+                            reason: "no schema present".into(),
+                        },
+                        warnings: Vec::new(),
+                    },
                 };
 
                 // Metadata Level
@@ -1196,11 +1183,12 @@ impl Cedarling {
                         column: None,
                         message: warning.to_string(),
                     })
+                    .chain(schema_validation.warnings)
                     .collect();
 
                 Ok(ValidationReport {
                     parse: LevelResult::Ok,
-                    schema: schema_res,
+                    schema: schema_validation.result,
                     metadata: metadata_res,
                     warnings,
                     unknown_fields: loaded
@@ -1212,5 +1200,58 @@ impl Cedarling {
                 })
             },
         }
+    }
+}
+
+/// Outcome of checking the policies against the schema: the level result plus
+/// Cedar's non-fatal findings, which belong in the report's `warnings`.
+#[cfg(feature = "tools")]
+struct SchemaValidation {
+    result: LevelResult,
+    warnings: Vec<Diagnostic>,
+}
+
+/// Validates `policies` against `schema` in strict mode.
+///
+/// Cedar reports some real problems only as warnings, such as a policy whose
+/// action can never apply to its principal and resource types, so they are kept
+/// rather than dropped when validation passes.
+#[cfg(feature = "tools")]
+fn validate_schema(
+    schema: cedar_policy::Schema,
+    policies: &cedar_policy::PolicySet,
+) -> SchemaValidation {
+    let result = cedar_policy::Validator::new(schema)
+        .validate(policies, cedar_policy::ValidationMode::Strict);
+
+    let warnings = result
+        .validation_warnings()
+        .map(|w| Diagnostic {
+            file: w.policy_id().to_string(),
+            line: None,
+            column: None,
+            message: w.to_string(),
+        })
+        .collect();
+
+    let level = if result.validation_passed() {
+        LevelResult::Ok
+    } else {
+        LevelResult::Failed {
+            errors: result
+                .validation_errors()
+                .map(|e| Diagnostic {
+                    file: e.policy_id().to_string(),
+                    line: None,
+                    column: None,
+                    message: e.to_string(),
+                })
+                .collect(),
+        }
+    };
+
+    SchemaValidation {
+        result: level,
+        warnings,
     }
 }

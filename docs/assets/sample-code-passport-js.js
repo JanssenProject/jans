@@ -83,9 +83,11 @@ app.get('/passport/auth/google/callback',
       jti: uuidv4(),
       exp: now / 1000 + 30,
       iat: now,
+      request_id: req.session.passportRequestId,
       data: encrypt(ldapMappedUser)
     }, privateKey(), defaultRpOptions())
 
+    req.session.passportRequestId = null
     console.log('User JWT: ', userJWT)
     return redirectAndPostUserToJans(res, userJWT)
 });
@@ -166,7 +168,8 @@ function validateToken (req, res, next) {
   const t = req.params.token
   try {
     console.log('Validating token')
-    verifyJWT(t)
+    // remembered so the user JWT can be bound to the Jans session that requested it
+    req.session.passportRequestId = verifyJWT(t).jwt
     next()
   } catch (err) {
     const msg = 'Token did not pass validation.'

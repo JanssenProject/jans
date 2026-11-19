@@ -144,7 +144,10 @@ fn item(entry: BulkResultEntry) -> Result<BulkItemResult, PostBulkError> {
         accepted: entry.accepted,
         error: Some(error).filter(|error| !error.is_empty()),
         reason: Some(reason).filter(|reason| !reason.is_empty()),
-        flags: entry.flags.as_ref().map_or_else(Vec::new, problem_flags),
+        flags: entry
+            .flags
+            .as_ref()
+            .map_or_else(Default::default, problem_flags),
     })
 }
 
