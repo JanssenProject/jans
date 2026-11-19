@@ -109,12 +109,14 @@ public class UserMgmtServiceTest {
     }
 
     @Test
-    public void updateRetriesOnFreshVersion() {
-        stored.set(user(GluuStatus.INACTIVE, 2L));
-        User replacement = user(GluuStatus.ACTIVE, 1L);
+    public void updateRetriesWhenStatusUnchanged() {
+        User read = user(GluuStatus.ACTIVE, 1L);
+        // concurrent write that leaves status alone
+        stored.set(user(GluuStatus.ACTIVE, 2L));
+        User replacement = user(GluuStatus.ACTIVE, null);
         replacement.setUserId("jdoe2");
 
-        User result = userMgmtService.updateUser(replacement, false, false);
+        User result = userMgmtService.updateUser(replacement, read, false, false);
 
         assertEquals(writes.size(), 1);
         assertEquals(stored.get().getUserId(), "jdoe2");
@@ -123,13 +125,26 @@ public class UserMgmtServiceTest {
     }
 
     @Test
-    public void updateWithoutStatusReadBeforeLockKeepsAccountInactive() {
+    public void updateWithStatusReadBeforeLockConflicts() {
+        User read = user(GluuStatus.ACTIVE, 1L);
         stored.set(user(GluuStatus.INACTIVE, 2L));
-        // resource copied status and version from its read, taken before the lock
-        User replacement = user(GluuStatus.ACTIVE, 1L);
+        User replacement = user(GluuStatus.ACTIVE, null);
+
+        assertThrows(VersionMismatchException.class,
+                () -> userMgmtService.updateUser(replacement, read, true, false));
+
+        assertTrue(writes.isEmpty());
+        assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);
+    }
+
+    @Test
+    public void updateWithoutStatusReadBeforeLockKeepsAccountInactive() {
+        User read = user(GluuStatus.ACTIVE, 1L);
+        stored.set(user(GluuStatus.INACTIVE, 2L));
+        User replacement = user(null, null);
         replacement.setUserId("jdoe2");
 
-        userMgmtService.updateUser(replacement, true, true);
+        userMgmtService.updateUser(replacement, read, true, true);
 
         assertEquals(writes.size(), 1);
         assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);

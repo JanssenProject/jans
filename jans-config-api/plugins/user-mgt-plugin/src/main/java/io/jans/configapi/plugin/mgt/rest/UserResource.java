@@ -330,7 +330,6 @@ public class UserResource extends BaseResource {
             User existingUser = StringUtils.isBlank(userInum) ? null : userMgmtSrv.getUserBasedOnInum(userInum);
             checkResourceNotNull(existingUser, USER);
             user.setDn(existingUser.getDn());
-            user.setVersion(existingUser.getVersion());
             // no status in the request keeps the stored one, so a PUT cannot lift a lock by omission
             boolean keepStoredStatus = customUser.getStatus() == null;
             if (keepStoredStatus) {
@@ -354,7 +353,7 @@ public class UserResource extends BaseResource {
 
             logger.info("Call update user:{}", user);
 
-            user = userMgmtSrv.updateUser(user, canChangeAdminUIRole(), keepStoredStatus);
+            user = userMgmtSrv.updateUser(user, existingUser, canChangeAdminUIRole(), keepStoredStatus);
             checkResourceNotNull(user, USER);
             logger.info("Updated user:{}", user);
 

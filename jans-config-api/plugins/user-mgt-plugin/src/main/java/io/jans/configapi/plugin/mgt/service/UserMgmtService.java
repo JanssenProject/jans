@@ -530,33 +530,42 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
-        return updateUser(user, true, false);
+        return updateUser(user, userService.getUserByDn(user.getDn()), true, user.getStatus() == null);
     }
 
     /**
-     * Replace the stored user with {@code user}, conditional on {@code user.getVersion()} (the
-     * version of the caller's read). On a concurrent write the stored entry is re-read, the role
-     * check repeated against it, and the write retried on its version. With {@code keepStoredStatus}
-     * the status is taken from that re-read rather than from {@code user}.
+     * Replace the stored user with {@code user}, conditional on the version of {@code read}, the
+     * caller's read of the entry. {@code keepStoredStatus} writes the stored status instead of the
+     * one on {@code user}. On a concurrent write the entry is re-read and the write retried on its
+     * version, unless the request sets a status and the stored status changed since {@code read}:
+     * that conflict is thrown.
      */
-    public User updateUser(User user, boolean allowRoleChange, boolean keepStoredStatus) {
+    public User updateUser(User user, User read, boolean allowRoleChange, boolean keepStoredStatus) {
         logger.info("\n Updating user:{}", user);
+        if (read == null) {
+            return null;
+        }
+        User base = read;
         for (int attempt = 1;; attempt++) {
+            user.setVersion(base.getVersion());
+            if (keepStoredStatus) {
+                user.setStatus(base.getStatus());
+            }
             try {
                 return saveWithVersion(user);
             } catch (VersionMismatchException ex) {
                 checkRetry(user, attempt, ex);
+                base = userService.getUserByDn(user.getDn());
+                if (base == null) {
+                    return null;
+                }
+                // the requested status was chosen against the read; don't let it override a newer one
+                if (!keepStoredStatus && base.getStatus() != read.getStatus()) {
+                    throw ex;
+                }
             }
-            User current = userService.getUserByDn(user.getDn());
-            if (current == null) {
-                return null;
-            }
-            if (!allowRoleChange && !getAdminUIRoles(current).equals(getAdminUIRoles(user))) {
+            if (!allowRoleChange && !getAdminUIRoles(base).equals(getAdminUIRoles(user))) {
                 throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
-            }
-            user.setVersion(current.getVersion());
-            if (keepStoredStatus) {
-                user.setStatus(current.getStatus());
             }
         }
     }
