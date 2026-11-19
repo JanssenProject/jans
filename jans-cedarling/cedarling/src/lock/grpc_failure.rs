@@ -24,7 +24,8 @@ pub(super) enum GrpcFailure {
 /// A gRPC call the same request would fail again.
 #[derive(Debug, thiserror::Error)]
 pub(super) enum GrpcRefusal {
-    /// A proxy's `4xx` without `grpc-status`, final as over REST.
+    /// A proxy's `3xx` or `4xx` without `grpc-status`, final as over REST: gRPC
+    /// does not follow redirects.
     #[error("a proxy before Lock refused the gRPC request with HTTP {0}")]
     Proxy(StatusCode),
     /// Lock sends no `OUT_OF_RANGE`: tonic gives it for an answer over the
@@ -56,9 +57,10 @@ impl GrpcFailure {
     }
 }
 
-/// tonic reads a proxy's `400` as `INTERNAL` and a `413` or `405` as `UNKNOWN`,
-/// both retried; REST makes such a `4xx` final, and so does this. `408` and
-/// `429` still ask to repeat the request.
+/// tonic reads a proxy's `400` as `INTERNAL` and a `3xx`, `413` or `405` as
+/// `UNKNOWN`, both retried; REST makes such a `4xx` final, and so does this. A
+/// `3xx` is final too, as the same request is redirected again. `408` and `429`
+/// still ask to repeat the request.
 fn proxy_refusal(status: &Status) -> Option<StatusCode> {
     let code = status
         .message()
@@ -67,7 +69,7 @@ fn proxy_refusal(status: &Status) -> Option<StatusCode> {
         .ok()?;
     let http = StatusCode::from_u16(code).ok()?;
     let repeat = http == StatusCode::REQUEST_TIMEOUT || http == StatusCode::TOO_MANY_REQUESTS;
-    (http.is_client_error() && !repeat).then_some(http)
+    ((http.is_redirection() || http.is_client_error()) && !repeat).then_some(http)
 }
 
 #[cfg(test)]
@@ -87,6 +89,8 @@ mod tests {
             (proxy(Code::Internal, 503), "Retryable"),
             (proxy(Code::Internal, 400), "ProxyRefusal(400)"),
             (proxy(Code::Unknown, 413), "ProxyRefusal(413)"),
+            (proxy(Code::Unknown, 301), "ProxyRefusal(301)"),
+            (proxy(Code::Unknown, 308), "ProxyRefusal(308)"),
             (Status::out_of_range("over the cap"), "ResponseTooLarge"),
             (Status::invalid_argument("bad"), "Refused"),
             (Status::permission_denied("scope"), "Refused"),
