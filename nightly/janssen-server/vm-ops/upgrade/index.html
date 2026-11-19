@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -75,6 +74,29 @@
 
     
     
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
+  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
+    https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
+    https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.bolddesk.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+"><script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+
   </head>
   
   
@@ -2104,26 +2126,26 @@ We recommend using Kubernetes installations over VM, to avail smooth upgrades an
 <p>Custom scripts are considered external configuration and are not updated automatically during an upgrade.
 Please review and adapt your custom scripts to work with the newer version of the Janssen Server.</p>
 </div>
-<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>nightly</code></p>
+<p>Let's assume we are upgrading Jans VM installation from <code>current version</code> to <code>vreplace-janssen-version</code></p>
 <ol>
 <li>
 <p>Keep the old VM installation running.</p>
 </li>
 <li>
-<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>nightly</code>.</p>
+<p><a href="../../install/vm-install/">Install</a> on a separate VM the target new Jans installation, i.e. <code>vreplace-janssen-version</code>.</p>
 <p>You can install with a test client. For example:</p>
 <p><code>sudo python3 /opt/jans/jans-setup/setup.py -test-client-id 6382c9da-f25d-435f-ac63-6acde36f4859 -test-client-pw secret1172023</code></p>
 <p>This <code>client-id</code> and <code>client-pw</code> will then be used to import Terraform configurations</p>
 </li>
 <li>
-<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>nightly</code> to:</p>
+<p>Use our Terraform <a href="../../terraform/">docs</a> on the new installation, i.e. <code>vreplace-janssen-version</code> to:</p>
 <ul>
 <li>import all the global configurations from the new installation using <code>terraform import</code></li>
 <li>define all the custom IDP configurations and apply them using <code>terraform apply</code></li>
 </ul>
 </li>
 <li>
-<p>At this point there should be two versions up, <code>old version</code> and <code>nightly</code>.</p>
+<p>At this point there should be two versions up, <code>old version</code> and <code>vreplace-janssen-version</code>.</p>
 </li>
 <li>
 <p>Traffic should be switched gradually from the old setup to the new setup.
@@ -2288,7 +2310,7 @@ Please review and adapt your custom scripts to work with the newer version of th
 
 
 <h4>Cookie consent</h4>
-<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. If you accept, Reo.dev and its third-party partners also collect device and network data to identify the company you visit from. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
 <input class="md-toggle" type="checkbox" id="__settings" >
 <div class="md-consent__settings">
   <ul class="task-list">

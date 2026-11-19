@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -75,6 +74,29 @@
 
     
     
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
+  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
+    https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
+    https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.bolddesk.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+"><script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+
   </head>
   
   
@@ -2689,7 +2711,7 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://jans-dynamic-mysql/jans-auth/restv1/revoke
 </code></pre></div>
 <p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>Token revocation</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#revoke_token">REVOKE_TOKEN feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -2877,7 +2899,7 @@ However it is possible to allow revoking of any token (which is issued with othe
 
 
 <h4>Cookie consent</h4>
-<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. If you accept, Reo.dev and its third-party partners also collect device and network data to identify the company you visit from. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
 <input class="md-toggle" type="checkbox" id="__settings" >
 <div class="md-consent__settings">
   <ul class="task-list">

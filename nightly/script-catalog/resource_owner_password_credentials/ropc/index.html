@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -75,6 +74,29 @@
 
     
     
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
+  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
+    https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
+    https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.bolddesk.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+"><script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+
   </head>
   
   
@@ -3609,7 +3631,7 @@ legacy flow.</p>
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -3659,7 +3681,7 @@ legacy flow.</p>
 <tbody>
 <tr>
 <td style="text-align: left;"><code>customScript</code></td>
-<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td style="text-align: left;">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>configurationAttributes</code></td>
@@ -3667,11 +3689,11 @@ legacy flow.</p>
 </tr>
 <tr>
 <td style="text-align: left;"><code>SimpleCustomProperty</code></td>
-<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td style="text-align: left;">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td style="text-align: left;"><code>context</code></td>
-<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td style="text-align: left;"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>
@@ -3978,7 +4000,7 @@ By default it is not enabled but it can be enabled if set <code>forceRopcInAutho
 
 
 <h4>Cookie consent</h4>
-<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. If you accept, Reo.dev and its third-party partners also collect device and network data to identify the company you visit from. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
 <input class="md-toggle" type="checkbox" id="__settings" >
 <div class="md-consent__settings">
   <ul class="task-list">

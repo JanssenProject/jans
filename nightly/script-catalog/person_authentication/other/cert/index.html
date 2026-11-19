@@ -1,5 +1,4 @@
 
-
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
@@ -71,6 +70,29 @@
 
     
     
+
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
+  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
+    https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
+    https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.bolddesk.com;
+  font-src 'self' data: https://fonts.gstatic.com;
+  worker-src 'self' blob:;
+"><script>
+  (function () {
+    var version = 2;
+    if (__md_get("__consent_version") === version) return;
+    try {
+      localStorage.removeItem(__md_scope.pathname + ".__consent");
+    } catch (e) {}
+    __md_set("__consent_version", version);
+  })();
+</script>
+
   </head>
   
   
@@ -1234,6 +1256,9 @@
    Default value: 5242880</p>
 <p>5) credentials_file - Patch to file with reCAPTCHA credentials.
    Example: '/etc/certs/cert_credentials.json'</p>
+<p>6) trust_client_cert_header - Read the client certificate from the <code>X-ClientCert</code> header. Enable only behind a trusted proxy that verifies the client certificate and overwrites this header; deployments that rely on the header must set it before upgrading.
+   Allowed values: true/false
+   Default value: false</p>
 <h2 id="generating-certificates-without-configuration">Generating Certificates Without Configuration<a class="headerlink" href="#generating-certificates-without-configuration" title="Permanent link">#</a></h2>
 <h3 id="1-generate-a-certificate-authority-ca-cert">1. Generate a certificate authority (CA) cert.<a class="headerlink" href="#1-generate-a-certificate-authority-ca-cert" title="Permanent link">#</a></h3>
 <h4 id="1-generate-your-ca-certificate-using-this-command">1. Generate your CA certificate using this command:<a class="headerlink" href="#1-generate-your-ca-certificate-using-this-command" title="Permanent link">#</a></h4>
@@ -1615,7 +1640,7 @@ extendedKeyUsage       = clientAuth, emailProtection
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 29, 2025
+    November 18, 2026
   </span>
 
     
@@ -1717,7 +1742,7 @@ extendedKeyUsage       = clientAuth, emailProtection
 
 
 <h4>Cookie consent</h4>
-<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
+<p>This site uses Scarf and Reo.dev to measure documentation traffic and to understand which content is most useful, so we can improve the docs. If you accept, Reo.dev and its third-party partners also collect device and network data to identify the company you visit from. These analytics cookies are only set with your consent. Essential cookies needed for the site to function are always active. For details on how your data is handled, see the <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.</p>
 <input class="md-toggle" type="checkbox" id="__settings" >
 <div class="md-consent__settings">
   <ul class="task-list">
