@@ -352,25 +352,24 @@ impl HttpClient {
     /// same tick or simply runs again on the next interval. Burning the retry
     /// budget on a probe would only delay the downgrade.
     pub(crate) async fn head_validators(&self, uri: &str) -> Result<HeadOutcome, HttpClientError> {
+        let result = self.raw_client.head(uri).send().await;
+        // Checked before the failure is sorted: whether a status is retried has no
+        // bearing on whether it means "no HEAD here".
+        if let Ok(response) = &result
+            && matches!(
+                response.status(),
+                reqwest::StatusCode::METHOD_NOT_ALLOWED | reqwest::StatusCode::NOT_IMPLEMENTED
+            )
+        {
+            return Ok(HeadOutcome::NotSupported);
+        }
         // Any other failure (auth, missing resource, server error) is a real failure,
         // not "HEAD returned no validators", so it is not counted as a degraded strategy.
-        match AttemptFailure::check(self.raw_client.head(uri).send().await) {
-            Ok(response) => Ok(HeadOutcome::Headers(CacheHeadersState::from_headers(
-                response.headers(),
-                chrono::Utc::now(),
-            ))),
-            Err(
-                AttemptFailure::Final(FinalFailure::Status {
-                    status: reqwest::StatusCode::METHOD_NOT_ALLOWED,
-                    ..
-                })
-                | AttemptFailure::Retryable(RetryableFailure::Status {
-                    status: reqwest::StatusCode::NOT_IMPLEMENTED,
-                    ..
-                }),
-            ) => Ok(HeadOutcome::NotSupported),
-            Err(failure) => Err(failure.into()),
-        }
+        let response = AttemptFailure::check(result)?;
+        Ok(HeadOutcome::Headers(CacheHeadersState::from_headers(
+            response.headers(),
+            chrono::Utc::now(),
+        )))
     }
 }
 
