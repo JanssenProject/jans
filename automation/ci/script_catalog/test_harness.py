@@ -8,6 +8,9 @@ import catalog
 import manifest
 import run
 
+# Fixture output (fake FAIL lines) in the CI log reads like real AIO failures.
+run.log = lambda *_: None
+
 
 class CatalogTest(unittest.TestCase):
     @classmethod
