@@ -67,6 +67,17 @@ public class PersistenceEntryManagerBatchDefaultsTest {
 	}
 
 	@Test
+	public void transactionsAreNotSupportedByDefault() {
+		FakeVersionEntryManager entryManager = new FakeVersionEntryManager();
+
+		assertFalse(entryManager.isTransactionSupported("ou=people,o=jans"));
+		assertThrows(UnsupportedOperationException.class,
+				() -> entryManager.executeInTransaction("ou=people,o=jans", () -> "x"));
+		assertThrows(UnsupportedOperationException.class,
+				() -> entryManager.findForUpdate(BatchTestEntry.class, "uid=a,ou=people,o=jans"));
+	}
+
+	@Test
 	public void findByDnsReturnsFoundEntriesAndOmitsMissingOnes() {
 		FakeVersionEntryManager entryManager = new FakeVersionEntryManager();
 		entryManager.persist(entry("uid=a,o=test", "a"));

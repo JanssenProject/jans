@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.KeyConversionException;
@@ -445,6 +446,28 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
 	public boolean isAtomicBatchSupported(String primaryKey) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
 		return persistenceEntryManager.isAtomicBatchSupported(primaryKey);
+	}
+
+	@Override
+	public boolean isTransactionSupported(String primaryKey) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+		return persistenceEntryManager.isTransactionSupported(primaryKey);
+	}
+
+	/**
+	 * Delegates the transaction to the backend of {@code primaryKey}. Only writes that map to the same
+	 * backend join it: one transaction cannot span several databases.
+	 */
+	@Override
+	public <T> T executeInTransaction(String primaryKey, TransactionCallback<T> callback) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+		return persistenceEntryManager.executeInTransaction(primaryKey, callback);
+	}
+
+	@Override
+	public <T> T findForUpdate(Class<T> entryClass, Object primaryKey) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
+		return persistenceEntryManager.findForUpdate(entryClass, primaryKey);
 	}
 
 	/**
