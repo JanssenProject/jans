@@ -25,10 +25,10 @@ pub enum SignatureError {
     /// The bundle could not be read from disk, or is too large to be a bundle.
     #[error("failed to load the policy store signature bundle from {location}: {reason}")]
     Bundle { location: String, reason: String },
-    /// The bundle could not be fetched over HTTP.
-    #[error("failed to fetch the policy store signature bundle from {location}: {source}")]
+    /// The bundle could not be fetched over HTTP. The HTTP error names the URL,
+    /// without its credentials.
+    #[error("failed to fetch the policy store signature bundle: {source}")]
     BundleFetch {
-        location: String,
         #[source]
         source: HttpRequestError,
     },
@@ -217,7 +217,6 @@ fn default_bundle_location(store_location: &str) -> String {
 /// Transport and HTTP failures stay typed so refresh can count them as network errors.
 async fn fetch_bundle(http: &HttpClient, url: &str) -> Result<Vec<u8>, SignatureError> {
     let fetch_err = |source: HttpClientError| SignatureError::BundleFetch {
-        location: url.to_string(),
         source: source.into(),
     };
     let response = http.get_with_retry(url).await.map_err(fetch_err)?;
@@ -468,6 +467,40 @@ mod tests {
         );
         ok.assert_async().await;
         missing.assert_async().await;
+    }
+
+    #[tokio::test]
+    async fn bundle_fetch_error_names_the_url_once_without_credentials() {
+        let mut server = Server::new_async().await;
+        let missing = server
+            .mock("GET", "/store.cjar.sigstore.json")
+            .match_query(mockito::Matcher::Any)
+            .with_status(404)
+            .create_async()
+            .await;
+        let verifier = static_verifier(&enforce(TestSigner::IDENTITY));
+        let url = server.url().replacen("http://", "http://alice:hunter2@", 1)
+            + "/store.cjar.sigstore.json?sig=abc";
+
+        let err = verifier
+            .load_bundle(&http_client(), &url)
+            .await
+            .expect_err("a 404 bundle must fail");
+
+        missing.assert_async().await;
+        let message = err.to_string();
+        for secret in ["alice", "hunter2", "sig=abc"] {
+            assert!(
+                !message.contains(secret),
+                "the error must not show `{secret}`: {message}"
+            );
+        }
+        let redacted = format!("{}/store.cjar.sigstore.json", server.url());
+        assert_eq!(
+            message.matches(&redacted).count(),
+            1,
+            "the error must name the URL once: {message}"
+        );
     }
 
     #[tokio::test]
