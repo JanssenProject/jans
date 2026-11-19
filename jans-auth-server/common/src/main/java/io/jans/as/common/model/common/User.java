@@ -41,6 +41,17 @@ public class User extends SimpleUser {
         this.version = version;
     }
 
+    // version is concurrency metadata, not identity: keep the inherited equality
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
     public Object getAttribute(String attributeName, boolean optional, boolean multivalued) throws InvalidClaimException {
         Object attribute = null;
 
