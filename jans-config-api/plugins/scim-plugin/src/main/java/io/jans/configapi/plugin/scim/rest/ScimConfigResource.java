@@ -31,6 +31,8 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import static io.jans.configapi.core.util.Util.escapeLog;
+
 @Path(Constants.SCIM_CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -93,7 +95,9 @@ public class ScimConfigResource extends BaseResource {
             Constants.SCIM_ADMIN_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchAppConfigurationProperty(@NotNull String requestString)
             throws IOException, JsonPatchException {
-        log.info("AUTH CONF details to patch - requestString:{}", requestString);
+        if (log.isInfoEnabled()) {
+            log.info("AUTH CONF details to patch - requestString:{}", escapeLog(requestString));
+        }
         Conf conf = scimConfigService.findConf();
         AppConfiguration appConfiguration = conf.getDynamicConf();
         log.trace("AUTH CONF details BEFORE patch - conf:{}, appConfiguration:{}", conf, appConfiguration);

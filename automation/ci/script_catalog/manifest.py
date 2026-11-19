@@ -1,5 +1,8 @@
 """Per-script expectations for the catalog load check. Keys are paths relative to docs/script-catalog."""
 
+# Short so the basic-lock behavior test can wait out a lock.
+BASIC_LOCK_SECONDS = 30
+
 # AIO service that loads each script type (mirrors each service's AppInitializer).
 AUTH_EXCLUDED = {"link_interception", "scim", "idp", "config_api_auth", "fido2_extension", "lock_extension"}
 NON_AUTH_LOADERS = {
@@ -95,7 +98,7 @@ def config_properties(rel, fqdn):
             "otp_type": "totp", "issuer": "Janssen CI", "otp_conf_file": "/etc/certs/otp_configuration.json"},
         "person_authentication/basic-lock-account-external-authenticator/BasicLockAccountExternalAuthenticator.py": {
             "invalid_login_count_attribute": "jansCountInvalidLogin", "maximum_invalid_login_attemps": "3",
-            "lock_expiration_time": "600"},
+            "lock_expiration_time": str(BASIC_LOCK_SECONDS)},
     }.get(rel, {})
     return [{"value1": k, "value2": v, "hide": False} for k, v in props.items()]
 

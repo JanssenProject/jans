@@ -29,6 +29,7 @@ public class UserAuthnUtil {
     private String jsonLocation;
     private String jsonDevice;
     private List<String> policies = Collections.emptyList();
+    private List<String> userMethods = Collections.emptyList();
 
     public UserAuthnUtil() { }
 
@@ -251,10 +252,15 @@ public class UserAuthnUtil {
         result.addAll(methods);
         
         logger.info("Authentication methods list has been distilled to {}", result); 
+        userMethods = result;
         return result;
 
     }
     
+    public boolean isMethodAllowed(String method) {
+        return method != null && userMethods.contains(method);
+    }
+
     public void updateTrustedDevices() {
 
         try {

@@ -63,12 +63,24 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void persist(Object entry);
 
+	/**
+	 * Updates {@code entry}. For a class with a {@code @Version} field, on backends that support
+	 * {@link #updateWithVersion(Object)}, the write is conditional on the version read just before it
+	 * and retried on conflict with only the changes the first read found.
+	 *
+	 * @throws io.jans.orm.exception.VersionMismatchException if the entry kept changing through every
+	 *         retry; nothing is written
+	 */
 	Void merge(Object entry);
 
 	/**
 	 * Conditionally updates {@code entry}, succeeding only if the entry's currently stored
 	 * {@code @Version} value still equals the value held on {@code entry} at call time. On success,
 	 * increments the stored version and writes the same new value back onto {@code entry}.
+	 *
+	 * <p>A null version on {@code entry} expects the stored entry to have no version attribute (an
+	 * entry written before its class got {@code @Version}); the write then stores version 1. Load
+	 * the entry with its version attribute, or the CAS fails against an existing stored version.</p>
 	 *
 	 * <p>Like {@link #merge(Object)}, this call pre-reads the entry's current attributes to build
 	 * the diff. If the entry does not exist at all when the call begins, the backend's normal
@@ -80,7 +92,7 @@ public interface PersistenceEntryManager extends EntityManager {
 	 * call's own pre-read and its write.</p>
 	 *
 	 * @throws io.jans.orm.exception.MappingException if entry's class has more than one
-	 *         {@code @Version} field, or that field's current value on {@code entry} is null
+	 *         {@code @Version} field
 	 * @throws io.jans.orm.exception.VersionMismatchException if the stored version no longer matches
 	 *         at the compare-and-swap (another writer updated first, or the entry was deleted after
 	 *         this call's own pre-read)
@@ -147,6 +159,53 @@ public interface PersistenceEntryManager extends EntityManager {
 	default void persistBatch(List<?> entries) {
 		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
 				"Atomic batch insert (persistBatch) is not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reports whether {@link #executeInTransaction(String, TransactionCallback)} and
+	 * {@link #findForUpdate(Class, Object)} are supported for entries stored under {@code primaryKey}.
+	 * Only the SQL backend supports them; a hybrid entry manager returns the capability of the backend
+	 * that the DN maps to.
+	 *
+	 * @param primaryKey DN (or base DN) of the entries the transaction will read and write
+	 * @return {@code true} when transactions are supported for that DN
+	 */
+	default boolean isTransactionSupported(String primaryKey) {
+		return false;
+	}
+
+	/**
+	 * Runs {@code callback} in ONE database transaction. Every read and write this entry manager performs
+	 * on the calling thread while the callback runs joins the transaction. The transaction commits when
+	 * the callback returns normally and rolls back when it throws; the exception is rethrown unchanged
+	 * when it is a {@link RuntimeException}, otherwise it is wrapped in an
+	 * {@link io.jans.orm.exception.EntryPersistenceException}.
+	 *
+	 * <p>A nested call on the same thread joins the outer transaction (no savepoints): the outer call
+	 * decides commit or rollback. Writes that a hybrid entry manager routes to a different backend than
+	 * {@code primaryKey} are not part of the transaction.</p>
+	 *
+	 * @param primaryKey DN (or base DN) that selects the backend
+	 * @param callback unit of work
+	 * @return result of the callback
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no transactions
+	 */
+	default <T> T executeInTransaction(String primaryKey, TransactionCallback<T> callback) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Transactions are not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reads one entry and locks its row until the current transaction ends ({@code SELECT ... FOR UPDATE}).
+	 * Must be called inside {@link #executeInTransaction(String, TransactionCallback)}.
+	 *
+	 * @return the entry, or {@code null} when it does not exist
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no row locks
+	 * @throws IllegalStateException called outside a transaction
+	 */
+	default <T> T findForUpdate(Class<T> entryClass, Object primaryKey) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Row locks are not supported by '%s' persistence backend", getPersistenceType()));
 	}
 
 	/**
