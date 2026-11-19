@@ -17,6 +17,7 @@ import jakarta.inject.Named;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.lang3.StringUtils;
@@ -60,10 +61,12 @@ public class ScimFilterParserService {
         return ldapBackend;
     }
 
-    private ParseTree getParseTree(String filter, ScimFilterErrorListener errorListener){
+    private ParseTree getParseTree(String filter, ScimFilterErrorListener errorListener) throws SCIMException {
 
         ANTLRInputStream input = new ANTLRInputStream(filter);
         ScimFilterLexer lexer = new ScimFilterLexer(input);
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(errorListener);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
 
         ScimFilterParser parser = new ScimFilterParser(tokens);
@@ -71,7 +74,12 @@ public class ScimFilterParserService {
         parser.removeErrorListeners();
         parser.addErrorListener(errorListener);
 
-        return parser.filter();
+        ParseTree tree = parser.filter();
+        if (tokens.LA(1) != Token.EOF) {
+            throw new SCIMException(String.format("Error parsing filter (symbol='%s'; message='unexpected trailing input')",
+                    tokens.LT(1).getText()));
+        }
+        return tree;
     }
 
     public ParseTree getParseTree(String filter) throws Exception {
