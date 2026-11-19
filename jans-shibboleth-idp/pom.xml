@@ -66,8 +66,8 @@
     </scm>
 
     <modules>
-       <module>adapter-kernel</module>
-       <module>kernel</module>
+       <module>shib-adapter-kernel</module>
+       <module>shib-kernel</module>
     </modules>
 
     <repositories>
