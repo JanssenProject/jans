@@ -12,6 +12,9 @@ import io.jans.agama.engine.script.LogUtils;
 import io.jans.as.common.service.common.ConfigurationService;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.regex.Pattern;
@@ -38,9 +41,15 @@ public class JansResetService extends ResetService{
     public static final String ACTIVE = "active";
     private static final int OTP_LENGTH = 6;
     private static final String SUBJECT_TEMPLATE = "Here's your verification code: %s";
-    private static final String MSG_TEMPLATE_TEXT = "%s is the code to complete your verification";   
+    private static final String MSG_TEMPLATE_TEXT = "%s is the code to complete your verification";
     private static final SecureRandom RAND = new SecureRandom();
-    
+    private static final ThreadPoolExecutor MAIL_EXECUTOR = new ThreadPoolExecutor(
+            2, 4, 60L, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100), r -> {
+        Thread t = new Thread(r, "agama-pw-reset-mail");
+        t.setDaemon(true);
+        return t;
+    });
+
     public JansResetService() {
     }
 
@@ -71,7 +80,7 @@ public class JansResetService extends ResetService{
 
         User user = getUser(MAIL, email);
         boolean local = user != null;
-        LogUtils.log("There is % local account for %", local ? "a" : "no", email);
+        LogUtils.log("There is % local account for %", local ? "a" : "no", sanitizeForLog(email));
     
         if (local) {            
             String uid = getSingleValuedAttr(user, UID);
@@ -104,16 +113,16 @@ public class JansResetService extends ResetService{
 
     @Override
     public boolean passwordPolicyMatch(String userPassword) {
-    // Regex Explanation:
-    // - (?=.*[!-~&&[^ ]]) ensures at least one printable ASCII character except space (also helps exclude space)
-    // - (?=.*[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]) ensures at least one special character
-    // - (?=.*[A-Za-z]) ensures at least one letter
-    // - (?=.*\\d) ensures at least one digit
-    // - [!-~&&[^ ]] limits all characters to printable ASCII excluding space (ASCII 33â126)
-    String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$";
-    Pattern pattern = Pattern.compile(regex);
-    return pattern.matcher(userPassword).matches();
-    }   
+        // Regex Explanation:
+        // - (?=.*[!-~&&[^ ]]) ensures at least one printable ASCII character except space (also helps exclude space)
+        // - (?=.*[!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~]) ensures at least one special character
+        // - (?=.*[A-Za-z]) ensures at least one letter
+        // - (?=.*\\d) ensures at least one digit
+        // - [!-~&&[^ ]] limits all characters to printable ASCII excluding space (ASCII 33â126)
+        String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!\"#$%&'()*+,-./:;<=>?@[\\\\]^_`{|}~])[!-~&&[^ ]]{12,24}$";
+        Pattern pattern = Pattern.compile(regex);
+        return pattern.matcher(userPassword).matches();
+    }
 
     @Override
     public String updateUserPassword(String userPassword, String mail) throws Exception {
@@ -134,8 +143,8 @@ public class JansResetService extends ResetService{
     public String sendEmail(String to) {
         String userLang = null;
         User user = getUser(MAIL, to);
-        LogUtils.log("User is: %", user.getUserId());
         if (user != null) {
+            LogUtils.log("User is: %", user.getUserId());
             userLang = getSingleValuedAttr(user, LANG);
             if (userLang == null || userLang.isBlank()) {
                 userLang = getSingleValuedAttr(user, LOCALE);
@@ -157,20 +166,34 @@ public class JansResetService extends ResetService{
         String line3 = labels.get("line3");
         String line4 = labels.get("line4");
 
-        String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4); 
+        String htmlBody = EmailTemplate.get(otp, line1, line2, line3, line4);
 
-        SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
-        String from = smtpConfiguration.getFromEmailAddress();
+        try {
+            SmtpConfiguration smtpConfiguration = getSmtpConfiguration();
+            String from = smtpConfiguration.getFromEmailAddress();
+            MailService mailService = CdiUtil.bean(MailService.class);
 
-        MailService mailService = CdiUtil.bean(MailService.class);
-        if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
-            LogUtils.log("E-mail delivery succeeded");
-            return otp;
+            MAIL_EXECUTOR.execute(() -> {
+                try {
+                    if (mailService.sendMailSigned(from, from, to, null, subject, msgText, htmlBody)) {
+                        LogUtils.log("E-mail delivery succeeded");
+                    } else {
+                        LogUtils.log("E-mail delivery failed, check jans-auth logs");
+                    }
+                } catch (Exception e) {
+                    LogUtils.log("E-mail delivery failed: %", e.getMessage());
+                }
+            });
+        } catch (Exception e) {
+            LogUtils.log("E-mail delivery could not be queued: %", e.getMessage());
         }
 
-        LogUtils.log("E-mail delivery failed, check jans-auth logs");
-        return null;
-    } 
+        return otp;
+    }
+
+    private static String sanitizeForLog(String value) {
+        return value == null ? null : value.replaceAll("[\\r\\n]", "_");
+    }
 
     private SmtpConfiguration getSmtpConfiguration() {
         ConfigurationService configurationService = CdiUtil.bean(ConfigurationService.class);

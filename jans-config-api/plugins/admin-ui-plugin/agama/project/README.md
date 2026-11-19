@@ -79,11 +79,13 @@ Below is a typical configuration for the Agama-PW project:
 | ----------------- | -------- | ------------------------------------------------------------------------------------------------------------- | ------- |
 | `maxLoginAttempt` | Yes      | Maximum number of consecutive failed login attempts allowed before the account is locked.                     | `6`     |
 | `enableLock`      | Yes      | Enables or disables the account lockout feature after the maximum number of failed login attempts is reached. | `true`  |
-| `lockExpTime`     | Yes      | Duration, in seconds, for which the account remains locked before it is automatically unlocked.               | `180`   |
+| `lockExpTime`     | Yes      | Duration, in seconds, for which the account remains locked before it is automatically unlocked. Maximum 2505600 (29 days). | `180`   |
 
 > **Note**
 >
 > If `enableLock` is set to `true`, users who exceed `maxLoginAttempt` consecutive failed login attempts will be locked out for the duration specified by `lockExpTime`. If `enableLock` is set to `false`, failed login attempts will not trigger account lockout regardless of the `maxLoginAttempt` value.
+>
+> Automatic unlock only applies to accounts locked by this flow, which keeps a lock record in the cache for 30 days. Accounts disabled by an administrator, locked before upgrading to this version, or whose lock record was lost (e.g. an in-memory cache restart) must be re-activated by an administrator.
 
 
 ### Test The Flow

@@ -51,6 +51,7 @@ components:
       title: Violation
       type: object
       required: [field, code]
+      additionalProperties: false
       properties:
         field:
           type: string
