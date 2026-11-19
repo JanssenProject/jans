@@ -56,13 +56,10 @@ public class AuditService {
         if (telemetryEntry == null) {
             return telemetryEntry;
         }
-        String inum = telemetryEntry.getInum();
-        if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForEntry("telemetry", TelemetryEntry.class);
-            telemetryEntry.setInum(inum);
-
-            telemetryEntry.setDn(this.getDnForTelemetryEntry(inum));
-        }
+        // Persistence identity is always assigned here so callers cannot target records outside the audit subtree.
+        String inum = this.generateInumForEntry("telemetry", TelemetryEntry.class);
+        telemetryEntry.setInum(inum);
+        telemetryEntry.setDn(this.getDnForTelemetryEntry(inum));
         persistenceEntryManager.persist(telemetryEntry);
 
         telemetryEntry = this.getTelemetryEntryByDn(this.getDnForTelemetryEntry(inum));
@@ -187,13 +184,9 @@ public class AuditService {
         if (healthEntry == null) {
             return healthEntry;
         }
-        String inum = healthEntry.getInum();
-        if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForEntry("health",HealthEntry.class);
-            healthEntry.setInum(inum);
-
-            healthEntry.setDn(this.getDnForHealthEntry(inum));
-        }
+        String inum = this.generateInumForEntry("health",HealthEntry.class);
+        healthEntry.setInum(inum);
+        healthEntry.setDn(this.getDnForHealthEntry(inum));
         persistenceEntryManager.persist(healthEntry);
 
         healthEntry = this.getHealthEntryByDn(this.getDnForHealthEntry(inum));
@@ -236,13 +229,9 @@ public class AuditService {
         if (logEntry == null) {
             return logEntry;
         }
-        String inum = logEntry.getInum();
-        if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForEntry("log", LogEntry.class);
-            logEntry.setInum(inum);
-
-            logEntry.setDn(this.getDnForLogEntry(inum));
-        }
+        String inum = this.generateInumForEntry("log", LogEntry.class);
+        logEntry.setInum(inum);
+        logEntry.setDn(this.getDnForLogEntry(inum));
         persistenceEntryManager.persist(logEntry);
 
         logEntry = this.getLogEntryByDn(this.getDnForLogEntry(inum));

@@ -1,5 +1,6 @@
 package io.jans.casa.core.model;
 
+import io.jans.orm.annotation.Version;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.CustomObjectClass;
@@ -20,6 +21,29 @@ import io.jans.casa.service.IPersistenceService;
 @DataEntry
 @ObjectClass("jansPerson")
 public class BasePerson extends InumEntry {
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    // version is concurrency metadata, not identity: keep the inherited equality
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
     @AttributeName
     private String uid;

@@ -13954,7 +13954,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -13985,7 +13984,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -15695,19 +15693,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
         whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -16691,8 +16689,6 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16702,6 +16698,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17462,10 +17460,6 @@ components:
           type: boolean
         tlsClientAuthSubjectDn:
           type: string
-        accessTokenSigningKid:
-          type: string
-        idTokenSigningKid:
-          type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
         keepClientAuthorizationAfterExpiration:
@@ -17699,6 +17693,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.

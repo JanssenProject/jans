@@ -35,8 +35,8 @@ uuid7 = { version = "1.8.0", features = [
     "uuid",
     "rand010",
 ], default-features = false }
-cedar-policy = { version = "4.11.2", features = ["partial-eval"] }
-cedar-policy-core = "4.11.2"
+cedar-policy = { version = "4.15.0", features = ["partial-eval"] }
+cedar-policy-core = "4.15.0"
 base64 = { workspace = true, features = ["std", "simd-unsafe"] }
 url = "2.5.8"
 jsonwebtoken = { workspace = true }
@@ -60,7 +60,6 @@ strum = { version = "0.28.0", features = ["derive"] }
 flate2 = "1.1.9"
 async-trait = "0.1.89"
 futures = "0.3.32"
-wasm-bindgen-futures = { workspace = true }
 config = "0.15.25"
 ahash = { version = "0.8.12", default-features = false, features = [
     "no-rng",
@@ -95,6 +94,7 @@ tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
 gloo-timers = { version = "0.4.0", features = ["futures"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = { workspace = true }
 web-sys = { workspace = true, features = ["console"] }
 # bounded incremental body reads in the browser
 reqwest = { workspace = true, features = ["stream"] }

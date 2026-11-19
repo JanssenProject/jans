@@ -316,13 +316,30 @@ def behavior_tests(run, scripts):
         assert login_code(client, lock_acr, lock_uid, password), f"{lock_acr} login with the right password failed"
         for _ in range(3):
             assert not aio.login(client, lock_acr, lock_uid, "wrong-" + password), "wrong password accepted"
-        status = (aio.get_user(lock_inum) or {}).get("jansStatus")
-        assert status == "inactive", f"jansStatus={status!r} after 3 failed logins, expected 'inactive'"
+        status = (aio.get_user(lock_inum) or {}).get("status")
+        assert status == "inactive", f"status={status!r} after 3 failed logins, expected 'inactive'"
         assert not aio.login(client, lock_acr, lock_uid, password), "locked account still logs in"
+        time.sleep(manifest.BASIC_LOCK_SECONDS + 5)
+        assert aio.login(client, lock_acr, lock_uid, password), "right password rejected after the lock expired"
+        status = (aio.get_user(lock_inum) or {}).get("status")
+        assert status == "active", f"status={status!r} after lock expiry, expected 'active'"
+
+    def basic_lock_keeps_disabled():
+        off_uid, off_inum = new_user("lockoff")
+        aio.set_user_status(off_inum, "inactive")
+        assert (aio.get_user(off_inum) or {}).get("status") == "inactive", "user was not created inactive"
+        client = aio.register_client()
+        for _ in range(4):
+            assert not aio.login(client, lock_acr, off_uid, "wrong-" + password), "wrong password accepted"
+        assert not aio.login(client, lock_acr, off_uid, password), "admin-disabled account logs in"
+        status = (aio.get_user(off_inum) or {}).get("status")
+        assert status == "inactive", f"status={status!r}: logins reactivated an admin-disabled account"
 
     behavior(run, "ScriptCatalog.behavior", "introspection_custom_params.py returns public sid", introspection_sid)
     behavior(run, "ScriptCatalog.behavior", "TokenExchange.java keeps built-in validation", token_exchange)
-    behavior(run, "ScriptCatalog.behavior", "BasicLockAccount locks after max attempts", basic_lock)
+    behavior(run, "ScriptCatalog.behavior", "BasicLockAccount locks after max attempts, unlocks on expiry", basic_lock)
+    behavior(run, "ScriptCatalog.behavior", "BasicLockAccount never unlocks admin-disabled accounts",
+             basic_lock_keeps_disabled)
 
 
 def client_authn_test(run, scripts):

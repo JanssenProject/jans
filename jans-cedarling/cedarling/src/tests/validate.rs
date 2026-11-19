@@ -394,3 +394,57 @@ async fn test_validate_applies_configured_entity_limit() {
         "5 entities must pass a configured limit of 10: {report:?}"
     );
 }
+
+/// Cedar reports a policy whose action cannot apply to its principal and
+/// resource types as a validation warning, not an error. The report must still
+/// show it, so a policy that can never match is not silently accepted.
+#[tokio::test]
+async fn test_validate_reports_cedar_validation_warnings() {
+    let store = r#"
+cedar_version: v4.0.0
+policy_stores:
+  test_store:
+    name: Test Store
+    schema:
+      encoding: none
+      content_type: cedar-json
+      body: '{"Jans": {"entityTypes": {"User": {}, "Workload": {}, "Issue": {}}, "actions": {"Update": {"appliesTo": {"principalTypes": ["User"], "resourceTypes": ["Issue"]}}}}}'
+    policies:
+      never_applies:
+        description: Workload can never perform Update
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans::Workload,
+                action == Jans::Action::"Update",
+                resource is Jans::Issue
+            );
+"#;
+    let config = crate::PolicyStoreConfig {
+        source: crate::PolicyStoreSource::Yaml(store.to_string()),
+        ..Default::default()
+    };
+
+    let report = Cedarling::validate_policy_store(&bootstrap(config))
+        .await
+        .expect("infra layer ok");
+
+    assert!(
+        matches!(report.schema, LevelResult::Ok),
+        "a Cedar warning must not fail the schema level: {report:?}"
+    );
+    assert!(
+        report.is_ok(),
+        "warnings must not affect the overall result: {report:?}"
+    );
+    assert!(
+        report
+            .warnings
+            .iter()
+            .any(|w| w.file == "never_applies" && w.message.contains("applicable action")),
+        "expected the inapplicable-action warning for policy `never_applies`: {report:?}"
+    );
+}
