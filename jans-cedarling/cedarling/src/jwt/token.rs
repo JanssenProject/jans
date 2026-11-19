@@ -108,10 +108,9 @@ impl TokenClaims {
     pub(crate) fn logging_info(&self, claim: &str) -> HashMap<String, serde_json::Value> {
         let claim = if claim.is_empty() { "jti" } else { claim };
 
-        self.claims
-            .get(claim)
-            .map(|value| HashMap::from([(claim.to_string(), value.clone())]))
-            .unwrap_or_default()
+        self.claims.get(claim).map_or_else(HashMap::new, |value| {
+            HashMap::from([(claim.to_string(), value.clone())])
+        })
     }
 }
 

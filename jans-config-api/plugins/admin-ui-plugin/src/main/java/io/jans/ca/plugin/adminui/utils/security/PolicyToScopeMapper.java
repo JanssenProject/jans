@@ -29,7 +29,6 @@ public class PolicyToScopeMapper {
     private static final Pattern ACTION_PATTERN = Pattern.compile(
             "GluuFlexAdminUI::Action::\"([^\"]+)\""
     );
-
     public static final String GLUU_FLEX_ADMINUI_RESOURCES_FEATURES = "GluuFlexAdminUIResources::Features";
 
 
@@ -39,6 +38,7 @@ public class PolicyToScopeMapper {
      * @param zipFile       the ZIP file containing policies (policies/*.cedar|*.cedarpl) and entity definitions (entities/*.json)
      * @param resourcesJson JSON structure that maps resources and access types to scope lists (used to build the scope mapping cache)
      * @return a map where each key is a role name and the value is the set of resolved scope strings for that role
+     * @throws IllegalArgumentException if a policy contains a forbid effect or unless condition
      */
     public Map<String, Set<String>> processZipFile(ZipFile zipFile, JsonNode resourcesJson) {
         long startTime = System.currentTimeMillis();
@@ -130,7 +130,7 @@ public class PolicyToScopeMapper {
      * @param zipFile          the ZIP archive containing the entry
      * @param entry            the ZIP entry pointing to an entity JSON file
      * @param parentToFeatures map that will be populated with parentId → list of featureIds; lists are created as
-     *                         {@link java.util.concurrent.CopyOnWriteArrayList} when a parentId is first encountered
+     *                         {@link java.util.ArrayList} when a parentId is first encountered
      */
     private void processEntityEntry(ZipFile zipFile, ZipEntry entry, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
@@ -155,7 +155,7 @@ public class PolicyToScopeMapper {
                     JsonNode parentIdNode = firstParent != null ? firstParent.get("id") : null;
                     if (parentIdNode == null) continue;
                     String parentId = parentIdNode.asText();
-                    parentToFeatures.computeIfAbsent(parentId, k -> new CopyOnWriteArrayList<>()).add(featureId);
+                    parentToFeatures.computeIfAbsent(parentId, k -> new ArrayList<>()).add(featureId);
                 }
             }
         } catch (IOException e) {
@@ -186,6 +186,8 @@ public class PolicyToScopeMapper {
             throw new IllegalStateException("No policy files found in policies folder");
         }
 
+        policyEntries.forEach(entry -> validatePolicyEntry(zipFile, entry));
+
         log.trace("Processing {} policy files.", policyEntries.size());
 
         // Process policies in parallel for better performance
@@ -194,6 +196,102 @@ public class PolicyToScopeMapper {
         );
 
         return roleToScopes;
+    }
+
+    private void validatePolicyEntry(ZipFile zipFile, ZipEntry entry) {
+        try (InputStream is = zipFile.getInputStream(entry)) {
+            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            List<String> tokens = tokenizePolicy(content);
+            for (int i = 0; i + 1 < tokens.size(); i++) {
+                if ("forbid".equals(tokens.get(i)) && "(".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported forbid policy in " + entry.getName());
+                }
+                if ("unless".equals(tokens.get(i)) && "{".equals(tokens.get(i + 1))) {
+                    throw new IllegalArgumentException("Unsupported unless condition in " + entry.getName());
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error processing policy: {}", entry.getName() + " - " + e.getMessage());
+        }
+    }
+
+    private List<String> tokenizePolicy(String content) {
+        String code = stripComments(content);
+        List<String> tokens = new ArrayList<>();
+        int i = 0;
+        while (i < code.length()) {
+            char current = code.charAt(i);
+            int next = i + 1;
+            if (current == '"') {
+                next = skipStringLiteral(code, i);
+                tokens.add("\"\"");
+            } else if (Character.isLetter(current) || current == '_') {
+                next = skipIdentifier(code, i);
+                tokens.add(code.substring(i, next));
+            } else if (!Character.isWhitespace(current)) {
+                tokens.add(String.valueOf(current));
+            }
+            i = next;
+        }
+        return tokens;
+    }
+
+    private int skipIdentifier(String content, int start) {
+        int i = start + 1;
+        while (i < content.length() && (Character.isLetterOrDigit(content.charAt(i)) || content.charAt(i) == '_')) {
+            i++;
+        }
+        return i;
+    }
+
+    private String stripComments(String content) {
+        StringBuilder result = new StringBuilder(content.length());
+        int i = 0;
+        while (i < content.length()) {
+            int next;
+            if (content.startsWith("//", i)) {
+                next = skipLineComment(content, i);
+            } else if (content.startsWith("/*", i)) {
+                next = skipBlockComment(content, i);
+                result.append(' ');
+            } else if (content.charAt(i) == '"') {
+                next = skipStringLiteral(content, i);
+                result.append(content, i, next);
+            } else {
+                next = i + 1;
+                result.append(content.charAt(i));
+            }
+            i = next;
+        }
+        return result.toString();
+    }
+
+    private int skipLineComment(String content, int start) {
+        int i = start + 2;
+        while (i < content.length() && content.charAt(i) != '\n' && content.charAt(i) != '\r') {
+            i++;
+        }
+        return i;
+    }
+
+    private int skipBlockComment(String content, int start) {
+        int commentEnd = content.indexOf("*/", start + 2);
+        if (commentEnd < 0) {
+            throw new IllegalArgumentException("Unterminated block comment");
+        }
+        return commentEnd + 2;
+    }
+
+    private int skipStringLiteral(String content, int quoteIndex) {
+        int i = quoteIndex + 1;
+        while (i < content.length()) {
+            char current = content.charAt(i);
+            if (current == '"') {
+                return i + 1;
+            }
+            i += current == '\\' ? 2 : 1;
+        }
+        throw new IllegalArgumentException("Unterminated string literal");
     }
 
     /**
@@ -207,7 +305,8 @@ public class PolicyToScopeMapper {
      */
     private void processPolicyEntry(ZipFile zipFile, ZipEntry entry, Map<String, Set<String>> roleToScopes, Map<String, Map<String, List<String>>> scopeMapping, Map<String, List<String>> parentToFeatures) {
         try (InputStream is = zipFile.getInputStream(entry)) {
-            String content = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            // Comment text must not select a role or contribute resources/actions
+            String content = stripComments(new String(is.readAllBytes(), StandardCharsets.UTF_8));
 
             String role = extractFirstMatch(ROLE_PATTERN, content);
             if (role == null) {

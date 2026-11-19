@@ -661,7 +661,7 @@ impl BootstrapConfigRaw {
     ) -> Result<Self, BootstrapConfigLoadingError> {
         let mut json_config_params = serde_json::json!(raw.unwrap_or_default())
             .as_object()
-            .map(std::borrow::ToOwned::to_owned)
+            .cloned()
             .unwrap_or_default();
 
         for (k, v) in get_cedarling_env_vars() {
