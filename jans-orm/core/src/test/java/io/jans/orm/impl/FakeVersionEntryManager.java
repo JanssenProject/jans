@@ -37,6 +37,7 @@ class FakeVersionEntryManager extends BaseEntryManager<PersistenceOperationServi
 
 	List<AttributeDataModification> lastMergeModifications;
 	String lastMergeDn;
+	int plainMergeCalls;
 
 	@Override
 	protected boolean isSupportForceUpdate() {
@@ -65,6 +66,7 @@ class FakeVersionEntryManager extends BaseEntryManager<PersistenceOperationServi
 			Integer expiration) {
 		this.lastMergeDn = dn;
 		this.lastMergeModifications = attributeDataModifications;
+		this.plainMergeCalls++;
 	}
 
 	@Override
@@ -239,6 +241,10 @@ class VersioningFakeVersionEntryManager extends FakeVersionEntryManager {
 
 	boolean mergeWithVersionResult = true;
 
+	// Consumed first, one per call, before falling back to mergeWithVersionResult
+	final java.util.Deque<Boolean> mergeWithVersionResults = new java.util.ArrayDeque<>();
+	int mergeWithVersionCalls;
+
 	String lastVersionAttributeName;
 	Object lastExpectedVersionValue;
 	Object lastNewVersionValue;
@@ -252,7 +258,10 @@ class VersioningFakeVersionEntryManager extends FakeVersionEntryManager {
 		this.lastExpectedVersionValue = expectedVersionValue;
 		this.lastNewVersionValue = newVersionValue;
 
-		return mergeWithVersionResult;
+		this.mergeWithVersionCalls++;
+
+		Boolean next = mergeWithVersionResults.poll();
+		return next == null ? mergeWithVersionResult : next;
 	}
 
 }

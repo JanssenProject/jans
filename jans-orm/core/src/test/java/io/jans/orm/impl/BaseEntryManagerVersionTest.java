@@ -117,6 +117,93 @@ public class BaseEntryManagerVersionTest {
 		assertNull(entryManager.lastExpectedVersionValue);
 		assertEquals(Long.valueOf(1L), entryManager.lastNewVersionValue);
 		assertEquals(Long.valueOf(1L), entry.getVersion());
+		assertVersionReplace(entryManager.lastMergeModifications, 1L);
+	}
+
+	@Test
+	public void mergeOnCasBackendWritesConditionallyOnStoredVersion() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "same"),
+				new AttributeData("jansversion", "5"))));
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("changed");
+
+		entryManager.merge(entry);
+
+		assertEquals(1, entryManager.mergeWithVersionCalls);
+		assertEquals(0, entryManager.plainMergeCalls);
+		assertEquals(Long.valueOf(5L), entryManager.lastExpectedVersionValue);
+		assertEquals(Long.valueOf(6L), entryManager.lastNewVersionValue);
+		assertVersionReplace(entryManager.lastMergeModifications, 6L);
+	}
+
+	@Test
+	public void mergeOnCasBackendWithoutStoredVersionExpectsAbsentVersion() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(new AttributeData("uid", "same"))));
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("changed");
+
+		entryManager.merge(entry);
+
+		assertNull(entryManager.lastExpectedVersionValue);
+		assertEquals(Long.valueOf(1L), entryManager.lastNewVersionValue);
+	}
+
+	@Test
+	public void mergeOnCasBackendRereadsAfterConflict() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "same"),
+				new AttributeData("jansversion", "5"))));
+		entryManager.mergeWithVersionResults.add(Boolean.FALSE);
+		entryManager.mergeWithVersionResults.add(Boolean.TRUE);
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("changed");
+
+		// Another writer commits version 6 between the first read and the first write
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "same"),
+				new AttributeData("jansversion", "6"))));
+
+		entryManager.merge(entry);
+
+		assertEquals(2, entryManager.mergeWithVersionCalls);
+		assertEquals(Long.valueOf(6L), entryManager.lastExpectedVersionValue);
+		assertEquals(Long.valueOf(7L), entryManager.lastNewVersionValue);
+	}
+
+	@Test
+	public void mergeOnCasBackendFallsBackToPlainMergeAfterRepeatedConflicts() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
+		entryManager.mergeWithVersionResult = false;
+		entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "same"),
+				new AttributeData("jansversion", "5"))));
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("changed");
+
+		entryManager.merge(entry);
+
+		assertEquals(5, entryManager.mergeWithVersionCalls);
+		assertEquals(1, entryManager.plainMergeCalls);
+		assertVersionReplace(entryManager.lastMergeModifications, 6L);
+	}
+
+	private static void assertVersionReplace(List<AttributeDataModification> modifications, long expected) {
+		assertTrue(modifications.stream().anyMatch(modification ->
+				modification.getModificationType() == AttributeModificationType.REPLACE
+						&& "jansversion".equals(modification.getAttribute().getName())
+						&& Long.valueOf(expected).equals(modification.getAttribute().getValue())));
 	}
 
 	@Test
