@@ -234,8 +234,13 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
 
-        let telemetry_active = config
+        // One config for the metrics mode and the workers, so a zero telemetry
+        // interval neither starts a ticker nor takes the metrics from the host.
+        let lock_config = config
             .lock_config
+            .as_ref()
+            .map(LockServiceConfig::with_zero_intervals_disabled);
+        let telemetry_active = lock_config
             .as_ref()
             .is_some_and(|c| c.telemetry_interval.is_some());
         let metrics_mode = resolve_metrics_mode(
@@ -248,7 +253,7 @@ impl Cedarling {
             &config.log_config,
             pdp_id,
             app_name,
-            config.lock_config.as_ref(),
+            lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
             config

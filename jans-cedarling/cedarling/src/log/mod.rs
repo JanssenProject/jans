@@ -118,7 +118,7 @@ pub(crate) async fn init_logger(
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(
             pdp_id,
-            &lock_config.with_zero_intervals_disabled(),
+            lock_config,
             Some(logger_weak),
             metrics,
             app_name,
