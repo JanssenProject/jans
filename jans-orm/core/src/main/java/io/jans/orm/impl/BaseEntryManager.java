@@ -286,8 +286,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		List<AttributeDataModification> attributeDataModifications = null;
 		String versionAttributeName = null;
 		Long newVersionValue = null;
-		// Versioned entries write with a compare-and-set on the version just read, so two merges can
-		// never store the same version; a conflict re-reads and re-diffs the entry
+		// Versioned entries write with a compare-and-set on the version just read, so two merges never
+		// store the same version; a conflict re-reads and re-diffs the entry. After MERGE_VERSION_ATTEMPTS
+		// conflicts the write is unconditional, trading that guarantee for not failing the merge
+		Set<String> intendedAttributeNames = null;
 		boolean casVersion = (versionProperty != null) && !isSchemaUpdate;
 		boolean written = false;
 		for (int attempt = 1; !written; attempt++) {
@@ -313,6 +315,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
 					entry, propertiesAnnotations, getAttributesMap(attributesToPersist), attributesFromLdap, schemaModificationType, isSchemaUpdate,
 					isConfigurationUpdate, forceUpdate);
+			if (attempt == 1) {
+				intendedAttributeNames = getModificationAttributeNames(attributeDataModifications);
+			} else {
+				// A retry applies only the changes the first read found, so a field this merge left
+				// untouched never reverts what the conflicting writer stored
+				Set<String> intended = intendedAttributeNames;
+				attributeDataModifications.removeIf(modification -> !intended.contains(getModificationAttributeName(modification)));
+			}
 
 			Long currentVersionValue = null;
 			if (versionProperty != null) {
@@ -553,6 +563,15 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return Long.parseLong(String.valueOf(value));
+	}
+
+	private Set<String> getModificationAttributeNames(List<AttributeDataModification> attributeDataModifications) {
+		Set<String> names = new HashSet<String>();
+		for (AttributeDataModification modification : attributeDataModifications) {
+			names.add(getModificationAttributeName(modification));
+		}
+
+		return names;
 	}
 
 	private String getModificationAttributeName(AttributeDataModification modification) {

@@ -63,6 +63,12 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void persist(Object entry);
 
+	/**
+	 * Updates {@code entry}. For a class with a {@code @Version} field, on backends that support
+	 * {@link #updateWithVersion(Object)}, the write is conditional on the version read just before it
+	 * and retried on conflict with only the changes the first read found. After repeated conflicts it
+	 * falls back to an unconditional write, which may store a version another writer also stored.
+	 */
 	Void merge(Object entry);
 
 	/**

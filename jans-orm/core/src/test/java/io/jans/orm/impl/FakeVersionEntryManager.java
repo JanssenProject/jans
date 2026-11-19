@@ -244,6 +244,10 @@ class VersioningFakeVersionEntryManager extends FakeVersionEntryManager {
 	// Consumed first, one per call, before falling back to mergeWithVersionResult
 	final java.util.Deque<Boolean> mergeWithVersionResults = new java.util.ArrayDeque<>();
 	int mergeWithVersionCalls;
+	final List<Object> expectedVersionValues = new ArrayList<>();
+	final List<List<AttributeDataModification>> mergeWithVersionModifications = new ArrayList<>();
+	// Simulates another writer committing between this call's read and its compare-and-set
+	Runnable onConflict;
 
 	String lastVersionAttributeName;
 	Object lastExpectedVersionValue;
@@ -259,9 +263,15 @@ class VersioningFakeVersionEntryManager extends FakeVersionEntryManager {
 		this.lastNewVersionValue = newVersionValue;
 
 		this.mergeWithVersionCalls++;
+		this.expectedVersionValues.add(expectedVersionValue);
+		this.mergeWithVersionModifications.add(new ArrayList<>(attributeDataModifications));
 
 		Boolean next = mergeWithVersionResults.poll();
-		return next == null ? mergeWithVersionResult : next;
+		boolean result = next == null ? mergeWithVersionResult : next.booleanValue();
+		if (!result && (onConflict != null)) {
+			onConflict.run();
+		}
+		return result;
 	}
 
 }

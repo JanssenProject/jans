@@ -163,21 +163,45 @@ public class BaseEntryManagerVersionTest {
 				new AttributeData("jansversion", "5"))));
 		entryManager.mergeWithVersionResults.add(Boolean.FALSE);
 		entryManager.mergeWithVersionResults.add(Boolean.TRUE);
+		entryManager.onConflict = () -> entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "same"),
+				new AttributeData("jansversion", "6"))));
 
 		VersionedEntry entry = new VersionedEntry();
 		entry.setDn("o=test");
 		entry.setUid("changed");
 
-		// Another writer commits version 6 between the first read and the first write
+		entryManager.merge(entry);
+
+		assertEquals(List.of(5L, 6L), entryManager.expectedVersionValues);
+		assertEquals(Long.valueOf(7L), entryManager.lastNewVersionValue);
+	}
+
+	@Test
+	public void mergeRetryKeepsOnlyChangesFoundByFirstRead() {
+		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
 		entryManager.storage.put("o=test", new ArrayList<>(List.of(
 				new AttributeData("uid", "same"),
+				new AttributeData("mail", "old@example.com"),
+				new AttributeData("jansversion", "5"))));
+		entryManager.mergeWithVersionResults.add(Boolean.FALSE);
+		entryManager.mergeWithVersionResults.add(Boolean.TRUE);
+		entryManager.onConflict = () -> entryManager.storage.put("o=test", new ArrayList<>(List.of(
+				new AttributeData("uid", "other"),
+				new AttributeData("mail", "old@example.com"),
 				new AttributeData("jansversion", "6"))));
+
+		VersionedEntry entry = new VersionedEntry();
+		entry.setDn("o=test");
+		entry.setUid("same");
+		entry.setMail("new@example.com");
 
 		entryManager.merge(entry);
 
-		assertEquals(2, entryManager.mergeWithVersionCalls);
-		assertEquals(Long.valueOf(6L), entryManager.lastExpectedVersionValue);
-		assertEquals(Long.valueOf(7L), entryManager.lastNewVersionValue);
+		List<AttributeDataModification> retry = entryManager.mergeWithVersionModifications.get(1);
+		assertTrue(retry.stream().anyMatch(modification -> "mail".equals(modification.getAttribute().getName())));
+		assertTrue(retry.stream().noneMatch(modification -> "uid".equals(modification.getAttribute().getName())));
+		assertVersionReplace(retry, 7L);
 	}
 
 	@Test
