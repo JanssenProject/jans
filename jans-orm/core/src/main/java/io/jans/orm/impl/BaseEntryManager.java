@@ -289,7 +289,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		// Versioned entries write with a compare-and-set on the version just read, so two merges can
 		// never store the same version; a conflict re-reads and re-diffs the entry
 		boolean casVersion = (versionProperty != null) && !isSchemaUpdate;
-		for (int attempt = 1; ; attempt++) {
+		boolean written = false;
+		for (int attempt = 1; !written; attempt++) {
 			// Load entry
 			if (isSchemaUpdate || forceUpdate) {
 				// If it's schema modification request we don't need to load
@@ -326,22 +327,20 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue.longValue());
 			}
 
+			VersionedMergeResult casResult = VersionedMergeResult.UNSUPPORTED;
 			if (casVersion && (attempt <= MERGE_VERSION_ATTEMPTS)) {
-				try {
-					if (mergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
-							versionAttributeName, currentVersionValue, newVersionValue)) {
-						break;
-					}
-					continue;
-				} catch (UnsupportedOperationException ex) {
-					casVersion = false;
-				}
+				casResult = tryMergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
+						versionAttributeName, currentVersionValue, newVersionValue);
 			} else if (casVersion) {
 				LOG.warn("Entry '{}' kept changing during {} versioned merge attempts, merging without version check", dnValue, MERGE_VERSION_ATTEMPTS);
 			}
 
-			merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
-			break;
+			if (casResult == VersionedMergeResult.UNSUPPORTED) {
+				merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
+				written = true;
+			} else {
+				written = casResult == VersionedMergeResult.WRITTEN;
+			}
 		}
 
 		if (isValidateAfterUpdate()) {
@@ -482,6 +481,19 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		versionSetter.set(entry, Long.valueOf(newVersionValue));
 
 		return null;
+	}
+
+	private enum VersionedMergeResult { WRITTEN, CONFLICT, UNSUPPORTED }
+
+	private VersionedMergeResult tryMergeWithVersion(String dn, String[] objectClasses,
+			List<AttributeDataModification> attributeDataModifications, Integer expiration, String versionAttributeName,
+			Long expectedVersionValue, Long newVersionValue) {
+		try {
+			return mergeWithVersion(dn, objectClasses, attributeDataModifications, expiration, versionAttributeName,
+					expectedVersionValue, newVersionValue) ? VersionedMergeResult.WRITTEN : VersionedMergeResult.CONFLICT;
+		} catch (UnsupportedOperationException ex) {
+			return VersionedMergeResult.UNSUPPORTED;
+		}
 	}
 
 	/**
