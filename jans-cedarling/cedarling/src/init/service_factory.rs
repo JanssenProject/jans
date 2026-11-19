@@ -327,7 +327,7 @@ pub enum LoadProducerKeyError {
     /// The key is not an unencrypted PKCS#8 PEM Ed25519 private key.
     #[error(
         "the TRACE signing key from `{property}`{} is invalid: {source}",
-        path.as_ref().map(|p| format!(" (`{}`)", p.display())).unwrap_or_default()
+        path.as_ref().map_or_else(String::new, |p| format!(" (`{}`)", p.display()))
     )]
     InvalidKey {
         /// Property the key was configured with.
