@@ -91,7 +91,7 @@ ALTER TABLE "jansPerson" ADD COLUMN "jansVersion" BIGINT;
 ```
 
 Existing rows keep a `NULL` version until their next update. Manual `UPDATE` statements on `jansPerson`
-should also set `jansVersion = COALESCE(jansVersion, 0) + 1`, so concurrent versioned writes notice the change.
+should also set `"jansVersion" = COALESCE("jansVersion", 0) + 1`, so concurrent versioned writes notice the change.
 
 ## Output column data into txt
 
