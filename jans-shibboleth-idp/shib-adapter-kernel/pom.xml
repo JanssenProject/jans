@@ -23,7 +23,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-kernel</artifactId>
+			<artifactId>jans-shib-kernel</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
