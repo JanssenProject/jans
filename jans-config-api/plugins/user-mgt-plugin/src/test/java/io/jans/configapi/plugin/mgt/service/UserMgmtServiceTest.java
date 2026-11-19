@@ -9,6 +9,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.util.exception.InvalidAttributeException;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -149,6 +150,19 @@ public class UserMgmtServiceTest {
         assertEquals(writes.size(), 1);
         assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);
         assertEquals(stored.get().getUserId(), "jdoe2");
+    }
+
+    @Test
+    public void updateRejectsRoleChangeWhenNotAllowed() {
+        User read = user(GluuStatus.ACTIVE, 1L);
+        stored.set(copy(read));
+        User replacement = user(GluuStatus.ACTIVE, null);
+        replacement.getCustomAttributes().add(new CustomObjectAttribute(UserMgmtService.ADMIN_UI_ROLE, "api-admin"));
+
+        assertThrows(InvalidAttributeException.class,
+                () -> userMgmtService.updateUser(replacement, read, false, false));
+
+        assertTrue(writes.isEmpty());
     }
 
     private static UserPatchRequest patch(String json) {

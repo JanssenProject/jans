@@ -551,6 +551,9 @@ public class UserMgmtService {
             if (keepStoredStatus) {
                 user.setStatus(base.getStatus());
             }
+            if (!allowRoleChange && !getAdminUIRoles(base).equals(getAdminUIRoles(user))) {
+                throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
+            }
             try {
                 return saveWithVersion(user);
             } catch (VersionMismatchException ex) {
@@ -563,9 +566,6 @@ public class UserMgmtService {
                 if (!keepStoredStatus && base.getStatus() != read.getStatus()) {
                     throw ex;
                 }
-            }
-            if (!allowRoleChange && !getAdminUIRoles(base).equals(getAdminUIRoles(user))) {
-                throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
             }
         }
     }
