@@ -18,12 +18,14 @@ This module has 2 properties:
    Default value: 180
 
 While an account is locked, `invalid_login_count_attribute` holds `locked:<epoch millis>:<jansVersion>` instead of a
-count. The script only unlocks inactive accounts carrying this marker that were not modified after the lock, so accounts
-disabled by an administrator stay disabled, even if the administrator acted while the account was locked.
+count, where `jansVersion` is the user version the lock wrote. The script only unlocks inactive accounts whose marker
+and version are unchanged since the lock, so accounts disabled or edited by an administrator stay locked.
 
-User writes are compare-and-set on the `jansVersion` attribute of `jansPerson`: a lock, unlock or counter update that
-races another write re-reads the user and decides again, so concurrent logins and administrator changes are never
-overwritten. Backends without versioned updates fall back to a plain update.
+The script's user writes are compare-and-set on `jansVersion`: a counter, lock or unlock write that races another
+write re-reads the user and decides again, so the script never overwrites a concurrent change. Writers that do not
+version `jansPerson` (for example Casa or Jans Link) can still overwrite a lock, and a lock written over by them is
+not unlocked automatically. Counter and lock writes fall back to a plain update on backends without versioned updates;
+unlock does not, so such accounts must be reactivated by an administrator.
 
 Upgrade note: accounts locked by a previous version of this script have no marker and are not unlocked when their
 lock expires. An administrator must reactivate them.

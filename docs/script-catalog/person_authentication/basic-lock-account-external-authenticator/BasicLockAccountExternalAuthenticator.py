@@ -20,7 +20,7 @@ from io.jans.jsf2.message import FacesMessages
 from io.jans.orm import PersistenceEntryManager
 from java.util import Date
 
-# Written to the invalid-login count attribute by lockUser: only inactive users carrying it are unlocked
+# Written to the invalid-login count attribute by registerFailedLogin: only inactive users carrying it are unlocked
 LOCK_MARKER_PREFIX = "locked:"
 UPDATE_ATTEMPTS = 5
 
@@ -117,25 +117,22 @@ class PersonAuthentication(PersonAuthenticationType):
                         return False
 
                     logged_in = authenticationService.authenticate(user_name, user_password)
-                    if not logged_in:
-                        self.setInvalidLoginCount(user_name, StringHelper.toString(1))
-                        if self.maximumInvalidLoginAttemps == 1:
-                            self.lockUser(user_name)
-                    return logged_in
+                    if logged_in:
+                        return True
 
-                countInvalidLogin = self.incrementInvalidLoginCount(user_name)
-                if countInvalidLogin is None:
+                failed = self.registerFailedLogin(user_name)
+                if failed is None:
                     return False
 
-                remainingAttempts = self.maximumInvalidLoginAttemps - countInvalidLogin
+                remainingAttempts = self.maximumInvalidLoginAttemps - failed['count']
                 print "Remaining login count attempts '%s' for user '%s'" % ( remainingAttempts, user_name )
-                if remainingAttempts > 0 and userSatus == "active":
+                if failed['locked']:
+                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
+                    print "Basic (lock account). Locked '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
+                elif remainingAttempts > 0:
                     facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
 
-                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus is None) or (userSatus == "active")):
-                    print "Basic (lock account). Locking '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
-                    self.lockUser(user_name)
-                    return False
+                return False
 
             return logged_in
         else:
@@ -194,7 +191,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return attribute_value
 
-    def updateUser(self, user_name, change):
+    def updateUser(self, user_name, change, allow_merge=True):
         # Compare-and-set on jansVersion: if another writer (lock, unlock, counter, admin) changed the
         # user since the read, re-read and let change() decide again on the current state
         userService = CdiUtil.bean(UserService)
@@ -209,6 +206,9 @@ class PersonAuthentication(PersonAuthenticationType):
             except VersionMismatchException:
                 print "Basic (lock account). User '%s' changed concurrently, retrying" % user_name
             except OrmUnsupportedOperationException:
+                if not allow_merge:
+                    print "Basic (lock account). Backend has no versioned update, user '%s' not updated" % user_name
+                    return None
                 print "Basic (lock account). Backend has no versioned update, user '%s' updated without it" % user_name
                 entryManager.merge(user)
                 return user
@@ -238,25 +238,43 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return updated_user
 
-    def incrementInvalidLoginCount(self, user_name):
-        # Increment on the current stored value so parallel failed logins are all counted
+    def registerFailedLogin(self, user_name):
+        # Count and lock in one write: the threshold is checked on the same state the lock replaces
+        if StringHelper.isEmpty(user_name):
+            return None
+
         result = {}
 
         def change(user):
+            result.clear()
             if self.isLocked(user):
                 return False
-            current = CdiUtil.bean(UserService).getCustomAttribute(user, self.invalidLoginCountAttribute)
-            count = StringHelper.toInteger(None if current is None else current.getValue(), 0)
+            userService = CdiUtil.bean(UserService)
+            current = userService.getCustomAttribute(user, self.invalidLoginCountAttribute)
+            stored = StringHelper.toInteger(None if current is None else current.getValue(), 0)
+            count = stored + 1 if stored < self.maximumInvalidLoginAttemps else stored
+            lock = count >= self.maximumInvalidLoginAttemps and user.getStatus() != GluuStatus.INACTIVE
             result['count'] = count
-            if count >= self.maximumInvalidLoginAttemps:
+            result['locked'] = lock
+            if count == stored and not lock:
                 return False
-            result['count'] = count + 1
-            CdiUtil.bean(UserService).setCustomAttribute(user, self.invalidLoginCountAttribute, StringHelper.toString(count + 1))
-            user.setUpdatedAt(Date())
+
+            result['write'] = True
+            now = Date()
+            user.setUpdatedAt(now)
+            if lock:
+                # The marker carries the version this write stores, so unlock can tell whether anyone wrote after it
+                lock_version = (0 if user.getVersion() is None else user.getVersion()) + 1
+                user.setStatus(GluuStatus.INACTIVE)
+                userService.setCustomAttribute(user, self.invalidLoginCountAttribute,
+                        "%s%s:%s" % (LOCK_MARKER_PREFIX, now.getTime(), lock_version))
+            else:
+                userService.setCustomAttribute(user, self.invalidLoginCountAttribute, StringHelper.toString(count))
             return True
 
-        self.updateUser(user_name, change)
-        return result.get('count')
+        if self.updateUser(user_name, change) is None and result.get('write'):
+            return None
+        return result or None
 
     # Marker format: locked:<epoch millis>:<jansVersion written by the lock>
     def parseLockMarker(self, count_attribute_value):
@@ -264,41 +282,13 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
         parts = count_attribute_value[len(LOCK_MARKER_PREFIX):].split(":")
         try:
-            return (long(parts[0]), long(parts[1]) if len(parts) > 1 else None)
+            return [long(part) for part in parts] if len(parts) == 2 else None
         except ValueError:
             return None
 
     def getLockTime(self, count_attribute_value):
         marker = self.parseLockMarker(count_attribute_value)
         return None if marker is None else marker[0]
-
-    def lockUser(self, user_name):
-        if StringHelper.isEmpty(user_name):
-            return None
-
-        facesMessages = CdiUtil.bean(FacesMessages)
-        facesMessages.setKeepMessages()
-
-        def change(user):
-            if user.getStatus() == GluuStatus.INACTIVE:
-                print "Basic (lock account). Lock user. User '%s' locked already" % user_name
-                return False
-            # Status and marker go in one write, so a lock never exists without its marker. The marker
-            # carries the version this write stores, so unlock can tell whether anyone wrote after it
-            locked_at = Date()
-            lock_version = (0 if user.getVersion() is None else user.getVersion()) + 1
-            user.setStatus(GluuStatus.INACTIVE)
-            user.setUpdatedAt(locked_at)
-            CdiUtil.bean(UserService).setCustomAttribute(user, self.invalidLoginCountAttribute,
-                    "%s%s:%s" % (LOCK_MARKER_PREFIX, locked_at.getTime(), lock_version))
-            return True
-
-        if self.updateUser(user_name, change) is None:
-            return None
-
-        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
-
-        print "Basic (lock account). Lock user. User '%s' locked" % user_name
 
     def unLockUser(self, user_name, expected_marker):
         if StringHelper.isEmpty(user_name):
@@ -307,7 +297,7 @@ class PersonAuthentication(PersonAuthenticationType):
         marker = self.parseLockMarker(expected_marker)
         if marker is None:
             return False
-        locked_at, lock_version = marker
+        lock_version = marker[1]
 
         def change(user):
             current = CdiUtil.bean(UserService).getCustomAttribute(user, self.invalidLoginCountAttribute)
@@ -316,9 +306,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Basic (lock account). Unlock user. Lock of user '%s' changed, not unlocking" % user_name
                 return False
 
-            # Any write after the lock (config-api, SCIM, admin UI) bumps jansVersion or stamps updatedAt
-            updated_at = user.getUpdatedAt()
-            if (lock_version is not None and user.getVersion() != lock_version) or updated_at is None or updated_at.getTime() != locked_at:
+            # Every versioned user write (config-api, SCIM, admin UI) bumps jansVersion past the lock's
+            if user.getVersion() != lock_version:
                 print "Basic (lock account). Unlock user. User '%s' was modified after the lock, not unlocking" % user_name
                 return False
 
@@ -327,7 +316,8 @@ class PersonAuthentication(PersonAuthenticationType):
             CdiUtil.bean(UserService).setCustomAttribute(user, self.invalidLoginCountAttribute, StringHelper.toString(0))
             return True
 
-        if self.updateUser(user_name, change) is None:
+        # Never unlock through an unconditional write: it could undo an admin disable racing it
+        if self.updateUser(user_name, change, allow_merge=False) is None:
             return False
 
         print "Basic (lock account). Unlock user. User '%s' unlocked" % user_name
