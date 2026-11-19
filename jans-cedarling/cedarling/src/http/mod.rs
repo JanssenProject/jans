@@ -215,7 +215,8 @@ impl HttpClient {
     ///
     /// Rebuilt from [`HttpClientConfig`] alone: any other setting of the builder
     /// passed to [`HttpClient::new_with_builder`] (proxy, root certificates,
-    /// accepting invalid certificates) is not carried over.
+    /// accepting invalid certificates) is not carried over. Nor is
+    /// [`HttpClient::retrying_unauthorized`]: it is for the token left out.
     pub(crate) fn without_default_headers(&self) -> Result<Self, InitializeHttpClientError> {
         Self::new(self.conf)
     }
