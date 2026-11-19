@@ -393,6 +393,103 @@ public class RateLimitServiceTest {
     }
 
     @Test
+    public void canonicalPath_whenPathIsAlreadyCanonical_shouldReturnSamePath() {
+        assertEquals("/jans-auth/restv1/token", RateLimitService.canonicalPath("/jans-auth/restv1/token"));
+        assertEquals("/", RateLimitService.canonicalPath("/"));
+        assertEquals("/", RateLimitService.canonicalPath(""));
+        assertEquals("/jans-auth/restv1/token", RateLimitService.canonicalPath("/jans-auth/restv1/token/"));
+        assertEquals("/jans-auth/restv1/token", RateLimitService.canonicalPath("/jans-auth//restv1/token"));
+    }
+
+    @Test
+    public void matchRulesByPathAndMethod_whenSamePathHasSeveralRules_shouldReturnAllMatchingMethod() {
+        RateLimitRule bodyRule = newRule("/jans-auth/restv1/token", List.of("POST"), new KeyExtractor(KeySource.BODY, List.of("client_id")));
+        RateLimitRule ipRule = newRule("/jans-auth/restv1/token", List.of("POST"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+        RateLimitRule getRule = newRule("/jans-auth/restv1/token", List.of("GET"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+
+        RateLimitConfig config = new RateLimitConfig();
+        config.setRateLimitRules(List.of(bodyRule, ipRule, getRule));
+        when(appConfiguration.getRateLimitConfiguration()).thenReturn(config);
+        rateLimitService.updateConfiguration(appConfiguration);
+
+        assertEquals(2, rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "POST").size());
+        assertEquals(1, rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "GET").size());
+        assertTrue(rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "PUT").isEmpty());
+    }
+
+    @Test
+    public void matchRulesByPathAndMethod_whenRuleIsMalformed_shouldExcludeIt() {
+        RateLimitRule malformed = new RateLimitRule();
+        malformed.setPath("/jans-auth/restv1/token");
+        malformed.setMethods(List.of("POST"));
+        AssertJUnit.assertFalse(malformed.isWellFormed());
+
+        RateLimitConfig config = new RateLimitConfig();
+        config.setRateLimitRules(List.of(malformed));
+        when(appConfiguration.getRateLimitConfiguration()).thenReturn(config);
+        rateLimitService.updateConfiguration(appConfiguration);
+
+        assertTrue(rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "POST").isEmpty());
+    }
+
+    @Test
+    public void matchRulesByPathAndMethod_whenRulePathIsNotCanonical_shouldMatchCanonicalRequestPath() {
+        RateLimitRule rule = newRule("/jans-auth//restv1/token/", List.of("POST"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+
+        RateLimitConfig config = new RateLimitConfig();
+        config.setRateLimitRules(List.of(rule));
+        when(appConfiguration.getRateLimitConfiguration()).thenReturn(config);
+        rateLimitService.updateConfiguration(appConfiguration);
+
+        assertEquals(1, rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "POST").size());
+    }
+
+    @Test
+    public void matchRulesByPathAndMethod_whenConfigurationReloaded_shouldUseNewRules() {
+        RateLimitRule registerRule = newRule("/jans-auth/restv1/register", List.of("POST"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+        RateLimitRule tokenRule = newRule("/jans-auth/restv1/token", List.of("POST"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+
+        RateLimitConfig first = new RateLimitConfig();
+        first.setRateLimitRules(List.of(registerRule));
+        RateLimitConfig second = new RateLimitConfig();
+        second.setRateLimitRules(List.of(tokenRule));
+        when(appConfiguration.getRateLimitConfiguration()).thenReturn(first, second);
+
+        rateLimitService.updateConfiguration(appConfiguration);
+        assertEquals(1, rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/register", "POST").size());
+
+        rateLimitService.updateConfiguration(appConfiguration);
+        assertTrue(rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/register", "POST").isEmpty());
+        assertEquals(1, rateLimitService.matchRulesByPathAndMethod("/jans-auth/restv1/token", "POST").size());
+    }
+
+    @Test
+    public void validateRateLimit_forTokenEndpointOverLimit_shouldFail() throws IOException {
+        RateLimitRule rule = newRule("/jans-auth/restv1/token", List.of("POST"), new KeyExtractor(KeySource.HEADER, List.of("X-Real-IP")));
+        rule.setRequestCount(2);
+
+        RateLimitConfig config = new RateLimitConfig();
+        config.setRateLimitRules(List.of(rule));
+        when(errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.RATE_LIMIT)).thenReturn(true);
+        when(appConfiguration.getRateLimitConfiguration()).thenReturn(config);
+        rateLimitService.updateConfiguration(appConfiguration);
+
+        try {
+            for (int i = 0; i < 5; i++) {
+                HttpServletRequest request = mock(HttpServletRequest.class);
+                when(request.getRequestURI()).thenReturn("/jans-auth/restv1/token;jsessionid=1");
+                when(request.getMethod()).thenReturn("POST");
+                when(request.getHeader("X-Real-IP")).thenReturn("203.0.113.7");
+                rateLimitService.validateRateLimit(request);
+            }
+        } catch (RateLimitedException e) {
+            return;
+        }
+
+        Assert.fail("Rate limit exception was not thrown for /token. But it's expected to get it.");
+    }
+
+    @Test
     public void saveSpaceIfNeeded_whenKeyIsLong_shouldReturnHashedKey() {
         String longKey = StringUtils.repeat("a", RateLimitService.KEY_LENGTH_LIMIT_FOR_DIGEST + 1);
         String hashedKey = RateLimitService.saveSpaceIfNeeded(longKey);
@@ -404,5 +501,15 @@ public class RateLimitServiceTest {
         String shortKey = StringUtils.repeat("a", RateLimitService.KEY_LENGTH_LIMIT_FOR_DIGEST - 1);
         String resultKey = RateLimitService.saveSpaceIfNeeded(shortKey);
         assertEquals(shortKey, resultKey);
+    }
+
+    private static RateLimitRule newRule(String path, List<String> methods, KeyExtractor extractor) {
+        RateLimitRule rule = new RateLimitRule();
+        rule.setPath(path);
+        rule.setMethods(methods);
+        rule.setPeriodInSeconds(60);
+        rule.setRequestCount(10);
+        rule.setKeyExtractors(List.of(extractor));
+        return rule;
     }
 }
