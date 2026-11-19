@@ -533,9 +533,10 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
      * waits for the commit and is dropped on rollback.
      */
     private void notifyAfterRemove(String dn, String[] objectClasses) {
+        final String[] removedObjectClasses = objectClasses.clone();
         getOperationService().runAfterCommit(() -> {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn, objectClasses);
+                subscriber.onAfterRemove(dn, removedObjectClasses);
             }
         });
     }

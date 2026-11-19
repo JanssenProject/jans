@@ -15,6 +15,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.expectThrows;
 
 import org.mockito.ArgumentCaptor;
@@ -75,6 +76,21 @@ public class SqlEntryManagerTest {
 		afterCommit.getValue().run();
 
 		verify(subscriber).onAfterRemove(DN, OBJECT_CLASSES);
+	}
+
+	@Test
+	public void removeByDn_callerChangesObjectClassesBeforeCommit_notifiesRemovedObjectClasses() throws Exception {
+		ArgumentCaptor<Runnable> afterCommit = ArgumentCaptor.forClass(Runnable.class);
+		String[] objectClasses = { "jansTest" };
+
+		entryManager.removeByDn(DN, objectClasses);
+		objectClasses[0] = "jansOther";
+		verify(operationService).runAfterCommit(afterCommit.capture());
+		afterCommit.getValue().run();
+
+		ArgumentCaptor<String[]> notified = ArgumentCaptor.forClass(String[].class);
+		verify(subscriber).onAfterRemove(eq(DN), notified.capture());
+		assertEquals(notified.getValue(), new String[] { "jansTest" });
 	}
 
 	@Test
