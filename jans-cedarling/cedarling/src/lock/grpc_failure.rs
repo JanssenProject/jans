@@ -49,6 +49,8 @@ impl GrpcFailure {
                 None => Self::Retryable(status),
             },
             Code::OutOfRange => Self::Final(GrpcRefusal::ResponseTooLarge(status)),
+            // `RESOURCE_EXHAUSTED` too: Lock sends it only for a request over its
+            // inbound message limit, which the same request exceeds again.
             _ => Self::Final(GrpcRefusal::Lock(status)),
         }
     }
