@@ -253,6 +253,18 @@ EOF
     --build-arg JANS_SCIM_IMAGE=local/scim:ci \
     --build-arg JANS_FIDO2_IMAGE=local/fido2:ci \
     ./docker-jans-all-in-one
+  # The AIO runs every service's /app/scripts against its own jans-pycloudlib, installed at
+  # JANS_SOURCE_VERSION; swap in this checkout's so scripts and library changes land together.
+  # pip is removed from the image, so replace the package dir (new dependencies are not picked up).
+  docker build -q -t local/aio:ci -f - jans-pycloudlib/jans >/dev/null <<'EOF'
+FROM local/aio:ci
+USER root
+COPY pycloudlib /tmp/pycloudlib
+RUN dst=$(python3 -c 'import importlib.util; print(importlib.util.find_spec("jans.pycloudlib").submodule_search_locations[0])') \
+    && rm -rf "$dst" \
+    && mv /tmp/pycloudlib "$dst"
+USER 1000
+EOF
   base_image="local/aio:ci"
 fi
 # Bake the integration-test env into a thin layer, tagged as the image the AIO demo
