@@ -263,7 +263,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new EntryPersistenceException("Transaction failed and was rolled back", ex);
+            throw new EntryPersistenceException("Transaction failed", ex);
         }
     }
 
@@ -522,12 +522,22 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn, objectClasses);
-            }
+            notifyAfterRemove(dn, objectClasses);
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
         }
+    }
+
+    /*
+     * Subscribers learn about a removal only once it is durable: inside a transaction the notification
+     * waits for the commit and is dropped on rollback.
+     */
+    private void notifyAfterRemove(String dn, String[] objectClasses) {
+        getOperationService().runAfterCommit(() -> {
+            for (DeleteNotifier subscriber : subscribers) {
+                subscriber.onAfterRemove(dn, objectClasses);
+            }
+        });
     }
 
     @Override
@@ -541,9 +551,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn, objectClasses);
-            }
+            notifyAfterRemove(dn, objectClasses);
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
         }

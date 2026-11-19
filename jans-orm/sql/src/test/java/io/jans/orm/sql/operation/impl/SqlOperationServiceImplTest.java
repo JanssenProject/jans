@@ -6,6 +6,7 @@
 
 package io.jans.orm.sql.operation.impl;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -29,6 +30,8 @@ import org.mockito.InOrder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.querydsl.core.QueryException;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.MySQLTemplates;
 import com.querydsl.sql.SQLQueryFactory;
@@ -193,6 +196,106 @@ public class SqlOperationServiceImplTest {
 	@Test
 	public void lookupForUpdate_outsideTransaction_throwsIllegalState() {
 		expectThrows(IllegalStateException.class, () -> operationService.lookupForUpdate("key", "jansPar"));
+	}
+
+	@Test
+	public void executeInTransaction_caughtStatementFailure_rollsBackInsteadOfCommitting() throws Exception {
+		when(connection.prepareStatement(anyString())).thenThrow(new SQLException("duplicate key"));
+
+		PersistenceException thrown = expectThrows(PersistenceException.class, () -> operationService.executeInTransaction(() -> {
+			try {
+				operationService.queryFactory().select(Expressions.ONE).fetchOne();
+			} catch (QueryException expected) {
+				return "done";
+			}
+			return "unexpected";
+		}));
+
+		assertTrue(thrown.getMessage().contains("rollback-only"), thrown.getMessage());
+		verify(connection, never()).commit();
+		verify(connection).rollback();
+		verify(connection).close();
+	}
+
+	@Test
+	public void executeInTransaction_caughtNestedFailure_rollsBackOuterTransaction() throws Exception {
+		expectThrows(PersistenceException.class, () -> operationService.executeInTransaction(() -> {
+			try {
+				operationService.executeInTransaction(() -> {
+					throw new IllegalStateException("inner");
+				});
+			} catch (IllegalStateException expected) {
+				return "done";
+			}
+			return "unexpected";
+		}));
+
+		verify(connection, never()).commit();
+		verify(connection).rollback();
+	}
+
+	@Test
+	public void runAfterCommit_outsideTransaction_runsImmediately() {
+		AtomicBoolean ran = new AtomicBoolean();
+
+		operationService.runAfterCommit(() -> ran.set(true));
+
+		assertTrue(ran.get());
+	}
+
+	@Test
+	public void runAfterCommit_insideTransaction_runsOnlyAfterCommit() throws Exception {
+		AtomicBoolean ran = new AtomicBoolean();
+
+		operationService.executeInTransaction(() -> {
+			operationService.runAfterCommit(() -> ran.set(true));
+			assertFalse(ran.get());
+			return null;
+		});
+
+		assertTrue(ran.get());
+		verify(connection).commit();
+	}
+
+	@Test
+	public void runAfterCommit_transactionRolledBack_discardsAction() {
+		AtomicBoolean ran = new AtomicBoolean();
+
+		expectThrows(IllegalStateException.class, () -> operationService.executeInTransaction(() -> {
+			operationService.runAfterCommit(() -> ran.set(true));
+			throw new IllegalStateException("abort");
+		}));
+
+		assertFalse(ran.get());
+	}
+
+	@Test
+	public void runAfterCommit_commitFails_discardsAction() throws Exception {
+		doThrow(new SQLException("commit failed")).when(connection).commit();
+		AtomicBoolean ran = new AtomicBoolean();
+
+		expectThrows(SQLException.class, () -> operationService.executeInTransaction(() -> {
+			operationService.runAfterCommit(() -> ran.set(true));
+			return null;
+		}));
+
+		assertFalse(ran.get());
+	}
+
+	@Test
+	public void runAfterCommit_failingAction_doesNotFailCommittedTransactionOrLaterActions() throws Exception {
+		AtomicBoolean laterRan = new AtomicBoolean();
+
+		String result = operationService.executeInTransaction(() -> {
+			operationService.runAfterCommit(() -> {
+				throw new IllegalStateException("subscriber failed");
+			});
+			operationService.runAfterCommit(() -> laterRan.set(true));
+			return "done";
+		});
+
+		assertEquals(result, "done");
+		assertTrue(laterRan.get());
 	}
 
 }

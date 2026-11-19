@@ -15,10 +15,12 @@ import static org.testng.Assert.expectThrows;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -125,33 +127,75 @@ public class SqlTransactionContractTest extends BaseOrmTest {
 	}
 
 	@Test
+	public void caughtDuplicateInsideTransactionStillRollsBack() {
+		VersionedTestEntry existing = newEntry("caught-dup");
+		entryManager.persist(existing);
+		VersionedTestEntry other = newEntry("caught-dup-other");
+
+		expectThrows(EntryPersistenceException.class, () -> entryManager.executeInTransaction(BASE_DN, () -> {
+			entryManager.persist(other);
+			VersionedTestEntry duplicate = newEntry("caught-dup");
+			duplicate.setDn(existing.getDn());
+			try {
+				entryManager.persist(duplicate);
+			} catch (EntryPersistenceException expected) {
+				return "done";
+			}
+			return "unexpected";
+		}));
+
+		assertFalse(entryManager.contains(other.getDn(), VersionedTestEntry.class));
+		cleanUp(existing);
+	}
+
+	@Test
 	public void findForUpdateBlocksSecondTransactionUntilFirstCommits() throws Exception {
+		assertLockHeldUntilEnd(false);
+	}
+
+	@Test
+	public void findForUpdateBlocksSecondTransactionUntilFirstRollsBack() throws Exception {
+		assertLockHeldUntilEnd(true);
+	}
+
+	private void assertLockHeldUntilEnd(boolean rollback) throws Exception {
 		VersionedTestEntry entry = newEntry("lock");
 		entryManager.persist(entry);
 
 		CountDownLatch locked = new CountDownLatch(1);
+		CountDownLatch waiterReady = new CountDownLatch(1);
 		CountDownLatch release = new CountDownLatch(1);
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		try {
 			Future<?> holder = executor.submit(() -> entryManager.executeInTransaction(BASE_DN, () -> {
 				VersionedTestEntry row = entryManager.findForUpdate(VersionedTestEntry.class, entry.getDn());
 				locked.countDown();
-				release.await(10, TimeUnit.SECONDS);
+				assertTrue(release.await(30, TimeUnit.SECONDS));
 				row.setData("holder");
 				entryManager.updateWithVersion(row);
+				if (rollback) {
+					throw new IllegalStateException("abort");
+				}
 				return null;
 			}));
 
 			assertTrue(locked.await(10, TimeUnit.SECONDS));
-			Future<String> waiter = executor.submit(() -> entryManager.executeInTransaction(BASE_DN,
-					() -> entryManager.findForUpdate(VersionedTestEntry.class, entry.getDn()).getData()));
+			Future<String> waiter = executor.submit(() -> entryManager.executeInTransaction(BASE_DN, () -> {
+				waiterReady.countDown();
+				return entryManager.findForUpdate(VersionedTestEntry.class, entry.getDn()).getData();
+			}));
 
-			Thread.sleep(500);
-			assertFalse(waiter.isDone());
+			assertTrue(waiterReady.await(10, TimeUnit.SECONDS));
+			expectThrows(TimeoutException.class, () -> waiter.get(1, TimeUnit.SECONDS));
 
 			release.countDown();
-			holder.get(10, TimeUnit.SECONDS);
-			assertEquals(waiter.get(10, TimeUnit.SECONDS), "holder");
+			if (rollback) {
+				ExecutionException failure = expectThrows(ExecutionException.class, () -> holder.get(10, TimeUnit.SECONDS));
+				assertTrue(hasCause(failure, IllegalStateException.class));
+			} else {
+				holder.get(10, TimeUnit.SECONDS);
+			}
+			assertEquals(waiter.get(10, TimeUnit.SECONDS), rollback ? "lock" : "holder");
 		} finally {
 			release.countDown();
 			executor.shutdownNow();

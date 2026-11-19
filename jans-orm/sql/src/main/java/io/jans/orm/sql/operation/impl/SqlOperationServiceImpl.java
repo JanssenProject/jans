@@ -46,6 +46,8 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.RelationalPathBase;
+import com.querydsl.sql.SQLBaseListener;
+import com.querydsl.sql.SQLListenerContext;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLDeleteClause;
@@ -159,6 +161,29 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	@Override
+	public void runAfterCommit(Runnable action) {
+		if (action == null) {
+			return;
+		}
+		BoundTransaction bound = boundTransaction.get();
+		if (bound == null) {
+			action.run();
+		} else {
+			bound.afterCommit.add(action);
+		}
+	}
+
+	private static void runAfterCommitActions(List<Runnable> actions) {
+		for (Runnable action : actions) {
+			try {
+				action.run();
+			} catch (RuntimeException ex) {
+				LOG.error("After-commit action failed", ex);
+			}
+		}
+	}
+
+	@Override
 	public <T> T executeInTransaction(TransactionCallback<T> callback) throws Exception {
 		if (callback == null) {
 			throw new InvalidArgumentException("Transaction callback is null");
@@ -166,7 +191,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 		BoundTransaction outer = boundTransaction.get();
 		if (outer != null) {
-			return callback.doInTransaction();
+			try {
+				return callback.doInTransaction();
+			} catch (Exception | Error ex) {
+				outer.rollbackOnly = true;
+				throw ex;
+			}
 		}
 
 		Connection connection;
@@ -180,6 +210,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		boolean transactionStarted = false;
 		boolean transactionFinished = false;
 		Throwable failure = null;
+		BoundTransaction bound = null;
+		boolean committed = false;
 		try {
 			restoreAutoCommit = connection.getAutoCommit();
 			connection.setAutoCommit(false);
@@ -187,12 +219,19 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 			// Without SQLCloseListener: the clauses must not close the transaction connection
 			SQLQueryFactory transactionQueryFactory = new SQLQueryFactory(getTransactionConfiguration(), () -> connection);
-			boundTransaction.set(new BoundTransaction(transactionQueryFactory));
+			bound = new BoundTransaction(transactionQueryFactory);
+			boundTransaction.set(bound);
 
 			T result = callback.doInTransaction();
 
+			// A failed statement aborts the transaction on some databases (PostgreSQL), whose COMMIT then rolls back silently
+			if (bound.rollbackOnly) {
+				throw new PersistenceException("Transaction is rollback-only: a database operation failed inside it");
+			}
+
 			connection.commit();
 			transactionFinished = true;
+			committed = true;
 
 			return result;
 		} catch (Exception | Error ex) {
@@ -217,11 +256,16 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			} catch (SQLException ex) {
 				LOG.error("Failed to return connection to pool after transaction", ex);
 			}
+			if (committed) {
+				runAfterCommitActions(bound.afterCommit);
+			}
 		}
 	}
 
 	private static final class BoundTransaction {
 		private final SQLQueryFactory queryFactory;
+		private final List<Runnable> afterCommit = new ArrayList<>();
+		private boolean rollbackOnly;
 
 		private BoundTransaction(SQLQueryFactory queryFactory) {
 			this.queryFactory = queryFactory;
@@ -371,6 +415,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					executeInsertGroup(queryFactory(), inserts, group);
 				}
 			} catch (Exception ex) {
+				// Earlier groups stay written on this connection: the owner must not commit a partial batch
+				boundTransaction.get().rollbackOnly = true;
 				int fromIndex = currentGroup == null ? 0 : currentGroup.fromIndex;
 				int toIndex = currentGroup == null ? inserts.size() - 1 : currentGroup.toIndex;
 
@@ -499,6 +545,15 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		Configuration configuration = this.transactionConfiguration;
 		if (configuration == null) {
 			configuration = new Configuration(connectionProvider.getSqlTemplates());
+			configuration.addListener(new SQLBaseListener() {
+				@Override
+				public void exception(SQLListenerContext context) {
+					BoundTransaction bound = boundTransaction.get();
+					if (bound != null) {
+						bound.rollbackOnly = true;
+					}
+				}
+			});
 			this.transactionConfiguration = configuration;
 		}
 
