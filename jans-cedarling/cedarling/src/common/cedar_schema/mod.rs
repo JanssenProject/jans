@@ -74,8 +74,7 @@ impl SchemaShape {
                 let entity_type = validator.get_entity_type(name.as_ref());
                 let shape = EntityTypeShape {
                     attributes: entity_type
-                        .map(|et| et.attributes().clone())
-                        .unwrap_or_default(),
+                        .map_or_else(Default::default, |et| et.attributes().clone()),
                     tag_type: entity_type.and_then(|et| et.tag_type().cloned()),
                     ancestors: names(schema.ancestors(name)),
                 };
