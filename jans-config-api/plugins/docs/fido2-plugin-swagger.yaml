@@ -1910,18 +1910,6 @@ components:
         lockAuditFlushInterval:
           type: integer
           format: int32
-        fido2TraceEnabled:
-          type: boolean
-        fido2TraceProducerId:
-          type: string
-        fido2TraceChainGenesis:
-          type: string
-        fido2TraceIncludeCredentialIdHash:
-          type: boolean
-        fido2TraceIncludeAttestationDetail:
-          type: boolean
-        fido2TraceEndpoint:
-          type: string
         nativeReadinessEnabled:
           type: boolean
         nativeReadinessAllowExternalFetch:
@@ -2004,55 +1992,55 @@ components:
           type: object
           additionalProperties:
             type: object
-        period:
-          type: string
+        authenticationFailures:
+          type: integer
+          format: int64
         registrationAttempts:
           type: integer
           format: int64
-        registrationSuccesses:
+        authenticationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccesses:
           type: integer
           format: int64
+        authenticationAvgDuration:
+          type: number
+          format: double
         registrationFailures:
+          type: integer
+          format: int64
+        registrationAvgDuration:
+          type: number
+          format: double
+        registrationSuccessRate:
+          type: number
+          format: double
+        registrationSuccesses:
           type: integer
           format: int64
         authenticationAttempts:
           type: integer
           format: int64
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationFailures:
-          type: integer
-          format: int64
+        performanceMetrics:
+          type: object
+          additionalProperties:
+            type: object
+        period:
+          type: string
         fallbackEvents:
           type: integer
           format: int64
-        registrationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccessRate:
-          type: number
-          format: double
-        registrationAvgDuration:
-          type: number
-          format: double
-        authenticationAvgDuration:
-          type: number
-          format: double
-        deviceTypes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int64
         errorCounts:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        performanceMetrics:
+        deviceTypes:
           type: object
           additionalProperties:
-            type: object
+            type: integer
+            format: int64
         baseDn:
           type: string
     Fido2MetricsAggregationPagedResult:

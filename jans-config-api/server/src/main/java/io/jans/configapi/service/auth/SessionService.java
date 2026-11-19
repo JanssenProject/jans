@@ -107,25 +107,27 @@ public class SessionService {
                 Filter.createGreaterOrEqualFilter("exp", persistenceEntryManager.encodeTime(getDnForSession(null),
                         new Date(System.currentTimeMillis()))),
                 0);
-        logger.debug("All sessionList:{}", sessionList);
+        logger.debug("All sessionList size:{}", sessionList.size());
 
         sessionList.sort((SessionId s1, SessionId s2) -> s2.getCreationDate().compareTo(s1.getCreationDate()));
-        logger.debug("Sorted Session sessionList:{}", sessionList);
-
         this.modifySessionList(sessionList);
 
         return sessionList;
     }
 
     public PagedResult<SessionId> searchSession(SearchRequest searchRequest) {
-        logger.info("Search Session with searchRequest:{}", searchRequest);
+        if (logger.isInfoEnabled()) {
+            logger.info("Search Session with searchRequest:{}", escapeLog(searchRequest));
+        }
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.info("Session Search with assertionValue:{}", assertionValue);
+                if (logger.isInfoEnabled()) {
+                    logger.info("Session Search with assertionValue:{}", escapeLog(assertionValue));
+                }
 
                 String[] targetArray = new String[] { assertionValue };
                 Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
@@ -141,7 +143,9 @@ public class SessionService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.debug("Session pattern searchFilter:{}", searchFilter);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Session pattern searchFilter:{}", escapeLog(searchFilter));
+        }
 
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
@@ -153,7 +157,9 @@ public class SessionService {
         searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                 Filter.createANDFilter(fieldValueFilters));
 
-        logger.info("Session searchFilter:{}", searchFilter);
+        if (logger.isInfoEnabled()) {
+            logger.info("Session searchFilter:{}", escapeLog(searchFilter));
+        }
 
         PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
                 SessionId.class, searchFilter, null, searchRequest.getSortBy(),
@@ -169,17 +175,25 @@ public class SessionService {
 
     }
 
-    public void revokeSessionTokens(String id, String sessionDn) {
-        logger.info("Revoke session tokens for id:{}, sessionDn:{}", id, sessionDn);
-        try {
-            String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
-            List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
-            logger.info("Revoke tokens for id:{}, sessionDn:{}, tokenList:{}", id, sessionDn, tokenList);
-            for (TokenEntity token : tokenList) {
+    public void revokeSessionTokens(String sessionDn) {
+        logger.info("Revoke session tokens for sessionDn:{}", sessionDn);
+        String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
+        List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
+        if (tokenList == null) {
+            return;
+        }
+        logger.info("Revoke tokens for sessionDn:{}, token count:{}", sessionDn, tokenList.size());
+        boolean complete = true;
+        for (TokenEntity token : tokenList) {
+            try {
                 tokenService.revokeTokenEntity(token.getTokenCode());
+            } catch (Exception ex) {
+                logger.error("Error while revoking session token for sessionDn:{} - ", sessionDn, ex);
+                complete = false;
             }
-        } catch (Exception ex) {
-            logger.error(" Error while revoking session token is - ", ex);
+        }
+        if (!complete) {
+            throw new jakarta.ws.rs.InternalServerErrorException("Session token revocation incomplete");
         }
     }
 
@@ -190,16 +204,16 @@ public class SessionService {
 
         if (StringUtils.isNotBlank(sid)) {
             SessionId sessionToDelete = this.getSession(sid);
-            logger.debug("User sessionToDelete:{}", sessionToDelete);
 
             if (sessionToDelete == null) {
                 throw new NotFoundException(
                         "No " + SessionIdState.AUTHENTICATED + " session exists for sid '" + sid + "'!!!");
             }
 
+            // Revoke tokens first so a failed revocation leaves the session in place for a retry
+            revokeSessionTokens(sessionToDelete.getDn());
             persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
             cacheService.remove(sessionToDelete.getDn());
-            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
 
         }
     }
@@ -208,7 +222,6 @@ public class SessionService {
         if (logger.isInfoEnabled()) {
             logger.info("Delete session of userDn:{}", escapeLog(userDn));
         }
-        logger.info("Revoke session userDn:{}, cacheService:{}", userDn, cacheService);
 
         if (StringUtils.isNotBlank(userDn)) {
             Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansUsrDN", userDn),
@@ -216,7 +229,6 @@ public class SessionService {
 
             List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
                     filter);
-            logger.debug("User sessionList:{}", sessionList);
 
             if (sessionList == null || sessionList.isEmpty()) {
                 throw new NotFoundException(
@@ -224,29 +236,25 @@ public class SessionService {
             }
 
             sessionList.stream().forEach(session -> {
+                revokeSessionTokens(session.getDn());
                 persistenceEntryManager.remove(session.getDn(), SessionId.class);
                 cacheService.remove(session.getDn());
-                revokeSessionTokens(userDn, session.getDn());
             });
         }
     }
 
     private SessionId modifySession(SessionId session) {
-        logger.debug("Modify session:{}", session);
         if (session == null) {
             return session;
         }
         List<SessionId> sessionList = new ArrayList<>();
         sessionList.add(session);
         this.modifySessionList(sessionList);
-        logger.debug("After modify session:{}", session);
         return session;
 
     }
 
     private List<SessionId> modifySessionList(List<SessionId> sessionList) {
-        logger.debug("Modify sessionList:{}", sessionList);
-
         if (sessionList == null || sessionList.isEmpty()) {
             return sessionList;
         }
@@ -255,7 +263,6 @@ public class SessionService {
             excludeAttribute(session);
         }
 
-        logger.debug("After modification sessionList:{}", sessionList);
         return sessionList;
     }
 
@@ -285,14 +292,16 @@ public class SessionService {
         }
         session.setId(null);
         session.setDn(null);
+        session.setDeviceSecrets(null);
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
         return session;
     }
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
-
-        logger.debug("Modify filter - fieldFilterDataList:{}", fieldFilterDataList);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Modify filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        }
         if (fieldFilterDataList == null || fieldFilterDataList.isEmpty()) {
             return fieldFilterDataList;
         }
@@ -311,7 +320,9 @@ public class SessionService {
                 }
             }
         }
-        logger.info("After modification of session filter - fieldFilterDataList:{}", fieldFilterDataList);
+        if (logger.isInfoEnabled()) {
+            logger.info("After modification of session filter - fieldFilterDataList:{}", escapeLog(fieldFilterDataList));
+        }
         return fieldFilterDataList;
     }
 

@@ -64,6 +64,14 @@ public class PasswordStatusService implements Serializable {
     }
 
     public Boolean changePassword(String userId, String newPassword) {
+        return updatePassword(userId, newPassword, false);
+    }
+
+    public Boolean setInitialPassword(String userId, String newPassword) {
+        return updatePassword(userId, newPassword, true);
+    }
+
+    private Boolean updatePassword(String userId, String newPassword, boolean initialOnly) {
 
         try {
             if (Utils.isNotEmpty(newPassword)) {
@@ -72,6 +80,10 @@ public class PasswordStatusService implements Serializable {
                         !passwordValidationPassed(newPassword)) return null;
                 
                 IdentityPerson person = persistenceService.get(IdentityPerson.class, persistenceService.getPersonDn(userId));
+                if (initialOnly && person.hasPassword()) {
+                    logger.warn("Initial password assignment rejected: user {} already has a password", userId);
+                    return false;
+                }
                 person.setPassword(newPassword);
                 return persistenceService.modify(person);
             }
