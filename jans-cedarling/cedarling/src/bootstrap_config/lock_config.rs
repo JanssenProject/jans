@@ -74,13 +74,13 @@ pub struct LockServiceConfig {
     #[cfg(not(target_arch = "wasm32"))]
     pub access_token_jwt: Option<String>,
     /// Intervals to send log messages to the lock server.
-    /// Set this to [`None`] to disable transmission.
+    /// Set this to [`None`] or zero to disable transmission.
     pub log_interval: Option<Duration>,
     /// Intervals to send health messages to the lock server.
-    /// Set this to [`None`] to disable transmission.
+    /// Set this to [`None`] or zero to disable transmission.
     pub health_interval: Option<Duration>,
     /// Intervals to send telemetry messages to the lock server.
-    /// Set this to [`None`] to disable transmission.
+    /// Set this to [`None`] or zero to disable transmission.
     pub telemetry_interval: Option<Duration>,
     /// Controls whether Cedarling should listen for updates from the Lock Server.
     pub listen_sse: bool,
@@ -98,6 +98,18 @@ pub struct LockServiceConfig {
 impl LockServiceConfig {
     pub(super) const DEFAULT_CHANNEL_CAPACITY: NonZeroUsize = NonZeroUsize::new(100).unwrap();
     pub(super) const DEFAULT_LOG_MAX_RETRIES: u32 = 5;
+
+    /// This config with each zero interval set to [`None`]: a zero interval disables
+    /// sending, as `0` does for the bootstrap properties.
+    pub(crate) fn with_zero_intervals_disabled(&self) -> Self {
+        let enabled = |interval: Option<Duration>| interval.filter(|period| !period.is_zero());
+        Self {
+            log_interval: enabled(self.log_interval),
+            health_interval: enabled(self.health_interval),
+            telemetry_interval: enabled(self.telemetry_interval),
+            ..self.clone()
+        }
+    }
 }
 
 /// Raw lock service config
@@ -219,5 +231,32 @@ impl TryFrom<&BootstrapConfigRaw> for LockServiceConfig {
             log_channel_capacity: raw.lock_log_channel_capacity,
             log_max_retries: raw.lock_log_max_retries,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn zero_interval_disables_sending() {
+        let config = LockServiceConfig {
+            log_interval: Some(Duration::ZERO),
+            health_interval: Some(Duration::from_secs(5)),
+            telemetry_interval: Some(Duration::ZERO),
+            ..Default::default()
+        };
+
+        let config = config.with_zero_intervals_disabled();
+
+        assert_eq!(
+            (
+                config.log_interval,
+                config.health_interval,
+                config.telemetry_interval
+            ),
+            (None, Some(Duration::from_secs(5)), None),
+            "a zero interval disables sending, as `0` does for the bootstrap properties"
+        );
     }
 }
