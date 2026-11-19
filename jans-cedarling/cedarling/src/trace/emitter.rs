@@ -2099,6 +2099,31 @@ mod tests {
         );
     }
 
+    /// A refused request is final: its records are counted once and the request is
+    /// never sent again, however long the emitter runs. The REST sink reports a
+    /// `403` whose body cannot be read as this same refusal.
+    #[tokio::test(start_paused = true)]
+    async fn a_refused_request_is_sent_once() {
+        let lock = FakeLock::new([Reply::Rejected]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+
+        lock.bodies(1).await;
+        tokio::time::sleep(Duration::from_secs(3600)).await;
+
+        assert_eq!(
+            lock.bodies.borrow().len(),
+            1,
+            "a refused request is not sent again"
+        );
+        emitter.handle.shut_down().await;
+        assert_eq!(
+            counter(&metrics, "trace.rejected"),
+            Some(1),
+            "the refused record is counted once"
+        );
+    }
+
     #[tokio::test(start_paused = true)]
     async fn a_request_that_cannot_be_sent_is_dropped_not_rejected() {
         let lock = FakeLock::new([Reply::NotSent]);
