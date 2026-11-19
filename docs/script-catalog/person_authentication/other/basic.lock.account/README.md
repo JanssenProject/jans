@@ -17,9 +17,22 @@ This module has 2 properties:
 3) lock_expiration_time - Specify the time in seconds when lock will be expired
    Default value: 180
 
-While an account is locked, `invalid_login_count_attribute` holds `locked:<lock time>:<updatedAt>` (epoch millis) instead of a count.
-The script only unlocks inactive accounts carrying this marker that were not modified after the lock, so accounts
-disabled by an administrator stay disabled, even if the administrator acted while the account was locked.
+While an account is locked, `invalid_login_count_attribute` holds `locked:<epoch millis>:<jansVersion>` instead of a
+count, where `jansVersion` is the user version the lock wrote. The script only unlocks inactive accounts whose marker
+and version are unchanged since the lock, so accounts disabled or edited by an administrator stay locked.
+
+On backends with versioned updates, the script's user writes are compare-and-set on `jansVersion`: a counter, lock
+or unlock write that races a write which advances `jansVersion` re-reads the user and decides again instead of
+overwriting it. Janssen's own user writers (auth server, Config API, SCIM, Casa, Jans Link) all advance `jansVersion`.
+Custom entity classes or direct database updates on `jansPerson` must advance it too, or the script and unlock cannot
+see their changes.
+
+Other writers update users with `merge`, which checks only the version it reads itself, not the one their own earlier
+read saw. An update read before a lock and saved after it (for example an in-flight Config API PATCH) can therefore
+write the status it read and reactivate the account early.
+
+Counter and lock writes fall back to a plain update on backends without versioned updates; unlock does not, so such
+accounts must be reactivated by an administrator.
 
 Upgrade note: accounts locked by a previous version of this script have no marker and are not unlocked when their
 lock expires. An administrator must reactivate them.
