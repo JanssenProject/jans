@@ -2032,7 +2032,7 @@ output, and where results land, then describes the pen-test that correlates them
 <td><code>scan-pentest.yml</code></td>
 <td>live endpoints</td>
 <td>PDF/JSON/MD/SARIF</td>
-<td>workflow artifact only — CONFIDENTIAL, not attached to the public release</td>
+<td>age-encrypted workflow artifact only — CONFIDENTIAL, not attached to the public release</td>
 </tr>
 </tbody>
 </table>
@@ -2119,11 +2119,13 @@ findings.</p>
    assessment-coverage table (findings per dimension), a findings register (with a
    Backend column), detailed write-ups with recommendations for medium+ findings,
    and appendices for run metadata and the SBOM component inventory. All formats
-   are uploaded <strong>only</strong> as a workflow artifact (30-day retention) — the report is
-   CONFIDENTIAL and is never attached to the public release; GitHub Actions
-   artifacts restrict access to users with repository access. The PDF and a link to
-   the run are also posted to Zulip (<code>#bot_reporter</code>, topic <code>pen-test</code>) when
-   <code>ZULIP_API_KEY</code> is set.</li>
+   are uploaded <strong>only</strong> as an age-encrypted workflow artifact
+   (<code>pentest-report.tar.gz.age</code>, 30-day retention) — the report is CONFIDENTIAL and
+   is never attached to the public release. Artifacts and run logs of a public repo
+   are readable by any signed-in GitHub user, so raw scanner output and target logs
+   are encrypted too, and scanner stdout goes to files inside them, not the log. The
+   PDF and a link to the run are also posted to Zulip (<code>#bot_reporter</code>, topic
+   <code>pen-test</code>) when <code>ZULIP_API_KEY</code> is set.</li>
 </ol>
 <h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h3>
 <table>
@@ -2135,6 +2137,16 @@ findings.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><code>PENTEST_AGE_KEY</code> (secret)</td>
+<td><strong>required</strong></td>
+<td>age identity; artifacts are encrypted to its public key. Without it the run fails before scanning</td>
+</tr>
+<tr>
+<td><code>PENTEST_AGE_RECIPIENTS</code> (var)</td>
+<td>optional</td>
+<td>extra age recipients, one per line; must be the same kind as the key (PQ or classic)</td>
+</tr>
 <tr>
 <td><code>PENTEST_AI_ENDPOINT</code> (secret)</td>
 <td>optional</td>
@@ -2167,6 +2179,19 @@ ingested context as a single user message with a system prompt instructing the
 model to return <code>{ "findings": [...] }</code>, then parses <code>.content[0].text</code>. Set
 <code>PENTEST_AI_MODEL</code> / <code>PENTEST_AI_API_VERSION</code> repository variables to override the
 defaults.</p>
+<p>To read a report, download it (<code>gh run download</code> unpacks the artifact ZIP; from
+the browser, unzip it first) and decrypt it with age 1.3.0 or later:</p>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span><span class="s2">&quot;report-RUN_ID&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span><span class="s2">&quot;report-RUN_ID&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>gh<span class="w"> </span>run<span class="w"> </span>download<span class="w"> </span>RUN_ID<span class="w"> </span>-R<span class="w"> </span>JanssenProject/jans<span class="w"> </span>-n<span class="w"> </span>pentest-report<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>age<span class="w"> </span>-d<span class="w"> </span>-i<span class="w"> </span>../key.txt<span class="w"> </span>pentest-report.tar.gz.age<span class="w"> </span><span class="p">|</span><span class="w"> </span>tar<span class="w"> </span>xz
+</code></pre></div>
+<p>Create the key with <code>age-keygen -pq -o key.txt</code> (post-quantum hybrid, also age
+1.3.0+; CI pins 1.3.2); store the whole file as <code>PENTEST_AGE_KEY</code> and keep a copy
+with the security team. AIO startup output goes to <code>startup.log</code> inside the
+encrypted <code>pentest-aio-logs-*</code> artifact, not the run log.</p>
+<p>If a backend uploaded raw output that cannot be downloaded or decrypted, a
+release run fails; a manual run warns and reports the remaining backend. A
+backend with no scanner output uploads nothing and is not counted.</p>
 
 
   <nav class="md-tags" >
@@ -2209,7 +2234,7 @@ defaults.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    November 18, 2026
+    November 19, 2026
   </span>
 
     
