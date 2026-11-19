@@ -147,7 +147,7 @@ public class ScimClient<T> extends AbstractScimClient<T> {
         } finally {
             response.close();
         }
-		logger.debug("Got token: " + access_token);
+		logger.debug("Got access token");
 		
     }
 
