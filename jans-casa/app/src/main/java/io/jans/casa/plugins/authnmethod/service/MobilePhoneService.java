@@ -40,7 +40,11 @@ abstract public class MobilePhoneService extends BaseService {
 
         boolean success = false;
         try {
-            List<VerifiedMobile> vphones = new ArrayList<>(mobiles);
+            PersonMobile person = persistenceService.get(PersonMobile.class, persistenceService.getPersonDn(userId));
+            //A stale list must not bring back phones removed in the meantime
+            List<String> current = Utils.nonNullList(person.getMobile());
+            List<VerifiedMobile> vphones = mobiles.stream().filter(ph -> current.contains(ph.getNumber()))
+                    .collect(Collectors.toList());
             if (newPhone != null) {
                 vphones.add(newPhone);
             }
@@ -49,7 +53,6 @@ abstract public class MobilePhoneService extends BaseService {
             String json = numbers.size() > 0 ? mapper.writeValueAsString(Collections.singletonMap("phones", vphones)) : null;
 
             logger.debug("Updating phones for user '{}'", userId);
-            PersonMobile person = persistenceService.get(PersonMobile.class, persistenceService.getPersonDn(userId));
             person.setMobileDevices(json);
             person.setMobile(numbers);
 

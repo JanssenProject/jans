@@ -7,27 +7,11 @@ use super::{
     PartitionResult,
     schema::{EntityRefAttrSrc, EntityRefSetSrc, ExpectedClaimType, TknClaimAttrSrc},
 };
-use crate::common::cedar_schema::cedar_json::attribute::Attribute;
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 use serde_json::Value;
 use smol_str::SmolStr;
 use std::{collections::HashMap, fmt::Display, str::FromStr};
 use thiserror::Error;
-
-impl Attribute {
-    pub(crate) fn kind_str(&self) -> &str {
-        match self {
-            Attribute::String => "String",
-            Attribute::Long => "Long",
-            Attribute::Boolean => "Boolean",
-            Attribute::Record { .. } => "Record",
-            Attribute::Set => "Set",
-            Attribute::Entity { .. } => "Entity",
-            Attribute::Extension => "Extension",
-            Attribute::EntityOrCommon { .. } => "EntityOrCommon",
-        }
-    }
-}
 
 impl TknClaimAttrSrc {
     pub(super) fn build_expr(

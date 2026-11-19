@@ -16,7 +16,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -37,9 +36,10 @@ public class AuditLoggingResourceTest extends AdminUIBaseTest {
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
         Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
-        assertTrue(true);
+        assertEquals(response.getStatus(), Status.OK.getStatusCode());
         log.info("\n\n Response for postAuditLoggingData -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
+        response.close();
 
     }
 

@@ -106,15 +106,31 @@ public class StrongAuthSettingsService {
     public boolean deleteTrustedDevice(String userId, List<TrustedDevice> devices, int index) {
 
         boolean updated = false;
-        List<TrustedDevice> copyOfDevices = new ArrayList<>(devices);
         try {
-            copyOfDevices.remove(index);
-            String updatedJson = Utils.stringEncrypter().encrypt(mapper.writeValueAsString(copyOfDevices));
-
+            TrustedDevice target = devices.get(index);
             PersonPreferences person = personPreferencesInstance(userId);
+
+            //Work on the persisted list so a stale page cannot bring back devices removed elsewhere
+            List<TrustedDevice> current = new ArrayList<>();
+            if (Utils.isNotEmpty(person.getTrustedDevices())) {
+                String info = Utils.stringEncrypter().decrypt(person.getTrustedDevices());
+                if (Utils.isNotEmpty(info)) {
+                    current.addAll(mapper.readValue(info, new TypeReference<List<TrustedDevice>>() { }));
+                }
+            }
+            //Remove only one entry: distinct devices may share these fields
+            for (int i = 0; i < current.size(); i++) {
+                if (sameDevice(current.get(i), target)) {
+                    current.remove(i);
+                    break;
+                }
+            }
+            String updatedJson = Utils.stringEncrypter().encrypt(mapper.writeValueAsString(current));
+
             person.setTrustedDevices(updatedJson);
             if (persistenceService.modify(person)) {
-                devices.remove(index);
+                devices.clear();
+                devices.addAll(current);
                 updated = true;
             }
         } catch (Exception e) {
@@ -122,6 +138,12 @@ public class StrongAuthSettingsService {
         }
         return updated;
 
+    }
+
+    private boolean sameDevice(TrustedDevice a, TrustedDevice b) {
+        return a.getAddedOn() == b.getAddedOn()
+                && Objects.equals(mapper.valueToTree(a.getBrowser()), mapper.valueToTree(b.getBrowser()))
+                && Objects.equals(mapper.valueToTree(a.getOs()), mapper.valueToTree(b.getOs()));
     }
 
     private PersonPreferences personPreferencesInstance(String id) {
