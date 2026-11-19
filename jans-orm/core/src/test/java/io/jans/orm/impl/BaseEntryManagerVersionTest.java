@@ -205,7 +205,7 @@ public class BaseEntryManagerVersionTest {
 	}
 
 	@Test
-	public void mergeOnCasBackendFallsBackToPlainMergeAfterRepeatedConflicts() {
+	public void mergeOnCasBackendFailsAfterRepeatedConflicts() {
 		VersioningFakeVersionEntryManager entryManager = new VersioningFakeVersionEntryManager();
 		entryManager.mergeWithVersionResult = false;
 		entryManager.storage.put("o=test", new ArrayList<>(List.of(
@@ -216,11 +216,9 @@ public class BaseEntryManagerVersionTest {
 		entry.setDn("o=test");
 		entry.setUid("changed");
 
-		entryManager.merge(entry);
-
-		assertEquals(5, entryManager.mergeWithVersionCalls);
-		assertEquals(1, entryManager.plainMergeCalls);
-		assertVersionReplace(entryManager.lastMergeModifications, 6L);
+		assertThrows(VersionMismatchException.class, () -> entryManager.merge(entry));
+		assertEquals(10, entryManager.mergeWithVersionCalls);
+		assertEquals(0, entryManager.plainMergeCalls);
 	}
 
 	private static void assertVersionReplace(List<AttributeDataModification> modifications, long expected) {

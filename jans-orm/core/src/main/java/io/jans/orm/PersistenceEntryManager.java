@@ -66,8 +66,10 @@ public interface PersistenceEntryManager extends EntityManager {
 	/**
 	 * Updates {@code entry}. For a class with a {@code @Version} field, on backends that support
 	 * {@link #updateWithVersion(Object)}, the write is conditional on the version read just before it
-	 * and retried on conflict with only the changes the first read found. After repeated conflicts it
-	 * falls back to an unconditional write, which may store a version another writer also stored.
+	 * and retried on conflict with only the changes the first read found.
+	 *
+	 * @throws io.jans.orm.exception.VersionMismatchException if the entry kept changing through every
+	 *         retry; nothing is written
 	 */
 	Void merge(Object entry);
 

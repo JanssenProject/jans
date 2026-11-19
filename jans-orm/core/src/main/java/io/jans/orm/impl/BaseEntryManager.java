@@ -86,7 +86,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private static final int ENTRY_EXPIRATION_LIMIT = 1576800000;
 
-	private static final int MERGE_VERSION_ATTEMPTS = 5;
+	private static final int MERGE_VERSION_ATTEMPTS = 10;
 
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
@@ -287,8 +287,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String versionAttributeName = null;
 		Long newVersionValue = null;
 		// Versioned entries write with a compare-and-set on the version just read, so two merges never
-		// store the same version; a conflict re-reads and re-diffs the entry. After MERGE_VERSION_ATTEMPTS
-		// conflicts the write is unconditional, trading that guarantee for not failing the merge
+		// store the same version; a conflict re-reads and re-diffs the entry, and MERGE_VERSION_ATTEMPTS
+		// conflicts fail the merge rather than write without the check
 		Set<String> intendedAttributeNames = null;
 		boolean casVersion = (versionProperty != null) && !isSchemaUpdate;
 		boolean written = false;
@@ -338,18 +338,18 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			}
 
 			VersionedMergeResult casResult = VersionedMergeResult.UNSUPPORTED;
-			if (casVersion && (attempt <= MERGE_VERSION_ATTEMPTS)) {
+			if (casVersion) {
 				casResult = tryMergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
 						versionAttributeName, currentVersionValue, newVersionValue);
-			} else if (casVersion) {
-				LOG.warn("Entry '{}' kept changing during {} versioned merge attempts, merging without version check", dnValue, MERGE_VERSION_ATTEMPTS);
 			}
 
 			if (casResult == VersionedMergeResult.UNSUPPORTED) {
 				merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
 				written = true;
-			} else {
-				written = casResult == VersionedMergeResult.WRITTEN;
+			} else if (casResult == VersionedMergeResult.WRITTEN) {
+				written = true;
+			} else if (attempt >= MERGE_VERSION_ATTEMPTS) {
+				throw new VersionMismatchException(dnValue.toString(), currentVersionValue);
 			}
 		}
 
