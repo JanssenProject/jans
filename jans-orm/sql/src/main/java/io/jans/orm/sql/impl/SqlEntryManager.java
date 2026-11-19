@@ -57,6 +57,7 @@ import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.sql.model.BatchInsert;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
@@ -245,6 +246,62 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to persist batch of %d entries", inserts.size()), ex);
         }
+    }
+
+    @Override
+    public boolean isTransactionSupported(String primaryKey) {
+        return true;
+    }
+
+    /**
+     * Runs the callback in one transaction on one pooled connection bound to the calling thread.
+     */
+    @Override
+    public <T> T executeInTransaction(String primaryKey, TransactionCallback<T> callback) {
+        try {
+            return getOperationService().executeInTransaction(callback);
+        } catch (RuntimeException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new EntryPersistenceException("Transaction failed", ex);
+        }
+    }
+
+    /**
+     * Reads the entry with {@code SELECT ... FOR UPDATE} inside the transaction bound to the calling thread.
+     */
+    @Override
+    public <T> T findForUpdate(Class<T> entryClass, Object primaryKey) {
+        if (StringHelper.isEmptyString(primaryKey)) {
+            throw new MappingException("DN to find entry is null");
+        }
+        if (!getOperationService().isInTransaction()) {
+            throw new IllegalStateException("findForUpdate requires an active transaction");
+        }
+
+        checkEntryClass(entryClass, true);
+        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+        String[] ldapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
+        String baseObjectClass = getBaseObjectClassForDataOperation(getTypeObjectClasses(entryClass));
+        String dn = primaryKey.toString();
+
+        List<AttributeData> attributes;
+        try {
+            attributes = getOperationService().lookupForUpdate(toSQLKey(dn).getKey(), baseObjectClass,
+                    toInternalAttributes(baseObjectClass, ldapReturnAttributes));
+        } catch (Exception ex) {
+            throw new EntryPersistenceException(String.format("Failed to find entry for update: '%s'", dn), ex);
+        }
+
+        if (attributes == null) {
+            return null;
+        }
+
+        Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<>();
+        entriesAttributes.put(dn, new ArrayList<>(attributes));
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, entriesAttributes);
+
+        return entries.isEmpty() ? null : entries.get(0);
     }
 
     /**
@@ -465,12 +522,23 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn, objectClasses);
-            }
+            notifyAfterRemove(dn, objectClasses);
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
         }
+    }
+
+    /*
+     * Subscribers learn about a removal only once it is durable: inside a transaction the notification
+     * waits for the commit and is dropped on rollback.
+     */
+    private void notifyAfterRemove(String dn, String[] objectClasses) {
+        final String[] removedObjectClasses = objectClasses.clone();
+        getOperationService().runAfterCommit(() -> {
+            for (DeleteNotifier subscriber : subscribers) {
+                subscriber.onAfterRemove(dn, removedObjectClasses);
+            }
+        });
     }
 
     @Override
@@ -484,9 +552,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
-            for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn, objectClasses);
-            }
+            notifyAfterRemove(dn, objectClasses);
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
         }

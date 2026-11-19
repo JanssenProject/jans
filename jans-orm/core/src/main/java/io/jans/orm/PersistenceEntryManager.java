@@ -162,6 +162,53 @@ public interface PersistenceEntryManager extends EntityManager {
 	}
 
 	/**
+	 * Reports whether {@link #executeInTransaction(String, TransactionCallback)} and
+	 * {@link #findForUpdate(Class, Object)} are supported for entries stored under {@code primaryKey}.
+	 * Only the SQL backend supports them; a hybrid entry manager returns the capability of the backend
+	 * that the DN maps to.
+	 *
+	 * @param primaryKey DN (or base DN) of the entries the transaction will read and write
+	 * @return {@code true} when transactions are supported for that DN
+	 */
+	default boolean isTransactionSupported(String primaryKey) {
+		return false;
+	}
+
+	/**
+	 * Runs {@code callback} in ONE database transaction. Every read and write this entry manager performs
+	 * on the calling thread while the callback runs joins the transaction. The transaction commits when
+	 * the callback returns normally and rolls back when it throws; the exception is rethrown unchanged
+	 * when it is a {@link RuntimeException}, otherwise it is wrapped in an
+	 * {@link io.jans.orm.exception.EntryPersistenceException}.
+	 *
+	 * <p>A nested call on the same thread joins the outer transaction (no savepoints): the outer call
+	 * decides commit or rollback. Writes that a hybrid entry manager routes to a different backend than
+	 * {@code primaryKey} are not part of the transaction.</p>
+	 *
+	 * @param primaryKey DN (or base DN) that selects the backend
+	 * @param callback unit of work
+	 * @return result of the callback
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no transactions
+	 */
+	default <T> T executeInTransaction(String primaryKey, TransactionCallback<T> callback) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Transactions are not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reads one entry and locks its row until the current transaction ends ({@code SELECT ... FOR UPDATE}).
+	 * Must be called inside {@link #executeInTransaction(String, TransactionCallback)}.
+	 *
+	 * @return the entry, or {@code null} when it does not exist
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no row locks
+	 * @throws IllegalStateException called outside a transaction
+	 */
+	default <T> T findForUpdate(Class<T> entryClass, Object primaryKey) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Row locks are not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
 	 * Reads entries by DN. Backends with a native implementation (SQL) read them in one round trip
 	 * per table; the default implementation works on every backend and reads one DN at a time, so
 	 * callers never need a capability check.

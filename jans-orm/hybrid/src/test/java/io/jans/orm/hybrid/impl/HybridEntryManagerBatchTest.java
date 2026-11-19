@@ -29,6 +29,7 @@ import java.util.Properties;
 import org.junit.jupiter.api.Test;
 
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
@@ -74,6 +75,32 @@ public class HybridEntryManagerBatchTest {
 
 		assertTrue(hybridEntryManager.isAtomicBatchSupported("uid=a,ou=people,o=jans"));
 		assertFalse(hybridEntryManager.isAtomicBatchSupported("uid=t,ou=tokens,o=jans"));
+	}
+
+	@Test
+	public void isTransactionSupportedReportsCapabilityOfResolvedDelegate() {
+		when(sqlDelegate.isTransactionSupported("uid=a,ou=people,o=jans")).thenReturn(true);
+		when(couchbaseDelegate.isTransactionSupported("uid=t,ou=tokens,o=jans")).thenReturn(false);
+
+		assertTrue(hybridEntryManager.isTransactionSupported("uid=a,ou=people,o=jans"));
+		assertFalse(hybridEntryManager.isTransactionSupported("uid=t,ou=tokens,o=jans"));
+	}
+
+	@Test
+	public void executeInTransactionDelegatesToBackendOfPrimaryKey() {
+		TransactionCallback<String> callback = () -> "x";
+		when(sqlDelegate.executeInTransaction("ou=people,o=jans", callback)).thenReturn("done");
+
+		assertEquals("done", hybridEntryManager.executeInTransaction("ou=people,o=jans", callback));
+		verify(couchbaseDelegate, never()).executeInTransaction(any(), any());
+	}
+
+	@Test
+	public void findForUpdateDelegatesToBackendOfPrimaryKey() {
+		HybridTestEntry found = entry("uid=a,ou=people,o=jans");
+		when(sqlDelegate.findForUpdate(HybridTestEntry.class, "uid=a,ou=people,o=jans")).thenReturn(found);
+
+		assertSame(found, hybridEntryManager.findForUpdate(HybridTestEntry.class, "uid=a,ou=people,o=jans"));
 	}
 
 	@Test

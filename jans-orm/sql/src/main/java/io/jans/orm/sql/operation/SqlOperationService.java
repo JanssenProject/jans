@@ -15,6 +15,7 @@ import java.util.Map;
 
 import com.querydsl.core.types.OrderSpecifier;
 
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
@@ -88,8 +89,11 @@ public interface SqlOperationService extends PersistenceOperationService {
     boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException;
 
     /**
-     * Inserts all entries in one database transaction on one pooled connection: one commit for the
-     * whole batch, or a rollback and nothing stored. Consecutive entries with the same table and
+     * Standalone (no transaction bound to the calling thread): inserts all entries in one database
+     * transaction on one pooled connection: one commit for the whole batch, or a rollback and nothing
+     * stored. Joined (inside {@link #executeInTransaction}): the entries are written on the bound
+     * connection and commit only with the owner transaction; a failure marks that transaction
+     * rollback-only, so a partial batch is never committed. Consecutive entries with the same table and
      * columns are sent as one JDBC batch. Values are converted exactly as {@link #addEntry} converts them.
      *
      * @throws DuplicateEntryException a unique key is violated (an existing DN or the same DN twice in
@@ -121,6 +125,36 @@ public interface SqlOperationService extends PersistenceOperationService {
 	Map<String, List<AttributeData>> lookupByKeys(String objectClass, Collection<String> keys, String... attributes)
 			throws SearchException, EntryConvertationException;
 
+	/**
+	 * Reads one entry by key with {@code SELECT ... FOR UPDATE}; the row stays locked until the current
+	 * transaction ends.
+	 *
+	 * @return attributes of the entry, or {@code null} when no row has the key
+	 * @throws IllegalStateException no transaction is active on the calling thread
+	 */
+	List<AttributeData> lookupForUpdate(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException;
+
+	/**
+	 * Runs {@code callback} in one transaction on one pooled connection bound to the calling thread.
+	 * The ORM operations of this service on that thread join it; {@link #getConnection()} does not (it returns
+	 * a separate pooled connection whose work is not rolled back with the transaction).
+	 * A nested call joins the outer transaction.
+	 * Commits when the callback returns, rolls back when it throws, and rethrows the callback exception.
+	 * A failed database statement, a failed joined batch or a failed nested callback marks the transaction
+	 * rollback-only: it is then rolled back and a {@link io.jans.orm.exception.operation.PersistenceException}
+	 * is thrown even when the callback caught the failure and returned normally.
+	 */
+	<T> T executeInTransaction(TransactionCallback<T> callback) throws Exception;
+
+	boolean isInTransaction();
+
+	/**
+	 * Runs {@code action} after the transaction bound to the calling thread commits, or immediately when no
+	 * transaction is active. The action is discarded when the transaction rolls back. A failing action is logged
+	 * and does not affect the committed transaction.
+	 */
+	void runAfterCommit(Runnable action);
+
     <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope,
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
@@ -147,6 +181,10 @@ public interface SqlOperationService extends PersistenceOperationService {
 
     boolean destroy();
 
+	/**
+	 * A pooled connection outside any transaction bound to the calling thread. Work done through it is
+	 * not rolled back with that transaction.
+	 */
 	Connection getConnection();
 
 	DatabaseMetaData getMetadata();
