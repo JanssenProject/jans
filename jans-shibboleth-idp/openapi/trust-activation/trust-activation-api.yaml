@@ -325,7 +325,9 @@ components:
           type: string
           format: date-time
         completed_at:
-          type: string
+          type: 
+            - string
+            - 'null'
           format: date-time
         log_entries:
           type: array

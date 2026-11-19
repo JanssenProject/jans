@@ -75,7 +75,8 @@ function showAlert(message, type, delay) {
         alertRef.removeClass();
         alertRef.addClass('alert' + cls);
 
-        alertRef.html(markupIconForType(type) + "&nbsp;" + message);
+        alertRef.html(markupIconForType(type) + "&nbsp;");
+        alertRef.append(document.createTextNode(message));
         alertRef.show();
         alertRef.delay(delay).slideUp(200, function() {});
     }
