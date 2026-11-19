@@ -46,12 +46,15 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.sql.Configuration;
 import com.querydsl.sql.RelationalPathBase;
+import com.querydsl.sql.SQLBaseListener;
+import com.querydsl.sql.SQLListenerContext;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 import com.querydsl.sql.dml.SQLDeleteClause;
 import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.exception.operation.DeleteException;
@@ -109,6 +112,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private volatile Configuration transactionConfiguration;
 
+	private final ThreadLocal<BoundTransaction> boundTransaction = new ThreadLocal<>();
+
 	private String schemaName;
 
 	private SqlAggregationQueryBuilder aggregationQueryBuilder;
@@ -137,6 +142,135 @@ public class SqlOperationServiceImpl implements SqlOperationService {
     public SqlConnectionProvider getConnectionProvider() {
         return connectionProvider;
     }
+
+	/**
+	 * Query factory of the transaction bound to the calling thread, or the pooled (autocommit) factory.
+	 */
+	protected SQLQueryFactory queryFactory() {
+		BoundTransaction transaction = boundTransaction.get();
+		if (transaction != null) {
+			return transaction.queryFactory;
+		}
+
+		return sqlQueryFactory;
+	}
+
+	@Override
+	public boolean isInTransaction() {
+		return boundTransaction.get() != null;
+	}
+
+	@Override
+	public void runAfterCommit(Runnable action) {
+		if (action == null) {
+			return;
+		}
+		BoundTransaction bound = boundTransaction.get();
+		if (bound == null) {
+			action.run();
+		} else {
+			bound.afterCommit.add(action);
+		}
+	}
+
+	private static void runAfterCommitActions(List<Runnable> actions) {
+		for (Runnable action : actions) {
+			try {
+				action.run();
+			} catch (RuntimeException ex) {
+				LOG.error("After-commit action failed", ex);
+			}
+		}
+	}
+
+	@Override
+	public <T> T executeInTransaction(TransactionCallback<T> callback) throws Exception {
+		if (callback == null) {
+			throw new InvalidArgumentException("Transaction callback is null");
+		}
+
+		BoundTransaction outer = boundTransaction.get();
+		if (outer != null) {
+			try {
+				return callback.doInTransaction();
+			} catch (Exception | Error ex) {
+				outer.rollbackOnly = true;
+				throw ex;
+			}
+		}
+
+		Connection connection;
+		try {
+			connection = connectionProvider.getConnection();
+		} catch (RuntimeException ex) {
+			throw new PersistenceException("Failed to get connection for transaction", ex);
+		}
+
+		boolean restoreAutoCommit = false;
+		boolean transactionStarted = false;
+		boolean transactionFinished = false;
+		Throwable failure = null;
+		BoundTransaction bound = null;
+		boolean committed = false;
+		try {
+			restoreAutoCommit = connection.getAutoCommit();
+			connection.setAutoCommit(false);
+			transactionStarted = true;
+
+			// Without SQLCloseListener: the clauses must not close the transaction connection
+			SQLQueryFactory transactionQueryFactory = new SQLQueryFactory(getTransactionConfiguration(), () -> connection);
+			bound = new BoundTransaction(transactionQueryFactory);
+			boundTransaction.set(bound);
+
+			T result = callback.doInTransaction();
+
+			// A failed statement aborts the transaction on some databases (PostgreSQL), whose COMMIT then rolls back silently
+			if (bound.rollbackOnly) {
+				throw new PersistenceException("Transaction is rollback-only: a database operation failed inside it");
+			}
+
+			connection.commit();
+			transactionFinished = true;
+			committed = true;
+
+			return result;
+		} catch (Exception | Error ex) {
+			failure = ex;
+			throw ex;
+		} finally {
+			boundTransaction.remove();
+			if (transactionStarted && !transactionFinished) {
+				transactionFinished = rollback(connection, failure);
+			}
+			// After a failed rollback the transaction state is unknown: leave it to the pool,
+			// setAutoCommit(true) would commit an open transaction
+			if (restoreAutoCommit && (!transactionStarted || transactionFinished)) {
+				try {
+					connection.setAutoCommit(true);
+				} catch (SQLException ex) {
+					LOG.error("Failed to restore auto commit after transaction", ex);
+				}
+			}
+			try {
+				connection.close();
+			} catch (SQLException ex) {
+				LOG.error("Failed to return connection to pool after transaction", ex);
+			}
+			if (committed) {
+				runAfterCommitActions(bound.afterCommit);
+			}
+		}
+	}
+
+	private static final class BoundTransaction {
+		private final SQLQueryFactory queryFactory;
+		private final List<Runnable> afterCommit = new ArrayList<>();
+		private boolean rollbackOnly;
+
+		private BoundTransaction(SQLQueryFactory queryFactory) {
+			this.queryFactory = queryFactory;
+		}
+	}
 
     @Override
     public boolean authenticate(String key, String password, String objectClass) throws SearchException {
@@ -200,7 +334,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
 		try {
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
+			SQLInsertClause sqlInsertQuery = queryFactory().insert(tableRelationalPath);
 
 			appendInsertValues(sqlInsertQuery, tableMapping, attributes);
 
@@ -272,6 +406,25 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	}
 
 	private void addEntriesInTransactionImpl(List<BatchInsert> inserts, List<InsertGroup> groups) throws PersistenceException {
+		if (isInTransaction()) {
+			// Join the transaction bound to this thread: its owner commits or rolls back
+			InsertGroup currentGroup = null;
+			try {
+				for (InsertGroup group : groups) {
+					currentGroup = group;
+					executeInsertGroup(queryFactory(), inserts, group);
+				}
+			} catch (Exception ex) {
+				// Earlier groups stay written on this connection: the owner must not commit a partial batch
+				boundTransaction.get().rollbackOnly = true;
+				int fromIndex = currentGroup == null ? 0 : currentGroup.fromIndex;
+				int toIndex = currentGroup == null ? inserts.size() - 1 : currentGroup.toIndex;
+
+				throw SqlBatchExceptionMapper.map(ex, inserts, fromIndex, toIndex);
+			}
+			return;
+		}
+
 		Connection connection;
 		try {
 			connection = connectionProvider.getConnection();
@@ -293,21 +446,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			SQLQueryFactory transactionQueryFactory = new SQLQueryFactory(getTransactionConfiguration(), () -> connection);
 			for (InsertGroup group : groups) {
 				currentGroup = group;
-
-				RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(group.tableMapping);
-				SQLInsertClause sqlInsertQuery = transactionQueryFactory.insert(tableRelationalPath);
-				for (int i = group.fromIndex; i <= group.toIndex; i++) {
-					appendInsertValues(sqlInsertQuery, group.tableMapping, inserts.get(i).getAttributes());
-					sqlInsertQuery.addBatch();
-				}
-
-				long rowsInserted = sqlInsertQuery.execute();
-				int expectedRows = group.toIndex - group.fromIndex + 1;
-				// Negative sum: the driver reports Statement.SUCCESS_NO_INFO for batch rows
-				if ((rowsInserted >= 0) && (rowsInserted != expectedRows)) {
-					throw new PersistenceException(String.format("Failed to add batch entries %d..%d: %d rows inserted instead of %d",
-							group.fromIndex, group.toIndex, rowsInserted, expectedRows));
-				}
+				executeInsertGroup(transactionQueryFactory, inserts, group);
 			}
 
 			currentGroup = null;
@@ -343,12 +482,29 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 	}
 
+	private void executeInsertGroup(SQLQueryFactory factory, List<BatchInsert> inserts, InsertGroup group) throws PersistenceException {
+		RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(group.tableMapping);
+		SQLInsertClause sqlInsertQuery = factory.insert(tableRelationalPath);
+		for (int i = group.fromIndex; i <= group.toIndex; i++) {
+			appendInsertValues(sqlInsertQuery, group.tableMapping, inserts.get(i).getAttributes());
+			sqlInsertQuery.addBatch();
+		}
+
+		long rowsInserted = sqlInsertQuery.execute();
+		int expectedRows = group.toIndex - group.fromIndex + 1;
+		// Negative sum: the driver reports Statement.SUCCESS_NO_INFO for batch rows
+		if ((rowsInserted >= 0) && (rowsInserted != expectedRows)) {
+			throw new PersistenceException(String.format("Failed to add batch entries %d..%d: %d rows inserted instead of %d",
+					group.fromIndex, group.toIndex, rowsInserted, expectedRows));
+		}
+	}
+
 	private boolean rollback(Connection connection, Throwable failure) {
 		try {
 			connection.rollback();
 			return true;
 		} catch (SQLException ex) {
-			LOG.error("Failed to roll back batch insert transaction", ex);
+			LOG.error("Failed to roll back transaction", ex);
 			if (failure != null) {
 				failure.addSuppressed(ex);
 			}
@@ -389,6 +545,15 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		Configuration configuration = this.transactionConfiguration;
 		if (configuration == null) {
 			configuration = new Configuration(connectionProvider.getSqlTemplates());
+			configuration.addListener(new SQLBaseListener() {
+				@Override
+				public void exception(SQLListenerContext context) {
+					BoundTransaction bound = boundTransaction.get();
+					if (bound != null) {
+						bound.rollbackOnly = true;
+					}
+				}
+			});
 			this.transactionConfiguration = configuration;
 		}
 
@@ -480,7 +645,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			List<AttributeDataModification> mods) throws PersistenceException {
 		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
-		SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
+		SQLUpdateClause sqlUpdateQuery = queryFactory().update(tableRelationalPath);
 
 		for (AttributeDataModification attributeMod : mods) {
 			AttributeData attribute = attributeMod.getAttribute();
@@ -532,7 +697,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private boolean deleteImpl(TableMapping tableMapping, String key) throws EntryNotFoundException {
 		try {
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLDeleteClause sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath);
+			SQLDeleteClause sqlDeleteQuery = queryFactory().delete(tableRelationalPath);
 
 			Predicate exp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID), Expressions.constant(key));
 			sqlDeleteQuery.where(exp);
@@ -570,13 +735,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 				// Inner query
 				RelationalPathBase<Object> innerTableRelationalPath = new RelationalPathBase<>(Object.class, DOC_INNER_ALIAS, this.schemaName, tableMapping.getTableName());
-				SubQueryExpression<String> sqlSelectQuery = this.sqlQueryFactory.select(Expressions.path(String.class, docInnerAlias, DOC_ID)).from(innerTableRelationalPath)
+				SubQueryExpression<String> sqlSelectQuery = queryFactory().select(Expressions.path(String.class, docInnerAlias, DOC_ID)).from(innerTableRelationalPath)
 						.where(exp).limit(count);
 
 				Predicate deleteExp = ExpressionUtils.in(Expressions.stringPath(DOC_ID), sqlSelectQuery);
-				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(deleteExp);
+				sqlDeleteQuery = queryFactory().delete(tableRelationalPath).where(deleteExp);
 			} else {
-				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(exp);
+				sqlDeleteQuery = queryFactory().delete(tableRelationalPath).where(exp);
 				if (count > 0) {
 					sqlDeleteQuery = sqlDeleteQuery.limit(count);
 	            }
@@ -631,7 +796,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			validateSelectAttributes(tableMapping, attributes);
 			Expression<?> attributesExp = buildSelectAttributes(attributes);
 
-			SQLQuery<?> sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath)
+			SQLQuery<?> sqlSelectQuery = queryFactory().select(attributesExp).from(tableRelationalPath)
 					.where(whereExp).limit(1);
 			
 			try (ResultSet resultSet = sqlSelectQuery.getResults();) {
@@ -645,6 +810,40 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 
 		throw new SearchException(String.format("Failed to lookup entry by key: '%s'", key));
+	}
+
+	@Override
+	public List<AttributeData> lookupForUpdate(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException {
+		if (!isInTransaction()) {
+			throw new IllegalStateException("SELECT ... FOR UPDATE requires an active transaction");
+		}
+
+		Instant startTime = OperationDurationUtil.instance().now();
+
+		TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+		List<AttributeData> result;
+		try {
+			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+
+			Predicate whereExp = ExpressionUtils.eq(Expressions.stringPath(SqlOperationService.DOC_ID),
+					Expressions.constant(key));
+			validateSelectAttributes(tableMapping, attributes);
+			Expression<?> attributesExp = buildSelectAttributes(attributes);
+
+			SQLQuery<?> sqlSelectQuery = queryFactory().select(attributesExp).from(tableRelationalPath)
+					.where(whereExp).limit(1).forUpdate();
+
+			try (ResultSet resultSet = sqlSelectQuery.getResults();) {
+				result = getAttributeDataList(tableMapping, resultSet, true);
+			}
+		} catch (SQLException | QueryException ex) {
+			throw new SearchException(String.format("Failed to lookup for update by key: '%s'", key), ex);
+		}
+
+		Duration duration = OperationDurationUtil.instance().duration(startTime);
+		OperationDurationUtil.instance().logDebug("SQL operation: lookup_for_update, duration: {}, table: {}, key: {}", duration, tableMapping.getTableName(), key);
+
+		return result;
 	}
 
 	@Override
@@ -683,7 +882,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			Predicate whereExp = ExpressionUtils.in(Expressions.stringPath(SqlOperationService.DOC_ID), chunkKeys);
 
 			try {
-				SQLQuery<?> sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+				SQLQuery<?> sqlSelectQuery = queryFactory().select(attributesExp).from(tableRelationalPath).where(whereExp);
 				try (ResultSet resultSet = sqlSelectQuery.getResults()) {
 					while (resultSet.next()) {
 						String docId = resultSet.getString(SqlOperationService.DOC_ID);
@@ -821,10 +1020,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
     		SQLQuery<?> sqlCountSelectQuery;
     		if (expression == null) {
-    			sqlCountSelectQuery = sqlQueryFactory.select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL")).from(tableRelationalPath);
+    			sqlCountSelectQuery = queryFactory().select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL")).from(tableRelationalPath);
     		} else {
     			Predicate whereExp = (Predicate) expression.expression();
-    			sqlCountSelectQuery = sqlQueryFactory.select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL")).from(tableRelationalPath).where(whereExp);
+    			sqlCountSelectQuery = queryFactory().select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL")).from(tableRelationalPath).where(whereExp);
     		}
 
     		try {
@@ -879,7 +1078,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		// Count of groups first: SQLQuery is mutable, so the count subquery must never
 		// be derived from the row query after limit/offset are applied
 		if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
-			SQLQuery<?> innerQuery = sqlQueryFactory.select(queryParts.selectExpression()).from(tableRelationalPath);
+			SQLQuery<?> innerQuery = queryFactory().select(queryParts.selectExpression()).from(tableRelationalPath);
 			if (whereExp != null) {
 				innerQuery = innerQuery.where(whereExp);
 			}
@@ -890,7 +1089,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			}
 
 			// Flat COUNT(*) over a grouped query returns per-group counts; wrap in a derived table instead
-			SQLQuery<?> countQuery = sqlQueryFactory.select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL"))
+			SQLQuery<?> countQuery = queryFactory().select(Expressions.as(ExpressionUtils.count(Wildcard.all), "TOTAL"))
 					.from(innerQuery, docInnerAlias);
 
 			try {
@@ -912,7 +1111,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 
 		if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
-			SQLQuery<?> query = sqlQueryFactory.select(queryParts.selectExpression()).from(tableRelationalPath);
+			SQLQuery<?> query = queryFactory().select(queryParts.selectExpression()).from(tableRelationalPath);
 			if (whereExp != null) {
 				query = query.where(whereExp);
 			}
@@ -1235,10 +1434,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			ConvertedExpression expression, OrderSpecifier<?>[] orderBy) {
 		SQLQuery<?> sqlSelectQuery;
 		if (expression == null) {
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath);
+			sqlSelectQuery = queryFactory().select(attributesExp).from(tableRelationalPath);
 		} else {
 			Predicate whereExp = (Predicate) expression.expression();
-			sqlSelectQuery = sqlQueryFactory.select(attributesExp).from(tableRelationalPath).where(whereExp);
+			sqlSelectQuery = queryFactory().select(attributesExp).from(tableRelationalPath).where(whereExp);
 		}
 
 		if (orderBy != null) {
