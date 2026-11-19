@@ -169,6 +169,10 @@ public class AssetService {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
+        if (documentStream != null && validateAssetMgtConfiguration()) {
+            throw new InvalidAttributeException("Asset server upload is disabled!!!");
+        }
+
         // validation
         validateModules(asset);
         validateAssetMetadata(asset);
@@ -210,6 +214,11 @@ public class AssetService {
             dbDocumentService.addDocument(asset);
         } else {
             log.info("Inum is not blank hence update existing asset with inum :{}", inum);
+            Document existingAsset = getAssetByInum(inum);
+            if (existingAsset == null) {
+                throw new InvalidAttributeException("Asset with inum '" + inum + "' does not exist!!!");
+            }
+            asset.setDn(existingAsset.getDn());
             dbDocumentService.updateDocument(asset);
         }
 
@@ -335,6 +344,8 @@ public class AssetService {
         return readDocumentAsStream(asset.getFileName(), asset.getDocument());
 
     }
+    
+    /* Helper methods */
 
     private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
@@ -577,6 +588,12 @@ public class AssetService {
             return null;
         }
         return new ByteArrayInputStream(assetContent.getBytes());
+    }
+    
+    private boolean validateAssetMgtConfiguration() {        
+        log.debug("AssetMgtConfiguration():{}", this.getAssetMgtConfiguration());
+        return (this.getAssetMgtConfiguration() == null
+                || !this.getAssetMgtConfiguration().isAssetServerUploadEnabled());
     }
 
 }
