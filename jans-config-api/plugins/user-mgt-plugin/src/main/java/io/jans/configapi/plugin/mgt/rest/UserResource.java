@@ -17,6 +17,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
+import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import io.jans.util.exception.InvalidAttributeException;
@@ -307,6 +308,7 @@ public class UserResource extends BaseResource {
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Conflict"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -328,6 +330,11 @@ public class UserResource extends BaseResource {
             User existingUser = StringUtils.isBlank(userInum) ? null : userMgmtSrv.getUserBasedOnInum(userInum);
             checkResourceNotNull(existingUser, USER);
             user.setDn(existingUser.getDn());
+            // no status in the request keeps the stored one, so a PUT cannot lift a lock by omission
+            boolean keepStoredStatus = customUser.getStatus() == null;
+            if (keepStoredStatus) {
+                user.setStatus(existingUser.getStatus());
+            }
 
             // validate user role-permission
             validateUserPermission(null, user);
@@ -346,7 +353,8 @@ public class UserResource extends BaseResource {
 
             logger.info("Call update user:{}", user);
 
-            user = userMgmtSrv.updateUser(user);
+            user = userMgmtSrv.updateUser(user, existingUser, canChangeAdminUIRole(), keepStoredStatus);
+            checkResourceNotNull(user, USER);
             logger.info("Updated user:{}", user);
 
             // excludedAttributes
@@ -397,6 +405,7 @@ public class UserResource extends BaseResource {
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "409", description = "Conflict"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -921,6 +930,13 @@ public class UserResource extends BaseResource {
     private void handleException(Exception ex, String errorCode) {
         if (ex instanceof WebApplicationException) {
             throw (WebApplicationException) ex;
+        }
+        if (ex instanceof VersionMismatchException) {
+            logger.error("{} - {}", errorCode, ex.getMessage());
+            ApiError error = new ApiError.ErrorBuilder()
+                    .withCode(String.valueOf(Response.Status.CONFLICT.getStatusCode()))
+                    .withMessage("User was modified concurrently, retry the request").build();
+            throw new ClientErrorException(Response.status(Response.Status.CONFLICT).entity(error).build());
         }
         if (ex instanceof ApiApplicationException || ex instanceof InvalidAttributeException) {
             logger.error("{} - {}", errorCode, ex.getMessage(), ex);
