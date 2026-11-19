@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 func TestSimpleCreate(t *testing.T) {
@@ -42,7 +43,7 @@ func TestSimpleCreate(t *testing.T) {
 			strings.HasSuffix(attr, "Localized")
 	}, cmp.Ignore())
 
-	if diff := cmp.Diff(&newClient, createdClient, filter); diff != "" {
+	if diff := cmp.Diff(&newClient, createdClient, filter, cmpopts.IgnoreUnexported(OidcClient{})); diff != "" {
 		t.Errorf("Got different configuration after create: %s", diff)
 	}
 
@@ -202,7 +203,7 @@ func TestOIDCClient(t *testing.T) {
 			strings.HasSuffix(attr, "Localized")
 	}, cmp.Ignore())
 
-	if diff := cmp.Diff(&newClient, createdClient, filter); diff != "" {
+	if diff := cmp.Diff(&newClient, createdClient, filter, cmpopts.IgnoreUnexported(OidcClient{})); diff != "" {
 		t.Errorf("Got different configuration after create: %s", diff)
 	}
 
@@ -212,7 +213,7 @@ func TestOIDCClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(updatedClient, createdClient); diff != "" {
+	if diff := cmp.Diff(updatedClient, createdClient, cmpopts.IgnoreUnexported(OidcClient{})); diff != "" {
 		t.Errorf("Got different configuration after update: %s", diff)
 	}
 

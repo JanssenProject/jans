@@ -119,8 +119,8 @@ public class PostgresMessageConfiguration implements Serializable {
 	@Override
 	public String toString() {
 		return "PostgresMessageConfiguration [driverClassName=" + driverClassName + ", dbSchemaName=" + dbSchemaName
-				+ ", connectionUri=" + connectionUri + ", authUserName=" + authUserName + ", authUserPassword="
-				+ authUserPassword + ", connectionPoolMaxTotal=" + connectionPoolMaxTotal + ", connectionPoolMaxIdle="
+				+ ", connectionUri=" + connectionUri + ", authUserName=" + authUserName
+				+ ", connectionPoolMaxTotal=" + connectionPoolMaxTotal + ", connectionPoolMaxIdle="
 				+ connectionPoolMaxIdle + ", connectionPoolMinIdle=" + connectionPoolMinIdle + ", messageWaitMillis="
 				+ messageWaitMillis + ", messageSleepThreadTime=" + messageSleepThreadTime + "]";
 	}

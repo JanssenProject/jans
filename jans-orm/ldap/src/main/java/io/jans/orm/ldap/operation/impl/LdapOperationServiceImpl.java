@@ -363,6 +363,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
                     lastResult = getEntryDataList(searchResult);
 	    			lastCountRows = lastResult.size();
+	    			resultCount += lastCountRows;
 
                     collectSearchResult = true;
                     if (batchOperation != null) {
@@ -620,9 +621,29 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         boolean result = addEntryImpl(dn, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: add, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
+        OperationDurationUtil.instance().logDebug("LDAP operation: add, duration: {}, dn: {}, attributes: {}", duration, dn, getAttributeNames(attributes));
         
         return result;
+    }
+
+    private static List<String> getAttributeNames(Collection<Attribute> attributes) {
+        List<String> names = new ArrayList<String>();
+        if (attributes != null) {
+            for (Attribute attribute : attributes) {
+                names.add(attribute.getName());
+            }
+        }
+        return names;
+    }
+
+    private static List<String> describeModifications(List<Modification> modifications) {
+        List<String> descriptions = new ArrayList<String>();
+        if (modifications != null) {
+            for (Modification modification : modifications) {
+                descriptions.add(modification.getModificationType().getName() + ":" + modification.getAttributeName());
+            }
+        }
+        return descriptions;
     }
 
     private boolean addEntryImpl(String dn, Collection<Attribute> attributes) throws DuplicateEntryException {
@@ -684,7 +705,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         boolean result = updateEntryImpl(dn, modifications);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: modify, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
+        OperationDurationUtil.instance().logDebug("LDAP operation: modify, duration: {}, dn: {}, modifications: {}", duration, dn, describeModifications(modifications));
 
         return result;
     }
@@ -706,7 +727,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         boolean result = updateEntryWithVersionImpl(dn, modifications, versionAttributeName, expectedVersionValue);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: modify_with_version, duration: {}, dn: {}, modifications: {}", duration, dn, modifications);
+        OperationDurationUtil.instance().logDebug("LDAP operation: modify_with_version, duration: {}, dn: {}, modifications: {}", duration, dn, describeModifications(modifications));
 
         return result;
     }

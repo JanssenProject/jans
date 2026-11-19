@@ -20,6 +20,7 @@ pub(super) use cache::*;
 pub(super) use error::*;
 
 use super::validation::ValidatedJwt;
+use crate::common::issuer_utils::IssClaim;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
@@ -96,6 +97,8 @@ impl StatusListJwtStr {
 #[derive(Debug, Deserialize, PartialEq)]
 pub(super) struct StatusListJwt {
     sub: String,
+    #[serde(default)]
+    iss: Option<IssClaim>,
     iat: u32,
     #[serde(default)]
     exp: Option<u64>,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import contextlib
+import io
 import os
 import tarfile
 import typing as _t
@@ -77,22 +77,17 @@ class DockerMeta(BaseMeta):
         src = os.path.basename(path)
         dirname = os.path.dirname(path)
 
-        os.chdir(dirname)
+        # build archive in memory so contents never land in a world-readable temp file
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode="w:gz") as tar:
+            tar.add(path, arcname=src)
+        payload = buf.getvalue()
 
-        with tarfile.open(src + ".tar", "w:gz") as tar:
-            tar.add(src)
+        # create directory first
+        self.exec_cmd(container, f"mkdir -p {dirname}")
 
-        with open(src + ".tar", "rb") as f:
-            payload = f.read()
-
-            # create directory first
-            self.exec_cmd(container, f"mkdir -p {dirname}")
-
-            # copy file
-            container.put_archive(os.path.dirname(path), payload)
-
-        with contextlib.suppress(FileNotFoundError):
-            os.unlink(src + ".tar")
+        # copy file
+        container.put_archive(dirname, payload)
 
     def exec_cmd(self, container: Container, cmd: str) -> _t.Any:
         """Run command inside container.

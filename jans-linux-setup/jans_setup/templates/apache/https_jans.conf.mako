@@ -40,6 +40,8 @@
 
     # Unset X-ClientCert to make sure that we not get certificate in request
     RequestHeader unset X-ClientCert
+    RequestHeader unset X-Forwarded-Client-Cert
+    RequestHeader unset X-Forwarded-Tls-Client-Cert
 
     # Turn off support for true Proxy behaviour as we are acting as a transparent proxy
     ProxyRequests Off

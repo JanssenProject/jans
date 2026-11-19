@@ -22,14 +22,14 @@ class UpdateToken(UpdateTokenType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Update token script. Initializing ..."
-        print "Update token script. Initialized successfully"
+        print "Role based Scopes Update token script. Initializing ..."
+        print "Role based Scopes Update token script. Initialized successfully"
 
         return True
 
     def destroy(self, configurationAttributes):
-        print "Update token script. Destroying ..."
-        print "Update token script. Destroyed successfully"
+        print "Role based Scopes Update token script. Destroying ..."
+        print "Role based Scopes Update token script. Destroyed successfully"
         return True
 
     def getApiVersion(self):
@@ -79,13 +79,19 @@ class UpdateToken(UpdateTokenType):
             self.validateAudience(context, jwtClaims, adminUIConfig)
             self.validateExpiration(jwtClaims)
             self.validateUserInum(jwtClaims)
-
+            userInum = jwtClaims.getClaim("inum")
+            context.putTokenAttribute("user_inum", userInum)
             jansAdminUIRoleClaim = jwtClaims.getClaim("jansAdminUIRole")
             if jansAdminUIRoleClaim is None:
                 print "Exception occured. The `jansAdminUIRole` claim is missing in user-info JWT."
                 raise BadRequestException("Exception occured. The `jansAdminUIRole` claim is missing in user-info JWT.")
 
             jansAdminUIRole = list(jansAdminUIRoleClaim)
+            roles = []
+            for role in jansAdminUIRole:
+                roles.append(str(role))
+            jansAdminUIRoleStr = ",".join(roles)
+            context.putTokenAttribute("user_role", jansAdminUIRoleStr)
             scopes = self.resolveScopes(context, adminUIConfig, jansAdminUIRole, scopes)
 
             print "Following scopes will be added in api token: {}".format(scopes)

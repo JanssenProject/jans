@@ -104,4 +104,7 @@ class AdminUiPlugin:
                     port = 80
 
         # download the cert (if possible)
-        get_server_certificate(host, port, cert_file)
+        get_server_certificate(
+            host, port, cert_file,
+            fingerprint=os.environ.get("CN_TOKEN_SERVER_CERT_FINGERPRINT", ""),
+        )

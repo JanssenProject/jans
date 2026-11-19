@@ -81,9 +81,9 @@ class JansLabelContainer:
             line_width += len(entry[1]) + 2
 
             if i == self.selected_entry:
-                result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format("white", "darkgrey", entry[1])))
+                result.append(HTML('<style fg="white" bg="darkgrey">{}</style>').format(entry[1]))
             else:
-                result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format("black", "lightgrey", entry[1])))
+                result.append(HTML('<style fg="black" bg="lightgrey">{}</style>').format(entry[1]))
             result.append('  ')
 
         if line_count > self.body.height:

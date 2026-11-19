@@ -195,6 +195,9 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
     }
 
     public void updateAttribute(JansAttribute attribute) {
+        if (StringHelper.isEmpty(attribute.getInum()) || !getDnForAttribute(attribute.getInum()).equalsIgnoreCase(attribute.getDn())) {
+            throw new IllegalArgumentException("Attribute DN does not match its inum");
+        }
         persistenceEntryManager.merge(attribute);
     }
 

@@ -58,7 +58,18 @@ public class UmaSecureInterceptor {
                 response = (HttpServletResponse)parameter;
         }
         
-    	InterceptSecure is = securityExtension.getInterceptSecure(ctx.getMethod());
+        // UMA scope validation is not implemented, so deny instead of silently allowing
+        UmaSecure umaSecure = ctx.getMethod().getAnnotation(UmaSecure.class);
+        if (umaSecure == null) {
+            umaSecure = ctx.getMethod().getDeclaringClass().getAnnotation(UmaSecure.class);
+        }
+        if ((umaSecure != null) && !umaSecure.scope().trim().isEmpty()) {
+            log.error("UMA scope '{}' enforcement is not supported for method: '{}'", umaSecure.scope(), ctx.getMethod());
+            throw new SecurityEvaluationException();
+        }
+
+    	Class<?> targetClass = (ctx.getTarget() == null) ? ctx.getMethod().getDeclaringClass() : ctx.getTarget().getClass();
+    	InterceptSecure is = securityExtension.getInterceptSecure(targetClass, ctx.getMethod());
 
         // SecurityChecking  restrictions
         Secure[] constraints = (is == null) ? new Secure[0] : is.value();

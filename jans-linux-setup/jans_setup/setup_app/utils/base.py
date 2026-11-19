@@ -13,7 +13,6 @@ import traceback
 import re
 import shutil
 import multiprocessing
-import ssl
 import tempfile
 import urllib.request
 import secrets
@@ -21,9 +20,6 @@ import secrets
 from pathlib import Path
 from collections import OrderedDict
 from urllib.error import URLError
-
-# disable ssl certificate check
-ssl._create_default_https_context = ssl._create_unverified_context
 
 from setup_app import paths
 from setup_app import static
@@ -234,10 +230,23 @@ def check_os_supported():
     return os_type + ' '+ os_version in get_os_package_list()
 
 
+SECRET_LOG_PATTERNS = (
+    re.compile(r"((?:^|\s)['\"]?-(?:storepass|keypass|srcstorepass|deststorepass|srckeypass|destkeypass|keypasswd|passout|passin|password)['\"]?[\s,]+)(\"[^\"]*\"|'[^']*'|[^\s,\]]+)", re.IGNORECASE),
+    re.compile(r"((?:^|\s)-p)('[^']*'|\"[^\"]*\")"),
+    re.compile(r"((?:IDENTIFIED\s+BY|PASSWORD)\s+)('[^']*'|\"[^\"]*\")", re.IGNORECASE),
+    )
+
+def redact_secrets(text):
+    for pattern in SECRET_LOG_PATTERNS:
+        text = pattern.sub(r'\1[REDACTED]', text)
+    return text
+
 def logIt(msg, errorLog=False, fatal=False):
     log_fn = paths.LOG_ERROR_FILE if errorLog else paths.LOG_FILE
-    with open(log_fn, 'a') as w:
-        w.write('{} {}\n'.format(time.strftime('%X %x'), msg))
+    fd = os.open(log_fn, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    os.fchmod(fd, 0o600)
+    with os.fdopen(fd, 'a') as w:
+        w.write('{} {}\n'.format(time.strftime('%X %x'), redact_secrets(str(msg))))
         if errorLog and 'NoneType: None' not in traceback.format_exc():
              w.write('{} {}\n'.format(time.strftime('%X %x'), traceback.format_exc()))
 
@@ -448,6 +457,13 @@ def extract_file(zip_file, source, target, ren=False):
     return fn
 
 
+def safe_extract_path(extract_dir, *parts):
+    root = Path(extract_dir).resolve()
+    target = root.joinpath(*parts).resolve()
+    if target != root and root not in target.parents:
+        raise ValueError(f"Archive member {'/'.join(parts)} escapes {extract_dir}")
+    return target
+
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
     zipobj = zipfile.ZipFile(zip_file, "r")
     parent_dir = zipobj.namelist()[0]
@@ -468,7 +484,7 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
         if member.filename.startswith(parent_sub_dir):
             p = Path(member.filename)
             pr = p.relative_to(parent_sub_dir)
-            target_fn = target_dir_path.joinpath(pr)
+            target_fn = safe_extract_path(target_dir_path, *pr.parts)
             if member.is_dir():
                 if not target_fn.exists():
                     target_fn.mkdir(parents=True)
@@ -506,7 +522,7 @@ def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
         for info in info_list:
             fpath = Path(info.filename)
             n = 0 if with_par_dir else 1
-            out_path = os.path.join(extract_dir, *fpath.parts[n:])
+            out_path = safe_extract_path(extract_dir, *fpath.parts[n:]).as_posix()
 
             if info.is_dir():
                 if not os.path.exists(out_path):
@@ -515,8 +531,9 @@ def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
                 with open(out_path, 'wb') as w:
                     w.write(zip_file.read(info))
 
-            perm = info.external_attr >> 16
-            os.chmod(out_path, perm)
+            perm = (info.external_attr >> 16) & 0o777
+            if perm:
+                os.chmod(out_path, perm)
 
 app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
 current_app.app_info = readJsonFile(app_info_fn)

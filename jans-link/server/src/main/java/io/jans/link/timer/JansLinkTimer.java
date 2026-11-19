@@ -25,6 +25,7 @@ import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
@@ -151,7 +152,6 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 	public void processInt() {
 		AppConfiguration currentConfiguration = getConfigurationFactory().getAppConfiguration();
 		try {
-			currentConfiguration.setServerIpAddress("255.255.255.255");
 			if (!isStartLink(currentConfiguration)) {
 				log.info("Starting conditions aren't reached");
 				return;
@@ -210,8 +210,8 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		}
 
 		if (!linkServer) {
-			linkServer = externalLinkService.executeExternalIsStartProcessMethods();
-			linkServer = true;
+			// Without interception scripts every node may run; otherwise the scripts decide
+			linkServer = externalLinkService.executeExternalIsStartProcessMethods() || !externalLinkService.isEnabled();
 		}
 
 		if (!linkServer) {
@@ -533,6 +533,12 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 				}else {
 					//other ORM
+					// Credentials are keyed by person inum and must be gone before the person is removed
+					if (StringHelper.isNotEmpty(inum)) {
+						Filter equalityFido2DeviceFilter = Filter.createEqualityFilter("personInum", inum);
+						targetPersistenceEntryManager.remove(fido2DeviceService.getDnForFido2Device(null, inum), Fido2RegistrationEntry.class, equalityFido2DeviceFilter,0);
+					}
+
 					targetPersistenceEntryManager.remove(removedPerson.getDn(), GluuCustomPerson.class);
 
 					Filter pairwiseIdentifiersFilter = Filter.createEqualityFilter(JansConstants.oxAuthUserId, removedPerson.getDn());
@@ -540,9 +546,6 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 
 					Filter equalityFilter = Filter.createEqualityFilter("personInum", removedPerson.getDn());
 					targetPersistenceEntryManager.remove(fidoDeviceService.getDnForFidoDevice(removedPerson.getDn(),null), GluuCustomFidoDevice.class, equalityFilter,0);
-
-					Filter equalityFido2DeviceFilter = Filter.createEqualityFilter("personInum", removedPerson.getDn());
-					targetPersistenceEntryManager.remove(fido2DeviceService.getDnForFido2Device(null, removedPerson.getDn()), GluuFido2Device.class, equalityFido2DeviceFilter,0);
 				}
 				result1.add(inum);
 			} catch (BasePersistenceException ex) {
@@ -689,7 +692,8 @@ public class JansLinkTimer extends BaseJansLinkTimer {
 		currentConfiguration.setLastUpdate(currentDateTime);
 		currentConfiguration.setLastUpdateCount(currentConfiguration.getLastUpdateCount());
 		currentConfiguration.setProblemCount(currentConfiguration.getProblemCount());
-		linkConfigurationService.updateConfiguration(currentConfiguration);
+		linkConfigurationService.updateStatus(currentDateTime, currentConfiguration.getLastUpdateCount(),
+				currentConfiguration.getProblemCount());
 	}
 
 	public ConfigurationFactory getConfigurationFactory() {

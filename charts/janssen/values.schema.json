@@ -461,7 +461,15 @@
                                     "type": "boolean"
                                 },
                                 "lockAuditEnabled": {
-                                    "description": "Enable endpoints /io.jans.lock.audit.AuditService, /io.jans.lock.trace.TraceService and /io.jans.lock.trace.TraceAdminService",
+                                    "description": "Enable Lock Audit gRPC endpoint /io.jans.lock.audit.AuditService",
+                                    "type": "boolean"
+                                },
+                                "lockTraceEnabled": {
+                                    "description": "Enable Lock Trace gRPC endpoint /io.jans.lock.trace.TraceService",
+                                    "type": "boolean"
+                                },
+                                "lockTraceAdminEnabled": {
+                                    "description": "Enable Lock Trace Admin gRPC endpoint /io.jans.lock.trace.TraceAdminService",
                                     "type": "boolean"
                                 },
                                 "authzenConfigEnabled": {

@@ -53,6 +53,16 @@ public class RedirectUriTest {
     }
 
     @Test
+    public void html_forFormPostWithInjectedRedirectUri_shouldEscapeFormAction() {
+        RedirectUri redirectUri = new RedirectUri("https://example.org/cb?a=\"><script>alert(1)</script>", Collections.singletonList(ResponseType.CODE), ResponseMode.FORM_POST);
+        redirectUri.addResponseParameter(AuthorizeResponseParam.CODE, "12345");
+        final String html = redirectUri.toString();
+
+        assertFalse(html.contains("<script>"));
+        assertTrue(html.contains("action=\"https://example.org/cb?a=&quot;&gt;&lt;script&gt;"));
+    }
+
+    @Test
     public void parseQueryString_queryStringNull_EmptyResult() {
         RedirectUri redirectUri = getRedirectUriTemplateGetQueryString(null, null, null, null);
         redirectUri.parseQueryString(null);

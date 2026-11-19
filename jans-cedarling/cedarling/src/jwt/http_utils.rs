@@ -50,11 +50,7 @@ pub(super) trait GetFromUrl<T: for<'de> serde::Deserialize<'de>> {
 /// "Safe" means either `https`, or `http` pointed at a loopback address
 /// (`localhost`, `127.0.0.1`, `::1`)
 pub(super) fn require_secure_url(url: &Url) -> Result<(), HttpError> {
-    if url.scheme().eq_ignore_ascii_case("https") {
-        return Ok(());
-    }
-
-    if url.scheme().eq_ignore_ascii_case("http") && is_loopback_host(url) {
+    if crate::http::is_secure_transport(url) {
         return Ok(());
     }
 
@@ -62,15 +58,6 @@ pub(super) fn require_secure_url(url: &Url) -> Result<(), HttpError> {
         url: url.to_string(),
         scheme: url.scheme().to_string(),
     })
-}
-
-fn is_loopback_host(url: &Url) -> bool {
-    match url.host() {
-        Some(url::Host::Ipv4(addr)) => addr.is_loopback(),
-        Some(url::Host::Ipv6(addr)) => addr.is_loopback(),
-        Some(url::Host::Domain(domain)) => domain.eq_ignore_ascii_case("localhost"),
-        None => false,
-    }
 }
 
 #[derive(Deserialize, Clone)]

@@ -49,7 +49,7 @@ resource "jans_message" "example" {
 Optional:
 
 - `auth_user_name` (String) Username for authenticating.
-- `auth_user_password` (String) Password for authenticating.
+- `auth_user_password` (String, Sensitive) Password for authenticating.
 - `connection_pool_max_idle` (Number) Maximum number of idle connections.
 - `connection_pool_max_total` (Number) Maximum number of connections.
 - `connection_pool_min_idle` (Number) Minimum number of idle connections.
@@ -70,13 +70,13 @@ Optional:
 - `max_idle_connections` (Number) Maximum number of idle connections.
 - `max_retry_attempts` (Number) Maximum number of retry attempts.
 - `max_total_connections` (Number) Maximum number of connections.
-- `password` (String) Password for authenticating.
+- `password` (String, Sensitive) Password for authenticating.
 - `redis_provider_type` (String) Redis provider type.
 - `sentinel_master_group_name` (String) Sentinel master group name.
 - `servers` (String) Redis servers.
 - `so_timeout` (Number) SO timeout.
 - `ssl_key_store_file_path` (String) SSL key store file path.
-- `ssl_key_store_password` (String) SSL key store password.
+- `ssl_key_store_password` (String, Sensitive) SSL key store password.
 - `ssl_trust_store_file_path` (String) SSL trust store file path.
-- `ssl_trust_store_password` (String) SSL trust store password.
+- `ssl_trust_store_password` (String, Sensitive) SSL trust store password.
 - `use_ssl` (Boolean) Whether to use SSL.

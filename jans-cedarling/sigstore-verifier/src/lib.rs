@@ -48,7 +48,7 @@ pub(crate) mod tlog;
 pub mod trust_root;
 pub mod verifier;
 
-pub use error::SigstoreVerificationError;
+pub use error::{CertificateChainError, SigstoreVerificationError};
 pub use policy::{IdentityMatch, VerificationPolicy};
 pub use trust_root::SigstoreTrustRootRaw;
 pub use verifier::{SigstoreBlobVerifier, VerifiedSignature};

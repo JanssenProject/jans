@@ -6,7 +6,8 @@
 //! This module is responsible for Cedarling's Dynamic Client Registration (DCR) at startup.
 
 use super::{init_http_client, lock_config::Url};
-use crate::http::HttpClient;
+use crate::http::{HttpClient, is_secure_transport};
+use crate::http_utils::HttpRequestError;
 use crate::{HttpClientConfig, app_types::PdpID, http::InitializeHttpClientError};
 use serde::Deserialize;
 use serde_json::json;
@@ -42,6 +43,10 @@ pub(super) async fn register_client(
         .get_json(oidc_endpoint.0.as_str())
         .await
         .map_err(ClientRegistrationError::GetOpenidConfig)?;
+    // Checked before any request: the SSA and the client secret go to these endpoints.
+    let registration_endpoint =
+        CredentialEndpoint::new("registration_endpoint", oidc.registration_endpoint.0)?;
+    let token_endpoint = CredentialEndpoint::new("token_endpoint", oidc.token_endpoint.0)?;
 
     // Register client with SSA JWT if provided
     let mut dcr_body = json!({
@@ -63,7 +68,7 @@ pub(super) async fn register_client(
     } = client
         .post_json(|client| {
             client
-                .post(&oidc.registration_endpoint)
+                .post(registration_endpoint.0.as_str())
                 .header("Content-Type", "application/json")
                 .body(dcr_body.to_string())
         })
@@ -71,12 +76,14 @@ pub(super) async fn register_client(
         .map_err(ClientRegistrationError::RegisterLockClient)?;
 
     let source = TokenSource {
-        token_endpoint: oidc.token_endpoint,
+        token_endpoint,
         client_id,
         client_secret,
         scope,
     };
-    let access_token = request_access_token(&client, &source).await?;
+    let access_token = request_access_token(&client, &source)
+        .await
+        .map_err(ClientRegistrationError::GetAccessToken)?;
 
     Ok(ClientCredentials {
         access_token,
@@ -89,7 +96,7 @@ pub(super) async fn register_client(
 pub(super) async fn request_access_token(
     http: &HttpClient,
     source: &TokenSource,
-) -> Result<String, ClientRegistrationError> {
+) -> Result<String, HttpRequestError> {
     let form_data = [
         ("grant_type", "client_credentials"),
         ("scope", source.scope.as_str()),
@@ -97,13 +104,12 @@ pub(super) async fn request_access_token(
     let AccessToken { access_token } = http
         .post_json(|client| {
             client
-                .post(&source.token_endpoint)
+                .post(source.token_endpoint.0.as_str())
                 .basic_auth(&source.client_id, Some(&source.client_secret))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .form(&form_data)
         })
-        .await
-        .map_err(ClientRegistrationError::GetAccessToken)?;
+        .await?;
     Ok(access_token)
 }
 
@@ -117,7 +123,7 @@ pub(super) struct ClientCredentials {
 /// The registered client and the token endpoint, kept so a token can be reissued.
 #[derive(PartialEq, Clone)]
 pub(super) struct TokenSource {
-    pub(super) token_endpoint: String,
+    pub(super) token_endpoint: CredentialEndpoint,
     pub(super) client_id: String,
     pub(super) client_secret: String,
     pub(super) scope: String,
@@ -134,22 +140,53 @@ impl std::fmt::Debug for TokenSource {
     }
 }
 
+/// An endpoint the client credentials may be sent to: `https`, or `http` only to
+/// a loopback host. Checked once where it is discovered, so reissuing a token
+/// cannot send the client secret anywhere else.
+#[derive(Debug, PartialEq, Clone)]
+pub(super) struct CredentialEndpoint(url::Url);
+
+impl CredentialEndpoint {
+    pub(super) fn new(name: &'static str, url: url::Url) -> Result<Self, InsecureEndpointError> {
+        if is_secure_transport(&url) {
+            Ok(Self(url))
+        } else {
+            Err(InsecureEndpointError {
+                endpoint: name,
+                origin: url.origin().ascii_serialization(),
+            })
+        }
+    }
+}
+
+#[derive(Debug, Error, PartialEq)]
+#[error(
+    "the discovered {endpoint} on '{origin}' must use https, or http only to a loopback host, \
+     because the client credentials are sent to it"
+)]
+pub struct InsecureEndpointError {
+    pub endpoint: &'static str,
+    pub origin: String,
+}
+
 #[derive(Debug, Error)]
 pub enum ClientRegistrationError {
     #[error("failed to get openid config: {0}")]
-    GetOpenidConfig(#[source] crate::http_utils::HttpRequestError),
+    GetOpenidConfig(#[source] HttpRequestError),
+    #[error(transparent)]
+    InsecureEndpoint(#[from] InsecureEndpointError),
     #[error("failed to register lock client: {0}")]
-    RegisterLockClient(#[source] crate::http_utils::HttpRequestError),
+    RegisterLockClient(#[source] HttpRequestError),
     #[error("failed to get access token: {0}")]
-    GetAccessToken(#[source] crate::http_utils::HttpRequestError),
+    GetAccessToken(#[source] HttpRequestError),
     #[error("failed to initialize HTTP client: {0}")]
     InitializeHttpClient(#[from] InitializeHttpClientError),
 }
 
 #[derive(Debug, Deserialize)]
 struct OpenidConfig {
-    registration_endpoint: String,
-    token_endpoint: String,
+    registration_endpoint: Url,
+    token_endpoint: Url,
 }
 
 #[derive(Debug, Deserialize)]
@@ -229,6 +266,95 @@ mod tests {
         oidc_endpoint.assert();
         dcr_endpoint.assert();
         token_endpoint.assert();
+    }
+
+    /// Registers against a discovery document that publishes `registration_endpoint`
+    /// and `token_endpoint`, and expects no request after discovery.
+    async fn register_with_discovered(
+        server: &mut ServerGuard,
+        registration_endpoint: &str,
+        token_endpoint: &str,
+    ) -> ClientRegistrationError {
+        let oidc = server
+            .mock("GET", "/.well-known/openid-configuration")
+            .with_body(
+                json!({
+                    "registration_endpoint": registration_endpoint,
+                    "token_endpoint": token_endpoint,
+                })
+                .to_string(),
+            )
+            .expect(1)
+            .create();
+        let other_requests = server
+            .mock("POST", mockito::Matcher::Any)
+            .expect(0)
+            .create();
+        let oidc_url: url::Url = format!("{}/.well-known/openid-configuration", server.url())
+            .parse()
+            .expect("valid URL");
+
+        let err = register_client(
+            PdpID::new(),
+            &super::super::lock_config::Url(oidc_url),
+            Some(&"ssa".to_string()),
+            false,
+            crate::http::HttpClientConfig::default(),
+            access_token_scope(false),
+        )
+        .await
+        .expect_err("an endpoint over plain http to a remote host must be refused");
+        oidc.assert();
+        other_requests.assert();
+        err
+    }
+
+    #[tokio::test]
+    async fn insecure_registration_endpoint_is_refused_before_the_ssa_is_sent() {
+        let mut server = Server::new_async().await;
+        let token_endpoint = format!("{}/token", server.url());
+
+        let err = register_with_discovered(
+            &mut server,
+            "http://idp.example.com/register",
+            &token_endpoint,
+        )
+        .await;
+
+        assert!(
+            matches!(
+                &err,
+                ClientRegistrationError::InsecureEndpoint(InsecureEndpointError {
+                    endpoint: "registration_endpoint",
+                    origin,
+                }) if origin == "http://idp.example.com"
+            ),
+            "the http registration_endpoint is named in the error, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn insecure_token_endpoint_is_refused_before_registering() {
+        let mut server = Server::new_async().await;
+        let registration_endpoint = format!("{}/register", server.url());
+
+        let err = register_with_discovered(
+            &mut server,
+            &registration_endpoint,
+            "http://idp.example.com/token",
+        )
+        .await;
+
+        assert!(
+            matches!(
+                &err,
+                ClientRegistrationError::InsecureEndpoint(InsecureEndpointError {
+                    endpoint: "token_endpoint",
+                    origin,
+                }) if origin == "http://idp.example.com"
+            ),
+            "the http token_endpoint is refused before a client is registered, got {err:?}"
+        );
     }
 
     /// Mocks the `.well-known/openid-configuration` endpoint

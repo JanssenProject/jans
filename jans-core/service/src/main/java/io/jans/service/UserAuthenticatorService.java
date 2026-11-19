@@ -79,7 +79,9 @@ public class UserAuthenticatorService {
 		if (user.getExternalUid() != null) {
 			externalUidList.addAll(Arrays.asList(user.getExternalUid()));
 		}
-		externalUidList.add(externalUid);
+		if (!externalUidList.contains(externalUid)) {
+			externalUidList.add(externalUid);
+		}
 
 		user.setExternalUid(externalUidList.toArray(EMPTY_STRING_ARRAY));
 	}
@@ -91,7 +93,6 @@ public class UserAuthenticatorService {
 				UserAuthenticator authenticator = (UserAuthenticator) it.next();
 				if (userAuthenticator.getId().equals(authenticator.getId()) && userAuthenticator.getType().equals(authenticator.getType())) {
 					it.remove();
-					break;
 				}
 			}
 			if (userAuthenticatorList.getAuthenticators().size() == 0) {
@@ -111,7 +112,6 @@ public class UserAuthenticatorService {
 					String id = externalUid.substring(idx + 1).trim();
 					if (userAuthenticator.getId().equals(id) && userAuthenticator.getType().equals(foundType)) {
 						it.remove();
-						break;
 					}
 				}
 			}

@@ -9,6 +9,7 @@ from io.jans.model.custom.script.type.owner import ResourceOwnerPasswordCredenti
 from io.jans.as.server.service import AuthenticationService, SessionIdService
 from io.jans.as.server.security import Identity
 from io.jans.service.cdi.util import CdiUtil
+from io.jans.as.server.util import ServerUtil
 from io.jans.as.model.authorize import AuthorizeRequestParam
 from io.jans.as.model.config import Constants
 from io.jans.util import StringHelper
@@ -45,11 +46,11 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         password = context.getHttpRequest().getParameter("password")
         result = authenticationService.authenticate(username, password)
         if not result:
-            print "ROPC script. Authenticate. Could not authenticate user '%s' " % username
+            print "ROPC script. Authenticate. Could not authenticate user '%s' " % ServerUtil.sanitizeUsernameForLog(username)
             return False
 
         context.setUser(authenticationService.getAuthenticatedUser())
-        print "ROPC script. Authenticate. User '%s' authenticated successfully" % username
+        print "ROPC script. Authenticate. User '%s' authenticated successfully" % ServerUtil.sanitizeUsernameForLog(username)
         
 
         # Get cusom parameters from request
@@ -59,14 +60,14 @@ class ResourceOwnerPasswordCredentials(ResourceOwnerPasswordCredentialsType):
         customParameters = {}
         customParameters["custom1"] = customParam1Value
         customParameters["custom2"] = customParam2Value
-        print "ROPC script. Authenticate. User '%s'. Creating authenticated session with custom attributes: '%s'" % (username, customParameters)
+        print "ROPC script. Authenticate. User '%s'. Creating authenticated session with custom attributes: '%s'" % (ServerUtil.sanitizeUsernameForLog(username), customParameters)
 
         session = self.createNewAuthenticatedSession(context, customParameters)
         
         # This is needed to allow store in token entry sessionId
         authenticationService.configureEventUser(session)
 
-        print "ROPC script. Authenticate. User '%s'. Created authenticated session: '%s'" % (username, customParameters)
+        print "ROPC script. Authenticate. User '%s'. Created authenticated session: '%s'" % (ServerUtil.sanitizeUsernameForLog(username), customParameters)
 
         return True
 

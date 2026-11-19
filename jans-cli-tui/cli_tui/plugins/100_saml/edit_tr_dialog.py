@@ -17,6 +17,7 @@ from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseTyp
 
 from utils.utils import DialogUtils, common_data
 from prompt_toolkit.layout import ScrollablePane
+from prompt_toolkit.formatted_text import HTML
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
 from utils.utils import common_data
@@ -394,8 +395,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
             self.released_attributes_container.remove_label(attribute[0])
 
         dialog = self.app.get_confirm_dialog(
-            message=_(
-                "Are you sure want to delete attribute:\n {} ?".format(attribute[1])),
+            message=HTML(_("Are you sure want to delete attribute:\n {} ?")).format(attribute[1]),
             confirm_handler=do_delete_attribute
         )
 

@@ -160,6 +160,7 @@ func resourceUser() *schema.Resource {
 			},
 			"password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Optional:    true,
 				Description: "",
 			},

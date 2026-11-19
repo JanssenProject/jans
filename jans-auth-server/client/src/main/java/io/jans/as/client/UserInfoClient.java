@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import io.jans.as.client.util.ClientUtil;
 import io.jans.as.model.common.AuthorizationMethod;
 import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
@@ -40,6 +41,7 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
     private String sharedKey;
     private PrivateKey privateKey;
     private String jwksUri;
+    private SignatureAlgorithm expectedSignatureAlgorithm;
 
     /**
      * Constructs an User Info client by providing a REST url where the service is located.
@@ -130,10 +132,18 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             if (jwtParts.length == 5) {
                 byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
                 Jwe jwe = Jwe.parse(entity, privateKey, sharedSymmetricKey);
-                getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
+                if (expectedSignatureAlgorithm == null) {
+                    getResponse().getClaimMap().putAll(jwe.getClaims().toMap());
+                } else if (jwe.getSignedJWTPayload() != null && isSignatureValid(jwe.getSignedJWTPayload())) {
+                    getResponse().getClaimMap().putAll(jwe.getSignedJWTPayload().getClaims().toMap());
+                } else {
+                    LOG.error("Encrypted UserInfo response does not carry a valid nested signed JWT.");
+                }
             } else {
                 parseJwt(entity);
             }
+        } else if (expectedSignatureAlgorithm != null) {
+            LOG.error("Unsigned UserInfo response rejected, expected signature algorithm: " + expectedSignatureAlgorithm);
         } else {
             parseJson(entity);
         }
@@ -145,18 +155,25 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
             return;
         }
 
+        if (isSignatureValid(jwt)) {
+            getResponse().getClaimMap().putAll(jwt.getClaims().toMap());
+        }
+    }
+
+    private boolean isSignatureValid(Jwt jwt) throws Exception {
+        if (expectedSignatureAlgorithm != null && expectedSignatureAlgorithm != jwt.getHeader().getSignatureAlgorithm()) {
+            LOG.error("UserInfo response signature algorithm does not match expected: " + expectedSignatureAlgorithm);
+            return false;
+        }
+
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-        boolean signatureVerified = cryptoProvider.verifySignature(
+        return cryptoProvider.verifySignature(
                 jwt.getSigningInput(),
                 jwt.getEncodedSignature(),
                 jwt.getHeader().getKeyId(),
                 JwtUtil.getJSONWebKeys(jwksUri),
                 sharedKey,
                 jwt.getHeader().getSignatureAlgorithm());
-
-        if (signatureVerified) {
-            getResponse().getClaimMap().putAll(jwt.getClaims().toMap());
-        }
     }
 
     private void parseJson(String entity) {
@@ -186,5 +203,17 @@ public class UserInfoClient extends BaseClient<UserInfoRequest, UserInfoResponse
 
     public void setJwksUri(String jwksUri) {
         this.jwksUri = jwksUri;
+    }
+
+    public SignatureAlgorithm getExpectedSignatureAlgorithm() {
+        return expectedSignatureAlgorithm;
+    }
+
+    /**
+     * Registered userinfo_signed_response_alg. When set, unsigned responses and responses signed
+     * with another algorithm are rejected instead of populating the claim map.
+     */
+    public void setExpectedSignatureAlgorithm(SignatureAlgorithm expectedSignatureAlgorithm) {
+        this.expectedSignatureAlgorithm = expectedSignatureAlgorithm;
     }
 }

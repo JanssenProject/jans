@@ -129,7 +129,8 @@ func recursivePatchFromPatches(original any, updates []PatchRequest, jsonPath st
 		// see if there is a patch for this field
 		var patch *PatchRequest
 		for _, p := range updates {
-			if strings.HasPrefix(p.Path, jsonPath+jsonTag) {
+			fieldPath := jsonPath + jsonTag
+			if p.Path == fieldPath || strings.HasPrefix(p.Path, fieldPath+"/") {
 				patch = &p
 				break
 			}

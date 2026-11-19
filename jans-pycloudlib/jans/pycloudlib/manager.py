@@ -21,6 +21,7 @@ from jans.pycloudlib.secret import AwsSecret
 from jans.pycloudlib.secret import FileSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib._fs import open_private
 from jans.pycloudlib.lock import LockRecord
 
 logger = logging.getLogger(__name__)
@@ -292,7 +293,7 @@ class SecretManager(BaseConfiguration):
                 # likely bytes from a binary
                 value = decode_text(value, salt).decode("ISO-8859-1")
 
-        with open(dest, mode) as f:
+        with open_private(dest, mode) as f:
             if binary_mode:
                 # convert to bytes
                 value = value.encode("ISO-8859-1")

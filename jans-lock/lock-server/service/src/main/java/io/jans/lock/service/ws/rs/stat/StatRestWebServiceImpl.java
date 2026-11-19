@@ -1,15 +1,17 @@
 package io.jans.lock.service.ws.rs.stat;
 
-import static io.jans.as.model.util.Util.escapeLog;
+import static io.jans.lock.service.util.LogEscaper.escapeLog;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.core.cedarling.model.AuditActionType;
@@ -201,7 +203,18 @@ public class StatRestWebServiceImpl extends BaseResource implements StatRestWebS
 
         months = ServerUtil.urlDecode(months);
 
+        // Months.getMonths expands the whole range, so bound it first
+        if (StringUtils.isBlank(months) && startMonth != null && startMonth.length() == 6
+                && endMonth != null && endMonth.length() == 6
+                && ChronoUnit.MONTHS.between(Months.parse(startMonth), Months.parse(endMonth)) >= StatResponseService.MAX_MONTHS) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Too many months requested, maximum is " + StatResponseService.MAX_MONTHS);
+        }
+
         Set<String> monthList = Months.getMonths(months, startMonth, endMonth);
+
+        if (monthList.size() > StatResponseService.MAX_MONTHS) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Too many months requested, maximum is " + StatResponseService.MAX_MONTHS);
+        }
 
         if (monthList.isEmpty()) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, StatErrorResponseType.INVALID_REQUEST, "Unable to identify months. Check `month` or `start-month`/`end-month` parameter(s). It can't be blank and should be in format yyyyMM (e.g. 202012). start-month must be before end-month");

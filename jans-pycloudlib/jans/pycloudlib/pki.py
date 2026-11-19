@@ -13,6 +13,8 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 
+from jans.pycloudlib._fs import open_private
+
 
 def generate_private_key(filename: str) -> rsa.RSAPrivateKeyWithSerialization:
     """Generate private key.
@@ -26,7 +28,7 @@ def generate_private_key(filename: str) -> rsa.RSAPrivateKeyWithSerialization:
 
     alg = serialization.NoEncryption()
 
-    with open(filename, "wb") as f:
+    with open_private(filename, "wb") as f:
         f.write(private_key.private_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PrivateFormat.TraditionalOpenSSL,

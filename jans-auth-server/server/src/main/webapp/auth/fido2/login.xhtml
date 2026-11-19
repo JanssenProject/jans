@@ -12,6 +12,7 @@
 	<ui:define name="head">
 	
 		<meta name="description" content="Janssen Project" />
+		<meta name="login_hint" content="#{loginAction.loginHint}" />
 		<script src="auth/fido2/js/base64js.js" />
 		<script src="auth/fido2/js/base64url.js" />
 		<script src="auth/fido2/js/webauthn.js" />
@@ -30,7 +31,8 @@
                 var passwordField = document.getElementById("loginForm:password");
 
                 passwordField.value = "";
-                var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
+                var loginHintMeta = document.querySelector('meta[name="login_hint"]');
+                var userName = loginHintMeta ? loginHintMeta.getAttribute("content") : "";
                 if (userName) {
                     userNameField.value = userName;
                     passwordField.focus();

@@ -90,7 +90,7 @@ public class BackchannelDeviceRegistrationRestWebServiceImpl implements Backchan
         User user = null;
 
         AuthorizationGrant authorizationGrant = authorizationGrantList.getAuthorizationGrantByIdToken(idTokenHint);
-        if (authorizationGrant == null) {
+        if (authorizationGrant == null || authorizationGrant.getIdToken() == null || !authorizationGrant.getIdToken().isValid()) {
             builder = Response.status(Response.Status.BAD_REQUEST.getStatusCode()); // 400
             builder.entity(errorResponseFactory.getErrorAsJson(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID));
             return builder.build();

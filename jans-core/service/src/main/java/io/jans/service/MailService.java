@@ -76,6 +76,7 @@ public class MailService {
     private SmtpConfiguration smtpConfiguration;
 
     private long connectionTimeout = 5000;
+    private long readTimeout = 60000;
     
     private KeyStore keyStore = null;
 
@@ -190,6 +191,11 @@ public class MailService {
         Properties props = new Properties();
 
         props.put("mail.from", mailFrom);
+        // serverTrust is the admin's explicit opt-out for this relay's certificate
+        if (!smtpConfiguration.isServerTrust()) {
+            props.put("mail.smtp.ssl.checkserveridentity", "true");
+            props.put("mail.smtps.ssl.checkserveridentity", "true");
+        }
 
         SmtpConnectProtectionType smtpConnectProtect = smtpConfiguration.getConnectProtection();
 
@@ -198,8 +204,8 @@ public class MailService {
 
             props.put("mail.smtp.host", smtpConfiguration.getHost());
             props.put("mail.smtp.port", smtpConfiguration.getPort());
-            props.put("mail.smtp.connectiontimeout", this.connectionTimeout);
-            props.put("mail.smtp.timeout", this.connectionTimeout);
+            props.put("mail.smtp.connectiontimeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtp.timeout", String.valueOf(this.readTimeout));
 
             props.put("mail.smtp.socketFactory.class", "com.sun.mail.util.MailSSLSocketFactory");
             props.put("mail.smtp.socketFactory.port", smtpConfiguration.getPort());
@@ -214,8 +220,8 @@ public class MailService {
 
             props.put("mail.smtps.host", smtpConfiguration.getHost());
             props.put("mail.smtps.port", smtpConfiguration.getPort());
-            props.put("mail.smtps.connectiontimeout", this.connectionTimeout);
-            props.put("mail.smtps.timeout", this.connectionTimeout);
+            props.put("mail.smtps.connectiontimeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtps.timeout", String.valueOf(this.readTimeout));
 
             props.put("mail.smtp.socketFactory.class", "com.sun.mail.util.MailSSLSocketFactory");
             props.put("mail.smtp.socketFactory.port", smtpConfiguration.getPort());
@@ -229,8 +235,8 @@ public class MailService {
 
             props.put("mail.smtp.host", smtpConfiguration.getHost());
             props.put("mail.smtp.port", smtpConfiguration.getPort());
-            props.put("mail.smtp.connectiontimeout", this.connectionTimeout);
-            props.put("mail.smtp.timeout", this.connectionTimeout);
+            props.put("mail.smtp.connectiontimeout", String.valueOf(this.connectionTimeout));
+            props.put("mail.smtp.timeout", String.valueOf(this.readTimeout));
         }
 
         Session session = null;
@@ -286,13 +292,13 @@ public class MailService {
 
                 // Set Multipart as the message's content
                 msg.setContent(mp);
+            }
 
-                String signingAlgorithm = smtpConfiguration.getSigningAlgorithm();
-
-                if (signMessage && isReadyForSign) {
-                    MimeMultipart multiPart = createMultipartWithSignature(privateKey, x509Certificates, signingAlgorithm, msg);
-                    msg.setContent(multiPart);
-                }
+            if (signMessage && !isReadyForSign) {
+                log.warn("Signing key or certificate is not available, sending message unsigned");
+            } else if (signMessage) {
+                MimeMultipart multiPart = createMultipartWithSignature(privateKey, x509Certificates, smtpConfiguration.getSigningAlgorithm(), msg);
+                msg.setContent(multiPart);
             }
             Transport.send(msg);
         } catch (Exception ex) {

@@ -107,8 +107,9 @@ impl VerificationPolicy {
         match &self.cert_identity {
             IdentityMatch::Exact(pattern) => san == pattern,
             // An uncompilable pattern rejects rather than matching anything.
-            IdentityMatch::Regex(pattern) => regex_lite::Regex::new(pattern)
-                .is_ok_and(|re| re.is_match(san)),
+            IdentityMatch::Regex(pattern) => {
+                regex_lite::Regex::new(pattern).is_ok_and(|re| re.is_match(san))
+            },
             IdentityMatch::CompiledRegex(re) => re.is_match(san),
         }
     }

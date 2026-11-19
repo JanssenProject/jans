@@ -76,6 +76,23 @@ public class EndSessionUtilsTest {
     }
 
     @Test
+    public void createFrontChannelHtml_whenUrisHaveScriptableScheme_shouldDropThem() {
+        String html = EndSessionUtils.createFrontChannelHtml(
+                Sets.newHashSet("javascript:alert(1)"),
+                " JavaScript:alert(2)",
+                null);
+
+        assertFalse(html.contains("alert(1)"), "non-http frontchannel_logout_uri must not be rendered");
+        assertFalse(html.contains("alert(2)"), "scriptable post_logout_redirect_uri must not be rendered");
+    }
+
+    @Test
+    public void createFrontChannelHtml_whenPostLogoutUrlIsNativeScheme_shouldRenderRedirect() {
+        String html = EndSessionUtils.createFrontChannelHtml(Collections.emptySet(), "com.example.app:/logout", null);
+        assertTrue(html.contains("com.example.app:\\/logout"));
+    }
+
+    @Test
     public void appendState_whenStateAlreadyPresent_shouldNotDuplicate() {
         String out = EndSessionUtils.appendState("https://rp.example/after?state=foo", "bar");
         assertEquals(out, "https://rp.example/after?state=foo");

@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"github.com/JanssenProject/jans/jans-cedarling/bindings/cedarling_go"
+
+	"cedarling-krakend/internal/pathmatch"
 )
 
 // pluginName is the plugin name
@@ -55,32 +57,37 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 	       }
 	   }
 	*/
-	// The config variable contains all the keys you have defined in the configuration
-	// if the key doesn't exists or is not a map the plugin returns an error and the default handler
+	// KrakenD calls this only for plugins listed in "name", so the plugin is enabled here.
+	// On any configuration error deny requests rather than returning an error: the host
+	// ignores the error and keeps serving the endpoints unprotected.
 	config, ok := extra[pluginName].(map[string]interface{})
 	if !ok {
-		return h, errors.New("configuration not found")
+		return denyAll(errors.New("configuration not found")), nil
 	}
 
-	// The plugin will look for this path:
-	path, ok := config["path"].(string)
-	if !ok {
-		return h, errors.New("No path provided")
+	// Without a path the protected endpoint is unknown, so every endpoint is denied.
+	protectedPath, ok := config["path"].(string)
+	if !ok || strings.TrimSpace(protectedPath) == "" {
+		return denyAll(errors.New("no path provided")), nil
+	}
+	pattern, err := pathmatch.Parse(protectedPath)
+	if err != nil {
+		return denyAll(err), nil
 	}
 	namespace, ok := config["namespace"].(string)
-	if !ok {
-		return h, errors.New("No cedar namespace provided")
+	if !ok || strings.TrimSpace(namespace) == "" {
+		return denyPath(pattern, h, errors.New("no cedar namespace provided")), nil
 	}
 	cedarling_instance, err := cedarling_go.NewCedarlingWithEnv(nil)
 	if err != nil {
-		return h, errors.New(fmt.Sprintf("Error initializing Cedarling: %s", err))
+		return denyPath(pattern, h, fmt.Errorf("error initializing Cedarling: %s", err)), nil
 	}
-	logger.Debug(fmt.Sprintf("The plugin is now protecting %s\n", path))
+	logger.Debug(fmt.Sprintf("The plugin is now protecting %s\n", protectedPath))
 
 	customHandler := func(w http.ResponseWriter, req *http.Request) {
 
 		// If the requested path is not what we defined, continue.
-		if req.URL.Path != path {
+		if !pattern.Matches(req.URL.Path) {
 			h.ServeHTTP(w, req)
 			return
 		}
@@ -91,8 +98,12 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 			return
 		} else {
 			bearer := req.Header.Get("Authorization")
-			split_bearer := strings.Split(bearer, " ")
-			token := split_bearer[1]
+			split_bearer := strings.SplitN(bearer, " ", 2)
+			if len(split_bearer) != 2 || strings.TrimSpace(split_bearer[1]) == "" {
+				http.Error(w, "Authorization not found", http.StatusForbidden)
+				return
+			}
+			token := strings.TrimSpace(split_bearer[1])
 			action := fmt.Sprintf("%s::Action::\"%s\"", namespace, req.Method)
 			resource := createResource(req, namespace)
 			request := cedarling_go.AuthorizeMultiIssuerRequest{
@@ -122,6 +133,26 @@ func (r registerer) registerHandlers(_ context.Context, extra map[string]interfa
 		}
 	}
 	return http.HandlerFunc(customHandler), nil
+}
+
+// denyAll rejects every request; used when the plugin is configured but cannot enforce authorization.
+func denyAll(err error) http.Handler {
+	logger.Error(fmt.Sprintf("[PLUGIN: %s] %s; denying all requests", pluginName, err))
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
+	})
+}
+
+// denyPath fails closed only for the protected path, leaving unrelated endpoints served.
+func denyPath(pattern pathmatch.Pattern, h http.Handler, err error) http.Handler {
+	logger.Error(fmt.Sprintf("[PLUGIN: %s] %s; denying requests to %s", pluginName, err, pattern))
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if !pattern.Matches(req.URL.Path) {
+			h.ServeHTTP(w, req)
+			return
+		}
+		http.Error(w, "Service Unavailable", http.StatusServiceUnavailable)
+	})
 }
 
 func main() {}

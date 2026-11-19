@@ -56,9 +56,9 @@ Cedarling provides two authorization methods. Choose the one that fits your depl
 | **When to use** | You have JWT tokens from trusted IDPs and want Cedarling to validate them | Your application has already authenticated the principal and wants to pass raw entity data directly |
 | **JWT validation** | Yes — signature and status validation; `exp`/`nbf` are checked when present and required when listed in `required_claims` | No — accepts raw entity data as-is |
 | **Principal source** | None — validated tokens become entities in `context.tokens` | Supplied directly by the application |
-| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Custom auth flows, testing, service-to-service with upstream verification |
+| **Typical scenarios** | Production apps with OIDC/OAuth IDPs, federation, API gateways | Workloads and agents whose identity the host system already established, service-to-service with upstream verification, custom auth flows |
 | **Security model** | Higher — Cedarling independently verifies token authenticity | Lower — trusts the calling application |
-| **Recommended for** | Most production deployments | Prototyping, or when authentication is handled externally |
+| **Recommended for** | Most production deployments | Production deployments where authorization inputs are provided by the client application; prototyping without an IDP |
 
 ## Multi-Issuer Authorization (authorize_multi_issuer) — Recommended
 
@@ -401,7 +401,8 @@ let context = {
 
 The `authorize_unsigned` method allows making authorization decisions without JWT token verification. Use this when:
 
-- Your application has already verified the principals through other means
+- Your application has already verified the principals through other means (for example, a host
+  that assigns identities to the workloads or agents it runs)
 - You need to make authorization decisions for non-token-based scenarios
 - You're implementing custom authentication flows
 - You're testing or prototyping without an IDP
@@ -593,9 +594,9 @@ Multi-issuer batch takes `tokens` in place of `principal` — see [Multi-Issuer 
 
 ## Authorize options and TRACE context
 
-Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. A request without `options` behaves exactly as before. In a batch request, `options` applies to the whole call, not to individual items.
+Every request type (`RequestUnsigned`, `AuthorizeMultiIssuerRequest`, `BatchAuthorizeUnsignedRequest`, `BatchAuthorizeMultiIssuerRequest`) has an optional `options` field. Options carry per-call metadata that is not a Cedar input: they never take part in policy evaluation, so the decision is the same with or without them. In a batch request, `options` applies to the whole call, not to individual items.
 
-The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [TRACE properties](./cedarling-properties.md#trace-properties)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
+The only option today is `trace`, the TRACE execution context of the call. With TRACE enabled (see [Cedarling TRACE](./cedarling-trace.md)), Cedarling signs a TRACE record for each decision of a call that carries this context and sends it to Lock Server.
 
 | Field | Required | Meaning |
 |---|---|---|
@@ -603,6 +604,8 @@ The only option today is `trace`, the TRACE execution context of the call. With 
 | `execution_authority` | yes | Authority that issued `execution_id`; always passed together with it |
 | `workload_id` | yes | Stable id of the workload the decision is made for |
 | `workload_instance_id` | no | Instance of the workload, when the host distinguishes instances |
+
+Each value is at most 255 characters. A longer value means no record for the decision (`not_emitted_over_limit`).
 
 The host passes already normalized values. Cedarling does not parse HTTP headers, tokens or baggage to find the context, and it never generates `execution_id` itself. A missing `trace`, or an empty required field, means the call has no execution context: no TRACE record is produced for that decision, and the decision is returned as usual. When TRACE is disabled, `options` has no effect at all.
 
@@ -636,7 +639,7 @@ With TRACE enabled, the decision log entry of every decision says what happened 
 }
 ```
 
-`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-properties.md#record-status-and-metrics) for every status.
+`emitted` means the record was handed to the emitter, which sends it to Lock Server in the background; the record's `record_id` is the decision's `request_id`. A decision without a TRACE context logs `not_emitted_missing_context`. See [Record status and metrics](./cedarling-trace.md#record-status-and-metrics) for every status.
 
 In Rust, attach options with `with_options`:
 
@@ -657,7 +660,7 @@ options = AuthorizeOptions(trace=TraceContext(execution_id, execution_authority,
 request = RequestUnsigned(action=action, resource=resource, context={}, options=options)
 ```
 
-In Java, every `CedarlingAdapter.authorize*` method has an overload with a trailing `AuthorizeOptions` argument; the overloads without it pass `null`. The UniFFI methods (Kotlin, Swift) take `options` as an optional last parameter that defaults to none. Java does not see Kotlin default arguments, so Java code that calls the generated `Cedarling` class directly must pass the last argument itself (`null` for no options); `CedarlingAdapter` keeps the overloads without it:
+In Kotlin and Swift, `options` is an optional last parameter of the authorize methods. In Java, use the `CedarlingAdapter.authorize*` overloads with a trailing `AuthorizeOptions` argument; Java code that calls the generated `Cedarling` class directly must pass the last argument itself, `null` for no options:
 
 ```java
 AuthorizeOptions options = new AuthorizeOptions(
@@ -665,7 +668,7 @@ AuthorizeOptions options = new AuthorizeOptions(
 AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
 ```
 
-The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. TRACE is not supported on WASM, so there `options` has no effect. In Go, set the `Options` field of the request struct:
 
 ```go
 request := cedarling_go.RequestUnsigned{

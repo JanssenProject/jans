@@ -115,9 +115,8 @@ impl DefaultEntitiesWithWarns {
 /// Parse default entities from raw data, returning entities and warnings
 pub(super) fn parse_default_entities_with_warns(
     raw_data: Option<HashMap<String, Value>>,
+    limits: DefaultEntitiesLimits,
 ) -> Result<DefaultEntitiesWithWarns, ParseDefaultEntityError> {
-    let limits = DefaultEntitiesLimits::default();
-
     if let Some(raw_data) = raw_data {
         let mut default_entities = HashMap::new();
         let mut warns = Vec::new();
@@ -126,15 +125,6 @@ pub(super) fn parse_default_entities_with_warns(
             // `n` starts with zero, so we add 1
             let entity_count = n + 1;
 
-            // Validate against limits (using default limits for deserialization)
-            // Note: Configuration limits will be applied later when the policy store is initialized
-
-            // check size of base64 string
-            limits
-                .validate_default_entity(&entry_id, &raw_value)
-                .map_err(|err| {
-                    ParseEntityErrorKind::LimitsValidation(err).with_entry_id(entry_id.clone())
-                })?;
             // check size of HashMap using explicit counter
             limits
                 .validate_entities_count(entity_count)
@@ -458,7 +448,10 @@ fn parse_entity_attrs<'a>(
 #[cfg(test)]
 mod test {
     use super::DANGEROUS_PATTERNS;
-    use super::{DefaultEntityWarning, ParseEntityErrorKind, parse_default_entities_with_warns};
+    use super::{
+        DefaultEntitiesLimits, DefaultEntityWarning, ParseEntityErrorKind,
+        parse_default_entities_with_warns,
+    };
     use base64::Engine;
     use cedar_policy::EntityUid;
     use serde_json::{Value, json};
@@ -483,8 +476,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("should parse default entities");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("should parse default entities");
         let entities_hashmap = &parsed_entities.entities();
 
         assert_eq!(entities_hashmap.len(), 1, "should have 1 default entity");
@@ -510,8 +504,9 @@ mod test {
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
 
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for entity missing uid field");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for entity missing uid field");
         assert_eq!(err.entry_id, "test123", "Expected entry_id to be 'test123'");
         assert!(
             matches!(*err.error, ParseEntityErrorKind::HaveNoUidOrEntityTypeField),
@@ -531,8 +526,9 @@ mod test {
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
 
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error when uid is not an object");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error when uid is not an object");
         assert_eq!(err.entry_id, "test123", "Expected entry_id to be 'test123'");
         assert!(
             matches!(*err.error, ParseEntityErrorKind::InvalidUidTypeField),
@@ -550,8 +546,9 @@ mod test {
         let default_entities_data = json!({"test456".to_string(): entity_data_no_type});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error when uid.type is missing");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error when uid.type is missing");
         assert_eq!(err.entry_id, "test456", "Expected entry_id to be 'test456'");
         assert!(
             matches!(*err.error, ParseEntityErrorKind::InvalidUidTypeField),
@@ -574,8 +571,9 @@ mod test {
         let default_entities_data = json!({"test789".to_string(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("should parse with empty attrs and parents");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("should parse with empty attrs and parents");
         let entities = parsed_entities.entities();
 
         let uid = EntityUid::from_str("Test::EmptyTest::\"test789\"").unwrap();
@@ -608,8 +606,9 @@ mod test {
         let default_entities_data = json!({String::new(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for empty entry ID");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for empty entry ID");
         assert_eq!(err.entry_id, "", "Expected entry_id to be empty");
         assert!(
             matches!(*err.error, ParseEntityErrorKind::EntityIdIsEmpty),
@@ -620,8 +619,9 @@ mod test {
         let default_entities_data_whitespace = json!({"   ".to_string(): entity_data});
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data_whitespace).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for whitespace-only entry ID");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for whitespace-only entry ID");
         assert_eq!(
             err.entry_id, "   ",
             "Expected entry_id to be whitespace-only"
@@ -647,9 +647,11 @@ mod test {
             let default_entities_data = json!({dangerous_id.clone(): entity_data.clone()});
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
-            let err = parse_default_entities_with_warns(Some(raw_data)).expect_err(&format!(
-                "Should return error for dangerous pattern: {pattern}"
-            ));
+            let err =
+                parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                    .expect_err(&format!(
+                        "Should return error for dangerous pattern: {pattern}"
+                    ));
             assert_eq!(
                 err.entry_id, dangerous_id,
                 "Expected entry_id to match dangerous pattern"
@@ -685,8 +687,9 @@ mod test {
             let default_entities_data = json!({valid_id.to_string(): entity_data.clone()});
             let raw_data: HashMap<String, Value> =
                 serde_json::from_value(default_entities_data).unwrap();
-            let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-                .unwrap_or_else(|_| panic!("Should parse valid entry ID: {valid_id}"));
+            let parsed_entities =
+                parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                    .unwrap_or_else(|_| panic!("Should parse valid entry ID: {valid_id}"));
 
             assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
         }
@@ -714,8 +717,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse valid base64 entity");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse valid base64 entity");
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
@@ -738,8 +742,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for invalid base64");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for invalid base64");
         assert_eq!(
             err.entry_id, "invalid_base64_entity",
             "Expected entry_id to be 'invalid_base64_entity'"
@@ -762,8 +767,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for invalid JSON after base64 decode");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for invalid JSON after base64 decode");
         assert_eq!(
             err.entry_id, "invalid_json_entity",
             "Expected entry_id to be 'invalid_json_entity'"
@@ -786,8 +792,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for non-UTF8 content after base64 decode");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for non-UTF8 content after base64 decode");
         assert_eq!(
             err.entry_id, "non_utf8_entity",
             "Expected entry_id to be 'non_utf8_entity'"
@@ -825,8 +832,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entities with and without namespaces");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entities with and without namespaces");
 
         assert_eq!(
             parsed_entities.entities().len(),
@@ -869,8 +877,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse legacy format entity");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse legacy format entity");
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
@@ -915,8 +924,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with parents");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with parents");
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
@@ -964,8 +974,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with invalid parents (but generate warnings)");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with invalid parents (but generate warnings)");
 
         // Should still parse the entity successfully
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
@@ -1007,8 +1018,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with various attribute types");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with various attribute types");
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
@@ -1048,8 +1060,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with fallback ID");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with fallback ID");
 
         assert_eq!(parsed_entities.entities().len(), 1, "Should have 1 entity");
 
@@ -1066,7 +1079,8 @@ mod test {
     fn test_empty_default_entities() {
         // Test deserializing None/empty default entities
         let parsed_entities =
-            parse_default_entities_with_warns(None).expect("Should parse empty default entities");
+            parse_default_entities_with_warns(None, DefaultEntitiesLimits::default())
+                .expect("Should parse empty default entities");
 
         assert_eq!(
             parsed_entities.entities().len(),
@@ -1088,8 +1102,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let err = parse_default_entities_with_warns(Some(raw_data))
-            .expect_err("Expected error for invalid value type");
+        let err =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect_err("Expected error for invalid value type");
         assert_eq!(
             err.entry_id, "invalid_entity",
             "Expected entry_id to be 'invalid_entity'"
@@ -1135,8 +1150,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse mixed format entities");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse mixed format entities");
 
         assert_eq!(
             parsed_entities.entities().len(),
@@ -1181,8 +1197,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with invalid parent");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with invalid parent");
 
         // This test should have no warnings since "invalid@uid" is actually valid
         assert!(
@@ -1215,8 +1232,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with invalid parents");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with invalid parents");
 
         // Should have warnings for non-object parent entries
         assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
@@ -1261,8 +1279,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with invalid parents");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with invalid parents");
 
         // Should have warnings for non-object parent entries
         assert!(!parsed_entities.warns().is_empty(), "Should have warnings");
@@ -1308,8 +1327,9 @@ mod test {
 
         let raw_data: HashMap<String, Value> =
             serde_json::from_value(default_entities_data).unwrap();
-        let parsed_entities = parse_default_entities_with_warns(Some(raw_data))
-            .expect("Should parse entity with multiple issues");
+        let parsed_entities =
+            parse_default_entities_with_warns(Some(raw_data), DefaultEntitiesLimits::default())
+                .expect("Should parse entity with multiple issues");
 
         // Should have multiple warnings
         let warnings = parsed_entities.warns();

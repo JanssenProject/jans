@@ -74,8 +74,16 @@ public class JwrService {
      * @return encoded Jwr
      */
     public io.jans.as.model.token.JsonWebResponse encode(io.jans.as.model.token.JsonWebResponse jwr, Client client) throws Exception {
+        return encode(jwr, client, null);
+    }
+
+    /**
+     * Same as {@link #encode(io.jans.as.model.token.JsonWebResponse, Client)} but uses explicit signing kid
+     * for nested JWT (if any). Blank kid means implicit key lookup.
+     */
+    public io.jans.as.model.token.JsonWebResponse encode(io.jans.as.model.token.JsonWebResponse jwr, Client client, String signingKid) throws Exception {
         if (jwr instanceof Jwe) {
-            return encryptJwe((Jwe) jwr, client);
+            return encryptJwe((Jwe) jwr, client, signingKid);
         }
         if (jwr instanceof Jwt) {
             return signJwt((Jwt) jwr, client);
@@ -91,10 +99,11 @@ public class JwrService {
         return jwt;
     }
 
-    private Jwe encryptJwe(Jwe jwe, Client client) throws Exception {
+    private Jwe encryptJwe(Jwe jwe, Client client, String signingKid) throws Exception {
 
         if (BooleanUtils.isTrue(appConfiguration.isUseNestedJwtDuringEncryption()) ){
             JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
+            jwtSigner.setSigningKid(signingKid);
             Jwt jwt = jwtSigner.newJwt();
             jwt.setClaims(jwe.getClaims());
             jwe.setSignedJWTPayload(signJwt(jwt, client));
@@ -128,6 +137,13 @@ public class JwrService {
     }
 
     public io.jans.as.model.token.JsonWebResponse createJwr(Client client) {
+        return createJwr(client, null);
+    }
+
+    /**
+     * Creates Jwr using explicit signing kid, blank kid means implicit key lookup.
+     */
+    public io.jans.as.model.token.JsonWebResponse createJwr(Client client, String signingKid) {
         try {
             KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseAlg());
             BlockEncryptionAlgorithm blockEncryptionAlgorithm = BlockEncryptionAlgorithm.fromName(client.getIdTokenEncryptedResponseEnc());
@@ -141,6 +157,7 @@ public class JwrService {
                 return jwe;
             } else {
                 JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, client);
+                jwtSigner.setSigningKid(signingKid);
                 return jwtSigner.newJwt();
             }
         } catch (Exception e) {

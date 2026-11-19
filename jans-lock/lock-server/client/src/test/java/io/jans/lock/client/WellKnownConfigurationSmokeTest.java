@@ -40,7 +40,7 @@ class WellKnownConfigurationSmokeTest extends BaseLockClientTest {
 	@BeforeEach
 	void setUp() {
 		assumeTrue(hasServer(), "No real profile selected (-Dcfg=<profile>); skipping, see profiles/default/README.md");
-		client = newInsecureHttpClient();
+		client = newTestHttpClient();
 	}
 
 	@Test

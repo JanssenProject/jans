@@ -1,0 +1,11 @@
+{
+    "Acme::Access_token": {
+        "type": "jwt",
+        "issuer": "Acme",
+        "configuration_endpoints": {
+            "jwks": "https://idp.acme.com/keys",
+            "iss": "https://idp.acme.com"
+        },
+        "x\u001b[2Jvendor‮": true
+    }
+}

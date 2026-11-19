@@ -54,7 +54,6 @@ public class BootstrapConfig {
     public static final String CEDARLING_LOCK_ACCEPT_INVALID_CERTS = "CEDARLING_LOCK_ACCEPT_INVALID_CERTS";
 
     public static final String CEDARLING_MAX_DEFAULT_ENTITIES = "CEDARLING_MAX_DEFAULT_ENTITIES";
-    public static final String CEDARLING_MAX_BASE64_SIZE = "CEDARLING_MAX_BASE64_SIZE";
 
     // Variables
     private String applicationName;
@@ -85,7 +84,6 @@ public class BootstrapConfig {
     private boolean lockListenSse;
 
     private int maxDefaultEntities;
-    private long maxBase64Size;
 
     private BootstrapConfig() {}
 
@@ -115,7 +113,6 @@ public class BootstrapConfig {
         this.lockListenSse = builder.lockListenSse;
 
         this.maxDefaultEntities = builder.maxDefaultEntities;
-        this.maxBase64Size = builder.maxBase64Size;
     }
 
     public static Builder builder() {
@@ -156,7 +153,6 @@ public class BootstrapConfig {
         jo.put(CEDARLING_LOCK_LISTEN_SSE, toEnabled(lockListenSse));
 
         jo.put(CEDARLING_MAX_DEFAULT_ENTITIES, maxDefaultEntities);
-        jo.put(CEDARLING_MAX_BASE64_SIZE, maxBase64Size);
 
         return jo.toString();
     }
@@ -193,7 +189,6 @@ public class BootstrapConfig {
         private int lockLogInterval = 0;
         private boolean lockListenSse = false;
         private int maxDefaultEntities = 1000;
-        private long maxBase64Size = 1048576L;
 
         protected Builder() {}
 
@@ -221,7 +216,6 @@ public class BootstrapConfig {
         public Builder lockLogInterval(int interval) { this.lockLogInterval = interval; return this; }
         public Builder lockListenSse(boolean listenSse) { this.lockListenSse = listenSse; return this; }
         public Builder maxDefaultEntities(int max) { this.maxDefaultEntities = max; return this; }
-        public Builder maxBase64Size(long size) { this.maxBase64Size = size; return this; }
 
         public BootstrapConfig build() {
             return new BootstrapConfig(this);

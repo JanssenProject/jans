@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import java.net.URI;
 import java.util.*;
 
+import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_KID;
+import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNING_KID;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -120,6 +122,8 @@ public class RegisterCreateAction {
             setAccessTokenSigningAlgFallback(r);
 
             registerParamsValidator.validateAlgorithms(r);
+            registerParamsValidator.validateSigningKid(r.getAccessTokenSigningKid(), ACCESS_TOKEN_SIGNING_KID.toString());
+            registerParamsValidator.validateSigningKid(r.getIdTokenSigningKid(), ID_TOKEN_SIGNING_KID.toString());
 
             registerValidator.validateClaimsRedirectUris(r);
             registerValidator.validateInitiateLoginUri(r);

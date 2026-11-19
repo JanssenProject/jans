@@ -142,7 +142,7 @@ pub enum PolicyStoreSource {
     /// Mostly used only for testing purposes.
     Yaml(String),
 
-    /// Fetch the policies from the Lock Master service using a specified identifier.
+    /// Fetch the policies from the Lock Server using a specified identifier.
     ///
     /// The string contains a URI where the policy store can be retrieved.
     LockServer(String),
@@ -172,7 +172,7 @@ pub enum PolicyStoreSource {
     ///
     /// During loading, [`load_policy_store`](crate::init::policy_store::load_policy_store)
     /// resolves this by making an HTTP request to determine whether the URI points
-    /// to a Cedar Archive (`.cjar`) or a Lock Master endpoint.
+    /// to a Cedar Archive (`.cjar`) or a Lock Server endpoint.
     Uri(String),
 
     /// Read policy from Cedar Archive bytes directly.

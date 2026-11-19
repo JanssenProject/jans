@@ -9,6 +9,7 @@ package io.jans.orm.ldap.impl;
 import com.unboundid.ldap.sdk.*;
 import com.unboundid.ldif.LDIFChangeRecord;
 import com.unboundid.ldif.LDIFException;
+import com.unboundid.ldif.LDIFModifyDNChangeRecord;
 import com.unboundid.ldif.LDIFReader;
 import io.jans.orm.util.StringHelper;
 import org.apache.commons.io.IOUtils;
@@ -275,22 +276,38 @@ public final class LdifDataUtility {
     }
 
     public ResultCode validateLDIF(LDIFReader ldifReader, String dn) {
-        String baseDn = dn.toLowerCase();
+        DN baseDn = null;
+        if (StringHelper.isNotEmpty(dn)) {
+            try {
+                baseDn = new DN(dn);
+            } catch (LDAPException ex) {
+                LOG.error("Invalid base DN", ex);
+                return ResultCode.INVALID_DN_SYNTAX;
+            }
+        }
+
         ResultCode resultCode = ResultCode.SUCCESS;
         while (true) {
             // Read the next change to process
             LDIFChangeRecord ldifRecord = null;
             try {
                 ldifRecord = ldifReader.readChangeRecord(true);
-                if (ldifRecord != null) {
-                    if (StringHelper.isNotEmpty(baseDn)) {
-                        if (!ldifRecord.getDN().toLowerCase().endsWith(baseDn)) {
-                            resultCode = ResultCode.NOT_SUPPORTED;
-                            break;
-                        }
+                if ((ldifRecord != null) && (baseDn != null)) {
+                    boolean inScope = ldifRecord.getParsedDN().isDescendantOf(baseDn, true);
+                    if (inScope && (ldifRecord instanceof LDIFModifyDNChangeRecord)) {
+                        DN newDn = ((LDIFModifyDNChangeRecord) ldifRecord).getNewDN();
+                        inScope = (newDn != null) && newDn.isDescendantOf(baseDn, true);
+                    }
+                    if (!inScope) {
+                        resultCode = ResultCode.NOT_SUPPORTED;
+                        break;
                     }
                 }
 
+            } catch (LDAPException le) {
+                LOG.error("Invalid DN in ldif record", le);
+                resultCode = ResultCode.INVALID_DN_SYNTAX;
+                break;
             } catch (LDIFException le) {
                 LOG.info("Malformed ldif record " + ldifRecord);
                 LOG.error("Malformed ldif record", le);

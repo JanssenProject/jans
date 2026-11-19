@@ -115,6 +115,7 @@ public class SessionIdServiceTest {
 
         assertFalse(sessionIdService.hasAllScopes(sessionId, Sets.newHashSet("email")));
         assertFalse(sessionIdService.hasAllScopes(sessionId, Sets.newHashSet("test")));
+        assertFalse(sessionIdService.hasAllScopes(sessionId, Sets.newHashSet("file")));
     }
 
     @Test

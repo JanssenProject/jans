@@ -110,7 +110,7 @@ public class AccountsServlet extends HttpServlet {
 
             String clientCertAsPem = CoreCertUtil.getClientCert(servletRequest).getCert();
             if (clientCertAsPem != null) {
-                log.info("FAPI Account: clientCertAsPem found*****************************************" + clientCertAsPem);
+                log.info("FAPI Account: clientCertAsPem found");
             } else
                 log.info("FAPI Account: Nooooooooo clientCertAsPem *****************************************");
 

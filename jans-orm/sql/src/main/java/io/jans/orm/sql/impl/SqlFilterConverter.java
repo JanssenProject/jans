@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +66,7 @@ public class SqlFilterConverter {
 	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 	
-	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
+	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}", "^", "$" };
 	
 	private Map<String, JDBCType> jdbcEnumTypesMap;
 
@@ -330,8 +329,9 @@ public class SqlFilterConverter {
         if (FilterType.SUBSTRING == type) {
         	String matchChar = multiValued && (SupportedDbType.POSTGRESQL == this.dbType) ? ".*" : "%";
         	StringBuilder like = new StringBuilder();
+            boolean regexMatch = multiValued && (SupportedDbType.POSTGRESQL == this.dbType);
             if (currentGenericFilter.getSubInitial() != null) {
-                like.append(currentGenericFilter.getSubInitial());
+                like.append(regexMatch ? escapeRegex(currentGenericFilter.getSubInitial()) : currentGenericFilter.getSubInitial());
             }
             like.append(matchChar);
 
@@ -352,13 +352,13 @@ public class SqlFilterConverter {
             }
 
             if (currentGenericFilter.getSubFinal() != null) {
-                like.append(currentGenericFilter.getSubFinal());
+                like.append(regexMatch ? escapeRegex(currentGenericFilter.getSubFinal()) : currentGenericFilter.getSubFinal());
             }
 
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
-    				String likeString = StringEscapeUtils.escapeJava(like.toString());
+    				String likeString = like.toString();
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
 							currentGenericFilter, typedPathColumn, Expressions.constant("like_regex"),
 							likeString);
@@ -430,7 +430,7 @@ public class SqlFilterConverter {
 			if (expressionValue instanceof Boolean) {
 				typedArrayExpression = Expressions.asString(((Boolean) expressionValue).toString());
 			} else if (expressionValue instanceof String) {
-				typedArrayExpression = Expressions.asString("\"" + (String) expressionValue + "\"");
+				typedArrayExpression = Expressions.asString("\"" + escapeJsonPathString((String) expressionValue) + "\"");
 			} else {
 				typedArrayExpression = Expressions.constant(expressionValue);
 			}
@@ -449,6 +449,21 @@ public class SqlFilterConverter {
 					typedArrayExpression);
 		}
 		return ConvertedExpression.build(operation, jsonAttributes);
+	}
+
+	private static String escapeJsonPathString(String value) {
+		StringBuilder sb = new StringBuilder(value.length() + 8);
+		for (int i = 0; i < value.length(); i++) {
+			char c = value.charAt(i);
+			if ((c == '"') || (c == '\\')) {
+				sb.append('\\').append(c);
+			} else if (c < 0x20) {
+				sb.append(String.format("\\u%04x", (int) c));
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 
 	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {

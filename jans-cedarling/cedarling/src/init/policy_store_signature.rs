@@ -128,7 +128,18 @@ impl ArchiveVerifier {
         let location = self
             .bundle_location(store_location)
             .ok_or(SignatureError::NoBundleLocation)?;
-        let bundle = self.load_bundle(http, &location).await?;
+        // `http` may carry the Lock bearer, which is scoped to the store's origin.
+        let bundle = if is_http_url(&location) && !same_origin(store_location, &location) {
+            let plain = http
+                .without_default_headers()
+                .map_err(|e| SignatureError::Bundle {
+                    location: location.clone(),
+                    reason: e.to_string(),
+                })?;
+            self.load_bundle(&plain, &location).await?
+        } else {
+            self.load_bundle(http, &location).await?
+        };
         self.verify(archive, &bundle)
     }
 
@@ -176,6 +187,16 @@ impl ArchiveVerifier {
             sha256: sha256_hex(archive),
         })
     }
+}
+
+fn same_origin(store_location: Option<&str>, bundle_location: &str) -> bool {
+    let (Some(store), Ok(bundle)) = (
+        store_location.and_then(|s| url::Url::parse(s).ok()),
+        url::Url::parse(bundle_location),
+    ) else {
+        return false;
+    };
+    store.origin().is_tuple() && store.origin() == bundle.origin()
 }
 
 fn is_http_url(location: &str) -> bool {

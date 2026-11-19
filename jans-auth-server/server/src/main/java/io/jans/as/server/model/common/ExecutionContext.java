@@ -34,6 +34,11 @@ import java.util.function.Function;
  */
 public class ExecutionContext {
 
+    /**
+     * Token attribute set on client_credentials access tokens requested without a "scope" parameter.
+     */
+    public static final String ATTR_SCOPE_PARAM_ABSENT = "scope_param_absent";
+
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
 

@@ -27,6 +27,7 @@ def unobscure(s=""):
 def Usage():
     print("To encode:   encode <string>")
     print("To decode:   encode -D <string>")
+    print("Use - as <string> to read it from stdin instead of the command line")
     print()
     sys.exit(0)
 
@@ -39,6 +40,13 @@ if len(sys.argv) == 3:
     arg = sys.argv[2]
 if len(sys.argv) == 2:
     arg = sys.argv[1]
+
+if arg == '-':
+    if sys.stdin.isatty():
+        import getpass
+        arg = getpass.getpass('Value: ')
+    else:
+        arg = sys.stdin.readline().rstrip('\n')
 
 if decode:
     print(unobscure(arg))

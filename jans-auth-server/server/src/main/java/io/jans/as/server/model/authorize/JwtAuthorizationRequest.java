@@ -34,6 +34,7 @@ import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.RedirectUriResponse;
 import io.jans.as.server.service.RedirectionUriService;
+import io.jans.as.server.service.net.PrivateAddressUtil;
 import io.jans.service.cdi.util.CdiUtil;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -49,12 +50,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Javier Rojas Blum
@@ -64,6 +68,7 @@ public class JwtAuthorizationRequest {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationRequest.class);
     private static final int SIXTY_MINUTES_AS_SECONDS = 3600;
+    private static final int NBF_CLOCK_SKEW_SECONDS = 60;
 
     // Header
     private String type;
@@ -334,6 +339,11 @@ public class JwtAuthorizationRequest {
     }
 
     private boolean validateSignature(@NotNull AbstractCryptoProvider cryptoProvider, SignatureAlgorithm signatureAlgorithm, Client client, String signingInput, String signature) throws Exception {
+        final String registeredAlg = client.getRequestObjectSigningAlg();
+        if (StringUtils.isNotBlank(registeredAlg) && (signatureAlgorithm == null || !registeredAlg.equals(signatureAlgorithm.getName()))) {
+            log.error("Request object signing algorithm {} does not match registered request_object_signing_alg {}", signatureAlgorithm, registeredAlg);
+            return false;
+        }
         ClientService clientService = CdiUtil.bean(ClientService.class);
         String sharedSecret = clientService.decryptSecret(client.getClientSecret());
         JSONObject jwks = CommonUtils.getJwks(client);
@@ -497,7 +507,17 @@ public class JwtAuthorizationRequest {
             String reqUriHash = reqUri.getFragment();
             String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-            jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+            if (!isAllowedRequestUriDestination(reqUri, reqUriWithoutFragment, appConfiguration)) {
+                if (redirectUriResponse != null) {
+                    throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_URI, "Invalid request uri.");
+                }
+                return null;
+            }
+
+            jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newBuilder()
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build();
 
             String request = null;
             try {
@@ -593,6 +613,38 @@ public class JwtAuthorizationRequest {
         if (nbfDiff > SIXTY_MINUTES_AS_SECONDS) { // https://github.com/JanssenProject/jans-auth-server/issues/166
             log.error("nbf claim is more then 60 Minutes in the past, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
             throw new InvalidJwtException("nbf claim is more then 60 in the past");
+        }
+        if (nbf - nowSeconds > NBF_CLOCK_SKEW_SECONDS) {
+            log.error("nbf claim is in the future, nbf: {}, nowSeconds: {}", nbf, nowSeconds);
+            throw new InvalidJwtException("nbf claim is in the future");
+        }
+    }
+
+    /**
+     * request_uri is fetched before the request object is verified, so only http(s) and, unless the URI is
+     * explicitly whitelisted in externalUriWhiteList, only public destinations are allowed (SSRF protection).
+     */
+    static boolean isAllowedRequestUriDestination(URI reqUri, String reqUriWithoutFragment, AppConfiguration appConfiguration) {
+        final String scheme = reqUri.getScheme();
+        if ((!"https".equalsIgnoreCase(scheme) && !"http".equalsIgnoreCase(scheme)) || StringUtils.isBlank(reqUri.getHost())) {
+            log.error("request_uri must be http(s) URL with host.");
+            return false;
+        }
+        final List<String> whiteList = appConfiguration.getExternalUriWhiteList();
+        if (whiteList != null && !whiteList.isEmpty() && new URLPatternList(whiteList).isUrlListed(reqUriWithoutFragment)) {
+            return true;
+        }
+        try {
+            for (InetAddress address : InetAddress.getAllByName(reqUri.getHost())) {
+                if (PrivateAddressUtil.isPrivateAddress(address)) {
+                    log.error("request_uri resolves to private address, add it to externalUriWhiteList to allow it.");
+                    return false;
+                }
+            }
+            return true;
+        } catch (UnknownHostException e) {
+            log.error("request_uri host can't be resolved.");
+            return false;
         }
     }
 

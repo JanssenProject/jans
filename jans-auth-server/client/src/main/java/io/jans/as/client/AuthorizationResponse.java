@@ -11,6 +11,8 @@ import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.TokenType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.crypto.AuthCryptoProvider;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
@@ -156,38 +158,9 @@ public class AuthorizationResponse extends BaseResponse {
 
                 if (params != null) {
                     if (params.containsKey(RESPONSE)) {
-                        response = params.get(RESPONSE);
-                        params.remove(RESPONSE);
-
-                        String[] jwtParts = response.split("\\.");
-
-                        if (jwtParts.length == 5) {
-                            byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
-                            Jwe jwe = Jwe.parse(response, privateKey, sharedSymmetricKey);
-
-                            if (jwe != null) {
-                                for (Map.Entry<String, List<String>> entry : jwe.getClaims().toMap().entrySet()) {
-                                    params.put(entry.getKey(), entry.getValue().get(0));
-                                }
-                            }
-                        } else {
-                            Jwt jwt = Jwt.parse(response);
-
-                            AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
-                            boolean signatureVerified = cryptoProvider.verifySignature(
-                                    jwt.getSigningInput(),
-                                    jwt.getEncodedSignature(),
-                                    jwt.getHeader().getKeyId(),
-                                    JwtUtil.getJSONWebKeys(jwksUri),
-                                    sharedKey,
-                                    jwt.getHeader().getSignatureAlgorithm());
-
-                            if (signatureVerified) {
-                                for (Map.Entry<String, List<String>> entry : jwt.getClaims().toMap().entrySet()) {
-                                    params.put(entry.getKey(), entry.getValue().get(0));
-                                }
-                            }
-                        }
+                        response = params.remove(RESPONSE);
+                        // only JARM claims are loaded; outer parameters are discarded (bare JWE accepted only for shared-key encryption)
+                        params = getJarmClaims(response);
                     }
 
                     loadParams(params);
@@ -195,6 +168,62 @@ public class AuthorizationResponse extends BaseResponse {
             }
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
+        }
+    }
+
+    private Map<String, String> getJarmClaims(String jarmResponse) throws Exception {
+        Map<String, String> claims = new HashMap<>();
+        Jwt jwt;
+        Jwe jwe = null;
+
+        if (jarmResponse.split("\\.").length == 5) {
+            byte[] sharedSymmetricKey = sharedKey != null ? sharedKey.getBytes(StandardCharsets.UTF_8) : null;
+            jwe = Jwe.parse(jarmResponse, privateKey, sharedSymmetricKey);
+            if (jwe == null) {
+                return claims;
+            }
+            jwt = jwe.getSignedJWTPayload();
+        } else {
+            jwt = Jwt.parse(jarmResponse);
+        }
+
+        if (jwt != null) {
+            if (!verifyJarmSignature(jwt)) {
+                LOG.error("Failed to verify JARM response signature.");
+                return claims;
+            }
+            putFirstValues(claims, jwt.getClaims().toMap());
+        } else if (privateKey == null && sharedKey != null) {
+            // Jwe.parse used the shared key; anyone can encrypt to the client's public key, so that needs a signed payload
+            putFirstValues(claims, jwe.getClaims().toMap());
+        } else {
+            LOG.error("Unsigned JARM response is accepted only when encrypted with the shared key.");
+        }
+        return claims;
+    }
+
+    private boolean verifyJarmSignature(Jwt jwt) throws Exception {
+        SignatureAlgorithm signatureAlgorithm = jwt.getHeader().getSignatureAlgorithm();
+        if (signatureAlgorithm == null || signatureAlgorithm == SignatureAlgorithm.NONE) {
+            return false;
+        }
+        if (AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) && sharedKey == null) {
+            return false;
+        }
+
+        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(null, null, null, true);
+        return cryptoProvider.verifySignature(
+                jwt.getSigningInput(),
+                jwt.getEncodedSignature(),
+                jwt.getHeader().getKeyId(),
+                AlgorithmFamily.HMAC.equals(signatureAlgorithm.getFamily()) ? null : JwtUtil.getJSONWebKeys(jwksUri),
+                sharedKey,
+                signatureAlgorithm);
+    }
+
+    private static void putFirstValues(Map<String, String> target, Map<String, List<String>> source) {
+        for (Map.Entry<String, List<String>> entry : source.entrySet()) {
+            target.put(entry.getKey(), entry.getValue().get(0));
         }
     }
 

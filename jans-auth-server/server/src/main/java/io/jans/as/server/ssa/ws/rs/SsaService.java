@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import static io.jans.as.model.ssa.SsaRequestParam.*;
@@ -110,7 +109,7 @@ public class SsaService {
     /**
      * Get list of SSAs based on "jti", "org_id" or "status" filters
      * <p>
-     * If the client only has ssa.portal scope, then it is filtered by the client that created the SSA
+     * Unless the caller has ssa.admin or ssa.portal scope, it is filtered by the client that created the SSA
      * </p>
      *
      * @param jti      Unique identifier
@@ -122,7 +121,7 @@ public class SsaService {
      */
     public List<Ssa> getSsaList(String jti, String orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
-        if (hasDeveloperScope(Arrays.asList(scopes))) {
+        if (!hasAdminOrPortalScope(Arrays.asList(scopes))) {
             filters.add(Filter.createEqualityFilter("creatorId", clientId));
         }
         if (jti != null) {
@@ -242,23 +241,13 @@ public class SsaService {
     }
 
     /**
-     * Check if there is only one "ssa.developer" scope
+     * Check if scopes allow listing SSAs of all creators
      *
-     * @param scopes List of scope
-     * @return true if is only one "ssa.developer", or false otherwise
+     * @param scopes List of scope ids
+     * @return true if contains "ssa.admin" or "ssa.portal", or false otherwise
      */
-    private boolean hasDeveloperScope(List<String> scopes) {
-        Iterator<String> scopesIterator = scopes.iterator();
-        boolean result = false;
-        while (scopesIterator.hasNext()) {
-            String scope = scopesIterator.next();
-            if (scope.equals(SsaScopeType.SSA_ADMIN.getValue()) || scope.equals(SsaScopeType.SSA_PORTAL.getValue())) {
-                return false;
-            } else if (scope.equals(SsaScopeType.SSA_DEVELOPER.getValue())) {
-                result = true;
-            }
-        }
-        return result;
+    private boolean hasAdminOrPortalScope(List<String> scopes) {
+        return scopes.contains(SsaScopeType.SSA_ADMIN.getValue()) || scopes.contains(SsaScopeType.SSA_PORTAL.getValue());
     }
 
     /**

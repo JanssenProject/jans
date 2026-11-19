@@ -83,6 +83,8 @@ The following table lists the client properties supported by Janssen Server and 
 | `refreshTokenLifetime` | Overrides the default refresh token lifetime for the client. | Janssen-specific custom client property. |
 | `accessTokenAsJwt` | Issues access tokens as JWTs. | Janssen-specific custom client property. |
 | `accessTokenSigningAlg` | Signing algorithm used for JWT access tokens. | Janssen-specific custom client property. |
+| `accessTokenSigningKid` | Key ID (`kid`) of the key used to sign JWT access tokens. Overrides implicit key selection by algorithm. Stored in `attributes`. | Janssen-specific custom client property. |
+| `idTokenSigningKid` | Key ID (`kid`) of the key used to sign ID tokens. Overrides implicit key selection by algorithm. Stored in `attributes`. | Janssen-specific custom client property. |
 | `rptAsJwt` | Issues Requesting Party Tokens (RPTs) as JWTs. | Janssen-specific custom client property. |
 | `authorizedOrigins` | Defines the allowed origins for browser-based requests. | Janssen-specific custom client property. |
 | `customAttributes` | Defines additional custom attributes for the client, with each attribute identified by a name and associated value or values. | Janssen-specific custom client property. |

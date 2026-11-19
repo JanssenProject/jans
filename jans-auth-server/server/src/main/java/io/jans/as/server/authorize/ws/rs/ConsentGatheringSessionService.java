@@ -9,6 +9,7 @@ package io.jans.as.server.authorize.ws.rs;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.service.ClientIdMetadataService;
@@ -101,15 +102,22 @@ public class ConsentGatheringSessionService {
         sessionIdService.setSessionIdStateAuthenticated(httpRequest, httpResponse, sessionId, connectSession.getUserDn());
     }
 
-    public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest) {
-        boolean hasSession = hasCookie(httpRequest);
-
-        if (hasSession) {
-            final SessionId session = getConsentSession(httpRequest, null, null, false);
-            return sessionIdService.isSessionIdAuthenticated(session);
-        } else {
+    public boolean isSessionStateAuthenticated(HttpServletRequest httpRequest, String clientId) {
+        if (!hasCookie(httpRequest)) {
             return false;
         }
+
+        final SessionId session = getConsentSession(httpRequest, null, null, false);
+        if (!sessionIdService.isSessionIdAuthenticated(session)) {
+            return false;
+        }
+
+        final SessionId connectSession = getConnectSession(httpRequest);
+        return connectSession != null
+                && StringUtils.isNotBlank(session.getUserDn())
+                && StringUtils.equals(session.getUserDn(), connectSession.getUserDn())
+                && StringUtils.isNotBlank(clientId)
+                && StringUtils.equals(clientId, getClientId(session));
     }
 
     public boolean persist(SessionId session) {
@@ -164,6 +172,7 @@ public class ConsentGatheringSessionService {
     }
 
     public void configure(SessionId session, String scriptName, String clientId, String state, List<String> acrValues) {
+        session.setState(SessionIdState.UNAUTHENTICATED);
         setStep(1, session);
         setScriptName(session, scriptName);
 

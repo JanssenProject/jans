@@ -96,7 +96,8 @@ public class SsaRevokeAction {
             final Client client = ssaRestWebServiceValidator.getClientFromSession();
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
-            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
+            final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(),
+                    ssaRestWebServiceValidator.getAuthorizedScopes(client).toArray(new String[0]));
             if (ssaList.isEmpty()) {
                 return ssaService.createUnprocessableEntityResponse().build();
             }

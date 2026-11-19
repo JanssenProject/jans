@@ -96,7 +96,7 @@ type User struct {
         PreferredLanguage string                    `schema:"preferred_language" json:"preferredLanguage,omitempty"`
         Locale            string                    `schema:"locale" json:"locale,omitempty"`
         Timezone          string                    `schema:"timezone" json:"timezone,omitempty"`
-        Active            bool                      `schema:"active" json:"active,omitempty"`
+	Active            bool                      `schema:"active" json:"active"`
         Password          string                    `schema:"password" json:"password,omitempty"`
         Emails            []Email                   `schema:"emails" json:"emails,omitempty"`
         PhoneNumbers      []PhoneNumber             `schema:"phone_numbers" json:"phoneNumbers,omitempty"`

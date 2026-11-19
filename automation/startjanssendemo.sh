@@ -24,6 +24,17 @@ fi
 if [[ -z $JANS_VERSION ]]; then
   JANS_VERSION="0.0.0-nightly"
 fi
+if [[ -z $JANS_ADMIN_PASSWORD ]]; then
+  read -rsp "Enter admin password:                                            " JANS_ADMIN_PASSWORD
+  echo
+fi
+if [[ -z $JANS_ADMIN_PASSWORD ]] || [[ $JANS_ADMIN_PASSWORD == *$'\n'* || $JANS_ADMIN_PASSWORD == *$'\r'* ]]; then
+  echo "[E] Admin password is required (set JANS_ADMIN_PASSWORD or enter it when prompted)"
+  exit 1
+fi
+SQ="'"
+# YAML single-quoted scalar: only ' needs escaping (doubled), so the value round-trips exactly
+JANS_ADMIN_PASSWORD_YAML="'${JANS_ADMIN_PASSWORD//$SQ/$SQ$SQ}'"
 LOG_TARGET="FILE"
 LOG_LEVEL="TRACE"
 if [[ -z $JANS_CI_CD_RUN ]]; then
@@ -32,8 +43,19 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP ]]; then
-  EXT_IP=$(curl ipinfo.io/ip)
+  EXT_IP=$(curl -fsS --proto '=https' https://ipinfo.io/ip)
 fi
+if ! [[ $EXT_IP =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+  echo "[E] Invalid external IP address: $EXT_IP"
+  exit 1
+fi
+IFS=. read -r -a EXT_IP_OCTETS <<< "$EXT_IP"
+for octet in "${EXT_IP_OCTETS[@]}"; do
+  if [[ $octet =~ ^0[0-9] ]] || (( 10#$octet > 255 )); then
+    echo "[E] Invalid external IP address: $EXT_IP"
+    exit 1
+  fi
+done
 
 sudo apt-get update
 sudo snap install microk8s --classic
@@ -66,11 +88,14 @@ if [[ $INSTALL_ISTIO == "true" ]]; then
   cd ..
 fi
 
+# owner-only before the admin password is written; install also truncates an existing file
+install -m 600 /dev/null override.yaml
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   sudo wget https://raw.githubusercontent.com/JanssenProject/jans/nightly/automation/mysql.yaml
   sudo microk8s.kubectl apply -f mysql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
+  adminPassword: $JANS_ADMIN_PASSWORD_YAML
   countryCode: US
   email: support@gluu.org
   orgName: Gluu
@@ -90,6 +115,7 @@ else
   sudo microk8s.kubectl apply -f pgsql.yaml --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
+  adminPassword: $JANS_ADMIN_PASSWORD_YAML
   countryCode: US
   email: support@gluu.org
   orgName: Gluu
@@ -179,8 +205,6 @@ sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
 sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" --version="$JANS_VERSION"
 cat << EOF > testendpoints.sh
-sudo microk8s config > config
-KUBECONFIG="$PWD"/config
 echo -e "Testing openid-configuration endpoint.. \n"
 curl -k https://$JANS_FQDN/.well-known/openid-configuration
 echo -e "Testing scim-configuration endpoint.. \n"

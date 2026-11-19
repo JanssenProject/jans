@@ -277,6 +277,13 @@ Create JAVA_OPTIONS ENV for Shibboleth IDP
 {{- end }}
 
 {{/*
+Admin password; required unless a custom configurator schema secret is used.
+*/}}
+{{- define "janssen-all-in-one.adminPassword" -}}
+{{- required "adminPassword is required: set a strong admin password for the UI" .Values.adminPassword -}}
+{{- end -}}
+
+{{/*
 Obfuscate configuration schema (only if configuration key is available)
 */}}
 {{- define "janssen-all-in-one.config.prepareSchema" }}
@@ -294,7 +301,7 @@ Obfuscate configuration schema (only if configuration key is available)
 {{- $_ := set $configmapSchema "init_keys_exp" (index .Values "auth-server-key-rotation" "initKeysLife") }}
 
 {{- $secretSchema := dict }}
-{{- $_ := set $secretSchema "admin_password" .Values.adminPassword }}
+{{- $_ := set $secretSchema "admin_password" (include "janssen-all-in-one.adminPassword" .) }}
 {{- $_ := set $secretSchema "redis_password" .Values.redisPassword }}
 {{- if or ( eq .Values.cnPersistenceType "sql" ) ( eq .Values.cnPersistenceType "hybrid" ) }}
 {{- $_ := set $secretSchema "sql_password" .Values.configmap.cnSqldbUserPassword }}

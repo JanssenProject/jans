@@ -209,6 +209,19 @@ public class AttestationCertificateService {
 
 	
 
+	/**
+	 * Called when a U2F attestation certificate carries no key identifier, so MDS lookup cannot run.
+	 * In enforced mode with MDS enabled this must reject rather than fall back to installed roots.
+	 */
+	public JsonNode getMetadataForU2fAuthenticatorWithoutKeyIdentifier(String origin) {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		if (!fido2Configuration.isEnterpriseAttestation() && !fido2Configuration.isDisableMetadataService()
+				&& isAttestationEnforced(origin)) {
+			throw new Fido2RuntimeException("U2F attestation certificate has no key identifier for metadata lookup");
+		}
+		return null;
+	}
+
 	public JsonNode getMetadataForU2fAuthenticator(String attestationCertificateKeyIdentifiers, String origin) {
 
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();

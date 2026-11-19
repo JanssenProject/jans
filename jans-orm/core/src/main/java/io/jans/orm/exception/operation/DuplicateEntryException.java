@@ -17,11 +17,14 @@ public class DuplicateEntryException extends PersistenceException {
      */
     private static final long serialVersionUID = 6749290172742578916L;
 
+    private final String dn;
+
     /**
      * Default constructor
      */
     public DuplicateEntryException() {
         super("Entry already exists");
+        this.dn = null;
     }
 
     /**
@@ -32,5 +35,28 @@ public class DuplicateEntryException extends PersistenceException {
      */
     public DuplicateEntryException(final String dn) {
         super("Entry already exists: " + dn);
+        this.dn = dn;
+    }
+
+    /**
+     * Constructor with the offending DN, a detailed message and the wrapped exception
+     *
+     * @param dn
+     *            DN that returned a duplicate; {@code null} when the backend did not report it
+     * @param message
+     *            Detailed message
+     * @param e
+     *            Wrapped exception
+     */
+    public DuplicateEntryException(final String dn, final String message, final Throwable e) {
+        super(message, e);
+        this.dn = dn;
+    }
+
+    /**
+     * @return DN that returned a duplicate, or {@code null} when it is unknown
+     */
+    public String getDn() {
+        return dn;
     }
 }

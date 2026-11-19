@@ -10,6 +10,7 @@ use std::collections::HashSet;
 use std::fs;
 use std::path::PathBuf;
 
+use crate::output::Untrusted;
 use crate::test::spec::{ExpectedDecision, TestFile};
 
 /// Executes a suite of YAML-defined authorization tests against a Cedarling instance.
@@ -46,7 +47,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
     let mut reason_ids_seen = HashSet::new();
 
     for test in test_file.tests {
-        print!("  test {} ... ", test.name);
+        print!("  test {} ... ", Untrusted(&test.name));
 
         let req = RequestUnsigned {
             principal: test.request.principal.map(std::convert::Into::into),
@@ -88,7 +89,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
                         .iter()
                         .filter(|id| !actual_ids.contains(*id))
                         .collect();
-                        
+
                     if !missing_ids.is_empty() {
                         test_passed = false;
                         fail_reasons.push(format!(
@@ -122,7 +123,7 @@ pub async fn run(config: cedarling::BootstrapConfig, test_file_path: PathBuf) ->
                 }
             },
             Err(e) => {
-                println!("{} (error: {})", "fail".red(), e);
+                println!("{} (error: {})", "fail".red(), Untrusted(&e.to_string()));
                 failed += 1;
             },
         }
@@ -171,13 +172,13 @@ fn print_coverage(cedarling: &Cedarling, reason_ids_seen: &HashSet<String>) {
     let mut triggered_sorted: Vec<_> = triggered.into_iter().collect();
     triggered_sorted.sort();
     for id in triggered_sorted {
-        println!("  {} {}", "✓".green(), id);
+        println!("  {} {}", "✓".green(), Untrusted(&id));
     }
 
     let mut untriggered_sorted: Vec<_> = untriggered.into_iter().collect();
     untriggered_sorted.sort();
     for id in untriggered_sorted {
-        println!("  {} {}", "✗".red(), id);
+        println!("  {} {}", "✗".red(), Untrusted(&id));
     }
 
     let mut extra_ids: Vec<_> = reason_ids_seen.difference(&all_ids).collect();
@@ -190,7 +191,7 @@ fn print_coverage(cedarling: &Cedarling, reason_ids_seen: &HashSet<String>) {
                 .yellow()
         );
         for id in extra_ids {
-            println!("  - {id}");
+            println!("  - {}", Untrusted(id));
         }
     }
 }

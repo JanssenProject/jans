@@ -32,6 +32,7 @@ func resourceLDAPDatabaseConfiguration() *schema.Resource {
 			},
 			"bind_password": {
 				Type:        schema.TypeString,
+				Sensitive:   true,
 				Required:    true,
 				Description: "Ldap password for binding.",
 			},

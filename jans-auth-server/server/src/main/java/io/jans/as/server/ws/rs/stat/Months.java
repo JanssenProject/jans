@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import static java.time.temporal.TemporalAdjusters.firstDayOfMonth;
 
 /**
@@ -78,7 +79,7 @@ public class Months {
             return true;
         }
 
-        log.error("Invalid month `{}`, month must be 6 chars length in format yyyyMM, e.g. 202212", month);
+        log.error("Invalid month `{}`, month must be 6 chars length in format yyyyMM, e.g. 202212", escapeLog(month));
         return false;
     }
 

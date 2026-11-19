@@ -20,8 +20,7 @@ use wasm_bindgen_test::*;
 wasm_bindgen_test_configure!(run_in_browser);
 
 // Policy store YAML for WASM tests
-static POLICY_STORE_RAW_YAML: &str =
-    include_str!("../test_files/policy-store.yaml");
+static POLICY_STORE_RAW_YAML: &str = include_str!("../test_files/policy-store.yaml");
 
 // Multi-issuer policy store for multi-issuer tests
 static MULTI_ISSUER_POLICY_STORE_YAML: &str =

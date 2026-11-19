@@ -211,7 +211,7 @@ public abstract class BaseAuthFilterService {
         for (IndexedParameter indexedParameter : authenticationFilterWithParameters.getIndexedVariables()) {
             String attributeValue = normalizedAttributeValues.get(indexedParameter.getParamName());
             if (attributeValue != null) {
-                filter = filter.replace(indexedParameter.getParamIndex(), attributeValue);
+                filter = filter.replace(indexedParameter.getParamIndex(), com.unboundid.ldap.sdk.Filter.encodeValue(attributeValue));
             }
         }
         return filter;

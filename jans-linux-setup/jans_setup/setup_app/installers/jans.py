@@ -161,6 +161,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
         self.run([paths.cmd_chmod, '551', Config.certFolder])
+        # rendered output keeps credentials and password hashes
+        self.run([paths.cmd_chmod, '700', Config.output_dir])
 
         self.chown(Config.jans_opt_bin_folder, user=Config.root_user, group=Config.jetty_user)
 
@@ -191,7 +193,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def make_salt(self):
         if base.argsp.encode_salt:
-            self.logIt("Salt {} is provided via argument".format(base.argsp.encode_salt))
+            self.logIt("Salt is provided via argument")
             Config.encode_salt = base.argsp.encode_salt
 
         if not Config.encode_salt:
@@ -201,7 +203,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         try:
             salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
-            self.writeFile(Config.salt_fn, salt_text)
+            self.writeFile(Config.salt_fn, salt_text, mode=0o600)
         except Exception:
             self.logIt("Error writing salt", True, True)
 
@@ -400,7 +402,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
         client_id = Config.get('test_client_id') or getattr(base.argsp, 'test_client_id', None)
         client_pw = Config.get('test_client_pw') or getattr(base.argsp, 'test_client_pw', None) or self.getPW()
         encoded_pw = self.obscure(client_pw)
-        trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
+        configured_trusted = Config.get('test_client_trusted')
+        if isinstance(configured_trusted, str):
+            configured_trusted = configured_trusted.strip().lower() in ('true', 'yes', '1', 'on')
+        trusted_client = 'true' if (configured_trusted or base.argsp.test_client_trusted) else 'false'
 
         if base.argsp.test_client_redirect_uri:
             redirect_uri = base.argsp.test_client_redirect_uri.split(',')

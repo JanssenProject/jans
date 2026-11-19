@@ -17,15 +17,22 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.WordUtils;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.bouncycastle.util.encoders.Base64;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.security.PrivateKey;
+import java.util.Set;
 
 /**
  * Export private key from JKS Command example: java -cp
@@ -112,7 +119,7 @@ public class KeyExporter {
                             sb.append("-----END PRIVATE KEY-----\n");
                         }
 
-                        FileUtils.writeStringToFile(new File(exportFile), sb.toString());
+                        writeOwnerOnly(Paths.get(exportFile), sb.toString());
                     } catch (Exception e) {
                         log.error("Failed to export key", e);
                         help();
@@ -124,6 +131,22 @@ public class KeyExporter {
                 log.error("Failed to export key", e);
                 help();
             }
+        }
+
+        private static void writeOwnerOnly(Path path, String content) throws IOException {
+            Path parent = path.toAbsolutePath().getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+            if (FileSystems.getDefault().supportedFileAttributeViews().contains("posix")) {
+                Set<PosixFilePermission> ownerOnly = PosixFilePermissions.fromString("rw-------");
+                if (Files.exists(path)) {
+                    Files.setPosixFilePermissions(path, ownerOnly);
+                } else {
+                    Files.createFile(path, PosixFilePermissions.asFileAttribute(ownerOnly));
+                }
+            }
+            Files.write(path, content.getBytes(StandardCharsets.UTF_8));
         }
 
         private void help() {

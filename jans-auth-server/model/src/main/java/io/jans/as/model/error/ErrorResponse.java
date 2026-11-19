@@ -156,7 +156,7 @@ public class ErrorResponse {
             }
 
             if (getState() != null && !getState().isEmpty()) {
-                queryStringBuilder.append("&state=").append(getState());
+                queryStringBuilder.append("&state=").append(URLEncoder.encode(getState(), StandardCharsets.UTF_8.name()));
             }
         } catch (UnsupportedEncodingException e) {
             log.error(e.getMessage(), e);

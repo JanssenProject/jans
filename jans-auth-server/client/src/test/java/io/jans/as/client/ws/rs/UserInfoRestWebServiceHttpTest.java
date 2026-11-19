@@ -546,6 +546,8 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         registerRequest.setScope(Tester.standardScopes);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setScope(scopes);
+        // claims requested via "claims" parameter are released only if the client is allowed to get them (registered claims or granted scopes)
+        registerRequest.setClaims(Arrays.asList(JwtClaimName.NAME));
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

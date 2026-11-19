@@ -188,36 +188,17 @@ impl TokenCache {
 
     /// Extract cache duration, result is optional
     fn cache_duration(&self, exp: Option<i64>) -> Option<i64> {
-        exp.and_then(|exp| {
-            // Anchor the remaining lifetime to insert time (`Utc::now()`), not the
-            // request-start `now`: sparkv stamps the entry from insert, so using the
-            // older `now` would over-extend the TTL and let the cache serve a token the
-            // fresh path already rejects as expired.
-            let duration = exp - Utc::now().timestamp();
-            if duration > 0 {
-                // if duration bigger than configured max ttl, use the max ttl
-                if let Ok(max_ttl_i64) = i64::try_from(self.max_ttl) {
-                    Some(if self.max_ttl > 0 && duration > max_ttl_i64 {
-                        max_ttl_i64
-                    } else {
-                        duration
-                    })
-                } else {
-                    // fallback to duration if max_ttl conversion fails
-                    Some(duration)
-                }
-            } else {
-                None
-            }
-        })
-        .or({
+        let max_ttl = i64::try_from(self.max_ttl).ok().filter(|ttl| *ttl > 0);
+        let Some(exp) = exp else {
             // if no exp claim, use the configured max ttl if set
-            if self.max_ttl > 0 {
-                i64::try_from(self.max_ttl).ok()
-            } else {
-                None
-            }
-        })
+            return max_ttl;
+        };
+        // Anchor the remaining lifetime to insert time (`Utc::now()`), not the
+        // request-start `now`: sparkv stamps the entry from insert, so using the
+        // older `now` would over-extend the TTL and let the cache serve a token the
+        // fresh path already rejects as expired. An elapsed `exp` is never cached.
+        let duration = exp - Utc::now().timestamp();
+        (duration > 0).then(|| max_ttl.map_or(duration, |ttl| duration.min(ttl)))
     }
 
     /// Clears expired tokens from the cache.
@@ -357,6 +338,7 @@ mod tests {
         let custom_kind = TokenKind::AuthorizeCustom {
             mapping: "Acme::ApiKey".into(),
             generation: 1,
+            processor: 0,
         };
 
         cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
@@ -412,6 +394,17 @@ mod tests {
             cache.cache_duration(TokenCache::effective_exp(&token, None)),
             Some(5),
             "positive max_ttl should cap the cache duration for tokens with exp"
+        );
+    }
+
+    #[test]
+    fn elapsed_expiration_is_not_given_max_ttl() {
+        let cache = token_cache(300);
+
+        assert_eq!(
+            cache.cache_duration(Some(Utc::now().timestamp() - 1)),
+            None,
+            "an elapsed exp must not fall back to max_ttl"
         );
     }
 

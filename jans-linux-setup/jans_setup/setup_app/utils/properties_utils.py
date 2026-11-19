@@ -222,10 +222,10 @@ class PropertiesUtils(SetupUtils):
                 if value != '':
                     p[obj_name] = value
 
-            with open(prop_fn, 'wb') as f:
+            fd = os.open(prop_fn, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            os.fchmod(fd, 0o600)
+            with os.fdopen(fd, 'wb') as f:
                 p.store(f, encoding="utf-8")
-
-            self.run([paths.cmd_chmod, '600', prop_fn])
 
         except Exception:
             self.logIt("Error saving properties", True)

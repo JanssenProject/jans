@@ -144,7 +144,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         if 'rptAsJwt' in self.data:
             self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
 
-        self.data['attributes'] = {}
+        # keep attributes the form does not show (e.g. minimumAcrLevel, requirePkce)
+        self.data['attributes'] = copy.deepcopy(current_data.get('attributes') or {})
         self.data['attributes']['redirectUrisRegex'] = self.data.pop('redirectUrisRegex')
         self.data['attributes']['parLifetime'] = self.data.pop('parLifetime')
         self.data['attributes']['requirePar'] = self.data.pop('requirePar')
@@ -173,6 +174,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
             values = self.scripts_widget_dict[scr_var].get_values()
             if values:
                 self.data['attributes'][scr_var] = values
+            else:
+                self.data['attributes'].pop(scr_var, None)
 
         self.data['displayName'] = self.data['clientName']
         self.data['attributes']['jansAuthorizedAcr'] = self.data.pop('jansAuthorizedAcr')
@@ -1277,8 +1280,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.client_scopes_entries.remove([scope[0], scope[1]])
 
         dialog = self.myparent.get_confirm_dialog(
-            message=_(
-                "Are you sure want to delete Scope:\n {} ?".format(scope[1])),
+            message=HTML(_("Are you sure want to delete Scope:\n {} ?")).format(scope[1]),
             confirm_handler=do_delete_scope
         )
 
