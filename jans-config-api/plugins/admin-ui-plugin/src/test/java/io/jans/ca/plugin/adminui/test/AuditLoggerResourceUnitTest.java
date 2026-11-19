@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -30,6 +31,7 @@ public class AuditLoggerResourceUnitTest {
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.openMocks(this);
+        when(log.isInfoEnabled()).thenReturn(true);
     }
 
     @Test
