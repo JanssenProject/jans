@@ -367,6 +367,15 @@ impl HttpClient {
         // Any other failure (auth, missing resource, server error) is a real failure,
         // not "HEAD returned no validators", so it is not counted as a degraded strategy.
         let response = AttemptFailure::check(result)?;
+        // A `3xx` left after redirects (a `304` to a request with no validators, say)
+        // describes no current version, so its headers are not trusted either.
+        if !response.status().is_success() {
+            return Err(AttemptFailure::Final(FinalFailure::Status {
+                status: response.status(),
+                url: Box::new(failure::RedactedUrl::new(response.url())),
+            })
+            .into());
+        }
         Ok(HeadOutcome::Headers(CacheHeadersState::from_headers(
             response.headers(),
             chrono::Utc::now(),
@@ -1302,6 +1311,13 @@ mod test {
     #[tokio::test]
     async fn head_validators_500_propagates_as_error() {
         assert_head_status_propagates_as_error(500).await;
+    }
+
+    /// A `304` must not pass as validators: a matching `ETag` on it would report
+    /// the store unchanged and clear the refresh worker's failure streak.
+    #[tokio::test]
+    async fn head_validators_304_propagates_as_error() {
+        assert_head_status_propagates_as_error(304).await;
     }
 
     #[tokio::test]

@@ -129,7 +129,7 @@ pub(crate) enum FinalFailure {
     /// A request that cannot be built (invalid URL) or a redirect that is refused.
     #[error("invalid request: {}", ErrorChain(.0))]
     InvalidRequest(reqwest::Error),
-    /// Any `4xx` other than `408` and `429`.
+    /// Any `4xx` other than `408` and `429`, or a `3xx` where only a `2xx` will do.
     #[error("HTTP {status} from {url}")]
     Status {
         status: StatusCode,
