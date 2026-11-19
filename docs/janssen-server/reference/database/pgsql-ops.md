@@ -80,6 +80,19 @@ ALTER TABLE "jansPerson"
 ADD COLUMN membership_level VARCHAR DEFAULT 'Basic';
 ```
 
+## Add user version column on upgrade
+
+User updates are versioned through the `jansVersion` column of `jansPerson`. Container and Kubernetes
+deployments add it automatically through the persistence loader. On a VM install, add it before
+upgrading the Janssen services:
+
+```
+ALTER TABLE "jansPerson" ADD COLUMN "jansVersion" BIGINT;
+```
+
+Existing rows keep a `NULL` version until their next update. Manual `UPDATE` statements on `jansPerson`
+should also set `"jansVersion" = COALESCE("jansVersion", 0) + 1`, so concurrent versioned writes notice the change.
+
 ## Output column data into txt
 
 If you want to output the data from a PostgreSQL table's column into a text file, you can use the `COPY` command. This command allows you to copy the contents of a table or query result into an external file. Here's how you can do it:

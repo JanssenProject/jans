@@ -6,6 +6,7 @@
 
 package io.jans.scim.model;
 
+import io.jans.orm.annotation.Version;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,29 @@ import io.jans.orm.annotation.ObjectClass;
 public class User extends CustomEntry implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7779582184398161112L;
+
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    // version is concurrency metadata, not identity: keep the inherited equality
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
 	@AttributesList(name = "name", value = "values", sortByName = true, multiValued = "multiValued",
 			attributesConfiguration = {

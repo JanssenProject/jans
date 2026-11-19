@@ -233,7 +233,13 @@ public class ScimResourceUtil {
                     Map<String, Object> submap=IntrospectUtil.strObjMap(source.get(path));
                     //get method above could have returned null (no extended attributes for source object)
                     if (submap != null) {
-                        submap.put(key, null);
+                        //Only registered fields of the extension can be removed
+                        String field = ext.getFields().keySet().stream().filter(key::equalsIgnoreCase).findFirst().orElse(null);
+                        if (field == null) {
+                            log.warn("Attribute {} is not part of extension {}", key, path);
+                        } else {
+                            submap.put(field, null);
+                        }
                     }
                 }
 

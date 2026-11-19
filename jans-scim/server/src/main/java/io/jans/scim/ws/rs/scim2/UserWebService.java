@@ -388,6 +388,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
             //Fill user instance with all info from person
             scim2UserService.transferAttributesToUserResource(person, user, endpointUrl);
 
+            boolean removePPIDs = false;
             //Apply patches one by one in sequence
             for (PatchOperation po : request.getOperations()) {
                 //Handle special case: https://github.com/GluuFederation/oxTrust/issues/800
@@ -395,7 +396,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
                     //If this block weren't here, the implementation will throw error because read-only attribute cannot be altered
                     person.setPpid(null);
                     user.setPairwiseIdentifiers(null);
-                    scim2UserService.removePPIDsBranch(person.getDn());
+                    removePPIDs = true;
                 } else {
                     user = (UserResource) scim2PatchService.applyPatchOperation(user, po);
                 }
@@ -411,6 +412,10 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
 
             //Replaces the information found in person with the contents of user
             scim2UserService.replacePersonInfo(person, user, endpointUrl);
+            //Deferred so a validation or updateUser script rejection leaves pairwise mappings intact
+            if (removePPIDs) {
+                scim2UserService.removePPIDsBranch(person.getDn());
+            }
 
             String json = resourceSerializer.serialize(user, attrsList, excludedAttrsList);
             response = Response.ok(new URI(user.getMeta().getLocation())).entity(json).build();

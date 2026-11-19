@@ -12,8 +12,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 
 //import io.jans.scim.ldap.service.IGroupService;
@@ -58,6 +60,13 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @Inject
     private AttributeService attributeService;
+
+    //Authentication secrets (e.g. Casa OTP keys) must never leave the server
+    private static final Set<String> EXCLUDED_ATTRIBUTES = Set.of("userpassword", "jansotpdevices", "jansotpcache",
+            "jansmobiledevices", "janstrusteddevices", "jansauthenticator", "jansbackchanneldeviceregistrationtkn",
+            "jansbackchannelusrcode");
+    private static final String EXT_UID_ATTRIBUTE = "jansExtUid";
+    private static final List<String> SECRET_EXT_UID_PREFIXES = List.of("totp:", "hotp:");
 
     private boolean ldapBackend;
 
@@ -127,6 +136,7 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             Map<String, List<Object>> map = new TreeMap<>();
             person.getTypedCustomAttributes().forEach(attr -> map.put(attr.getName(), new ArrayList<>(attr.getValues())));
             map.putAll(getNonCustomAttributes(person));
+            removeSecretAttributes(map);
 
             //Do a best effort to supply output in proper data types
             for (String key : map.keySet()) {
@@ -175,6 +185,21 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
             resources.add(map);
         }
         return getResultsAsJson(resources, fresher);
+
+    }
+
+    private void removeSecretAttributes(Map<String, List<Object>> map) {
+
+        map.keySet().removeIf(name -> EXCLUDED_ATTRIBUTES.contains(name.toLowerCase(Locale.ROOT)));
+        map.entrySet().removeIf(entry -> {
+            if (!EXT_UID_ATTRIBUTE.equalsIgnoreCase(entry.getKey())) {
+                return false;
+            }
+            List<Object> values = entry.getValue();
+            values.removeIf(v -> v != null && SECRET_EXT_UID_PREFIXES.stream()
+                    .anyMatch(prefix -> v.toString().toLowerCase(Locale.ROOT).startsWith(prefix)));
+            return values.isEmpty();
+        });
 
     }
 

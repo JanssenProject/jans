@@ -18,14 +18,11 @@ use std::str::FromStr;
 
 use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId};
-use cedar_policy_core::extensions::Extensions;
-use cedar_policy_core::validator::ValidatorSchema;
 use serde::de::{self, Error};
 use serde::{Deserialize, Deserializer};
 use url::Url;
 
 use crate::common::PartitionResult;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::{
     DefaultEntitiesWithWarns, parse_default_entities_with_warns,
 };
@@ -246,14 +243,13 @@ enum CedarSchemaMaybeEncoded {
 #[derive(Debug, Clone)]
 pub(crate) struct LegacyCedarSchema {
     pub schema: cedar_policy::Schema,
-    pub json: CedarSchemaJson,
-    pub validator_schema: ValidatorSchema,
 }
 
 #[cfg(test)]
 impl PartialEq for LegacyCedarSchema {
     fn eq(&self, other: &Self) -> bool {
-        self.json == other.json
+        use crate::common::cedar_schema::SchemaShape;
+        SchemaShape::of(&self.schema) == SchemaShape::of(&other.schema)
     }
 }
 
@@ -267,8 +263,6 @@ enum ParseCedarSchemaSetMessage {
     Parse,
     #[error("invalid utf8 detected while decoding cedar policy")]
     Utf8,
-    #[error("failed to parse cedar schema from JSON")]
-    ParseCedarSchemaJson,
 }
 
 impl<'de> Deserialize<'de> for LegacyCedarSchema {
@@ -295,79 +289,34 @@ impl<'de> Deserialize<'de> for LegacyCedarSchema {
         };
         let decoded_body = decoded_body.trim_end().to_string();
 
-        let (schema_fragment, json_string) = match encoded_schema.content_type {
-            ContentType::Cedar => {
-                let (schema_fragment, _warning) =
-                    cedar_policy::SchemaFragment::from_cedarschema_str(&decoded_body).map_err(
-                        |err| {
-                            de::Error::custom(format!(
-                                "{}: {}",
-                                ParseCedarSchemaSetMessage::Parse,
-                                err
-                            ))
-                        },
-                    )?;
-                let json_string = schema_fragment.to_json_string().map_err(|err| {
+        let schema_fragment = match encoded_schema.content_type {
+            ContentType::Cedar => cedar_policy::SchemaFragment::from_cedarschema_str(&decoded_body)
+                .map(|(schema_fragment, _warnings)| schema_fragment)
+                .map_err(|err| {
+                    de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Parse, err))
+                })?,
+            ContentType::CedarJson => cedar_policy::SchemaFragment::from_json_str(&decoded_body)
+                .map_err(|err| {
                     de::Error::custom(format!(
                         "{}: {}",
                         ParseCedarSchemaSetMessage::CedarSchemaJsonFormat,
                         err
                     ))
-                })?;
-                (schema_fragment, json_string)
-            },
-            ContentType::CedarJson => {
-                let schema_fragment = cedar_policy::SchemaFragment::from_json_str(&decoded_body)
-                    .map_err(|err| {
-                        de::Error::custom(format!(
-                            "{}: {}",
-                            ParseCedarSchemaSetMessage::CedarSchemaJsonFormat,
-                            err
-                        ))
-                    })?;
-                (schema_fragment, decoded_body)
-            },
+                })?,
         };
 
-        let fragment_iter = std::iter::once(schema_fragment);
-        let schema = cedar_policy::Schema::from_schema_fragments(fragment_iter).map_err(|err| {
-            de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Parse, err))
-        })?;
+        let schema =
+            cedar_policy::Schema::from_schema_fragments([schema_fragment]).map_err(|err| {
+                de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Parse, err))
+            })?;
 
-        let json = serde_json::from_str(&json_string).map_err(|err| {
-            de::Error::custom(format!(
-                "{}: {}",
-                ParseCedarSchemaSetMessage::CedarSchemaJsonFormat,
-                err
-            ))
-        })?;
-
-        let validator_schema =
-            ValidatorSchema::from_json_str(&json_string, Extensions::all_available()).map_err(
-                |err| {
-                    de::Error::custom(format!(
-                        "{}: {}",
-                        ParseCedarSchemaSetMessage::ParseCedarSchemaJson,
-                        err
-                    ))
-                },
-            )?;
-
-        Ok(LegacyCedarSchema {
-            schema,
-            json,
-            validator_schema,
-        })
+        Ok(LegacyCedarSchema { schema })
     }
 }
 
 impl From<LegacyCedarSchema> for crate::common::cedar_schema::CedarSchema {
     fn from(v: LegacyCedarSchema) -> Self {
-        crate::common::cedar_schema::CedarSchema {
-            schema: v.schema,
-            json: v.json,
-            validator_schema: v.validator_schema,
-        }
+        v.schema.into()
     }
 }
 
