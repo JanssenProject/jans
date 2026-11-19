@@ -114,12 +114,26 @@ public class UserMgmtServiceTest {
         User replacement = user(GluuStatus.ACTIVE, 1L);
         replacement.setUserId("jdoe2");
 
-        User result = userMgmtService.updateUser(replacement, false);
+        User result = userMgmtService.updateUser(replacement, false, false);
 
         assertEquals(writes.size(), 1);
         assertEquals(stored.get().getUserId(), "jdoe2");
         assertEquals(stored.get().getVersion(), Long.valueOf(3L));
         assertNotNull(result);
+    }
+
+    @Test
+    public void updateWithoutStatusReadBeforeLockKeepsAccountInactive() {
+        stored.set(user(GluuStatus.INACTIVE, 2L));
+        // resource copied status and version from its read, taken before the lock
+        User replacement = user(GluuStatus.ACTIVE, 1L);
+        replacement.setUserId("jdoe2");
+
+        userMgmtService.updateUser(replacement, true, true);
+
+        assertEquals(writes.size(), 1);
+        assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);
+        assertEquals(stored.get().getUserId(), "jdoe2");
     }
 
     private static UserPatchRequest patch(String json) {

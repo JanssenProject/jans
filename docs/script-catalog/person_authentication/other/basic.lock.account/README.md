@@ -28,7 +28,8 @@ Custom entity classes or direct database updates on `jansPerson` must advance it
 see their changes.
 
 Config API user updates (PUT and PATCH) save conditionally on the version they read, and on a conflict re-read the
-user and reapply the request, so a PATCH read before a lock keeps the account locked. Other writers that update users
+user and reapply the request, so a PATCH read before a lock keeps the account locked. A PUT without `jansStatus`
+keeps the stored status. Other writers that update users
 with plain `merge` (for example SCIM) check only the version `merge` reads itself, not the one their own earlier read
 saw. An update read before a lock and saved after it can therefore write the status it read and reactivate the account
 early.

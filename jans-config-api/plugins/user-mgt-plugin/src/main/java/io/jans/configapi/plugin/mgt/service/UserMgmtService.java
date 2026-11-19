@@ -530,15 +530,16 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
-        return updateUser(user, true);
+        return updateUser(user, true, false);
     }
 
     /**
      * Replace the stored user with {@code user}, conditional on {@code user.getVersion()} (the
      * version of the caller's read). On a concurrent write the stored entry is re-read, the role
-     * check repeated against it, and the write retried on its version.
+     * check repeated against it, and the write retried on its version. With {@code keepStoredStatus}
+     * the status is taken from that re-read rather than from {@code user}.
      */
-    public User updateUser(User user, boolean allowRoleChange) {
+    public User updateUser(User user, boolean allowRoleChange, boolean keepStoredStatus) {
         logger.info("\n Updating user:{}", user);
         for (int attempt = 1;; attempt++) {
             try {
@@ -554,6 +555,9 @@ public class UserMgmtService {
                 throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
             }
             user.setVersion(current.getVersion());
+            if (keepStoredStatus) {
+                user.setStatus(current.getStatus());
+            }
         }
     }
 

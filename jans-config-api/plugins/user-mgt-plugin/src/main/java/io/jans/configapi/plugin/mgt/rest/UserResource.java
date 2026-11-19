@@ -331,6 +331,11 @@ public class UserResource extends BaseResource {
             checkResourceNotNull(existingUser, USER);
             user.setDn(existingUser.getDn());
             user.setVersion(existingUser.getVersion());
+            // no status in the request keeps the stored one, so a PUT cannot lift a lock by omission
+            boolean keepStoredStatus = customUser.getStatus() == null;
+            if (keepStoredStatus) {
+                user.setStatus(existingUser.getStatus());
+            }
 
             // validate user role-permission
             validateUserPermission(null, user);
@@ -349,7 +354,7 @@ public class UserResource extends BaseResource {
 
             logger.info("Call update user:{}", user);
 
-            user = userMgmtSrv.updateUser(user, canChangeAdminUIRole());
+            user = userMgmtSrv.updateUser(user, canChangeAdminUIRole(), keepStoredStatus);
             checkResourceNotNull(user, USER);
             logger.info("Updated user:{}", user);
 
