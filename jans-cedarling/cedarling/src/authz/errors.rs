@@ -202,10 +202,6 @@ pub enum BuildContextError {
     /// Error encountered while building entity references in the Context
     #[error("failed to build entity reference for `{0}` since an entity id was not provided")]
     MissingEntityId(String),
-    #[error("invalid action context type: {0}. expected: {1}")]
-    InvalidKind(String, String),
-    #[error("failed to parse the entity name `{0}`: {1}")]
-    ParseEntityName(String, Box<ParseErrors>),
     /// Error encountered while creating Cedar context
     #[error("failed to create Cedar context: {0}")]
     ContextCreation(String),
