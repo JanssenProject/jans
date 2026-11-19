@@ -167,7 +167,8 @@ class Aio:
 
     def set_user_status(self, inum, status):
         """Admin status change; create always stores active (UserService.addUser)."""
-        patch = json.dumps([{"op": "replace", "path": "/status", "value": status}])
+        # the patch is applied to the Java entity, so GluuStatus takes the enum name
+        patch = json.dumps([{"op": "replace", "path": "/status", "value": status.upper()}])
         return self.api("PATCH", f"/mgt/configuser/{inum}", {"jsonPatchString": patch})
 
     def get_user(self, inum):
