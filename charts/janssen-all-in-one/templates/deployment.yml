@@ -93,7 +93,11 @@ spec:
               {{- with .Values.customScripts }}
               {{- toYaml . | replace "- " "" | nindent 14}}
               {{- end }}
-              python3 /scripts/tls_generator.py &
+              {{- if .Values.istio.ingress }}
+              python3 /app/jans_aio/configurator/tls_generator.py --namespace={{ .Values.istio.namespace | quote }} &
+              {{- else }}
+              python3 /app/jans_aio/configurator/tls_generator.py --namespace={{ .Release.Namespace | quote }} &
+              {{- end }}
               /app/bin/entrypoint.sh
           {{- end}}
         {{- end}}
@@ -124,9 +128,6 @@ spec:
         {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-          - mountPath: /scripts/tls_generator.py
-            name: {{ include "janssen-all-in-one.name" . }}-tls-script
-            subPath: tls_generator.py
         {{- if not .Values.isFqdnRegistered }}
           - name: {{ include "janssen-all-in-one.fullname" .}}-updatelbip
             mountPath: /scripts/updatelbip.py
@@ -169,9 +170,6 @@ spec:
       {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-        - name: {{ include "janssen-all-in-one.name" . }}-tls-script
-          configMap:
-            name: {{ include "janssen-all-in-one.fullname" . }}-tls-script
       {{- if not .Values.isFqdnRegistered }}
         - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
           configMap:

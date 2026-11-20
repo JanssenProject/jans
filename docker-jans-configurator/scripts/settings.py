@@ -22,5 +22,10 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
+        "tls-generator": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
