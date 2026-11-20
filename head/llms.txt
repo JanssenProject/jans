@@ -393,7 +393,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Getting Started](https://docs.jans.io/head/cedarling/tutorials/cedarling-getting-started/index.md)
 - [Golang](https://docs.jans.io/head/cedarling/tutorials/go/index.md)
 - [Java](https://docs.jans.io/head/cedarling/tutorials/java/index.md)
-- [Javascript](https://docs.jans.io/head/cedarling/tutorials/javascript/index.md)
+- [JavaScript (WASM)](https://docs.jans.io/head/cedarling/tutorials/javascript/index.md)
 - [Kotlin](https://docs.jans.io/head/cedarling/tutorials/kotlin/index.md)
 - [Python](https://docs.jans.io/head/cedarling/tutorials/python/index.md)
 - [Rust](https://docs.jans.io/head/cedarling/tutorials/rust/index.md)

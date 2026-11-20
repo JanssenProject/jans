@@ -29,7 +29,7 @@
     
     
       
-        <title>Getting Started with Cedarling in a JavaScript app - Janssen Documentation</title>
+        <title>Using Cedarling WebAssembly (WASM) in JavaScript - Janssen Documentation</title>
       
     
     
@@ -116,7 +116,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#getting-started-with-cedarling-in-a-javascript-app" class="md-skip">
+        <a href="#using-cedarling-webassembly-wasm-in-javascript" class="md-skip">
           Skip to content
         </a>
       
@@ -167,7 +167,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Getting Started with Cedarling in a JavaScript app
+              Using Cedarling WebAssembly (WASM) in JavaScript
             
           </span>
         </div>
@@ -903,7 +903,7 @@
   <span class="md-ellipsis">
     
   
-  Javascript
+  JavaScript (WASM)
 
     
   </span>
@@ -920,7 +920,7 @@
   <span class="md-ellipsis">
     
   
-  Javascript
+  JavaScript (WASM)
 
     
   </span>
@@ -956,77 +956,31 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#using-the-package-manager" class="md-nav__link">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Using the package manager
+        Unsigned authorization
       </span>
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Build from Source
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Build from Source">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Requirements
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Building
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Usage
+        Token-based authorization (multi-issuer)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#initialization" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1035,18 +989,19 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Initialization">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#policy-store-sources-wasm" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Policy Store Sources (WASM)
+        Policy store sources (WASM)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+    <nav class="md-nav" aria-label="Policy store sources (WASM)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1076,57 +1031,45 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Authorization
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Authorization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Token-Based Authorization (Multi-Issuer)
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unsigned-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Unsigned Authorization
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#batch-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Batch Authorization
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#decision-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Decision diagnostics
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Batch authorization
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Trusted issuer readiness
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1136,9 +1079,37 @@
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#context-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Context data
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-and-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Metrics and shutdown
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choose-a-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Choose a runtime
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -1147,17 +1118,6 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         API reference
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        See Also
       </span>
     </span>
   </a>
@@ -1704,77 +1664,31 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Installation">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#using-the-package-manager" class="md-nav__link">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#unsigned-authorization" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Using the package manager
+        Unsigned authorization
       </span>
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#build-from-source" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Build from Source
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Build from Source">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#requirements" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Requirements
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#building" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Building
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Usage
+        Token-based authorization (multi-issuer)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#initialization" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1783,18 +1697,19 @@
     </span>
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Initialization">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
   <a href="#policy-store-sources-wasm" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
-        Policy Store Sources (WASM)
+        Policy store sources (WASM)
       </span>
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Policy Store Sources (WASM)">
+    <nav class="md-nav" aria-label="Policy store sources (WASM)">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1824,57 +1739,45 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Authorization
-      </span>
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Authorization">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#token-based-authorization-multi-issuer" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Token-Based Authorization (Multi-Issuer)
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#unsigned-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Unsigned Authorization
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#batch-authorization" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        Batch Authorization
-      </span>
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
+  <a href="#decision-diagnostics" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Decision diagnostics
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#batch-authorization" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Batch authorization
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-readiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Trusted issuer readiness
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#logging" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1884,9 +1787,37 @@
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#context-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Context data
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-and-shutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Metrics and shutdown
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#choose-a-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Choose a runtime
+      </span>
+    </span>
+  </a>
   
 </li>
       
@@ -1895,17 +1826,6 @@
     <span class="md-ellipsis">
       <span class="md-typeset">
         API reference
-      </span>
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      <span class="md-typeset">
-        See Also
       </span>
     </span>
   </a>
@@ -2030,251 +1950,389 @@
   
 
 
-<h1 id="getting-started-with-cedarling-in-a-javascript-app">Getting Started with Cedarling in a JavaScript app<a class="headerlink" href="#getting-started-with-cedarling-in-a-javascript-app" title="Permanent link">#</a></h1>
-<p>This guide explains how to install, build, and use the Cedarling WebAssembly
-(WASM) package from JavaScript.</p>
+<h1 id="using-cedarling-webassembly-wasm-in-javascript">Using Cedarling WebAssembly (WASM) in JavaScript<a class="headerlink" href="#using-cedarling-webassembly-wasm-in-javascript" title="Permanent link">#</a></h1>
+<p>Janssen's Cedarling npm package includes the WebAssembly binary for evaluating
+Cedar policies in JavaScript or TypeScript. It runs in browsers, Node.js, and
+edge workers. In the Node.js examples below, Alice first requests a document
+using an identity supplied by the application. The second example uses signed
+tokens from two issuers.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<h3 id="using-the-package-manager">Using the package manager<a class="headerlink" href="#using-the-package-manager" title="Permanent link">#</a></h3>
-<p>You can easily install Cedarling using WASM.</p>
-<div class="highlight"><pre><span></span><code>npm<span class="w"> </span>i<span class="w"> </span>@janssenproject/cedarling_wasm
+<p>With Node.js 22, 24, or 26 installed, run these commands in an empty directory.</p>
+<div class="highlight"><pre><span></span><code>npm<span class="w"> </span>init<span class="w"> </span>-y
+npm<span class="w"> </span>install<span class="w"> </span>@janssenproject/cedarling_wasm
 </code></pre></div>
-<p>Alternatively, see <a href="#build-from-source">here</a>, if you want to build Cedarling from the source.</p>
-<h3 id="build-from-source">Build from Source<a class="headerlink" href="#build-from-source" title="Permanent link">#</a></h3>
-<h4 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">#</a></h4>
-<p>Rust 1.63 or Greater. Ensure that you have <code>Rust</code> version 1.63 or higher installed.
-You can check your current version of Rust using the command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>rustc<span class="w"> </span>--version
-</code></pre></div>
-<p>Installed <code>wasm-pack</code> via <code>Cargo</code>. You can install it with the following command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cargo<span class="w"> </span>install<span class="w"> </span>wasm-pack
-</code></pre></div>
-<p>Ensure that Clang is installed with support for WebAssembly targets. You can check the installation and available targets with:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>clang<span class="w"> </span>-print-targets
-</code></pre></div>
-<p>Check <code>clang</code> version</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>clang<span class="w"> </span>--version
-</code></pre></div>
-<h4 id="building">Building<a class="headerlink" href="#building" title="Permanent link">#</a></h4>
-<p>Clone the Janssen server repository from the GitHub and change the directory to the <code>cedarling_wasm</code> directory:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>/path/to/jans/jans-cedarling/bindings/cedarling_wasm
-</code></pre></div>
-<p>Generate the web-target binding used as the JavaScript package's build input:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>wasm-pack<span class="w"> </span>build<span class="w"> </span>--release<span class="w"> </span>--locked<span class="w"> </span>--target<span class="w"> </span>web<span class="w"> </span>--scope<span class="w"> </span>janssenproject
-</code></pre></div>
-<p>This creates the intermediate <code>pkg/</code> directory. Assemble the publishable package
-from the handwritten source in <code>js/</code>:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>js
-npm<span class="w"> </span>ci<span class="w"> </span>--ignore-scripts
-npm<span class="w"> </span>run<span class="w"> </span>build
-</code></pre></div>
-<p>See the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md">JavaScript package maintainer guide</a>
-for the complete build and verification workflow.</p>
-<h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
-<div class="admonition info">
-<p class="admonition-title">Sample Apps</p>
-<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_wasm/js/examples">maintained JavaScript examples</a>
-for Node.js ESM, Node.js CommonJS, React with Vite, webpack, and Cloudflare
-Workers integrations.</p>
-</div>
-<h3 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h3>
-<p>The package loads its bundled WASM module when <code>init()</code> creates a Cedarling
-instance.</p>
+<p><span id="usage"></span>
+<span id="authorization"></span></p>
+<h2 id="unsigned-authorization">Unsigned authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h2>
+<p>Save this as <code>unsigned.mjs</code>. Its inline YAML defines a policy store with a single
+policy that lets Alice read <code>document-1</code>. The loop asks Cedarling whether she can
+read each of two documents.</p>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
-<span class="kd">let</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_APPLICATION_NAME&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="c1">// make sure to update this with your own policy store</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_POLICY_STORE_URI&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://raw.githubusercontent.com/...&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_LOG_TYPE&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;std_out&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_LOG_LEVEL&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;CEDARLING_JWT_SIG_VALIDATION&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;disabled&quot;</span><span class="p">,</span>
-<span class="p">});</span>
-</code></pre></div>
-<h3 id="policy-store-sources-wasm">Policy Store Sources (WASM)<a class="headerlink" href="#policy-store-sources-wasm" title="Permanent link">#</a></h3>
-<p>Choose the loading method that matches how your application obtains the policy
-archive.</p>
-<h4 id="load-an-archive-from-a-url">Load an archive from a URL<a class="headerlink" href="#load-an-archive-from-a-url" title="Permanent link">#</a></h4>
-<p>Pass the archive URL through <code>CEDARLING_POLICY_STORE_URI</code> when calling <code>init()</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">policyStore</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`</span>
+<span class="sb">cedar_version: 4.5.0</span>
+<span class="sb">policy_stores:</span>
+<span class="sb">  abc123def456:</span>
+<span class="sb">    name: Document access</span>
+<span class="sb">    schema:</span>
+<span class="sb">      encoding: none</span>
+<span class="sb">      content_type: cedar</span>
+<span class="sb">      body: |</span>
+<span class="sb">        namespace Example {</span>
+<span class="sb">          entity User;</span>
+<span class="sb">          entity Document;</span>
+<span class="sb">          action &quot;Read&quot; appliesTo { principal: [User], resource: [Document], context: {} };</span>
+<span class="sb">        }</span>
+<span class="sb">    policies:</span>
+<span class="sb">      allow-alice:</span>
+<span class="sb">        description: Alice may read document-1.</span>
+<span class="sb">        policy_content:</span>
+<span class="sb">          encoding: none</span>
+<span class="sb">          content_type: cedar</span>
+<span class="sb">          body: |</span>
+<span class="sb">            @description(&quot;Alice may read document-1&quot;)</span>
+<span class="sb">            permit(principal == Example::User::&quot;alice&quot;,</span>
+<span class="sb">                   action == Example::Action::&quot;Read&quot;,</span>
+<span class="sb">                   resource == Example::Document::&quot;document-1&quot;);</span>
+<span class="sb">`</span><span class="p">;</span>
 
 <span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_URI</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;document-reader&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_LOCAL</span><span class="o">:</span><span class="w"> </span><span class="nx">policyStore</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_LOG_TYPE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;memory&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_LOG_LEVEL</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_LOG_TTL</span><span class="o">:</span><span class="w"> </span><span class="mf">120</span><span class="p">,</span>
 <span class="p">});</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">principal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Example::User&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;alice&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="kd">function</span><span class="w"> </span><span class="nx">readDocument</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Example::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Example::Document&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">id</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;document-1&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;document-2&quot;</span><span class="p">])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="nx">readDocument</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span><span class="w"> </span><span class="p">};</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;allow&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;deny&quot;</span><span class="p">);</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogsByRequestId</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">request_id</span><span class="p">);</span>
+<span class="w">      </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Request has logs:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">logs</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">result</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">shutDown</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="p">}</span>
 </code></pre></div>
+<p>Run <code>node unsigned.mjs</code>. You'll see <code>document-1 allow</code> and <code>document-2 deny</code>,
+each followed by <code>Request has logs: true</code>. Both calls succeeded. Cedarling
+denied the second request because no policy lets Alice read that document.
+The binding takes JSON text. An invalid request rejects the promise, while a
+denial returns a result with <code>decision === false</code>.</p>
+<p>Take the principal from trusted application state. If you omit it or pass
+<code>null</code>, Cedarling uses partial evaluation and denies the request if it still
+needs the principal to reach a decision. If the resource lives on a server,
+enforce the decision on the server that handles the request.</p>
+<h2 id="token-based-authorization-multi-issuer">Token-based authorization (multi-issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h2>
+<p>Acme and Dolphin each issue an access token with an <code>org_id</code> claim. The caller
+can read the resource only if both tokens are valid and both claims match the
+resource's organization. In the request, <code>mapping</code> names the token's Cedar
+entity type and <code>payload</code> holds the JWT.</p>
+<p>Save <a download="download" href="../../../assets/cedarling/wasm/demo-issuers.mjs">demo-issuers.mjs</a>
+and <a download="download" href="../../../assets/cedarling/wasm/signed-policy.yml">signed-policy.yml</a>
+alongside <code>unsigned.mjs</code>. The demo runs both issuers on a local HTTP server.
+Each gets its own signing key and issues a token that lasts five minutes.
+Cedarling reads each issuer's discovery document, fetches its public key, and
+checks the token's signature. In your application, use your identity providers'
+HTTPS discovery URLs and the tokens from your login flows.</p>
+<p>Save the example as <code>signed.mjs</code> in the same directory.</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">readFile</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;node:fs/promises&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">startDemoIssuers</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;./demo-issuers.mjs&quot;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">template</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">readFile</span><span class="p">(</span><span class="ow">new</span><span class="w"> </span><span class="nx">URL</span><span class="p">(</span><span class="s2">&quot;./signed-policy.yml&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">url</span><span class="p">),</span><span class="w"> </span><span class="s2">&quot;utf8&quot;</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">demo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">startDemoIssuers</span><span class="p">();</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;organization-reader&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">CEDARLING_POLICY_STORE_LOCAL</span><span class="o">:</span><span class="w"> </span><span class="nx">template</span><span class="p">.</span><span class="nx">replaceAll</span><span class="p">(</span><span class="s2">&quot;DEMO_ORIGIN&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">demo</span><span class="p">.</span><span class="nx">origin</span><span class="p">),</span>
+<span class="w">    </span><span class="nx">CEDARLING_JWT_SIG_VALIDATION</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enabled&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ES256&quot;</span><span class="p">],</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;MultiIssuer::Action::&quot;Read&quot;&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;MultiIssuer::Resource&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;document&quot;</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{},</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="p">[</span><span class="nx">demo</span><span class="p">.</span><span class="nx">tokens</span><span class="p">,</span><span class="w"> </span><span class="nx">demo</span><span class="p">.</span><span class="nx">tokens</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span><span class="w"> </span><span class="mf">1</span><span class="p">)])</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span><span class="w"> </span><span class="p">...</span><span class="nx">item</span><span class="w"> </span><span class="p">};</span>
+<span class="w">      </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
+<span class="w">      </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">tokens</span><span class="p">.</span><span class="nx">length</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;token(s):&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s2">&quot;allow&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;deny&quot;</span><span class="p">);</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">result</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">shutDown</span><span class="p">();</span>
+<span class="w">    </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">demo</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Run <code>node signed.mjs</code>. The first call prints <code>2 token(s): allow</code>. The second
+prints <code>1 token(s): deny</code> because it sends only Acme's token. Cedarling can
+still evaluate a request when some tokens fail validation, using those that
+passed. To see why Cedarling dropped a token you sent, check the <a href="#decision-diagnostics">decision diagnostics</a>.</p>
+<h2 id="initialization">Initialization<a class="headerlink" href="#initialization" title="Permanent link">#</a></h2>
+<p><code>init(config)</code> loads the bundled WASM module and creates a Cedarling instance.
+Pass the bootstrap properties as a plain object or a JavaScript <code>Map</code>, then
+reuse that instance across requests. To try the snippets below, add them to
+the corresponding example before it shuts down.</p>
+<h3 id="policy-store-sources-wasm">Policy store sources (WASM)<a class="headerlink" href="#policy-store-sources-wasm" title="Permanent link">#</a></h3>
+<h4 id="load-an-archive-from-a-url">Load an archive from a URL<a class="headerlink" href="#load-an-archive-from-a-url" title="Permanent link">#</a></h4>
+<p>Set <code>CEDARLING_POLICY_STORE_URI</code> to the absolute HTTPS URL of your Cedar archive.
+For a signed archive, supply the certificate identity and OIDC issuer used to
+sign it. In <code>enforce</code> mode, Cedarling starts only if the signature verifies.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;document-reader&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_SIGSTORE_MODE</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;enforce&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_SIGSTORE_CERT_IDENTITY</span><span class="o">:</span><span class="w"> </span><span class="nx">signerIdentity</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_SIGSTORE_CERT_OIDC_ISSUER</span><span class="o">:</span><span class="w"> </span><span class="nx">signerOidcIssuer</span><span class="p">,</span>
+<span class="p">};</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span><span class="w"> </span><span class="p">...</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">CEDARLING_POLICY_STORE_URI</span><span class="o">:</span><span class="w"> </span><span class="nx">archiveUrl</span><span class="w"> </span><span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">policyStoreId</span><span class="p">());</span>
+</code></pre></div>
+<p><code>policyStoreId()</code> returns the loaded store's ID, or <code>undefined</code> if it has none.
+Cedarling finds the signature bundle by appending <code>.sigstore.json</code> to the
+archive URL.</p>
 <h4 id="load-archive-bytes">Load archive bytes<a class="headerlink" href="#load-archive-bytes" title="Permanent link">#</a></h4>
-<p>Use <code>initFromArchiveBytes()</code> when the application fetches or otherwise obtains
-the archive itself:</p>
+<p>If your application downloads the archive, pass its bytes as a <code>Uint8Array</code>.
+Supply the bundle URL too when you enforce signature verification. In a
+browser, the archive and bundle must each be on the application's origin or
+served with CORS headers that allow that origin.</p>
 <div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm&quot;</span><span class="p">;</span>
 
-<span class="kd">const</span><span class="w"> </span><span class="nx">bearer</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;your-bearer-token&gt;&quot;</span><span class="p">;</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;My App&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="c1">// ... other configuration properties</span>
-<span class="p">};</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="s2">&quot;https://example.com/policy-store.cjar&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">headers</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">Authorization</span><span class="o">:</span><span class="w"> </span><span class="sb">`Bearer </span><span class="si">${</span><span class="nx">bearer</span><span class="si">}</span><span class="sb">`</span><span class="w"> </span><span class="p">},</span>
-<span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span><span class="nx">archiveUrl</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">response</span><span class="p">.</span><span class="nx">ok</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="sb">`Policy download failed: </span><span class="si">${</span><span class="nx">response</span><span class="p">.</span><span class="nx">status</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
 <span class="kd">const</span><span class="w"> </span><span class="nx">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Uint8Array</span><span class="p">(</span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">arrayBuffer</span><span class="p">());</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">(</span><span class="nx">config</span><span class="p">,</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">initFromArchiveBytes</span><span class="p">({</span>
+<span class="w">  </span><span class="p">...</span><span class="nx">config</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI</span><span class="o">:</span><span class="w"> </span><span class="nx">bundleUrl</span><span class="p">,</span>
+<span class="p">},</span><span class="w"> </span><span class="nx">bytes</span><span class="p">);</span>
 </code></pre></div>
-<p>For the directory-based format, package your policy store as a <code>.cjar</code> file and host it:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>policy-store<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../policy-store.cjar<span class="w"> </span>.
+<p>See <a href="../../reference/cedarling-policy-store/">policy store formats</a> and
+<a href="../../reference/cedarling-properties/">bootstrap properties</a>.</p>
+<h2 id="decision-diagnostics">Decision diagnostics<a class="headerlink" href="#decision-diagnostics" title="Permanent link">#</a></h2>
+<p>To keep a decision after you release the WASM result, call <code>result.jsonString()</code>
+first and parse the JSON. In either walkthrough, <code>reason</code> lists the IDs of the
+policies that determined the decision, and <code>errors</code> lists any evaluation
+errors. For Alice's request to read the second document, no policy matches
+and <code>reason</code> is empty.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">decision</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">jsonString</span><span class="p">());</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="nx">errors</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">decision</span><span class="p">.</span><span class="nx">response</span><span class="p">.</span><span class="nx">diagnostics</span><span class="p">;</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">decision</span><span class="p">.</span><span class="nx">request_id</span><span class="p">,</span><span class="w"> </span><span class="nx">decision</span><span class="p">.</span><span class="nx">decision</span><span class="p">,</span><span class="w"> </span><span class="nx">reason</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">errors</span><span class="p">)</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotationValues</span><span class="p">(</span><span class="nx">reason</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;description&quot;</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotationsByPolicy</span><span class="p">(</span><span class="nx">reason</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">annotationsMap</span><span class="p">(</span><span class="nx">reason</span><span class="p">));</span>
 </code></pre></div>
-<p>See <a href="../../reference/cedarling-policy-store/#policy-store-formats">Policy Store Formats</a> for details.</p>
-<h3 id="authorization">Authorization<a class="headerlink" href="#authorization" title="Permanent link">#</a></h3>
-<p>Cedarling provides two main interfaces for performing authorization checks: <strong>Token-Based Authorization</strong> and <strong>Unsigned Authorization</strong>. Both methods involve evaluating access requests based on various factors, including principals (entities), actions, resources, and context. The difference lies in how the Principals are provided.</p>
-<ul>
-<li><a href="#token-based-authorization-multi-issuer"><strong>Token-Based Authorization</strong></a> is the standard method where principals are extracted from JSON Web Tokens (JWTs), typically used in scenarios where you have existing user authentication and authorization data encapsulated in tokens.</li>
-<li><a href="#unsigned-authorization"><strong>Unsigned Authorization</strong></a> allows you to pass principals directly, bypassing tokens entirely. This is useful when you need to authorize based on internal application data, or when tokens are not available.</li>
-</ul>
-<h4 id="token-based-authorization-multi-issuer">Token-Based Authorization (Multi-Issuer)<a class="headerlink" href="#token-based-authorization-multi-issuer" title="Permanent link">#</a></h4>
-<p>For token-based authorization, use <code>authorizeMultiIssuer</code> which processes JWT tokens and maps them to Cedar entities based on the token types declared in your policy store's <a href="../../reference/cedarling-policy-store/#trusted-issuersjson"><code>trusted-issuers.json</code></a>.</p>
-<p><strong>1. Prepare tokens</strong></p>
-<p>Tokens are provided as an array of <code>TokenInput</code> objects, each specifying a mapping name and the JWT payload:</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">tokens</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Access_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;access_token_jwt&gt;&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">mapping</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Id_token&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">payload</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;&lt;id_token_jwt&gt;&quot;</span><span class="w"> </span><span class="p">},</span>
-<span class="p">];</span>
-</code></pre></div>
-<p>The <code>mapping</code> field must equal an entity type declared as a key in your policy store's <code>trusted-issuers.json</code>.</p>
-<p><strong>2. Define the resource</strong></p>
-<p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">protocol</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>3. Define the action</strong></p>
-<p>An <em>action</em> represents what the principal is trying to do to the resource. For example, read, write, or delete operations.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span><span class="p">;</span>
-</code></pre></div>
-<p><strong>4. Define Context (optional)</strong></p>
-<p>The <em>context</em> represents additional data that may affect the authorization decision.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>5. Build and execute the request</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">tokens</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
-<span class="p">};</span>
-
-<span class="c1">// the request is passed as a JSON string</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuer</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
-</code></pre></div>
-<p>See <a href="../../reference/cedarling-multi-issuer/">Multi-Issuer Authorization</a> for more details.</p>
-<h4 id="unsigned-authorization">Unsigned Authorization<a class="headerlink" href="#unsigned-authorization" title="Permanent link">#</a></h4>
-<p>In unsigned authorization, you pass a Principal directly, without relying on tokens. This can be useful when the application needs to perform authorization based on internal data, or when token-based data is not available. The principal is optional — omit it (or pass <code>null</code>) to evaluate the request with partial evaluation.</p>
-<p><strong>1. Define the Principal</strong></p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">principal</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::User&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;random_user_id&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">roles</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;manager&quot;</span><span class="p">],</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>2. Define the Resource</strong></p>
-<p>This represents the <em>resource</em> that the action will be performed on, such as a protected API endpoint or file.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">resource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">cedar_entity_mapping</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">entity_type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;app_id_001&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;App Name&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">path</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;/admin-dashboard&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nx">protocol</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>3. Define the Action</strong></p>
-<p>An <em>action</em> represents what the principal is trying to do to the resource. For example, read, write, or delete operations.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">action</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;Write&quot;&#39;</span><span class="p">;</span>
-</code></pre></div>
-<p><strong>4. Define the Context</strong></p>
-<p>The <em>context</em> represents additional data that may affect the authorization decision, such as time, location, or user-agent.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">current_time</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">1000</span><span class="p">),</span>
-<span class="w">  </span><span class="nx">device_health</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
-<span class="w">  </span><span class="nx">location</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">network</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">operating_system</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>5. Build the Request</strong></p>
-<p>Now you'll construct the <strong><em>request</em></strong> by including the <em>principal</em>, <em>action</em>, and <em>context</em>.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">principal</span><span class="o">:</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="nx">action</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">resource</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="nx">context</span><span class="p">,</span>
-<span class="p">};</span>
-</code></pre></div>
-<p><strong>6. Perform Authorization</strong></p>
-<p>Finally, call the <code>authorizeUnsigned</code> function to check whether the principal is allowed to perform the specified action on the resource. The request is passed as a JSON string.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsigned</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
-</code></pre></div>
-<h4 id="batch-authorization">Batch Authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h4>
-<p>Each entry in <code>results</code> is a <code>BatchItemUnsignedResult</code> — <code>.is_ok</code> reports whether Cedar reached a decision; <code>.unwrap()</code> returns the <code>AuthorizeResult</code> on Ok, <code>.error</code> returns the <code>BatchItemError</code> on Err. Positional mapping to <code>items[i]</code> is preserved for both branches; the shared <code>batch_id</code> (UUIDv7) is stamped on every per-item decision-log entry.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">request</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">principal</span><span class="o">:</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">doc1Resource</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;View&quot;&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">},</span>
-<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="nx">doc2Resource</span><span class="p">,</span><span class="w"> </span><span class="nx">action</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;Jans::Action::&quot;View&quot;&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="o">:</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="p">],</span>
-<span class="p">};</span>
-
-<span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsignedBatch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">request</span><span class="p">));</span>
-
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;batch_id:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">batch_id</span><span class="p">);</span>
-<span class="nx">response</span><span class="p">.</span><span class="nx">results</span><span class="p">.</span><span class="nx">forEach</span><span class="p">((</span><span class="nx">r</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">is_ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">r</span><span class="p">.</span><span class="nx">unwrap</span><span class="p">();</span>
-<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`item </span><span class="si">${</span><span class="nx">i</span><span class="si">}</span><span class="sb">: </span><span class="si">${</span><span class="nx">ok</span><span class="p">.</span><span class="nx">decision</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;allow&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;deny&#39;</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
-<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// r.error carries { category, item_index, message }</span>
-<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`item </span><span class="si">${</span><span class="nx">i</span><span class="si">}</span><span class="sb">: build error: </span><span class="si">${</span><span class="nx">r</span><span class="p">.</span><span class="nx">error</span><span class="p">.</span><span class="nx">category</span><span class="si">}</span><span class="sb"> at index </span><span class="si">${</span><span class="nx">r</span><span class="p">.</span><span class="nx">error</span><span class="p">.</span><span class="nx">item_index</span><span class="si">}</span><span class="sb">`</span><span class="p">);</span>
+<p>Use <code>annotationsByPolicy()</code> when you need to know which policy supplied an
+annotation. If two policies use the same key, <code>annotationsMap()</code> keeps just
+one value. On a multi-issuer result, each dropped token records its original
+index, mapping, and the reason Cedarling excluded it. Call <code>toJSON()</code> to get
+those details as a JavaScript object.</p>
+<div class="highlight"><pre><span></span><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">token</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">droppedTokens</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">token</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">());</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">token</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
 <span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>You can also read <code>token.index</code>, <code>token.mapping</code>, and <code>token.reason</code> directly.
+The reason has a <code>kind</code>, a <code>message</code>, optional <code>detail</code>, and its own <code>toJSON()</code>
+method. The decision JSON includes <code>dropped_tokens</code> only when Cedarling
+excluded at least one token.</p>
+<h2 id="batch-authorization">Batch authorization<a class="headerlink" href="#batch-authorization" title="Permanent link">#</a></h2>
+<p>A batch lets you check several actions or resources for the same principal or
+set of tokens. To try it with Alice's two documents, add this code inside the
+outer <code>try</code> in the unsigned example.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="nx">readDocument</span><span class="p">(</span><span class="s2">&quot;document-1&quot;</span><span class="p">),</span><span class="w"> </span><span class="nx">readDocument</span><span class="p">(</span><span class="s2">&quot;document-2&quot;</span><span class="p">)];</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeUnsignedBatch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span><span class="w"> </span><span class="nx">principal</span><span class="p">,</span><span class="w"> </span><span class="nx">items</span><span class="w"> </span><span class="p">}));</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">&quot;Batch ID:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">batch</span><span class="p">.</span><span class="nx">batch_id</span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">item</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">batch</span><span class="p">.</span><span class="nx">results</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">is_ok</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">item</span><span class="p">.</span><span class="nx">unwrap</span><span class="p">();</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">decision</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">result</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">const</span><span class="w"> </span><span class="nx">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">item</span><span class="p">.</span><span class="nx">error</span><span class="p">;</span>
+<span class="w">        </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="nx">error</span><span class="p">.</span><span class="nx">item_index</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">category</span><span class="p">,</span><span class="w"> </span><span class="nx">error</span><span class="p">.</span><span class="nx">message</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">          </span><span class="nx">error</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">item</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">batch</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The batch returns decisions in request order. Here it prints <code>true</code> for the
+first document and <code>false</code> for the second. If Cedarling can't build an item,
+that item has <code>is_ok === false</code> and an <code>error</code>. An empty <code>items</code> array rejects
+the whole call. In the signed example, pass the tokens once for the batch.</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// In signed.mjs, after defining item:</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">authorizeMultiIssuerBatch</span><span class="p">(</span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">tokens</span><span class="o">:</span><span class="w"> </span><span class="nx">demo</span><span class="p">.</span><span class="nx">tokens</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">item</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="nx">item</span><span class="p">,</span><span class="w"> </span><span class="nx">resource</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="nx">item</span><span class="p">.</span><span class="nx">resource</span><span class="p">,</span><span class="w"> </span><span class="nx">org_id</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;other&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}],</span>
+<span class="p">}));</span>
+<span class="c1">// Inspect batch.results as above before freeing the batch.</span>
+<span class="nx">batch</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+</code></pre></div>
+<h2 id="trusted-issuer-readiness">Trusted issuer readiness<a class="headerlink" href="#trusted-issuer-readiness" title="Permanent link">#</a></h2>
+<p>Run these checks after initialization in <code>signed.mjs</code>. If Acme or Dolphin
+appears in the list of failed issuers, check its discovery document and
+public keys when investigating the denial.</p>
+<div class="highlight"><pre><span></span><code><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">loadedTrustedIssuersCount</span><span class="p">(),</span><span class="w"> </span><span class="s2">&quot;of&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">totalIssuers</span><span class="p">());</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">loadedTrustedIssuerIds</span><span class="p">(),</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">failedTrustedIssuerIds</span><span class="p">());</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">isTrustedIssuerLoadedByName</span><span class="p">(</span><span class="s2">&quot;Acme&quot;</span><span class="p">));</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">isTrustedIssuerLoadedByIss</span><span class="p">(</span><span class="nx">demo</span><span class="p">.</span><span class="nx">origin</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s2">&quot;/Acme&quot;</span><span class="p">));</span>
+</code></pre></div>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h2>
+<p>The unsigned example keeps logs in memory. Use <code>request_id</code> to find the
+records for one decision, or a log ID to look up one record. Call <code>popLogs()</code>
+when you're ready to collect and clear everything the logger still holds.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">records</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogsByRequestId</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">request_id</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">decisions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogsByRequestIdAndTag</span><span class="p">(</span><span class="nx">result</span><span class="p">.</span><span class="nx">request_id</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Decision&quot;</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">allDecisions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogsByTag</span><span class="p">(</span><span class="s2">&quot;Decision&quot;</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">firstId</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogIds</span><span class="p">();</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">firstId</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span><span class="p">)</span><span class="w"> </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getLogById</span><span class="p">(</span><span class="nx">firstId</span><span class="p">));</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">drained</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">popLogs</span><span class="p">();</span><span class="w"> </span><span class="c1">// returns and clears retained records</span>
+</code></pre></div>
+<h2 id="context-data">Context data<a class="headerlink" href="#context-data" title="Permanent link">#</a></h2>
+<p>Store a value under a key to make it available to policies through
+<code>context.data</code>. You can give the value a lifetime in seconds as a JavaScript
+<code>bigint</code>. Each request can also supply its own <code>context</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="nx">cedarling</span><span class="p">.</span><span class="nx">pushDataCtx</span><span class="p">(</span><span class="s2">&quot;user:alice&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">plan</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;pro&quot;</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="mi">120n</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getDataCtx</span><span class="p">(</span><span class="s2">&quot;user:alice&quot;</span><span class="p">));</span><span class="w"> </span><span class="c1">// { plan: &quot;pro&quot; }</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getDataEntryCtx</span><span class="p">(</span><span class="s2">&quot;user:alice&quot;</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">entry</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">entry</span><span class="p">.</span><span class="nx">key</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">value</span><span class="p">(),</span><span class="w"> </span><span class="nx">entry</span><span class="p">.</span><span class="nx">expires_at</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">entry</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kd">const</span><span class="w"> </span><span class="nx">stored</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">listDataCtx</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">stored</span><span class="p">.</span><span class="nx">jsonString</span><span class="p">());</span>
+<span class="w">  </span><span class="nx">stored</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="p">}</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">stats</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">getStatsCtx</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">stats</span><span class="p">.</span><span class="nx">entry_count</span><span class="p">,</span><span class="w"> </span><span class="nx">stats</span><span class="p">.</span><span class="nx">capacity_usage_percent</span><span class="p">);</span>
+<span class="nx">stats</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="nx">cedarling</span><span class="p">.</span><span class="nx">removeDataCtx</span><span class="p">(</span><span class="s2">&quot;user:alice&quot;</span><span class="p">);</span><span class="w"> </span><span class="c1">// true if removed</span>
+</code></pre></div>
+<p>If a key is missing or has expired, <code>getDataCtx()</code> returns <code>null</code> and
+<code>getDataEntryCtx()</code> returns <code>undefined</code>. To clear every entry from the
+instance, call <code>clearDataCtx()</code>. Both entry metadata and store statistics
+have a <code>jsonString()</code> method.</p>
+<h2 id="metrics-and-shutdown">Metrics and shutdown<a class="headerlink" href="#metrics-and-shutdown" title="Permanent link">#</a></h2>
+<p>Set <code>CEDARLING_METRICS_COLLECTION: "enabled"</code> when you initialize Cedarling.
+For local collection, call <code>drainMetrics()</code> to read the metrics for the current
+interval and reset the counters. If you set <code>CEDARLING_LOCK_TELEMETRY_INTERVAL</code>,
+Lock handles collection and the local call fails.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">snapshot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">drainMetrics</span><span class="p">();</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">snapshot</span><span class="p">.</span><span class="nx">interval_secs</span><span class="p">,</span><span class="w"> </span><span class="nx">snapshot</span><span class="p">.</span><span class="nx">operational_stats</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;authz.requests_total&quot;</span><span class="p">));</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">snapshot</span><span class="p">.</span><span class="nx">jsonString</span><span class="p">());</span>
+<span class="p">}</span><span class="w"> </span><span class="k">finally</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">snapshot</span><span class="p">.</span><span class="nx">free</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><code>operational_stats</code>, <code>policy_stats</code>, and <code>error_counters</code> are JavaScript maps.
+The number in <code>interval_secs</code> tells you how long the collection interval lasted.
+When your application is done, await <code>cedarling.shutDown()</code>, then call
+<code>cedarling.free()</code>. Generated result, entry, and diagnostic wrappers have their
+own <code>free()</code> method. Read the fields you need before releasing each wrapper.
+For wrappers with <code>jsonString()</code>, you can keep a JSON copy. Generated wrappers
+also implement <code>[Symbol.dispose]()</code> for runtimes with explicit resource
+management.</p>
+<h2 id="choose-a-runtime">Choose a runtime<a class="headerlink" href="#choose-a-runtime" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>Package entry</th>
+<th>How to initialize</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node.js ESM or CommonJS</td>
+<td><code>@janssenproject/cedarling_wasm</code></td>
+<td>Use <code>import { init }</code> or <code>const { init } = require("@janssenproject/cedarling_wasm")</code>. Await <code>init(config)</code>.</td>
+</tr>
+<tr>
+<td>Browser with Vite or webpack</td>
+<td><code>@janssenproject/cedarling_wasm</code></td>
+<td>Import <code>init</code> in your app. The bundler handles the WASM binary.</td>
+</tr>
+<tr>
+<td>Edge worker with precompiled WASM support</td>
+<td><code>@janssenproject/cedarling_wasm/edge</code></td>
+<td>Import <code>init</code> from the edge entry. In Cloudflare Workers, call it inside a request handler so Cedarling can fetch the policy archive.</td>
+</tr>
+<tr>
+<td>ESM bundler with custom asset loading</td>
+<td><code>@janssenproject/cedarling_wasm/manual</code> and <code>@janssenproject/cedarling_wasm/wasm</code></td>
+<td>Configure the bundler to emit the binary as an asset URL. Initialize the module once, then create a client.</td>
+</tr>
+</tbody>
+</table>
+<p>In the manual example, <code>wasmUrl</code> points to the binary emitted by the bundler.
+Set <code>archiveUrl</code> to the HTTPS URL of your policy archive.</p>
+<div class="highlight"><pre><span></span><code><span class="k">import</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">init</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm/manual&quot;</span><span class="p">;</span>
+<span class="k">import</span><span class="w"> </span><span class="nx">wasmUrl</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s2">&quot;@janssenproject/cedarling_wasm/wasm&quot;</span><span class="p">;</span>
+
+<span class="k">await</span><span class="w"> </span><span class="nx">initWasm</span><span class="p">({</span><span class="w"> </span><span class="nx">module_or_path</span><span class="o">:</span><span class="w"> </span><span class="nx">wasmUrl</span><span class="w"> </span><span class="p">});</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">cedarling</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">init</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">CEDARLING_APPLICATION_NAME</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;document-reader&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">CEDARLING_POLICY_STORE_URI</span><span class="o">:</span><span class="w"> </span><span class="nx">archiveUrl</span><span class="p">,</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>For multi-issuer, swap <code>{ principal, items }</code> for <code>{ tokens, items }</code> and call <code>authorizeMultiIssuerBatch</code>. <code>context</code> is optional on each item and defaults to <code>{}</code>. See <a href="../../reference/cedarling-authz/#batch-authorization">Batch Authorization</a> for the request / response shape, failure model, and <code>BatchItemError</code> variant list.</p>
-<h3 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">#</a></h3>
-<p>The logs could be retrieved using the <code>popLogs</code> function.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">logs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">cedarling</span><span class="p">.</span><span class="nx">popLogs</span><span class="p">();</span>
-<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">logs</span><span class="p">);</span>
-</code></pre></div>
+<p>If you already have a compiled WASM module or its bytes, initialize it
+synchronously with <code>initSync({ module })</code>, then await <code>init(config)</code>. The root
+entry exports <code>initWasm</code> as its default if you want to load WASM explicitly.
+On the edge entry, <code>initWasm()</code> loads the bundled module. After initializing
+the manual entry, you can also create clients with <code>Cedarling.new(config)</code> or
+<code>Cedarling.newFromMap(configMap)</code>.</p>
+<p>See the <a href="https://github.com/JanssenProject/jans/tree/main/jans-cedarling/bindings/cedarling_wasm/js/examples">runnable Node.js, React/Vite, webpack, and Cloudflare examples</a>.</p>
 <h2 id="api-reference">API reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
-<p>The full WASM API is auto-generated from the <code>cedarling_wasm</code> source on every
-release: <a href="https://janssenproject.github.io/developer-docs/cedarling/cedarling_wasm/index.html">Cedarling WASM API documentation</a>.</p>
-<p><code>@janssenproject/cedarling_wasm</code> also ships TypeScript declarations for every
-public export, so editors and TypeScript resolve the same API automatically
-after installation.</p>
-<p>See the Cedarling references for <a href="../../reference/cedarling-authz/">authorization</a>,
-<a href="../../reference/cedarling-properties/">bootstrap properties</a>,
-<a href="../../reference/cedarling-policy-store/">policy stores</a>, and
-<a href="../../reference/cedarling-logs/">logs</a>.</p>
-<hr />
-<h2 id="see-also">See Also<a class="headerlink" href="#see-also" title="Permanent link">#</a></h2>
-<ul>
-<li><a href="../../quick-start/cedarling-quick-start/#implement-rbac-using-signed-tokens-tbac">Cedarling TBAC quickstart</a></li>
-<li><a href="../../quick-start/cedarling-quick-start/#step-1-create-the-cedar-policy-and-schema">Cedarling Unsigned quickstart</a></li>
-<li><a href="../../sidecar/cedarling-sidecar-tutorial/">Cedarling Sidecar Tutorial</a></li>
-</ul>
+<p>The package includes TypeScript declarations for its public methods and result
+types. For signatures and return values, see the <a href="https://janssenproject.github.io/developer-docs/cedarling-js/index.html">JavaScript/TypeScript API reference</a>.</p>
+<p><span id="build-from-source"></span></p>
+<p>To build the binding from source, follow the <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md">package maintainer guide</a>.</p>
 
 
   <nav class="md-tags" >
@@ -2284,13 +2342,6 @@ after installation.</p>
       
       
         <span class="md-tag">WASM</span>
-      
-    
-      
-      
-      
-      
-        <span class="md-tag">browser app</span>
       
     
       
@@ -2338,7 +2389,7 @@ after installation.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    October 27, 2026
+    November 20, 2026
   </span>
 
     
