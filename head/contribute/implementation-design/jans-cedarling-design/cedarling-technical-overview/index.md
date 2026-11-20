@@ -136,7 +136,7 @@ cargo run --example profiling
 ## Known Quirks & Things to Watch Out For
 
 * The `entity_builder` relies heavily on the structure of the token metadata unexpected schema changes might break parsing silently.
-* WASM build will sometimes fail even if it works on native. One example is you can't just spawn a new task using `tokio::spawn`. There are some helper functions in the `http_utils` module to solve the usual tasks.
+* WASM build will sometimes fail even if it works on native. One example is you can't just spawn a new task using `tokio::spawn`. Use the helpers that work on both: `crate::http::spawn_task` to spawn a task and `crate::async_sleep::sleep` to wait; `tokio::time` panics in the browser.
 * The Lock Server will not recognize the client immediately after DCR. Expect receive some unauthorized responses for the first few seconds if you're testing locally.
 
 
