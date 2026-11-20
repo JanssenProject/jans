@@ -21,9 +21,7 @@ import java.io.PrintWriter;
 @WebFilter(
         filterName = "RateLimitFilter",
         asyncSupported = true,
-        urlPatterns = {
-                "/restv1/register"
-        },
+        urlPatterns = {"/restv1/*"},
         displayName = "RateLimitFilter")
 @Priority(Priorities.AUTHENTICATION)
 public class RateLimitFilter implements Filter {

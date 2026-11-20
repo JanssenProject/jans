@@ -105,7 +105,7 @@ Regarding `com.acme.workaday.smsChallenge`, the situation is not better. This is
 
 Attention need to be paid to the kind of functionalities flows expose. Sometimes this can be mitigated following a stricter flow design philosophy, however, this is not always doable, and there has to be a way to block certain flows to be launched directly.
 
-[`project.json`](../../../../../agama/language-reference.md#metadata) metadata descriptor allows developers  control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/project.json) with the following:
+[`project.json`](../../../../../agama/gama-format.md#metadata) metadata descriptor allows developers  control these situations. Via `noDirectLaunch` property, it can be explicitly set what cannot be launched freely. Try editing this project's [descriptor](https://github.com/JanssenProject/jans/blob/main/docs/janssen-server/developer/agama/programming-guide/access-control/project/project.json) with the following:
 
 ```json
 {

@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +66,7 @@ public class RateLimitService {
     private static final int MIN_BUCKET_RETENTION_IN_SECONDS = 120;
 
     private final AtomicReference<Cache<String, Bucket>> buckets = new AtomicReference<>(newBucketCache(MIN_BUCKET_RETENTION_IN_SECONDS));
-    private final AtomicReference<RateLimitConfig> rateLimitConfiguration = new AtomicReference<>();
+    private final AtomicReference<RateLimitState> rateLimitState = new AtomicReference<>();
     private volatile int bucketRetentionInSeconds = MIN_BUCKET_RETENTION_IN_SECONDS;
 
     public HttpServletRequest validateRateLimit(HttpServletRequest httpRequest) throws RateLimitedException, IOException {
@@ -75,17 +76,18 @@ public class RateLimitService {
         }
 
         // snapshot so a concurrent configuration reload cannot change rules mid-request
-        final RateLimitConfig config = rateLimitConfiguration.get();
+        final RateLimitState state = rateLimitState.get();
 
         // no rate limit configuration -> return
-        if (config == null || isEmpty(config.getRateLimitRules())) {
+        if (state == null || isEmpty(state.config.getRateLimitRules())) {
             return httpRequest;
         }
+        final RateLimitConfig config = state.config;
 
         String requestPath = canonicalPath(httpRequest.getRequestURI());
         String method = httpRequest.getMethod();
 
-        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(config, requestPath, method);
+        final List<RateLimitRule> matchedRules = matchRulesByPathAndMethod(state, requestPath, method);
 
         // no matching rules
         if (matchedRules.isEmpty()) {
@@ -162,6 +164,9 @@ public class RateLimitService {
         if (StringUtils.isBlank(requestUri)) {
             return "/";
         }
+        if (isAlreadyCanonical(requestUri)) {
+            return requestUri;
+        }
         StringBuilder path = new StringBuilder();
         for (String segment : requestUri.split("/")) {
             int paramIndex = segment.indexOf(';');
@@ -179,6 +184,24 @@ public class RateLimitService {
             path.append('/').append(segment);
         }
         return path.length() == 0 ? "/" : path.toString();
+    }
+
+    /**
+     * Cheap check that skips normalization for the common case: no path parameters, no percent-encoding,
+     * no empty segments and no trailing slash.
+     */
+    private static boolean isAlreadyCanonical(String requestUri) {
+        final int length = requestUri.length();
+        if (length < 2 || requestUri.charAt(0) != '/' || requestUri.charAt(length - 1) == '/') {
+            return false;
+        }
+        for (int i = 1; i < length; i++) {
+            char c = requestUri.charAt(i);
+            if (c == ';' || c == '%' || (c == '/' && requestUri.charAt(i - 1) == '/')) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public String buildKey(RateLimitContext rateLimitContext, RateLimitRule rule) throws IOException {
@@ -268,23 +291,40 @@ public class RateLimitService {
     }
 
     public List<RateLimitRule> matchRulesByPathAndMethod(String requestPath, String method) {
-        return matchRulesByPathAndMethod(rateLimitConfiguration.get(), requestPath, method);
+        return matchRulesByPathAndMethod(rateLimitState.get(), requestPath, method);
     }
 
-    private List<RateLimitRule> matchRulesByPathAndMethod(RateLimitConfig config, String requestPath, String method) {
-        List<RateLimitRule> result = new ArrayList<>();
+    private List<RateLimitRule> matchRulesByPathAndMethod(RateLimitState state, String requestPath, String method) {
+        if (state == null) {
+            return Collections.emptyList();
+        }
 
-        for (RateLimitRule rule : config.getRateLimitRules()) {
-            if (!rule.isWellFormed()) {
-                log.error("Invalid rate limit rule: {}", rule);
-                continue;
-            }
+        final List<RateLimitRule> rulesForPath = state.rulesByPath.get(requestPath);
+        if (rulesForPath == null) {
+            return Collections.emptyList();
+        }
 
-            if (canonicalPath(rule.getPath()).equals(requestPath) && rule.getMethods().contains(method)) {
+        List<RateLimitRule> result = new ArrayList<>(rulesForPath.size());
+        for (RateLimitRule rule : rulesForPath) {
+            if (rule.getMethods().contains(method)) {
                 result.add(rule);
             }
         }
         return result;
+    }
+
+    private RateLimitState buildState(RateLimitConfig config) {
+        Map<String, List<RateLimitRule>> rulesByPath = new HashMap<>();
+        if (config.getRateLimitRules() != null) {
+            for (RateLimitRule rule : config.getRateLimitRules()) {
+                if (!rule.isWellFormed()) {
+                    log.error("Invalid rate limit rule: {}", rule);
+                    continue;
+                }
+                rulesByPath.computeIfAbsent(canonicalPath(rule.getPath()), k -> new ArrayList<>()).add(rule);
+            }
+        }
+        return new RateLimitState(config, rulesByPath);
     }
 
     private int getRequestLimit(Integer requestLimit) {
@@ -374,13 +414,23 @@ public class RateLimitService {
                 buckets.set(newBucketCache(retention));
                 bucketRetentionInSeconds = retention;
             }
-            rateLimitConfiguration.set(config);
+            rateLimitState.set(config != null ? buildState(config) : null);
 
             if (config == null) {
                 log.info("Rate limiting is not configured.");
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private static final class RateLimitState {
+        private final RateLimitConfig config;
+        private final Map<String, List<RateLimitRule>> rulesByPath;
+
+        private RateLimitState(RateLimitConfig config, Map<String, List<RateLimitRule>> rulesByPath) {
+            this.config = config;
+            this.rulesByPath = rulesByPath;
         }
     }
 }

@@ -221,8 +221,8 @@ public class ApiProtectionService {
                 log.info("updateScopeForClientIfNeeded() - 1 - client.getClientSecret():{} ", client.getClientSecret());
                 // Assign scope
                 // Prepare scope array
-                List<String> scopes = getScopeWithDn(getAllScopes());
-                log.debug("updateScopeForClientIfNeeded() - All scopes:{}", scopes);
+                List<String> scopes = getScopeWithDn(getSuperScopes());
+                log.debug("updateScopeForClientIfNeeded() - SuperScopes:{}", scopes);
 
                 if (client.getScopes() != null) {
                     List<String> existingScopes = Arrays.asList(client.getScopes());
@@ -253,21 +253,38 @@ public class ApiProtectionService {
         }
 
     }
-
-    private List<String> getAllScopes() {
+    
+    private List<String> getSuperScopes() {
         List<String> scopes = new ArrayList<>();
 
         // Verify in cache
-        Map<String, Scope> scopeMap = ApiProtectionCache.getAllTypesOfScopes();
+        Map<String, Scope> scopeMap = ApiProtectionCache.getSuperScopes();
         Set<String> keys = scopeMap.keySet();
-        log.debug(" All Scopes scopeMap:{}, keys:{}", scopeMap, keys);
+        log.debug("SuperScopes scopeMap:{}, keys:{}", scopeMap, keys);
 
         for (String id : keys) {
             Scope scope = scopeMap.get(id);
-            log.trace(" All Scopes scopeMap:{}, keys:{}", scopeMap, keys);
+            log.trace(" SuperScopes scopeMap:{}, keys:{}", scopeMap, keys);
             scopes.add(scope.getInum());
         }
-        log.debug(" All Scopes being returned scopes:{}", scopes);
+        log.debug(" SuperScopes being returned scopes:{}", scopes);
+        return scopes;
+    }
+    
+    private List<String> getAuthScopes() {
+        List<String> scopes = new ArrayList<>();
+
+        // Verify in cache
+        Map<String, Scope> scopeMap = ApiProtectionCache.getSuperScopes();
+        Set<String> keys = scopeMap.keySet();
+        log.debug("SuperScopes scopeMap:{}, keys:{}", scopeMap, keys);
+
+        for (String id : keys) {
+            Scope scope = scopeMap.get(id);
+            log.trace(" SuperScopes scopeMap:{}, keys:{}", scopeMap, keys);
+            scopes.add(scope.getInum());
+        }
+        log.debug(" SuperScopes being returned scopes:{}", scopes);
         return scopes;
     }
 
