@@ -424,7 +424,8 @@ public class Authenticator {
 
         // 12. Create authenticatorData byte array
         byte[] rpIdHash = this.cryptoProvider.sha256(options.rpEntity.id); // 32 bytes
-        byte[] authenticatorData = constructAuthenticatorData(rpIdHash, attestedCredentialData, 0); // 141 bytes
+        byte[] authenticatorData = constructAuthenticatorData(rpIdHash, attestedCredentialData, 0,
+                credentialSafe.keyRequiresVerification(credentialSource.keyPairAlias)); // 141 bytes
 
         // 13. Return attestation object
         AttestationObject attestationObject = constructAttestationObject(authenticatorData, options.clientDataHash, credentialSource.keyPairAlias, signature);
@@ -514,6 +515,11 @@ public class Authenticator {
         // get verification, if necessary
         AuthenticatorGetAssertionResult result;
         boolean keyNeedsUnlocking = credentialSafe.keyRequiresVerification(selectedCredential.keyPairAlias);
+        if (options.requireUserVerification && !keyNeedsUnlocking) {
+            // only a Keystore auth-bound key proves verification happened for this signature
+            Log.w(TAG, "user verification required but credential key is not authentication-bound");
+            throw new NotAllowedError();
+        }
         if (options.requireUserVerification || keyNeedsUnlocking) {
             if (ctx == null) {
                 throw new VirgilException("User Verification requires passing a context to getAssertion");
@@ -598,7 +604,8 @@ public class Authenticator {
 
             // 10. Construct authenticatorData
             byte[] rpIdHash = this.cryptoProvider.sha256(options.rpId); // 32 bytes
-            authenticatorData = constructAuthenticatorData(rpIdHash, null, authCounter);
+            authenticatorData = constructAuthenticatorData(rpIdHash, null, authCounter,
+                    credentialSafe.keyRequiresVerification(selectedCredential.keyPairAlias));
 
             // 11. Sign the concatentation authenticatorData || hash
             ByteBuffer byteBuffer = ByteBuffer.allocate(authenticatorData.length + options.clientDataHash.length);
@@ -654,17 +661,18 @@ public class Authenticator {
      *
      * @param rpIdHash               the SHA-256 hash of the rpId
      * @param attestedCredentialData byte array containing the attested credential data
+     * @param userVerified           whether the signing key is Keystore authentication-bound
      * @return a byte array that matches the authenticatorData format
      * @throws VirgilException
      */
-    private byte[] constructAuthenticatorData(byte[] rpIdHash, byte[] attestedCredentialData, int authCounter) throws VirgilException {
+    private byte[] constructAuthenticatorData(byte[] rpIdHash, byte[] attestedCredentialData, int authCounter, boolean userVerified) throws VirgilException {
         if (rpIdHash.length != 32) {
             throw new VirgilException("rpIdHash must be a 32-byte SHA-256 hash");
         }
 
         byte flags = 0x00;
         flags |= 0x01; // user present
-        if (this.credentialSafe.supportsUserVerification()) {
+        if (userVerified) {
             flags |= (0x01 << 2); // user verified
         }
         if (attestedCredentialData != null) {

@@ -107,6 +107,12 @@ TRACE is configured in the `traceConfiguration` block of the Lock Server dynamic
   "chainRegistrationMode": "PRE_REGISTERED",
   "cryptoProvider": "JAVA",
   "receiptAllocationRetryLimit": 8,
+  "batchIngestEnabled": false,
+  "rangeAllocationRetryLimit": 32,
+  "rangeAllocationBackoffMs": 5,
+  "rangeAllocationMaxBackoffMs": 250,
+  "batchVerifyThreads": 0,
+  "postCommitCorrelationThreads": 0,
   "receiptRepairIntervalSeconds": 300,
   "pendingReceiptTimeoutSeconds": 120
 }
@@ -144,6 +150,8 @@ Lock fails closed. When the selected provider is not available, because the nati
 A value that is not one of the two names is treated as `JAVA` and logged once at `WARN`: `Unknown traceConfiguration.cryptoProvider '<value>', using JAVA`.
 
 **Policy store release check.** `policyMismatchGraceSeconds` (default `300`) is how long after the last node stops serving a policy store release records judged under it still count as matching; see the acceptance window below. `policyReleaseRetentionDays` (default `30`) is how long a release no node serves any more is kept before it is deleted. A mismatch only sets `policy_mismatch_flag`; it never rejects a record. See [Policy store release check](#policy-store-release-check).
+
+**Batch ingest.** `batchIngestEnabled` (default `false`) changes how Lock writes a request. Off, Lock ingests each element on its own: about three database commits per record (claim the receipt, insert the record, settle the receipt). On, Lock verifies and plans every element first, then writes the receipts and the records of the whole request in one database transaction; a single submission is written as a batch of one, with one commit. `batchVerifyThreads` and `postCommitCorrelationThreads` (both default `0`) move verification and the post-commit flag updates of the batch path to bounded thread pools. `rangeAllocationRetryLimit` (default `32`), `rangeAllocationBackoffMs` (default `5`) and `rangeAllocationMaxBackoffMs` (default `250`) bound how often, and after what random wait, a batch retries its receipt range when another node took a position first; `receiptAllocationRetryLimit` (default `8`) applies only to the per-record path. See [Batch ingest](#batch-ingest) for the behavior and for how to enable and roll back.
 
 **Timers.** The receipt repair timer runs every `receiptRepairIntervalSeconds`. It settles receipt claims that stayed `PENDING` longer than `pendingReceiptTimeoutSeconds`, up to 500 per run (see [Receipt chain](#receipt-chain) and [Deployment constraints](#deployment-constraints)). Lock derives its ingest deadline from `pendingReceiptTimeoutSeconds`. It has no setting of its own. Setting `enabled` to `false` makes every TRACE endpoint return a structured `invalid_request` error with reason `trace_disabled` and stops the timer.
 
@@ -469,7 +477,7 @@ A processed batch returns `207 Multi-Status`, whatever the per-item results. Acc
 
 `index` is the position in the submitted array, and `results` keeps request order. `record_id` and `producer_id` are present on a rejected entry when they could be read. The error ids are the ones in the [error catalog](#error-catalog).
 
-Request-level failures return an ordinary structured error with a real HTTP status and no `results`: malformed JSON, a body that is not an array (`not_array`), an empty array (`empty_bulk_records`), more than `maxBulkRecords` elements (`max_bulk_records_exceeded`), a body over `maxBulkRequestBytes` (`bulk_body_too_large`), mixed producers (`bulk_mixed_producers`), TRACE disabled, and `client_not_bound`. Receipt sequences are allocated in array order but are not guaranteed to be contiguous within a batch, because a rejected item claims no receipt.
+Request-level failures return an ordinary structured error with a real HTTP status and no `results`: malformed JSON, a body that is not an array (`not_array`), an empty array (`empty_bulk_records`), more than `maxBulkRecords` elements (`max_bulk_records_exceeded`), a body over `maxBulkRequestBytes` (`bulk_body_too_large`), mixed producers (`bulk_mixed_producers`), TRACE disabled, and `client_not_bound`. Receipt sequences are allocated in array order but are not guaranteed to be contiguous within a batch, because a rejected item claims no receipt. With [batch ingest](#batch-ingest) enabled, the new records that a request stores in one successful batch transaction get consecutive sequence numbers. A replayed record keeps its original sequence number. When a request falls back to per-record ingest, its new records are not guaranteed consecutive numbers.
 
 ### Error catalog
 
@@ -502,7 +510,9 @@ Reasons of `storage_failure` that come from the receipt protocol (see [Receipt c
 
 | Reason | When | Stored? | Producer action |
 |---|---|---|---|
-| `receipt_allocation_exhausted` | No receipt position could be claimed within `receiptAllocationRetryLimit` tries. | No. | Send again. |
+| `receipt_allocation_exhausted` | No receipt position could be claimed within `receiptAllocationRetryLimit` tries (per-record path), or no receipt range within `rangeAllocationRetryLimit` tries (batch path; the batch then falls back to the per-record path, so a response shows this reason only when that path also runs out of tries). | No. | Send again. |
+| `receipt_allocation_interrupted` | The request thread was interrupted during the backoff between two receipt range attempts of the batch path (`rangeAllocationBackoffMs` above `0`), for example while Lock stops. Lock fails closed: the elements without an outcome get this reason and are not retried on the per-record path. | No. | Send again. |
+| `batch_verification_abandoned` | Lock stopped while the element was still queued for verification on the `batchVerifyThreads` pool. | No. | Send again. |
 | `receipt_claim_expired` | The request passed its ingest deadline before the record insert. Lock settles the claim `VOID`. | No. | Send again. The new request claims a new position. |
 | `race_record_missing` | Another request won the identity race and Lock cannot read its record. Lock settles the claim `VOID`. | No. | Send again. |
 | `receipt_void_after_insert` | The record was stored after its claim became `VOID`. | Yes. The record is kept. | Do not expect success from a resend. See [Late insert after VOID](#late-insert-after-void). |
@@ -613,13 +623,15 @@ Flags are Lock-derived findings about a record. Lock flags a condition instead o
 | Flag | Meaning | Cleared later? |
 |---|---|---|
 | `coverage_gap_flag` | The record's predecessor in its producer chain (`sequence_number - 1`) has not been seen. Records can arrive out of order. | Yes. When the missing position arrives and links correctly, the flag on its successor clears. |
-| `chain_link_failure_flag` | The predecessor is present but its `content_digest` does not match this record's `prev_record_hash`. A genuine break in the chain. | No. The conflicting predecessor already exists, so later arrivals cannot resolve it. It stays visible as an integrity finding. |
+| `chain_link_failure_flag` | The predecessor is present but its `content_digest` does not match this record's `prev_record_hash`. A genuine break in the chain. When several records hold the predecessor position (equivocation), one matching `content_digest` is enough. Lock checks this record when it arrives and again each time a record arrives at the predecessor position, against all records present there at that time. Once set, the flag stays, so a matching predecessor that arrives after a nonmatching one does not clear it. | No. The conflicting predecessor already exists, so later arrivals cannot resolve it. It stays visible as an integrity finding. |
 | `equivocation_flag` | Two or more records with different `record_id` values claim the same chain position. Lock stores and flags all of them and never selects a winner. | No. |
 | `late_flag` | Lock received the record more than `latenessThresholdSeconds` after its `signed_at`. Fixed at ingestion. | No. |
 | `policy_mismatch_flag` | The record's `trace.policy` names a policy store Lock serves, with a release this node did not serve at `signed_at` or within `policyMismatchGraceSeconds` before it. Fixed at ingestion. See [Policy store release check](#policy-store-release-check). | No. |
 | `reserved_member_flag` | The producer signed a member Lock derives itself, such as `evidence_domain_id` or `trust_tier`. Lock ignored it and used its own values; `reserved_members` lists the paths. Fixed at ingestion. | No. |
 
 Lock updates the flags on neighboring records after it stores a new record. These updates are best-effort and eventually consistent. If one fails, Lock logs it and still accepts the new record. A reader can see a flag change shortly after a record is accepted.
+
+After the commit Lock reads the predecessor, own and successor positions of the new record once more. Lock computes the flags of a record from the chain as it was before the record was written, so a neighbor that another request or node stored at the same time can be missing from that computation. With the second read Lock corrects the new record's own `coverage_gap_flag` (cleared when the predecessor is now stored) and `chain_link_failure_flag` (set when the predecessor is now stored and does not match), and it corrects a successor that arrived while the record was being written. These corrections only clear a coverage gap and only set a chain link failure, never the other way round. A flag of the new record can therefore change within this post-commit window, after the response when `postCommitCorrelationThreads` is set. The response reports the flags the record was stored with, on both write paths.
 
 A producer-chain break or gap is a statement about the records Lock has received. It is not a statement about what the producer did.
 
@@ -653,7 +665,7 @@ For every accepted record Lock assigns, within the evidence domain:
 - `prev_receipt_hash`: the hash of the preceding receipt entry.
 - `receipt_hash`: the hash of this entry.
 
-Lock writes the receipt entry and the record as two separate rows: it claims the position, inserts the record, then settles the entry. It is not one atomic write (see [Deployment constraints](#deployment-constraints)).
+By default Lock writes the receipt entry and the record as two separate rows: it claims the position, inserts the record, then settles the entry. It is not one atomic write (see [Deployment constraints](#deployment-constraints)). With [batch ingest](#batch-ingest) enabled, a request writes its receipt entries and records in one transaction instead, unless it falls back to per-record ingest.
 
 ### Receipt states
 
@@ -661,7 +673,7 @@ Every receipt entry has one of three states. The state is not part of the receip
 
 | State | Meaning |
 |---|---|
-| `PENDING` | Lock claimed the position and has not settled it. Every entry starts here. |
+| `PENDING` | Lock claimed the position and has not settled it. Every per-record entry starts here. Batch entries are inserted as `COMMITTED` and never start here. |
 | `COMMITTED` | The record that carries this entry is stored. |
 | `VOID` | Lock allocated the position and abandoned it. Normally no record carries it. |
 
@@ -747,7 +759,15 @@ gRPC is served in the mode set by `grpcConfiguration.serverMode` (`bridge`, `pla
 - `io.jans.lock.trace.TraceService`
 - `io.jans.lock.trace.TraceAdminService`
 
-The Apache template of the VM installer, the all-in-one nginx configuration and the Helm gateway routes (`lockAuditEnabled`) include them. A custom proxy needs the same rules.
+The Apache template of the VM installer and the all-in-one nginx configuration include them. In the Helm charts each service has its own route and its own flag, so Lock Audit, Lock Trace and Lock Trace Admin can be exposed independently:
+
+| Service | Helm flag |
+|---|---|
+| `io.jans.lock.audit.AuditService` | `gateway-api.routes.lockAuditEnabled` |
+| `io.jans.lock.trace.TraceService` | `gateway-api.routes.lockTraceEnabled` |
+| `io.jans.lock.trace.TraceAdminService` | `gateway-api.routes.lockTraceAdminEnabled` |
+
+All three require `global.auth-server.lockEnabled: true`. A custom proxy needs the same rules.
 
 | gRPC method | REST equivalent | Scope |
 |---|---|---|
@@ -794,7 +814,7 @@ grpcurl -import-path jans-lock/lock-server/service/src/main/proto/grpc -proto tr
 
 ## Deployment constraints
 
-**Multi-node deployments.** The database ORM gives Lock two things for TRACE: per-entry compare-and-swap through `PersistenceEntryManager.updateWithVersion` (it throws `VersionMismatchException`; added in commit `393cd48bac9`, PR #15255) and primary-key uniqueness on insert. It has no multi-entry transaction and no sequence allocator. Lock does not target Couchbase or Spanner for TRACE, because they do not implement the compare-and-swap. The protocol below is the selected protocol under these persistence APIs. It is not the only possible protocol.
+**Multi-node deployments.** The database ORM gives Lock two things for TRACE: per-entry compare-and-swap through `PersistenceEntryManager.updateWithVersion` (it throws `VersionMismatchException`; added in commit `393cd48bac9`, PR #15255) and primary-key uniqueness on insert. It has no general multi-entry transaction and no sequence allocator. The SQL backend has an atomic batch insert, which only [batch ingest](#batch-ingest) uses. Lock does not target Couchbase or Spanner for TRACE, because they do not implement the compare-and-swap. The protocol below is the selected protocol under these persistence APIs. It is not the only possible protocol.
 
 1. A node reads the highest receipt, in any state, and proposes the next sequence number.
 2. It inserts a `PENDING` receipt claim at that position. If another node claimed it first, the node re-reads and retries, up to `receiptAllocationRetryLimit` times (default 8), then fails with `500 storage_failure` and reason `receipt_allocation_exhausted`.
@@ -810,7 +830,9 @@ Storing the record and appending its receipt entry is not a single atomic write.
 
 **Request size and column size.** `maxRequestBytes` limits the size of one request body. The stored assertion is kept as text in a `MEDIUMTEXT` column on MySQL and a `TEXT` column on PostgreSQL. Keep `maxRequestBytes` and the per-record limit inside the bulk path well below the size of that column type for your database, and raise the limits only after checking it. Many TRACE identifiers are stored in `VARCHAR` columns of fixed width, which Lock's validation keeps the values within.
 
-**Upgrading.** Search by policy store release, `policy_mismatch_flag` and `reserved_member_flag` use columns added in this release. An existing VM install must add them once; see [Upgrading an Existing Deployment](./lock-server.md#upgrading-an-existing-deployment).
+**Upgrading.** Batch ingest needs no schema change and no migration, and it is off by default. To enable it, follow the steps in [Batch ingest](#batch-ingest).
+
+Search by policy store release, `policy_mismatch_flag` and `reserved_member_flag` use columns added in this release. An existing VM install must add them once; see [Upgrading an Existing Deployment](./lock-server.md#upgrading-an-existing-deployment).
 
 !!! warning "Breaking change for `RUNTIME_EFFECT` producers"
 
@@ -819,6 +841,113 @@ Storing the record and appending its receipt entry is not a single atomic write.
     Receipt entries now have terminal states and an ingest deadline. See [Receipt chain](#receipt-chain). No schema change is needed for this.
 
 **Time.** Lock uses `received_at` for receipt order and treats `signed_at` as a producer claim. Keep node clocks synchronized.
+
+## Batch ingest
+
+Batch ingest is an opt-in write mode for bulk requests and single submissions. It does not change the API: request and response shapes, status codes, error ids, reasons, receipt fields and flags are the same, and no schema change is needed.
+
+**What it changes.** With `batchIngestEnabled` set to `true`, `POST /audit/trace/bulk` and the gRPC `TraceService/SubmitBulkRecords` method work like this:
+
+1. Lock verifies every element and plans its correlation (chain position, flags) without holding any lock. An element that fails is reported on its own, as before. A later element sees the earlier valid elements of the same request as already stored, so a chain of many records in one request gets the same flags as if the records had arrived one by one.
+
+   Within one bulk request Lock reads each producer key (`producer`, `kid`) from the database once and reuses it for the other elements that name the same key. The validity window (`valid_from`, `valid_until`, revocation) is still checked for every element, and every error id and reason is the same as without the reuse. Only a key that verified an element is reused: a missing, revoked, expired or not yet valid key, or a failed read, is looked up again by the next element that names it. Nothing is kept after the request ends, so a key revoked while a bulk request is being verified is seen by the next request.
+2. Lock reserves the next N receipt positions of the evidence domain for the N records that are new, and writes the N receipt entries and the N records in one database transaction.
+3. After the commit, Lock updates the derived flags of neighboring records as it does for a single submission.
+
+Single submissions (`POST /audit/trace`, `SubmitRecord`) go through the same steps as a batch of one element: one transaction writes the receipt entry and the record, instead of the three commits of the per-record path. The response, the errors and the stored rows are the same as on the per-record path.
+
+**Thread pools.** Two optional settings move work of the batch path off the request thread. Both apply only while `batchIngestEnabled` is `true`, both default to `0` (no pool, the request thread does the work), and both are clamped to 64.
+
+- `batchVerifyThreads`: the number of threads that verify the elements of one bulk request in parallel (parse, validation, producer key lookup, signature). The results keep request order, and an element that fails verification fails on its own as before. The threads share the producer key reads of the request (see step 1 above): concurrent elements that name the same key wait for one read, so the pool adds signature work, not key lookups.
+- `postCommitCorrelationThreads`: the number of threads that update the derived flags of neighboring records (`coverage_gap_flag`, `chain_link_failure_flag`, `equivocation_flag` on records stored earlier) after a batch commit. The response no longer waits for these updates. A read right after the response can therefore show flags before the update, on a neighbor and, when a neighbor arrived from another request at the same time, on the submitted record itself (see [Flags explained](#flags-explained)). Updates still queued when Lock stops get 10 seconds to finish; after that they are lost and Lock logs a `WARN` line with their number. Nothing repairs a lost update later, so leave this at `0` where the neighbor flags must be correct immediately.
+
+Each pool queues up to 1024 tasks. When the queue is full, the request thread does the work itself, so a busy pool slows requests down instead of dropping work. A changed thread count takes effect with the next request.
+
+**Requirements.** The store must support atomic batch inserts. The ORM provides this on the SQL backend (PostgreSQL and MySQL) only; see [Atomic batch insert and multi-get by DN](https://github.com/JanssenProject/jans/blob/main/jans-orm/docs/batch_operations.md). On another backend, or when the selected crypto provider is not available, Lock keeps the per-record path for every request. Keep `maxBulkRecords` at 500 or below while batch ingest is on: one transaction writes a receipt entry and a record per element, and the ORM accepts at most 1000 rows in one batch. A larger request is not written as one transaction; Lock logs a `WARN` line with reason `batch_too_large` and ingests its elements one by one.
+
+**Receipt chain.** Batch rows are inserted as `COMMITTED` in the same transaction as the records, so a batch never leaves a `PENDING` entry. The chain, the receipt hash input and the meaning of `receipt_sequence` are unchanged. A request that stores N new records in one successful batch transaction gets N consecutive sequence numbers in request order. A replayed record keeps its original number, and a rejected element gets none. When the request falls back to per-record ingest, other writers can take positions between its records. Another node can write entries between two requests, so the numbers of two requests need not be adjacent.
+
+**Multi-node.** The protocol is still compare-and-swap on the unique receipt position. If another node took a position first, the transaction fails, nothing is stored, and Lock retries the request from a fresh head. A record identity that another request stored in the meantime with the same content is reported as a replay and dropped from the retry. If it was stored with different content, later elements of the request may have been planned against it, so the request falls back to per-record ingest, which reports that element as a `record_conflict`. After the commit Lock reads such a record again, so the replay reports its flags as they are after the request's own records were stored and correlated: the stored state at the time of the response. In this case Lock correlates the request's records in the request thread before the read, also when `postCommitCorrelationThreads` is set. Corrections that other requests still have queued on their own pools are not waited for. Both steps are best-effort. If the correlation fails, the replay shows the stored flags without its corrections. If the second read fails, the replay keeps the flags read at the collision, which can predate the corrections from this request's records. Nodes running the old code, nodes with the flag off and nodes with the flag on can write the same evidence domain at the same time, because all of them compete for the same unique position.
+
+Three settings control the retries of the batch path. They apply only while `batchIngestEnabled` is `true`; the per-record path keeps `receiptAllocationRetryLimit` (default `8`), retries without a wait and is not affected.
+
+- `rangeAllocationRetryLimit` (default `32`): the number of attempts, the first one included, before the batch gives up its range and falls back to per-record ingest. A value of `0` or less means the default. A batch has a larger budget than a single claim because it holds its positions for a whole transaction, so under load from several nodes it loses the race more often.
+- `rangeAllocationBackoffMs` (default `5`) and `rangeAllocationMaxBackoffMs` (default `250`): before retry k (k = 1 for the first retry) Lock waits a random time between 0 and `min(rangeAllocationBackoffMs * 2^(k-1), rangeAllocationMaxBackoffMs)` milliseconds. Nodes that collided then retry at different times instead of colliding again in lockstep. Lock releases the evidence domain's in-process lock during the wait, so other requests of the same node can commit, and reads the head and the stored identities again after it. `0` for the base disables the wait: the retry starts at once with the lock still held. A negative base, and a cap of `0` or less, mean the default. In the 4-node measurement the backoff cut the retries, and so the rolled-back database transactions, several times over, but it did not raise throughput and lowered the throughput of single submissions with few nodes. Consider `0` when latency matters more than the database load of the retries.
+
+The total wait of one request is at most `(rangeAllocationRetryLimit - 1) * rangeAllocationMaxBackoffMs`. With the defaults the windows add up to 6565 ms, under 8 seconds, on top of the attempts themselves. If the thread is interrupted during the wait (for example while Lock stops), Lock stores nothing more for that range, keeps the interrupt and fails closed: the elements without an outcome get `500 storage_failure` with reason `receipt_allocation_interrupted`, and the batch does not fall back to the per-record path. A `WARN` line `TRACE batch ingest interrupted, failing pending elements without fallback: size=..., pending=..., reason=...` records it.
+
+**Failure behavior.** If the batch transaction fails for any reason other than a position or identity collision, or if the collisions use up `rangeAllocationRetryLimit` attempts, nothing was stored by that attempt. Lock logs one `WARN` line with the batch size, the number of unfinished elements and the failure type, then processes the unfinished elements one by one through the per-record path, together with the elements that were dropped from a retry because another request stored them. Each element then gets the result of the per-record path, including its own errors, so one failing row does not fail its neighbors.
+
+**Enable and roll back.**
+
+- Lock reads `batchIngestEnabled` on every request. Lock checks for a changed dynamic configuration every 30 seconds, so a change takes effect within about that time and needs no restart. Each node reloads on its own timer, so for a short time different nodes can use different modes.
+- Roll back by setting `batchIngestEnabled` to `false`. Rows written by the batch path are ordinary `COMMITTED` receipt entries and records. They need no cleanup, and a replay of a record written by either path is answered the same way.
+- Recommended order: upgrade all nodes, enable the flag on one node, compare the rate of `500 storage_failure` responses with reason `receipt_allocation_exhausted` and the ingest throughput against the other nodes, then enable it everywhere.
+
+**Sizing.** The figures below help choose the settings and the client concurrency. They were measured on 2026-11-14 (batch ingest on) and 2026-11-16 (batch ingest off) over HTTPS on one test VM with 8 vCPUs and 8 GB of RAM. Lock (Jetty 12, Java heap limit 634 MB, behind Apache) and PostgreSQL 16 ran on that VM, and the load client ran on another host. The load was signed `AUTHORIZATION_DECISION` records for one evidence domain, one producer per request, with `batchIngestEnabled=true` unless noted and every other setting at its default. Before each pool setting the domain was preloaded with 200 000 records and the database statistics were refreshed. Each row is two runs of 20 000 records; each session began with one warm-up run, not shown. These are measurements on one test VM, not guarantees: measure on your own hardware before you rely on them.
+
+Bulk requests of 100 records, 8 producer chains:
+
+| `batchVerifyThreads` | `postCommitCorrelationThreads` | Client connections | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|---|
+| `0` | `0` | 1 | 2209-2218 | 44 | 49-50 | 0 |
+| `0` | `0` | 4 | 6264-6862 | 55-57 | 75-104 | 0 |
+| `0` | `0` | 8 | 7103-7161 | 109-110 | 120-130 | 1-2 |
+| `0` | `0` | 16 | 5986-6250 | 241-243 | 321-357 | 189 |
+| `4` | `2` | 1 | 4074-4142 | 23 | 28 | 0 |
+| `4` | `2` | 4 | 6377-6805 | 54-58 | 67-75 | 0 |
+| `4` | `2` | 8 | 6675-6722 | 112-116 | 132-162 | 3-10 |
+| `4` | `2` | 16 | 6639-6767 | 233-238 | 245-250 | 190-191 |
+| `8` | `4` | 1 | 4154-4224 | 22 | 27-28 | 0 |
+| `8` | `4` | 4 | 6926-7175 | 55-56 | 62-67 | 0 |
+| `8` | `4` | 8 | 6930-7016 | 109-110 | 131-141 | 4 |
+| `8` | `4` | 16 | 6280-6733 | 234-237 | 248-411 | 189-190 |
+
+Other request shapes with `batchVerifyThreads=8`, `postCommitCorrelationThreads=4` and 4 client connections, measured in one later session. The single-submission row comes from an earlier session without the preload, with `4`/`2` and 8 connections:
+
+| Requests | Producer chains | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|
+| Bulk, 100 records | 8 | 6274-6991 | 55 | 64-129 | 0 |
+| Bulk, 50 records | 8 | 5939-6009 | 32-33 | 39-40 | 0 |
+| Bulk, 100 records | 1 | 5768-6743 | 57-60 | 66-142 | 199 |
+| Bulk, 100 records | 32 | 6179-6182 | 55-56 | 88-96 | 0 |
+| Single (`POST /audit/trace`) | 8 | 414-425 | 16 | 28-29 | 42-58 |
+
+With batch ingest off (`batchIngestEnabled=false`, the per-record path), 8 producer chains, measured the same way on 2026-11-16. A control run with batch ingest on (`8`/`4`, 4 connections, bulk requests of 100) gave 6714-6852 records/s that day, so the two days are comparable:
+
+| Requests | Client connections | Records/s | Request p50, ms | Request p95, ms | Records reported with `coverage_gap_flag` (of 20 000) |
+|---|---|---|---|---|---|
+| Bulk, 100 records | 1 | 161-165 | 605-618 | 638-676 | 0 |
+| Bulk, 100 records | 4 | 372-373 | 1071-1072 | 1115 | 0 |
+| Bulk, 100 records | 8 | 365-368 | 2145-2180 | 2278-2350 | 15-17 |
+| Bulk, 100 records | 16 | 354-372 | 4283-4503 | 4505-4982 | 183-186 |
+| Single (`POST /audit/trace`) | 8 | 329-330 | 22 | 34 | 5-6 |
+
+With batch ingest off the rate stops at about 370 records/s from 4 connections on, and more connections only add latency. The limit is the database's write-ahead log: every record needs about three commits, and each commit waits for a log flush (top waits `LWLock:WALWrite` and `IO:WALSync`). Lock used less than one core.
+
+Choosing the settings:
+
+- **Batch ingest.** Turn on `batchIngestEnabled` for producers that send bulk requests. On the test VM, bulk requests of 100 records were about 13 times faster with one connection and no pools (2209-2218 against 161-165 records/s), about 25 times faster with one connection and pools, and 16-20 times faster from 4 connections on (5986-7175 against 354-373 records/s), at a small fraction of the latency. Single submissions gained less: 414-425 against 329-330 records/s, measured on different days and, with batch ingest on, without the preload.
+- **Request size.** Send bulk requests of 100 records, the default `maxBulkRecords`. Bulk requests of 50 records reached 85-96 % of the rate of bulk requests of 100 in the same session, and single submissions about 6-7 %.
+- **Client connections.** From 4 parallel connections per Lock node and evidence domain on, every setting reached about 6000-7200 records/s, and 4 connections gave the lowest latency at that rate. More connections raised the latency much more than the rate: about 235-245 ms p50 at 16 connections.
+- **Thread pools.** The pools pay off when producers use only one or two connections. With one connection, `batchVerifyThreads=4` and `postCommitCorrelationThreads=2` nearly doubled the rate and halved the latency; `8`/`4` added little more. With 4 or more connections all three settings reached the same rate, so the pools are optional there. `postCommitCorrelationThreads` has a cost: the flags of neighboring records are updated after the response, and updates still queued when Lock stops are lost (see Thread pools above). `batchVerifyThreads` without `postCommitCorrelationThreads` was not measured.
+- **Requests of one chain.** Send the requests of one producer chain one after another. When several requests of one chain are in flight, for example with more connections than chains or with one chain over 4 connections, records arrive out of order. Their responses then report `coverage_gap_flag`, as the last column shows; Lock corrects the stored flag after the missing record arrives.
+- **Where the limit is.** With batch ingest on, CPU was not the limit. With 4 or more connections Lock used 1.3-2.3 cores, PostgreSQL 0.4-0.7 core and the whole VM at most 3.3 of its 8 cores. The limit is the per-domain receipt lock of a Lock node. One batch at a time holds it while Lock reads the receipt head and writes the batch transaction, about 14 ms per batch of 100 at this rate, and the other requests for that domain wait. More CPU does not raise the rate of one domain.
+- **Going further.** Each evidence domain has its own lock, so separate domains should add up, but this was not measured. Lock nodes that write the same evidence domain compete for its receipt positions and retry. In tests with several nodes on one domain, four nodes were not reliably faster than two. Several domains or several nodes over HTTP were not measured.
+- **Rule of thumb.** On comparable hardware, plan for about 6000-7000 records per second per evidence domain and Lock node, with bulk requests of 100 and about 4 client connections.
+- **Logs.** Lock also checks every request's access token with jans-auth. On the test VM the jans-auth request log grew by more than 10 GB during the 2026-11-14 runs and filled the disk; on 2026-11-16 it grew by about 7.6 GB for about 64 000 requests. Size the log disks and log levels of both services for the request rate.
+
+**Diagnosing.** Set the Lock log level to `DEBUG` to see one line per request that uses the batch path (a single submission shows `size=1`):
+
+```
+TRACE batch ingest: size=100, accepted=98, replays=1, rejected=1, attempts=1, fallback=false
+```
+
+The line has counts only. `size` is the number of elements, `attempts` is the number of transactions that Lock tried for the range, and `fallback=true` means the per-record path finished the request. The values above are an example of the format, not a measurement.
+
+- `attempts` above 1 means another node (or a concurrent writer) took a receipt position or a record identity first. A high value in most requests is contention between nodes on the same evidence domain. If it limits your throughput, this is the signal that a different allocation scheme is needed. A `DEBUG` line `receipt range contended: domain=..., firstSeq=..., size=..., attempt=..., backoffMs=...` shows each lost attempt and the wait before the next one (`0` after the last attempt or when the backoff is disabled).
+- A `WARN` line `TRACE batch ingest falls back to per-record ingest` means the transaction failed for another reason. Read the `reason` value, and the stack trace in the `DEBUG` line that follows, to find the cause.
+- To check on PostgreSQL that bulk requests commit less often, sample write transactions and WAL flushes before and after you enable the flag, with the same load. `txid_snapshot_xmax(txid_current_snapshot())` advances once per write transaction. `pg_stat_wal.wal_sync` counts WAL flushes. `pg_stat_activity` shows `IO:WALSync` and `LWLock:WALWrite` wait events while commits wait for the flush. Do not use `pg_stat_database.xact_commit` as a count of commits per record: it also counts every read-only statement that runs in its own transaction.
 
 ## Deferred features
 

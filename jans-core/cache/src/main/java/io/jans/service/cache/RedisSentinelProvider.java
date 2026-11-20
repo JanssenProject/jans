@@ -40,7 +40,10 @@ public class RedisSentinelProvider extends AbstractRedisProvider {
 
             if (redisConfiguration.getUseSSL()) {
                 RedisProviderFactory.setSSLSystemProperties(redisConfiguration);
-                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(true).user(redisConfiguration.getUsername()).password(password).build();
+                jedisClientConfig = DefaultJedisClientConfig.builder().ssl(true).user(redisConfiguration.getUsername()).password(password)
+                        .sslSocketFactory(RedisProviderFactory.createSslSocketFactory(redisConfiguration))
+                        .sslParameters(RedisProviderFactory.createSslParameters())
+                        .hostnameVerifier(RedisProviderFactory.createHostnameVerifier()).build();
             } else {
                 jedisClientConfig = DefaultJedisClientConfig.builder().ssl(false).user(redisConfiguration.getUsername()).password(password).build();
             }

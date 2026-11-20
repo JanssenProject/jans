@@ -4,6 +4,7 @@
  */
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.config.Constants;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.external.context.ExternalClientAuthnContext;
@@ -59,6 +60,10 @@ public class ClientAuthn implements ClientAuthnType {
             final boolean authenticated = clientService.authenticate(clientId, clientSecret);
             if (authenticated) {
                 final Client client = clientService.getClient(clientId);
+                if (client == null || !client.hasAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC)) {
+                    context.sendUnauthorizedError();
+                    return null;
+                }
                 scriptLogger.debug("Successfully performed basic client authentication, clientId: {}", clientId);
                 return client;
             }

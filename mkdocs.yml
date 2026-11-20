@@ -9,8 +9,10 @@ extra:
     title: Cookie consent
     description: >-
       This site uses Scarf and Reo.dev to measure documentation traffic and to
-      understand which content is most useful, so we can improve the docs. These
-      analytics cookies are only set with your consent. Essential cookies needed
+      understand which content is most useful, so we can improve the docs. If you
+      accept, Reo.dev and its third-party partners also collect device and network
+      data to identify the company you visit from. These analytics cookies are only
+      set with your consent. Essential cookies needed
       for the site to function are always active. For details on how your data is
       handled, see the
       <a href="https://www.linuxfoundation.org/legal/privacy-policy" target="_blank" rel="noopener noreferrer">Linux Foundation Privacy Policy</a>.
@@ -505,7 +507,7 @@ nav:
           - Microsoft AKS: janssen-server/install/helm-install/prerequisites/microsoft-aks.md
           - Local (Minikube/MicroK8s): janssen-server/install/helm-install/prerequisites/local.md
           - Rancher Marketplace: janssen-server/install/helm-install/prerequisites/rancher.md
-        - Ingress Setup: janssen-server/install/helm-install/ingress-setup.md
+        - External Access: janssen-server/install/helm-install/external-access.md
         - Database Setup: janssen-server/install/helm-install/database-setup.md
         - Install Janssen: janssen-server/install/helm-install/install-janssen.md
         - Post-Installation: janssen-server/install/helm-install/post-install.md
@@ -600,7 +602,7 @@ nav:
 # 5. CEDARLING
 # ====================
 - Cedarling:
-  - Overview: cedarling/README.md
+  - cedarling/README.md
   - Cedar Introduction: cedar-intro.md
   - Quick Start: cedarling/quick-start/cedarling-quick-start.md
   - Tutorials:

@@ -63,28 +63,28 @@ public final class ProcessHelper {
 
         PrintResultHandler printResult = null;
         try {
-            LOG.debug(String.format("Preparing to start process %s", commandLine.toString()));
+            LOG.debug(String.format("Preparing to start process %s", toLogString(commandLine)));
             printResult = executeProgram(commandLine, workingDirectory, printJobTimeout, executeInBackground,
                     successExitValue, streamHandler);
-            LOG.debug(String.format("Successfully start process %s", commandLine.toString()));
+            LOG.debug(String.format("Successfully start process %s", toLogString(commandLine)));
         } catch (Exception ex) {
-            LOG.trace(String.format("Problem during starting process %s", commandLine.toString()), ex);
+            LOG.trace(String.format("Problem during starting process %s", toLogString(commandLine)), ex);
             ex.printStackTrace();
             return false;
         }
 
         // come back to check the print result
-        LOG.debug(String.format("Waiting for the proces %s finish", commandLine.toString()));
+        LOG.debug(String.format("Waiting for the proces %s finish", toLogString(commandLine)));
         try {
             if (printResult == null) {
                 return false;
             }
             printResult.waitFor();
         } catch (InterruptedException ex) {
-            LOG.error(String.format("Problem during process execution %s", commandLine.toString()), ex);
+            LOG.error(String.format("Problem during process execution %s", toLogString(commandLine)), ex);
         }
 
-        LOG.debug(String.format("Process %s has finished", commandLine.toString()));
+        LOG.debug(String.format("Process %s has finished", toLogString(commandLine)));
 
         return true;
     }
@@ -145,16 +145,20 @@ public final class ProcessHelper {
 
         // Pass a "ExecuteResultHandler" when doing background printing
         if (printInBackground) {
-            LOG.debug(String.format("Executing non-blocking process %s", commandLine.toString()));
+            LOG.debug(String.format("Executing non-blocking process %s", toLogString(commandLine)));
             resultHandler = new PrintResultHandler(watchdog);
             executor.execute(commandLine, resultHandler);
         } else {
-            LOG.debug(String.format("Executing blocking process %s", commandLine.toString()));
+            LOG.debug(String.format("Executing blocking process %s", toLogString(commandLine)));
             successExitValue = executor.execute(commandLine);
             resultHandler = new PrintResultHandler(successExitValue);
         }
 
         return resultHandler;
+    }
+
+    private static String toLogString(CommandLine commandLine) {
+        return String.valueOf(commandLine).replaceAll("[\\r\\n]", "_");
     }
 
     private static class PrintResultHandler extends DefaultExecuteResultHandler {

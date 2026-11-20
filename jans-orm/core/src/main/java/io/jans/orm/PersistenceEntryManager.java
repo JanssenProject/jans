@@ -8,8 +8,11 @@ package io.jans.orm;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -27,6 +30,8 @@ import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.metamodel.Metamodel;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.event.DeleteNotifier;
+import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.MappingException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeType;
@@ -58,12 +63,24 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void persist(Object entry);
 
+	/**
+	 * Updates {@code entry}. For a class with a {@code @Version} field, on backends that support
+	 * {@link #updateWithVersion(Object)}, the write is conditional on the version read just before it
+	 * and retried on conflict with only the changes the first read found.
+	 *
+	 * @throws io.jans.orm.exception.VersionMismatchException if the entry kept changing through every
+	 *         retry; nothing is written
+	 */
 	Void merge(Object entry);
 
 	/**
 	 * Conditionally updates {@code entry}, succeeding only if the entry's currently stored
 	 * {@code @Version} value still equals the value held on {@code entry} at call time. On success,
 	 * increments the stored version and writes the same new value back onto {@code entry}.
+	 *
+	 * <p>A null version on {@code entry} expects the stored entry to have no version attribute (an
+	 * entry written before its class got {@code @Version}); the write then stores version 1. Load
+	 * the entry with its version attribute, or the CAS fails against an existing stored version.</p>
 	 *
 	 * <p>Like {@link #merge(Object)}, this call pre-reads the entry's current attributes to build
 	 * the diff. If the entry does not exist at all when the call begins, the backend's normal
@@ -75,7 +92,7 @@ public interface PersistenceEntryManager extends EntityManager {
 	 * call's own pre-read and its write.</p>
 	 *
 	 * @throws io.jans.orm.exception.MappingException if entry's class has more than one
-	 *         {@code @Version} field, or that field's current value on {@code entry} is null
+	 *         {@code @Version} field
 	 * @throws io.jans.orm.exception.VersionMismatchException if the stored version no longer matches
 	 *         at the compare-and-swap (another writer updated first, or the entry was deleted after
 	 *         this call's own pre-read)
@@ -84,6 +101,160 @@ public interface PersistenceEntryManager extends EntityManager {
 	 *         {@code @Version} fields
 	 */
 	Void updateWithVersion(Object entry);
+
+	/**
+	 * Reports whether {@link #persistBatch(List)} is implemented atomically by this backend. Only the
+	 * SQL backend implements it; every other backend returns {@code false} and its
+	 * {@code persistBatch} throws {@link io.jans.orm.exception.UnsupportedOperationException}.
+	 *
+	 * <p>A hybrid entry manager returns {@code true} only when every configured backend supports it.
+	 * Use {@link #isAtomicBatchSupported(String)} to ask for the backend that stores a given DN.</p>
+	 *
+	 * @return {@code true} when {@code persistBatch} is atomic on this backend
+	 */
+	default boolean isAtomicBatchSupported() {
+		return false;
+	}
+
+	/**
+	 * Reports whether {@link #persistBatch(List)} is atomic for entries stored under {@code primaryKey}.
+	 * Single-backend managers return {@link #isAtomicBatchSupported()}; a hybrid entry manager returns
+	 * the capability of the backend that the DN maps to.
+	 *
+	 * @param primaryKey DN (or base DN) of the entries to write
+	 * @return {@code true} when {@code persistBatch} is atomic for that DN
+	 */
+	default boolean isAtomicBatchSupported(String primaryKey) {
+		return isAtomicBatchSupported();
+	}
+
+	/**
+	 * Inserts all entries in ONE transaction: either every entry is stored or none is. There are no
+	 * partial results. Entries may be of different entity classes (and tables). The insertion order is
+	 * the list order.
+	 *
+	 * <p>Each entry is mapped exactly as {@link #persist(Object)} maps it: the DN comes from the
+	 * {@code @DN} property and is handled the same way, object classes and expiration are the same, and
+	 * the {@code @Version} property of an entry is initialized exactly as {@code persist} initializes
+	 * it (the entry object is updated in place before the write).</p>
+	 *
+	 * <p>An empty list is a no-op. The method is stateless and thread safe; on the SQL backend the
+	 * batch is one transaction on one pooled connection. There is no general transaction API: the
+	 * batch is the unit of atomicity.</p>
+	 *
+	 * <p>The default implementation always throws {@link io.jans.orm.exception.UnsupportedOperationException},
+	 * also for an empty list. Callers check {@link #isAtomicBatchSupported()} first and fall back to
+	 * {@link #persist(Object)} per entry.</p>
+	 *
+	 * @param entries entries to insert, in order
+	 * @throws io.jans.orm.exception.MappingException {@code entries} is {@code null} or contains a
+	 *         {@code null} element, or an entry cannot be mapped; nothing is stored
+	 * @throws io.jans.orm.exception.EntryPersistenceException an entry with the same DN already exists:
+	 *         the cause is a {@link io.jans.orm.exception.operation.DuplicateEntryException} (checked, so it
+	 *         is wrapped exactly as {@code persist} wraps it), with {@code getDn()} set to the failing DN
+	 *         when the backend reports it; the transaction is rolled back and nothing is stored. Any other
+	 *         failure is an {@code EntryPersistenceException} without that cause; nothing is stored
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no atomic batch
+	 */
+	default void persistBatch(List<?> entries) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Atomic batch insert (persistBatch) is not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reports whether {@link #executeInTransaction(String, TransactionCallback)} and
+	 * {@link #findForUpdate(Class, Object)} are supported for entries stored under {@code primaryKey}.
+	 * Only the SQL backend supports them; a hybrid entry manager returns the capability of the backend
+	 * that the DN maps to.
+	 *
+	 * @param primaryKey DN (or base DN) of the entries the transaction will read and write
+	 * @return {@code true} when transactions are supported for that DN
+	 */
+	default boolean isTransactionSupported(String primaryKey) {
+		return false;
+	}
+
+	/**
+	 * Runs {@code callback} in ONE database transaction. Every read and write this entry manager performs
+	 * on the calling thread while the callback runs joins the transaction. The transaction commits when
+	 * the callback returns normally and rolls back when it throws; the exception is rethrown unchanged
+	 * when it is a {@link RuntimeException}, otherwise it is wrapped in an
+	 * {@link io.jans.orm.exception.EntryPersistenceException}.
+	 *
+	 * <p>A nested call on the same thread joins the outer transaction (no savepoints): the outer call
+	 * decides commit or rollback. Writes that a hybrid entry manager routes to a different backend than
+	 * {@code primaryKey} are not part of the transaction.</p>
+	 *
+	 * @param primaryKey DN (or base DN) that selects the backend
+	 * @param callback unit of work
+	 * @return result of the callback
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no transactions
+	 */
+	default <T> T executeInTransaction(String primaryKey, TransactionCallback<T> callback) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Transactions are not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reads one entry and locks its row until the current transaction ends ({@code SELECT ... FOR UPDATE}).
+	 * Must be called inside {@link #executeInTransaction(String, TransactionCallback)}.
+	 *
+	 * @return the entry, or {@code null} when it does not exist
+	 * @throws io.jans.orm.exception.UnsupportedOperationException the backend has no row locks
+	 * @throws IllegalStateException called outside a transaction
+	 */
+	default <T> T findForUpdate(Class<T> entryClass, Object primaryKey) {
+		throw new io.jans.orm.exception.UnsupportedOperationException(String.format(
+				"Row locks are not supported by '%s' persistence backend", getPersistenceType()));
+	}
+
+	/**
+	 * Reads entries by DN. Backends with a native implementation (SQL) read them in one round trip
+	 * per table; the default implementation works on every backend and reads one DN at a time, so
+	 * callers never need a capability check.
+	 *
+	 * <p>Missing DNs are absent from the result. Result keys are the DNs as passed; the iteration
+	 * order of the result follows the first occurrence of each DN in {@code dns}. A DN passed more than
+	 * once is read once. An empty collection returns an empty map.</p>
+	 *
+	 * @param entryClass entity class of all requested entries
+	 * @param dns DNs to read
+	 * @return found entries keyed by DN; never {@code null}
+	 * @throws io.jans.orm.exception.MappingException {@code dns} is {@code null} or contains a
+	 *         {@code null} or empty DN
+	 * @throws io.jans.orm.exception.EntryPersistenceException a read fails for a reason other than a
+	 *         missing entry. The default implementation checks existence with {@code contains}, which
+	 *         reports a failed read as a missing entry on backends that swallow the read error, so a DN
+	 *         can be absent from the result although the read failed. The SQL implementation reports
+	 *         every read failure.
+	 */
+	default <T> Map<String, T> findByDns(Class<T> entryClass, Collection<String> dns) {
+		if (dns == null) {
+			throw new MappingException("DNs to find entries are null");
+		}
+
+		Map<String, T> result = new LinkedHashMap<>();
+		Set<String> processed = new HashSet<>();
+		for (String dn : dns) {
+			if (dn == null || dn.isEmpty()) {
+				throw new MappingException("DN to find entry is null");
+			}
+			if (!processed.add(dn) || !contains(dn, entryClass)) {
+				continue;
+			}
+
+			try {
+				result.put(dn, find(dn, entryClass, null));
+			} catch (EntryPersistenceException ex) {
+				// The entry can be removed between contains() and find(): skip it only in that case
+				if (contains(dn, entryClass)) {
+					throw ex;
+				}
+			}
+		}
+
+		return result;
+	}
 
 	@Deprecated
 	boolean contains(Object entity);

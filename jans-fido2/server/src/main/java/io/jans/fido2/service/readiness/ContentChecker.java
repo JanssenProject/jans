@@ -62,6 +62,8 @@ public class ContentChecker {
     private static final String ID_IOS_APP = "content.ios.app";
     private static final String ID_DRIFT = "content.drift";
     private static final String PACKAGE = "package ";
+    /** Every derived fact copies the package name, so an oversized one would multiply memory per fingerprint. */
+    static final int MAX_PACKAGE_NAME_LENGTH = 255;
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
@@ -205,19 +207,27 @@ public class ContentChecker {
     private static Set<String> androidFacts(JsonNode statements) {
         Set<String> facts = new HashSet<>();
         for (JsonNode statement : statements) {
-            JsonNode target = statement.path("target");
-            if (!"android_app".equals(target.path("namespace").asText()) || !target.path("package_name").isTextual()) {
-                continue;
-            }
-            String pkg = target.path("package_name").asText();
-            boolean hasRelation = hasLoginCredsRelation(statement);
-            facts.add("P|" + pkg);
-            if (hasRelation) {
-                facts.add("R|" + pkg);
-            }
-            addFingerprintFacts(facts, pkg, target, hasRelation);
+            addAndroidStatementFacts(facts, statement);
         }
         return facts;
+    }
+
+    private static void addAndroidStatementFacts(Set<String> facts, JsonNode statement) {
+        JsonNode target = statement.path("target");
+        if (!"android_app".equals(target.path("namespace").asText()) || !target.path("package_name").isTextual()) {
+            return;
+        }
+        String pkg = target.path("package_name").asText();
+        if (pkg.length() > MAX_PACKAGE_NAME_LENGTH) {
+            facts.add("X|oversized package_name");
+            return;
+        }
+        boolean hasRelation = hasLoginCredsRelation(statement);
+        facts.add("P|" + pkg);
+        if (hasRelation) {
+            facts.add("R|" + pkg);
+        }
+        addFingerprintFacts(facts, pkg, target, hasRelation);
     }
 
     private static void addFingerprintFacts(Set<String> facts, String pkg, JsonNode target, boolean hasRelation) {

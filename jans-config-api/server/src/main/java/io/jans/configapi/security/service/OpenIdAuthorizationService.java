@@ -8,6 +8,8 @@ package io.jans.configapi.security.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.util.*;
@@ -65,7 +67,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
     public String processAuthorization(String token, String issuer, ResourceInfo resourceInfo, String method,
             String path, HttpHeaders httpHeaders) throws WebApplicationException {
-        logger.error("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ", issuer,
+        logger.info("oAuth  Authorization parameters , issuer:{}, resourceInfo:{}, method: {}, path: {} ", issuer,
                 resourceInfo, method, path);
 
         if (StringUtils.isBlank(token)) {
@@ -81,7 +83,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         // Check the type of token simple, jwt, reference
-        logger.error("Verify if JWT");
+        logger.info("Verify if JWT");
         String acccessToken = token.substring("Bearer".length()).trim();
         boolean isJwtToken = false;
         List<String> tokenScopes = null;
@@ -90,9 +92,19 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
             if (isJwtToken) {
 
-                logger.error("Since token is JWT Validate it");
-                jwtUtil.parse(acccessToken);
+                logger.info("Since token is JWT Validate it");
+                Jwt jwt = jwtUtil.parse(acccessToken);
+                if (isDpopBound(jwt)) {
+                    logger.error("DPoP-bound token presented as Bearer token.");
+                    throw new WebApplicationException("DPoP-bound token cannot be used as Bearer token.",
+                            Response.status(Response.Status.UNAUTHORIZED).build());
+                }
                 tokenScopes = jwtUtil.validateToken(acccessToken);
+                if (isJwtIntrospectionEnabled()) {
+                    requireActive(introspect(token, acccessToken, issuer));
+                }
+                setAuthenticatedPrincipal(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER),
+                        jwt.getClaims().getClaimAsString(JwtClaimName.CLIENT_ID));
             }
         } catch (InvalidJwtException exp) {
             throw new WebApplicationException("InvalidJwtException - Jwt Token is Invalid.",
@@ -104,29 +116,19 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
         }
 
         if (!isJwtToken) {
-            logger.error("Non JWT Token Introspection");
-            IntrospectionResponse introspectionResponse = null;
-            try {
-                introspectionResponse = openIdService.getIntrospectionResponse(token, acccessToken, issuer);
-                logger.error(" OpenIdAuthorizationService::processAuthorization() - introspectionResponse:{}", introspectionResponse);
-                logger.error(" OpenIdAuthorizationService - user_inum:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_inum"));
-                logger.error(" OpenIdAuthorizationService - user_role:{}", authUtil.getJsonNodeKeyValue(introspectionResponse.getAuthorizationDetails(),"user_role"));
-            } catch (JsonProcessingException ex) {
-                logger.error("Error while token Introspection exception - ", ex);
-                throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
+            logger.info("Non JWT Token Introspection");
+            IntrospectionResponse introspectionResponse = introspect(token, acccessToken, issuer);
+            requireActive(introspectionResponse);
+            if (introspectionResponse.getCnf() != null
+                    && introspectionResponse.getCnf().containsKey(JwtClaimName.JKT)) {
+                logger.error("DPoP-bound token presented as Bearer token.");
+                throw new WebApplicationException("DPoP-bound token cannot be used as Bearer token.",
                         Response.status(Response.Status.UNAUTHORIZED).build());
             }
-
-            logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
-            if (introspectionResponse == null || !introspectionResponse.isActive()) {
-                logger.error("Token is Invalid.");
-                throw new WebApplicationException("Token is Invalid.",
-                        Response.status(Response.Status.UNAUTHORIZED).build());
-            }
-
             tokenScopes = introspectionResponse.getScope();
+            setAuthenticatedPrincipal(introspectionResponse.getSubject(), introspectionResponse.getClientId());
         }
-        logger.error(" OpenIdAuthorizationService - tokenScopes:{}", tokenScopes); 
+
         // Validate Scopes
         acccessToken = validateScope(token, tokenScopes, resourceInfo, issuer, httpHeaders);
 
@@ -158,10 +160,10 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                 logger.info(" If no resource scopes required return original accessToken");
                 return accessToken;
             }
-            logger.error(" OpenIdAuthorizationService- tokenScopes:{}, resourceScopes:{}", tokenScopes, resourceScopes); 
+
             // find missing scopes
             List<String> missingScopes = authUtil.findMissingScopes(resourceScopesByType, tokenScopes);
-            logger.error("missingScopes:{}", missingScopes);
+            logger.info("missingScopes:{}", missingScopes);
 
             // Check if resource requires auth server specific scope
             List<String> authSpecificScope = getAuthSpecificScopeRequired(resourceInfo);
@@ -234,6 +236,38 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
                     Response.status(Response.Status.UNAUTHORIZED).build());
         }
 
+    }
+
+    private IntrospectionResponse introspect(String token, String accessToken, String issuer) {
+        try {
+            return openIdService.getIntrospectionResponse(token, accessToken, issuer);
+        } catch (JsonProcessingException ex) {
+            logger.error("Error while token Introspection exception - ", ex);
+            throw new WebApplicationException("IntrospectionResponse - Jwt Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+    }
+
+    private void requireActive(IntrospectionResponse introspectionResponse) {
+        logger.trace("oAuth  Authorization introspectionResponse:{}", introspectionResponse);
+        if (introspectionResponse == null || !introspectionResponse.isActive()) {
+            logger.error("Token is Invalid.");
+            throw new WebApplicationException("Token is Invalid.",
+                    Response.status(Response.Status.UNAUTHORIZED).build());
+        }
+    }
+
+    private boolean isJwtIntrospectionEnabled() {
+        return this.configurationFactory.getApiAppConfiguration() != null
+                && this.configurationFactory.getApiAppConfiguration().isJwtIntrospectionEnabled();
+    }
+
+    private boolean isDpopBound(Jwt jwt) {
+        if (jwt == null || jwt.getClaims() == null || !jwt.getClaims().hasClaim(JwtClaimName.CNF)) {
+            return false;
+        }
+        JSONObject cnf = jwt.getClaims().getClaimAsJSON(JwtClaimName.CNF);
+        return cnf == null || cnf.has(JwtClaimName.JKT);
     }
 
     private boolean externalAuthorization(String token, String issuer, String method, String path) {

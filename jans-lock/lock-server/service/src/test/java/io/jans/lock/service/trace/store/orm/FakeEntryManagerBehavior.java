@@ -42,8 +42,8 @@ import io.jans.orm.search.filter.Filter;
  * A map-backed stand-in for {@link PersistenceEntryManager} that emulates enough of a SQL backend's
  * behavior for {@code OrmTraceStore} to be exercised by the shared {@code TraceStoreContractTest}
  * suite: {@code contains}, {@code persist} (throwing
- * {@link EntryPersistenceException} with <strong>no</strong> {@code DuplicateEntryException} cause
- * on a duplicate DN, exactly like SQL), {@code find} (throwing when the DN is absent; returns a
+ * {@link EntryPersistenceException} with an ORM {@code DuplicateEntryException} cause on a duplicate
+ * DN, exactly like SQL), {@code find} (throwing when the DN is absent; returns a
  * defensive copy, like a real backend deserializing a fresh row, so a caller mutating the found
  * entity never aliases the stored state before a subsequent CAS check), {@code merge},
  * {@code updateWithVersion} (compare-and-swaps the entity's {@code @Version} field against
@@ -52,7 +52,9 @@ import io.jans.orm.search.filter.Filter;
  * {@code EQUALITY} (including the {@code multiValued()} marker used for
  * {@code jansTraceCapKeys}/{@code jansTraceTokenKeys}) and {@code LESS_OR_EQUAL} filters by
  * reflecting on each entity's {@code @AttributeName} fields, and applying the entity's
- * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does.
+ * {@code @DataEntry} default sort before any {@code limit}, as the SQL backend does. The atomic
+ * batch API is emulated too: {@code persistBatch} stores every entry or none and reports the first
+ * duplicate DN like SQL, {@code findByDns} returns copies of the found entries.
  *
  * <p>Not a general-purpose ORM fake: it only supports the filter shapes and method overloads
  * {@code OrmTraceStore} actually issues.
@@ -74,6 +76,16 @@ final class FakeEntryManagerBehavior {
 	private boolean caseInsensitiveDomain;
 
 	private Runnable afterPolicyBatch;
+
+	private boolean atomicBatchSupported = true;
+
+	/** Like {@link #create()}, but the manager has no atomic batch, as on a non-SQL backend. */
+	static PersistenceEntryManager createWithoutAtomicBatch() {
+		FakeEntryManagerBehavior behavior = new FakeEntryManagerBehavior();
+		behavior.atomicBatchSupported = false;
+		BY_MOCK.put(behavior.mock, behavior);
+		return behavior.mock;
+	}
 
 	static void afterNextPolicyBatch(PersistenceEntryManager manager, Runnable action) {
 		BY_MOCK.get(manager).afterPolicyBatch = action;
@@ -119,6 +131,8 @@ final class FakeEntryManagerBehavior {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void wire() {
+		when(mock.getPersistenceType(anyString())).thenReturn(PersistenceEntryManager.PERSITENCE_TYPES.sql.name());
+
 		when(mock.contains(anyString(), any(Class.class)))
 				.thenAnswer(inv -> storeFor(inv.getArgument(1)).containsKey((String) inv.getArgument(0)));
 
@@ -127,9 +141,9 @@ final class FakeEntryManagerBehavior {
 			String dn = dnOf(entity);
 			Map<String, Object> store = storeFor(entity.getClass());
 			if (store.containsKey(dn)) {
-				// SQL does not throw io.jans.orm.exception.operation.DuplicateEntryException; it
-				// wraps every persist failure in a plain EntryPersistenceException.
-				throw new EntryPersistenceException("Duplicate entry: " + dn);
+				// Like SQL: the ORM DuplicateEntryException is the cause of the EntryPersistenceException
+				throw new EntryPersistenceException("Failed to persist entry: '" + dn + "'",
+						new io.jans.orm.exception.operation.DuplicateEntryException(dn));
 			}
 			initVersionIfNeeded(entity);
 			store.put(dn, entity);
@@ -216,6 +230,44 @@ final class FakeEntryManagerBehavior {
 
 		when(mock.countEntries(anyString(), any(Class.class), any(Filter.class)))
 				.thenAnswer(inv -> matchAll(inv, -1).size());
+
+		when(mock.isAtomicBatchSupported()).thenAnswer(inv -> atomicBatchSupported);
+		when(mock.isAtomicBatchSupported(anyString())).thenAnswer(inv -> atomicBatchSupported);
+
+		doAnswer(inv -> {
+			if (!atomicBatchSupported) {
+				throw new io.jans.orm.exception.UnsupportedOperationException("persistBatch is not supported");
+			}
+			List<Object> entries = inv.getArgument(0);
+			// Like the SQL transaction: the first duplicate DN (stored or earlier in the batch) rolls back everything
+			Map<Class<?>, java.util.Set<String>> batchDns = new HashMap<>();
+			for (Object entity : entries) {
+				String dn = dnOf(entity);
+				if (storeFor(entity.getClass()).containsKey(dn)
+						|| !batchDns.computeIfAbsent(entity.getClass(), c -> new java.util.HashSet<>()).add(dn)) {
+					throw new EntryPersistenceException("Failed to persist batch of " + entries.size() + " entries",
+							new io.jans.orm.exception.operation.DuplicateEntryException(dn));
+				}
+			}
+			for (Object entity : entries) {
+				initVersionIfNeeded(entity);
+				storeFor(entity.getClass()).put(dnOf(entity), entity);
+			}
+			return null;
+		}).when(mock).persistBatch(any());
+
+		when(mock.findByDns(any(Class.class), any())).thenAnswer(inv -> {
+			Class<?> entryClass = inv.getArgument(0);
+			java.util.Collection<String> dns = inv.getArgument(1);
+			Map<String, Object> result = new LinkedHashMap<>();
+			for (String dn : dns) {
+				Object entity = storeFor(entryClass).get(dn);
+				if (entity != null && !result.containsKey(dn)) {
+					result.put(dn, shallowCopy(entity));
+				}
+			}
+			return result;
+		});
 	}
 
 	/**
@@ -369,20 +421,19 @@ final class FakeEntryManagerBehavior {
 
 	private static boolean matchesLessOrEqual(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
-		if (!(attrValue instanceof Number)) {
-			return false;
-		}
-		long actual = ((Number) attrValue).longValue();
-		long expected = ((Number) filter.getAssertionValue()).longValue();
-		return actual <= expected;
+		return attrValue != null && compareRange(attrValue, filter.getAssertionValue()) <= 0;
 	}
 
 	private static boolean matchesGreaterOrEqual(Filter filter, Object entity) {
 		Object attrValue = attrValue(entity, filter.getAttributeName());
-		if (!(attrValue instanceof Number)) {
-			return false;
+		return attrValue != null && compareRange(attrValue, filter.getAssertionValue()) >= 0;
+	}
+
+	private static int compareRange(Object actual, Object expected) {
+		if (actual instanceof Number && expected instanceof Number) {
+			return Long.compare(((Number) actual).longValue(), ((Number) expected).longValue());
 		}
-		return ((Number) attrValue).longValue() >= ((Number) filter.getAssertionValue()).longValue();
+		return String.valueOf(actual).compareTo(String.valueOf(expected));
 	}
 
 	@SuppressWarnings("unchecked")

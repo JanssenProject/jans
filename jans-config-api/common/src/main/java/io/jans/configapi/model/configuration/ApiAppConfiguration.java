@@ -48,6 +48,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Client IDs exempt from the User Role-Permission mapping check. Only honoured for tokens that carry no user, so a user token is always checked. Empty by default.")
     private List<String> userRolePermissionExcludedClients;
     
+    @Schema(description = "Flag to enable/disable introspection of JWT access tokens so revoked tokens are rejected before expiry. Default value `false`.")
+    private boolean jwtIntrospectionEnabled;
+
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
  
@@ -224,6 +227,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setUserRolePermissionExcludedClients(List<String> userRolePermissionExcludedClients) {
         this.userRolePermissionExcludedClients = userRolePermissionExcludedClients;
+    }
+
+    public boolean isJwtIntrospectionEnabled() {
+        return jwtIntrospectionEnabled;
+    }
+
+    public void setJwtIntrospectionEnabled(boolean jwtIntrospectionEnabled) {
+        this.jwtIntrospectionEnabled = jwtIntrospectionEnabled;
     }
 
     public boolean isDisableAuditLogger() {
@@ -502,7 +513,7 @@ public class ApiAppConfiguration implements Configuration {
                 +" ,validateUserInumInIntrospectionFlag=" + validateUserInumInIntrospectionFlag
                 +" ,fetchUserRoleInIntrospectionFlag=" + fetchUserRoleInIntrospectionFlag
                 +" ,userRolePermissionExcludedClients=" + userRolePermissionExcludedClients
-                + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
+                + ", jwtIntrospectionEnabled=" + jwtIntrospectionEnabled + ", disableAuditLogger=" + disableAuditLogger + ", customAttributeValidationEnabled="
                 + customAttributeValidationEnabled + ", acrValidationEnabled=" + acrValidationEnabled
                 + ", returnClientSecretInResponse=" + returnClientSecretInResponse
                 + ", returnEncryptedClientSecretInResponse=" + returnEncryptedClientSecretInResponse

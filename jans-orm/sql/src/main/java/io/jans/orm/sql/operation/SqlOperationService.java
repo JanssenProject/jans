@@ -11,9 +11,11 @@ import java.sql.DatabaseMetaData;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.querydsl.core.types.OrderSpecifier;
 
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
@@ -28,6 +30,7 @@ import io.jans.orm.model.SearchProjection;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
+import io.jans.orm.sql.model.BatchInsert;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
@@ -72,7 +75,34 @@ public interface SqlOperationService extends PersistenceOperationService {
 
     SqlConnectionProvider getConnectionProvider();
 
+    /**
+     * Maximum number of entries in one {@link #addEntriesInTransaction(List)} call. The whole batch,
+     * with all converted attribute values, is held in memory until the commit.
+     */
+    int MAX_BATCH_INSERT_SIZE = 1000;
+
+    /**
+     * Maximum number of keys in one {@code WHERE doc_id IN (...)} statement of {@link #lookupByKeys}.
+     */
+    int LOOKUP_BY_KEYS_CHUNK_SIZE = 500;
+
     boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException;
+
+    /**
+     * Standalone (no transaction bound to the calling thread): inserts all entries in one database
+     * transaction on one pooled connection: one commit for the whole batch, or a rollback and nothing
+     * stored. Joined (inside {@link #executeInTransaction}): the entries are written on the bound
+     * connection and commit only with the owner transaction; a failure marks that transaction
+     * rollback-only, so a partial batch is never committed. Consecutive entries with the same table and
+     * columns are sent as one JDBC batch. Values are converted exactly as {@link #addEntry} converts them.
+     *
+     * @throws DuplicateEntryException a unique key is violated (an existing DN or the same DN twice in
+     *         the batch); {@code getDn()} is the failing DN when the driver reports the key, otherwise
+     *         the message names the batch index range of the failing statement
+     * @throws PersistenceException any other failure, with the cause
+     * @throws io.jans.orm.exception.InvalidArgumentException more than {@link #MAX_BATCH_INSERT_SIZE} entries
+     */
+    void addEntriesInTransaction(List<BatchInsert> inserts) throws DuplicateEntryException, PersistenceException;
 
     boolean updateEntry(String key, String objectClass, List<AttributeDataModification> mods) throws UnsupportedOperationException, PersistenceException;
 
@@ -85,6 +115,45 @@ public interface SqlOperationService extends PersistenceOperationService {
 	boolean deleteRecursively(String key, String objectClass) throws EntryNotFoundException, SearchException;
 
 	List<AttributeData> lookup(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException;
+
+	/**
+	 * Reads entries by key with {@code WHERE doc_id IN (...)}, at most {@link #LOOKUP_BY_KEYS_CHUNK_SIZE}
+	 * keys per statement, grouped by table. Attributes are converted exactly as {@link #lookup} converts them.
+	 *
+	 * @return attributes of the found entries keyed by {@code doc_id}; missing keys are absent
+	 */
+	Map<String, List<AttributeData>> lookupByKeys(String objectClass, Collection<String> keys, String... attributes)
+			throws SearchException, EntryConvertationException;
+
+	/**
+	 * Reads one entry by key with {@code SELECT ... FOR UPDATE}; the row stays locked until the current
+	 * transaction ends.
+	 *
+	 * @return attributes of the entry, or {@code null} when no row has the key
+	 * @throws IllegalStateException no transaction is active on the calling thread
+	 */
+	List<AttributeData> lookupForUpdate(String key, String objectClass, String... attributes) throws SearchException, EntryConvertationException;
+
+	/**
+	 * Runs {@code callback} in one transaction on one pooled connection bound to the calling thread.
+	 * The ORM operations of this service on that thread join it; {@link #getConnection()} does not (it returns
+	 * a separate pooled connection whose work is not rolled back with the transaction).
+	 * A nested call joins the outer transaction.
+	 * Commits when the callback returns, rolls back when it throws, and rethrows the callback exception.
+	 * A failed database statement, a failed joined batch or a failed nested callback marks the transaction
+	 * rollback-only: it is then rolled back and a {@link io.jans.orm.exception.operation.PersistenceException}
+	 * is thrown even when the callback caught the failure and returned normally.
+	 */
+	<T> T executeInTransaction(TransactionCallback<T> callback) throws Exception;
+
+	boolean isInTransaction();
+
+	/**
+	 * Runs {@code action} after the transaction bound to the calling thread commits, or immediately when no
+	 * transaction is active. The action is discarded when the transaction rolls back. A failing action is logged
+	 * and does not affect the committed transaction.
+	 */
+	void runAfterCommit(Runnable action);
 
     <O> PagedResult<EntryData> search(String key, String objectClass, ConvertedExpression expression, SearchScope scope,
             String[] attributes, OrderSpecifier<?>[] orderBy, SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
@@ -112,6 +181,10 @@ public interface SqlOperationService extends PersistenceOperationService {
 
     boolean destroy();
 
+	/**
+	 * A pooled connection outside any transaction bound to the calling thread. Work done through it is
+	 * not rolled back with that transaction.
+	 */
 	Connection getConnection();
 
 	DatabaseMetaData getMetadata();

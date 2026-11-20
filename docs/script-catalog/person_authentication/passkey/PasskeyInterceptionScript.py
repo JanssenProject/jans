@@ -96,6 +96,8 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Fido2. Authenticate step 2. Call Fido2 in order to finish authentication flow"
                     assertionService = self.createAssertionServiceWithContext(self.getMetaDataConfiguration())
                     assertionResult = mapper.readValue(token_response, AssertionResult)
+                    if not self.isIssuedChallenge(identity, assertionResult):
+                        return False
                     assertionStatus = assertionService.verify(assertionResult)
                     authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
                     print "Fido2. Authenticate step 2. assertionStatus.getStatus() : %s" % assertionStatus.getStatus()
@@ -146,12 +148,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
                 assertionService = self.createAssertionServiceWithContext(self.getMetaDataConfiguration())
                 assertionResult = mapper.readValue(token_response, AssertionResult)
+                if not self.isIssuedChallenge(identity, assertionResult):
+                    return False
 
                 assertionStatus = assertionService.verify(assertionResult)
-                assertionStatus.readEntity(java.lang.String)
+                authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
                 print "Fido2. Authenticate for step 2. assertionStatus.getStatus() : %s" % assertionStatus.getStatus()
                 if assertionStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
+                    return False
+
+                if json.loads(authenticationStatusEntity).get("username") != user.getUserId():
+                    print "Fido2. Authenticate for step 2. Assertion belongs to another user"
                     return False
 
                 return True
@@ -159,6 +167,8 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
                 attestationService = self.createAttestationServiceWithContext(self.getMetaDataConfiguration())
                 attestationResult = mapper.readValue(token_response, AttestationResult)
+                if not self.isIssuedChallenge(identity, attestationResult):
+                    return False
                 attestationStatus = attestationService.verify(attestationResult)
 
                 attestationStatusEntity = attestationStatus.readEntity(java.lang.String)
@@ -196,6 +206,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
 
                 identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
+                identity.setWorkingParameter("fido2_challenge", self.getOptionsChallenge(assertionResponse))
 
             except ClientErrorException, ex:
                     print "Fido2. Prepare for step 1. Failed to start assertion flow. Exception:", sys.exc_info()[1]
@@ -250,6 +261,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
             identity.setWorkingParameter("fido2_assertion_request", ServerUtil.asJson(assertionResponse))
             identity.setWorkingParameter("fido2_attestation_request", ServerUtil.asJson(attestationResponse))
+            identity.setWorkingParameter("fido2_challenge", self.getOptionsChallenge(assertionResponse or attestationResponse))
             print "Fido2. Prepare for step 2. Successfully started flow"
 
             return True
@@ -261,7 +273,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList( "conditionalUI","fido2_assertion_request","fido2_attestation_request")
+        return Arrays.asList( "conditionalUI","fido2_assertion_request","fido2_attestation_request","fido2_challenge")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         identity = CdiUtil.bean(Identity)
@@ -322,6 +334,27 @@ class PersonAuthentication(PersonAuthenticationType):
         finally:
             self.metaDataLoaderLock.unlock()
         return None
+
+    def getOptionsChallenge(self, options):
+        try:
+            return json.loads(options).get("challenge")
+        except (Exception, Throwable):
+            return None
+
+    # Binds the ceremony result to the challenge issued for this session, so a ceremony
+    # completed elsewhere cannot be replayed into this login
+    def isIssuedChallenge(self, identity, tokenResult):
+        expected = identity.getWorkingParameter("fido2_challenge")
+        try:
+            clientData = json.loads(Base64Util.base64urldecodeToString(tokenResult.getResponse().getClientDataJSON()))
+            challenge = clientData.get("challenge")
+        except (Exception, Throwable):
+            challenge = None
+
+        if StringHelper.isEmpty(expected) or challenge is None or challenge.rstrip("=") != expected.rstrip("="):
+            print "Fido2. Ceremony challenge does not match the one issued for this session"
+            return False
+        return True
 
     def getForwardedContext(self):
         # Forwards the Auth Server's own directly-observed remote address, never the caller-supplied

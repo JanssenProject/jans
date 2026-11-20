@@ -6,6 +6,9 @@
 
 package io.jans.service;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.service.message.provider.MessageInterface;
@@ -32,7 +35,9 @@ public abstract class BaseMessageService implements MessageInterface {
 			return;
 		}
 
-		log.trace("Subscribe '{}' for channels '{}'", pubSubAdapter, channels);
+		if (log.isTraceEnabled()) {
+			log.trace("Subscribe '{}' for channels '{}'", pubSubAdapter, Arrays.toString(channels).replaceAll("[\\r\\n]", "_"));
+		}
 		messageProvider.subscribe(pubSubAdapter, channels);
 	}
 
@@ -55,7 +60,7 @@ public abstract class BaseMessageService implements MessageInterface {
 		}
 
 		if (log.isTraceEnabled()) {
-			log.trace("Publish '{}' to channel '{}'", message, channel);
+			log.trace("Publish '{}' to channel '{}'", StringUtils.replaceChars(message, "\r\n", "__"), StringUtils.replaceChars(channel, "\r\n", "__"));
 		}
 
 		boolean result = messageProvider.publish(channel, message);

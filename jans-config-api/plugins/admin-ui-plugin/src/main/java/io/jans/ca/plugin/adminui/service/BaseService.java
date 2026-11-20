@@ -178,6 +178,9 @@ public class BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ORG_ID_CLAIM_NOT_FOUND.getDescription());
             }
             String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
+            if (!issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER) && !issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), "SSA issuer is not a trusted licensing server");
+            }
             String hardwareId = claims.get("org_id").toString();
 
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
@@ -224,11 +227,9 @@ public class BaseService {
                         dcrResponse.setClientSecret(entity.getString("client_secret"));
                         dcrResponse.setOpHost(issuer);
                         dcrResponse.setHardwareId(hardwareId);
-                        if (issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_DEV_SERVER);
-                        } else if (issuer.equals(AppConstants.SCAN_PROD_AUTH_SERVER)) {
-                            dcrResponse.setScanHostname(AppConstants.SCAN_PROD_SERVER);
-                        }
+                        dcrResponse.setScanHostname(issuer.equals(AppConstants.SCAN_DEV_AUTH_SERVER)
+                                ? AppConstants.SCAN_DEV_SERVER
+                                : AppConstants.SCAN_PROD_SERVER);
                         return dcrResponse;
                     }
                     jsonString = httpService.getContent(httpEntity);
@@ -273,7 +274,10 @@ public class BaseService {
 
         if (response.getStatus() == 200) {
             Optional<Map<String, Object>> entity = Optional.of(response.readEntity(Map.class));
-            log.info("Introspection response entity: {}", entity.get().toString());
+            if(log.isInfoEnabled()) {
+                    log.info("Introspection response entity: {}", entity.get());
+            }
+                    
             return entity;
         }
         return Optional.empty();

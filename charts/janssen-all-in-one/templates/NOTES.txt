@@ -38,7 +38,7 @@ ATTRIBUTE CHANGES:
 {{- $casaIngress := .Values.casa.ingress }}
 {{- $fido2Ingress := .Values.fido2.ingress }}
 {{- $scimIngress := .Values.scim.ingress }}
-{{- $legacy := dict "lockConfigEnabled" $authIngress.lockConfigEnabled "lockAuditEnabled" $authIngress.lockAuditEnabled "casaEnabled" $casaIngress.casaEnabled "fido2Enabled" $fido2Ingress.fido2Enabled "fido2ConfigEnabled" $fido2Ingress.fido2ConfigEnabled "fido2WebauthnEnabled" $fido2Ingress.fido2WebauthnEnabled "scimEnabled" $scimIngress.scimEnabled "scimConfigEnabled" $scimIngress.scimConfigEnabled }}
+{{- $legacy := dict "lockConfigEnabled" $authIngress.lockConfigEnabled "lockAuditEnabled" $authIngress.lockAuditEnabled "lockTraceEnabled" $authIngress.lockTraceEnabled "lockTraceAdminEnabled" $authIngress.lockTraceAdminEnabled "casaEnabled" $casaIngress.casaEnabled "fido2Enabled" $fido2Ingress.fido2Enabled "fido2ConfigEnabled" $fido2Ingress.fido2ConfigEnabled "fido2WebauthnEnabled" $fido2Ingress.fido2WebauthnEnabled "scimEnabled" $scimIngress.scimEnabled "scimConfigEnabled" $scimIngress.scimConfigEnabled }}
 {{- $stale := list }}
 {{- range $flag, $legacyValue := $legacy }}
 {{- if and $legacyValue (not (index $routes $flag)) }}

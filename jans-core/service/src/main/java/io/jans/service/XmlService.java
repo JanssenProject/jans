@@ -97,18 +97,16 @@ public class XmlService {
     private DocumentBuilderFactory createDocumentBuilderFactory(boolean skipValidation) throws ParserConfigurationException {
         DocumentBuilderFactory fty = DocumentBuilderFactory.newInstance();
 
-        if (skipValidation) {
-            return fty;
-        }
-
-        fty.setNamespaceAware(true);
-
         // Fix XXE vulnerability
         fty.setXIncludeAware(false);
         fty.setExpandEntityReferences(false);
         fty.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
         fty.setFeature("http://xml.org/sax/features/external-general-entities", false);
         fty.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+        if (!skipValidation) {
+            fty.setNamespaceAware(true);
+        }
 
         return fty;
     }

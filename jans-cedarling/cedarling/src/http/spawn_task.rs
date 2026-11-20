@@ -13,7 +13,7 @@ use std::future::Future;
 ///
 /// Use this instead of the following:
 /// - [`tokio::spawn`]
-/// - [`wasm_bindgen_futures::spawn_local`]
+/// - `wasm_bindgen_futures::spawn_local`
 #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
 pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
 where

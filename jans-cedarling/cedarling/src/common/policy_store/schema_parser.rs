@@ -14,84 +14,6 @@ use std::str::FromStr;
 
 use super::errors::{CedarSchemaErrorType, PolicyStoreError};
 
-/// Merge multiple `SchemaFragment`s into one by serializing each to JSON,
-/// deep-merging the JSON objects, and parsing the result back.
-///
-/// # Why JSON?
-///
-/// Each `SchemaFragment` stores two private fields (cedar-policy 4.11):
-/// - `value: ValidatorSchemaFragment` — the validated form used for
-///   `Schema::from_schema_fragments()`. No public getter, no merge method.
-/// - `lossless: json_schema::Fragment<RawName>` — a `BTreeMap<Option<Name>,
-///   NamespaceDefinition>` which is the JSON representation.
-///
-/// There is no public API to merge `SchemaFragment`s directly. The only way
-/// to obtain a merged `SchemaFragment` is to round-trip through JSON:
-///   `to_json_value()` → deep-merge → `from_json_value()`
-///
-/// Internally, cedar-policy-core's `ValidatorSchema::from_schema_fragments`
-/// (see schema.rs:553) merges by collecting all namespace definitions from
-/// all fragments, running RFC 70 checks, adding builtin aliases, etc. But it
-/// returns a `ValidatorSchema`, not a `ValidatorSchemaFragment`, so the
-/// `lossless` JSON data is lost. We use `Schema::from_schema_fragments`
-/// separately for validation; this function is only about building a single
-/// `SchemaFragment` for downstream JSON serialization.
-///
-/// # Why not construct a `SchemaFragment` from `Schema`?
-///
-/// `Schema` has no `to_cedarschema()` or `to_json_string()`. Only
-/// `SchemaFragment` does (via its `lossless` field). Downstream code in
-/// `manager.rs` calls `fragment.to_json_string()` to build `CedarSchemaJson`
-/// and `ValidatorSchema`, so we must produce a `SchemaFragment`.
-pub(super) fn combine_schema_fragments(
-    fragments: &[SchemaFragment],
-) -> Result<SchemaFragment, PolicyStoreError> {
-    let mut combined = serde_json::Map::new();
-    for fragment in fragments {
-        let json =
-            fragment
-                .clone()
-                .to_json_value()
-                .map_err(|e| PolicyStoreError::CedarSchemaError {
-                    file: "(combine)".to_string(),
-                    err: CedarSchemaErrorType::ParseError(e.to_string()),
-                })?;
-        if let serde_json::Value::Object(map) = json {
-            deep_merge(&mut combined, map);
-        }
-    }
-    SchemaFragment::from_json_value(serde_json::Value::Object(combined)).map_err(|e| {
-        PolicyStoreError::CedarSchemaError {
-            file: "(combine)".to_string(),
-            err: CedarSchemaErrorType::ValidationError(e.to_string()),
-        }
-    })
-}
-
-/// Recursively merge `source` into `target` (both are JSON objects).
-/// Keys in `source` that already exist in `target` are deep-merged
-/// (if both values are objects) or overwritten.
-///
-/// This implementation is sufficient for our use case (merging Cedar schema
-/// namespace maps). Ideally this functionality would live upstream in
-/// cedar-policy as `SchemaFragment::merge()`. Consider contributing a merge
-/// API to cedar-policy so we can remove the JSON round-trip entirely.
-fn deep_merge(
-    target: &mut serde_json::Map<String, serde_json::Value>,
-    source: serde_json::Map<String, serde_json::Value>,
-) {
-    for (key, value) in source {
-        match (target.get_mut(&key), value) {
-            (Some(serde_json::Value::Object(existing)), serde_json::Value::Object(new_map)) => {
-                deep_merge(existing, new_map);
-            },
-            (_existing, new_value) => {
-                target.insert(key, new_value);
-            },
-        }
-    }
-}
-
 /// A schema file with its name and content.
 ///
 /// Used when loading multiple schema files that need to be combined
@@ -105,15 +27,10 @@ pub(super) struct SchemaFile {
 }
 
 /// A parsed and validated Cedar schema.
-///
-/// Contains the schema, fragment, and metadata about the source file.
-/// The fragment is preserved to avoid re-parsing when converting to JSON.
 #[derive(Debug, Clone)]
 pub(crate) struct ParsedSchema {
     /// The Cedar schema
     pub schema: Schema,
-    /// The schema fragment (preserved for JSON conversion without re-parsing)
-    pub fragment: SchemaFragment,
 }
 
 impl ParsedSchema {
@@ -124,14 +41,14 @@ impl ParsedSchema {
                 file: filename.to_string(),
                 err: CedarSchemaErrorType::ParseError(e.to_string()),
             })?;
-        let schema = Schema::from_schema_fragments([fragment.clone()]).map_err(|e| {
+        let schema = Schema::from_schema_fragments([fragment]).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filename.to_string(),
                 err: CedarSchemaErrorType::ValidationError(e.to_string()),
             }
         })?;
 
-        Ok(Self { schema, fragment })
+        Ok(Self { schema })
     }
 
     /// Get a reference to the Cedar Schema.
@@ -141,20 +58,11 @@ impl ParsedSchema {
         &self.schema
     }
 
-    /// Get a reference to the schema fragment.
-    ///
-    /// Returns the parsed fragment, which can be used for JSON serialization
-    /// without re-parsing the schema content.
-    pub(super) fn get_fragment(&self) -> &SchemaFragment {
-        &self.fragment
-    }
-
     /// Parse multiple Cedar schema fragments and combine them into a single schema.
     ///
-    /// Each file is parsed into its own `SchemaFragment`, then all fragments are
-    /// merged via `Schema::from_schema_fragments` (additive, handles shared
-    /// namespaces) and `combine_schema_fragments` (JSON deep-merge for downstream
-    /// serialization).
+    /// Each file is parsed into its own `SchemaFragment`, then Cedar merges them
+    /// with `Schema::from_schema_fragments`, which accepts a namespace split across
+    /// files and references from one file to types declared in another.
     pub(super) fn parse_multiple(files: &[SchemaFile]) -> Result<Self, PolicyStoreError> {
         if files.is_empty() {
             return Err(PolicyStoreError::CedarSchemaError {
@@ -178,22 +86,14 @@ impl ParsedSchema {
             fragments.push(fragment);
         }
 
-        // Validate and merge fragments. from_schema_fragments accepts shared
-        // namespaces across files (additive merge). Then combine_schema_fragments
-        // produces a single fragment via JSON deep-merge for downstream use.
-        let schema = Schema::from_schema_fragments(fragments.iter().cloned()).map_err(|e| {
+        let schema = Schema::from_schema_fragments(fragments).map_err(|e| {
             PolicyStoreError::CedarSchemaError {
                 file: filenames.join(", "),
                 err: CedarSchemaErrorType::ValidationError(e.to_string()),
             }
         })?;
 
-        let combined_fragment = combine_schema_fragments(&fragments)?;
-
-        Ok(Self {
-            schema,
-            fragment: combined_fragment,
-        })
+        Ok(Self { schema })
     }
 }
 
@@ -537,7 +437,7 @@ mod tests {
             .expect("Valid schema should parse for clone test");
         let cloned = parsed.clone();
 
-        // Clone preserves schema and fragment
+        // Clone preserves the schema
         assert_eq!(
             parsed.get_schema().entity_types().count(),
             cloned.get_schema().entity_types().count()
@@ -713,79 +613,55 @@ mod tests {
             type_names.contains(&"Docs::Folder".to_string()),
             "Should contain Docs::Folder"
         );
-
-        // Verify JSON conversion works (via fragment)
-        let fragment = parsed.get_fragment();
-        let json = fragment.to_json_string().expect("Should serialize to JSON");
-        assert!(
-            json.contains("Users::User") || json.contains("Users"),
-            "expected JSON to contain Users namespace; got: {json}"
-        );
-        assert!(
-            json.contains("Docs::Document") || json.contains("Docs"),
-            "expected JSON to contain Docs namespace; got: {json}"
-        );
     }
 
     #[test]
-    fn test_combine_fragments_json_single() {
-        let content = r"namespace Test { entity User; }";
-        let fragment = SchemaFragment::from_str(content).expect("Valid Cedar DSL should parse");
-        let combined = combine_schema_fragments(&[fragment])
-            .expect("combine_fragments_json with single fragment should succeed");
-        let json = combined.to_json_string().expect("Should serialize to JSON");
+    fn test_parse_multiple_resolves_context_entity_from_another_file() {
+        use cedar_policy_core::validator::types::{EntityKind, Type};
+
+        let files = vec![
+            SchemaFile {
+                name: "users.cedarschema".to_string(),
+                content: "namespace App { entity User; entity File; }".to_string(),
+            },
+            SchemaFile {
+                name: "actions.cedarschema".to_string(),
+                content: r#"namespace App {
+                    action "read" appliesTo {
+                        principal: [User],
+                        resource: [File],
+                        context: { owner: User }
+                    };
+                }"#
+                .to_string(),
+            },
+        ];
+
+        let parsed = ParsedSchema::parse_multiple(&files)
+            .expect("a namespace split across files should merge");
+        let action =
+            cedar_policy::EntityUid::from_str(r#"App::Action::"read""#).expect("valid action uid");
+        let context = parsed
+            .get_schema()
+            .as_ref()
+            .context_type(action.as_ref())
+            .expect("the merged schema should know the action");
+
+        let Type::Record { attrs, .. } = context else {
+            panic!("an action context is always a record, got: {context:?}");
+        };
+        let owner = attrs
+            .iter()
+            .find_map(|(name, attr)| (name == "owner").then_some(attr))
+            .expect("context should declare owner");
         assert!(
-            json.contains("User"),
-            "Combined fragment should contain User"
-        );
-    }
-
-    #[test]
-    fn test_combine_fragments_json_deep_merge_same_namespace() {
-        let f1 = SchemaFragment::from_str(r"namespace App { entity User; }")
-            .expect("Valid Cedar DSL should parse (User)");
-        let f2 = SchemaFragment::from_str(r"namespace App { entity Admin; }")
-            .expect("Valid Cedar DSL should parse (Admin)");
-        let combined = combine_schema_fragments(&[f1, f2])
-            .expect("combine_fragments_json with same namespace should succeed");
-        let json = combined.to_json_string().expect("Should serialize to JSON");
-        assert!(json.contains("User"), "Should contain User");
-        assert!(json.contains("Admin"), "Should contain Admin");
-    }
-
-    #[test]
-    fn test_deep_merge_overlapping_keys() {
-        use serde_json::{Map, Value, json};
-
-        let mut target: Map<String, Value> = serde_json::from_value(json!({
-            "App": {
-                "entityTypes": {
-                    "User": { "shape": { "type": "Record", "attributes": {} } }
-                }
-            }
-        }))
-        .expect("json! macro produces valid Value");
-
-        let source: Map<String, Value> = serde_json::from_value(json!({
-            "App": {
-                "entityTypes": {
-                    "Admin": { "shape": { "type": "Record", "attributes": {} } }
-                }
-            }
-        }))
-        .expect("json! macro produces valid Value");
-
-        deep_merge(&mut target, source);
-
-        let merged = Value::Object(target);
-        let app = merged.get("App").expect("App key exists in merged object");
-        let etypes = app
-            .get("entityTypes")
-            .expect("entityTypes key exists in App");
-        assert!(etypes.get("User").is_some(), "User should survive merge");
-        assert!(
-            etypes.get("Admin").is_some(),
-            "Admin should be added by merge"
+            matches!(
+                owner.attr_type.as_ref(),
+                Type::Entity(EntityKind::Entity(lub))
+                    if lub.get_single_entity().map(ToString::to_string).as_deref()
+                        == Some("App::User")
+            ),
+            "owner should resolve to the User type declared in another file, got: {owner:?}"
         );
     }
 

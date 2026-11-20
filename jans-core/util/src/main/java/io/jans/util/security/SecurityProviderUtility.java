@@ -246,7 +246,11 @@ public class SecurityProviderUtility {
         String providerName = BC_PROVIDER_NAME;
         String className = BC_GENERIC_PROVIDER_CLASS_NAME;
 
-        if (securityMode == null || securityMode == SecurityModeType.BCFIPS_SECURITY_MODE) {
+        if (securityMode == SecurityModeType.BCFIPS_SECURITY_MODE) {
+            // Explicitly requested FIPS mode must not fall back to the generic provider
+            providerName = BC_FIPS_PROVIDER_NAME;
+            className = BC_FIPS_PROVIDER_CLASS_NAME;
+        } else if (securityMode == null) {
             boolean isFipsMode = checkFipsMode();
             if (isFipsMode) {
                 LOG.info("Fips mode is enabled");

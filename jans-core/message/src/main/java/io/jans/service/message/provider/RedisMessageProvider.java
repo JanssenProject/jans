@@ -126,7 +126,7 @@ public class RedisMessageProvider extends AbstractMessageProvider<AbstractRedisP
 
 	@Override
 	public void subscribe(PubSubInterface pubSub, String... channels) {
-		log.info("Starting new thread for subscribing to Redis channels {}", Arrays.asList(channels));
+		log.info("Starting new thread for subscribing to Redis channels {}", Arrays.toString(channels).replaceAll("[\\r\\n]", "_"));
 		Object objectPool = redisProvider.getDelegate();
 		if (objectPool instanceof JedisPool) {
 			executorService.execute(() -> {
@@ -148,7 +148,7 @@ public class RedisMessageProvider extends AbstractMessageProvider<AbstractRedisP
 			// Not supported in current lib, also Sharded is deprecated in 5.x lib
 			throw new UnsupportedOperationException("Sharded pool not provides PubSub in 3.9.x API");
 		}
-		log.info("Stopping thread after subscription end to Redis from channels {}", Arrays.asList(channels));
+		log.info("Stopping thread after subscription end to Redis from channels {}", Arrays.toString(channels).replaceAll("[\\r\\n]", "_"));
 	}
 
 	@Override

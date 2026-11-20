@@ -13954,7 +13954,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -13985,7 +13984,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.delete
-        - revoke_session
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.admin
       - oauth2:
@@ -15699,11 +15697,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanEdit:
           type: boolean
         userCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -17673,15 +17671,6 @@ components:
           type: boolean
           description: Flag to enable/disable timer to dynamically reflect log configuration
             changes. Default value `false`.
-        roleAttributeName:
-          type: string
-          description: DB attribute name for storing user role
-        adminRoleNames:
-          type: array
-          description: Role names corresponding to `admin` role
-          items:
-            type: string
-            description: Role names corresponding to `admin` role
         userRolePermissionValidationEnabled:
           type: boolean
           description: Flag to enable/disable User Role-Permission mapping check while
@@ -17704,6 +17693,10 @@ components:
             description: "Client IDs exempt from the User Role-Permission mapping\
               \ check. Only honoured for tokens that carry no user, so a user token\
               \ is always checked. Empty by default."
+        jwtIntrospectionEnabled:
+          type: boolean
+          description: Flag to enable/disable introspection of JWT access tokens so
+            revoked tokens are rejected before expiry. Default value `false`.
         disableAuditLogger:
           type: boolean
           description: Flag to enable/disable request audit. Default value `false`.
@@ -17780,12 +17773,6 @@ components:
         externalLoggerConfiguration:
           type: string
           description: The path to the external log4j2 logging configuration.
-        superAdminScopes:
-          type: array
-          description: List of Super Admin oAuth scopes.
-          items:
-            type: string
-            description: List of Super Admin oAuth scopes.
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers.
@@ -18758,9 +18745,9 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        logoutStatusJwt:
-          type: boolean
         accessToken:
+          type: boolean
+        logoutStatusJwt:
           type: boolean
     TokenEntityPagedResult:
       type: object
