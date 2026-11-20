@@ -22,7 +22,7 @@ It's also possible to push data into the Cedarling for additional context.
 
 The Cedarling can be:
 
-* Embedded in browsers using the WASM npm package
+* Embedded in browsers with the [JavaScript (WASM) npm package](./tutorials/javascript.md)
 * Embedded in mobile apps using the iOS or Android SDKs
 * Integrated into backend services using the Java, Go, Rust, Python, or C SDKs
 * Deployed as a sidecar
