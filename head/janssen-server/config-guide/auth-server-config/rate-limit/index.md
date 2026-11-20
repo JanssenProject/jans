@@ -57,7 +57,7 @@ Sample rate limit configuration
 ## Rate Limit Rules
 
 Rate limiting is applied based on rules which consists of :
-- **path** - path of the endpoint, e.g. `/jans-auth/restv1/register`
+- **path** - exact path of the endpoint, e.g. `/jans-auth/restv1/register`. Any endpoint under `/jans-auth/restv1/` can be rate limited, e.g. `/jans-auth/restv1/token` or `/jans-auth/restv1/authorize-challenge`. Wildcards are not supported. Path parameters (`;...`), percent-encoding, repeated and trailing slashes are normalized before matching.
 - **methods** - http methods: `POST`, `PUT`, `GET`, `DELETE`, `PATCH`, `OPTIONS`, `HEAD`
 - **requestCount** - requests count
 - **periodInSeconds** - period allowed for given requests count 
@@ -66,6 +66,7 @@ Rate limiting is applied based on rules which consists of :
   - **parameterNames** - name of parameters to extract
 
 **Key** is value which is dynamically constructed from request by applying key extractors. Rate limiting is made by key.
+All key extractors of one rule are combined into a single key, so a rule with `client_id` from body and `Authorization` from header limits each (`client_id`, `Authorization`) pair. To limit by each value independently, define separate rules for the same path.
 
 Here is sample request
 ```http request
