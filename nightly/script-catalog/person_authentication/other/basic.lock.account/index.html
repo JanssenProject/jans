@@ -757,6 +757,21 @@ It looks user account after specified number of unsuccessful login attempts.</p>
    Default value: 3
 3) lock_expiration_time - Specify the time in seconds when lock will be expired
    Default value: 180</p>
+<p>While an account is locked, <code>invalid_login_count_attribute</code> holds <code>locked:&lt;epoch millis&gt;:&lt;jansVersion&gt;</code> instead of a
+count, where <code>jansVersion</code> is the user version the lock wrote. The script only unlocks inactive accounts whose marker
+and version are unchanged since the lock, so accounts disabled or edited by an administrator stay locked.</p>
+<p>On backends with versioned updates, the script's user writes are compare-and-set on <code>jansVersion</code>: a counter, lock
+or unlock write that races a write which advances <code>jansVersion</code> re-reads the user and decides again instead of
+overwriting it. Janssen's own user writers (auth server, Config API, SCIM, Casa, Jans Link) all advance <code>jansVersion</code>.
+Custom entity classes or direct database updates on <code>jansPerson</code> must advance it too, or the script and unlock cannot
+see their changes.</p>
+<p>Other writers update users with <code>merge</code>, which checks only the version it reads itself, not the one their own earlier
+read saw. An update read before a lock and saved after it (for example an in-flight Config API PATCH) can therefore
+write the status it read and reactivate the account early.</p>
+<p>Counter and lock writes fall back to a plain update on backends without versioned updates; unlock does not, so such
+accounts must be reactivated by an administrator.</p>
+<p>Upgrade note: accounts locked by a previous version of this script have no marker and are not unlocked when their
+lock expires. An administrator must reactivate them.</p>
 
 
 
@@ -781,7 +796,7 @@ It looks user account after specified number of unsuccessful login attempts.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    December 22, 2025
+    November 19, 2026
   </span>
 
     
