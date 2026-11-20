@@ -6,6 +6,8 @@
 
 package io.jans.fido2.service.audit.trace;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Clock;
 import java.util.Objects;
 import java.util.UUID;
@@ -30,12 +32,16 @@ public final class TraceRecordBuilder {
     /** Event kind. Lock does not accept this value yet. */
     public static final String EVENT_KIND = "FIDO_CEREMONY";
 
+    /** trace.eat_profile required by Lock (TraceConstants.EAT_PROFILE). */
+    public static final String EAT_PROFILE = "tag:jans.io,2026:trace-v1";
+
     static final String FIELD_RECORD_ID = "record_id";
     static final String FIELD_PRODUCER = "producer";
     static final String FIELD_PRODUCER_CHAIN = "producer_chain";
     static final String FIELD_PRODUCER_ID = "producer_id";
     static final String FIELD_PRODUCER_INSTANCE_ID = "producer_instance_id";
     static final String FIELD_TRACE = "trace";
+    static final String FIELD_EAT_PROFILE = "eat_profile";
     static final String FIELD_EVENT_KIND = "event_kind";
     static final String FIELD_SIGNED_AT = "signed_at";
     static final String FIELD_SESSION_ID = "session_id";
@@ -73,7 +79,7 @@ public final class TraceRecordBuilder {
             this.type = Objects.requireNonNull(type, "type");
             this.outcome = Objects.requireNonNull(outcome, "outcome");
             this.sessionId = requireNonBlank(sessionId, "session_id");
-            this.sessionIssuer = requireNonBlank(sessionIssuer, "session_issuer");
+            this.sessionIssuer = requireIssuer(sessionIssuer);
         }
 
         CeremonyType getType() {
@@ -90,6 +96,24 @@ public final class TraceRecordBuilder {
 
         String getSessionIssuer() {
             return sessionIssuer;
+        }
+
+        /** Same rule as Lock's TraceIssuers.isValid: https, or http only for localhost. No I/O. */
+        private static String requireIssuer(String value) {
+            String checked = requireNonBlank(value, "session_issuer");
+            try {
+                URI uri = new URI(checked);
+                String scheme = uri.getScheme();
+                boolean valid = uri.isAbsolute() && !uri.isOpaque() && uri.getHost() != null && scheme != null
+                        && ("https".equalsIgnoreCase(scheme)
+                        || ("http".equalsIgnoreCase(scheme) && "localhost".equalsIgnoreCase(uri.getHost())));
+                if (valid) {
+                    return checked;
+                }
+            } catch (URISyntaxException e) {
+                // fall through to the rejection below
+            }
+            throw new IllegalArgumentException("session_issuer must be https, or http for localhost");
         }
 
         private static String requireNonBlank(String value, String name) {
@@ -144,6 +168,7 @@ public final class TraceRecordBuilder {
         chain.put(FIELD_PRODUCER_INSTANCE_ID, producerInstanceId);
 
         ObjectNode trace = record.putObject(FIELD_TRACE);
+        trace.put(FIELD_EAT_PROFILE, EAT_PROFILE);
         trace.put(FIELD_EVENT_KIND, EVENT_KIND);
         trace.put(FIELD_SIGNED_AT, clock.instant().getEpochSecond());
         trace.put(FIELD_SESSION_ID, ceremony.getSessionId());

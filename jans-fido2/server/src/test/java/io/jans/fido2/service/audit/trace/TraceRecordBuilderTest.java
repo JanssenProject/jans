@@ -64,6 +64,7 @@ class TraceRecordBuilderTest {
                 + "\"producer\":\"fido2-test\","
                 + "\"producer_chain\":{\"producer_id\":\"fido2-test\",\"producer_instance_id\":\"node-a\"},"
                 + "\"trace\":{"
+                + "\"eat_profile\":\"tag:jans.io,2026:trace-v1\","
                 + "\"event_kind\":\"FIDO_CEREMONY\","
                 + "\"signed_at\":" + FIXED.getEpochSecond() + ","
                 + "\"session_id\":\"" + SESSION_ID + "\","
@@ -94,7 +95,7 @@ class TraceRecordBuilderTest {
                 SESSION_ID, SESSION_ISSUER));
 
         assertEquals(keys("record_id", "producer", "producer_chain", "trace"), keys(record));
-        assertEquals(keys("event_kind", "signed_at", "session_id", "session_issuer", "event"), keys(record.get("trace")));
+        assertEquals(keys("eat_profile", "event_kind", "signed_at", "session_id", "session_issuer", "event"), keys(record.get("trace")));
         assertEquals(keys("ceremony_type", "ceremony_outcome"), keys(record.get("trace").get("event")));
         String text = record.toString().toLowerCase();
         for (String forbidden : new String[] {"decision", "invocation", "policy", "username", "credential", "attestation", "subject"}) {
@@ -114,6 +115,40 @@ class TraceRecordBuilderTest {
     void rejectsMissingSessionIssuer() {
         assertThrows(IllegalArgumentException.class,
                 () -> new TraceRecordBuilder.Ceremony(CeremonyType.REGISTRATION, Outcome.SUCCESS, SESSION_ID, null));
+    }
+
+    @Test
+    void rejectsSessionIssuerThatLockWouldRefuse() {
+        for (String bad : new String[] {"http://op.example.org", "not a uri", "urn:x:y", "ftp://op.example.org"}) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> new TraceRecordBuilder.Ceremony(CeremonyType.ASSERTION, Outcome.SUCCESS, SESSION_ID, bad), bad);
+        }
+        // http is allowed only for localhost
+        new TraceRecordBuilder.Ceremony(CeremonyType.ASSERTION, Outcome.SUCCESS, SESSION_ID, "http://localhost:8080");
+    }
+
+    @Test
+    void twoSignedRecordsFormAVerifiableLinkAndTamperingIsDetected() throws Exception {
+        TraceChainState chain = new TraceChainState(dir.resolve("chain2.json"), "node-a",
+                new TraceSigner(keys.getPrivate()));
+        ObjectNode first = chain.signAndAdvance(builder().build(new TraceRecordBuilder.Ceremony(
+                CeremonyType.REGISTRATION, Outcome.SUCCESS, SESSION_ID, SESSION_ISSUER)));
+        ObjectNode second = chain.signAndAdvance(new TraceRecordBuilder("fido2-test", "node-a",
+                Clock.fixed(FIXED, ZoneOffset.UTC), () -> "rec-2").build(new TraceRecordBuilder.Ceremony(
+                CeremonyType.ASSERTION, Outcome.FAILURE, "sess-2", SESSION_ISSUER)));
+
+        assertEquals(TraceChainState.ZERO_HASH, first.get("producer_chain").get("prev_record_hash").asText());
+        String firstHash = TraceHashes.sha256Prefixed(TraceCanonicalizer.canonicalBytes(first));
+        assertEquals(firstHash, second.get("producer_chain").get("prev_record_hash").asText());
+        assertTrue(verifies(first, keys.getPublic()));
+        assertTrue(verifies(second, keys.getPublic()));
+
+        ObjectNode tampered = first.deepCopy();
+        ((ObjectNode) tampered.get("trace").get("event")).put("ceremony_outcome", "FAILURE");
+        assertFalse(verifies(tampered, keys.getPublic()));
+        ObjectNode tamperedSession = first.deepCopy();
+        ((ObjectNode) tamperedSession.get("trace")).put("session_id", "other");
+        assertFalse(verifies(tamperedSession, keys.getPublic()));
     }
 
     @Test
