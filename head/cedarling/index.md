@@ -1,4 +1,4 @@
-# An Overview of The Cedarling
+# Cedarling
 
 The Cedarling, powered by the Rust Cedar engine, provides a fast, embeddable, and
 self-contained solution for policy-based authorization, designed for both client-side and

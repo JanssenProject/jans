@@ -359,7 +359,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 
 ## Cedarling documentation
 
-- [Overview](https://docs.jans.io/head/cedarling/index.md)
+- [Cedarling](https://docs.jans.io/head/cedarling/index.md)
 - [Kotlin/Java](https://docs.jans.io/head/cedarling/developer/cedarling-kotlin/index.md)
 - [Rust](https://docs.jans.io/head/cedarling/developer/cedarling-rust/index.md)
 - [Android](https://docs.jans.io/head/cedarling/developer/mobile-apps/cedarling-android/index.md)
