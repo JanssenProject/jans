@@ -3,6 +3,7 @@ auth-server pods change while the job is waiting.
 
 Run from docker-jans-cloudtools/: `pytest tests`
 """
+import hashlib
 import json
 import os
 import sys
@@ -18,13 +19,20 @@ class GoneError(Exception):
 
 
 class FakeMeta:
-    """Minimal meta client; `pods` is the live cluster state."""
+    """Minimal meta client with a per-pod fake filesystem; `pods` is the live cluster state."""
 
     def __init__(self, pods):
         self.pods = list(pods)
+        self.files = {p: {} for p in pods}   # pod -> {path: bytes}
         self.jks_pushed = []
         self.jwks_pushed = []
-        self.fail_on = set()  # pods that raise on exec even if listed (died after listing)
+        self.fail_on = set()      # pods that raise even if listed (died after listing)
+        self.silent_fail = set()  # copy "succeeds" but nothing is written (remote tar exits nonzero)
+        self.partial = set()      # copy writes a truncated file
+
+    def _check(self, c):
+        if c not in self.pods or c in self.fail_on:
+            raise GoneError(f'pods "{c}" not found')
 
     def get_containers(self, label):
         return list(self.pods)
@@ -33,12 +41,26 @@ class FakeMeta:
         return c
 
     def exec_cmd(self, c, cmd):
-        if c not in self.pods or c in self.fail_on:
-            raise GoneError(f'pods "{c}" not found')
+        self._check(c)
+        parts = cmd.split()
+        fs = self.files.setdefault(c, {})
+        if parts[0] == "cp":
+            if parts[1] in fs:
+                fs[parts[2]] = fs[parts[1]]
+        elif parts[0] == "sha256sum":
+            data = fs.get(parts[1], b"")
+            return f"{hashlib.sha256(data).hexdigest()}  {parts[1]}\n"
+        return ""
 
     def copy_to_container(self, c, path):
-        if c not in self.pods or c in self.fail_on:
-            raise GoneError(f'pods "{c}" not found')
+        self._check(c)
+        if c in self.silent_fail:
+            return
+        with open(path, "rb") as f:
+            data = f.read()
+        if c in self.partial:
+            data = data[:1]
+        self.files.setdefault(c, {})[path] = data
         (self.jks_pushed if path.endswith(".jks") else self.jwks_pushed).append(c)
 
 
@@ -95,6 +117,9 @@ def handler(monkeypatch, tmp_path):
 
     h = certmanager.AuthHandler(FakeManager(), False, **{"privkey-push-delay": 60})
     h.meta_client = FakeMeta(["auth-a", "auth-b", "auth-c"])
+    for pod in h.meta_client.pods:
+        h.meta_client.files[pod][str(jks)] = b"old-jks"
+    h.jks_path = str(jks)
     return h
 
 
@@ -147,3 +172,42 @@ def test_all_pods_gone_skips_reload(handler, monkeypatch):
 
     assert meta.jks_pushed == []
     assert len(handler.backend.revisions) == 1  # only the initial bump
+
+
+def test_silent_copy_failure_is_not_counted_and_reload_still_runs(handler, monkeypatch):
+    """remote tar exits nonzero but copy_to_container returns normally"""
+    meta = handler.meta_client
+    meta.silent_fail.add("auth-b")
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.jks_pushed == ["auth-a", "auth-c"]
+    assert len(handler.backend.revisions) == 2
+    # failed pod still has its previous, loadable keystore
+    assert meta.files["auth-b"][handler.jks_path] == b"old-jks"
+
+
+def test_only_silent_failures_skips_reload(handler, monkeypatch):
+    meta = handler.meta_client
+    meta.silent_fail.update(meta.pods)
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.jks_pushed == []
+    assert len(handler.backend.revisions) == 1  # only the initial bump
+
+
+def test_partial_copy_is_restored_from_backup(handler, monkeypatch):
+    meta = handler.meta_client
+    meta.partial.add("auth-a")
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    # truncated keystore must not be left on the pod
+    assert meta.files["auth-a"][handler.jks_path] == b"old-jks"
+    # healthy pods hold the full new keystore
+    assert meta.files["auth-b"][handler.jks_path] == b"jks"
+    assert len(handler.backend.revisions) == 2
