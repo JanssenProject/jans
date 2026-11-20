@@ -106,28 +106,45 @@ class SQLBackend:
             if column_type == "TEXT":
                 # set key length to 255
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (255))"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 if self.client.get_server_version() < (8, 0):
                     # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
                     # switch to virtual column instead
                     for i in range(4):
                         index_str_fmt = f"{column_name}_mem_idx_{i}"
-                        query = " ".join([
-                            f"ALTER TABLE {self.client.quoted_id(table_name)}",
-                            f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
-                            f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
-                        ])
-                        try:
-                            self.client.create_index(query)
-                        except OperationalError as exc:
-                            # re-raise exception if the code isn't one of the following code
-                            # 1060 - duplicate column error
-                            if exc.orig.args[0] not in [1060]:
-                                raise exc
+
+                        # the index implies its virtual column; skip both without touching the table
+                        if self.client.get_index_state(table_name, index_str_fmt):
+                            continue
+
+                        # MySQL 5.7 adds a virtual column in place only when it is the sole change in
+                        # the ALTER TABLE; combined with ADD INDEX it may copy the table and block writers,
+                        # so the column and the index are added by separate statements
+                        if index_str_fmt not in column_mapping:
+                            column_query = (
+                                f"ALTER TABLE {self.client.quoted_id(table_name)} "
+                                f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')"
+                            )
+                            try:
+                                if not self.client.alter_table(column_query, table_name):
+                                    # could not lock the table in time; the index needs the column,
+                                    # so leave both to the next start
+                                    continue
+                            except OperationalError as exc:
+                                # re-raise exception if the code isn't one of the following code
+                                # 1060 - duplicate column error (e.g. added by another loader in the meantime)
+                                if exc.orig.args[0] not in [1060]:
+                                    raise exc
+
+                        query = (
+                            f"ALTER TABLE {self.client.quoted_id(table_name)} "
+                            f"ADD INDEX {self.client.quoted_id(index_str_fmt)} ({self.client.quoted_id(index_str_fmt)})"
+                        )
+                        self.client.create_index(query, table_name, index_str_fmt)
                 else:
                     for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                         index_str_fmt = Template(index_str).safe_substitute({
@@ -135,7 +152,7 @@ class SQLBackend:
                         })
                         name = f"{table_name}_json_{i}"
                         query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
-                        self.client.create_index(query)
+                        self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -143,7 +160,7 @@ class SQLBackend:
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
 
     def create_pgsql_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
@@ -156,7 +173,7 @@ class SQLBackend:
 
             if column_type.lower() != "jsonb":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                     index_str_fmt = Template(index_str).safe_substitute({
@@ -164,12 +181,12 @@ class SQLBackend:
                     })
                     name = f"{table_name}_json_{i}"
                     query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {index_str_fmt}"
-                    self.client.create_index(query)
+                    self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {custom}"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
 
     def create_indexes(self):
         # exclude tables that created externally https://github.com/JanssenProject/jans/issues/10512
@@ -195,7 +212,7 @@ class SQLBackend:
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD UNIQUE INDEX {self.client.quoted_id(index_name)} ({self.client.quoted_id(column)})"
             else:
                 query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, index_name)
 
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
