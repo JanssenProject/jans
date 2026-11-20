@@ -64,7 +64,7 @@ async fn test_cedarling_with_valid_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
-        http_client_config: crate::HttpClientConfig::default(),
+        http_client_config: crate::http::test_support::fast_retries(),
         trace_config: None,
     })
     .await;
@@ -120,7 +120,7 @@ async fn test_cedarling_without_ssa() {
         lock_config: Some(lock_config),
         max_default_entities: None,
         data_store_config: DataStoreConfig::default(),
-        http_client_config: crate::HttpClientConfig::default(),
+        http_client_config: crate::http::test_support::fast_retries(),
         trace_config: None,
     })
     .await;

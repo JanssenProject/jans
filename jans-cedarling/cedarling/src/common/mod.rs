@@ -14,6 +14,7 @@ pub(crate) mod default_entities_limits;
 
 pub(crate) mod issuer_utils;
 pub(crate) mod policy_store;
+pub(crate) mod retry;
 
 // Implement the trait for all iterators over Result<T, E>
 impl<T, E, I> PartitionResult<T, E> for I where I: Iterator<Item = Result<T, E>> {}

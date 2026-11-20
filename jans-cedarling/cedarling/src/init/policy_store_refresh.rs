@@ -725,13 +725,13 @@ async fn parse_swap_and_record(
         Ok(p) => p,
         Err(e) => {
             state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-            let (outcome, kind) = classify_parse_error(&e);
+            let Classified { label, outcome } = classify_parse_error(&e);
             ctx.log.log_any(
                 LogEntry::new(BaseLogEntry::new_system_opt_request_id(
                     LogLevel::ERROR,
                     None,
                 ))
-                .set_message(format!("policy store refresh: {kind} for {url}: {e}")),
+                .set_message(format!("policy store refresh: {label} for {url}: {e}")),
             );
             return outcome;
         },
@@ -810,20 +810,30 @@ fn bundle_hash_note(bundle_hash: Option<jans_trace_core::Digest>) -> String {
     bundle_hash.map_or_else(String::new, |hash| format!(", bundle_hash: {hash}"))
 }
 
+/// How a failed refresh is logged (`label`) and counted (`outcome`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Classified {
+    label: &'static str,
+    outcome: RefreshOutcome,
+}
+
 /// A failed signature check keeps its own outcome so it is not mistaken for a broken store.
 /// A bundle that could not be fetched counts like any fetch failure; a missing one (404) does not.
-fn classify_parse_error(e: &PolicyStoreLoadError) -> (RefreshOutcome, &'static str) {
+fn classify_parse_error(e: &PolicyStoreLoadError) -> Classified {
     match e {
         PolicyStoreLoadError::Signature(SignatureError::BundleFetch { source, .. })
-            if source.status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
+            if source.kind().status_code() != Some(reqwest::StatusCode::NOT_FOUND) =>
         {
-            let (kind, outcome) = classify_fetch_error(source);
-            (outcome, kind)
+            classify_fetch_error(source.kind())
         },
-        PolicyStoreLoadError::Signature(_) => {
-            (RefreshOutcome::VerificationError, "signature check failure")
+        PolicyStoreLoadError::Signature(_) => Classified {
+            label: "signature check failure",
+            outcome: RefreshOutcome::VerificationError,
         },
-        _ => (RefreshOutcome::ParseError, "parse failure"),
+        _ => Classified {
+            label: "parse failure",
+            outcome: RefreshOutcome::ParseError,
+        },
     }
 }
 
@@ -834,39 +844,62 @@ fn fetch_error(
 ) -> RefreshOutcome {
     let url = ctx.source.url();
     state.consecutive_failures = state.consecutive_failures.saturating_add(1);
-    let (kind, outcome) = classify_fetch_error(e);
+    let Classified { label, outcome } = classify_fetch_error(e);
     ctx.log.log_any(
         LogEntry::new(BaseLogEntry::new_system_opt_request_id(
             LogLevel::WARN,
             None,
         ))
-        .set_message(format!("policy store refresh: {kind} against {url}: {e}")),
+        .set_message(format!("policy store refresh: {label} against {url}: {e}")),
     );
     outcome
 }
 
 /// Pure classifier for [`fetch_error`] — extracted so unit tests can pin the
-/// routing without constructing a full [`WorkerContext`].
-///
-/// Order matters:
-/// 1. **Body decode failure** (`DecodeResponseBytes`) — distinct bucket so
-///    truncated bodies don't conflate with status errors.
-/// 2. **HTTP status error** (`status_code.is_some()`) — covers the case the
-///    retry layer collapses 4xx/5xx exhaustion into `MaxRetriesExceeded` but
-///    still carries the response status; without this, *every* GET-path
-///    `HttpError` outcome would silently land in `NetworkError`.
-/// 3. **Transport failure** (`is_max_retries_exceeded()` with no status) —
-///    DNS / TCP / TLS; nothing arrived.
-/// 4. **Fallback** — any other variant routes to `HttpError`.
-fn classify_fetch_error(e: &crate::http::HttpClientError) -> (&'static str, RefreshOutcome) {
-    if e.is_decode_error() {
-        ("body decode error", RefreshOutcome::DecodeError)
-    } else if e.status_code().is_some() {
-        ("HTTP error", RefreshOutcome::HttpError)
-    } else if e.is_max_retries_exceeded() {
-        ("network error", RefreshOutcome::NetworkError)
-    } else {
-        ("HTTP error", RefreshOutcome::HttpError)
+/// routing without constructing a full [`WorkerContext`]. A response that arrived
+/// with a failure status is an HTTP error; only one that never arrived is a
+/// network error, and a body cut short has its own bucket.
+fn classify_fetch_error(e: &crate::http::HttpClientError) -> Classified {
+    use crate::http::HttpClientError;
+    use crate::http::{AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError};
+
+    const HTTP: Classified = Classified {
+        label: "HTTP error",
+        outcome: RefreshOutcome::HttpError,
+    };
+    const NETWORK: Classified = Classified {
+        label: "network error",
+        outcome: RefreshOutcome::NetworkError,
+    };
+    const INVALID: Classified = Classified {
+        label: "invalid request",
+        outcome: RefreshOutcome::HttpError,
+    };
+
+    match e {
+        HttpClientError::Send(SendError::RetriesExhausted { last, .. })
+        | HttpClientError::Attempt(AttemptFailure::Retryable(last)) => match last {
+            RetryableFailure::Transport(_) => NETWORK,
+            RetryableFailure::Status { .. } => HTTP,
+        },
+        HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+        | HttpClientError::Attempt(AttemptFailure::Final(FinalFailure::InvalidRequest(_))) => {
+            INVALID
+        },
+        HttpClientError::ReadBody {
+            error: ReadBodyError::Read(_),
+            ..
+        } => Classified {
+            label: "body decode error",
+            outcome: RefreshOutcome::DecodeError,
+        },
+        HttpClientError::Send(SendError::Final(FinalFailure::Status { .. }))
+        | HttpClientError::Attempt(AttemptFailure::Final(FinalFailure::Status { .. }))
+        | HttpClientError::ReadBody {
+            error: ReadBodyError::TooLarge { .. },
+            ..
+        }
+        | HttpClientError::DeserializeJson { .. } => HTTP,
     }
 }
 
@@ -1928,54 +1961,85 @@ mod tests {
 
     // ---- classify_fetch_error: routing for HTTP / network / decode / status ----
 
+    fn store_url() -> reqwest::Url {
+        reqwest::Url::parse("https://lock.test/store").expect("a valid URL")
+    }
+
     #[test]
-    fn classify_max_retries_exceeded_without_status_routes_to_network_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None);
-        let (kind, outcome) = classify_fetch_error(&err);
+    fn classify_failure_statuses_route_to_http_error() {
+        use crate::http::HttpClientError;
+        use crate::http::{AttemptFailure, FinalFailure, RetryableFailure, SendError};
+        use reqwest::StatusCode;
+
+        let final_status = || FinalFailure::Status {
+            status: StatusCode::NOT_FOUND,
+            url: Box::new(crate::http::RedactedUrl::new(&store_url())),
+        };
+        let retryable_status = || RetryableFailure::Status {
+            status: StatusCode::SERVICE_UNAVAILABLE,
+            url: Box::new(crate::http::RedactedUrl::new(&store_url())),
+        };
+        let cases = [
+            HttpClientError::Send(SendError::Final(final_status())),
+            HttpClientError::Send(SendError::RetriesExhausted {
+                retries: 3,
+                last: retryable_status(),
+            }),
+            HttpClientError::Attempt(AttemptFailure::Final(final_status())),
+            HttpClientError::Attempt(AttemptFailure::Retryable(retryable_status())),
+        ];
+        for err in cases {
+            assert_eq!(
+                classify_fetch_error(&err),
+                Classified {
+                    label: "HTTP error",
+                    outcome: RefreshOutcome::HttpError
+                },
+                "a response with a failure status means the upstream replied: {err:?}",
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn classify_transport_failure_routes_to_network_error() {
+        use crate::http::HttpClientError;
+        use crate::http::{RetryableFailure, SendError};
+
+        let closed = crate::http::test_support::ClosedPort::new();
+        let transport = reqwest::get(closed.url("/store"))
+            .await
+            .expect_err("the port refuses connections");
+        let err = HttpClientError::Send(SendError::RetriesExhausted {
+            retries: 3,
+            last: RetryableFailure::Transport(transport),
+        });
         assert_eq!(
-            kind, "network error",
-            "MaxRetriesExceeded with no status must classify as a transport-level network error",
-        );
-        assert_eq!(
-            outcome,
-            RefreshOutcome::NetworkError,
-            "no-status MaxRetriesExceeded must surface as NetworkError, got {outcome:?}",
+            classify_fetch_error(&err),
+            Classified {
+                label: "network error",
+                outcome: RefreshOutcome::NetworkError
+            },
+            "no response arrived, so it is a network error: {err:?}",
         );
     }
 
     #[test]
-    fn classify_max_retries_exceeded_with_status_routes_to_http_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(
-            HttpRequestReasonError::MaxRetriesExceeded,
-            Some(reqwest::StatusCode::NOT_FOUND),
-        );
-        let (kind, outcome) = classify_fetch_error(&err);
-        assert_eq!(
-            kind, "HTTP error",
-            "MaxRetriesExceeded carrying a status code means the upstream replied — classify as HttpError",
-        );
-        assert_eq!(
-            outcome,
-            RefreshOutcome::HttpError,
-            "retry-exhausted 4xx/5xx must surface as HttpError, not NetworkError, got {outcome:?}",
-        );
-    }
+    fn classify_invalid_request_routes_to_http_error() {
+        use crate::http::HttpClientError;
+        use crate::http::{FinalFailure, SendError};
 
-    #[test]
-    fn classify_http_status_error_routes_to_http_error() {
-        use crate::http_utils::{HttpRequestError, HttpRequestReasonError};
-        let err = HttpRequestError::new(
-            HttpRequestReasonError::HttpStatusError,
-            Some(reqwest::StatusCode::INTERNAL_SERVER_ERROR),
-        );
-        let (kind, outcome) = classify_fetch_error(&err);
-        assert_eq!(kind, "HTTP error");
+        let builder = reqwest::Client::new()
+            .get("not a url")
+            .build()
+            .expect_err("a relative URL cannot be built");
+        let err = HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(builder)));
         assert_eq!(
-            outcome,
-            RefreshOutcome::HttpError,
-            "HttpStatusError variant must surface as HttpError, got {outcome:?}",
+            classify_fetch_error(&err),
+            Classified {
+                label: "invalid request",
+                outcome: RefreshOutcome::HttpError
+            },
+            "an invalid request never reached the network: {err:?}",
         );
     }
 }
@@ -2093,7 +2157,7 @@ mod signature_tests {
                 "expected a signature error, got {err:?}"
             );
             assert_eq!(
-                classify_parse_error(&err).0,
+                classify_parse_error(&err).outcome,
                 RefreshOutcome::VerificationError,
                 "signature failures get their own refresh outcome"
             );
@@ -2135,12 +2199,12 @@ mod signature_tests {
             .expect_err("an unreachable bundle host must fail");
 
         assert_eq!(
-            classify_parse_error(&PolicyStoreLoadError::Signature(server_error)).0,
+            classify_parse_error(&PolicyStoreLoadError::Signature(server_error)).outcome,
             RefreshOutcome::HttpError,
             "a 5xx while fetching the bundle is an HTTP error, not a signature failure"
         );
         assert_eq!(
-            classify_parse_error(&PolicyStoreLoadError::Signature(unreachable)).0,
+            classify_parse_error(&PolicyStoreLoadError::Signature(unreachable)).outcome,
             RefreshOutcome::NetworkError,
             "a connection failure while fetching the bundle is a network error"
         );
@@ -2150,13 +2214,13 @@ mod signature_tests {
     fn other_parse_failures_stay_parse_errors() {
         let err = PolicyStoreLoadError::Archive("broken".to_string());
         assert_eq!(
-            classify_parse_error(&err).0,
+            classify_parse_error(&err).outcome,
             RefreshOutcome::ParseError,
             "a broken archive is a parse error"
         );
         let err = PolicyStoreLoadError::Signature(SignatureError::NoBundleLocation);
         assert_eq!(
-            classify_parse_error(&err).0,
+            classify_parse_error(&err).outcome,
             RefreshOutcome::VerificationError,
             "any signature error is a verification error"
         );

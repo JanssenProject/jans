@@ -7,7 +7,7 @@ use thiserror::Error;
 use url::Url;
 
 use crate::common::issuer_utils::IssClaim;
-use crate::jwt::{decode::DecodeJwtError, http_utils::HttpError, validation::ValidateJwtError};
+use crate::jwt::{decode::DecodeJwtError, fetch::HttpError, validation::ValidateJwtError};
 
 #[derive(Debug, Error)]
 pub enum ParseStatusListError {
