@@ -5460,7 +5460,8 @@
         "jansStrongAuthPolicy",
         "jansUnlinkedExternalUids",
         "jansBackchannelDeviceRegistrationTkn",
-        "jansBackchannelUsrCode"
+        "jansBackchannelUsrCode",
+        "jansVersion"
       ],
       "must": [
         "objectclass"

@@ -602,7 +602,7 @@ nav:
 # 5. CEDARLING
 # ====================
 - Cedarling:
-  - Overview: cedarling/README.md
+  - cedarling/README.md
   - Cedar Introduction: cedar-intro.md
   - Quick Start: cedarling/quick-start/cedarling-quick-start.md
   - Tutorials:
