@@ -515,12 +515,27 @@ class AuthHandler:
                     logger.info("Waiting for private key push delay (%s seconds) ...", self.privkey_push_delay)
                     time.sleep(self.privkey_push_delay)
 
+                    # the container list fetched before the delay may be stale (pods can be evicted, crash,
+                    # or be replaced during the delay); refresh it so we only push to pods that still exist
+                    auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
+                    pushed = 0
+
                     for container in auth_containers:
                         name = self.meta_client.get_container_name(container)
-                        logger.info("creating backup of %s:%s", name, jks_fn)
-                        self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-                        logger.info("creating new %s:%s", name, jks_fn)
-                        self.meta_client.copy_to_container(container, jks_fn)
+                        try:
+                            logger.info("creating backup of %s:%s", name, jks_fn)
+                            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+                            logger.info("creating new %s:%s", name, jks_fn)
+                            self.meta_client.copy_to_container(container, jks_fn)
+                            pushed += 1
+                        except Exception as exc:  # noqa: BLE001
+                            # a single unreachable pod must not abort the push to the remaining pods
+                            # (pod that is restarted will load the JKS from the updated secret)
+                            logger.warning("unable to push %s to %s; reason=%s; skipping", jks_fn, name, exc)
+
+                    if not pushed:
+                        logger.warning("no auth-server container received the new %s; skipping reload", jks_fn)
+                        return
 
                     # as new JKS pushed to container, we need to tell auth-server to reload the private keys
                     # by increasing jansRevision again; note that as jansRevision may have been modified externally
