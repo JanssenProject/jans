@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging.config
 import os
@@ -261,6 +262,51 @@ class AuthHandler:
     def allowed_key_algs(self):
         return self.sig_keys.split() + self.enc_keys.split()
 
+    def push_jks_verified(self, container, jks_fn):
+        """Push JKS to a container and verify it arrived intact.
+
+        ``copy_to_container`` does not report the exit status of the remote ``tar``, so a failed or partial
+        extraction is not raised. The checksum of the remote file is compared with the local one instead.
+        On mismatch the previous JKS (``<jks_fn>.backup``) is restored so the pod keeps a loadable keystore.
+
+        Returns True only if the remote file matches the local one.
+        """
+        name = self.meta_client.get_container_name(container)
+
+        try:
+            logger.info("creating backup of %s:%s", name, jks_fn)
+            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+            logger.info("creating new %s:%s", name, jks_fn)
+            self.meta_client.copy_to_container(container, jks_fn)
+
+            with open(jks_fn, "rb") as f:
+                local_sum = hashlib.sha256(f.read()).hexdigest()
+
+            out = self.meta_client.exec_cmd(container, f"sha256sum {jks_fn}")
+            if isinstance(out, bytes):
+                out = out.decode(errors="replace")
+            remote_sum = (out or "").split()[0] if (out or "").split() else ""
+
+            if remote_sum == local_sum:
+                return True
+            reason = f"checksum mismatch (local={local_sum}, remote={remote_sum or 'n/a'})"
+        except Exception as exc:  # noqa: BLE001
+            reason = str(exc)
+
+        # a single bad pod must not abort the push to the remaining pods; a pod that is restarted later
+        # loads the JKS from the updated secret
+        logger.warning("unable to push %s to %s; reason=%s; skipping", jks_fn, name, reason)
+
+        try:
+            self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
+            logger.warning(
+                "restored previous %s on %s; the pod cannot use the newly generated keys until it is restarted",
+                jks_fn, name,
+            )
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("unable to restore previous %s on %s; reason=%s", jks_fn, name, exc)
+        return False
+
     def get_merged_keys(self, exp_hours):
         # get previous JWKS
         with open("/etc/certs/auth-keys.old.json") as f:
@@ -521,17 +567,8 @@ class AuthHandler:
                     pushed = 0
 
                     for container in auth_containers:
-                        name = self.meta_client.get_container_name(container)
-                        try:
-                            logger.info("creating backup of %s:%s", name, jks_fn)
-                            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-                            logger.info("creating new %s:%s", name, jks_fn)
-                            self.meta_client.copy_to_container(container, jks_fn)
+                        if self.push_jks_verified(container, jks_fn):
                             pushed += 1
-                        except Exception as exc:  # noqa: BLE001
-                            # a single unreachable pod must not abort the push to the remaining pods
-                            # (pod that is restarted will load the JKS from the updated secret)
-                            logger.warning("unable to push %s to %s; reason=%s; skipping", jks_fn, name, exc)
 
                     if not pushed:
                         logger.warning("no auth-server container received the new %s; skipping reload", jks_fn)
