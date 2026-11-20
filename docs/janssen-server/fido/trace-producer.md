@@ -39,18 +39,79 @@ through the SSA-to-DCR client-credentials flow.
 
 ## What a record contains
 
-Each record is a `FIDO_CEREMONY` event.
+Each record is a `FIDO_CEREMONY` event. It records that a passkey ceremony happened and how it ended. It does not
+record an allow or deny judgement.
 
-- **Event kind:** `trace.event_kind` is `FIDO_CEREMONY`.
-- **Ceremony:** `ceremony_type` is `REGISTRATION` or `ASSERTION`.
-- **Outcome:** `ceremony_outcome` is `SUCCESS`, `FAILURE`, or `ABANDONED`.
-- **Authenticator:** `authenticator_attachment` is `platform` or `cross-platform`.
-- **Correlation:** `trace.session_id` is required. Ceremonies with no session do not emit a record by default.
-- **Integrity:** `record_id`, `sequence_number`, `prev_record_hash`, and an Ed25519 `signature` over the
-  RFC 8785 (JCS) canonical form of the record.
+| Member | Value |
+|---|---|
+| `record_id` | Producer-generated UUID. Unique per record. |
+| `producer` | Equal to `producer_chain.producer_id`. |
+| `producer_chain.producer_id` | The stable producer ID (`fido2TraceProducerId`). |
+| `producer_chain.producer_instance_id` | The node that wrote the record. |
+| `trace.eat_profile` | Always `tag:jans.io,2026:trace-v1`. |
+| `trace.event_kind` | Always `FIDO_CEREMONY`. |
+| `trace.signed_at` | Epoch seconds at which the record was built. |
+| `trace.session_id` | Required. The session the ceremony belongs to. |
+| `trace.session_issuer` | Required. The issuer of that session: `https`, or `http` for `localhost` only. |
+| `trace.event.ceremony_type` | `REGISTRATION` or `ASSERTION`. |
+| `trace.event.ceremony_outcome` | `SUCCESS`, `FAILURE`, or `ABANDONED`. |
 
-Records do not contain policy decisions, invocations, or capability IDs. TRACE records describe what happened
-in a ceremony, and they do not affect how the ceremony is decided.
+The producer adds the chain fields (`producer_chain.producer_chain_id`, `sequence_number`, `prev_record_hash`,
+and `chain_link` on the first record) and the `signature` when it signs the record. See [Chains](#chains) and
+[Signing](#signing).
+
+Records never contain a policy decision, a policy invocation, a username, credential material, or a raw
+attestation. A ceremony with no session does not produce a record.
+
+### Example: successful assertion
+
+The unsigned record as built by the producer:
+
+```json
+{
+  "record_id" : "7f3c2a10-9b4e-4d8a-8f1e-2c5d6e7f8a90",
+  "producer" : "fido2-prod-1",
+  "producer_chain" : {
+    "producer_id" : "fido2-prod-1",
+    "producer_instance_id" : "node-a"
+  },
+  "trace" : {
+    "eat_profile" : "tag:jans.io,2026:trace-v1",
+    "event_kind" : "FIDO_CEREMONY",
+    "signed_at" : 1795168800,
+    "session_id" : "sess-8d21",
+    "session_issuer" : "https://op.example.org",
+    "event" : {
+      "ceremony_type" : "ASSERTION",
+      "ceremony_outcome" : "SUCCESS"
+    }
+  }
+}
+```
+
+### Example: failed registration
+
+```json
+{
+  "record_id" : "b2e9d4c1-3a7f-4e6b-9c8d-1f0a2b3c4d5e",
+  "producer" : "fido2-prod-1",
+  "producer_chain" : {
+    "producer_id" : "fido2-prod-1",
+    "producer_instance_id" : "node-a"
+  },
+  "trace" : {
+    "eat_profile" : "tag:jans.io,2026:trace-v1",
+    "event_kind" : "FIDO_CEREMONY",
+    "signed_at" : 1795168800,
+    "session_id" : "sess-8d22",
+    "session_issuer" : "https://op.example.org",
+    "event" : {
+      "ceremony_type" : "REGISTRATION",
+      "ceremony_outcome" : "FAILURE"
+    }
+  }
+}
+```
 
 ## Chains
 
