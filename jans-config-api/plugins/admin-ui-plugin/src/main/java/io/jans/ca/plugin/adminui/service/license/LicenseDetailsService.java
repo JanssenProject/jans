@@ -971,17 +971,12 @@ public class LicenseDetailsService extends BaseService {
             log.debug("Active license for admin-ui found : {}", licenseConfiguration.getProductName());
             licenseResponse.setLicenseEnabled(licenseConfiguration.getLicenseActive());
             licenseResponse.setProductName(licenseConfiguration.getProductName());
-            licenseResponse.setProductCode(licenseConfiguration.getProductCode());
             licenseResponse.setLicenseType(licenseConfiguration.getLicenseType());
             licenseResponse.setLicenseMAUThreshold(licenseConfiguration.getLicenseMAUThreshold());
             licenseResponse.setLicenseKey(licenseConfiguration.getLicenseKey());
             licenseResponse.setValidityPeriod(licenseConfiguration.getLicenseValidUpto());
             licenseResponse.setLicenseActive(licenseConfiguration.getLicenseActive());
             licenseResponse.setLicenseExpired(licenseConfiguration.getLicenseExpired());
-            licenseResponse.setCompanyName(licenseConfiguration.getCompanyName());
-            licenseResponse.setCustomerEmail(licenseConfiguration.getCustomerEmail());
-            licenseResponse.setCustomerFirstName(licenseConfiguration.getCustomerFirstName());
-            licenseResponse.setCustomerLastName(licenseConfiguration.getCustomerLastName());
             return licenseResponse;
 
         } catch (Exception e) {
