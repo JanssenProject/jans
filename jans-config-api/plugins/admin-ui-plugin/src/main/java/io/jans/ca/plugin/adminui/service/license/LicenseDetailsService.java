@@ -824,12 +824,8 @@ public class LicenseDetailsService extends BaseService {
             } catch (Exception ex) {
                 throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is missing. " + ex.getMessage());
             }
-            log.info("1");
-            log.info("1"+entity.getBoolean("isTrial"));
             licenseConfiguration.setTrial(entity.getBoolean("isTrial"));
-            log.info("2");
             licenseConfiguration.setLicenseUsable(entity.getBoolean("isUsable"));
-            log.info("1"+entity.getBoolean("isUsable"));
             try {
                 licenseConfiguration.setLicenseExpired(entity.getBoolean("isExpired"));
                 licenseConfiguration.setLicenseActive(entity.getBoolean("active"));
