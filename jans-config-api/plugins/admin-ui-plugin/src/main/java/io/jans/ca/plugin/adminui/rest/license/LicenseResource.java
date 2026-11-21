@@ -27,11 +27,11 @@ import org.slf4j.Logger;
 @Path("/admin-ui/license")
 public class LicenseResource {
 
-    static final String IS_ACTIVE = "/isActive";
-    static final String ACTIVATE = "/activate";
+    static final String CHECK = "/check";
+    static final String ACTIVATION = "/activation";
     static final String TRIAL = "/trial";
     static final String DETAILS = "/details";
-    static final String RETRIEVE = "/retrieve";
+    static final String FETCH = "/fetch";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
     static final String CONFIG_DELETE = "/deleteConfig";
@@ -68,7 +68,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
-    @Path(IS_ACTIVE)
+    @Path(CHECK)
     @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
@@ -132,7 +132,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
     @GET
-    @Path(RETRIEVE)
+    @Path(FETCH)
     @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {SCOPE_LICENSE_ADMIN, AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response retrieveLicense() {

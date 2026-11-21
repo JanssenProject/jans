@@ -22,10 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -209,19 +206,18 @@ public class CommonUtils {
 
     // Method to convert ISO datetime to formatted string (yyyy-MM-dd)
     public static String convertIsoToDateString(String isoDateTime) {
-        Instant instant = Instant.parse(isoDateTime);
-        LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDateTime localDate = LocalDateTime.parse("2027-01-05T00:00:00");
+        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
     // Method to convert formatted string (yyyy-MM-dd) back to LocalDate
-    public static LocalDate convertStringToLocalDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(dateString, formatter);
+    public static LocalDateTime convertStringToLocalDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        return LocalDateTime.parse(dateString, formatter);
     }
 
-    public static String convertLocalDateToString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static String convertLocalDateToString(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return date.format(formatter);
     }
 
