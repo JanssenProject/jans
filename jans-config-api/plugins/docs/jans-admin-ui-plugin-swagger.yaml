@@ -1121,7 +1121,7 @@ paths:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
-  /admin-ui/license/check:
+  /admin-ui/license/isActive:
     get:
       tags:
       - Admin UI - License
@@ -1195,7 +1195,7 @@ paths:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.admin
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/read-all
-  /admin-ui/license/fetch:
+  /admin-ui/license/retrieve:
     get:
       tags:
       - Admin UI - License
@@ -2091,8 +2091,6 @@ components:
           type: boolean
         productName:
           type: string
-        productCode:
-          type: string
         licenseType:
           type: string
         maxActivations:
@@ -2103,14 +2101,6 @@ components:
         licenseActive:
           type: boolean
         validityPeriod:
-          type: string
-        companyName:
-          type: string
-        customerEmail:
-          type: string
-        customerFirstName:
-          type: string
-        customerLastName:
           type: string
         licenseMAUThreshold:
           type: integer

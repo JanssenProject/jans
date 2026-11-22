@@ -153,12 +153,11 @@ public class LicenseDetailsService extends BaseService {
         }
         // Check if the 'licenseValidUpto' field is not null or empty
         if (!Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
-            // Calculate the number of days between today and the license expiry date
-            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDateTime.now(), CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseValidUpto()));
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime licenseValidUpto = CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseValidUpto());
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(now, licenseValidUpto);
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
-            // If the license has already expired (daysDiffOfLicenseValidity < 0),
-            // sync the license OIDC client details to update or renew the license
-            if (daysDiffOfLicenseValidity < 0) {
+            if (licenseValidUpto.isBefore(now)) {
                 return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
             }
         }
@@ -319,10 +318,11 @@ public class LicenseDetailsService extends BaseService {
             if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
-            //calculate if license is expired
-            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDateTime.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime licenseValidUpto = CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto());
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(now, licenseValidUpto);
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
-            if (daysDiffOfLicenseValidity < 0) {
+            if (licenseValidUpto.isBefore(now)) {
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             if (licenseConfiguration.getLicenseMAUThreshold() == null) {
@@ -331,7 +331,7 @@ public class LicenseDetailsService extends BaseService {
             }
             ObjectMapper mapper = new ObjectMapper();
             JSONObject mauDetails = new JSONObject();
-            mauDetails.put("mauThreshold", licenseConfiguration.getLicenseUsable());
+            mauDetails.put("mauThreshold", licenseConfiguration.getLicenseMAUThreshold());
             mauDetails.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
 
             return CommonUtils.createGenericResponse(true, 200, "Valid license present.", mapper.readTree(mauDetails.toString()));
@@ -439,7 +439,7 @@ public class LicenseDetailsService extends BaseService {
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
                         JSONObject successJSONObject = new JSONObject();
-                        successJSONObject.put("mauThreshold", licenseConfiguration.getLicenseUsable());
+                        successJSONObject.put("mauThreshold", licenseConfiguration.getLicenseMAUThreshold());
                         successJSONObject.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
 
                         return CommonUtils.createGenericResponse(true, 200, "Valid license present.",

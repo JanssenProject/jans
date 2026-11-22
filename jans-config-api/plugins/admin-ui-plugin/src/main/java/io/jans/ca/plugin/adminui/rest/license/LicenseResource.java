@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 public class LicenseResource {
 
     static final String CHECK = "/check";
-    static final String ACTIVATION = "/activation";
     static final String TRIAL = "/trial";
     static final String DETAILS = "/details";
     static final String FETCH = "/fetch";

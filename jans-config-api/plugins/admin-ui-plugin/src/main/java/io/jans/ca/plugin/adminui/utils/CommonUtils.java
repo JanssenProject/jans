@@ -24,6 +24,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -206,14 +207,18 @@ public class CommonUtils {
 
     // Method to convert ISO datetime to formatted string (yyyy-MM-dd)
     public static String convertIsoToDateString(String isoDateTime) {
-        LocalDateTime localDate = LocalDateTime.parse("2027-01-05T00:00:00");
+        LocalDateTime localDate = LocalDateTime.parse(isoDateTime);
         return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
     // Method to convert formatted string (yyyy-MM-dd) back to LocalDate
     public static LocalDateTime convertStringToLocalDate(String dateString) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        return LocalDateTime.parse(dateString, formatter);
+        try {
+            return LocalDateTime.parse(dateString, formatter);
+        } catch (DateTimeParseException exception) {
+            return LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+        }
     }
 
     public static String convertLocalDateToString(LocalDateTime date) {
