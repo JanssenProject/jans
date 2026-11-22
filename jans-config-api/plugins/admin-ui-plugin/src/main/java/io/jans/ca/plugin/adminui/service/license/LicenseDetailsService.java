@@ -765,8 +765,11 @@ public class LicenseDetailsService extends BaseService {
                         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
+                        ObjectNode jsonNode = mapper.createObjectNode();
+                        jsonNode.put("mauThreshold",licenseConfiguration.getLicenseMAUThreshold());
+                        jsonNode.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
                         return CommonUtils.createGenericResponse(true, 200, "License have been activated."
-                                , mapper.readTree(entity.getJSONArray("custom_fields").toString()));
+                                , mapper.readTree(jsonNode.toString()));
                     }
                     //getting error
                     jsonString = httpService.getContent(httpEntity);
