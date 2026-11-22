@@ -83,7 +83,7 @@ public class CommonUtils {
      * @param responseCode    numeric response code
      * @param responseMessage human-readable response message
      * @param node            JSON node to use as the response object, may be null
-     * @return                a GenericResponse instance populated with the given values
+     * @return a GenericResponse instance populated with the given values
      */
     public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
         GenericResponse genericResponse = new GenericResponse();
@@ -97,10 +97,10 @@ public class CommonUtils {
     /**
      * Creates a GenericResponse populated with the provided success flag, response code, message, and byte array.
      *
-     * @param result whether the response indicates success
-     * @param responseCode numeric response code
+     * @param result          whether the response indicates success
+     * @param responseCode    numeric response code
      * @param responseMessage human-readable response message
-     * @param byteArray payload bytes to attach to the response
+     * @param byteArray       payload bytes to attach to the response
      * @return the populated GenericResponse with `responseCode`, `responseMessage`, `success`, and `responseBytes` set
      */
     public static GenericResponse createResponseWithByteArray(boolean result, int responseCode, String responseMessage, byte[] byteArray) {
@@ -207,7 +207,12 @@ public class CommonUtils {
 
     // Method to convert ISO datetime to formatted string (yyyy-MM-dd)
     public static String convertIsoToDateString(String isoDateTime) {
-        LocalDateTime localDate = LocalDateTime.parse(isoDateTime);
+        LocalDateTime localDate;
+        try {
+            localDate = Instant.parse(isoDateTime).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        } catch (DateTimeParseException exception) {
+            localDate = LocalDateTime.parse(isoDateTime);
+        }
         return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
@@ -307,7 +312,7 @@ public class CommonUtils {
     /**
      * Checks the expiration and audience claims required for an Admin UI UJWT.
      *
-     * @param claims the parsed UJWT claims
+     * @param claims        the parsed UJWT claims
      * @param configuration the Admin UI configuration containing accepted client IDs
      * @return {@code true} when the UJWT is not expired and targets an accepted client
      */
@@ -353,7 +358,7 @@ public class CommonUtils {
     public static String toUrlEncodedString(Map<String, String> params) {
         return params.entrySet()
                 .stream()
-                .filter(e -> e.getValue() !=null)
+                .filter(e -> e.getValue() != null)
                 .map(e ->
                         URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
                                 URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)
