@@ -82,7 +82,7 @@ With metrics enabled, `operational_stats` counts each status as `trace.<status>`
 
 - `trace.accepted`: records Lock Server accepted.
 - `trace.rejected`: records Lock Server refused for good.
-- `trace.dropped`: records given up: after their retries, on shut down, or with a producer chain Lock Server lost.
+- `trace.dropped`: records given up: after their retries, on shut down, with a request that could not be sent (for example a redirect Cedarling refuses to follow), or with a producer chain Lock Server lost.
 - `trace.sign_failed`: records that could not be signed.
 - `trace.chains_opened`: producer chains started again because Lock Server lost or did not accept the previous one.
 

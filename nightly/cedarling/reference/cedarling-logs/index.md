@@ -9,7 +9,8 @@ There are three different log records produced by the Cedarling:
 * `Metric`- Performance and usage data
 
 !!! note "Logging execution model"
-All platforms (native, WASM, and tests) perform JSON serialization and writing synchronously on the calling thread. Thread-safety for output streams is provided by Mutex and Send+Sync traits, not background-thread serialization. Regardless of the runtime, the log contents and retrieval APIs remain the same.
+    
+    All platforms (native, WASM, and tests) perform JSON serialization and writing synchronously on the calling thread. Thread-safety for output streams is provided by Mutex and Send+Sync traits, not background-thread serialization. Regardless of the runtime, the log contents and retrieval APIs remain the same.
 
 The Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
 bootstrap property:
