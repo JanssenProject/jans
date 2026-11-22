@@ -757,6 +757,9 @@ public class LicenseDetailsService extends BaseService {
                         AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                         adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseConfiguration.getLicenseKey());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
+                        // Since the activation API does not return LicenseUsable
+                        Boolean usable = licenseConfiguration.getLicenseActive() && !licenseConfiguration.getLicenseExpired();
+                        adminConf.getMainSettings().getLicenseConfig().setLicenseUsable(usable);
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
