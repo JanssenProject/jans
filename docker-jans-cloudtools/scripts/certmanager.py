@@ -251,6 +251,8 @@ class AuthHandler:
         # how many extra rounds are made for pods whose JKS push failed, and the wait between rounds (seconds)
         self.privkey_push_retries = max(int(opts.get("privkey-push-retries", 3)), 0)
         self.privkey_push_retry_interval = max(int(opts.get("privkey-push-retry-interval", 10)), 0)
+        # container name -> SHA-256 of the original JKS, as verified when its backup was first created
+        self._original_backups = {}
         self.privkey_push_strategy = opts.get("privkey-push-strategy", "NEWER")
         self.sig_keys = resolve_sig_keys(opts.get("sig-keys", SIG_KEYS))
         self.enc_keys = resolve_enc_keys(opts.get("enc-keys", ENC_KEYS))
@@ -281,7 +283,11 @@ class AuthHandler:
             res = res.decode(errors="replace")
 
         parts = (res or "").split()
-        return parts[0] if parts else ""
+        token = parts[0] if parts else ""
+        # a failed sha256sum returns its error text (e.g. "sha256sum: ...: No such file"); two such errors
+        # must never compare equal, so only a real SHA-256 hex digest is accepted
+        is_digest = len(token) == 64 and set(token.lower()) <= set("0123456789abcdef")
+        return token if is_digest else ""
 
     def push_jks_verified(self, container, jks_fn):
         """Push JKS to a container and verify it arrived intact.
@@ -296,15 +302,26 @@ class AuthHandler:
         backup_ok = False
 
         try:
-            logger.info("creating backup of %s:%s", name, jks_fn)
-            self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+            original_sum = self._original_backups.get(name)
 
-            # only a backup created and verified by this attempt may be used for restore; an old
-            # `.backup` left by an earlier rotation must never overwrite the current JKS
-            current_sum = self._remote_sha256(container, jks_fn)
-            if not current_sum or current_sum != self._remote_sha256(container, f"{jks_fn}.backup"):
-                raise RuntimeError("unable to verify backup of current JKS; leaving it unchanged")
-            backup_ok = True
+            if original_sum:
+                # retry of a pod whose earlier attempt failed: its JKS may now be partial, so it must not be
+                # backed up again (that would replace the original with the partial file); keep using the
+                # original backup, but only while it is still intact
+                if self._remote_sha256(container, f"{jks_fn}.backup") != original_sum:
+                    raise RuntimeError("original backup of JKS is missing or changed; not retrying")
+                backup_ok = True
+            else:
+                logger.info("creating backup of %s:%s", name, jks_fn)
+                self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+
+                # only a backup created and verified by this attempt may be used for restore; an old
+                # `.backup` left by an earlier rotation must never overwrite the current JKS
+                current_sum = self._remote_sha256(container, jks_fn)
+                if not current_sum or current_sum != self._remote_sha256(container, f"{jks_fn}.backup"):
+                    raise RuntimeError("unable to verify backup of current JKS; leaving it unchanged")
+                backup_ok = True
+                self._original_backups[name] = current_sum
 
             logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
@@ -362,6 +379,7 @@ class AuthHandler:
         """
         updated = set()
         total_rounds = self.privkey_push_retries + 1
+        self._original_backups = {}
 
         for attempt in range(1, total_rounds + 1):
             pending = []
@@ -396,7 +414,9 @@ class AuthHandler:
                     jks_fn, ", ".join(failed), total_rounds,
                 )
 
-        return len(updated)
+        # a pod that was updated in an earlier round may have been evicted since; count only pods still listed
+        live = {self.meta_client.get_container_name(c) for c in self.meta_client.get_containers("APP_NAME=auth-server")}
+        return len(updated & live)
 
     def get_merged_keys(self, exp_hours):
         # get previous JWKS
