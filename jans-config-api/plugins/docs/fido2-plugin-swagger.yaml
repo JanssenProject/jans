@@ -1910,6 +1910,24 @@ components:
         lockAuditFlushInterval:
           type: integer
           format: int32
+        fido2TraceEnabled:
+          type: boolean
+        fido2TraceProducerId:
+          type: string
+        fido2TraceChainGenesis:
+          type: string
+        fido2TraceIncludeCredentialIdHash:
+          type: boolean
+        fido2TraceIncludeAttestationDetail:
+          type: boolean
+        fido2TraceEndpoint:
+          type: string
+        fido2TraceKeyStorePath:
+          type: string
+        fido2TraceKeyAlias:
+          type: string
+        fido2TraceKeyStorePassword:
+          type: string
         nativeReadinessEnabled:
           type: boolean
         nativeReadinessAllowExternalFetch:
@@ -1988,55 +2006,55 @@ components:
         lastUpdated:
           type: string
           format: date-time
-        metricsData:
+        performanceMetrics:
           type: object
           additionalProperties:
             type: object
-        authenticationFailures:
-          type: integer
-          format: int64
-        registrationAttempts:
-          type: integer
-          format: int64
-        authenticationSuccessRate:
-          type: number
-          format: double
-        authenticationSuccesses:
-          type: integer
-          format: int64
-        authenticationAvgDuration:
-          type: number
-          format: double
-        registrationFailures:
-          type: integer
-          format: int64
-        registrationAvgDuration:
-          type: number
-          format: double
-        registrationSuccessRate:
-          type: number
-          format: double
-        registrationSuccesses:
-          type: integer
-          format: int64
-        authenticationAttempts:
-          type: integer
-          format: int64
-        performanceMetrics:
+        metricsData:
           type: object
           additionalProperties:
             type: object
         period:
           type: string
+        registrationAttempts:
+          type: integer
+          format: int64
+        registrationSuccesses:
+          type: integer
+          format: int64
+        registrationFailures:
+          type: integer
+          format: int64
+        authenticationAttempts:
+          type: integer
+          format: int64
+        authenticationSuccesses:
+          type: integer
+          format: int64
+        authenticationFailures:
+          type: integer
+          format: int64
         fallbackEvents:
           type: integer
           format: int64
-        errorCounts:
+        registrationSuccessRate:
+          type: number
+          format: double
+        authenticationSuccessRate:
+          type: number
+          format: double
+        registrationAvgDuration:
+          type: number
+          format: double
+        authenticationAvgDuration:
+          type: number
+          format: double
+        deviceTypes:
           type: object
           additionalProperties:
             type: integer
             format: int64
-        deviceTypes:
+        errorCounts:
           type: object
           additionalProperties:
             type: integer
