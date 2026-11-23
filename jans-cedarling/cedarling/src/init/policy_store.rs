@@ -18,7 +18,7 @@ use crate::common::policy_store::migration::MigrationError;
 use crate::common::policy_store::validator::MetadataValidator;
 use crate::common::policy_store::{ConversionError, PolicyStore, PolicyStoreWithID};
 use crate::http::cache_headers::CacheHeadersState;
-use crate::http::{HttpClient, HttpClientError};
+use crate::http::{HttpClient, HttpClientError, HttpRequestError};
 
 use super::policy_store_signature::{
     ArchiveVerifier, SignatureError, VerifiedArchive, check_if_enabled,
@@ -56,9 +56,10 @@ pub enum PolicyStoreLoadError {
     /// Failed to parse policy store from YAML string.
     #[error("failed to parse the policy store from policy_store yaml: {0}")]
     ParseYaml(#[from] serde_saphyr::Error),
-    /// Failed to fetch the policy store from the lock server.
-    #[error("failed to fetch the policy store from the lock server")]
-    FetchFromLockServer(#[from] HttpClientError),
+    /// Failed to fetch the policy store from a URL, the Lock Server's or any other.
+    /// The HTTP error names the URL, without its credentials.
+    #[error("failed to fetch the policy store: {0}")]
+    Fetch(HttpRequestError),
     /// Invalid structure in the policy store.
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
@@ -294,11 +295,15 @@ async fn load_policy_store_from_uri(
     verifier: Option<&ArchiveVerifier>,
     options: LoadOptions,
 ) -> Result<LoadedPolicyStore, PolicyStoreLoadError> {
-    let response = http_client.get_with_retry(uri).await?;
+    let fetch_err = |error: HttpClientError| PolicyStoreLoadError::Fetch(error.into());
+    let response = http_client.get_with_retry(uri).await.map_err(fetch_err)?;
 
     let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
 
-    let bytes = http_client.read_response_capped(response).await?;
+    let bytes = http_client
+        .read_response_capped(response)
+        .await
+        .map_err(fetch_err)?;
     let body_hash = crate::init::policy_store_refresh::body_hash(&bytes);
 
     if bytes.starts_with(&ZIP_MAGIC) {
@@ -358,6 +363,7 @@ async fn read_store_offloaded(
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     #[cfg(not(target_arch = "wasm32"))]
     {
+        #[allow(clippy::disallowed_methods, reason = "native-only branch")]
         tokio::task::spawn_blocking(read)
             .await
             .map_err(|e| panic_err(format!("Policy store read task panicked: {e}")))?
@@ -400,6 +406,7 @@ async fn read_cjar_file_offloaded(
     limits: ArchiveLimits,
 ) -> Result<Vec<u8>, PolicyStoreLoadError> {
     let path = path.to_path_buf();
+    #[allow(clippy::disallowed_methods, reason = "native-only function")]
     tokio::task::spawn_blocking(move || read_cjar_file(&path, limits))
         .await
         .map_err(|e| {
@@ -826,6 +833,51 @@ mod test {
     }
 
     #[tokio::test]
+    async fn fetch_failure_names_the_url_and_the_http_cause() {
+        use crate::http::HttpClientError;
+        use crate::http::{FinalFailure, SendError};
+
+        let mut mock_server = Server::new_async().await;
+        let mock_endpoint = mock_server
+            .mock("GET", "/policy-store")
+            .with_status(404)
+            .expect(1)
+            .create();
+        let uri = format!("{}/policy-store", mock_server.url());
+
+        let err = load_policy_store(
+            &PolicyStoreConfig {
+                source: PolicyStoreSource::Uri(uri.clone()),
+                ..Default::default()
+            },
+            &HTTP_CLIENT,
+            ReadOptions::for_test(false),
+        )
+        .await
+        .expect_err("a 404 policy store must fail");
+
+        assert!(
+            matches!(
+                &err,
+                PolicyStoreLoadError::Fetch(error) if matches!(
+                        error.kind(),
+                        HttpClientError::Send(SendError::Final(FinalFailure::Status {
+                            status: reqwest::StatusCode::NOT_FOUND,
+                            ..
+                        }))
+                    )
+            ),
+            "expected a Fetch error with the URL and the 404, got {err:?}"
+        );
+        let message = err.to_string();
+        assert!(
+            message.matches(uri.as_str()).count() == 1 && message.contains("404 Not Found"),
+            "the message must name the URL once and the status, got: {message}"
+        );
+        mock_endpoint.assert();
+    }
+
+    #[tokio::test]
     async fn rejects_legacy_json_from_uri() {
         let mut mock_server = Server::new_async().await;
 
@@ -1210,7 +1262,7 @@ mod signature_tests {
             matches!(
                 err,
                 PolicyStoreLoadError::Signature(SignatureError::BundleFetch { ref source, .. })
-                    if source.status_code() == Some(reqwest::StatusCode::NOT_FOUND)
+                    if source.kind().status_code() == Some(reqwest::StatusCode::NOT_FOUND)
             ),
             "expected a 404 bundle fetch error, got {err:?}"
         );

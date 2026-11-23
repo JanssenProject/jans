@@ -92,6 +92,7 @@
             <class name="io.jans.as.server.ssa.ws.rs.SsaJsonServiceTest" />
 
             <!-- Rate Limit -->
+            <class name="io.jans.as.server.rate.RateLimitFilterTest" />
             <class name="io.jans.as.server.rate.RateLimitServiceTest" />
 
             <!-- UTIL -->

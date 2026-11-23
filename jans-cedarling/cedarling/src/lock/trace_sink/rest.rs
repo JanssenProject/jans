@@ -17,8 +17,9 @@ use serde::Deserialize;
 use super::{
     Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus, retryable,
 };
+use crate::common::retry::MAX_EXPONENTIAL_DELAY;
+use crate::http::AttemptFailure;
 use crate::http::HttpClient;
-use crate::http_utils::MAX_EXPONENTIAL_DELAY;
 
 /// Lock's TRACE bulk endpoint and the client that posts to it.
 pub(in crate::lock) struct RestTraceClient {
@@ -44,41 +45,44 @@ impl RestTraceClient {
     }
 
     pub(super) async fn submit(&self, token: &str, body: &Bytes) -> Result<Attempt, PostBulkError> {
-        let response = self
-            .bulk_request(token, body)
-            .send()
-            .await
-            .map_err(|err| retryable(err.to_string()))?;
+        let response = self.bulk_request(token, body).send().await.map_err(|err| {
+            match AttemptFailure::from_send_error(err) {
+                AttemptFailure::Retryable(failure) => retryable(failure.to_string()),
+                AttemptFailure::Final(failure) => PostBulkError::NotSent(failure),
+            }
+        })?;
         let status = response.status();
         if status == StatusCode::UNAUTHORIZED {
             return Ok(Attempt::Unauthorized);
         }
-        // `429` and `408` come from a proxy before Lock as often as from Lock:
-        // both ask to repeat the request later, not to drop it.
-        if status.is_server_error()
-            || status == StatusCode::TOO_MANY_REQUESTS
-            || status == StatusCode::REQUEST_TIMEOUT
-        {
-            return Err(PostBulkError::Retryable {
-                reason: format!("HTTP {status}"),
-                retry_after: retry_after(response.headers(), Utc::now()),
-            });
+        match AttemptFailure::from_response(&response) {
+            Some(AttemptFailure::Retryable(_)) => {
+                return Err(PostBulkError::Retryable {
+                    reason: format!("HTTP {status}"),
+                    retry_after: retry_after(response.headers(), Utc::now()),
+                });
+            },
+            // Read for Lock's error, as is any answer other than `207`.
+            Some(AttemptFailure::Final(_)) | None => {},
         }
         let bytes = self
             .http
             .read_response_capped(response)
             .await
-            .map_err(|err| match (err.is_response_too_large(), status) {
-                // Lock processed the request; its answer would be over the cap again.
-                (true, StatusCode::MULTI_STATUS) => PostBulkError::UnreadableResponse {
-                    reason: format!("HTTP 207 body: {err}"),
-                },
-                (true, _) => PostBulkError::Rejected {
-                    status: RejectedStatus::Http(status),
-                    error: None,
-                    reason: None,
-                },
-                (false, _) => retryable(err.to_string()),
+            .map_err(|err| {
+                if status == StatusCode::MULTI_STATUS {
+                    // Lock processed the request, so its records are not sent again.
+                    PostBulkError::UnreadableResponse {
+                        reason: format!("HTTP 207 body: {err}"),
+                    }
+                } else {
+                    // The status already refused the request; only Lock's error body is lost.
+                    PostBulkError::Rejected {
+                        status: RejectedStatus::Http(status),
+                        error: None,
+                        reason: None,
+                    }
+                }
             })?;
         if status == StatusCode::MULTI_STATUS {
             return parse_results(&bytes).map(Attempt::Results);
@@ -164,6 +168,9 @@ impl From<RawItem> for BulkItemResult {
 mod tests {
     use mockito::{Matcher, Mock, Server, ServerGuard};
     use serde_json::json;
+
+    use std::sync::Arc;
+    use std::sync::atomic::{AtomicUsize, Ordering};
 
     use super::*;
     use crate::lock::register_client::TokenSource;
@@ -328,14 +335,18 @@ mod tests {
             .post_bulk(&bulk_body())
             .await
             .expect_err("a refusal with a body over the cap should be an error");
-        assert_eq!(
-            err,
-            PostBulkError::Rejected {
-                status: RejectedStatus::Http(StatusCode::PAYLOAD_TOO_LARGE),
-                error: None,
-                reason: None,
-            },
-            "a refusal stays final when its body is over the cap; only the error body is lost"
+        assert!(
+            matches!(
+                &err,
+                PostBulkError::Rejected {
+                    status: got_status,
+                    error: got_error,
+                    reason: got_reason,
+                } if *got_status == RejectedStatus::Http(StatusCode::PAYLOAD_TOO_LARGE)
+                    && got_error.is_none()
+                    && got_reason.is_none()
+            ),
+            "a refusal stays final when its body is over the cap; only the error body is lost, got {err:?}"
         );
     }
 
@@ -424,6 +435,103 @@ mod tests {
         );
     }
 
+    /// A Lock that cuts every answer short, and how often it was called.
+    struct TruncatingLock {
+        endpoint: url::Url,
+        connections: Arc<AtomicUsize>,
+    }
+
+    /// Answers each connection with `status_line`, a `Content-Length` of 1000 and a
+    /// shorter body, so reading the body fails. Counts the connections.
+    fn truncating_lock(status_line: &'static str) -> TruncatingLock {
+        use std::io::{Read, Write};
+
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").expect("a local port is free");
+        let addr = listener.local_addr().expect("the listener has an address");
+        let connections = Arc::new(AtomicUsize::new(0));
+        let counted = connections.clone();
+        std::thread::spawn(move || {
+            for mut sock in listener.incoming().flatten() {
+                counted.fetch_add(1, Ordering::SeqCst);
+                // Read the whole request so the reply is not cut by a reset.
+                let mut request = Vec::new();
+                let mut buf = [0u8; 4096];
+                while let Ok(n @ 1..) = sock.read(&mut buf) {
+                    request.extend_from_slice(&buf[..n]);
+                    if request.ends_with(BODY.as_bytes()) {
+                        break;
+                    }
+                }
+                let head =
+                    format!("{status_line}\r\nContent-Length: 1000\r\nConnection: close\r\n\r\n");
+                sock.write_all(head.as_bytes()).ok();
+                sock.write_all(b"{\"partial").ok();
+            }
+        });
+        TruncatingLock {
+            endpoint: format!("http://{addr}{BULK_PATH}")
+                .parse()
+                .expect("valid URL"),
+            connections,
+        }
+    }
+
+    #[tokio::test]
+    async fn truncated_207_body_is_unreadable_and_not_resent() {
+        let TruncatingLock {
+            endpoint,
+            connections,
+        } = truncating_lock("HTTP/1.1 207 Multi-Status");
+        let client = RestTraceClient::new(endpoint, test_support::http());
+
+        let err = test_support::sink(TraceChannel::Rest(client), None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a 207 whose body cannot be read is an error");
+
+        assert!(
+            matches!(err, PostBulkError::UnreadableResponse { .. }),
+            "Lock processed the request, so its records must not be resent, got {err:?}"
+        );
+        assert_eq!(
+            connections.load(Ordering::SeqCst),
+            1,
+            "the bulk request is sent once"
+        );
+    }
+
+    #[tokio::test]
+    async fn truncated_refusal_body_stays_final() {
+        let TruncatingLock {
+            endpoint,
+            connections,
+        } = truncating_lock("HTTP/1.1 403 Forbidden");
+        let client = RestTraceClient::new(endpoint, test_support::http());
+
+        let err = test_support::sink(TraceChannel::Rest(client), None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a 403 is an error");
+
+        assert!(
+            matches!(
+                err,
+                PostBulkError::Rejected {
+                    status: RejectedStatus::Http(StatusCode::FORBIDDEN),
+                    error: None,
+                    reason: None,
+                }
+            ),
+            "the 403 refused the request; only its error body is lost, so it is final, \
+             not retried, got {err:?}"
+        );
+        assert_eq!(
+            connections.load(Ordering::SeqCst),
+            1,
+            "the bulk request is sent once"
+        );
+    }
+
     #[tokio::test]
     async fn unreachable_endpoint_is_retryable() {
         let server = Server::new_async().await;
@@ -446,6 +554,33 @@ mod tests {
                 }
             ),
             "expected Retryable without Retry-After, got {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn refused_redirect_is_not_sent_again() {
+        let mut server = Server::new_async().await;
+        let redirect = server
+            .mock("POST", BULK_PATH)
+            .with_status(302)
+            .with_header("location", "http://lock.invalid/bulk")
+            .expect(1)
+            .create_async()
+            .await;
+
+        let err = sink(&server, None)
+            .post_bulk(&bulk_body())
+            .await
+            .expect_err("a redirect from loopback to remote http must not be followed");
+
+        redirect.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                PostBulkError::NotSent(crate::http::FinalFailure::InvalidRequest(ref redirect))
+                    if redirect.is_redirect()
+            ),
+            "a refused redirect fails the same way every time, got {err:?}"
         );
     }
 

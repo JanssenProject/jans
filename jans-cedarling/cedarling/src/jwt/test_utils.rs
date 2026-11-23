@@ -7,7 +7,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use super::http_utils::OpenIdConfig;
+use super::fetch::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
 use super::validation::RefJwtStatusList;
 use crate::common::issuer_utils::IssClaim;
