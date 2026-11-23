@@ -20,6 +20,8 @@ AIO_IMAGE_TAG="ghcr.io/janssenproject/jans/all-in-one:0.0.0-nightly"
 # Which suites to run (comma-separated top-level modules, or "all"). The reactor + AIO are always
 # built in full so runtime dependencies are honoured; this only gates which test suites execute.
 TEST_MODULES="${TEST_MODULES:-all}"
+# docs/script-catalog tests are opt-in (the workflow sets this for catalog PRs / ticked dispatches).
+SCRIPT_CATALOG="${SCRIPT_CATALOG:-false}"
 want_module() {
   case "$TEST_MODULES" in all | "") return 0 ;; esac
   case ",${TEST_MODULES}," in *",$1,"*) return 0 ;; *) return 1 ;; esac
@@ -233,6 +235,16 @@ FROM local/persistence-loader:ci
 COPY static/rdbm /app/static/rdbm
 COPY templates/test /app/templates/test
 COPY schema/jans_test_schema.json /app/templates/test/
+COPY templates/scripts.ldif /app/templates/
+EOF
+  # The loader seeds custom scripts from docs/script-catalog at JANS_SOURCE_VERSION; ship this
+  # checkout's catalog instead so the AIO runs the scripts under test.
+  docker build -q -t local/persistence-loader:ci -f - docs/script-catalog >/dev/null <<EOF
+FROM local/persistence-loader:ci
+USER root
+RUN rm -rf /app/script-catalog
+COPY . /app/script-catalog
+USER 1000
 EOF
   docker build -t local/aio:ci \
     --build-arg JANS_PERSISTENCE_LOADER_IMAGE=local/persistence-loader:ci \
@@ -241,6 +253,18 @@ EOF
     --build-arg JANS_SCIM_IMAGE=local/scim:ci \
     --build-arg JANS_FIDO2_IMAGE=local/fido2:ci \
     ./docker-jans-all-in-one
+  # The AIO runs every service's /app/scripts against its own jans-pycloudlib, installed at
+  # JANS_SOURCE_VERSION; swap in this checkout's so scripts and library changes land together.
+  # pip is removed from the image, so replace the package dir (new dependencies are not picked up).
+  docker build -q -t local/aio:ci -f - jans-pycloudlib/jans >/dev/null <<'EOF'
+FROM local/aio:ci
+USER root
+COPY pycloudlib /tmp/pycloudlib
+RUN dst=$(python3 -c 'import importlib.util; print(importlib.util.find_spec("jans.pycloudlib").submodule_search_locations[0])') \
+    && rm -rf "$dst" \
+    && mv /tmp/pycloudlib "$dst"
+USER 1000
+EOF
   base_image="local/aio:ci"
 fi
 # Bake the integration-test env into a thin layer, tagged as the image the AIO demo
@@ -487,6 +511,23 @@ for entry in jans-scim:jans-scim/client jans-config-api:jans-config-api \
   echo "----- tail $suitelog -----"; tail -n 25 "$suitelog" 2>/dev/null || true
   echo "::endgroup::"
 done
+# Last against the AIO: it enables global scripts (client_authn, persistence_extension) that would
+# disturb the suites above.
+if [ "${SCRIPT_CATALOG:-false}" = true ]; then
+  echo "::group::test docs/script-catalog"
+  rc=0
+  timeout -k 30 2400 env REPORT_DIR=test-reports AIO_IMAGE="${AIO_IMAGE:-}" \
+    python3 automation/ci/script_catalog/run.py > aio-logs/test-script-catalog.log 2>&1 || rc=$?
+  if [ "$rc" = 124 ] || [ "$rc" = 137 ]; then
+    echo "::error::script-catalog timed out after 2400s; its results are incomplete"
+    integration_timeouts="$integration_timeouts script-catalog"
+  elif [ ! -f test-reports/script-catalog-TEST-ScriptCatalog.xml ]; then
+    echo "::error::script-catalog produced no test report"
+    integration_no_reports="$integration_no_reports script-catalog"
+  fi
+  tail -n 40 aio-logs/test-script-catalog.log 2>/dev/null || true
+  echo "::endgroup::"
+fi
 echo "::endgroup::"
 
 # ---------------------------------------------------------------------------

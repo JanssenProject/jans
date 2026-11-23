@@ -189,7 +189,7 @@ public class Transpilation {
                 try {
                     error = mapper.writeValueAsString(se);
                     shortError = se.getMessage();
-                } catch(JsonProcessingException je) {
+                } catch (JsonProcessingException je) {
                     error = je.getMessage();
                 }
             } catch (TranspilerException te) {

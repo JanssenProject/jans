@@ -23,6 +23,8 @@ ignore = [
     "RUSTSEC-2026-0374",
     # See rationale in jans-cedarling/.cargo/audit.toml
     "RUSTSEC-2026-0387",
+    # See rationale in jans-cedarling/.cargo/audit.toml
+    "RUSTSEC-2026-0543",
 ]
 
 [licenses]

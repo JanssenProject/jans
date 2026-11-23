@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::lock::health_registry::{HealthStatus, SystemHealth};
-use crate::lock::transport::{AuditItem, AuditPayload, TransportError};
+use crate::lock::transport::{AuditItem, AuditPayload};
 use crate::log::DecisionLogEntry;
 
 #[derive(Debug, thiserror::Error)]
@@ -198,19 +198,27 @@ impl TryFrom<&AuditItem> for LockServerHealthEntry {
     }
 }
 
+/// A batch with no entry to send, so there is no request to make.
+#[derive(Debug, thiserror::Error)]
+pub(in crate::lock) enum NothingToSend {
+    #[error("the batch is empty; nothing to send")]
+    Empty,
+    #[error("none of the {count} entries could be mapped; nothing to send")]
+    NoneMapped { count: usize },
+}
+
 /// Map a batch of typed audit items into the Lock Server wire format
 pub(super) fn map_entries<'a, T>(
     entries: &'a [AuditItem],
     log_warn: impl Fn(String),
-) -> Result<Vec<T>, TransportError>
+) -> Result<Vec<T>, NothingToSend>
 where
     T: TryFrom<&'a AuditItem>,
     <T as TryFrom<&'a AuditItem>>::Error: std::fmt::Display,
 {
     if entries.is_empty() {
-        return Ok(Vec::new());
+        return Err(NothingToSend::Empty);
     }
-
     let mapped: Vec<T> = entries
         .iter()
         .enumerate()
@@ -225,10 +233,9 @@ where
         .collect();
 
     if mapped.is_empty() {
-        return Err(TransportError::Serialization(format!(
-            "all {} entries were malformed, nothing to send",
-            entries.len(),
-        )));
+        return Err(NothingToSend::NoneMapped {
+            count: entries.len(),
+        });
     }
 
     Ok(mapped)
@@ -556,6 +563,9 @@ mod test {
 
         let err = map_entries::<LockServerLogEntry>(&items, |_| {})
             .expect_err("all-malformed batch must fail");
-        assert!(matches!(err, TransportError::Serialization(_)));
+        assert!(
+            matches!(err, NothingToSend::NoneMapped { count: 1 }),
+            "the one malformed entry leaves nothing to send, got {err:?}"
+        );
     }
 }

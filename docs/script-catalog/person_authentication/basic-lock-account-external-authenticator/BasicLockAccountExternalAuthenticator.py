@@ -10,15 +10,19 @@ from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import UserService
-from io.jans.service import CacheService
 from io.jans.util import StringHelper
+from io.jans.model import GluuStatus
 from io.jans.orm.exception import AuthenticationException
+from io.jans.orm.exception import VersionMismatchException
+from io.jans.orm.exception import UnsupportedOperationException as OrmUnsupportedOperationException
 from jakarta.faces.application import FacesMessage
 from io.jans.jsf2.message import FacesMessages
-from java.time import LocalDateTime, Duration
-from java.time.format import DateTimeFormatter
+from io.jans.orm import PersistenceEntryManager
+from java.util import Date
 
-import json
+# Written to the invalid-login count attribute by registerFailedLogin: only inactive users carrying it are unlocked
+LOCK_MARKER_PREFIX = "locked:"
+UPDATE_ATTEMPTS = 5
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -78,8 +82,10 @@ class PersonAuthentication(PersonAuthenticationType):
             credentials = identity.getCredentials()
             user_name = credentials.getUsername()
             user_password = credentials.getPassword()
-            cacheService = CdiUtil.bean(CacheService)
 
+            # user names are logged below; reject line breaks to keep log records intact
+            if user_name is not None and ("\r" in user_name or "\n" in user_name):
+                return False
 
             logged_in = False
             if (StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password)):
@@ -89,65 +95,44 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Basic (lock account). Authenticate. Failed to authenticate user '%s'" % user_name
 
             if logged_in:
-                self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
+                self.setInvalidLoginCount(user_name, StringHelper.toString(0))
             else:
                 countInvalidLoginArributeValue = self.getUserAttributeValue(user_name, self.invalidLoginCountAttribute)
-                userSatus = self.getUserAttributeValue(user_name, "jansStatus")
+                userSatus = self.getUserStatus(user_name)
                 print "Current user '%s' status is '%s'" % ( user_name, userSatus )
 
-                countInvalidLogin = StringHelper.toInteger(countInvalidLoginArributeValue, 0)
+                if userSatus == "inactive":
+                    locked_at = self.getLockTime(countInvalidLoginArributeValue)
+                    if locked_at is None:
+                        print "Basic (lock account). User '%s' is inactive and was not locked by this script" % user_name
+                        return False
 
-                if countInvalidLogin < self.maximumInvalidLoginAttemps:
-                    countInvalidLogin = countInvalidLogin + 1
-                    remainingAttempts = self.maximumInvalidLoginAttemps - countInvalidLogin
+                    locked_for = (Date().getTime() - locked_at) / 1000
+                    if locked_for < self.lockExpirationTime:
+                        print "Basic (lock account). User '%s' is locked for '%s' more seconds" % ( user_name, self.lockExpirationTime - locked_for )
+                        return False
 
-                    print "Remaining login count attempts '%s' for user '%s'" % ( remainingAttempts, user_name )
+                    print "Basic (lock account). Unlocking user '%s' after lock expiration" % user_name
+                    if not self.unLockUser(user_name, countInvalidLoginArributeValue):
+                        return False
 
-                    self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(countInvalidLogin))
-                    if remainingAttempts > 0 and userSatus == "active":
-                        facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
+                    logged_in = authenticationService.authenticate(user_name, user_password)
+                    if logged_in:
+                        return True
 
-                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and ((userSatus is None) or (userSatus == "active")):
-                    print "Basic (lock account). Locking '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
-                    self.lockUser(user_name)
+                failed = self.registerFailedLogin(user_name)
+                if failed is None:
                     return False
 
-                if (countInvalidLogin >= self.maximumInvalidLoginAttemps) and userSatus == "inactive":
-                    print "Basic (lock account). User '%s' is locked. Checking if we can unlock him" % user_name
-                    
-                    unlock_and_authenticate = False
+                remainingAttempts = self.maximumInvalidLoginAttemps - failed['count']
+                print "Remaining login count attempts '%s' for user '%s'" % ( remainingAttempts, user_name )
+                if failed['locked']:
+                    facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
+                    print "Basic (lock account). Locked '%s' for '%s' seconds" % ( user_name, self.lockExpirationTime)
+                elif remainingAttempts > 0:
+                    facesMessages.add(FacesMessage.SEVERITY_INFO, StringHelper.toString(remainingAttempts)+" more attempt(s) before account is LOCKED!")
 
-                    object_from_store = cacheService.get(None, "lock_user_" + user_name)
-                    if object_from_store is None:
-                        # Object in cache was expired. We need to unlock user
-                        print "Basic (lock account). User locking details for user '%s' not exists" % user_name
-                        unlock_and_authenticate = True
-                    else:
-                        # Analyze object from cache
-                        user_lock_details = json.loads(object_from_store)
-
-                        user_lock_details_locked = user_lock_details['locked']
-                        user_lock_details_created = user_lock_details['created']
-                        user_lock_details_created_date = LocalDateTime.parse(user_lock_details_created, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                        user_lock_details_created_diff = Duration.between(user_lock_details_created_date, LocalDateTime.now()).getSeconds()
-                        print "Basic (lock account). Get user '%s' locking details. locked: '%s', Created: '%s', Difference in seconds: '%s'" % ( user_name, user_lock_details_locked, user_lock_details_created, user_lock_details_created_diff )
-
-                        if user_lock_details_locked and user_lock_details_created_diff >= self.lockExpirationTime:
-                            print "Basic (lock account). Unlocking user '%s' after lock expiration" % user_name
-                            unlock_and_authenticate = True
-
-                    if unlock_and_authenticate:
-                        self.unLockUser(user_name)
-                        self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(0))
-                        logged_in = authenticationService.authenticate(user_name, user_password)
-                        if not logged_in:
-                            # Update number of attempts 
-                            self.setUserAttributeValue(user_name, self.invalidLoginCountAttribute, StringHelper.toString(1))
-                            if self.maximumInvalidLoginAttemps == 1:
-                                # Lock user if maximum count login attempts is 1 
-                                self.lockUser(user_name)
-                                return False
-
+                return False
 
             return logged_in
         else:
@@ -179,6 +164,13 @@ class PersonAuthentication(PersonAuthenticationType):
     def logout(self, configurationAttributes, requestParameters):
         return True
 
+    # jansStatus is the mapped status field, not a custom attribute
+    def getUserStatus(self, user_name):
+        find_user_by_uid = CdiUtil.bean(UserService).getUser(user_name)
+        if find_user_by_uid is None or find_user_by_uid.getStatus() is None:
+            return None
+        return find_user_by_uid.getStatus().getValue()
+
     def getUserAttributeValue(self, user_name, attribute_name):
         if StringHelper.isEmpty(user_name):
             return None
@@ -199,70 +191,134 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return attribute_value
 
-    def setUserAttributeValue(self, user_name, attribute_name, attribute_value):
+    def updateUser(self, user_name, change, allow_merge=True):
+        # Compare-and-set on jansVersion: if another writer (lock, unlock, counter, admin) changed the
+        # user since the read, re-read and let change() decide again on the current state
+        userService = CdiUtil.bean(UserService)
+        entryManager = CdiUtil.bean(PersistenceEntryManager)
+        for _ in range(UPDATE_ATTEMPTS):
+            user = userService.getUser(user_name)
+            if user is None or not change(user):
+                return None
+            try:
+                entryManager.updateWithVersion(user)
+                return user
+            except VersionMismatchException:
+                print "Basic (lock account). User '%s' changed concurrently, retrying" % user_name
+            except OrmUnsupportedOperationException:
+                if not allow_merge:
+                    print "Basic (lock account). Backend has no versioned update, user '%s' not updated" % user_name
+                    return None
+                print "Basic (lock account). Backend has no versioned update, user '%s' updated without it" % user_name
+                entryManager.merge(user)
+                return user
+
+        print "Basic (lock account). User '%s' kept changing, update skipped" % user_name
+        return None
+
+    def isLocked(self, user):
+        current = CdiUtil.bean(UserService).getCustomAttribute(user, self.invalidLoginCountAttribute)
+        return user.getStatus() == GluuStatus.INACTIVE and current is not None and self.getLockTime(current.getValue()) is not None
+
+    def setInvalidLoginCount(self, user_name, count):
         if StringHelper.isEmpty(user_name):
             return None
 
-        userService = CdiUtil.bean(UserService)
+        def change(user):
+            if self.isLocked(user):
+                print "Basic (lock account). Set invalid login count. User '%s' is locked, count not updated" % user_name
+                return False
+            CdiUtil.bean(UserService).setCustomAttribute(user, self.invalidLoginCountAttribute, count)
+            user.setUpdatedAt(Date())
+            return True
 
-        find_user_by_uid = userService.getUser(user_name)
-        if find_user_by_uid is None:
-            return None
-        
-        userService.setCustomAttribute(find_user_by_uid, attribute_name, attribute_value)
-        updated_user = userService.updateUser(find_user_by_uid)
-
-        print "Basic (lock account). Set user attribute. User's '%s' attribute '%s' value is '%s'" % (user_name, attribute_name, attribute_value)
+        updated_user = self.updateUser(user_name, change)
+        if updated_user is not None:
+            print "Basic (lock account). Set invalid login count. User '%s' count is '%s'" % (user_name, count)
 
         return updated_user
 
-    def lockUser(self, user_name):
+    def registerFailedLogin(self, user_name):
+        # Count and lock in one write: the threshold is checked on the same state the lock replaces
         if StringHelper.isEmpty(user_name):
             return None
 
-        userService = CdiUtil.bean(UserService)
-        cacheService= CdiUtil.bean(CacheService)
-        facesMessages = CdiUtil.bean(FacesMessages)
-        facesMessages.setKeepMessages()
+        result = {}
 
-        find_user_by_uid = userService.getUser(user_name)
-        if (find_user_by_uid is None):
+        def change(user):
+            result.clear()
+            if self.isLocked(user):
+                return False
+            userService = CdiUtil.bean(UserService)
+            current = userService.getCustomAttribute(user, self.invalidLoginCountAttribute)
+            stored = StringHelper.toInteger(None if current is None else current.getValue(), 0)
+            count = stored + 1 if stored < self.maximumInvalidLoginAttemps else stored
+            lock = count >= self.maximumInvalidLoginAttemps and user.getStatus() != GluuStatus.INACTIVE
+            result['count'] = count
+            result['locked'] = lock
+            if count == stored and not lock:
+                return False
+
+            result['write'] = True
+            now = Date()
+            user.setUpdatedAt(now)
+            if lock:
+                # The marker carries the version this write stores, so unlock can tell whether anyone wrote after it
+                lock_version = (0 if user.getVersion() is None else user.getVersion()) + 1
+                user.setStatus(GluuStatus.INACTIVE)
+                userService.setCustomAttribute(user, self.invalidLoginCountAttribute,
+                        "%s%s:%s" % (LOCK_MARKER_PREFIX, now.getTime(), lock_version))
+            else:
+                userService.setCustomAttribute(user, self.invalidLoginCountAttribute, StringHelper.toString(count))
+            return True
+
+        if self.updateUser(user_name, change) is None and result.get('write'):
+            return None
+        return result or None
+
+    # Marker format: locked:<epoch millis>:<jansVersion written by the lock>
+    def parseLockMarker(self, count_attribute_value):
+        if count_attribute_value is None or not count_attribute_value.startswith(LOCK_MARKER_PREFIX):
+            return None
+        parts = count_attribute_value[len(LOCK_MARKER_PREFIX):].split(":")
+        try:
+            return [long(part) for part in parts] if len(parts) == 2 else None
+        except ValueError:
             return None
 
-        status_attribute_value = userService.getCustomAttribute(find_user_by_uid, "gluuStatus")
-        if status_attribute_value != None:
-            user_status = status_attribute_value.getValue()
-            if StringHelper.equals(user_status, "inactive"):
-                print "Basic (lock account). Lock user. User '%s' locked already" % user_name
-                return
-        
-        userService.setCustomAttribute(find_user_by_uid, "gluuStatus", "inactive")
-        userService.updateUser(find_user_by_uid)
+    def getLockTime(self, count_attribute_value):
+        marker = self.parseLockMarker(count_attribute_value)
+        return None if marker is None else marker[0]
 
-        object_to_store = json.dumps({'locked': True, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
-
-        cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
-        facesMessages.add(FacesMessage.SEVERITY_ERROR, "Your account is locked. Please try again after " + StringHelper.toString(self.lockExpirationTime) + " secs")
-
-        print "Basic (lock account). Lock user. User '%s' locked" % user_name
-
-    def unLockUser(self, user_name):
+    def unLockUser(self, user_name, expected_marker):
         if StringHelper.isEmpty(user_name):
-            return None
+            return False
 
-        userService = CdiUtil.bean(UserService)
-        cacheService= CdiUtil.bean(CacheService)
+        marker = self.parseLockMarker(expected_marker)
+        if marker is None:
+            return False
+        lock_version = marker[1]
 
-        find_user_by_uid = userService.getUser(user_name)
-        if (find_user_by_uid is None):
-            return None
+        def change(user):
+            current = CdiUtil.bean(UserService).getCustomAttribute(user, self.invalidLoginCountAttribute)
+            current_marker = None if current is None else current.getValue()
+            if user.getStatus() != GluuStatus.INACTIVE or current_marker != expected_marker:
+                print "Basic (lock account). Unlock user. Lock of user '%s' changed, not unlocking" % user_name
+                return False
 
-        object_to_store = json.dumps({'locked': False, 'created': LocalDateTime.now().toString()}, separators=(',',':'))
-        cacheService.put(StringHelper.toString(self.lockExpirationTime), "lock_user_"+user_name, object_to_store);
+            # Every versioned user write (config-api, SCIM, admin UI) bumps jansVersion past the lock's
+            if user.getVersion() != lock_version:
+                print "Basic (lock account). Unlock user. User '%s' was modified after the lock, not unlocking" % user_name
+                return False
 
-        userService.setCustomAttribute(find_user_by_uid, "jansStatus", "active")
-        userService.setCustomAttribute(find_user_by_uid, self.invalidLoginCountAttribute, None)
-        userService.updateUser(find_user_by_uid)
+            user.setStatus(GluuStatus.ACTIVE)
+            user.setUpdatedAt(Date())
+            CdiUtil.bean(UserService).setCustomAttribute(user, self.invalidLoginCountAttribute, StringHelper.toString(0))
+            return True
 
+        # Never unlock through an unconditional write: it could undo an admin disable racing it
+        if self.updateUser(user_name, change, allow_merge=False) is None:
+            return False
 
-        print "Basic (lock account). Lock user. User '%s' unlocked" % user_name
+        print "Basic (lock account). Unlock user. User '%s' unlocked" % user_name
+        return True

@@ -86,6 +86,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private static final int ENTRY_EXPIRATION_LIMIT = 1576800000;
 
+	private static final int MERGE_VERSION_ATTEMPTS = 10;
+
 	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
@@ -278,53 +280,85 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		Integer expirationValue = getExpirationValue(entry, entryClass, true);
 
 		List<AttributeData> attributesToPersist = getAttributesListForPersist(entry, propertiesAnnotations);
-		Map<String, AttributeData> attributesToPersistMap = getAttributesMap(attributesToPersist);
 
-		// Load entry
 		List<AttributeData> attributesFromLdap = null;
 		List<String> currentLdapReturnAttributesList = null;
-		if (isSchemaUpdate || forceUpdate) {
-			// If it's schema modification request we don't need to load
-			// attributes from LDAP
-			attributesFromLdap = new ArrayList<AttributeData>();
-		} else {
-			currentLdapReturnAttributesList = buildAttributesListForUpdate(entry, objectClasses, propertiesAnnotations);
-			if (!isConfigurationUpdate) {
-				currentLdapReturnAttributesList.add("objectClass");
-			}
-
-			attributesFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
-		}
-
-		if (LOG.isTraceEnabled()) {
-			dumpAttributes("attributesFromLdap", attributesFromLdap);
-			dumpAttributes("attributesToPersist", attributesToPersist);
-		}
-
-		List<AttributeDataModification> attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
-				entry, propertiesAnnotations, attributesToPersistMap, attributesFromLdap, schemaModificationType, isSchemaUpdate,
-				isConfigurationUpdate, forceUpdate);
-
+		List<AttributeDataModification> attributeDataModifications = null;
 		String versionAttributeName = null;
 		Long newVersionValue = null;
-		if (versionProperty != null) {
-			// Version column is always bumped unconditionally, never diffed like a normal field
-			versionAttributeName = getVersionAttributeName(entryClass, versionProperty.getPropertyName(), propertiesAnnotations);
-			AttributeData currentVersionAttribute = getAttributesMap(attributesFromLdap).get(versionAttributeName);
-			long currentVersionValue = getLongAttributeValue(currentVersionAttribute);
+		// Versioned entries write with a compare-and-set on the version just read, so two merges never
+		// store the same version; a conflict re-reads and re-diffs the entry, and MERGE_VERSION_ATTEMPTS
+		// conflicts fail the merge rather than write without the check
+		Set<String> intendedAttributeNames = null;
+		boolean casVersion = (versionProperty != null) && !isSchemaUpdate;
+		boolean written = false;
+		for (int attempt = 1; !written; attempt++) {
+			// Load entry
+			if (isSchemaUpdate || forceUpdate) {
+				// If it's schema modification request we don't need to load
+				// attributes from LDAP
+				attributesFromLdap = new ArrayList<AttributeData>();
+			} else {
+				currentLdapReturnAttributesList = buildAttributesListForUpdate(entry, objectClasses, propertiesAnnotations);
+				if (!isConfigurationUpdate) {
+					currentLdapReturnAttributesList.add("objectClass");
+				}
 
-			newVersionValue = Long.valueOf(currentVersionValue + 1);
-			applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue.longValue());
+				attributesFromLdap = find(dnValue.toString(), objectClasses, propertiesAnnotationsMap, currentLdapReturnAttributesList.toArray(EMPTY_STRING_ARRAY));
+			}
+
+			if (LOG.isTraceEnabled()) {
+				dumpAttributes("attributesFromLdap", attributesFromLdap);
+				dumpAttributes("attributesToPersist", attributesToPersist);
+			}
+
+			attributeDataModifications = prepareAttributeDataModifications(entryClass, dnValue,
+					entry, propertiesAnnotations, getAttributesMap(attributesToPersist), attributesFromLdap, schemaModificationType, isSchemaUpdate,
+					isConfigurationUpdate, forceUpdate);
+			if (attempt == 1) {
+				intendedAttributeNames = getModificationAttributeNames(attributeDataModifications);
+			} else {
+				// A retry applies only the changes the first read found, so a field this merge left
+				// untouched never reverts what the conflicting writer stored
+				Set<String> intended = intendedAttributeNames;
+				attributeDataModifications.removeIf(modification -> !intended.contains(getModificationAttributeName(modification)));
+			}
+
+			Long currentVersionValue = null;
+			if (versionProperty != null) {
+				// Version column is always bumped unconditionally, never diffed like a normal field
+				versionAttributeName = getVersionAttributeName(entryClass, versionProperty.getPropertyName(), propertiesAnnotations);
+				AttributeData currentVersionAttribute = getAttributesMap(attributesFromLdap).get(versionAttributeName);
+				if ((currentVersionAttribute != null) && (currentVersionAttribute.getValue() != null)) {
+					currentVersionValue = Long.valueOf(getLongAttributeValue(currentVersionAttribute));
+				}
+
+				newVersionValue = Long.valueOf((currentVersionValue == null ? 0L : currentVersionValue.longValue()) + 1);
+				applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue.longValue());
+			}
+
+			VersionedMergeResult casResult = VersionedMergeResult.UNSUPPORTED;
+			if (casVersion) {
+				casResult = tryMergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
+						versionAttributeName, currentVersionValue, newVersionValue);
+			}
+
+			if (casResult == VersionedMergeResult.UNSUPPORTED) {
+				merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
+				written = true;
+			} else if (casResult == VersionedMergeResult.WRITTEN) {
+				written = true;
+			} else if (attempt >= MERGE_VERSION_ATTEMPTS) {
+				throw new VersionMismatchException(dnValue.toString(), currentVersionValue);
+			}
 		}
-
-		merge(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue);
 
 		if (isValidateAfterUpdate()) {
 			if (!isSchemaUpdate && !forceUpdate) {
 				// Compare loaded entry data after merge
 
 				// Step 1. Rebuild map with attributes which we planned to persist
-				attributesToPersistMap = getAttributesMap(attributesToPersist);
+				Map<String, AttributeData> attributesToPersistMap = getAttributesMap(attributesToPersist);
 				if (versionProperty != null) {
 					// Reflect the bump applied above, or the post-merge re-diff flags it as a spurious "missing change"
 					attributesToPersistMap.put(versionAttributeName, new AttributeData(versionAttributeName, newVersionValue));
@@ -376,19 +410,15 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			throw new MappingException("Entry should has setter for property " + versionPropertyName);
 		}
 
-		Object expectedVersionObject = versionGetter.get(entry);
-		if (expectedVersionObject == null) {
-			throw new MappingException(String.format(
-					"Entry '%s' @Version field must be initialized -- call persist() or find() first", entryClass));
-		}
-
 		Class<?> parameterType = ReflectHelper.getSetterType(versionSetter);
 		if (!(parameterType.equals(Long.class) || parameterType.equals(Long.TYPE))) {
 			throw new MappingException(String.format(
 					"Entry '%s' @Version field must be Long/long", entryClass));
 		}
 
-		long expectedVersionValue = ((Long) expectedVersionObject).longValue();
+		// Null means the stored entry has no version yet (written before the class got @Version, or by
+		// a class without it): the CAS then expects the attribute to be absent
+		Long expectedVersionValue = (Long) versionGetter.get(entry);
 
 		boolean forceUpdate = isUseEntryForceUpdate(entryClass);
 		if (forceUpdate) {
@@ -424,14 +454,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 		String versionAttributeName = getVersionAttributeName(entryClass, versionPropertyName, propertiesAnnotations);
 
-		long newVersionValue = expectedVersionValue + 1;
+		long newVersionValue = (expectedVersionValue == null ? 0L : expectedVersionValue.longValue()) + 1;
 		applyVersionBump(attributeDataModifications, versionAttributeName, newVersionValue);
 
 		boolean updated = mergeWithVersion(dnValue.toString(), objectClasses, attributeDataModifications, expirationValue,
-				versionAttributeName, Long.valueOf(expectedVersionValue), Long.valueOf(newVersionValue));
+				versionAttributeName, expectedVersionValue, Long.valueOf(newVersionValue));
 
 		if (!updated) {
-			throw new VersionMismatchException(dnValue.toString(), Long.valueOf(expectedVersionValue));
+			throw new VersionMismatchException(dnValue.toString(), expectedVersionValue);
 		}
 
 		if (isValidateAfterUpdate()) {
@@ -463,8 +493,22 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return null;
 	}
 
+	private enum VersionedMergeResult { WRITTEN, CONFLICT, UNSUPPORTED }
+
+	private VersionedMergeResult tryMergeWithVersion(String dn, String[] objectClasses,
+			List<AttributeDataModification> attributeDataModifications, Integer expiration, String versionAttributeName,
+			Long expectedVersionValue, Long newVersionValue) {
+		try {
+			return mergeWithVersion(dn, objectClasses, attributeDataModifications, expiration, versionAttributeName,
+					expectedVersionValue, newVersionValue) ? VersionedMergeResult.WRITTEN : VersionedMergeResult.CONFLICT;
+		} catch (UnsupportedOperationException ex) {
+			return VersionedMergeResult.UNSUPPORTED;
+		}
+	}
+
 	/**
-	 * Per-backend hook for {@link #updateWithVersion(Object)}. Concrete with a default throw (not
+	 * Per-backend hook for {@link #updateWithVersion(Object)}. A null {@code expectedVersionValue} must
+	 * match only an entry that has no stored version attribute. Concrete with a default throw (not
 	 * abstract) so every existing backend subclass keeps compiling before its own CAS support lands.
 	 */
 	protected boolean mergeWithVersion(String dn, String[] objectClasses,
@@ -519,6 +563,15 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return Long.parseLong(String.valueOf(value));
+	}
+
+	private Set<String> getModificationAttributeNames(List<AttributeDataModification> attributeDataModifications) {
+		Set<String> names = new HashSet<String>();
+		for (AttributeDataModification modification : attributeDataModifications) {
+			names.add(getModificationAttributeName(modification));
+		}
+
+		return names;
 	}
 
 	private String getModificationAttributeName(AttributeDataModification modification) {

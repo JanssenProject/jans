@@ -72,6 +72,10 @@ on:
         description: "jans-lock"
         type: boolean
         default: false
+      script_catalog:
+        description: "docs/script-catalog (custom scripts load + behavior; nightly always, PRs only when the catalog changes)"
+        type: boolean
+        default: false
   schedule:
     - cron: "0 4 * * *"
   pull_request:
@@ -89,6 +93,8 @@ on:
       - "jans-config-api/**"
       - "jans-fido2/**"
       - "jans-orm/**"
+      - "docs/script-catalog/**"
+      - "automation/ci/script_catalog/**"
 
 permissions:
   contents: read
@@ -157,6 +163,32 @@ jobs:
         with:
           # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
           persist-credentials: false
+
+      # Script-catalog tests run nightly (so the Zulip report covers them), on a PR touching the
+      # catalog/harness, or on a dispatch with the box (or "all modules") ticked.
+      - name: Decide script-catalog tests
+        id: catalog
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          run=false
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            run=true
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            [ "${{ inputs.script_catalog }}" = "true" ] || [ "${{ inputs.all_modules }}" = "true" ] && run=true
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch -q --no-tags --depth=1 origin "$BASE_SHA"
+            rc=0
+            git diff --quiet "$BASE_SHA" HEAD -- docs/script-catalog automation/ci/script_catalog || rc=$?
+            case "$rc" in 0) ;; 1) run=true ;; *) echo "::error::git diff failed ($rc)"; exit "$rc" ;; esac
+          fi
+          echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "[info] script-catalog tests: $run"
+
+      # Offline: catches a renamed catalog script or stale manifest entry before a VM is provisioned.
+      - name: Script-catalog harness self-test
+        if: steps.catalog.outputs.run == 'true'
+        run: python3 -m unittest discover -s automation/ci/script_catalog
 
       - name: Sweep stale CI droplets
         env:
@@ -349,6 +381,8 @@ jobs:
           [ "${{ inputs.jans_cedarling }}" = "true" ] && sel="$sel,jans-cedarling" || true
           [ "${{ inputs.jans_lock }}" = "true" ] && sel="$sel,jans-lock" || true
           sel="${sel#,}"
+          # only the script-catalog box ticked: run no Java suites
+          [ -z "$sel" ] && [ "${{ inputs.script_catalog }}" = "true" ] && sel="none"
           echo "modules=${sel:-all}" >> "$GITHUB_OUTPUT"
           echo "[info] selected test modules: ${sel:-all}"
 
@@ -397,6 +431,7 @@ jobs:
             AIO_IMAGE='${{ inputs.aio_image }}' \
             LOG_LEVEL='${{ inputs.log_level }}' \
             TEST_MODULES='${{ steps.mods.outputs.modules }}' \
+            SCRIPT_CATALOG='${{ steps.catalog.outputs.run }}' \
             SAVE_CACHE='${{ github.event_name != 'pull_request' && matrix.persistence == fromJson(needs.setup.outputs.matrix)[0] && 1 || 0 }}' \
             DB_NAME='$DB_NAME' DB_USER='$DB_USER' DB_PASSWORD='$DB_PASSWORD' \
             CN_CONFIG_API_TEST_CLIENT_ID='$CN_CONFIG_API_TEST_CLIENT_ID' \
@@ -414,6 +449,21 @@ jobs:
           [ -n "${IP:-}" ] || { echo "[warn] no VM IP; skipping result collection"; exit 0; }
           scp -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -r "root@$IP:/root/jans/test-reports" ./ || true
           scp -i id_ci -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ci_known_hosts -r "root@$IP:/root/jans/aio-logs" ./ || true
+
+      # The gate passes on any non-empty, non-failing result set, so a lost catalog report must fail here.
+      - name: Require script-catalog report
+        if: always() && steps.catalog.outputs.run == 'true'
+        run: |
+          python3 - <<'PY'
+          import sys, xml.etree.ElementTree as ET
+          path = "test-reports/script-catalog-TEST-ScriptCatalog.xml"
+          try:
+              cases = ET.parse(path).getroot().iter("testcase")
+              if next(cases, None) is None:
+                  sys.exit(f"::error::{path} has no test cases")
+          except (OSError, ET.ParseError) as e:
+              sys.exit(f"::error::script-catalog report missing or unreadable: {e}")
+          PY
 
       # First matrix leg only (both build the same artifacts), and non-PR only: a PR's cache is
       # scoped to its own ref, so it would evict in-use entries while being readable by nothing.

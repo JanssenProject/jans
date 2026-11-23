@@ -33,11 +33,15 @@ use super::ProducerId;
 use super::chain::{AppendError, ProducerChain};
 use super::record::RecordDraft;
 use super::status::EmitterEvent;
+use crate::async_sleep::sleep;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
+use crate::common::retry::{
+    Attempt, Backoff, RetryError, RetryPolicy, RetryUntilCancelledError, retry,
+    retry_until_cancelled,
+};
 use crate::http::{JoinHandle, spawn_task};
-use crate::http_utils::Backoff;
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
@@ -210,8 +214,9 @@ enum ChainUse {
 enum LockState {
     /// Lock took the last request; the next one goes without waiting.
     Accepting,
-    /// Lock did not take the last requests in a row: each next one waits longer.
-    Refusing { backoff: Backoff },
+    /// Lock did not take the last `failures` requests in a row: each next one
+    /// waits longer.
+    Refusing { failures: u32 },
 }
 
 /// What a round leaves: the chain to sign into next and how the round went.
@@ -396,12 +401,16 @@ impl Emitter {
     /// `retry_after` is how long Lock or a proxy before it last asked to wait;
     /// the wait is never shorter than the backoff.
     async fn back_off(&mut self, cancel: &CancellationToken, retry_after: Option<Duration>) {
-        let mut backoff = match std::mem::replace(&mut self.lock, LockState::Accepting) {
-            LockState::Refusing { backoff } => backoff,
-            LockState::Accepting => Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, None),
+        let failures = match self.lock {
+            LockState::Refusing { failures } => failures,
+            LockState::Accepting => 0,
         };
-        let delay = backoff.next_delay().max(retry_after.unwrap_or_default());
-        self.lock = LockState::Refusing { backoff };
+        let delay = Backoff::exponential(WORKER_HTTP_RETRY_DUR)
+            .delay(failures)
+            .max(retry_after.unwrap_or_default());
+        self.lock = LockState::Refusing {
+            failures: failures.saturating_add(1),
+        };
         self.log(
             LogLevel::WARN,
             None,
@@ -411,7 +420,7 @@ impl Emitter {
             ),
         );
         tokio::select! {
-            () = tokio::time::sleep(delay) => {},
+            () = sleep(delay) => {},
             () = cancel.cancelled() => {},
         }
     }
@@ -655,52 +664,79 @@ impl Emitter {
 
     /// Posts `body`, retrying a failed request with the same bytes.
     async fn send(&mut self, body: &Bytes, records: usize, mode: Mode<'_>) -> Sent {
-        let mut backoff = Backoff::new_exponential(WORKER_HTTP_RETRY_DUR, Some(self.max_retries));
-        loop {
-            let (err, retry_after) = match self.sink.post_bulk(body).await {
-                Ok(results) => return Sent::Results(results),
+        let sink = &self.sink;
+        let attempt = || async {
+            match sink.post_bulk(body).await {
+                Ok(results) => Attempt::Done(results),
+                Err(err @ PostBulkError::Retryable { retry_after, .. }) => Attempt::Retryable {
+                    error: err,
+                    wait_at_least: retry_after,
+                },
                 Err(
                     err @ (PostBulkError::Rejected { .. }
+                    | PostBulkError::NotSent { .. }
                     | PostBulkError::UnreadableResponse { .. }),
-                ) => {
-                    let fix = err
-                        .refusal()
-                        .map(|refusal| format!("; {}", self.refusal_fix(refusal)))
-                        .unwrap_or_default();
-                    self.log(
-                        LogLevel::ERROR,
-                        None,
-                        format!("{err}; its {records} TRACE records are lost{fix}"),
-                    );
-                    self.count(EmitterEvent::Rejected, records);
-                    return Sent::Lost { retry_after: None };
-                },
-                Err(err @ PostBulkError::Retryable { retry_after, .. }) => (err, retry_after),
-            };
-            let retry = match mode {
-                Mode::Running(cancel) => tokio::select! {
-                    retry = backoff.snooze_at_least(retry_after.unwrap_or_default()) => retry.is_ok(),
-                    () = cancel.cancelled() => return Sent::Interrupted,
-                },
-                Mode::Stopping => {
-                    self.log(
-                        LogLevel::WARN,
-                        None,
-                        format!("{err}; Cedarling is shutting down, its {records} TRACE records are dropped"),
-                    );
-                    self.count(EmitterEvent::Dropped, records);
-                    return Sent::Lost { retry_after: None };
-                },
-            };
-            if !retry {
+                ) => Attempt::Final(err),
+            }
+        };
+        let result = match mode {
+            Mode::Running(cancel) => {
+                let policy = RetryPolicy {
+                    backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
+                    max_retries: self.max_retries,
+                };
+                match retry_until_cancelled(policy, cancel, attempt).await {
+                    Ok(results) => Ok(results),
+                    Err(RetryUntilCancelledError::GaveUp(error)) => Err(error),
+                    Err(RetryUntilCancelledError::Cancelled) => return Sent::Interrupted,
+                }
+            },
+            // Each batch goes once, so stopping while Lock is down is quick.
+            Mode::Stopping => {
+                let once = RetryPolicy {
+                    backoff: Backoff::exponential(WORKER_HTTP_RETRY_DUR),
+                    max_retries: 0,
+                };
+                retry(once, attempt).await
+            },
+        };
+
+        match result {
+            Ok(results) => Sent::Results(results),
+            Err(RetryError::Final(err)) => {
+                let fix = err.refusal().map_or_else(String::new, |refusal| {
+                    format!("; {}", self.refusal_fix(refusal))
+                });
+                self.log(
+                    LogLevel::ERROR,
+                    None,
+                    format!("{err}; its {records} TRACE records are lost{fix}"),
+                );
+                // Lock never saw a request that could not be sent, so it refused nothing.
+                let event = match err {
+                    PostBulkError::NotSent(_) => EmitterEvent::Dropped,
+                    _ => EmitterEvent::Rejected,
+                };
+                self.count(event, records);
+                Sent::Lost { retry_after: None }
+            },
+            Err(RetryError::RetriesExhausted { last, .. }) => {
+                let reason = match mode {
+                    Mode::Running(_) => "retries exhausted",
+                    Mode::Stopping => "Cedarling is shutting down",
+                };
                 self.log(
                     LogLevel::WARN,
                     None,
-                    format!("{err}; retries exhausted, its {records} TRACE records are dropped"),
+                    format!("{last}; {reason}, its {records} TRACE records are dropped"),
                 );
                 self.count(EmitterEvent::Dropped, records);
-                return Sent::Lost { retry_after };
-            }
+                let retry_after = match (mode, last) {
+                    (Mode::Running(_), PostBulkError::Retryable { retry_after, .. }) => retry_after,
+                    _ => None,
+                };
+                Sent::Lost { retry_after }
+            },
         }
     }
 
@@ -980,7 +1016,7 @@ impl Emitter {
     async fn pause(&self, mode: Mode<'_>) {
         if let Mode::Running(cancel) = mode {
             tokio::select! {
-                () = tokio::time::sleep(WORKER_HTTP_RETRY_DUR) => {},
+                () = sleep(WORKER_HTTP_RETRY_DUR) => {},
                 () = cancel.cancelled() => {},
             }
         }
@@ -1027,6 +1063,10 @@ async fn sign_batch_offloaded(
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
 ) -> Result<SignedBatch, SignTaskPanicked> {
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "TRACE is rejected on WASM before it starts"
+    )]
     tokio::task::spawn_blocking(move || {
         let results = drafts
             .iter()
@@ -1082,6 +1122,8 @@ mod tests {
         RetryAfter(u64),
         /// The whole request refused, as Lock does with `403`.
         Rejected,
+        /// The request could not be sent at all, as with a refused redirect.
+        NotSent,
         /// Per record: `None` accepted, `Some(id)` rejected with that error id.
         PerRecord(Vec<Option<&'static str>>),
         /// The whole request refused with `400 invalid_request` and this reason.
@@ -1160,6 +1202,14 @@ mod tests {
                     error: Some("access_denied".to_string()),
                     reason: None,
                 }),
+                Reply::NotSent => Err(PostBulkError::NotSent(
+                    crate::http::FinalFailure::InvalidRequest(
+                        reqwest::Client::new()
+                            .get("not a url")
+                            .build()
+                            .expect_err("a relative URL cannot be built"),
+                    ),
+                )),
                 #[cfg(feature = "grpc")]
                 Reply::ResourceExhausted => Err(PostBulkError::Rejected {
                     status: RejectedStatus::Grpc(tonic::Code::ResourceExhausted),
@@ -2046,6 +2096,53 @@ mod tests {
             stats.get("trace.rejected"),
             Some(&1),
             "the record of the refused request"
+        );
+    }
+
+    /// A refused request is final: its records are counted once and the request is
+    /// never sent again, however long the emitter runs. The REST sink reports a
+    /// `403` whose body cannot be read as this same refusal.
+    #[tokio::test(start_paused = true)]
+    async fn a_refused_request_is_sent_once() {
+        let lock = FakeLock::new([Reply::Rejected]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+
+        lock.bodies(1).await;
+        tokio::time::sleep(Duration::from_secs(3600)).await;
+
+        assert_eq!(
+            lock.bodies.borrow().len(),
+            1,
+            "a refused request is not sent again"
+        );
+        emitter.handle.shut_down().await;
+        assert_eq!(
+            counter(&metrics, "trace.rejected"),
+            Some(1),
+            "the refused record is counted once"
+        );
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn a_request_that_cannot_be_sent_is_dropped_not_rejected() {
+        let lock = FakeLock::new([Reply::NotSent]);
+        let metrics = metrics();
+        let emitter = start(params(lock.clone(), metrics.clone()), 4, [draft()]);
+
+        lock.bodies(1).await;
+        emitter.handle.shut_down().await;
+
+        let stats = metrics.snapshot_and_reset().operational_stats;
+        assert_eq!(
+            stats.get("trace.dropped"),
+            Some(&1),
+            "a record whose request could not be sent is given up"
+        );
+        assert_eq!(
+            stats.get("trace.rejected").copied().unwrap_or(0),
+            0,
+            "Lock never saw the request, so it refused nothing"
         );
     }
 

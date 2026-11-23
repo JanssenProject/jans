@@ -8,8 +8,11 @@ package io.jans.lock.service.trace.correlation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -51,6 +54,15 @@ import jakarta.inject.Inject;
  * another writer's flag change. Exhausting the retry budget is logged at WARN and the update is given up on, same as any other best-effort
  * failure here.
  *
+ * <p>{@link #afterInsert} also corrects the inserted record itself. Its {@code plan} read the chain
+ * before the insert, so a predecessor that another writer stored in the meantime was not seen. After
+ * the insert the predecessor rows are read again, and {@code coverage_gap} of the inserted record is
+ * cleared when a predecessor now exists, and {@code chain_link_failure} is set when predecessors now
+ * exist and none of their digests matches its {@code prev_record_hash}. Both corrections only go in
+ * the direction the one-by-one ingest of the same records would reach: a coverage gap is never set
+ * here and a chain link failure is never cleared (design §8). {@code equivocation} is only ever
+ * set, never cleared, and {@code late} and {@code policy_mismatch} are never touched.
+ *
  * @author Yuriy Movchan
  */
 @ApplicationScoped
@@ -76,6 +88,8 @@ public class TraceCorrelationService {
 	@Inject
 	private PolicyMismatchCheck policyMismatchCheck;
 
+	private final PlanLookup storeLookup = position -> store.findRecordsByChainPosition(position);
+
 	/** Last unknown {@code chainRegistrationMode} value already reported, so it is logged once. */
 	private volatile String warnedChainRegistrationMode;
 
@@ -84,6 +98,17 @@ public class TraceCorrelationService {
 	 * or {@code invalid_genesis}
 	 */
 	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx) {
+		return plan(verified, ctx, storeLookup);
+	}
+
+	/**
+	 * Same as {@link #plan(VerifiedAssertion, TraceRequestContext)}, reading the existing records
+	 * from {@code lookup} instead of the store.
+	 *
+	 * @throws io.jans.lock.service.trace.error.TraceValidationException {@code chain_not_registered}
+	 * or {@code invalid_genesis}
+	 */
+	public CorrelationPlan plan(VerifiedAssertion verified, TraceRequestContext ctx, PlanLookup lookup) {
 		CorrelationInputs inputs = verified.getInputs();
 		ParsedAssertion.ProducerChain producerChain = inputs.getChainPosition();
 		String domainId = ctx.getEvidenceDomainId();
@@ -94,32 +119,34 @@ public class TraceCorrelationService {
 		long policyJudgedAtMs = late ? inputs.getSignedAt() * 1000L : ctx.getReceivedAtMs();
 		boolean policyMismatch = policyMismatchCheck.check(inputs.getPolicy(), policyJudgedAtMs);
 
-		ChainIdentity chainIdentity = new ChainIdentity(domainId, producerChain.getProducerId(),
-				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
-		long sequenceNumber = producerChain.getSequenceNumber();
-		ChainPosition position = new ChainPosition(chainIdentity, sequenceNumber);
+		ChainPosition position = positionOf(verified, ctx);
+		ChainIdentity chainIdentity = position.getChainIdentity();
+		long sequenceNumber = position.getSequenceNumber();
 
-		if (chainRegistrationMode() == ChainRegistrationMode.FIRST_OBSERVED) {
-			chainRegistry.requireRegisteredOrObserveGenesis(chainIdentity, sequenceNumber,
-					producerChain.getPrevRecordHash(), ctx.getClientId(), ctx.getReceivedAtMs());
-		} else {
-			chainRegistry.requireRegistered(chainIdentity);
+		if (!lookup.isChainConfirmed(chainIdentity)) {
+			if (chainRegistrationMode() == ChainRegistrationMode.FIRST_OBSERVED) {
+				chainRegistry.requireRegisteredOrObserveGenesis(chainIdentity, sequenceNumber,
+						producerChain.getPrevRecordHash(), ctx.getClientId(), ctx.getReceivedAtMs());
+			} else {
+				chainRegistry.requireRegistered(chainIdentity);
+			}
+			lookup.confirmChain(chainIdentity);
 		}
 		chainRegistry.checkGenesis(sequenceNumber, producerChain.getPrevRecordHash());
 
 		List<StoredTraceRecord> predecessors = sequenceNumber > 1
-				? store.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber - 1))
+				? lookup.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber - 1))
 				: Collections.emptyList();
 		boolean coverageGap = ProducerChainRules.isCoverageGap(sequenceNumber, predecessors);
 		boolean chainLinkFailure = ProducerChainRules.isChainLinkFailure(sequenceNumber, predecessors,
 				producerChain.getPrevRecordHash());
 
-		List<StoredTraceRecord> rowsAtPosition = store.findRecordsByChainPosition(position);
+		List<StoredTraceRecord> rowsAtPosition = lookup.findRecordsByChainPosition(position);
 		List<RecordIdentity> equivocationPeers = ProducerChainRules.equivocationPeers(verified.getIdentity(),
 				rowsAtPosition);
 		boolean equivocation = !equivocationPeers.isEmpty();
 
-		List<StoredTraceRecord> successors = store
+		List<StoredTraceRecord> successors = lookup
 				.findRecordsByChainPosition(new ChainPosition(chainIdentity, sequenceNumber + 1));
 
 		IngestionFlags flags = new IngestionFlags(coverageGap, chainLinkFailure, equivocation, late, policyMismatch);
@@ -137,7 +164,17 @@ public class TraceCorrelationService {
 		List<String> tokenKeys = dedupKeys(inputs.getTokenRefs(), token -> traceKeys.tokenKey(domainId, token));
 
 		return new CorrelationPlan(flags, position, execution, tokenKeys, equivocationPeers,
-				successors, inputs.getWarnings());
+				successors, rowsAtPosition, inputs.getWarnings());
+	}
+
+	/**
+	 * @return the producer-chain position the record claims in the request's evidence domain
+	 */
+	public ChainPosition positionOf(VerifiedAssertion verified, TraceRequestContext ctx) {
+		ParsedAssertion.ProducerChain producerChain = verified.getInputs().getChainPosition();
+		ChainIdentity chainIdentity = new ChainIdentity(ctx.getEvidenceDomainId(), producerChain.getProducerId(),
+				producerChain.getProducerInstanceId(), producerChain.getProducerChainId());
+		return new ChainPosition(chainIdentity, producerChain.getSequenceNumber());
 	}
 
 	private ChainRegistrationMode chainRegistrationMode() {
@@ -155,46 +192,198 @@ public class TraceCorrelationService {
 	}
 
 	/**
-	 * Re-reads the chain position, retrying a transient failure. When every attempt fails the rows
-	 * stay unknown and only the planned peers are updated; a peer that arrived after {@code plan()}
-	 * then goes uncorrelated, which is logged at error level.
+	 * Reads the predecessor, own and successor positions of {@code position} with one
+	 * {@code findRecordsByChainPositions} call, retrying a transient failure.
+	 *
+	 * @return the rows per position, or {@code null} when every attempt failed: the rows are then
+	 *         unknown, the inserted record keeps its own flags, only the planned successors and
+	 *         peers are updated, and a neighbor that arrived after {@code plan()} goes uncorrelated,
+	 *         which is logged at error level
 	 */
-	private List<StoredTraceRecord> readPosition(StoredTraceRecord inserted, CorrelationPlan plan) {
+	private Map<ChainPosition, List<StoredTraceRecord>> readNeighborhood(StoredTraceRecord inserted,
+			ChainPosition position) {
+		List<ChainPosition> positions = ProducerChainRules.neighborhood(position);
 		for (int attempt = 1; attempt <= POSITION_READ_ATTEMPTS; attempt++) {
 			try {
-				return store.findRecordsByChainPosition(plan.getPosition());
+				return store.findRecordsByChainPositions(positions);
 			} catch (RuntimeException ex) {
 				if (attempt == POSITION_READ_ATTEMPTS) {
-					log.error("TRACE correlation afterInsert failed to re-query chain position after {} attempts: inserted={}",
+					log.error("TRACE correlation afterInsert failed to re-query chain positions after {} attempts: inserted={}",
 							attempt, inserted.getIdentity(), ex);
 				} else {
-					log.warn("TRACE correlation afterInsert chain position re-query failed, attempt {}: inserted={}",
+					log.warn("TRACE correlation afterInsert chain positions re-query failed, attempt {}: inserted={}",
 							attempt, inserted.getIdentity(), ex);
 				}
 			}
 		}
-		return Collections.emptyList();
+		return null;
 	}
 
 	/**
-	 * Updates the equivocation peers and the successor at {@code sequence_number + 1} after
-	 * {@code inserted} became visible in the store, then re-queries the
-	 * insert's own chain position: {@link #plan} computed {@code equivocationPeers} from a
-	 * pre-insert snapshot, so a peer that landed at the same position between this node's
-	 * {@code plan()} and its own {@code insertRecord()} would otherwise never be flagged, and
-	 * neither would {@code inserted}'s own {@code equivocation} (computed against that same stale
-	 * snapshot). Best-effort throughout: a failure updating one neighbor is logged and does not
-	 * propagate.
+	 * Corrects the flags around {@code inserted} after it became visible in the store. {@link #plan}
+	 * read the chain before the insert, so any neighbor that another writer stored in between was
+	 * not seen. This method reads the predecessor, own and successor positions of {@code inserted}
+	 * once, after the insert, and then, in this order:
+	 * <ol>
+	 * <li>corrects the inserted record's own {@code coverage_gap} (cleared when a predecessor now
+	 * exists) and {@code chain_link_failure} (set when predecessors now exist and none matches its
+	 * {@code prev_record_hash}), with the same rules as {@link #plan};</li>
+	 * <li>updates the records now stored at {@code sequence_number + 1}: every successor the plan
+	 * knew, and every other one whose coverage gap is still set.
+	 * It clears the coverage gap and sets the chain link failure when the successor's
+	 * {@code prev_record_hash} matches no record now at the inserted position (the inserted one or
+	 * an equivocation peer), the rule {@link #plan} applies to a record's own predecessors;</li>
+	 * <li>flags as equivocating every other record at the inserted position, and the inserted record
+	 * itself when a peer arrived that the plan did not know.</li>
+	 * </ol>
+	 * A record whose flags already agree is not written. Every write is a compare-and-swap on the
+	 * version of the row as read; a lost race re-reads that row and recomputes. Best-effort
+	 * throughout: a failure updating one row is logged and does not propagate.
 	 */
 	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan) {
-		for (StoredTraceRecord successor : plan.getSuccessors()) {
-			updateSuccessor(inserted, successor.getIdentity());
-		}
+		afterInsert(inserted, plan, null);
+	}
 
+	/**
+	 * Same as {@link #afterInsert(StoredTraceRecord, CorrelationPlan)} with the rows already read by
+	 * the caller (one {@code findRecordsByChainPositions} for a whole batch, after its commit).
+	 *
+	 * @param positionRows rows per chain position as read after the insert; it must cover the
+	 *                     positions of {@link ProducerChainRules#neighborhood} of the insert, and a
+	 *                     position absent from the map counts as empty. {@code null} makes this method
+	 *                     read them itself.
+	 */
+	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan,
+			Map<ChainPosition, List<StoredTraceRecord>> positionRows) {
+		afterInsert(inserted, plan, positionRows, Collections.<RecordIdentity>emptySet());
+	}
+
+	/**
+	 * Same as {@link #afterInsert(StoredTraceRecord, CorrelationPlan, Map)}, correlating
+	 * {@code inserted} as if the records in {@code hidden} were not stored yet.
+	 *
+	 * @param hidden records committed together with {@code inserted} and correlated after it (the later
+	 *               elements of one batch); they are left out of the rows, whether passed in
+	 *               {@code positionRows} or read here, as on the one-by-one path
+	 */
+	public void afterInsert(StoredTraceRecord inserted, CorrelationPlan plan,
+			Map<ChainPosition, List<StoredTraceRecord>> positionRows, Set<RecordIdentity> hidden) {
+		ChainPosition position = plan.getPosition();
+		Map<ChainPosition, List<StoredTraceRecord>> rows = positionRows != null ? positionRows
+				: readNeighborhood(inserted, position);
+		if (rows != null && !hidden.isEmpty()) {
+			rows = withoutHidden(rows, position, hidden);
+		}
+		if (rows != null) {
+			correctOwnFlags(inserted, position, rows);
+		}
+		updateSuccessors(inserted, plan, rows);
+		updateEquivocation(inserted, plan, rows == null ? Collections.<StoredTraceRecord>emptyList()
+				: rowsAt(rows, position));
+	}
+
+	/** @return the rows of the neighborhood of {@code position} without the records in {@code hidden} */
+	private static Map<ChainPosition, List<StoredTraceRecord>> withoutHidden(
+			Map<ChainPosition, List<StoredTraceRecord>> rows, ChainPosition position, Set<RecordIdentity> hidden) {
+		Map<ChainPosition, List<StoredTraceRecord>> visible = new HashMap<>();
+		for (ChainPosition neighbor : ProducerChainRules.neighborhood(position)) {
+			List<StoredTraceRecord> kept = new ArrayList<>();
+			for (StoredTraceRecord row : rowsAt(rows, neighbor)) {
+				if (!hidden.contains(row.getIdentity())) {
+					kept.add(row);
+				}
+			}
+			visible.put(neighbor, kept);
+		}
+		return visible;
+	}
+
+	private void correctOwnFlags(StoredTraceRecord inserted, ChainPosition position,
+			Map<ChainPosition, List<StoredTraceRecord>> rows) {
+		long sequenceNumber = position.getSequenceNumber();
+		List<StoredTraceRecord> predecessors = sequenceNumber > 1
+				? rowsAt(rows, new ChainPosition(position.getChainIdentity(), sequenceNumber - 1))
+				: Collections.<StoredTraceRecord>emptyList();
+		Function<StoredTraceRecord, IngestionFlags> mutator = stored -> {
+			IngestionFlags flags = stored.getFlags();
+			boolean changed = false;
+			if (flags.isCoverageGap() && !ProducerChainRules.isCoverageGap(sequenceNumber, predecessors)) {
+				flags.setCoverageGap(false);
+				changed = true;
+			}
+			// design §8: chainLinkFailure is never self-clearing, only ever set here.
+			if (!flags.isChainLinkFailure() && ProducerChainRules.isChainLinkFailure(sequenceNumber, predecessors,
+					stored.getPrevRecordHash())) {
+				flags.setChainLinkFailure(true);
+				changed = true;
+			}
+			return changed ? flags : null;
+		};
+		StoredTraceRecord observed = find(rowsAt(rows, position), inserted.getIdentity());
+		if (observed == null && mutator.apply(inserted) == null) {
+			// Both corrections are one-way, so flags that agree as planned agree as stored too.
+			return;
+		}
+		updateFlags(inserted.getIdentity(), observed, mutator, "correct own flags", inserted.getIdentity());
+	}
+
+	/**
+	 * A successor the plan knew was planned before {@code inserted} existed, so it is updated as the
+	 * one-by-one path would update it. A successor the plan did not know may have been planned
+	 * either before or after {@code inserted} became visible. It is updated only while its coverage
+	 * gap is still set: its own plan then saw no predecessor, so it cannot have taken
+	 * {@code inserted} into account. Otherwise its chain link was already judged against the
+	 * predecessors it saw.
+	 *
+	 * <p>A successor's link is judged against every record at the inserted position, as read after
+	 * the insert (or as the plan saw them when that read failed), plus {@code inserted}: one
+	 * matching digest is enough, as in {@link ProducerChainRules#isChainLinkFailure}.
+	 */
+	private void updateSuccessors(StoredTraceRecord inserted, CorrelationPlan plan,
+			Map<ChainPosition, List<StoredTraceRecord>> rows) {
+		ChainPosition position = plan.getPosition();
+		List<StoredTraceRecord> predecessors = withInserted(
+				rows != null ? rowsAt(rows, position) : plan.getPositionRows(), inserted);
+		long successorSequence = position.getSequenceNumber() + 1;
+		Set<RecordIdentity> planned = new HashSet<>();
+		for (StoredTraceRecord successor : plan.getSuccessors()) {
+			planned.add(successor.getIdentity());
+		}
+		Set<RecordIdentity> updated = new HashSet<>();
+		if (rows != null) {
+			ChainPosition next = new ChainPosition(position.getChainIdentity(), successorSequence);
+			for (StoredTraceRecord successor : rowsAt(rows, next)) {
+				RecordIdentity successorId = successor.getIdentity();
+				updated.add(successorId);
+				boolean known = planned.contains(successorId);
+				if (known || (successor.getFlags() != null && successor.getFlags().isCoverageGap())) {
+					updateSuccessor(inserted, predecessors, successorSequence, successorId, successor, !known);
+				}
+			}
+		}
+		for (StoredTraceRecord successor : plan.getSuccessors()) {
+			if (updated.add(successor.getIdentity())) {
+				updateSuccessor(inserted, predecessors, successorSequence, successor.getIdentity(), null, false);
+			}
+		}
+	}
+
+	/** @return {@code rows} with {@code inserted} added when it is not among them */
+	private static List<StoredTraceRecord> withInserted(List<StoredTraceRecord> rows, StoredTraceRecord inserted) {
+		if (find(rows, inserted.getIdentity()) != null) {
+			return rows;
+		}
+		List<StoredTraceRecord> all = new ArrayList<>(rows.size() + 1);
+		all.addAll(rows);
+		all.add(inserted);
+		return all;
+	}
+
+	private void updateEquivocation(StoredTraceRecord inserted, CorrelationPlan plan,
+			List<StoredTraceRecord> rowsAtPosition) {
 		// equivocation is never cleared, so rows already flagged need no per-row re-read; this keeps
 		// the work for one insert from growing with the number of records already at the position
 		Set<RecordIdentity> unseenPlanPeers = new LinkedHashSet<>(plan.getEquivocationPeers());
-		List<StoredTraceRecord> rowsAtPosition = readPosition(inserted, plan);
 		boolean newPeerFound = false;
 		boolean insertedFlagged = inserted.getFlags() != null && inserted.getFlags().isEquivocation();
 		for (StoredTraceRecord row : rowsAtPosition) {
@@ -221,8 +410,23 @@ public class TraceCorrelationService {
 		}
 	}
 
+	private static List<StoredTraceRecord> rowsAt(Map<ChainPosition, List<StoredTraceRecord>> rows,
+			ChainPosition position) {
+		List<StoredTraceRecord> found = rows.get(position);
+		return found == null ? Collections.<StoredTraceRecord>emptyList() : found;
+	}
+
+	private static StoredTraceRecord find(List<StoredTraceRecord> rows, RecordIdentity identity) {
+		for (StoredTraceRecord row : rows) {
+			if (row.getIdentity().equals(identity)) {
+				return row;
+			}
+		}
+		return null;
+	}
+
 	private void updatePeer(RecordIdentity insertedId, RecordIdentity peerId) {
-		updateFlags(peerId, stored -> {
+		updateFlags(peerId, null, stored -> {
 			IngestionFlags flags = stored.getFlags();
 			if (flags.isEquivocation()) {
 				return null;
@@ -232,17 +436,28 @@ public class TraceCorrelationService {
 		}, "flag equivocation peer", insertedId);
 	}
 
-	private void updateSuccessor(StoredTraceRecord inserted, RecordIdentity successorId) {
-		updateFlags(successorId, stored -> {
+	/**
+	 * @param predecessors      the records at the inserted position, {@code inserted} included
+	 * @param successorSequence the successor's {@code sequence_number}
+	 * @param observed          the successor's row as read after the insert, or {@code null} to read it here
+	 * @param whileGapOnly      {@code true} to change nothing once the successor's coverage gap is clear,
+	 *                          also on a re-read after a lost compare-and-swap
+	 */
+	private void updateSuccessor(StoredTraceRecord inserted, List<StoredTraceRecord> predecessors,
+			long successorSequence, RecordIdentity successorId, StoredTraceRecord observed, boolean whileGapOnly) {
+		updateFlags(successorId, observed, stored -> {
 			IngestionFlags flags = stored.getFlags();
+			if (whileGapOnly && !flags.isCoverageGap()) {
+				return null;
+			}
 			boolean changed = false;
 			if (flags.isCoverageGap()) {
 				flags.setCoverageGap(false);
 				changed = true;
 			}
 			// design §8: chainLinkFailure is never self-clearing, only ever set here.
-			if (!flags.isChainLinkFailure()
-					&& ProducerChainRules.successorLinkBroken(stored.getPrevRecordHash(), inserted.getContentDigest())) {
+			if (!flags.isChainLinkFailure() && ProducerChainRules.isChainLinkFailure(successorSequence, predecessors,
+					stored.getPrevRecordHash())) {
 				flags.setChainLinkFailure(true);
 				changed = true;
 			}
@@ -253,16 +468,19 @@ public class TraceCorrelationService {
 	/**
 	 * Shared retry-on-version-conflict logic for a single neighbor write.
 	 * {@code mutator} recomputes the flags to write from the current {@link StoredTraceRecord} (the
-	 * initial read, or a fresh re-read after a lost CAS race), returning {@code null} when nothing
-	 * needs to change (so no write is attempted). A {@link TraceStorageException} whose reason is
-	 * not {@link TraceStore#VERSION_CONFLICT_REASON}, or any other {@link RuntimeException}, is
-	 * logged at ERROR and swallowed (today's best-effort contract, unchanged); exhausting the retry
-	 * budget on a genuine version conflict is logged at WARN instead.
+	 * row passed as {@code observed} or else an initial read, or a fresh re-read after a lost CAS
+	 * race), returning {@code null} when nothing needs to change (so no write is attempted). A
+	 * {@link TraceStorageException} whose reason is not {@link TraceStore#VERSION_CONFLICT_REASON},
+	 * or any other {@link RuntimeException}, is logged at ERROR and swallowed (today's best-effort
+	 * contract, unchanged); exhausting the retry budget on a genuine version conflict is logged at
+	 * WARN instead.
+	 *
+	 * @param observed the target's row as already read after the insert, or {@code null} to read it
 	 */
-	private void updateFlags(RecordIdentity targetId, Function<StoredTraceRecord, IngestionFlags> mutator,
-			String action, RecordIdentity insertedId) {
+	private void updateFlags(RecordIdentity targetId, StoredTraceRecord observed,
+			Function<StoredTraceRecord, IngestionFlags> mutator, String action, RecordIdentity insertedId) {
 		try {
-			Optional<StoredTraceRecord> current = store.findRecord(targetId);
+			Optional<StoredTraceRecord> current = observed != null ? Optional.of(observed) : store.findRecord(targetId);
 			int retryLimit = appConfiguration.getTraceConfiguration().getCorrelationRetryLimit();
 			for (int attempt = 0; current.isPresent() && attempt <= retryLimit; attempt++) {
 				StoredTraceRecord stored = current.get();

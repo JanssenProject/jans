@@ -69,7 +69,7 @@ public class Page {
     }
     
     private Map<String, Object> mapFromObject(Object object) {
-        return mapper.convertValue(object, new TypeReference<Map<String, Object>>(){});
+        return mapper.convertValue(object, new TypeReference<Map<String, Object>>() { });
     }
 
     @PostConstruct

@@ -86,10 +86,6 @@ Kubernetes: `>=v1.22.0-0`
 | image.repository | string | `"ghcr.io/janssenproject/jans/configurator"` | Image  to use for deploying. |
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
-| migration | object | `{"enabled":false,"migrationDataFormat":"ldif","migrationDir":"/ce-migration"}` | CE to CN Migration section |
-| migration.enabled | bool | `false` | Boolean flag to enable migration from CE |
-| migration.migrationDataFormat | string | `"ldif"` | migration data-format depending on persistence backend. Supported data formats are ldif, postgresql+json, and mysql+json. |
-| migration.migrationDir | string | `"/ce-migration"` | Directory holding all migration files |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` | Add nodeSelector (see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector) |
 | orgName | string | `"Janssen"` | Organization name. Used for certificate creation. |
