@@ -18,10 +18,18 @@ class GoneError(Exception):
     """Stand-in for kubernetes ApiException(404)."""
 
 
+class DockerResult(tuple):
+    """Shape of docker-py ExecResult: (exit_code, output-as-bytes)."""
+
+    exit_code = property(lambda self: self[0])
+    output = property(lambda self: self[1])
+
+
 class FakeMeta:
     """Minimal meta client with a per-pod fake filesystem; `pods` is the live cluster state."""
 
-    def __init__(self, pods):
+    def __init__(self, pods, docker_style=False):
+        self.docker_style = docker_style
         self.pods = list(pods)
         self.files = {p: {} for p in pods}   # pod -> {path: bytes}
         self.jks_pushed = []
@@ -29,6 +37,7 @@ class FakeMeta:
         self.fail_on = set()      # pods that raise even if listed (died after listing)
         self.silent_fail = set()  # copy "succeeds" but nothing is written (remote tar exits nonzero)
         self.partial = set()      # copy writes a truncated file
+        self.flaky = {}           # pod -> number of copy attempts that fail before it starts working
 
     def _check(self, c):
         if c not in self.pods or c in self.fail_on:
@@ -48,12 +57,17 @@ class FakeMeta:
             if parts[1] in fs:
                 fs[parts[2]] = fs[parts[1]]
         elif parts[0] == "sha256sum":
-            data = fs.get(parts[1], b"")
-            return f"{hashlib.sha256(data).hexdigest()}  {parts[1]}\n"
+            if parts[1] not in fs:
+                return DockerResult((1, b"")) if self.docker_style else "sha256sum: no such file"
+            line = f"{hashlib.sha256(fs[parts[1]]).hexdigest()}  {parts[1]}\n"
+            return DockerResult((0, line.encode())) if self.docker_style else line
         return ""
 
     def copy_to_container(self, c, path):
         self._check(c)
+        if path.endswith(".jks") and self.flaky.get(c, 0) > 0:
+            self.flaky[c] -= 1
+            raise GoneError(f"transient error on {c}")
         if c in self.silent_fail:
             return
         with open(path, "rb") as f:
@@ -210,4 +224,161 @@ def test_partial_copy_is_restored_from_backup(handler, monkeypatch):
     assert meta.files["auth-a"][handler.jks_path] == b"old-jks"
     # healthy pods hold the full new keystore
     assert meta.files["auth-b"][handler.jks_path] == b"jks"
+    assert len(handler.backend.revisions) == 2
+
+
+def test_docker_style_exec_result_is_handled(handler, monkeypatch):
+    """DockerMeta.exec_cmd returns ExecResult(exit_code, bytes), not a string"""
+    meta = handler.meta_client
+    meta.docker_style = True
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.jks_pushed == ["auth-a", "auth-b", "auth-c"]
+    assert len(handler.backend.revisions) == 2
+
+
+def test_docker_style_partial_copy_is_restored(handler, monkeypatch):
+    meta = handler.meta_client
+    meta.docker_style = True
+    meta.partial.add("auth-a")
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.files["auth-a"][handler.jks_path] == b"old-jks"
+    assert len(handler.backend.revisions) == 2
+
+
+def test_failed_restore_is_logged_as_error(handler, monkeypatch, caplog):
+    meta = handler.meta_client
+    meta.partial.add("auth-a")
+    meta.no_restore = True  # `cp backup jks` silently does nothing
+    orig = meta.exec_cmd
+
+    def exec_cmd(c, cmd):
+        if meta.no_restore and cmd.startswith("cp") and cmd.endswith(handler.jks_path):
+            return ""
+        return orig(c, cmd)
+
+    meta.exec_cmd = exec_cmd
+    _sleep_hook(monkeypatch, lambda: None)
+
+    with caplog.at_level("ERROR"):
+        handler.patch()
+
+    assert any("unable to verify restore" in r.message for r in caplog.records)
+    assert len(handler.backend.revisions) == 2
+
+
+def test_stale_backup_is_not_restored_when_backup_step_fails(handler, monkeypatch):
+    """backup creation fails -> copy never starts -> an old .backup must not replace the current JKS"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    meta.files["auth-a"][jks + ".backup"] = b"stale-from-earlier-rotation"
+    orig = meta.exec_cmd
+
+    def exec_cmd(c, cmd):
+        if c == "auth-a" and cmd == f"cp {jks} {jks}.backup":
+            raise GoneError("connection reset")
+        return orig(c, cmd)
+
+    meta.exec_cmd = exec_cmd
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.files["auth-a"][jks] == b"old-jks"
+    assert "auth-a" not in meta.jks_pushed
+    assert meta.jks_pushed == ["auth-b", "auth-c"]
+    assert len(handler.backend.revisions) == 2
+
+
+def test_stale_backup_is_not_restored_when_backup_silently_fails(handler, monkeypatch):
+    """cp returns normally but did not refresh the backup (stale content) -> do not copy, do not restore"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    meta.files["auth-a"][jks + ".backup"] = b"stale-from-earlier-rotation"
+    orig = meta.exec_cmd
+
+    def exec_cmd(c, cmd):
+        if c == "auth-a" and cmd == f"cp {jks} {jks}.backup":
+            return ""  # silently does nothing
+        return orig(c, cmd)
+
+    meta.exec_cmd = exec_cmd
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert meta.files["auth-a"][jks] == b"old-jks"
+    assert "auth-a" not in meta.jks_pushed
+
+
+def test_failed_pod_is_retried_and_receives_jks(handler, monkeypatch):
+    """transient failure on one pod: job must not fail, pod must get the new JKS on a later round"""
+    meta = handler.meta_client
+    meta.flaky["auth-b"] = 2
+    sleeps = []
+    monkeypatch.setattr(certmanager.time, "sleep", lambda sec: sleeps.append(sec))
+
+    handler.patch()
+
+    assert meta.files["auth-b"][handler.jks_path] == b"jks"
+    assert meta.jks_pushed.count("auth-a") == 1 and meta.jks_pushed.count("auth-c") == 1
+    assert meta.jks_pushed.count("auth-b") == 1
+    # reload happens once, after every pod was updated
+    assert len(handler.backend.revisions) == 2
+    # delay + two retry waits
+    assert sleeps == [60, 10, 10]
+
+
+def test_pod_that_never_recovers_does_not_fail_job(handler, monkeypatch):
+    meta = handler.meta_client
+    meta.flaky["auth-b"] = 999
+    sleeps = []
+    monkeypatch.setattr(certmanager.time, "sleep", lambda sec: sleeps.append(sec))
+
+    handler.patch()  # must not raise
+
+    assert meta.files["auth-b"][handler.jks_path] == b"old-jks"
+    assert meta.files["auth-a"][handler.jks_path] == b"jks"
+    assert meta.files["auth-c"][handler.jks_path] == b"jks"
+    assert len(handler.backend.revisions) == 2
+    # bounded: delay + 3 retry waits
+    assert sleeps == [60, 10, 10, 10]
+
+
+def test_pod_replaced_during_retry_is_pushed(handler, monkeypatch):
+    """failing pod is evicted between rounds and its replacement becomes Ready"""
+    meta = handler.meta_client
+    meta.flaky["auth-b"] = 999
+    calls = {"n": 0}
+
+    def sleep(sec):
+        calls["n"] += 1
+        if calls["n"] == 2:  # first retry wait
+            meta.pods.remove("auth-b")
+            meta.pods.append("auth-d")
+
+    monkeypatch.setattr(certmanager.time, "sleep", sleep)
+
+    handler.patch()
+
+    assert "auth-d" in meta.jks_pushed
+    assert len(handler.backend.revisions) == 2
+
+
+def test_retries_can_be_disabled(handler, monkeypatch):
+    handler.privkey_push_retries = 0
+    meta = handler.meta_client
+    meta.flaky["auth-b"] = 1
+    sleeps = []
+    monkeypatch.setattr(certmanager.time, "sleep", lambda sec: sleeps.append(sec))
+
+    handler.patch()
+
+    assert sleeps == [60]
+    assert meta.files["auth-b"][handler.jks_path] == b"old-jks"
     assert len(handler.backend.revisions) == 2
