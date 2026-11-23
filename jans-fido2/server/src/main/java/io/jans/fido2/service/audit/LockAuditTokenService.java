@@ -40,6 +40,9 @@ public class LockAuditTokenService {
 	/** Scope the Lock Server's /audit/log endpoints require; see ApiAccessConstants.LOCK_LOG_WRITE_ACCESS in jans-lock. */
 	private static final String LOCK_LOG_WRITE_SCOPE = "https://jans.io/oauth/lock/log.write";
 
+	/** Scope the Lock Server's /audit/trace endpoints require; see ApiAccessConstants.LOCK_TRACE_WRITE_ACCESS in jans-lock. */
+	private static final String LOCK_TRACE_WRITE_SCOPE = "https://jans.io/oauth/lock/trace.write";
+
 	private static final int CONNECT_TIMEOUT_SECONDS = 5;
 	private static final int READ_TIMEOUT_SECONDS = 10;
 
@@ -83,15 +86,19 @@ public class LockAuditTokenService {
 	 */
 	private final AtomicReference<CachedToken> cachedToken = new AtomicReference<>();
 
+	/** Separate cache for {@link #LOCK_TRACE_WRITE_SCOPE}: a token is scope-bound, so the log.write token cannot be reused for TRACE. */
+	private final AtomicReference<CachedToken> cachedTraceToken = new AtomicReference<>();
+
 	/**
 	 * Issuer or audit client credentials may change on reload; drop caches so a new secret is never
-	 * sent to the previous issuer's token endpoint. Synchronized with {@link #requestNewToken()} so
+	 * sent to the previous issuer's token endpoint. Synchronized with {@link #requestNewToken(String, AtomicReference)} so
 	 * an in-flight request cannot republish a token obtained under the old configuration.
 	 */
 	public synchronized void onConfigurationUpdate(@Observes @ConfigurationUpdate AppConfiguration updatedConfiguration) {
 		cachedTokenEndpoint = null;
 		cachedTokenEndpointIssuer = null;
 		cachedToken.set(null);
+		cachedTraceToken.set(null);
 	}
 
 	/**
@@ -104,11 +111,23 @@ public class LockAuditTokenService {
 	 *         issued a brand-new token — flagged in review on the PR that introduced this class.
 	 */
 	public String getAccessToken() {
-		CachedToken cached = cachedToken.get();
+		return getAccessToken(LOCK_LOG_WRITE_SCOPE, cachedToken);
+	}
+
+	/**
+	 * @return a cached access token for {@link #LOCK_TRACE_WRITE_SCOPE}, obtained and cached the same way as
+	 *         {@link #getAccessToken()}, or {@code null} if one could not be obtained.
+	 */
+	public String getTraceAccessToken() {
+		return getAccessToken(LOCK_TRACE_WRITE_SCOPE, cachedTraceToken);
+	}
+
+	private String getAccessToken(String scope, AtomicReference<CachedToken> cache) {
+		CachedToken cached = cache.get();
 		if (cached != null && cached.isUsable()) {
 			return cached.accessToken;
 		}
-		return requestNewToken();
+		return requestNewToken(scope, cache);
 	}
 
 	/**
@@ -116,8 +135,8 @@ public class LockAuditTokenService {
 	 * rather than one each; re-checks the cache after acquiring the lock in case the request ahead of
 	 * this one already refreshed it.
 	 */
-	private synchronized String requestNewToken() {
-		CachedToken cached = cachedToken.get();
+	private synchronized String requestNewToken(String scope, AtomicReference<CachedToken> cache) {
+		CachedToken cached = cache.get();
 		if (cached != null && cached.isUsable()) {
 			return cached.accessToken;
 		}
@@ -147,14 +166,14 @@ public class LockAuditTokenService {
 
 		TokenClient tokenClient = new TokenClient(tokenEndpoint);
 		tokenClient.setExecutor(TIMEOUT_ENGINE);
-		TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(LOCK_LOG_WRITE_SCOPE, clientId, clientSecret);
+		TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(scope, clientId, clientSecret);
 		if (tokenResponse == null || tokenResponse.getStatus() != 200 || StringHelper.isEmpty(tokenResponse.getAccessToken())) {
 			log.error("Failed to obtain Lock audit access token, status: {}",
 					tokenResponse == null ? "no response" : tokenResponse.getStatus());
 			return null;
 		}
 
-		cachedToken.set(cacheableToken(tokenResponse));
+		cache.set(cacheableToken(tokenResponse));
 		return tokenResponse.getAccessToken();
 	}
 
