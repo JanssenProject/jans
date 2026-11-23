@@ -40,7 +40,7 @@ tags:
 | fido2TraceIncludeAttestationDetail | Whether TRACE records include optional signed attestation and MDS trust detail | [Details](#fido2traceincludeattestationdetail) |
 | fido2TraceIncludeCredentialIdHash | Whether TRACE records include credential_id_hash, a hash of the WebAuthn credential ID | [Details](#fido2traceincludecredentialidhash) |
 | fido2TraceKeyAlias | Alias of the Ed25519 signing key inside fido2TraceKeyStorePath | [Details](#fido2tracekeyalias) |
-| fido2TraceKeyStorePassword | Password of fido2TraceKeyStorePath (encrypted at rest, same as other client secrets) | [Details](#fido2tracekeystorepassword) |
+| fido2TraceKeyStorePassword | Password of fido2TraceKeyStorePath; stored as submitted, the configuration API does not encrypt it | [Details](#fido2tracekeystorepassword) |
 | fido2TraceKeyStorePath | Path to a BCFKS keystore file that holds the Ed25519 TRACE producer signing key. The key itself never appears in configuration | [Details](#fido2tracekeystorepath) |
 | fido2TraceProducerId | Stable producer ID for this FIDO Server (fleet or per-node). When empty it is derived from the server ID and version | [Details](#fido2traceproducerid) |
 | hints | Hints to the RP - security-key, client-device, hybrid | [Details](#hints) |
@@ -351,7 +351,7 @@ tags:
 
 ## fido2TraceKeyStorePassword
 
-- Description: Password of fido2TraceKeyStorePath (encrypted at rest, same as other client secrets)
+- Description: Password of fido2TraceKeyStorePath; stored as submitted, the configuration API does not encrypt it
 
 - Required: No
 

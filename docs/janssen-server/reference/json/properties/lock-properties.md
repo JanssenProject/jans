@@ -55,7 +55,7 @@ tags:
 | pendingReceiptTimeoutSeconds | Seconds a PENDING receipt may stay unresolved before the repair timer settles it | [Details](#pendingreceipttimeoutseconds) |
 | policyMismatchGraceSeconds | Seconds after the last Lock node stops serving a policy store release during which records judged under it are not flagged policy_mismatch_flag; the check uses the larger of this and latenessThresholdSeconds, plus about 130 seconds for update and cache lag | [Details](#policymismatchgraceseconds) |
 | policyReleaseRetentionDays | Days a policy store release no node serves any more is kept for the policy release check before it is deleted; never less than the check's acceptance window | [Details](#policyreleaseretentiondays) |
-| postCommitCorrelationThreads | Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64 | [Details](#postcommitcorrelationthreads) |
+| postCommitCorrelationThreads | Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64 | [Details](#postcommitcorrelationthreads) |
 | protectionMode | Protection mode for the Lock server (OAuth or Cedarling) | [Details](#protectionmode) |
 | rangeAllocationBackoffMs | Base in milliseconds of the jittered exponential backoff before a batch retries its receipt range after losing a position race; retry k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs) with the domain lock released; 0 disables the wait; a negative value means the default | [Details](#rangeallocationbackoffms) |
 | rangeAllocationMaxBackoffMs | Cap in milliseconds of one backoff wait before a receipt range retry; 0 or less means the default | [Details](#rangeallocationmaxbackoffms) |
@@ -479,7 +479,7 @@ tags:
 
 ## postCommitCorrelationThreads
 
-- Description: Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64
+- Description: Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64
 
 - Required: No
 

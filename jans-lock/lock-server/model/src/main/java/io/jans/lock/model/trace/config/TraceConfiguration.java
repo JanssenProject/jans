@@ -129,8 +129,8 @@ public class TraceConfiguration {
     @Schema(description = "Threads that verify the elements of one batch in parallel when batchIngestEnabled is true; 0 verifies them one after another in the request thread; clamped to 64")
     private int batchVerifyThreads = DEFAULT_BATCH_VERIFY_THREADS;
 
-    @DocProperty(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64", defaultValue = "0")
-    @Schema(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response does not wait for them; 0 updates them in the request thread before the response; clamped to 64")
+    @DocProperty(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64", defaultValue = "0")
+    @Schema(description = "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64")
     private int postCommitCorrelationThreads = DEFAULT_POST_COMMIT_CORRELATION_THREADS;
 
     @DocProperty(description = "Maximum retries when a correlation neighbor update hits a version conflict", defaultValue = "3")
