@@ -9,6 +9,7 @@ import os
 import re
 import ssl
 import time
+import zlib
 import typing as _t
 import warnings
 import weakref
@@ -269,6 +270,24 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         # modifiers already present in the query are consumed by the pattern, so they are never doubled
         return f"{match.group(1)} CONCURRENTLY IF NOT EXISTS {query[match.end():]}"
 
+    def index_lock_queries(self, table_name: str, index_name: str) -> _t.Optional[tuple[str, str]]:
+        """Queries to acquire and release a cross-session lock for one index.
+
+        The check of the index state, the drop of an invalid index and its (re)creation must not
+        interleave between loaders: otherwise one loader can drop the index another one is building.
+        A session-level advisory lock serializes them. Waiting for it honours ``lock_timeout``.
+
+        Returns:
+            Tuple of (acquire query, release query).
+        """
+        # two 31-bit keys: a fixed namespace and a hash of the index; collisions only serialize needlessly
+        namespace = zlib.crc32(b"jans.pycloudlib.index") & 0x7FFFFFFF
+        key = zlib.crc32(f"{table_name}.{index_name}".encode()) & 0x7FFFFFFF
+        return (
+            f"SELECT pg_advisory_lock({namespace}, {key})",
+            f"SELECT pg_advisory_unlock({namespace}, {key})",
+        )
+
     def drop_index_query(self, table_name: str, index_name: str) -> str:
         """Query to drop an index (left invalid by a failed concurrent build)."""
         q = self.quote_char
@@ -386,6 +405,10 @@ class MysqlAdapter(CloudSqlConnectorMixin):
     def prepare_index_query(self, query: str) -> str:
         """Return the index query unchanged."""
         return query
+
+    def index_lock_queries(self, table_name: str, index_name: str) -> _t.Optional[tuple[str, str]]:
+        """No cross-session index lock is needed for MySQL (no invalid index state, no drop)."""
+        return None
 
     def drop_index_query(self, table_name: str, index_name: str) -> str:
         """Query to drop an index.
@@ -896,10 +919,14 @@ class SqlClient(SqlSchemaMixin):
             (e.g. left by a failed concurrent build), otherwise ``True``.
         """
         with self.engine.connect() as conn:
-            row = conn.execute(
-                text(self.adapter.index_state_query),
-                {"table_name": table_name, "index_name": index_name},
-            ).fetchone()
+            return self._index_state_on(conn, table_name, index_name)
+
+    def _index_state_on(self, conn: _t.Any, table_name: str, index_name: str) -> _t.Optional[bool]:
+        """Look up an index state using an existing connection (see ``get_index_state``)."""
+        row = conn.execute(
+            text(self.adapter.index_state_query),
+            {"table_name": table_name, "index_name": index_name},
+        ).fetchone()
         if row is None:
             return None
         return bool(row[0])
@@ -1024,6 +1051,11 @@ class SqlClient(SqlSchemaMixin):
             index_name: Name of the index.
             lock_timeout: Maximum seconds to wait for a lock.
             drop_first: Drop the index first (it is invalid, e.g. left by a failed concurrent build).
+
+        When the adapter provides an index lock (PostgreSQL), it is held for the whole operation and the
+        index state is checked again under the lock: the index is skipped if another loader made it valid
+        in the meantime, and dropped only if it is still invalid. This stops concurrent loaders from
+        dropping an index that another one is rebuilding.
         """
         with self.engine.connect() as conn:
             if self.adapter.index_ddl_autocommit:
@@ -1033,19 +1065,36 @@ class SqlClient(SqlSchemaMixin):
             else:
                 tx = conn.begin()
 
+            lock_queries = self.adapter.index_lock_queries(table_name, index_name) if index_name else None
+            locked = False
+
             try:
                 with tx:
                     conn.execute(text(self.adapter.set_lock_timeout_query(lock_timeout)))
+
+                    if lock_queries:
+                        # waits at most lock_timeout seconds; a timeout is retried by the caller
+                        conn.execute(text(lock_queries[0]))
+                        locked = True
+
+                        state = self._index_state_on(conn, table_name, index_name)
+                        if state:
+                            logger.debug("index %s on %s became valid; skipping", index_name, table_name)
+                            return
+                        drop_first = state is False
+
                     if drop_first:
                         conn.execute(text(self.adapter.drop_index_query(table_name, index_name)))
                     conn.execute(text(query))
             finally:
-                # the connection goes back to the pool, so do not leave the timeout set on it
+                # the connection goes back to the pool, so do not leave the lock or timeout set on it
                 try:
+                    if locked and lock_queries:
+                        conn.execute(text(lock_queries[1]))
                     conn.execute(text(self.adapter.reset_lock_timeout_query))
                 except DatabaseError as exc:
-                    # do not return a connection with a lock timeout still set to the pool
-                    logger.debug("unable to reset lock timeout; invalidating connection: %s", exc)
+                    # do not return a connection with a lock or lock timeout still set to the pool
+                    logger.debug("unable to release lock or reset lock timeout; invalidating connection: %s", exc)
                     conn.invalidate()
 
     def quoted_id(self, identifier: str) -> str:
