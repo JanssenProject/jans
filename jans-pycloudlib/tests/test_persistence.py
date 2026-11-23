@@ -639,17 +639,25 @@ def test_sql_client_run_index_ddl_postgresql_autocommit(monkeypatch, sql_client)
     from jans.pycloudlib.persistence.sql import PostgresqlAdapter
 
     conn = MagicMock()
-    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    # index is still invalid when rechecked under the lock
+    conn.execute.return_value.fetchone.return_value = (False,)
+    adapter = PostgresqlAdapter()
+    acquire, release = adapter.index_lock_queries("t", "x")
+    monkeypatch.setattr(sql_client, "adapter", adapter)
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
-    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=True)
+    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
 
     conn.execution_options.assert_called_once_with(isolation_level="AUTOCOMMIT")
     conn.begin.assert_not_called()
-    assert _executed(conn) == [
-        "SET lock_timeout = '10s'",
+    executed = _executed(conn)
+    assert executed[0] == "SET lock_timeout = '10s'"
+    assert executed[1] == acquire
+    assert executed[2] == adapter.index_state_query
+    assert executed[3:] == [
         'DROP INDEX CONCURRENTLY IF EXISTS "x"',
         "CREATE INDEX CONCURRENTLY x",
+        release,
         "RESET lock_timeout",
     ]
 
@@ -693,10 +701,18 @@ def test_sql_client_run_index_ddl_resets_timeout_after_failure(monkeypatch, sql_
     monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
+    # index does not exist when rechecked under the lock
+    conn.execute.side_effect = lambda stmt, *a, **kw: (
+        (_ for _ in ()).throw(err) if str(stmt).startswith("CREATE") else _none_row()
+    )
+
     with pytest.raises(OperationalError):
         sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
 
-    assert _executed(conn)[-1] == "RESET lock_timeout"
+    executed = _executed(conn)
+    # the advisory lock is released and the timeout reset even though the DDL failed
+    assert executed[-2].startswith("SELECT pg_advisory_unlock")
+    assert executed[-1] == "RESET lock_timeout"
     conn.invalidate.assert_not_called()
 
 
@@ -855,3 +871,90 @@ def test_mysql_adapter_drop_index_query_escapes_quotes():
     assert adapter.drop_index_query("t", "i") == f"DROP INDEX {adapter.quote_char}i{adapter.quote_char} ON {adapter.quote_char}t{adapter.quote_char}"
     q = adapter.quote_char
     assert adapter.drop_index_query("t", f"a{q}b") == f"DROP INDEX {q}a{q}{q}b{q} ON {q}t{q}"
+
+
+def _none_row():
+    from unittest.mock import MagicMock
+
+    result = MagicMock()
+    result.fetchone.return_value = None
+    return result
+
+
+def test_postgresql_adapter_index_lock_queries():
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    adapter = PostgresqlAdapter()
+    acquire, release = adapter.index_lock_queries("t", "x")
+    assert acquire.startswith("SELECT pg_advisory_lock(") and release.startswith("SELECT pg_advisory_unlock(")
+    # same keys for acquire and release; different index -> different key
+    assert acquire.split("(", 1)[1] == release.split("(", 1)[1]
+    assert adapter.index_lock_queries("t", "y") != (acquire, release)
+
+
+def test_mysql_adapter_has_no_index_lock():
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    assert MysqlAdapter().index_lock_queries("t", "x") is None
+
+
+def test_sql_client_run_index_ddl_skips_when_index_became_valid_under_lock(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+    # another loader finished building the index while this one waited for the lock
+    conn.execute.return_value.fetchone.return_value = (True,)
+    adapter = PostgresqlAdapter()
+    monkeypatch.setattr(sql_client, "adapter", adapter)
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    # even if the caller saw an invalid index, it must not drop/create a now-valid one
+    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=True)
+
+    executed = _executed(conn)
+    assert not any(q.startswith(("DROP", "CREATE")) for q in executed)
+    assert executed[-2].startswith("SELECT pg_advisory_unlock")
+    assert executed[-1] == "RESET lock_timeout"
+
+
+def test_sql_client_run_index_ddl_does_not_unlock_when_lock_not_acquired(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+
+    def execute(stmt, *a, **kw):
+        if str(stmt).startswith("SELECT pg_advisory_lock"):
+            raise OperationalError("stmt", {}, Exception())  # e.g. lock_timeout while waiting
+        return MagicMock()
+
+    conn.execute.side_effect = execute
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    with pytest.raises(OperationalError):
+        sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
+
+    executed = _executed(conn)
+    assert not any(q.startswith("SELECT pg_advisory_unlock") for q in executed)
+    assert executed[-1] == "RESET lock_timeout"
+
+
+def test_sql_client_run_index_ddl_no_lock_for_alter_table(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    # alter_table passes an empty index name: nothing to lock or check
+    sql_client._run_index_ddl("ALTER TABLE t ADD COLUMN c INT", "t", "", 10, drop_first=False)
+
+    assert not any("advisory" in q for q in _executed(conn))
