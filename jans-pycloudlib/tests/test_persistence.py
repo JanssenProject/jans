@@ -1114,3 +1114,53 @@ def test_postgresql_legacy_index_state_query_has_no_progress_view():
     legacy = PostgresqlAdapter.index_state_query_legacy
     assert "pg_stat_progress_create_index" not in legacy
     assert ":table_name" in legacy and ":index_name" in legacy and "indisvalid" in legacy
+
+
+@pytest.mark.parametrize("bad", [0, -1, -10, 0.5, 1.5, None, "10", True])
+def test_sql_client_create_index_rejects_non_positive_lock_timeout(monkeypatch, sql_client, bad):
+    # 0 means "no timeout" on PostgreSQL (unbounded wait); nothing may run before the value is rejected
+    ran = []
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: ran.append("state"))
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: ran.append("ddl"))
+    monkeypatch.setattr(type(sql_client), "engine", property(lambda self: ran.append("engine")), raising=False)
+
+    with pytest.raises(ValueError, match="lock_timeout"):
+        sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x", lock_timeout=bad)
+    with pytest.raises(ValueError, match="lock_timeout"):  # also rejected without the names
+        sql_client.create_index("CREATE INDEX x ON t (a)", lock_timeout=bad)
+
+    assert ran == []
+
+
+@pytest.mark.parametrize("bad", [0, -1, 0.5, None, "10", True])
+def test_sql_client_alter_table_rejects_non_positive_lock_timeout(monkeypatch, sql_client, bad):
+    ran = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda *a, **kw: ran.append("ddl"))
+
+    with pytest.raises(ValueError, match="lock_timeout"):
+        sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t", lock_timeout=bad)
+
+    assert ran == []
+
+
+def test_sql_client_lock_timeout_default_is_ten_seconds(monkeypatch, sql_client):
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", MysqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+    seen = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda q, t, i, lock_timeout, drop_first: seen.append(lock_timeout))
+
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x")
+    sql_client.create_index("CREATE INDEX x ON t (a)", "t", "x", lock_timeout=3)
+
+    assert seen == [10, 3]
+
+
+def test_sql_client_alter_table_default_lock_timeout_is_ten_seconds(monkeypatch, sql_client):
+    seen = []
+    monkeypatch.setattr(sql_client, "_run_index_ddl", lambda q, t, i, lock_timeout, drop_first: seen.append(lock_timeout))
+
+    sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t")
+
+    assert seen == [10]
