@@ -248,6 +248,9 @@ class AuthHandler:
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "NEWER")
         self.privkey_push_delay = int(opts.get("privkey-push-delay", 0))
+        # how many extra rounds are made for pods whose JKS push failed, and the wait between rounds (seconds)
+        self.privkey_push_retries = max(int(opts.get("privkey-push-retries", 3)), 0)
+        self.privkey_push_retry_interval = max(int(opts.get("privkey-push-retry-interval", 10)), 0)
         self.privkey_push_strategy = opts.get("privkey-push-strategy", "NEWER")
         self.sig_keys = resolve_sig_keys(opts.get("sig-keys", SIG_KEYS))
         self.enc_keys = resolve_enc_keys(opts.get("enc-keys", ENC_KEYS))
@@ -262,6 +265,24 @@ class AuthHandler:
     def allowed_key_algs(self):
         return self.sig_keys.split() + self.enc_keys.split()
 
+    def _remote_sha256(self, container, fn):
+        """Return SHA-256 of a file inside container, or empty string if it cannot be determined.
+
+        Handles the different shapes returned by the meta clients: plain string (Kubernetes) and
+        ``ExecResult(exit_code, output)`` with bytes output (Docker).
+        """
+        res = self.meta_client.exec_cmd(container, f"sha256sum {fn}")
+
+        if hasattr(res, "exit_code") and hasattr(res, "output"):
+            if res.exit_code not in (0, None):
+                return ""
+            res = res.output
+        if isinstance(res, bytes):
+            res = res.decode(errors="replace")
+
+        parts = (res or "").split()
+        return parts[0] if parts else ""
+
     def push_jks_verified(self, container, jks_fn):
         """Push JKS to a container and verify it arrived intact.
 
@@ -272,20 +293,26 @@ class AuthHandler:
         Returns True only if the remote file matches the local one.
         """
         name = self.meta_client.get_container_name(container)
+        backup_ok = False
 
         try:
             logger.info("creating backup of %s:%s", name, jks_fn)
             self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+
+            # only a backup created and verified by this attempt may be used for restore; an old
+            # `.backup` left by an earlier rotation must never overwrite the current JKS
+            current_sum = self._remote_sha256(container, jks_fn)
+            if not current_sum or current_sum != self._remote_sha256(container, f"{jks_fn}.backup"):
+                raise RuntimeError("unable to verify backup of current JKS; leaving it unchanged")
+            backup_ok = True
+
             logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
 
             with open(jks_fn, "rb") as f:
                 local_sum = hashlib.sha256(f.read()).hexdigest()
 
-            out = self.meta_client.exec_cmd(container, f"sha256sum {jks_fn}")
-            if isinstance(out, bytes):
-                out = out.decode(errors="replace")
-            remote_sum = (out or "").split()[0] if (out or "").split() else ""
+            remote_sum = self._remote_sha256(container, jks_fn)
 
             if remote_sum == local_sum:
                 return True
@@ -297,15 +324,79 @@ class AuthHandler:
         # loads the JKS from the updated secret
         logger.warning("unable to push %s to %s; reason=%s; skipping", jks_fn, name, reason)
 
+        if not backup_ok:
+            return False
+
         try:
             self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
-            logger.warning(
-                "restored previous %s on %s; the pod cannot use the newly generated keys until it is restarted",
-                jks_fn, name,
-            )
+            # make sure the restore really happened, otherwise a partial JKS may remain on the pod
+            if self._remote_sha256(container, jks_fn) == self._remote_sha256(container, f"{jks_fn}.backup") != "":
+                logger.warning(
+                    "restored previous %s on %s; the pod cannot use the newly generated keys until it is restarted",
+                    jks_fn, name,
+                )
+            else:
+                logger.error(
+                    "unable to verify restore of previous %s on %s; the pod may have an incomplete keystore "
+                    "and should be restarted",
+                    jks_fn, name,
+                )
         except Exception as exc:  # noqa: BLE001
-            logger.warning("unable to restore previous %s on %s; reason=%s", jks_fn, name, exc)
+            logger.error(
+                "unable to restore previous %s on %s; reason=%s; the pod may have an incomplete keystore "
+                "and should be restarted",
+                jks_fn, name, exc,
+            )
         return False
+
+    def push_jks_with_retry(self, jks_fn):
+        """Push JKS to every running auth-server container, retrying the ones that failed.
+
+        The container list is refreshed on every round, so pods that disappeared are dropped, and pods that
+        became Ready meanwhile (including replacements of evicted pods) are pushed as well.
+
+        This never raises because of a single pod. Pods that still failed after all rounds are logged;
+        they load the JKS from the updated secret when they are restarted.
+
+        Returns the number of containers that hold a verified new JKS.
+        """
+        updated = set()
+        total_rounds = self.privkey_push_retries + 1
+
+        for attempt in range(1, total_rounds + 1):
+            pending = []
+            for container in self.meta_client.get_containers("APP_NAME=auth-server"):
+                name = self.meta_client.get_container_name(container)
+                if name not in updated:
+                    pending.append((name, container))
+
+            if not pending:
+                break
+
+            failed = []
+            for name, container in pending:
+                if self.push_jks_verified(container, jks_fn):
+                    updated.add(name)
+                else:
+                    failed.append(name)
+
+            if not failed:
+                break
+
+            if attempt < total_rounds:
+                logger.warning(
+                    "unable to push %s to %s (round %s of %s); retrying in %s seconds",
+                    jks_fn, ", ".join(failed), attempt, total_rounds, self.privkey_push_retry_interval,
+                )
+                time.sleep(self.privkey_push_retry_interval)
+            else:
+                logger.warning(
+                    "unable to push %s to %s after %s rounds; skipping; those pods cannot use the newly "
+                    "generated keys until they are restarted",
+                    jks_fn, ", ".join(failed), total_rounds,
+                )
+
+        return len(updated)
 
     def get_merged_keys(self, exp_hours):
         # get previous JWKS
@@ -562,13 +653,8 @@ class AuthHandler:
                     time.sleep(self.privkey_push_delay)
 
                     # the container list fetched before the delay may be stale (pods can be evicted, crash,
-                    # or be replaced during the delay); refresh it so we only push to pods that still exist
-                    auth_containers = self.meta_client.get_containers("APP_NAME=auth-server")
-                    pushed = 0
-
-                    for container in auth_containers:
-                        if self.push_jks_verified(container, jks_fn):
-                            pushed += 1
+                    # or be replaced during the delay); the list is refreshed and pods that failed are retried
+                    pushed = self.push_jks_with_retry(jks_fn)
 
                     if not pushed:
                         logger.warning("no auth-server container received the new %s; skipping reload", jks_fn)
