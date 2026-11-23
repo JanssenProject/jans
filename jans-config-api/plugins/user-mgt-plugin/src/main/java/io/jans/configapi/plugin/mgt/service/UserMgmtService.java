@@ -259,18 +259,38 @@ public class UserMgmtService {
             return null;
         }
 
+        boolean setsStatus = patchSetsStatus(userPatchRequest);
+        GluuStatus readStatus = null;
+        VersionMismatchException conflict = null;
         for (int attempt = 1;; attempt++) {
             User user = userService.getUserByInum(inum);
             if (user == null) {
                 return null;
+            }
+            if (conflict == null) {
+                readStatus = user.getStatus();
+            } else if (setsStatus && user.getStatus() != readStatus) {
+                // the requested status was chosen against the first read; don't let it override a newer one
+                throw conflict;
             }
             user = applyPatch(user, userPatchRequest, allowRoleChange);
             try {
                 return saveWithVersion(user);
             } catch (VersionMismatchException ex) {
                 checkRetry(user, attempt, ex);
+                conflict = ex;
             }
         }
+    }
+
+    private boolean patchSetsStatus(UserPatchRequest userPatchRequest) {
+        if (StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())
+                && Jackson.isFieldPresent(userPatchRequest.getJsonPatchString(), "status")) {
+            return true;
+        }
+        List<CustomObjectAttribute> customAttributes = userPatchRequest.getCustomAttributes();
+        return customAttributes != null && customAttributes.stream()
+                .anyMatch(attribute -> attribute != null && AttributeConstants.JANS_STATUS.equalsIgnoreCase(attribute.getName()));
     }
 
     private User applyPatch(User user, UserPatchRequest userPatchRequest, boolean allowRoleChange)

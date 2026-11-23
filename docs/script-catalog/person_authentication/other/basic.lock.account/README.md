@@ -27,11 +27,11 @@ overwriting it. Janssen's own user writers (auth server, Config API, SCIM, Casa,
 Custom entity classes or direct database updates on `jansPerson` must advance it too, or the script and unlock cannot
 see their changes.
 
-On backends with versioned updates, Config API user updates save conditionally on the version they read. On a
-conflict a PATCH re-reads the user and reapplies the patch, so a PATCH that does not set `jansStatus` and was read
-before a lock keeps the account locked; a PATCH that sets `jansStatus` applies that status. A PUT without `jansStatus`
-keeps the stored status; a PUT with a status fails with 409 if the stored status changed since its read. On other
-backends Config API falls back to plain `merge` and does not preserve the lock. Other writers that update users with
+On backends with versioned updates, Config API user updates save conditionally on the version they read, and a
+request read before a lock keeps the account locked. On a conflict a PATCH re-reads the user and reapplies the patch;
+a PUT without `jansStatus` keeps the stored status. A PATCH or PUT that sets a status fails with 409 if the stored
+status changed since its read. On other backends Config API falls back to plain `merge` and does not preserve the
+lock. Other writers that update users with
 plain `merge` (for example SCIM) check only the version `merge` reads itself, not the one their own earlier read saw.
 An update read before a lock and saved after it can therefore write the status it read and reactivate the account
 early.

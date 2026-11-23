@@ -98,6 +98,33 @@ public class UserMgmtServiceTest {
     }
 
     @Test
+    public void patchSettingStatusReadBeforeLockConflicts() {
+        User staleRead = user(GluuStatus.ACTIVE, 1L);
+        stored.set(user(GluuStatus.INACTIVE, 2L));
+        when(userService.getUserByInum(INUM)).thenReturn(staleRead, copy(stored.get()));
+
+        assertThrows(VersionMismatchException.class, () -> userMgmtService.patchUser(INUM,
+                patch("[{\"op\":\"replace\",\"path\":\"/status\",\"value\":\"ACTIVE\"}]")));
+
+        assertTrue(writes.isEmpty());
+        assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);
+    }
+
+    @Test
+    public void patchSettingStatusRetriesWhenStatusUnchanged() throws Exception {
+        User staleRead = user(GluuStatus.ACTIVE, 1L);
+        stored.set(user(GluuStatus.ACTIVE, 2L));
+        when(userService.getUserByInum(INUM)).thenReturn(staleRead, copy(stored.get()));
+
+        userMgmtService.patchUser(INUM,
+                patch("[{\"op\":\"replace\",\"path\":\"/status\",\"value\":\"INACTIVE\"}]"));
+
+        assertEquals(writes.size(), 1);
+        assertEquals(stored.get().getStatus(), GluuStatus.INACTIVE);
+        assertEquals(stored.get().getVersion(), Long.valueOf(3L));
+    }
+
+    @Test
     public void patchGivesUpAfterMaxAttempts() {
         stored.set(user(GluuStatus.ACTIVE, 7L));
         when(userService.getUserByInum(INUM)).thenAnswer(inv -> user(GluuStatus.ACTIVE, 1L));
