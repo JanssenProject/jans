@@ -9,21 +9,11 @@ tags:
 
 # TRACE Producer
 
-The planned TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome
+The TRACE producer makes jans-fido2 emit one record for each passkey registration and assertion outcome
 that has a session, to the Lock Server. Each record is signed and hash-chained. The chain lets a reader detect a
 gap or an altered record between records it has seen. It cannot by itself show that the newest records are
 missing: detecting tail loss needs an independently trusted checkpoint or an expected chain head. This page
-covers the planned configuration properties and what a record contains.
-
-!!! note "Status"
-    This is planned behavior, not yet available. The properties are added in
-    [#15680](https://github.com/JanssenProject/jans/pull/15680) and take effect only after that PR and the
-    follow-up work tracked in [#15275](https://github.com/JanssenProject/jans/issues/15275) (record emission,
-    signing, and transport) are merged. Until then, setting `fido2TraceEnabled` to `true` does not change behavior.
-
-    **Lock dependency:** the producer's key must be registered on Lock with `FIDO_CEREMONY` in its
-    `authorized_event_kinds`. The current Lock Server does not define that event kind, so delivery will fail
-    until Lock adds support for it.
+covers the configuration properties and what a record contains.
 
 ## Configuration
 
@@ -32,15 +22,15 @@ All properties are set in the `fido2Configuration` object, the same place as the
 
 | Property | Type | Default | Description |
 |---|---|---|---|
-| `fido2TraceEnabled` | Boolean | `false` | Planned. Master switch. When `false`, nothing is emitted. |
-| `fido2TraceProducerId` | String | derived | Planned. Stable producer ID. Leave empty to derive it from the server ID and version; the derived value can change on upgrade, so set an explicit ID for continuity. |
-| `fido2TraceChainGenesis` | String | `first_observed` | Planned. `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
-| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Planned. Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
-| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Planned. Include optional signed attestation and MDS trust detail in each record. |
-| `fido2TraceEndpoint` | String | discovered | Planned. Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace`. |
-| `fido2TraceKeyStorePath` | String | — | Planned. Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration. |
-| `fido2TraceKeyAlias` | String | — | Planned. Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
-| `fido2TraceKeyStorePassword` | String | — | Planned. Keystore password, encrypted at rest like other client secrets. |
+| `fido2TraceEnabled` | Boolean | `false` | Master switch. When `false`, nothing is emitted. |
+| `fido2TraceProducerId` | String | derived | Stable producer ID. Leave empty to derive it from the server ID and version; the derived value can change on upgrade, so set an explicit ID for continuity. |
+| `fido2TraceChainGenesis` | String | `first_observed` | `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
+| `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
+| `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Include optional signed attestation and MDS trust detail in each record. |
+| `fido2TraceEndpoint` | String | discovered | Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace`. |
+| `fido2TraceKeyStorePath` | String | — | Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration. |
+| `fido2TraceKeyAlias` | String | — | Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
+| `fido2TraceKeyStorePassword` | String | — | Keystore password, encrypted at rest like other client secrets. |
 
 The TRACE properties are separate from the `lockAudit*` properties. Enabling one does not enable the other.
 
@@ -61,6 +51,80 @@ Each record is a `FIDO_CEREMONY` event.
 
 Records do not contain policy decisions, invocations, or capability IDs. TRACE records describe what happened
 in a ceremony, and they do not affect how the ceremony is decided.
+
+## Chains
+
+Each FIDO Server node keeps its own chain. A chain is a sequence of signed records that share one
+`producer_chain_id`. Each record carries:
+
+- `producer_chain.producer_chain_id`: the chain the record belongs to.
+- `producer_chain.sequence_number`: the position in the chain. The first record is `1`, and each record after it is
+  one higher.
+- `producer_chain.prev_record_hash`: the hash of the previous record in the same chain. The first record has the
+  all-zero sentinel, `sha256:` followed by 64 zeros.
+- `producer_chain.chain_link` (genesis only): an object with `prev_producer_chain_id`, which names the chain this one
+  follows after a restart. Only the first record of a chain can carry it.
+
+### Hash input
+
+`prev_record_hash` is `sha256:` followed by the lowercase hex SHA-256 of the RFC 8785 (JCS) canonical form of the
+previous record, including its `signature`. Hash the signed record, not the unsigned one. This is the same digest
+Lock calls `content_digest`, so a producer and Lock compute the same value for each record.
+
+### Restart
+
+On startup a node resumes its existing chain when the saved state is usable: it belongs to this node and holds a
+chain id, a next sequence number of at least 1, and a well-formed previous hash. The node then continues with the
+next sequence number and the saved previous hash.
+
+When the state is missing, corrupt, malformed, or belongs to another node, the node starts a new chain:
+
+- It gets a new `producer_chain_id`, and its first record has `sequence_number` 1 and the zero sentinel.
+- If the previous chain id for this node is still known, the genesis record carries `chain_link` pointing to it.
+  If it is not known, for example after the state file is corrupted, the new genesis has no `chain_link`.
+
+```mermaid
+flowchart LR
+    subgraph A["Chain A (before restart)"]
+        A1["seq 1, genesis"] --> A2["seq 2"] --> A3["seq 3"]
+    end
+    subgraph B["Chain B (after state is lost)"]
+        B1["seq 1, genesis<br/>chain_link: prev_producer_chain_id = A"] --> B2["seq 2"]
+    end
+    A3 -. "restart without usable state" .-> B1
+```
+
+Lock checks only the shape of `chain_link`, and only on a genesis record. It does not check the link against chain A.
+The link is therefore a claim in the signed record, not something Lock has verified.
+
+### Clusters
+
+Each node has its own chain, so N nodes produce N independent chains. Lock verifies each chain on its own: gaps,
+broken `prev_record_hash` links, and conflicting records at the same position (equivocation) are reported per chain.
+
+Each node needs its own state file. Do not copy one node's state file to another node. The copy names a different
+node, so the receiving node rejects it and starts a new chain. Two running nodes that write to the same state file
+would produce records with the same sequence numbers, which Lock reports as equivocation.
+
+### Where state lives and what a crash loses
+
+The producer keeps its chain state in a small file, written atomically: it writes a temporary file, flushes it to
+disk, and renames it over the old one. It writes the next state before it returns a signed record, so:
+
+- A crash before the state is written loses nothing that was sent. The next start reissues the same sequence number.
+- A crash after the state is written but before the record is sent leaves a gap in the sequence. Lock reports the gap
+  with `coverage_gap_flag`, and the chain continues after it.
+- A lost or corrupt state file starts a new chain. Records already sent on the old chain remain valid.
+
+
+### Interaction with chain genesis
+
+- With `fido2TraceChainGenesis` set to `first_observed`, a new chain starts with a genesis record that Lock accepts
+  and registers. This is the normal case after a restart without usable state.
+- With `pre_registered`, Lock must know the new chain before its first record is accepted. A restart that opens a new
+  chain therefore needs that chain registered first. The procedure is covered in the pre-registered genesis runbook.
+
+See [Chain registration modes](../lock/trace.md#chain-registration-modes) for how Lock treats genesis records.
 
 ## Signing
 
@@ -108,8 +172,7 @@ openssl pkey -pubin -in trace-producer.pem -outform DER | tail -c 32 | base64 | 
 ```
 
 Register the result with `{"kty": "OKP", "crv": "Ed25519", "x": "<output>"}` as described in
-[Register a key](../lock/trace.md#register-a-key). Lock does not yet define the `FIDO_CEREMONY` event kind, so
-registration with that kind cannot succeed until Lock adds it.
+[Register a key](../lock/trace.md#register-a-key).
 
 ### Rotating the signing key
 
