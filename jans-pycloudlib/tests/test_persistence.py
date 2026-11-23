@@ -838,3 +838,20 @@ def test_sql_client_duplicate_error_handled_after_rollback(monkeypatch, sql_clie
     getattr(sql_client, method)(*args)
 
     assert handled == [True]
+
+
+def test_postgresql_adapter_drop_index_query_escapes_quotes():
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    adapter = PostgresqlAdapter()
+    assert adapter.drop_index_query("t", "t_a") == 'DROP INDEX CONCURRENTLY IF EXISTS "t_a"'
+    assert adapter.drop_index_query("t", 'a"b') == 'DROP INDEX CONCURRENTLY IF EXISTS "a""b"'
+
+
+def test_mysql_adapter_drop_index_query_escapes_quotes():
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    adapter = MysqlAdapter()
+    assert adapter.drop_index_query("t", "i") == f"DROP INDEX {adapter.quote_char}i{adapter.quote_char} ON {adapter.quote_char}t{adapter.quote_char}"
+    q = adapter.quote_char
+    assert adapter.drop_index_query("t", f"a{q}b") == f"DROP INDEX {q}a{q}{q}b{q} ON {q}t{q}"
