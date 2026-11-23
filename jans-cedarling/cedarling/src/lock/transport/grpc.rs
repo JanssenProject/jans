@@ -10,22 +10,27 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use prost_types::Timestamp;
+use tonic::Request;
+use tonic::metadata::{Ascii, MetadataValue};
 #[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
-use tonic::{Request, metadata::MetadataValue};
 #[cfg(target_arch = "wasm32")]
 use tonic_web_wasm_client::Client;
 
 use crate::{
     lock::{
         LockLogEntry,
+        grpc_failure::GrpcFailure,
         proto::{
             BulkHealthRequest, BulkLogRequest, BulkTelemetryRequest, HealthEntry, LogEntry,
             TelemetryEntry, audit_service_client::AuditServiceClient,
         },
         transport::{
-            AuditItem, AuditKind, AuditTransport, TransportError, TransportResult,
-            mapping::{self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry},
+            AuditItem, AuditKind, AuditTransport, RetryableSend, SendFailure, TransportError,
+            mapping::{
+                self, LockServerHealthEntry, LockServerLogEntry, LockServerMetricsEntry,
+                NothingToSend,
+            },
         },
     },
     log::{LogWriter, LoggerWeak},
@@ -40,12 +45,13 @@ pub(crate) struct GrpcTransport {
     client: AuditServiceClient<Channel>,
     #[cfg(target_arch = "wasm32")]
     client: AuditServiceClient<Client>,
-    access_token: String,
+    /// Parsed once: an access token that is not a valid header value fails here,
+    /// not on every attempt.
+    authorization: MetadataValue<Ascii>,
     logger: Option<LoggerWeak>,
 }
 
 impl GrpcTransport {
-    #[cfg_attr(target_arch = "wasm32", allow(clippy::unnecessary_wraps))]
     /// Constructs a new [`GrpcTransport`]
     pub(crate) fn new(
         endpoint: impl Into<String>,
@@ -66,79 +72,91 @@ impl GrpcTransport {
 
         Ok(Self {
             client,
-            access_token: access_token.into(),
+            authorization: format!("Bearer {access_token}").parse()?,
             logger,
         })
     }
 }
 
+/// The request message for one audit endpoint, built once and cloned per attempt.
+#[derive(Debug)]
+pub(in crate::lock) enum GrpcBatch {
+    Log(BulkLogRequest),
+    Telemetry(BulkTelemetryRequest),
+    Health(BulkHealthRequest),
+}
+
 #[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
 #[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl AuditTransport for GrpcTransport {
-    async fn send(&self, entries: &[AuditItem], audit_kind: &AuditKind) -> TransportResult<()> {
-        if entries.is_empty() {
-            return Ok(());
-        }
+    type Batch = GrpcBatch;
+    type PrepareError = NothingToSend;
 
-        let token: MetadataValue<_> = format!("Bearer {}", self.access_token).parse()?;
-        let mut client = self.client.clone();
+    fn prepare(
+        &self,
+        entries: &[AuditItem],
+        audit_kind: &AuditKind,
+    ) -> Result<GrpcBatch, NothingToSend> {
         let warn = |msg| self.logger.log_any(LockLogEntry::warn(msg));
+        Ok(match audit_kind {
+            AuditKind::Log(_) => GrpcBatch::Log(BulkLogRequest {
+                entries: mapping::map_entries::<LockServerLogEntry>(entries, warn)?
+                    .into_iter()
+                    .map(log_json_to_proto)
+                    .collect(),
+            }),
+            AuditKind::Telemetry(_) => GrpcBatch::Telemetry(BulkTelemetryRequest {
+                entries: mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
+                    .into_iter()
+                    .map(telemetry_json_to_proto)
+                    .collect(),
+            }),
+            AuditKind::Health(_) => GrpcBatch::Health(BulkHealthRequest {
+                entries: mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
+                    .into_iter()
+                    .map(health_json_to_proto)
+                    .collect(),
+            }),
+        })
+    }
 
-        let response = match audit_kind {
-            AuditKind::Log(_) => {
-                let entries: Vec<LogEntry> =
-                    mapping::map_entries::<LockServerLogEntry>(entries, warn)?
-                        .into_iter()
-                        .map(log_json_to_proto)
-                        .collect();
+    async fn send(&self, batch: &GrpcBatch) -> Result<(), SendFailure> {
+        let token = self.authorization.clone();
+        let mut client = self.client.clone();
 
-                let mut request = Request::new(BulkLogRequest { entries });
-                request
-                    .metadata_mut()
-                    .insert("authorization", token.clone());
-
-                client.process_bulk_log(request).await?
+        let result = match batch {
+            GrpcBatch::Log(message) => {
+                client
+                    .process_bulk_log(authorized(message.clone(), token))
+                    .await
             },
-            AuditKind::Telemetry(_) => {
-                let entries: Vec<TelemetryEntry> =
-                    mapping::map_entries::<LockServerMetricsEntry>(entries, warn)?
-                        .into_iter()
-                        .map(telemetry_json_to_proto)
-                        .collect();
-
-                let mut request = Request::new(BulkTelemetryRequest { entries });
-                request
-                    .metadata_mut()
-                    .insert("authorization", token.clone());
-
-                client.process_bulk_telemetry(request).await?
+            GrpcBatch::Telemetry(message) => {
+                client
+                    .process_bulk_telemetry(authorized(message.clone(), token))
+                    .await
             },
-            AuditKind::Health(_) => {
-                let proto_entries: Vec<HealthEntry> =
-                    mapping::map_entries::<LockServerHealthEntry>(entries, warn)?
-                        .into_iter()
-                        .map(health_json_to_proto)
-                        .collect();
-
-                let mut request = Request::new(BulkHealthRequest {
-                    entries: proto_entries,
-                });
-                request.metadata_mut().insert("authorization", token);
-
-                client.process_bulk_health(request).await?
+            GrpcBatch::Health(message) => {
+                client
+                    .process_bulk_health(authorized(message.clone(), token))
+                    .await
             },
         };
 
-        let inner = response.into_inner();
+        let inner = result.map_err(GrpcFailure::sort)?.into_inner();
         if !inner.success {
-            return Err(TransportError::GrpcServer(format!(
-                "Server reported failure: {}",
-                inner.message
-            )));
+            return Err(SendFailure::Retryable(RetryableSend::Unsuccessful {
+                message: inner.message,
+            }));
         }
 
         Ok(())
     }
+}
+
+fn authorized<T>(message: T, token: MetadataValue<Ascii>) -> Request<T> {
+    let mut request = Request::new(message);
+    request.metadata_mut().insert("authorization", token);
+    request
 }
 
 /// Converts a [`LockServerLogEntry`] into a [`LogEntry`]
@@ -211,6 +229,19 @@ mod test {
     use std::net::SocketAddr;
 
     use super::*;
+
+    /// Prepares and sends `entries`, as the audit worker does.
+    async fn deliver(
+        transport: &GrpcTransport,
+        entries: &[AuditItem],
+        kind: AuditKind,
+    ) -> Result<(), SendFailure> {
+        let batch = transport
+            .prepare(entries, &kind)
+            .expect("the test batch should map");
+        transport.send(&batch).await
+    }
+
     use tokio::{net::TcpListener, sync::mpsc};
     use tokio_stream::wrappers::TcpListenerStream;
     use tonic::{Response, Status, transport::Server};
@@ -268,7 +299,9 @@ mod test {
             );
 
             let entries = request.into_inner().entries;
-            self.health_sender.send(entries).unwrap();
+            self.health_sender
+                .send(entries)
+                .expect("the test still reads the batches");
 
             Ok(Response::new(AuditResponse {
                 success: true,
@@ -305,7 +338,9 @@ mod test {
             );
 
             let entries = request.into_inner().entries;
-            self.log_sender.send(entries).unwrap();
+            self.log_sender
+                .send(entries)
+                .expect("the test still reads the batches");
 
             Ok(Response::new(AuditResponse {
                 success: true,
@@ -342,7 +377,9 @@ mod test {
             );
 
             let entries = request.into_inner().entries;
-            self.telemetry_sender.send(entries).unwrap();
+            self.telemetry_sender
+                .send(entries)
+                .expect("the test still reads the batches");
 
             Ok(Response::new(AuditResponse {
                 success: true,
@@ -369,15 +406,17 @@ mod test {
             should_fail,
         };
 
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let addr = listener.local_addr().unwrap();
+        let listener = TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("a local port is free");
+        let addr = listener.local_addr().expect("the listener has an address");
 
         tokio::spawn(async move {
             Server::builder()
                 .add_service(AuditServiceServer::new(service))
                 .serve_with_incoming(TcpListenerStream::new(listener))
                 .await
-                .unwrap();
+                .expect("the mock Lock serves");
         });
 
         (addr, rx, telemetry_rx, health_rx)
@@ -459,20 +498,21 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_success() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
         // Verify the server received the logs
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
         assert_ne!(received[0].node_name, "");
@@ -481,77 +521,84 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_empty() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
-        transport
-            .send(
-                &Vec::<AuditItem>::new(),
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+        let err = transport
+            .prepare(
+                &[],
+                &AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
             )
-            .await
-            .expect("logs should be sent successfully");
-
-        // Should not have sent anything
-        assert!(rx.try_recv().is_err());
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(err, NothingToSend::Empty),
+            "expected NothingToSend::Empty, got {err:?}"
+        );
+        assert!(rx.try_recv().is_err(), "nothing should have been sent");
     }
 
     #[tokio::test]
     async fn test_send_logs_malformed_json() {
         let (addr, _, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![malformed_log_item()];
 
-        let error = transport
-            .send(
+        let err = transport
+            .prepare(
                 &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
+                &AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
             )
-            .await
-            .expect_err("this should cause a serialization error");
+            .expect_err("a batch with no mappable entry has nothing to send");
         assert!(
-            matches!(error, TransportError::Serialization(_)),
-            "expected serialization error, got {error:?}"
+            matches!(err, NothingToSend::NoneMapped { count: 1 }),
+            "expected NothingToSend::NoneMapped {{ count: 1 }}, got {err:?}"
         );
     }
 
     #[tokio::test]
     async fn test_send_logs_server_error() {
         let (addr, _, _, _) = start_mock_server(true).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item()];
 
-        let error = transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect_err("this should cause a server error");
+        let error = deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect_err("this should cause a server error");
 
         assert!(
-            matches!(error, TransportError::GrpcServer(_)),
-            "expected server error, got {error:?}",
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Unsuccessful { ref message }) if message == "Server error"
+            ),
+            "success = false may be Lock failing to store the batch, so it is retried, got {error:?}",
         );
     }
 
     #[tokio::test]
     async fn test_send_logs_partial_malformed() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item(), malformed_log_item(), sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully despite malformed entries");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully despite malformed entries");
 
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 2, "only valid entries should be forwarded");
         assert_eq!(received[0].service, "test_app");
         assert_eq!(received[1].service, "test_app");
@@ -560,19 +607,20 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_multiple_entries() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item(), sample_log_item(), sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 3);
         assert_eq!(received[0].service, "test_app");
         assert_eq!(received[1].service, "test_app");
@@ -582,19 +630,20 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_with_all_fields() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 1);
         let entry = &received[0];
 
@@ -611,19 +660,20 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_with_missing_optional_fields() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_log_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
         assert_ne!(received[0].node_name, "");
@@ -632,38 +682,42 @@ mod test {
     #[tokio::test]
     async fn test_send_logs_large_batch() {
         let (addr, mut rx, _, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries: Vec<_> = (0..100).map(|_| sample_log_item()).collect();
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Log(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("logs should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Log(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("logs should be sent successfully");
 
-        let received = rx.try_recv().unwrap();
+        let received = rx.try_recv().expect("the mock Lock received the batch");
         assert_eq!(received.len(), 100);
     }
 
     #[tokio::test]
     async fn test_send_telemetry_success() {
         let (addr, _, mut telemetry_rx, _) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_metric_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Telemetry(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("telemetry should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Telemetry(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("telemetry should be sent successfully");
 
-        let received = telemetry_rx.try_recv().unwrap();
+        let received = telemetry_rx
+            .try_recv()
+            .expect("the mock Lock received the batch");
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
         assert_ne!(received[0].node_name, "");
@@ -723,11 +777,19 @@ mod test {
         let proto_entry = log_json_to_proto(lock_entry);
 
         assert_eq!(
-            proto_entry.creation_date.as_ref().unwrap().seconds,
+            proto_entry
+                .creation_date
+                .as_ref()
+                .expect("the timestamp is set")
+                .seconds,
             -2_208_988_800
         );
         assert_eq!(
-            proto_entry.event_time.as_ref().unwrap().seconds,
+            proto_entry
+                .event_time
+                .as_ref()
+                .expect("the timestamp is set")
+                .seconds,
             -2_208_988_800
         );
     }
@@ -735,79 +797,101 @@ mod test {
     #[tokio::test]
     async fn test_send_health_success() {
         let (addr, _, _, mut health_rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_health_item()];
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("health check should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("health check should be sent successfully");
 
-        let received = health_rx.try_recv().unwrap();
+        let received = health_rx
+            .try_recv()
+            .expect("the mock Lock received the batch");
         assert_eq!(received.len(), 1);
         assert_eq!(received[0].service, "test_app");
         assert_eq!(received[0].node_name, "test-pdp");
         assert_eq!(received[0].status, "running");
-        assert_eq!(received[0].engine_status.get("core").unwrap(), "success");
+        assert_eq!(
+            received[0]
+                .engine_status
+                .get("core")
+                .expect("the core engine status is sent"),
+            "success"
+        );
     }
 
     #[tokio::test]
     async fn test_send_health_empty() {
         let (addr, _, _, mut health_rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
-        transport
-            .send(
-                &Vec::<AuditItem>::new(),
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
+        let err = transport
+            .prepare(
+                &[],
+                &AuditKind::Health(format!("http://{addr}").parse().expect("a valid URL")),
             )
-            .await
-            .expect("empty health check should succeed");
-
-        assert!(health_rx.try_recv().is_err());
+            .expect_err("an empty batch has nothing to send");
+        assert!(
+            matches!(err, NothingToSend::Empty),
+            "expected NothingToSend::Empty, got {err:?}"
+        );
+        assert!(
+            health_rx.try_recv().is_err(),
+            "nothing should have been sent"
+        );
     }
 
     #[tokio::test]
     async fn test_send_health_server_error() {
         let (addr, _, _, _) = start_mock_server(true).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries = vec![sample_health_item()];
 
-        let error = transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect_err("this should cause a server error");
+        let error = deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect_err("this should cause a server error");
 
         assert!(
-            matches!(error, TransportError::GrpcServer(_)),
-            "expected server error, got {error:?}",
+            matches!(
+                error,
+                SendFailure::Retryable(RetryableSend::Unsuccessful { ref message }) if message == "Server error"
+            ),
+            "success = false may be Lock failing to store the batch, so it is retried, got {error:?}",
         );
     }
 
     #[tokio::test]
     async fn test_send_health_large_batch() {
         let (addr, _, _, mut health_rx) = start_mock_server(false).await;
-        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None).unwrap();
+        let transport = GrpcTransport::new(format!("http://{addr}"), "test-token", None)
+            .expect("the gRPC transport is built");
 
         let entries: Vec<_> = (0..100).map(|_| sample_health_item()).collect();
 
-        transport
-            .send(
-                &entries,
-                &AuditKind::Health(format!("http://{addr}").parse().unwrap()),
-            )
-            .await
-            .expect("health checks should be sent successfully");
+        deliver(
+            &transport,
+            &entries,
+            AuditKind::Health(format!("http://{addr}").parse().expect("a valid URL")),
+        )
+        .await
+        .expect("health checks should be sent successfully");
 
-        let received = health_rx.try_recv().unwrap();
+        let received = health_rx
+            .try_recv()
+            .expect("the mock Lock received the batch");
         assert_eq!(received.len(), 100);
         assert_eq!(received[0].service, "test_app");
         assert_eq!(received[99].service, "test_app");
@@ -845,6 +929,244 @@ mod test {
         assert_eq!(proto.service, "test_app");
         assert_eq!(proto.node_name, "test-pdp");
         assert_eq!(proto.status, "running");
-        assert_eq!(proto.engine_status.get("core").unwrap(), "success");
+        assert_eq!(
+            proto
+                .engine_status
+                .get("core")
+                .expect("the core engine status is sent"),
+            "success"
+        );
+    }
+
+    mod retries {
+        use std::sync::Arc;
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        use std::time::Duration;
+
+        use tokio::net::TcpListener;
+        use tokio::sync::mpsc;
+        use tokio_stream::wrappers::TcpListenerStream;
+        use tokio_util::sync::CancellationToken;
+        use tonic::transport::Server;
+        use tonic::{Request, Response, Status};
+
+        use crate::lock::log_worker::AuditWorker;
+        use crate::lock::proto::audit_service_server::{AuditService, AuditServiceServer};
+        use crate::lock::proto::{self, AuditResponse, BulkLogRequest};
+        use crate::lock::transport::AuditKind;
+        use crate::lock::transport::grpc::GrpcTransport;
+        use crate::lock::transport::test_utils::sample_log_item;
+
+        const MAX_RETRIES: usize = 2;
+
+        type Reply = fn() -> Result<AuditResponse, Status>;
+
+        /// Answers every bulk log call with `reply` and counts the calls.
+        struct ReplyingLock {
+            reply: Reply,
+            calls: Arc<AtomicUsize>,
+        }
+
+        #[tonic::async_trait]
+        impl AuditService for ReplyingLock {
+            async fn process_log(
+                &self,
+                _: Request<proto::LogRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_log(
+                &self,
+                _: Request<BulkLogRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                self.calls.fetch_add(1, Ordering::SeqCst);
+                (self.reply)().map(Response::new)
+            }
+
+            async fn process_telemetry(
+                &self,
+                _: Request<proto::TelemetryRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_telemetry(
+                &self,
+                _: Request<proto::BulkTelemetryRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_health(
+                &self,
+                _: Request<proto::HealthRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+
+            async fn process_bulk_health(
+                &self,
+                _: Request<proto::BulkHealthRequest>,
+            ) -> Result<Response<AuditResponse>, Status> {
+                unimplemented!()
+            }
+        }
+
+        /// Answers every call with `status`'s HTTP status and no `grpc-status`, as a
+        /// proxy before Lock does when it refuses the request itself.
+        #[derive(Clone)]
+        struct ProxyAnswer {
+            status: u16,
+            calls: Arc<AtomicUsize>,
+        }
+
+        impl tonic::server::NamedService for ProxyAnswer {
+            const NAME: &'static str = "io.jans.lock.audit.AuditService";
+        }
+
+        impl tonic::codegen::Service<tonic::codegen::http::Request<tonic::body::Body>> for ProxyAnswer {
+            type Response = tonic::codegen::http::Response<tonic::body::Body>;
+            type Error = std::convert::Infallible;
+            type Future = std::future::Ready<Result<Self::Response, Self::Error>>;
+
+            fn poll_ready(
+                &mut self,
+                _: &mut std::task::Context<'_>,
+            ) -> std::task::Poll<Result<(), Self::Error>> {
+                std::task::Poll::Ready(Ok(()))
+            }
+
+            fn call(
+                &mut self,
+                _: tonic::codegen::http::Request<tonic::body::Body>,
+            ) -> Self::Future {
+                self.calls.fetch_add(1, Ordering::SeqCst);
+                let response = tonic::codegen::http::Response::builder()
+                    .status(self.status)
+                    .body(tonic::body::Body::default())
+                    .expect("a status-only response builds");
+                std::future::ready(Ok(response))
+            }
+        }
+
+        /// A bound local port: the connections to serve and the origin to call.
+        struct Listening {
+            incoming: TcpListenerStream,
+            origin: String,
+        }
+
+        async fn listen() -> Listening {
+            let listener = TcpListener::bind("127.0.0.1:0")
+                .await
+                .expect("a local port is free");
+            let addr = listener.local_addr().expect("the listener has an address");
+            Listening {
+                incoming: TcpListenerStream::new(listener),
+                origin: format!("http://{addr}"),
+            }
+        }
+
+        async fn lock(reply: Reply, calls: Arc<AtomicUsize>) -> String {
+            let Listening { incoming, origin } = listen().await;
+            tokio::spawn(
+                Server::builder()
+                    .add_service(AuditServiceServer::new(ReplyingLock { reply, calls }))
+                    .serve_with_incoming(incoming),
+            );
+            origin
+        }
+
+        async fn proxy(status: u16, calls: Arc<AtomicUsize>) -> String {
+            let Listening { incoming, origin } = listen().await;
+            tokio::spawn(
+                Server::builder()
+                    .add_routes(tonic::service::Routes::new(ProxyAnswer { status, calls }))
+                    .serve_with_incoming(incoming),
+            );
+            origin
+        }
+
+        /// Runs a log worker on one entry until it is sent or dropped.
+        async fn flush_one_entry(origin: &str) {
+            let transport = GrpcTransport::new(origin, "test-token", None).expect("transport");
+            let mut worker = AuditWorker::new(
+                Duration::from_secs(60),
+                Arc::new(transport),
+                AuditKind::Log(format!("{origin}/audit/log").parse().expect("valid URL")),
+                None,
+                u32::try_from(MAX_RETRIES).expect("small"),
+                Duration::from_millis(1),
+            );
+            let (tx, rx) = mpsc::channel(1);
+            tx.send(sample_log_item())
+                .await
+                .expect("the entry is queued");
+            let cancel = CancellationToken::new();
+            cancel.cancel();
+            // Shutting down flushes the queued entry, retries included.
+            worker.run(rx, cancel).await;
+            drop(tx);
+        }
+
+        #[tokio::test]
+        async fn lock_refusal_is_sent_once() {
+            let cases: [(&str, Reply); 2] = [
+                ("InvalidArgument", || Err(Status::invalid_argument("bad"))),
+                ("PermissionDenied", || {
+                    Err(Status::permission_denied("missing scope"))
+                }),
+            ];
+            for (name, reply) in cases {
+                let calls = Arc::new(AtomicUsize::new(0));
+                flush_one_entry(&lock(reply, calls.clone()).await).await;
+                assert_eq!(
+                    calls.load(Ordering::SeqCst),
+                    1,
+                    "{name} is Lock's answer to this batch, so it is not repeated"
+                );
+            }
+        }
+
+        #[tokio::test]
+        async fn failure_that_may_clear_is_retried() {
+            let cases: [(&str, Reply); 3] = [
+                ("UNAVAILABLE", || Err(Status::unavailable("restarting"))),
+                // Lock refuses a client for a few seconds after registering it.
+                ("UNAUTHENTICATED", || {
+                    Err(Status::unauthenticated("unknown client"))
+                }),
+                // Lock also answers so when storing the batch failed.
+                ("success = false", || {
+                    Ok(AuditResponse {
+                        success: false,
+                        message: "Failed to persist bulk data".to_string(),
+                    })
+                }),
+            ];
+            for (name, reply) in cases {
+                let calls = Arc::new(AtomicUsize::new(0));
+                flush_one_entry(&lock(reply, calls.clone()).await).await;
+                assert_eq!(
+                    calls.load(Ordering::SeqCst),
+                    MAX_RETRIES + 1,
+                    "{name} may clear, so it is sent once and retried {MAX_RETRIES} times"
+                );
+            }
+        }
+
+        #[tokio::test]
+        async fn proxy_client_error_is_sent_once() {
+            let calls = Arc::new(AtomicUsize::new(0));
+            let origin = proxy(400, calls.clone()).await;
+
+            flush_one_entry(&origin).await;
+
+            assert_eq!(
+                calls.load(Ordering::SeqCst),
+                1,
+                "a proxy's 400 without grpc-status is final, as over REST"
+            );
+        }
     }
 }

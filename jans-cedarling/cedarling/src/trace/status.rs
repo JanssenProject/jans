@@ -61,7 +61,8 @@ pub(crate) enum EmitterEvent {
     Accepted,
     /// Lock refused the record for good, alone or with its whole request.
     Rejected,
-    /// The record was given up after its retries, or discarded with its lost chain.
+    /// The record was given up after its retries, with a request that could not be
+    /// sent, or discarded with its lost chain.
     Dropped,
     /// The draft could not be signed.
     SignFailed,

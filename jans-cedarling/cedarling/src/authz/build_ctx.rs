@@ -4,13 +4,12 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use super::AuthzConfig;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
-use crate::common::cedar_schema::cedar_json::attribute::Attribute;
+use crate::common::cedar_schema::CedarSchema;
 use crate::common::policy_store::ContextKey;
 use crate::common::policy_store::token_types::TOTAL_TOKEN_COUNT_KEY;
 use crate::entity_builder::BuiltEntities;
 use cedar_policy::Entity;
-use cedar_policy::EntityTypeName;
+use cedar_policy_core::validator::types::{EntityKind, Type};
 use serde_json::{Value, json, map::Entry};
 use smol_str::ToSmolStr;
 use std::collections::HashMap;
@@ -29,10 +28,11 @@ pub(super) fn build_context(
     action: &cedar_policy::EntityUid,
     pushed_data: &HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    if config.policy_store.schema.is_some() {
-        build_context_with_schema(config, request_context, build_entities, action, pushed_data)
-    } else {
-        build_context_no_schema(request_context, pushed_data)
+    match &config.policy_store.schema {
+        Some(schema) => {
+            build_context_with_schema(schema, request_context, build_entities, action, pushed_data)
+        },
+        None => build_context_no_schema(request_context, pushed_data),
     }
 }
 
@@ -41,74 +41,13 @@ pub(super) fn build_context(
 /// Builds context by looking up the action's expected context shape in the Cedar schema
 /// and injecting matching entity references from the built entities.
 pub(super) fn build_context_with_schema(
-    config: &AuthzConfig,
+    schema: &CedarSchema,
     request_context: Value,
     build_entities: &BuiltEntities,
     action: &cedar_policy::EntityUid,
     pushed_data: &HashMap<String, Value>,
 ) -> Result<cedar_policy::Context, BuildContextError> {
-    let store_schema = config.policy_store.schema.as_ref().ok_or_else(|| {
-        BuildContextError::ContextCreation(
-            "build_context_with_schema called but policy store has no schema".to_string(),
-        )
-    })?;
-    let json_schema = &store_schema.json;
-    let schema = &store_schema.schema;
-    let namespace = action.type_name().namespace();
-    let action_name = &action.id().escaped();
-
-    let action_schema = json_schema
-        .get_action(&namespace, action_name)
-        .ok_or(BuildContextError::UnknownAction(action_name.to_string()))?;
-
-    let mut ctx_entity_refs = json!({});
-
-    if let Some(ctx) = action_schema.applies_to.context.as_ref() {
-        match ctx {
-            Attribute::Record { attrs, .. } => {
-                for (key, attr) in attrs {
-                    if let Some(entity_ref) =
-                        build_entity_refs_from_attr(&namespace, attr, build_entities, json_schema)?
-                    {
-                        ctx_entity_refs[key] = entity_ref;
-                    }
-                }
-            },
-            Attribute::EntityOrCommon { name, .. } => {
-                if let Some((_entity_type_name, attr)) = json_schema
-                    .get_common_type(name, Some(&namespace))
-                    .map_err(|err| BuildContextError::ParseEntityName(name.clone(), err))?
-                {
-                    match attr {
-                        Attribute::Record { attrs, .. } => {
-                            for (key, attr) in attrs {
-                                if let Some(entity_ref) = build_entity_refs_from_attr(
-                                    &namespace,
-                                    attr,
-                                    build_entities,
-                                    json_schema,
-                                )? {
-                                    ctx_entity_refs[key] = entity_ref;
-                                }
-                            }
-                        },
-                        attr => {
-                            return Err(BuildContextError::InvalidKind(
-                                attr.kind_str().to_string(),
-                                "record".to_string(),
-                            ));
-                        },
-                    }
-                }
-            },
-            attr => {
-                return Err(BuildContextError::InvalidKind(
-                    attr.kind_str().to_string(),
-                    "record or common".to_string(),
-                ));
-            },
-        }
-    }
+    let mut ctx_entity_refs = context_entity_refs(schema, action, build_entities)?;
 
     // Inject pushed data under context.data namespace, merging so key conflicts are surfaced.
     if !pushed_data.is_empty() {
@@ -124,10 +63,49 @@ pub(super) fn build_context_with_schema(
 
     let context = merge_json_values(request_context, &ctx_entity_refs)?;
     let context: cedar_policy::Context =
-        cedar_policy::Context::from_json_value(context, Some((schema, action)))
+        cedar_policy::Context::from_json_value(context, Some((&schema.schema, action)))
             .map_err(|e| BuildContextError::ContextCreation(e.to_string()))?;
 
     Ok(context)
+}
+
+/// Returns a JSON object with a reference to a built entity for every attribute of the
+/// action's context that is typed as an entity.
+///
+/// The context type comes from Cedar's validator schema, where common types are already
+/// inlined and entity type names fully qualified, so no name resolution is needed here.
+fn context_entity_refs(
+    schema: &CedarSchema,
+    action: &cedar_policy::EntityUid,
+    build_entities: &BuiltEntities,
+) -> Result<Value, BuildContextError> {
+    let context_type = schema
+        .validator_schema()
+        .context_type(action.as_ref())
+        .ok_or_else(|| BuildContextError::UnknownAction(action.id().escaped().to_string()))?;
+
+    let mut ctx_entity_refs = serde_json::Map::new();
+    // Cedar always gives an action's context a record type.
+    if let Type::Record { attrs, .. } = context_type {
+        for (key, attr) in attrs.iter() {
+            let Type::Entity(EntityKind::Entity(lub)) = attr.attr_type.as_ref() else {
+                continue;
+            };
+            // Strict validation gives each attribute exactly one entity type.
+            let Some(entity_type) = lub.get_single_entity() else {
+                continue;
+            };
+            match map_entity_id(&entity_type.to_smolstr(), build_entities) {
+                Ok(entity_ref) => {
+                    ctx_entity_refs.insert(key.to_string(), entity_ref);
+                },
+                Err(err) if attr.is_required => return Err(err),
+                Err(_) => {},
+            }
+        }
+    }
+
+    Ok(Value::Object(ctx_entity_refs))
 }
 
 /// Constructs the authorization context without schema-based entity references.
@@ -225,68 +203,15 @@ pub(super) fn build_multi_issuer_context(
     Ok(context)
 }
 
-/// Builds the JSON entity references from a given attribute.
-///
-/// Returns `Ok(None)` if the attr is not an Entity Reference
-fn build_entity_refs_from_attr(
-    namespace: &str,
-    attr: &Attribute,
-    built_entities: &BuiltEntities,
-    schema: &CedarSchemaJson,
-) -> Result<Option<Value>, BuildContextError> {
-    match attr {
-        Attribute::Entity { name, required } => {
-            let Some(type_name) = schema
-                .get_entity_type_name(name, Some(namespace))
-                .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
-            else {
-                return Ok(None);
-            };
-
-            match map_entity_id(&type_name, built_entities) {
-                Ok(res) => Ok(res),
-                Err(err) => {
-                    if *required {
-                        Err(err)
-                    } else {
-                        Ok(None)
-                    }
-                },
-            }
-        },
-        Attribute::EntityOrCommon { name, required } => {
-            let Some(type_name) = schema
-                .get_entity_type_name(name, Some(namespace))
-                .map_err(|e| BuildContextError::ParseEntityName(name.clone(), e))?
-            else {
-                return Ok(None);
-            };
-
-            match map_entity_id(&type_name, built_entities) {
-                Ok(res) => Ok(res),
-                Err(err) => {
-                    if *required {
-                        Err(err)
-                    } else {
-                        Ok(None)
-                    }
-                },
-            }
-        },
-        _ => Ok(None),
-    }
-}
-
 /// Maps a known entity ID to the entity reference
 fn map_entity_id(
-    name: &EntityTypeName,
+    type_name: &str,
     built_entities: &BuiltEntities,
-) -> Result<Option<Value>, BuildContextError> {
-    if let Some(type_id) = built_entities.get_single(&name.to_smolstr()) {
-        Ok(Some(json!({"type": name.to_string(), "id": type_id})))
-    } else {
-        Err(BuildContextError::MissingEntityId(name.to_string()))
-    }
+) -> Result<Value, BuildContextError> {
+    built_entities
+        .get_single(type_name)
+        .map(|type_id| json!({"type": type_name, "id": type_id}))
+        .ok_or_else(|| BuildContextError::MissingEntityId(type_name.to_string()))
 }
 
 fn merge_json_values(mut base: Value, other: &Value) -> Result<Value, BuildContextError> {
@@ -307,6 +232,154 @@ mod test {
     use super::*;
     use serde_json::json;
     use std::str::FromStr;
+
+    const SCHEMA: &str = r#"
+        entity Global;
+        namespace Jans {
+            entity User;
+            entity Workload;
+            entity Issue;
+            type Ctx = { user: User };
+            action "read" appliesTo {
+                principal: [User],
+                resource: [Issue],
+                context: { user: User, workload?: Workload, global?: Global, note?: String }
+            };
+            action "write" appliesTo { principal: [User], resource: [Issue], context: Ctx };
+            action "list" appliesTo { principal: [User], resource: [Issue] };
+        }
+    "#;
+
+    fn cedar_schema() -> CedarSchema {
+        cedar_policy::Schema::from_str(SCHEMA)
+            .expect("test schema is valid")
+            .into()
+    }
+
+    fn action(name: &str) -> cedar_policy::EntityUid {
+        cedar_policy::EntityUid::from_type_name_and_id(
+            "Jans::Action".parse().expect("valid action type"),
+            cedar_policy::EntityId::new(name),
+        )
+    }
+
+    fn built(uids: &[&str]) -> BuiltEntities {
+        uids.iter()
+            .map(|uid| cedar_policy::EntityUid::from_str(uid).expect("valid test entity uid"))
+            .collect()
+    }
+
+    #[test]
+    fn context_entity_refs_fills_entity_attrs_of_record_context() {
+        let refs = context_entity_refs(
+            &cedar_schema(),
+            &action("read"),
+            &built(&[
+                r#"Jans::User::"alice""#,
+                r#"Jans::Workload::"w1""#,
+                r#"Global::"g""#,
+            ]),
+        )
+        .expect("entity refs should build for a record context");
+
+        assert_eq!(
+            refs,
+            json!({
+                "user": {"type": "Jans::User", "id": "alice"},
+                "workload": {"type": "Jans::Workload", "id": "w1"},
+                "global": {"type": "Global", "id": "g"},
+            }),
+            "every entity-typed context attribute gets a reference, including one resolved \
+             from the empty namespace; non-entity attributes are left to the request"
+        );
+    }
+
+    #[test]
+    fn context_entity_refs_resolves_common_type_context() {
+        let refs = context_entity_refs(
+            &cedar_schema(),
+            &action("write"),
+            &built(&[r#"Jans::User::"alice""#]),
+        )
+        .expect("entity refs should build for a common-type context");
+
+        assert_eq!(
+            refs,
+            json!({"user": {"type": "Jans::User", "id": "alice"}}),
+            "a context declared as a common type is resolved to its record"
+        );
+    }
+
+    #[test]
+    fn context_entity_refs_skips_missing_optional_entity() {
+        let refs = context_entity_refs(
+            &cedar_schema(),
+            &action("read"),
+            &built(&[r#"Jans::User::"alice""#]),
+        )
+        .expect("a missing optional entity should not fail");
+
+        assert_eq!(
+            refs,
+            json!({"user": {"type": "Jans::User", "id": "alice"}}),
+            "optional entity attributes without a built entity are omitted"
+        );
+    }
+
+    #[test]
+    fn context_entity_refs_errors_on_missing_required_entity() {
+        let err = context_entity_refs(
+            &cedar_schema(),
+            &action("read"),
+            &built(&[r#"Jans::Workload::"w1""#]),
+        )
+        .expect_err("a missing required entity should fail");
+
+        assert!(
+            matches!(&err, BuildContextError::MissingEntityId(name) if name == "Jans::User"),
+            "expected MissingEntityId for Jans::User, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn context_entity_refs_errors_on_unknown_action() {
+        let err = context_entity_refs(&cedar_schema(), &action("delete"), &built(&[]))
+            .expect_err("an action missing from the schema should fail");
+
+        assert!(
+            matches!(&err, BuildContextError::UnknownAction(name) if name == "delete"),
+            "expected UnknownAction for delete, got: {err:?}"
+        );
+    }
+
+    #[test]
+    fn context_entity_refs_is_empty_for_action_without_context() {
+        let refs = context_entity_refs(&cedar_schema(), &action("list"), &built(&[]))
+            .expect("an action without context should build");
+
+        assert_eq!(refs, json!({}), "no context means no entity references");
+    }
+
+    #[test]
+    fn build_context_with_schema_merges_request_context_and_entity_refs() {
+        let context = build_context_with_schema(
+            &cedar_schema(),
+            json!({"note": "hello"}),
+            &built(&[r#"Jans::User::"alice""#]),
+            &action("read"),
+            &HashMap::new(),
+        )
+        .expect("context should build against the schema");
+
+        assert!(
+            context.get("user").is_some(),
+            "the entity reference should be injected into the context"
+        );
+        assert!(
+            context.get("note").is_some(),
+            "the request context should be kept"
+        );
+    }
 
     #[test]
     fn can_merge_json_objects() {

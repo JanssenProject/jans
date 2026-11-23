@@ -13,7 +13,6 @@ use thiserror::Error;
 use tokio::sync::Notify;
 use tokio_util::sync::CancellationToken;
 
-use crate::http_utils::Backoff;
 use crate::{
     JwtConfig, LogLevel,
     async_sleep::sleep,
@@ -34,6 +33,9 @@ use crate::{
 };
 
 use crate::http::spawn_task;
+
+/// How long a failed JWKS refresh waits before the regular interval starts again.
+const REFRESH_RETRY_DELAY: Duration = Duration::from_secs(10);
 
 #[derive(Error, Debug)]
 pub(crate) enum TrustedIssuerLoaderError {
@@ -537,7 +539,6 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
 
     let mut interval = initial_interval;
     let mut last_refresh = Utc::now() - interval;
-    let mut backoff = Backoff::default_fixed();
 
     loop {
         tokio::select! {
@@ -562,7 +563,6 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
         {
             Ok(max_age) => {
                 last_refresh = Utc::now();
-                backoff.reset();
 
                 if let Some(config_secs) = config_override {
                     interval = Duration::from_secs(config_secs);
@@ -594,7 +594,7 @@ async fn keep_jwks_updated(params: JwksRefreshParams) {
                 ));
 
                 tokio::select! {
-                    _ = backoff.snooze() => {},
+                    () = sleep(REFRESH_RETRY_DELAY) => {},
                     () = cancel_tkn.cancelled() => { break; },
                 }
             },

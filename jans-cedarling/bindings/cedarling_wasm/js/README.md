@@ -1,13 +1,14 @@
-# Getting Started with Cedarling in a JavaScript App
+# Cedarling WebAssembly (WASM) for JavaScript and TypeScript
 
-The `@janssenproject/cedarling_wasm` package brings
-[Cedarling](https://docs.jans.io/stable/cedarling/) authorization to JavaScript and
-TypeScript applications. Cedarling evaluates Cedar policies within your
+The `@janssenproject/cedarling_wasm` npm package includes the
+[Cedarling](https://docs.jans.io/stable/cedarling/) WebAssembly binary.
+Cedarling evaluates Cedar policies within your
 application's process, whether it runs in a browser, on a server, or at the edge.
 It determines whether a principal or token set may perform an action on a resource.
 
 Use Cedarling to apply consistent access policies, inspect authorization decisions,
 retain decision logs, and make application context available to policy evaluation.
+Try the signed and unsigned authorization examples in the [JavaScript (WASM) tutorial](https://docs.jans.io/stable/cedarling/tutorials/javascript/).
 
 ## Installation
 
@@ -527,8 +528,7 @@ Bootstrap keys (`CEDARLING_*`), request JSON, result/data fields such as
 
 ## See Also
 
-- [JavaScript tutorial](https://docs.jans.io/stable/cedarling/tutorials/javascript/)
-- [Full API reference](https://docs.jans.io/stable/cedarling/tutorials/javascript/#api-reference)
+- [JavaScript/TypeScript API reference](https://janssenproject.github.io/developer-docs/cedarling-js/index.html)
 - [Bootstrap-property reference](https://docs.jans.io/stable/cedarling/reference/cedarling-properties/)
 - [Cedar Archive format](https://docs.jans.io/nightly/cedarling/reference/cedarling-policy-store/#cedar-archive-cjar-format)
 - [Maintainer guide](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_wasm/js/docs/maintainer.md)
