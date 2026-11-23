@@ -1,0 +1,68 @@
+cedar_version: 4.5.0
+policy_stores:
+  abc123def456:
+    name: Two local JWT issuers
+    trusted_issuers:
+      Acme:
+        name: Acme
+        openid_configuration_endpoint: DEMO_ORIGIN/Acme/.well-known/openid-configuration
+        token_metadata:
+          access_token:
+            entity_type_name: Acme::Access_Token
+      Dolphin:
+        name: Dolphin
+        openid_configuration_endpoint: DEMO_ORIGIN/Dolphin/.well-known/openid-configuration
+        token_metadata:
+          access_token:
+            entity_type_name: Dolphin::Access_Token
+    policies:
+      matching-organizations:
+        description: Both issuers must grant access to the resource organization.
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |
+            @description("Requires matching organization claims from both issuers")
+            permit(principal, action == MultiIssuer::Action::"Read", resource)
+            when {
+              context has tokens &&
+              context.tokens has acme_access_token &&
+              context.tokens has dolphin_access_token &&
+              context.tokens.acme_access_token.hasTag("org_id") &&
+              context.tokens.dolphin_access_token.hasTag("org_id") &&
+              context.tokens.acme_access_token.getTag("org_id").contains(resource.org_id) &&
+              context.tokens.dolphin_access_token.getTag("org_id").contains(resource.org_id)
+            };
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |
+        namespace Acme {
+          entity TrustedIssuer = { issuer_entity_id: MultiIssuer::Url };
+          entity Access_Token = {
+            token_type: String, jti: String, iss: TrustedIssuer,
+            validated_at: Long, exp: Long, sub?: String, org_id?: String
+          } tags Set<String>;
+        }
+        namespace Dolphin {
+          entity TrustedIssuer = { issuer_entity_id: MultiIssuer::Url };
+          entity Access_Token = {
+            token_type: String, jti: String, iss: TrustedIssuer,
+            validated_at: Long, exp: Long, sub?: String, org_id?: String
+          } tags Set<String>;
+        }
+        namespace MultiIssuer {
+          type Url = { host: String, path: String, protocol: String };
+          entity Any;
+          entity Resource = { org_id: String };
+          action "Read" appliesTo {
+            principal: [Any], resource: [Resource], context: Context
+          };
+        }
+        type Context = {
+          tokens: {
+            acme_access_token?: Acme::Access_Token,
+            dolphin_access_token?: Dolphin::Access_Token,
+            total_token_count: Long
+          }
+        };

@@ -106,7 +106,7 @@
 //! - **`GetLockConfig`**: Failed to retrieve Lock Server configuration
 //! - **`ClientRegistration`**: Failed to register client with IDP
 //! - **`InitHttpClient`**: Failed to initialize HTTP client
-//! - **`TransportError`**: Transport layer error (REST or gRPC)
+//! - **`TransportError`**: The gRPC transport could not be built
 //! - **`MissingGrpcEndpoint`**: gRPC endpoint not configured when using gRPC transport
 //! - **`InvalidAccessToken`**: Failed to parse access token
 //!
@@ -127,6 +127,8 @@
 //! - Issue access tokens for Lock Server communication
 //! - Provide JWKS endpoint for key validation
 
+#[cfg(feature = "grpc")]
+mod grpc_failure;
 pub(crate) mod health_registry;
 mod health_ticker;
 mod lock_config;
@@ -619,6 +621,7 @@ fn create_worker(
                 audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
+                WORKER_HTTP_RETRY_DUR,
             );
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
@@ -640,6 +643,7 @@ fn create_worker(
                 audit_kind,
                 logger,
                 bootstrap_conf.log_max_retries,
+                WORKER_HTTP_RETRY_DUR,
             );
 
             let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });

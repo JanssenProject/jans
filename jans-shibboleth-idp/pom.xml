@@ -68,6 +68,7 @@
     <modules>
        <module>shib-adapter-kernel</module>
        <module>shib-kernel</module>
+       <module>trust-domain</module>
     </modules>
 
     <repositories>

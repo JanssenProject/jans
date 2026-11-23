@@ -94,3 +94,45 @@ async fn test_metrics_snapshot_disabled_returns_not_enabled() {
         "expected Disabled error, got {err:?}"
     );
 }
+
+/// A zero Lock telemetry interval disables Lock telemetry, so the host keeps
+/// the metrics: `drain_metrics` must not report that Lock owns them.
+#[test]
+async fn test_zero_lock_telemetry_interval_keeps_local_metrics() {
+    let mut lock = mockito::Server::new_async().await;
+    let base = lock.url();
+    lock.mock("GET", "/.well-known/lock-server-configuration")
+        .with_body(
+            json!({
+                "version": "1.0",
+                "issuer": base,
+                "audit": { "telemetry_endpoint": format!("{base}/audit/telemetry") },
+                "config": {},
+            })
+            .to_string(),
+        )
+        .create_async()
+        .await;
+    let lock_config = crate::LockServiceConfig {
+        config_uri: format!("{base}/.well-known/lock-server-configuration")
+            .parse()
+            .expect("mock Lock URL should parse"),
+        access_token_jwt: Some("pre.issued.token".to_string()), // # gitleaks:allow
+        telemetry_interval: Some(std::time::Duration::ZERO),
+        ..Default::default()
+    };
+
+    let cedarling = get_cedarling_with_callback(
+        PolicyStoreSource::Yaml(POLICY_STORE_NO_SCHEMA.to_string()),
+        |config| {
+            config.authorization_config.strict_schema_validation = false;
+            config.authorization_config.metrics_collection = true;
+            config.lock_config = Some(lock_config);
+        },
+    )
+    .await;
+
+    cedarling
+        .drain_metrics()
+        .expect("a zero telemetry interval must leave the metrics to the host");
+}

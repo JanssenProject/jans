@@ -3,6 +3,8 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+// Native-only program, so the WASM-unsafe calls banned in clippy.toml are fine here.
+#![allow(clippy::disallowed_methods)]
 #![allow(clippy::cast_precision_loss)]
 
 use cedarling::{
