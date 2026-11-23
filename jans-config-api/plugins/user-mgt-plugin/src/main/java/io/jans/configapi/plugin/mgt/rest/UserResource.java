@@ -2,6 +2,7 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
+import io.jans.as.model.common.IntrospectionResponse;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.exception.ApiApplicationException;
 import io.jans.configapi.core.util.ApiErrorResponse;
@@ -23,9 +24,11 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -72,6 +75,9 @@ public class UserResource extends BaseResource {
     private static final String USER_UPDATE_FLAG_PLACEHOLDER = "user:{}, isUpdate:{}";
     private static final Pattern SEARCH_ATTRIBUTE_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_-]*$");
     private static final String LOGGED_IN_USER = "Logged-in user{";
+    private static final StringBuilder USER_PERMISSION_ERROR_MSG = new StringBuilder("%s User")
+            .append(" does not have super admin permission to fetch/modify user{%s}");
+
 
     private class UserPagedResult extends PagedResult<CustomUser> {
     };
