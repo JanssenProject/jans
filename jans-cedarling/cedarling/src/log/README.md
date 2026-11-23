@@ -32,6 +32,8 @@ Configuration options for native targets (not applicable to WASM):
 - `CEDARLING_STDOUT_BUFFER_LIMIT`: Maximum buffer size in bytes before forcing a flush (only applies to async mode)
 
 In `async` mode, logs are buffered and flushed periodically to improve performance.
+Entries wait in a queue of 10,000 entries; when stdout cannot keep up and the queue is full,
+new entries are dropped and a `WARN` system entry reports how many.
 In `immediate` mode, each log line is written immediately to stdout.
 
 ### Log type `lock`
