@@ -1,5 +1,5 @@
 # FROM blazemeter/taurus:master-f96971fa-2022-12-12
-FROM blazemeter/taurus:1.17.2@sha256:9d5427c9de0907ee54c831d5e2b456343456bbab6df00da22da7b2c7ba1002cb
+FROM blazemeter/taurus:1.17.4@sha256:07ec0826418c6019c5a8be90d8d16620f0cccb88774cd6a865024b6da2e26f37
 
 # ===============
 # Ubuntu packages
