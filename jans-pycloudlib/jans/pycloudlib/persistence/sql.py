@@ -7,8 +7,8 @@ import json
 import logging
 import os
 import re
-import time
 import ssl
+import time
 import typing as _t
 import warnings
 import weakref
@@ -198,6 +198,14 @@ class CloudSqlConnectorMixin:
                 self._cloudsql_connector = None
 
 
+#: Leading ``CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]`` of an index query; keywords are
+#: case-insensitive and may be separated by any whitespace.
+_PG_CREATE_INDEX_RE = re.compile(
+    r"^\s*(CREATE\s+(?:UNIQUE\s+)?INDEX)\s+(?:CONCURRENTLY\s+)?(?:IF\s+NOT\s+EXISTS\s+)?",
+    re.IGNORECASE,
+)
+
+
 def _pg_error_code(exc: DatabaseError) -> _t.Optional[str]:
     """Get SQLSTATE of a PostgreSQL error, whichever driver (psycopg2 or pg8000) raised it."""
     orig = exc.orig
@@ -255,10 +263,11 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         self-conflicting and still waits on a running (auto)vacuum; that wait is avoided by checking
         the catalog first (see ``SqlClient.create_index``), not by ``CONCURRENTLY``.
         """
-        for prefix in ("CREATE UNIQUE INDEX ", "CREATE INDEX "):
-            if query.startswith(prefix):
-                return f"{prefix}CONCURRENTLY IF NOT EXISTS {query[len(prefix):]}"
-        return query
+        match = _PG_CREATE_INDEX_RE.match(query)
+        if not match:
+            return query
+        # modifiers already present in the query are consumed by the pattern, so they are never doubled
+        return f"{match.group(1)} CONCURRENTLY IF NOT EXISTS {query[match.end():]}"
 
     def drop_index_query(self, table_name: str, index_name: str) -> str:
         """Query to drop an index (left invalid by a failed concurrent build)."""
@@ -837,13 +846,15 @@ class SqlClient(SqlSchemaMixin):
         query = f"CREATE TABLE {self.quoted_id(table_name)} ({columns_fmt}, {pk_def})"
 
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
+            # handle the error outside the transaction block, so the failed transaction is rolled back
+            # (not committed) before a duplicate is ignored
+            try:
+                with conn.begin():
                     conn.execute(text(query))
                     # refresh metadata as we have newly created table
                     self.metadata.reflect(conn)
-                except DatabaseError as exc:
-                    self.adapter.on_create_table_error(exc)
+            except DatabaseError as exc:
+                self.adapter.on_create_table_error(exc)
 
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
@@ -914,11 +925,12 @@ class SqlClient(SqlSchemaMixin):
         """
         if table_name is None or index_name is None:
             with self.engine.connect() as conn:
-                with conn.begin():
-                    try:
+                # handle the error after the transaction is rolled back
+                try:
+                    with conn.begin():
                         conn.execute(text(query))
-                    except DatabaseError as exc:
-                        self.adapter.on_create_index_error(exc)
+                except DatabaseError as exc:
+                    self.adapter.on_create_index_error(exc)
             return
 
         query = self.adapter.prepare_index_query(query)
@@ -1059,11 +1071,12 @@ class SqlClient(SqlSchemaMixin):
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
+            # handle the error after the transaction is rolled back
+            try:
+                with conn.begin():
                     conn.execute(query)
-                except DatabaseError as exc:
-                    self.adapter.on_insert_into_error(exc)
+            except DatabaseError as exc:
+                self.adapter.on_insert_into_error(exc)
 
     def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
         """Get a row from a table with matching ID."""
