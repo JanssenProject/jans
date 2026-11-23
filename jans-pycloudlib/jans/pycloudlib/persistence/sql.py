@@ -207,6 +207,25 @@ _PG_CREATE_INDEX_RE = re.compile(
 )
 
 
+def _positive_seconds(name: str, value: _t.Any) -> int:
+    """Validate a lock timeout given in whole seconds.
+
+    PostgreSQL treats ``lock_timeout = 0`` as "no timeout" (the DDL would wait for a conflicting lock
+    indefinitely) and a fractional value would be truncated to ``0``, so only positive whole numbers
+    are accepted.
+
+    Raises:
+        ValueError: The value is not a positive whole number of seconds.
+    """
+    try:
+        seconds = int(value)
+    except (TypeError, ValueError):
+        seconds = None
+    if seconds is None or seconds != value or seconds < 1 or isinstance(value, bool):
+        raise ValueError(f"{name} must be a positive whole number of seconds, got {value!r}")
+    return seconds
+
+
 class _IndexLockTimeout(Exception):
     """Raised when the cross-session index lock cannot be acquired within the lock timeout."""
 
@@ -994,7 +1013,12 @@ class SqlClient(SqlSchemaMixin):
           if all attempts time out, a warning is logged and the next start tries again.
 
         Without the names, the query is run as is and "already exists" errors are ignored.
+
+        Raises:
+            ValueError: ``lock_timeout`` is not a positive whole number of seconds.
         """
+        lock_timeout = _positive_seconds("lock_timeout", lock_timeout)
+
         if table_name is None or index_name is None:
             with self.engine.connect() as conn:
                 # handle the error after the transaction is rolled back
@@ -1062,8 +1086,10 @@ class SqlClient(SqlSchemaMixin):
             a warning is logged and the next start tries again.
 
         Raises:
+            ValueError: ``lock_timeout`` is not a positive whole number of seconds.
             DatabaseError: Any error other than a lock timeout, for the caller to handle.
         """
+        lock_timeout = _positive_seconds("lock_timeout", lock_timeout)
         retries = max(retries, 1)
         for attempt in range(1, retries + 1):
             try:
