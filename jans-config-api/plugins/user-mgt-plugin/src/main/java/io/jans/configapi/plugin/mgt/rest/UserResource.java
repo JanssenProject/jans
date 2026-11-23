@@ -434,6 +434,7 @@ public class UserResource extends BaseResource {
 
             // patch user
             existingUser = userMgmtSrv.patchUser(inum, userPatchRequest, canChangeAdminUIRole());
+            checkResourceNotNull(existingUser, USER);
             logger.debug("Patched user:{}", existingUser);
 
             // excludedAttributes

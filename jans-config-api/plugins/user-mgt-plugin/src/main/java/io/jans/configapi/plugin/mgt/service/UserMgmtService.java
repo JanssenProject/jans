@@ -557,17 +557,23 @@ public class UserMgmtService {
             try {
                 return saveWithVersion(user);
             } catch (VersionMismatchException ex) {
-                checkRetry(user, attempt, ex);
-                base = userService.getUserByDn(user.getDn());
+                base = reReadForRetry(user, read, keepStoredStatus, attempt, ex);
                 if (base == null) {
                     return null;
                 }
-                // the requested status was chosen against the read; don't let it override a newer one
-                if (!keepStoredStatus && base.getStatus() != read.getStatus()) {
-                    throw ex;
-                }
             }
         }
+    }
+
+    private User reReadForRetry(User user, User read, boolean keepStoredStatus, int attempt,
+            VersionMismatchException ex) {
+        checkRetry(user, attempt, ex);
+        User current = userService.getUserByDn(user.getDn());
+        // the requested status was chosen against the read; don't let it override a newer one
+        if (current != null && !keepStoredStatus && current.getStatus() != read.getStatus()) {
+            throw ex;
+        }
+        return current;
     }
 
     private User saveWithVersion(User user) {

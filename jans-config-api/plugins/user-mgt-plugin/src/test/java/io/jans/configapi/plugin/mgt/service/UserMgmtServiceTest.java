@@ -98,7 +98,7 @@ public class UserMgmtServiceTest {
     }
 
     @Test
-    public void patchGivesUpAfterMaxAttempts() throws Exception {
+    public void patchGivesUpAfterMaxAttempts() {
         stored.set(user(GluuStatus.ACTIVE, 7L));
         when(userService.getUserByInum(INUM)).thenAnswer(inv -> user(GluuStatus.ACTIVE, 1L));
 
