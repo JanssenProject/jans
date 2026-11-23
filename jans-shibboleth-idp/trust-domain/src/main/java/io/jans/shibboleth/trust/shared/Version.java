@@ -5,6 +5,18 @@ package io.jans.shibboleth.trust.shared;
  */
 public record Version(int value) implements Comparable<Version> {
 
+    public Version {
+
+        if (value == 0) {
+
+            throw new IllegalArgumentException("Version must be greater than zero");
+        }
+
+        if (value == -1) {
+
+            throw new IllegalArgumentException("Version cannot be negative");
+        }
+    }
     public static Version initial() {
 
         return new Version(1);
@@ -17,6 +29,11 @@ public record Version(int value) implements Comparable<Version> {
 
     public Version next() {
 
+        if (value == Integer.MAX_VALUE) {
+
+            return initial();
+        }
+        
         return new Version(value + 1);
     }
 
