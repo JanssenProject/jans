@@ -271,7 +271,9 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
 
     def drop_index_query(self, table_name: str, index_name: str) -> str:
         """Query to drop an index (left invalid by a failed concurrent build)."""
-        return f"DROP INDEX CONCURRENTLY IF EXISTS {self.quote_char}{index_name}{self.quote_char}"
+        q = self.quote_char
+        escaped = index_name.replace(q, q * 2)
+        return f"DROP INDEX CONCURRENTLY IF EXISTS {q}{escaped}{q}"
 
     def set_lock_timeout_query(self, seconds: int) -> str:
         """Query to limit how long a statement waits for a lock."""
@@ -391,6 +393,7 @@ class MysqlAdapter(CloudSqlConnectorMixin):
         Part of the adapter interface; not used for MySQL as its index state is never "invalid".
         """
         q = self.quote_char
+        index_name, table_name = (name.replace(q, q * 2) for name in (index_name, table_name))
         return f"DROP INDEX {q}{index_name}{q} ON {q}{table_name}{q}"
 
     def set_lock_timeout_query(self, seconds: int) -> str:
