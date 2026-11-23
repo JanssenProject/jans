@@ -46,7 +46,7 @@ class LockPersistenceSetup:
             "jans_auth_token_endpoint": f"https://{hostname}/jans-auth/restv1/token",
         }
 
-        # client
+        # lock audit client
         ctx["lock_client_id"] = self.manager.config.get("lock_client_id")
 
         if not ctx["lock_client_id"]:
@@ -66,6 +66,27 @@ class LockPersistenceSetup:
                 ctx["lock_client_pw"], self.manager.secret.get("encoded_salt"),
             ).decode()
             self.manager.secret.set("lock_client_encoded_pw", ctx["lock_client_encoded_pw"])
+
+        # lock trace client
+        ctx["lock_trace_client_id"] = self.manager.config.get("lock_trace_client_id")
+
+        if not ctx["lock_trace_client_id"]:
+            ctx["lock_trace_client_id"] = f"2200.{uuid4()}"
+            self.manager.config.set("lock_trace_client_id", ctx["lock_trace_client_id"])
+
+        ctx["lock_trace_client_pw"] = self.manager.secret.get("lock_trace_client_pw")
+
+        if not ctx["lock_trace_client_pw"]:
+            ctx["lock_trace_client_pw"] = get_random_chars()
+            self.manager.secret.set("lock_trace_client_pw", ctx["lock_trace_client_pw"])
+
+        ctx["lock_trace_client_encoded_pw"] = self.manager.secret.get("lock_trace_client_encoded_pw")
+
+        if not ctx["lock_trace_client_encoded_pw"]:
+            ctx["lock_trace_client_encoded_pw"] = encode_text(
+                ctx["lock_trace_client_pw"], self.manager.secret.get("encoded_salt"),
+            ).decode()
+            self.manager.secret.set("lock_trace_client_encoded_pw", ctx["lock_trace_client_encoded_pw"])
 
         # pre-populate lock_dynamic_conf_base64
         with open("/app/templates/jans-lock/dynamic-conf.json") as f:
