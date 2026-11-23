@@ -442,6 +442,19 @@ def test_simple_json_mysql(monkeypatch, gmanager, env_value, expected):
 @pytest.mark.parametrize("query, expected", [
     ('CREATE INDEX "t_a" ON "t" ("a")', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
     ('CREATE UNIQUE INDEX "t_a" ON "t" ("a")', 'CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    # keywords are case-insensitive and may be separated by any whitespace
+    ('create index "t_a" on "t" ("a")', 'create index CONCURRENTLY IF NOT EXISTS "t_a" on "t" ("a")'),
+    ('Create  Unique\tIndex   "t_a" ON "t" ("a")', 'Create  Unique\tIndex CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    ('\n  CREATE INDEX "t_a" ON "t" ("a")', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    # modifiers already in the query are not repeated
+    ('CREATE INDEX IF NOT EXISTS "t_a" ON "t" ("a")', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    ('CREATE INDEX CONCURRENTLY "t_a" ON "t" ("a")', 'CREATE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")'),
+    (
+        'CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")',
+        'CREATE UNIQUE INDEX CONCURRENTLY IF NOT EXISTS "t_a" ON "t" ("a")',
+    ),
+    # not an index creation; left unchanged
+    ('DROP INDEX "t_a"', 'DROP INDEX "t_a"'),
 ])
 def test_postgresql_adapter_prepare_index_query(query, expected):
     from jans.pycloudlib.persistence.sql import PostgresqlAdapter
@@ -774,3 +787,54 @@ def test_sql_client_alter_table_runs_at_least_once(monkeypatch, sql_client):
 
     assert sql_client.alter_table("ALTER TABLE t ADD COLUMN c INT", "t", retries=0) is True
     assert len(calls) == 1
+
+
+class _FakeTx:
+    """Transaction context manager that records whether the block exited with an error (rollback)."""
+
+    def __init__(self):
+        self.rolled_back = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        self.rolled_back = exc_type is not None
+        return False
+
+
+def _failing_conn(tx):
+    from unittest.mock import MagicMock
+
+    from sqlalchemy.exc import OperationalError
+
+    conn = MagicMock()
+    conn.begin.return_value = tx
+    conn.execute.side_effect = OperationalError("stmt", {}, Exception())
+    return conn
+
+
+@pytest.mark.parametrize("method, args, handler", [
+    ("create_table", ("t", {"doc_id": "VARCHAR(64)"}, "doc_id"), "on_create_table_error"),
+    ("create_index", ("CREATE INDEX x ON t (a)",), "on_create_index_error"),
+    ("insert_into", ("t", {"doc_id": "1"}), "on_insert_into_error"),
+])
+def test_sql_client_duplicate_error_handled_after_rollback(monkeypatch, sql_client, method, args, handler):
+    from unittest.mock import MagicMock
+
+    tx = _FakeTx()
+    conn = _failing_conn(tx)
+    handled = []
+
+    adapter = MagicMock()
+    adapter.quote_char = '"'
+    # the transaction must be rolled back before the error handler suppresses the duplicate
+    getattr(adapter, handler).side_effect = lambda exc: handled.append(tx.rolled_back)
+    monkeypatch.setattr(sql_client, "adapter", adapter)
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+    monkeypatch.setattr(sql_client, "_apply_json_defaults", lambda table, mapping: mapping, raising=False)
+    monkeypatch.setattr(type(sql_client), "metadata", MagicMock(), raising=False)
+
+    getattr(sql_client, method)(*args)
+
+    assert handled == [True]
