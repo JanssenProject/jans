@@ -300,6 +300,7 @@ pub(crate) enum StartTraceError {
 #[cfg(not(target_arch = "wasm32"))]
 async fn read_key_file(path: PathBuf) -> Result<String, LoadProducerKeyError> {
     let task_path = path.clone();
+    #[allow(clippy::disallowed_methods, reason = "native-only function")]
     tokio::task::spawn_blocking(move || fs::read_to_string(task_path))
         .await
         // The task fails to join only if it panics or the runtime shuts down.
@@ -327,7 +328,7 @@ pub enum LoadProducerKeyError {
     /// The key is not an unencrypted PKCS#8 PEM Ed25519 private key.
     #[error(
         "the TRACE signing key from `{property}`{} is invalid: {source}",
-        path.as_ref().map(|p| format!(" (`{}`)", p.display())).unwrap_or_default()
+        path.as_ref().map_or_else(String::new, |p| format!(" (`{}`)", p.display()))
     )]
     InvalidKey {
         /// Property the key was configured with.

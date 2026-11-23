@@ -18,7 +18,43 @@ output, and where results land, then describes the pen-test that correlates them
 | Sonar | `scan-sonar.yml` | quality + security hotspots per module | Sonar report | SonarCloud (off-platform) |
 | Scorecard | `scan-scorecard.yml` | supply-chain posture | SARIF | code scanning + artifact + OpenSSF |
 | SBOM (Parlay + sbomqs) | `scan-sbom.yml` | dependency graph + compliance | signed JSON | release assets |
-| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | workflow artifact only — CONFIDENTIAL, not attached to the public release |
+| CBOM (cbomkit) | `scan-cbom.yml` | crypto algorithms, protocols, certs, keys | signed CycloneDX 1.6 JSON | release asset `jans-cbom.json`; image CBOM workflow artifact only |
+| Pen-test (DAST) | `scan-pentest.yml` | live endpoints | PDF/JSON/MD/SARIF | age-encrypted workflow artifact only — CONFIDENTIAL, not attached to the public release |
+
+## CBOM
+
+`scan-cbom.yml` produces a cryptographic bill of materials (CycloneDX 1.6) for
+post-quantum readiness reviews.
+
+- **Source** (after each tag-push "Build: Publish" succeeds, or dispatch): builds
+  the Maven modules, then
+  [cbomkit-action](https://github.com/cbomkit/cbomkit-action) scans Java, Python
+  and Go code for crypto API use. Cedarling is Rust, which cbomkit does not scan,
+  so `scripts/cbom.py rust` maps the crypto crates in `jans-cedarling/Cargo.lock`
+  to the algorithms they provide. Both merge into `jans-cbom.json`, stamped with
+  the scanned commit (`jans:commit`). After a tag-push publish it is
+  cosign-signed and attached to the release, unless the tag has since moved or
+  the release already holds a complete pair for that commit. A manual run only
+  uploads an unsigned `jans-cbom` workflow artifact.
+- **Images** (manual dispatch only): [cbomkit-theia](https://github.com/cbomkit/cbomkit-theia)
+  scans each published image for certificates, keys, secrets and OpenSSL config.
+  Base-image CA trust stores are skipped; Janssen certs under `/etc/certs` are
+  not. Image digests are resolved once per run, so a partial re-run scans the
+  same images. Each platform of a multi-arch image is scanned by its own digest.
+  Every finding carries `jans:image`; findings from multi-platform scans also
+  carry `jans:platform`, and each container component records its
+  `jans:image-index`. Output is a workflow artifact (`jans-image-cbom`), not a
+  release asset, until reviewed. If some images fail, the artifact is
+  `jans-image-cbom-partial` and lists them in `jans:missing-images`. If none
+  succeed, no artifact is produced and `image-publish` fails at "Build
+  jans-image-cbom.json".
+
+`scripts/cbom.py gate` runs on every CBOM before upload. It strips key values and
+fails the job if it finds private keys, secret or generic keys, passwords,
+credentials or tokens, at any nesting depth, printing only the type, finding name
+(e.g. `generic-api-key`) and file path. The gitleaks false positive on the stock
+JDK `java.security` is allowed. theia stderr is discarded because
+it can echo scanned file contents into the public run log.
 
 ## Pen-test (DAST)
 
@@ -73,16 +109,20 @@ Flow:
    assessment-coverage table (findings per dimension), a findings register (with a
    Backend column), detailed write-ups with recommendations for medium+ findings,
    and appendices for run metadata and the SBOM component inventory. All formats
-   are uploaded **only** as a workflow artifact (30-day retention) — the report is
-   CONFIDENTIAL and is never attached to the public release; GitHub Actions
-   artifacts restrict access to users with repository access. The PDF and a link to
-   the run are also posted to Zulip (`#bot_reporter`, topic `pen-test`) when
-   `ZULIP_API_KEY` is set.
+   are uploaded **only** as an age-encrypted workflow artifact
+   (`pentest-report.tar.gz.age`, 30-day retention) — the report is CONFIDENTIAL and
+   is never attached to the public release. Artifacts and run logs of a public repo
+   are readable by any signed-in GitHub user, so raw scanner output and target logs
+   are encrypted too, and scanner stdout goes to files inside them, not the log. The
+   PDF and a link to the run are also posted to Zulip (`#bot_reporter`, topic
+   `pen-test`) when `ZULIP_API_KEY` is set.
 
 ### Configuration
 
 | Secret / Var | Required | Use |
 |---|---|---|
+| `PENTEST_AGE_KEY` (secret) | **required** | age identity; artifacts are encrypted to its public key. Without it the run fails before scanning |
+| `PENTEST_AGE_RECIPIENTS` (var) | optional | extra age recipients, one per line; must be the same kind as the key (PQ or classic) |
 | `PENTEST_AI_ENDPOINT` (secret) | optional | Messages API URL, e.g. `https://api.anthropic.com/v1/messages`; step skipped if unset |
 | `PENTEST_AI_TOKEN` (secret) | optional | API key, sent as the `x-api-key` header |
 | `PENTEST_AI_MODEL` (var) | optional | model id (default `claude-opus-5`) |
@@ -94,3 +134,21 @@ ingested context as a single user message with a system prompt instructing the
 model to return `{ "findings": [...] }`, then parses `.content[0].text`. Set
 `PENTEST_AI_MODEL` / `PENTEST_AI_API_VERSION` repository variables to override the
 defaults.
+
+To read a report, download it (`gh run download` unpacks the artifact ZIP; from
+the browser, unzip it first) and decrypt it with age 1.3.0 or later:
+
+```bash
+mkdir "report-RUN_ID" && cd "report-RUN_ID" && \
+  gh run download RUN_ID -R JanssenProject/jans -n pentest-report && \
+  age -d -i ../key.txt pentest-report.tar.gz.age | tar xz
+```
+
+Create the key with `age-keygen -pq -o key.txt` (post-quantum hybrid, also age
+1.3.0+; CI pins 1.3.2); store the whole file as `PENTEST_AGE_KEY` and keep a copy
+with the security team. AIO startup output goes to `startup.log` inside the
+encrypted `pentest-aio-logs-*` artifact, not the run log.
+
+If a backend uploaded raw output that cannot be downloaded or decrypted, a
+release run fails; a manual run warns and reports the remaining backend. A
+backend with no scanner output uploads nothing and is not counted.

@@ -10,10 +10,14 @@ import java.util.List;
 
 import org.json.JSONArray;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import io.jans.as.model.exception.InvalidClaimException;
 import io.jans.model.user.SimpleUser;
+import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.Version;
 
 /**
  * @author Yuriy Movchan Date: 06/11/2013
@@ -23,6 +27,30 @@ import io.jans.orm.annotation.ObjectClass;
 public class User extends SimpleUser {
 
     private static final long serialVersionUID = 6634191420188575733L;
+
+    @JsonIgnore
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    // version is concurrency metadata, not identity: keep the inherited equality
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
     public Object getAttribute(String attributeName, boolean optional, boolean multivalued) throws InvalidClaimException {
         Object attribute = null;

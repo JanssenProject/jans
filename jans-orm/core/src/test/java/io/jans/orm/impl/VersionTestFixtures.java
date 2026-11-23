@@ -27,6 +27,17 @@ class VersionTestFixtures {
 		@AttributeName(name = "uid")
 		private String uid;
 
+		@AttributeName(name = "mail")
+		private String mail;
+
+		public String getMail() {
+			return mail;
+		}
+
+		public void setMail(String mail) {
+			this.mail = mail;
+		}
+
 		@Version
 		@AttributeName(name = "jansVersion")
 		private Long version;

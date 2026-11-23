@@ -13,13 +13,17 @@ use std::future::Future;
 ///
 /// Use this instead of the following:
 /// - [`tokio::spawn`]
-/// - [`wasm_bindgen_futures::spawn_local`]
+/// - `wasm_bindgen_futures::spawn_local`
 #[cfg(not(any(target_arch = "wasm32", target_arch = "wasm64")))]
 pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
 where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "native branch of the cross-platform wrapper"
+    )]
     let handle = tokio::spawn(future);
     JoinHandle { handle }
 }

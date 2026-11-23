@@ -20,26 +20,18 @@ use super::entity_parser::EntityParser;
 use super::formats::StoreContent;
 use super::log_entry::PolicyStoreLogEntry;
 use super::policy_parser::PolicyParser;
-use super::schema_parser::ParsedSchema;
 use super::{PoliciesContainer, PolicyStore, TokenTypes};
 use crate::common::cedar_schema::CedarSchema;
-use crate::common::cedar_schema::cedar_json::CedarSchemaJson;
 use crate::common::default_entities::parse_default_entities_with_warns;
 use crate::common::default_entities_limits::{DefaultEntitiesLimits, DefaultEntitiesLimitsError};
 use crate::log::Logger;
 use crate::log::interface::LogWriter;
 use cedar_policy::PolicySet;
-use cedar_policy_core::extensions::Extensions;
-use cedar_policy_core::validator::ValidatorSchema;
 use std::collections::HashMap;
 
 /// Errors that can occur during policy store conversion.
 #[derive(Debug, thiserror::Error)]
 pub enum ConversionError {
-    /// Schema conversion failed
-    #[error("Failed to convert schema: {0}")]
-    SchemaConversion(String),
-
     /// Policy conversion failed
     #[error("Failed to convert policies: {0}")]
     PolicyConversion(String),
@@ -107,8 +99,7 @@ impl PolicyStoreManager {
         let cedar_schema = content
             .schema
             .as_ref()
-            .map(Self::convert_parsed_schema)
-            .transpose()?;
+            .map(|parsed| CedarSchema::from(parsed.get_schema().clone()));
 
         // 2. Convert policies and templates into a single PoliciesContainer
         let policies_container =
@@ -131,46 +122,6 @@ impl PolicyStoreManager {
             token_types,
             default_entities,
         })
-    }
-
-    /// Convert a pre-parsed `ParsedSchema` to `CedarSchema`.
-    fn convert_parsed_schema(parsed: &ParsedSchema) -> Result<CedarSchema, ConversionError> {
-        let schema = parsed.get_schema().clone();
-
-        let json_string = parsed.get_fragment().to_json_string().map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to serialize schema to JSON: {e}"))
-        })?;
-
-        let json: CedarSchemaJson = serde_json::from_str(&json_string).map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to parse CedarSchemaJson: {e}"))
-        })?;
-
-        let validator_schema = ValidatorSchema::from_json_str(
-            &json_string,
-            Extensions::all_available(),
-        )
-        .map_err(|e| {
-            ConversionError::SchemaConversion(format!("Failed to create ValidatorSchema: {e}"))
-        })?;
-
-        Ok(CedarSchema {
-            schema,
-            json,
-            validator_schema,
-        })
-    }
-
-    /// Convert raw schema string to `CedarSchema`.
-    #[cfg(test)]
-    fn convert_schema(schema_content: &str) -> Result<CedarSchema, ConversionError> {
-        use super::schema_parser::ParsedSchema;
-
-        let parsed_schema =
-            ParsedSchema::parse(schema_content, "schema.cedarschema").map_err(|e| {
-                ConversionError::SchemaConversion(format!("Failed to parse schema: {e}"))
-            })?;
-
-        Self::convert_parsed_schema(&parsed_schema)
     }
 
     /// Convert policy and template files to `PoliciesContainer`.
@@ -311,46 +262,10 @@ impl PolicyStoreManager {
 mod tests {
     use super::*;
     use crate::common::policy_store::loader::StoreFile;
+    use crate::common::policy_store::schema_parser::ParsedSchema;
 
     fn parse_schema(content: &str) -> ParsedSchema {
         ParsedSchema::parse(content, "schema.cedarschema").expect("test schema should parse")
-    }
-
-    #[test]
-    fn test_convert_schema_valid() {
-        let schema_content = r#"
-    namespace TestApp {
-        entity User;
-        entity Resource;
-        action "read" appliesTo {
-            principal: [User],
-            resource: [Resource]
-        };
-    }
-"#;
-
-        let result = PolicyStoreManager::convert_schema(schema_content);
-        assert!(
-            result.is_ok(),
-            "Schema conversion failed: {:?}",
-            result.err()
-        );
-
-        let cedar_schema = result.unwrap();
-        // Verify schema has expected entity types
-        let entity_types: Vec<_> = cedar_schema.schema.entity_types().collect();
-        assert_ne!(entity_types, [] as [&cedar_policy::EntityTypeName; 0]);
-    }
-
-    #[test]
-    fn test_convert_schema_invalid() {
-        let schema_content = "this is not valid cedar schema syntax {{{";
-        let result = PolicyStoreManager::convert_schema(schema_content);
-        let err = result.expect_err("Expected error for invalid Cedar schema syntax");
-        assert!(
-            matches!(err, ConversionError::SchemaConversion(_)),
-            "Expected SchemaConversion error, got: {err:?}"
-        );
     }
 
     #[test]

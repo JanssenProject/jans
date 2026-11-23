@@ -6,6 +6,9 @@
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
 #![allow(clippy::missing_errors_doc)]
+// The WASM-unsafe calls banned in clippy.toml are fine in unit tests, which only run natively.
+// The non-test build is still linted, so production code cannot rely on this.
+#![cfg_attr(test, allow(clippy::disallowed_methods))]
 
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
@@ -22,7 +25,6 @@ mod common;
 mod context_data_api;
 mod entity_builder;
 mod http;
-mod http_utils;
 mod init;
 mod jwt;
 mod lock;
@@ -74,7 +76,7 @@ pub use common::policy_store::validate::{
     Diagnostic, LevelResult, ValidateInfraError, ValidationReport,
 };
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
-pub use http::HttpClientConfig;
+pub use http::{HttpClientConfig, HttpRequestError};
 use init::ServiceFactory;
 use init::policy_store::{LoadOptions, LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
@@ -232,8 +234,13 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
 
-        let telemetry_active = config
+        // One config for the metrics mode and the workers, so a zero telemetry
+        // interval neither starts a ticker nor takes the metrics from the host.
+        let lock_config = config
             .lock_config
+            .as_ref()
+            .map(LockServiceConfig::with_zero_intervals_disabled);
+        let telemetry_active = lock_config
             .as_ref()
             .is_some_and(|c| c.telemetry_interval.is_some());
         let metrics_mode = resolve_metrics_mode(
@@ -246,7 +253,7 @@ impl Cedarling {
             &config.log_config,
             pdp_id,
             app_name,
-            config.lock_config.as_ref(),
+            lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
             config
@@ -725,7 +732,7 @@ fn policy_store_http_client(
         reqwest::Client::builder().default_headers(headers),
         config.http_client_config,
     )?;
-    Ok(Some(client))
+    Ok(Some(client.retrying_unauthorized()))
 }
 
 /// Spawn the background policy-store refresh worker if the source is a remote
@@ -1072,7 +1079,7 @@ impl Cedarling {
                 );
 
                 match e {
-                    PolicyStoreLoadError::FetchFromLockServer(_)
+                    PolicyStoreLoadError::Fetch(_)
                     | PolicyStoreLoadError::Archive(_)
                     | PolicyStoreLoadError::Directory(_) => {
                         Err(ValidateInfraError::Io(std::io::Error::other(err_str)))
@@ -1125,30 +1132,17 @@ impl Cedarling {
                 // Parse succeeded! Now run schema and metadata independently.
 
                 // Schema Level
-                let schema_res = if let Some(schema) = &loaded.store.store.schema {
-                    let validator = cedar_policy::Validator::new(schema.schema.clone());
-                    let result = validator.validate(
+                let schema_validation = match &loaded.store.store.schema {
+                    Some(schema) => validate_schema(
+                        schema.schema.clone(),
                         loaded.store.store.policies.get_set(),
-                        cedar_policy::ValidationMode::Strict,
-                    );
-                    if result.validation_passed() {
-                        LevelResult::Ok
-                    } else {
-                        let errors = result
-                            .validation_errors()
-                            .map(|e| Diagnostic {
-                                file: e.policy_id().to_string(),
-                                line: None,
-                                column: None,
-                                message: e.to_string(),
-                            })
-                            .collect();
-                        LevelResult::Failed { errors }
-                    }
-                } else {
-                    LevelResult::Skipped {
-                        reason: "no schema present".into(),
-                    }
+                    ),
+                    None => SchemaValidation {
+                        result: LevelResult::Skipped {
+                            reason: "no schema present".into(),
+                        },
+                        warnings: Vec::new(),
+                    },
                 };
 
                 // Metadata Level
@@ -1194,11 +1188,12 @@ impl Cedarling {
                         column: None,
                         message: warning.to_string(),
                     })
+                    .chain(schema_validation.warnings)
                     .collect();
 
                 Ok(ValidationReport {
                     parse: LevelResult::Ok,
-                    schema: schema_res,
+                    schema: schema_validation.result,
                     metadata: metadata_res,
                     warnings,
                     unknown_fields: loaded
@@ -1210,5 +1205,58 @@ impl Cedarling {
                 })
             },
         }
+    }
+}
+
+/// Outcome of checking the policies against the schema: the level result plus
+/// Cedar's non-fatal findings, which belong in the report's `warnings`.
+#[cfg(feature = "tools")]
+struct SchemaValidation {
+    result: LevelResult,
+    warnings: Vec<Diagnostic>,
+}
+
+/// Validates `policies` against `schema` in strict mode.
+///
+/// Cedar reports some real problems only as warnings, such as a policy whose
+/// action can never apply to its principal and resource types, so they are kept
+/// rather than dropped when validation passes.
+#[cfg(feature = "tools")]
+fn validate_schema(
+    schema: cedar_policy::Schema,
+    policies: &cedar_policy::PolicySet,
+) -> SchemaValidation {
+    let result = cedar_policy::Validator::new(schema)
+        .validate(policies, cedar_policy::ValidationMode::Strict);
+
+    let warnings = result
+        .validation_warnings()
+        .map(|w| Diagnostic {
+            file: w.policy_id().to_string(),
+            line: None,
+            column: None,
+            message: w.to_string(),
+        })
+        .collect();
+
+    let level = if result.validation_passed() {
+        LevelResult::Ok
+    } else {
+        LevelResult::Failed {
+            errors: result
+                .validation_errors()
+                .map(|e| Diagnostic {
+                    file: e.policy_id().to_string(),
+                    line: None,
+                    column: None,
+                    message: e.to_string(),
+                })
+                .collect(),
+        }
+    };
+
+    SchemaValidation {
+        result: level,
+        warnings,
     }
 }
