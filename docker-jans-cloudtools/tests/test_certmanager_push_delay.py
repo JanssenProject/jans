@@ -171,7 +171,12 @@ def test_pod_dies_after_refresh_does_not_abort_push(handler, monkeypatch):
 
 def test_pod_added_during_delay_receives_jks(handler, monkeypatch):
     meta = handler.meta_client
-    _sleep_hook(monkeypatch, lambda: meta.pods.append("auth-d"))
+
+    def add_pod():
+        meta.pods.append("auth-d")
+        meta.files["auth-d"] = {handler.jks_path: b"old-jks"}  # new pods mount the JKS from the secret
+
+    _sleep_hook(monkeypatch, add_pod)
 
     handler.patch()
 
@@ -361,6 +366,7 @@ def test_pod_replaced_during_retry_is_pushed(handler, monkeypatch):
         if calls["n"] == 2:  # first retry wait
             meta.pods.remove("auth-b")
             meta.pods.append("auth-d")
+            meta.files["auth-d"] = {handler.jks_path: b"old-jks"}
 
     monkeypatch.setattr(certmanager.time, "sleep", sleep)
 
@@ -382,3 +388,70 @@ def test_retries_can_be_disabled(handler, monkeypatch):
     assert sleeps == [60]
     assert meta.files["auth-b"][handler.jks_path] == b"old-jks"
     assert len(handler.backend.revisions) == 2
+
+
+def test_failed_sha256sum_errors_do_not_verify_backup(handler, monkeypatch):
+    """both sha256sum calls fail with the same error text -> they must not compare equal / verify the backup"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    orig = meta.exec_cmd
+
+    def exec_cmd(c, cmd):
+        if c == "auth-a" and cmd.startswith("sha256sum"):
+            return f"sha256sum: {cmd.split()[1]}: Permission denied"  # error text, not a digest
+        return orig(c, cmd)
+
+    meta.exec_cmd = exec_cmd
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    assert "auth-a" not in meta.jks_pushed
+    assert meta.files["auth-a"][jks] == b"old-jks"
+    assert meta.jks_pushed == ["auth-b", "auth-c"]
+    assert len(handler.backend.revisions) == 2
+
+
+def test_retry_keeps_original_backup_after_failed_copy_and_restore(handler, monkeypatch):
+    """partial copy + failed restore on every round: the partial JKS must never replace the original backup"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    meta.partial.add("auth-a")
+    orig = meta.exec_cmd
+    backups = []
+
+    def exec_cmd(c, cmd):
+        if c == "auth-a" and cmd == f"cp {jks} {jks}.backup":
+            backups.append(meta.files["auth-a"][jks])
+        if c == "auth-a" and cmd == f"cp {jks}.backup {jks}":
+            return ""  # restore silently does nothing, partial JKS stays on the pod
+        return orig(c, cmd)
+
+    meta.exec_cmd = exec_cmd
+    _sleep_hook(monkeypatch, lambda: None)
+
+    handler.patch()
+
+    # the backup was taken once, from the original keystore, and still holds it after all rounds
+    assert backups == [b"old-jks"]
+    assert meta.files["auth-a"][jks + ".backup"] == b"old-jks"
+    assert len(handler.backend.revisions) == 2
+
+
+def test_pod_updated_then_evicted_is_not_counted(handler, monkeypatch):
+    """the only pod that was updated disappears before the end; the rest failed -> no reload"""
+    meta = handler.meta_client
+    meta.flaky["auth-b"] = 999
+    meta.flaky["auth-c"] = 999
+    calls = {"n": 0}
+
+    def sleep(sec):
+        calls["n"] += 1
+        if calls["n"] == 2:  # first retry wait
+            meta.pods.remove("auth-a")
+
+    monkeypatch.setattr(certmanager.time, "sleep", sleep)
+
+    handler.patch()
+
+    assert len(handler.backend.revisions) == 1  # only the initial bump, no reload
