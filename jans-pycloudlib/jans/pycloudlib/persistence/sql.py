@@ -207,6 +207,10 @@ _PG_CREATE_INDEX_RE = re.compile(
 )
 
 
+class _IndexLockTimeout(Exception):
+    """Raised when the cross-session index lock cannot be acquired within the lock timeout."""
+
+
 def _pg_error_code(exc: DatabaseError) -> _t.Optional[str]:
     """Get SQLSTATE of a PostgreSQL error, whichever driver (psycopg2 or pg8000) raised it."""
     orig = exc.orig
@@ -253,6 +257,21 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         "WHERE n.nspname = current_schema() AND t.relname = :table_name AND c.relname = :index_name"
     )
 
+    #: Same lookup for PostgreSQL < 12, which has no ``pg_stat_progress_create_index``. Another session that
+    #: builds the same index cannot be detected, which is safe: loaders serialize on the index lock
+    #: (see ``index_lock_queries``), so an invalid index seen under that lock is a failed build.
+    index_state_query_legacy = (
+        "SELECT i.indisvalid "
+        "FROM pg_index i "
+        "JOIN pg_class c ON c.oid = i.indexrelid "
+        "JOIN pg_class t ON t.oid = i.indrelid "
+        "JOIN pg_namespace n ON n.oid = t.relnamespace "
+        "WHERE n.nspname = current_schema() AND t.relname = :table_name AND c.relname = :index_name"
+    )
+
+    #: First ``server_version_num`` that has ``pg_stat_progress_create_index`` (PostgreSQL 12).
+    progress_view_min_version = 120000
+
     #: Whether index DDL must run outside a transaction (needed by ``CREATE INDEX CONCURRENTLY``).
     index_ddl_autocommit = True
 
@@ -275,16 +294,20 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
 
         The check of the index state, the drop of an invalid index and its (re)creation must not
         interleave between loaders: otherwise one loader can drop the index another one is building.
-        A session-level advisory lock serializes them. Waiting for it honours ``lock_timeout``.
+        A session-level advisory lock serializes them.
+
+        The acquire query is non-blocking (``pg_try_advisory_lock``) and callers poll it. A blocking
+        ``pg_advisory_lock`` would hold a snapshot while waiting, and the lock holder's
+        ``CREATE INDEX CONCURRENTLY`` waits for older snapshots, which deadlocks both sessions.
 
         Returns:
-            Tuple of (acquire query, release query).
+            Tuple of (try-acquire query, release query).
         """
         # two 31-bit keys: a fixed namespace and a hash of the index; collisions only serialize needlessly
         namespace = zlib.crc32(b"jans.pycloudlib.index") & 0x7FFFFFFF
         key = zlib.crc32(f"{table_name}.{index_name}".encode()) & 0x7FFFFFFF
         return (
-            f"SELECT pg_advisory_lock({namespace}, {key})",
+            f"SELECT pg_try_advisory_lock({namespace}, {key})",
             f"SELECT pg_advisory_unlock({namespace}, {key})",
         )
 
@@ -302,12 +325,15 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
     reset_lock_timeout_query = "RESET lock_timeout"
 
     def is_lock_timeout(self, exc: DatabaseError) -> bool:
-        """Check whether the error is a lock timeout (SQLSTATE 55P03, lock_not_available).
+        """Check whether the error is retryable lock contention.
+
+        That is a lock timeout (SQLSTATE 55P03, lock_not_available) or a deadlock detected by
+        PostgreSQL (40P01), where one of the sessions is aborted and the statement can be retried.
 
         Args:
             exc: Exception instance.
         """
-        return _pg_error_code(exc) == "55P03"
+        return _pg_error_code(exc) in ("55P03", "40P01")
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -679,6 +705,8 @@ class SqlClient(SqlSchemaMixin):
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
         self._closed = False
+        # PostgreSQL only: whether the server has pg_stat_progress_create_index (looked up once)
+        self._pg_has_progress_view: _t.Optional[bool] = None
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             self._bootstrap_ssl_assets()
@@ -921,10 +949,24 @@ class SqlClient(SqlSchemaMixin):
         with self.engine.connect() as conn:
             return self._index_state_on(conn, table_name, index_name)
 
+    def _index_state_sql(self, conn: _t.Any) -> str:
+        """Pick the index lookup query supported by the server.
+
+        PostgreSQL before 12 has no ``pg_stat_progress_create_index``; using it would fail on every start.
+        """
+        legacy = getattr(self.adapter, "index_state_query_legacy", None)
+        if legacy is None:
+            return self.adapter.index_state_query
+
+        if self._pg_has_progress_view is None:
+            version_num = int(conn.execute(text("SHOW server_version_num")).scalar())
+            self._pg_has_progress_view = version_num >= self.adapter.progress_view_min_version
+        return self.adapter.index_state_query if self._pg_has_progress_view else legacy
+
     def _index_state_on(self, conn: _t.Any, table_name: str, index_name: str) -> _t.Optional[bool]:
         """Look up an index state using an existing connection (see ``get_index_state``)."""
         row = conn.execute(
-            text(self.adapter.index_state_query),
+            text(self._index_state_sql(conn)),
             {"table_name": table_name, "index_name": index_name},
         ).fetchone()
         if row is None:
@@ -974,8 +1016,8 @@ class SqlClient(SqlSchemaMixin):
             try:
                 self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=state is False)
                 return
-            except DatabaseError as exc:
-                if self.adapter.is_lock_timeout(exc):
+            except (DatabaseError, _IndexLockTimeout) as exc:
+                if self._is_lock_contention(exc):
                     if attempt == retries:
                         # do not fail the whole job; the next start retries
                         logger.warning(
@@ -991,6 +1033,10 @@ class SqlClient(SqlSchemaMixin):
                     continue
                 self.adapter.on_create_index_error(exc)
                 return
+
+    def _is_lock_contention(self, exc: Exception) -> bool:
+        """Check whether the error is retryable lock contention (lock timeout, or deadlock on PostgreSQL)."""
+        return isinstance(exc, _IndexLockTimeout) or self.adapter.is_lock_timeout(exc)
 
     def alter_table(
         self,
@@ -1059,6 +1105,10 @@ class SqlClient(SqlSchemaMixin):
         """
         with self.engine.connect() as conn:
             if self.adapter.index_ddl_autocommit:
+                # a pooled connection may already be inside a DBAPI transaction (e.g. pg8000 starts one on the
+                # `pool_pre_ping` query); AUTOCOMMIT does not end it, and CREATE INDEX CONCURRENTLY would fail
+                # with "cannot run inside a transaction block". End it first.
+                conn.connection.rollback()
                 # must be set before the connection starts a transaction
                 conn = conn.execution_options(isolation_level="AUTOCOMMIT")
                 tx = nullcontext()
@@ -1073,8 +1123,9 @@ class SqlClient(SqlSchemaMixin):
                     conn.execute(text(self.adapter.set_lock_timeout_query(lock_timeout)))
 
                     if lock_queries:
-                        # waits at most lock_timeout seconds; a timeout is retried by the caller
-                        conn.execute(text(lock_queries[0]))
+                        # poll without blocking; a blocked statement would hold a snapshot that the
+                        # lock holder's CREATE INDEX CONCURRENTLY waits for (deadlock)
+                        self._acquire_index_lock(conn, lock_queries[0], lock_timeout)
                         locked = True
 
                         state = self._index_state_on(conn, table_name, index_name)
@@ -1096,6 +1147,19 @@ class SqlClient(SqlSchemaMixin):
                     # do not return a connection with a lock or lock timeout still set to the pool
                     logger.debug("unable to release lock or reset lock timeout; invalidating connection: %s", exc)
                     conn.invalidate()
+
+    @staticmethod
+    def _acquire_index_lock(conn: _t.Any, try_acquire_query: str, lock_timeout: float) -> None:
+        """Acquire the index lock by polling a non-blocking query, for at most ``lock_timeout`` seconds.
+
+        Raises:
+            _IndexLockTimeout: The lock is still held by another session after ``lock_timeout`` seconds.
+        """
+        deadline = time.monotonic() + lock_timeout
+        while not conn.execute(text(try_acquire_query)).scalar():
+            if time.monotonic() >= deadline:
+                raise _IndexLockTimeout("timed out waiting for the index lock")
+            time.sleep(0.5)
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
