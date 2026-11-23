@@ -644,11 +644,14 @@ def test_sql_client_run_index_ddl_postgresql_autocommit(monkeypatch, sql_client)
     adapter = PostgresqlAdapter()
     acquire, release = adapter.index_lock_queries("t", "x")
     monkeypatch.setattr(sql_client, "adapter", adapter)
+    sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
     sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
 
     conn.execution_options.assert_called_once_with(isolation_level="AUTOCOMMIT")
+    # a transaction left open on the pooled connection (e.g. by pg8000's pre-ping) is ended first
+    conn.connection.rollback.assert_called_once_with()
     conn.begin.assert_not_called()
     executed = _executed(conn)
     assert executed[0] == "SET lock_timeout = '10s'"
@@ -675,6 +678,7 @@ def test_sql_client_run_index_ddl_mysql_transaction(monkeypatch, sql_client):
 
     conn.begin.assert_called_once()
     conn.execution_options.assert_not_called()
+    conn.connection.rollback.assert_not_called()
     assert _executed(conn) == [
         "SET SESSION lock_wait_timeout = 10",
         "CREATE INDEX x ON t (a)",
@@ -699,6 +703,7 @@ def test_sql_client_run_index_ddl_resets_timeout_after_failure(monkeypatch, sql_
 
     conn.execute.side_effect = execute
     monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
     # index does not exist when rechecked under the lock
@@ -886,7 +891,8 @@ def test_postgresql_adapter_index_lock_queries():
 
     adapter = PostgresqlAdapter()
     acquire, release = adapter.index_lock_queries("t", "x")
-    assert acquire.startswith("SELECT pg_advisory_lock(") and release.startswith("SELECT pg_advisory_unlock(")
+    # non-blocking acquire: a blocking pg_advisory_lock would hold a snapshot and deadlock with CONCURRENTLY
+    assert acquire.startswith("SELECT pg_try_advisory_lock(") and release.startswith("SELECT pg_advisory_unlock(")
     # same keys for acquire and release; different index -> different key
     assert acquire.split("(", 1)[1] == release.split("(", 1)[1]
     assert adapter.index_lock_queries("t", "y") != (acquire, release)
@@ -908,6 +914,7 @@ def test_sql_client_run_index_ddl_skips_when_index_became_valid_under_lock(monke
     conn.execute.return_value.fetchone.return_value = (True,)
     adapter = PostgresqlAdapter()
     monkeypatch.setattr(sql_client, "adapter", adapter)
+    sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
     # even if the caller saw an invalid index, it must not drop/create a now-valid one
@@ -922,27 +929,117 @@ def test_sql_client_run_index_ddl_skips_when_index_became_valid_under_lock(monke
 def test_sql_client_run_index_ddl_does_not_unlock_when_lock_not_acquired(monkeypatch, sql_client):
     from unittest.mock import MagicMock
 
-    from sqlalchemy.exc import OperationalError
-
     from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+    from jans.pycloudlib.persistence.sql import _IndexLockTimeout
 
     conn = MagicMock()
 
     def execute(stmt, *a, **kw):
-        if str(stmt).startswith("SELECT pg_advisory_lock"):
-            raise OperationalError("stmt", {}, Exception())  # e.g. lock_timeout while waiting
-        return MagicMock()
+        result = MagicMock()
+        # another session holds the lock for the whole time
+        result.scalar.return_value = False if str(stmt).startswith("SELECT pg_try_advisory_lock") else MagicMock()
+        return result
 
     conn.execute.side_effect = execute
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
     monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
-    with pytest.raises(OperationalError):
-        sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
+    with pytest.raises(_IndexLockTimeout):
+        sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 0, drop_first=False)
 
     executed = _executed(conn)
     assert not any(q.startswith("SELECT pg_advisory_unlock") for q in executed)
+    assert not any(q.startswith(("DROP", "CREATE")) for q in executed)
     assert executed[-1] == "RESET lock_timeout"
+
+
+def test_sql_client_run_index_ddl_polls_for_lock_without_blocking(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    conn = MagicMock()
+    attempts = []
+
+    def execute(stmt, *a, **kw):
+        result = MagicMock()
+        text_ = str(stmt)
+        if text_.startswith("SELECT pg_try_advisory_lock"):
+            attempts.append(1)
+            # held by another loader for the first two polls
+            result.scalar.return_value = len(attempts) > 2
+        elif text_ == PostgresqlAdapter.index_state_query:
+            result.fetchone.return_value = None
+        return result
+
+    conn.execute.side_effect = execute
+    slept = []
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", slept.append)
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    sql_client._pg_has_progress_view = True
+    monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
+
+    sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 10, drop_first=False)
+
+    executed = _executed(conn)
+    assert len(attempts) == 3 and len(slept) == 2
+    # a blocking advisory lock is never used (it would hold a snapshot while waiting)
+    assert not any(q.startswith("SELECT pg_advisory_lock") for q in executed)
+    assert "CREATE INDEX CONCURRENTLY x" in executed
+    assert any(q.startswith("SELECT pg_advisory_unlock") for q in executed)
+
+
+def test_sql_client_create_index_retries_on_index_lock_timeout(monkeypatch, sql_client):
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+    from jans.pycloudlib.persistence.sql import _IndexLockTimeout
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(1)
+        if len(calls) < 3:
+            raise _IndexLockTimeout("held by another loader")
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    sql_client.create_index('CREATE INDEX "x" ON "t" ("a")', "t", "x")
+    assert len(calls) == 3
+
+
+def test_sql_client_create_index_retries_on_deadlock(monkeypatch, sql_client):
+    from sqlalchemy.exc import OperationalError
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    monkeypatch.setattr(sql_client, "get_index_state", lambda t, i: None)
+
+    calls = []
+
+    def fake_run(query, table_name, index_name, lock_timeout, drop_first):
+        calls.append(1)
+        if len(calls) == 1:
+            exc = OperationalError("stmt", {}, Exception())
+            exc.orig = PGException("40P01").orig  # deadlock_detected
+            raise exc
+
+    monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
+
+    sql_client.create_index('CREATE INDEX "x" ON "t" ("a")', "t", "x")
+    assert len(calls) == 2
+
+
+def test_postgresql_adapter_is_lock_timeout_includes_deadlock():
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    assert PostgresqlAdapter().is_lock_timeout(PGException("40P01"))
 
 
 def test_sql_client_run_index_ddl_no_lock_for_alter_table(monkeypatch, sql_client):
@@ -952,9 +1049,68 @@ def test_sql_client_run_index_ddl_no_lock_for_alter_table(monkeypatch, sql_clien
 
     conn = MagicMock()
     monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
     # alter_table passes an empty index name: nothing to lock or check
     sql_client._run_index_ddl("ALTER TABLE t ADD COLUMN c INT", "t", "", 10, drop_first=False)
 
     assert not any("advisory" in q for q in _executed(conn))
+
+
+@pytest.mark.parametrize("version_num, uses_progress_view", [
+    (110016, False),
+    (119999, False),
+    (120000, True),
+    (160009, True),
+])
+def test_sql_client_index_state_query_depends_on_server_version(monkeypatch, sql_client, version_num, uses_progress_view):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    adapter = PostgresqlAdapter()
+    monkeypatch.setattr(sql_client, "adapter", adapter)
+    conn = MagicMock()
+    conn.execute.return_value.scalar.return_value = str(version_num)
+
+    query = sql_client._index_state_sql(conn)
+
+    assert query == (adapter.index_state_query if uses_progress_view else adapter.index_state_query_legacy)
+    assert ("pg_stat_progress_create_index" in query) is uses_progress_view
+
+
+def test_sql_client_index_state_query_version_is_looked_up_once(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
+    conn = MagicMock()
+    conn.execute.return_value.scalar.return_value = "110016"
+
+    for _ in range(3):
+        sql_client._index_state_sql(conn)
+
+    assert conn.execute.call_count == 1
+
+
+def test_sql_client_index_state_query_mysql_unchanged(monkeypatch, sql_client):
+    from unittest.mock import MagicMock
+
+    from jans.pycloudlib.persistence.sql import MysqlAdapter
+
+    adapter = MysqlAdapter()
+    monkeypatch.setattr(sql_client, "adapter", adapter)
+    conn = MagicMock()
+
+    assert sql_client._index_state_sql(conn) == adapter.index_state_query
+    conn.execute.assert_not_called()  # no version lookup for MySQL
+
+
+def test_postgresql_legacy_index_state_query_has_no_progress_view():
+    from jans.pycloudlib.persistence.sql import PostgresqlAdapter
+
+    legacy = PostgresqlAdapter.index_state_query_legacy
+    assert "pg_stat_progress_create_index" not in legacy
+    assert ":table_name" in legacy and ":index_name" in legacy and "indisvalid" in legacy
