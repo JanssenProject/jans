@@ -183,12 +183,13 @@ public class ActivationDiagnostics {
                 return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, "logEntries"));
             }
 
-            if (logEntries.contains(null)) {
+            for(int i =0; i < logEntries.size(); i++) {
 
-                String fieldName = String.format("logEntries[%d]",logEntries.indexOf(null));
-                return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class,fieldName));
+                if (logEntries.get(i) == null) {
+                    String fieldName = String.format("logEntries[%d]",i);
+                    return Result.failure(RequiredValueMissing.forField(ActivationDiagnostics.class, fieldName));
+                }
             }
-
             return Result.success(new ActivationDiagnostics(status, origin, logEntries, startedAt, completedAt));
         }
     }
