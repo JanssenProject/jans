@@ -47,7 +47,7 @@ FROM ${JANS_CASA_IMAGE} AS jans-casa-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:d2a7df63eacdba722b47e628cafb3b433c4a2f7369d73db6f3925fa8b2b49d03
+FROM bellsoft/liberica-openjdk-alpine:27-36@sha256:78a8e8f704b078de573fa58a4e7676f3f779226d89f9c0891c0e99287684a7e1
 
 # hadolint ignore=DL3018
 RUN apk update \
