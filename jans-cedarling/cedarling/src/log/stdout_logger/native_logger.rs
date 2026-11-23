@@ -6,6 +6,9 @@
 //! Implements a logger that writes to standard output (stdout).
 //! Write failures are silently ignored to prevent panics in logging code paths.
 
+// Native-only module (WASM uses `wasm_logger`), so threads and `Instant` are available.
+#![allow(clippy::disallowed_methods)]
+
 use std::io::Write;
 use std::sync::mpsc;
 use std::sync::{Arc, Mutex};

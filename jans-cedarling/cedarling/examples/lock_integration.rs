@@ -3,6 +3,9 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+// Native-only program, so the WASM-unsafe calls banned in clippy.toml are fine here.
+#![allow(clippy::disallowed_methods)]
+
 // run this example using `cargo run --example lock_integration`
 
 use cedarling::log_config::StdOutLoggerMode;
