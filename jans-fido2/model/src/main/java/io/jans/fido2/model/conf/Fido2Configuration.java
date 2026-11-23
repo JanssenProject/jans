@@ -94,7 +94,7 @@ public class Fido2Configuration {
 	private String fido2TraceKeyStorePath;
 	@DocProperty(description = "Alias of the Ed25519 signing key inside fido2TraceKeyStorePath")
 	private String fido2TraceKeyAlias;
-	@DocProperty(description = "Password of fido2TraceKeyStorePath (encrypted at rest, same as other client secrets)")
+	@DocProperty(description = "Password of fido2TraceKeyStorePath; stored as submitted, the configuration API does not encrypt it")
 	private String fido2TraceKeyStorePassword;
 
 	@DocProperty(description = "Boolean value indicating whether the native app readiness endpoint is available. When false the endpoint does no work", defaultValue = "false")
