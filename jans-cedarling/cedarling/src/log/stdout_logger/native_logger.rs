@@ -9,15 +9,29 @@
 // Native-only module (WASM uses `wasm_logger`), so threads and `Instant` are available.
 #![allow(clippy::disallowed_methods)]
 
+use std::convert::Infallible;
 use std::io::Write;
-use std::sync::mpsc;
-use std::sync::{Arc, Mutex};
-use std::thread::{self, JoinHandle};
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, SyncSender};
+use std::sync::{Arc, Mutex, PoisonError};
+use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::log::LogLevel;
-use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
+use crate::log::log_json::LogJson;
+use crate::log::{BaseLogEntry, LogEntry, LogLevel};
+
+/// Entries the async queue holds before new ones are dropped.
+///
+/// The queue only absorbs the bursts between flushes (at least every 100 ms by
+/// default), which at thousands of authorizations per second is 1 000-3 000
+/// entries; this leaves about 3x headroom and bounds the queue at about 10 MB
+/// for 1 KB entries.
+const QUEUE_CAPACITY: usize = 10_000;
+
+/// How long dropping an async logger waits for the writer to write the queued
+/// entries before it detaches the writer, so a blocked stdout cannot hang the caller.
+const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(1);
 
 /// Mode for stdout logger in native builds.
 /// Supports both immediate and asynchronous logging.
@@ -26,6 +40,10 @@ pub enum StdOutLoggerMode {
     /// Immediate synchronous logging (no buffering).
     Immediate,
     /// Asynchronous logging with configurable timeout and buffer.
+    ///
+    /// Entries wait in a bounded queue for a writer thread. When stdout is slower
+    /// than the log rate and the queue is full, new entries are dropped, and the
+    /// writer reports how many in a WARN entry.
     Async {
         /// Timeout in milliseconds to flush the log buffer.
         timeout_millis: u64,
@@ -41,88 +59,188 @@ impl StdOutLoggerMode {
     pub const DEFAULT_BUFFER_LIMIT: usize = 1 << 20;
 }
 
-enum LogMessage {
-    Log(Box<dyn FnOnce() -> String + Send + 'static>),
-    Shutdown,
-}
+/// Serializes an entry on the writer thread, off the caller's path.
+type SerializeJob = Box<dyn FnOnce() -> LogJson + Send>;
 
-fn spawn_writer_thread(
-    receiver: mpsc::Receiver<LogMessage>,
-    writer: Box<dyn Write + Send + Sync>,
-    flush_timeout: Duration,
-    buffer_limit: usize,
-) -> JoinHandle<()> {
-    thread::spawn(move || {
-        let mut writer = writer;
-        let mut buffer = String::new();
-        let mut next_flush_deadline = Instant::now() + flush_timeout;
-        loop {
-            // Check if flush deadline has passed
-            let now = Instant::now();
-            if now >= next_flush_deadline && !buffer.is_empty() {
-                let _ = writer.write_all(buffer.as_bytes());
-                buffer.clear();
-                next_flush_deadline = now + flush_timeout;
-            }
-
-            // Nothing to flush: block instead of polling with an expired deadline.
-            let next_message = if buffer.is_empty() {
-                receiver
-                    .recv()
-                    .map_err(|_| mpsc::RecvTimeoutError::Disconnected)
-            } else {
-                receiver.recv_timeout(next_flush_deadline.saturating_duration_since(now))
-            };
-            match next_message {
-                Ok(LogMessage::Log(serializer)) => {
-                    if buffer.is_empty() {
-                        next_flush_deadline = Instant::now() + flush_timeout;
-                    }
-                    let json_string = serializer();
-                    buffer.push_str(&json_string);
-                    buffer.push('\n');
-                    if buffer.len() >= buffer_limit {
-                        let _ = writer.write_all(buffer.as_bytes());
-                        buffer.clear();
-                        // Reset flush deadline since we just flushed
-                        next_flush_deadline = Instant::now() + flush_timeout;
-                    }
-                },
-                Ok(LogMessage::Shutdown) => {
-                    break;
-                },
-                Err(mpsc::RecvTimeoutError::Timeout) => {
-                    // Timeout, flush buffer if not empty
-                    if !buffer.is_empty() {
-                        let _ = writer.write_all(buffer.as_bytes());
-                        buffer.clear();
-                        next_flush_deadline = Instant::now() + flush_timeout;
-                    }
-                },
-                Err(mpsc::RecvTimeoutError::Disconnected) => {
-                    // Sender dropped, flush and exit
-                    if !buffer.is_empty() {
-                        let _ = writer.write_all(buffer.as_bytes());
-                        buffer.clear();
-                    }
-                    break;
-                },
-            }
-        }
-        // Final flush
-        if !buffer.is_empty() {
-            let _ = writer.write_all(buffer.as_bytes());
-        }
-    })
-}
+type BoxedWriter = Box<dyn Write + Send + Sync>;
 
 /// A logger that write to std output.
 pub(crate) struct StdOutLogger {
-    mode: StdOutLoggerMode,
-    sender: Option<mpsc::Sender<LogMessage>>,
-    thread_handle: Option<JoinHandle<()>>,
-    writer: Option<Arc<Mutex<Box<dyn Write + Send + Sync>>>>,
     log_level: LogLevel,
+    sink: Sink,
+}
+
+enum Sink {
+    Immediate(Mutex<BoxedWriter>),
+    Async(AsyncSink),
+}
+
+/// Settings of the async sink; the bounds are constants outside tests.
+#[derive(Clone, Copy)]
+struct AsyncConfig {
+    flush_timeout: Duration,
+    buffer_limit: usize,
+    queue_capacity: usize,
+    shutdown_timeout: Duration,
+}
+
+impl AsyncConfig {
+    fn new(timeout_millis: u64, buffer_limit: usize) -> Self {
+        Self {
+            flush_timeout: Duration::from_millis(timeout_millis),
+            buffer_limit,
+            queue_capacity: QUEUE_CAPACITY,
+            shutdown_timeout: SHUTDOWN_TIMEOUT,
+        }
+    }
+}
+
+/// Hands entries to a writer thread without ever blocking or panicking the caller.
+struct AsyncSink {
+    /// `None` only while dropping: closing the queue tells the writer to write
+    /// what is queued and exit.
+    jobs: Option<SyncSender<SerializeJob>>,
+    /// Entries not queued because the queue was full or the writer had exited,
+    /// shared with the writer, which reports and resets it.
+    dropped: Arc<AtomicU64>,
+    /// Never receives; it disconnects when the writer thread exits. The mutex
+    /// only makes the sink `Sync`, it is never locked.
+    writer_exited: Mutex<Receiver<Infallible>>,
+    shutdown_timeout: Duration,
+}
+
+impl AsyncSink {
+    fn spawn(out: BoxedWriter, log_level: LogLevel, config: AsyncConfig) -> Self {
+        let (jobs, jobs_receiver) = mpsc::sync_channel(config.queue_capacity);
+        let (exited_sender, writer_exited) = mpsc::channel();
+        let dropped = Arc::new(AtomicU64::new(0));
+
+        let writer = QueueWriter {
+            out,
+            buffer: String::new(),
+            buffer_limit: config.buffer_limit,
+            flush_timeout: config.flush_timeout,
+            flush_deadline: None,
+            dropped: Arc::clone(&dropped),
+            log_level,
+        };
+        thread::spawn(move || {
+            writer.run(&jobs_receiver);
+            drop(exited_sender);
+        });
+
+        Self {
+            jobs: Some(jobs),
+            dropped,
+            writer_exited: Mutex::new(writer_exited),
+            shutdown_timeout: config.shutdown_timeout,
+        }
+    }
+
+    fn send(&self, job: SerializeJob) {
+        let queued = self
+            .jobs
+            .as_ref()
+            .is_some_and(|jobs| jobs.try_send(job).is_ok());
+        if !queued {
+            self.dropped.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+}
+
+impl Drop for AsyncSink {
+    fn drop(&mut self) {
+        drop(self.jobs.take());
+        // Either the writer exited (`Disconnected`) or it is detached (`Timeout`).
+        let writer_exited = self
+            .writer_exited
+            .get_mut()
+            .unwrap_or_else(PoisonError::into_inner);
+        let _ = writer_exited.recv_timeout(self.shutdown_timeout);
+    }
+}
+
+/// The writer thread's state: lines waiting to be written and when they must be.
+struct QueueWriter {
+    out: BoxedWriter,
+    buffer: String,
+    buffer_limit: usize,
+    flush_timeout: Duration,
+    /// Set while the buffer holds lines, and not moved by later lines, so a steady
+    /// stream of entries cannot postpone the flush.
+    flush_deadline: Option<Instant>,
+    dropped: Arc<AtomicU64>,
+    log_level: LogLevel,
+}
+
+impl QueueWriter {
+    fn run(mut self, jobs: &Receiver<SerializeJob>) {
+        loop {
+            let next = match self.flush_deadline {
+                None => jobs.recv().map_err(|_| RecvTimeoutError::Disconnected),
+                Some(deadline) => {
+                    jobs.recv_timeout(deadline.saturating_duration_since(Instant::now()))
+                },
+            };
+
+            // Written by the writer itself, so the report cannot be dropped too.
+            if let Some(report) = dropped_report(self.dropped.swap(0, Ordering::Relaxed)) {
+                self.push_entry(&report);
+            }
+
+            match next {
+                Ok(serialize) => self.push_line(&serialize()),
+                Err(RecvTimeoutError::Timeout) => {},
+                Err(RecvTimeoutError::Disconnected) => break,
+            }
+
+            self.flush_if_due();
+        }
+        self.flush();
+    }
+
+    fn push_entry<T: Loggable>(&mut self, entry: &T) {
+        if entry.can_log(self.log_level) {
+            self.push_line(&LogJson::from_loggable(entry));
+        }
+    }
+
+    fn push_line(&mut self, json: &LogJson) {
+        self.buffer.push_str(json.as_str());
+        self.buffer.push('\n');
+    }
+
+    fn flush_if_due(&mut self) {
+        if self.buffer.is_empty() {
+            return;
+        }
+        let now = Instant::now();
+        let deadline = *self.flush_deadline.get_or_insert(now + self.flush_timeout);
+        if self.buffer.len() >= self.buffer_limit || now >= deadline {
+            self.flush();
+        }
+    }
+
+    fn flush(&mut self) {
+        if !self.buffer.is_empty() {
+            let _ = self.out.write_all(self.buffer.as_bytes());
+            self.buffer.clear();
+        }
+        self.flush_deadline = None;
+    }
+}
+
+/// The WARN entry reporting `count` dropped entries, if any were dropped.
+fn dropped_report(count: u64) -> Option<LogEntry> {
+    (count > 0).then(|| {
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+            LogLevel::WARN,
+            None,
+        ))
+        .set_message(format!(
+            "{count} log entries were dropped because the stdout log queue was full"
+        ))
+    })
 }
 
 impl StdOutLogger {
@@ -135,66 +253,26 @@ impl StdOutLogger {
     // is used in tests.
     #[cfg(test)]
     pub(crate) fn new_with(
-        writer: Box<dyn Write + Send + Sync>,
+        writer: BoxedWriter,
         log_level: LogLevel,
         mode: StdOutLoggerMode,
     ) -> Self {
         Self::new_inner(writer, log_level, mode)
     }
 
-    fn new_inner(
-        writer: Box<dyn Write + Send + Sync>,
-        log_level: LogLevel,
-        mode: StdOutLoggerMode,
-    ) -> Self {
-        match mode {
-            StdOutLoggerMode::Immediate => Self {
-                mode,
-                sender: None,
-                thread_handle: None,
-                writer: Some(Arc::new(Mutex::new(writer))),
-                log_level,
-            },
+    fn new_inner(writer: BoxedWriter, log_level: LogLevel, mode: StdOutLoggerMode) -> Self {
+        let sink = match mode {
+            StdOutLoggerMode::Immediate => Sink::Immediate(Mutex::new(writer)),
             StdOutLoggerMode::Async {
-                timeout_millis: timeout,
+                timeout_millis,
                 buffer_limit,
-            } => {
-                let (sender, receiver) = mpsc::channel();
-                let thread_handle = Some(spawn_writer_thread(
-                    receiver,
-                    writer,
-                    Duration::from_millis(timeout),
-                    buffer_limit,
-                ));
-                Self {
-                    mode,
-                    sender: Some(sender),
-                    thread_handle,
-                    writer: None,
-                    log_level,
-                }
-            },
-        }
-    }
-}
-
-impl Drop for StdOutLogger {
-    fn drop(&mut self) {
-        match self.mode {
-            StdOutLoggerMode::Immediate => {
-                // Nothing to do for immediate mode
-            },
-            StdOutLoggerMode::Async { .. } => {
-                // Send shutdown signal
-                if let Some(sender) = &self.sender {
-                    let _ = sender.send(LogMessage::Shutdown);
-                }
-                // Wait for thread to finish
-                if let Some(handle) = self.thread_handle.take() {
-                    let _ = handle.join();
-                }
-            },
-        }
+            } => Sink::Async(AsyncSink::spawn(
+                writer,
+                log_level,
+                AsyncConfig::new(timeout_millis, buffer_limit),
+            )),
+        };
+        Self { log_level, sink }
     }
 }
 
@@ -206,33 +284,15 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let serializer = move || match serde_json::to_value(&entry) {
-            Ok(json) => json.to_string(),
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
-                    .expect(&err_msg)
-                    .to_string()
+        match &self.sink {
+            Sink::Immediate(writer) => {
+                let json = LogJson::from_loggable(&entry);
+                // A poisoned lock still holds a usable writer; logging must not panic.
+                let mut writer = writer.lock().unwrap_or_else(PoisonError::into_inner);
+                let _ = writer.write_all(json.as_str().as_bytes());
+                let _ = writer.write_all(b"\n");
             },
-        };
-        match self.mode {
-            StdOutLoggerMode::Immediate => {
-                let json_string = serializer();
-                if let Some(writer) = &self.writer {
-                    let mut guard = writer
-                        .lock()
-                        .expect("failed to acquire lock on stdout writer");
-                    let _ = guard.write_all(json_string.as_bytes());
-                    let _ = guard.write_all(b"\n");
-                }
-            },
-            StdOutLoggerMode::Async { .. } => {
-                if let Some(sender) = &self.sender {
-                    sender.send(LogMessage::Log(Box::new(serializer))).expect(
-                        "could not send log entry to queue StdOutLogger, receiver was deallocated",
-                    );
-                }
-            },
+            Sink::Async(sink) => sink.send(Box::new(move || LogJson::from_loggable(&entry))),
         }
     }
 
@@ -296,8 +356,8 @@ mod tests {
 
     use super::*;
     use crate::common::app_types::PdpID;
+    use crate::log::gen_uuid7;
     use crate::log::log_strategy::LogEntryWithClientInfo;
-    use crate::log::{BaseLogEntry, LogEntry, gen_uuid7};
 
     #[test]
     fn write_log_ok() {
@@ -461,5 +521,244 @@ mod tests {
                 "Continuous message {i} should be in final output"
             );
         }
+    }
+
+    /// Lets the test hold the writer thread inside a write.
+    struct Gate {
+        /// Dropping it releases every write, now and later.
+        open: mpsc::Sender<()>,
+        /// Receives once, when the first write has started.
+        first_write_started: Receiver<()>,
+    }
+
+    /// Writes to a [`TestWriter`], each write blocked until the [`Gate`] opens.
+    struct GatedWriter {
+        inner: TestWriter,
+        gate: Mutex<Receiver<()>>,
+        first_write_started: Mutex<Option<mpsc::Sender<()>>>,
+    }
+
+    struct Gated {
+        writer: GatedWriter,
+        gate: Gate,
+    }
+
+    fn gated(inner: TestWriter) -> Gated {
+        let (open, gate) = mpsc::channel();
+        let (started_sender, first_write_started) = mpsc::channel();
+        Gated {
+            writer: GatedWriter {
+                inner,
+                gate: Mutex::new(gate),
+                first_write_started: Mutex::new(Some(started_sender)),
+            },
+            gate: Gate {
+                open,
+                first_write_started,
+            },
+        }
+    }
+
+    impl Write for GatedWriter {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            if let Some(started) = self.first_write_started.lock().unwrap().take() {
+                let _ = started.send(());
+            }
+            // Returns once the gate's sender is dropped.
+            let _ = self.gate.lock().unwrap().recv();
+            self.inner.write(buf)
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    struct PanickingWriter;
+
+    impl Write for PanickingWriter {
+        fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+            panic!("writer thread fails");
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    /// Writes every line as soon as it is queued.
+    fn unbuffered(queue_capacity: usize, shutdown_timeout: Duration) -> AsyncConfig {
+        AsyncConfig {
+            flush_timeout: Duration::from_secs(60),
+            buffer_limit: 1,
+            queue_capacity,
+            shutdown_timeout,
+        }
+    }
+
+    fn async_logger(writer: BoxedWriter, log_level: LogLevel, config: AsyncConfig) -> StdOutLogger {
+        StdOutLogger {
+            log_level,
+            sink: Sink::Async(AsyncSink::spawn(writer, log_level, config)),
+        }
+    }
+
+    fn async_sink(logger: &StdOutLogger) -> &AsyncSink {
+        let Sink::Async(sink) = &logger.sink else {
+            panic!("the logger should be in async mode");
+        };
+        sink
+    }
+
+    fn system_entry(level: LogLevel, msg: &str) -> LogEntry {
+        LogEntry::new(BaseLogEntry::new_system_opt_request_id(level, None))
+            .set_message(msg.to_string())
+    }
+
+    fn written_messages(output: &str) -> Vec<String> {
+        output
+            .lines()
+            .map(|line| {
+                let value: serde_json::Value =
+                    serde_json::from_str(line).expect("each written line should be JSON");
+                value["msg"]
+                    .as_str()
+                    .expect("each written line should have a message")
+                    .to_string()
+            })
+            .collect()
+    }
+
+    #[test]
+    fn full_queue_drops_entries_and_reports_their_count() {
+        let output = TestWriter::new();
+        let Gated { writer, gate } = gated(output.clone());
+        let logger = async_logger(
+            Box::new(writer),
+            LogLevel::TRACE,
+            unbuffered(2, Duration::from_secs(5)),
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "written"));
+        gate.first_write_started
+            .recv()
+            .expect("the writer should start writing the first entry");
+        // The writer is blocked, so these fill the queue and the rest are dropped.
+        for msg in [
+            "queued 1",
+            "queued 2",
+            "dropped 1",
+            "dropped 2",
+            "dropped 3",
+        ] {
+            logger.log_any(system_entry(LogLevel::INFO, msg));
+        }
+        assert_eq!(
+            async_sink(&logger).dropped.load(Ordering::Relaxed),
+            3,
+            "entries that do not fit in the queue should be counted"
+        );
+
+        drop(gate.open);
+        drop(logger);
+
+        assert_eq!(
+            written_messages(&output.into_inner_buf()),
+            [
+                "written",
+                "3 log entries were dropped because the stdout log queue was full",
+                "queued 1",
+                "queued 2",
+            ],
+            "the next write should report the exact dropped count, and dropped entries \
+             should not be written"
+        );
+    }
+
+    #[test]
+    fn dropped_count_report_obeys_log_level() {
+        let output = TestWriter::new();
+        let Gated { writer, gate } = gated(output.clone());
+        let logger = async_logger(
+            Box::new(writer),
+            LogLevel::ERROR,
+            unbuffered(1, Duration::from_secs(5)),
+        );
+
+        logger.log_any(system_entry(LogLevel::ERROR, "written"));
+        gate.first_write_started
+            .recv()
+            .expect("the writer should start writing the first entry");
+        logger.log_any(system_entry(LogLevel::ERROR, "queued"));
+        logger.log_any(system_entry(LogLevel::ERROR, "dropped"));
+
+        drop(gate.open);
+        drop(logger);
+
+        assert_eq!(
+            written_messages(&output.into_inner_buf()),
+            ["written", "queued"],
+            "the WARN report should not be written when the log level is ERROR"
+        );
+    }
+
+    #[test]
+    fn log_after_writer_exited_does_not_panic() {
+        let logger = async_logger(
+            Box::new(PanickingWriter),
+            LogLevel::TRACE,
+            unbuffered(2, Duration::from_secs(5)),
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "kills the writer"));
+        let writer_exited = async_sink(&logger)
+            .writer_exited
+            .lock()
+            .unwrap()
+            .recv()
+            .expect_err("the writer should never send");
+        assert_eq!(
+            writer_exited,
+            mpsc::RecvError,
+            "the writer should have exited"
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "after the writer exited"));
+
+        assert_eq!(
+            async_sink(&logger).dropped.load(Ordering::Relaxed),
+            1,
+            "an entry logged after the writer exited should be counted as dropped"
+        );
+    }
+
+    #[test]
+    fn drop_with_blocked_writer_returns_after_timeout() {
+        let shutdown_timeout = Duration::from_millis(50);
+        let Gated { writer, gate } = gated(TestWriter::new());
+        let logger = async_logger(
+            Box::new(writer),
+            LogLevel::TRACE,
+            unbuffered(2, shutdown_timeout),
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "blocks the writer"));
+        gate.first_write_started
+            .recv()
+            .expect("the writer should start writing the first entry");
+
+        let started = Instant::now();
+        drop(logger);
+        let elapsed = started.elapsed();
+
+        assert!(
+            elapsed >= shutdown_timeout,
+            "drop should wait for the writer up to the timeout, waited {elapsed:?}"
+        );
+        assert!(
+            elapsed < Duration::from_secs(5),
+            "drop should not wait for a blocked writer past the timeout, waited {elapsed:?}"
+        );
+        drop(gate.open);
     }
 }
