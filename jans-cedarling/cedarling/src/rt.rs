@@ -5,7 +5,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Runtime services that differ between native and WASM: timers and task spawning.
-//! `clippy.toml` bans the raw Tokio and `spawn_local` calls elsewhere, so they go through here.
+//! `clippy.toml` bans raw Tokio timers, spawns and `spawn_local` elsewhere, so use these.
 
 use std::future::Future;
 use std::pin::Pin;
@@ -250,6 +250,7 @@ mod tests {
         );
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[tokio::test]
     async fn cancelled_task_is_an_error_not_a_panic() {
         let join = spawn_task(std::future::pending::<()>());

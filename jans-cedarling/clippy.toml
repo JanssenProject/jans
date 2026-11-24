@@ -57,7 +57,7 @@ reason = "does not exist on WASM, allow it only in native-only code and say why"
 
 [[disallowed-methods]]
 path = "wasm_bindgen_futures::spawn_local"
-reason = "only a WASM branch, use crate::rt::spawn_task instead"
+reason = "WASM-only, use crate::rt::spawn_task so native and WASM share one call"
 
 [[disallowed-methods]]
 path = "std::time::Instant::now"
