@@ -37,7 +37,7 @@ const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(1);
 /// caller counts a drop without waking it.
 const IDLE_REPORT_INTERVAL: Duration = Duration::from_secs(1);
 
-/// Most bytes handed to stdout in one write, so each finished write counts as progress for `Drop`.
+/// Target bytes per write; a single oversized line stays whole to prevent interleaving.
 const WRITE_CHUNK: usize = 64 * 1024;
 
 /// Mode for stdout logger in native builds.
@@ -257,8 +257,8 @@ impl QueueWriter {
 
     fn flush(&mut self) {
         if !self.buffer.is_empty() {
-            for chunk in self.buffer.as_bytes().chunks(WRITE_CHUNK) {
-                if self.out.write_all(chunk).is_err() {
+            for batch in line_batches(&self.buffer) {
+                if self.out.write_all(batch.as_bytes()).is_err() {
                     break;
                 }
                 self.made_progress();
@@ -271,6 +271,25 @@ impl QueueWriter {
     fn made_progress(&self) {
         self.progress.fetch_add(1, Ordering::Relaxed);
     }
+}
+
+/// Keeps stdout lock releases between records while batching small lines for throughput.
+fn line_batches(mut buffer: &str) -> impl Iterator<Item = &str> {
+    std::iter::from_fn(move || {
+        if buffer.is_empty() {
+            return None;
+        }
+        let bytes = buffer.as_bytes();
+        let end = bytes[..bytes.len().min(WRITE_CHUNK)]
+            .iter()
+            .rposition(|byte| *byte == b'\n')
+            .or_else(|| bytes.iter().position(|byte| *byte == b'\n'))
+            .map_or(bytes.len(), |position| position + 1);
+        // A newline's end (or the buffer's end) is always a UTF-8 boundary.
+        let batch = &buffer[..end];
+        buffer = &buffer[end..];
+        Some(batch)
+    })
 }
 
 /// The WARN entry reporting `count` dropped entries, if any were dropped.
@@ -632,6 +651,78 @@ mod tests {
         fn flush(&mut self) -> std::io::Result<()> {
             Ok(())
         }
+    }
+
+    /// Models another stdout writer acquiring the lock between `write_all` calls.
+    struct InterleavingWriter {
+        inner: TestWriter,
+    }
+
+    impl Write for InterleavingWriter {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.inner.write_all(buf)?;
+            self.inner.write_all(b"{\"msg\":\"other writer\"}\n")?;
+            Ok(buf.len())
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn flush_preserves_oversized_unicode_line_with_interleaved_writes() {
+        let messages: &[String] = &[
+            "before".to_string(),
+            "🦀".repeat(WRITE_CHUNK),
+            "after".to_string(),
+        ];
+        let output = TestWriter::new();
+        let logger = async_logger(
+            Box::new(InterleavingWriter {
+                inner: output.clone(),
+            }),
+            LogLevel::TRACE,
+            AsyncConfig {
+                buffer_limit: usize::MAX,
+                ..unbuffered(messages.len(), Duration::from_secs(5))
+            },
+        );
+        for message in messages {
+            logger.log_any(system_entry(LogLevel::INFO, message));
+        }
+        drop(logger);
+        let written = written_messages(&output.into_inner_buf());
+        assert!(
+            written.iter().any(|message| message == "other writer"),
+            "the test should interleave another writer's complete JSON record"
+        );
+        let own_messages: Vec<_> = written
+            .into_iter()
+            .filter(|message| message != "other writer")
+            .collect();
+        assert_eq!(
+            own_messages, messages,
+            "interleaved writes should preserve every original message in order"
+        );
+    }
+
+    #[test]
+    fn line_batches_group_complete_lines_up_to_target() {
+        let first = format!("{}\n", "x".repeat(WRITE_CHUNK / 2 - 1));
+        let buffer = format!("{first}{first}🦀\n");
+        let batches: Vec<_> = line_batches(&buffer).collect();
+
+        assert_eq!(
+            batches,
+            [&buffer[..WRITE_CHUNK], "🦀\n"],
+            "lines fitting exactly in the target should share a batch without splitting Unicode"
+        );
+        assert_eq!(
+            line_batches("").count(),
+            0,
+            "an empty buffer should not produce writes"
+        );
     }
 
     struct PanickingWriter;
