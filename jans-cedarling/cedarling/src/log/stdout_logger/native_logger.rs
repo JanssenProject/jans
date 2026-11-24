@@ -33,6 +33,10 @@ const QUEUE_CAPACITY: usize = 10_000;
 /// entries before it detaches the writer, so a blocked stdout cannot hang the caller.
 const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(1);
 
+/// How often an idle writer checks for dropped entries to report, since the
+/// caller counts a drop without waking it.
+const IDLE_REPORT_INTERVAL: Duration = Duration::from_secs(1);
+
 /// Mode for stdout logger in native builds.
 /// Supports both immediate and asynchronous logging.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -43,7 +47,7 @@ pub enum StdOutLoggerMode {
     ///
     /// Entries wait in a bounded queue for a writer thread. When stdout is slower
     /// than the log rate and the queue is full, new entries are dropped, and the
-    /// writer reports how many in a WARN entry.
+    /// writer reports how many in a WARN entry, if the log level allows WARN.
     Async {
         /// Timeout in milliseconds to flush the log buffer.
         timeout_millis: u64,
@@ -82,6 +86,7 @@ struct AsyncConfig {
     buffer_limit: usize,
     queue_capacity: usize,
     shutdown_timeout: Duration,
+    idle_report_interval: Duration,
 }
 
 impl AsyncConfig {
@@ -91,6 +96,7 @@ impl AsyncConfig {
             buffer_limit,
             queue_capacity: QUEUE_CAPACITY,
             shutdown_timeout: SHUTDOWN_TIMEOUT,
+            idle_report_interval: IDLE_REPORT_INTERVAL,
         }
     }
 }
@@ -103,6 +109,9 @@ struct AsyncSink {
     /// Entries not queued because the queue was full or the writer had exited,
     /// shared with the writer, which reports and resets it.
     dropped: Arc<AtomicU64>,
+    /// Bumped by the writer each time it finishes an entry or a write, so `Drop`
+    /// can tell a slow writer from a blocked one.
+    progress: Arc<AtomicU64>,
     /// Never receives; it disconnects when the writer thread exits. The mutex
     /// only makes the sink `Sync`, it is never locked.
     writer_exited: Mutex<Receiver<Infallible>>,
@@ -114,6 +123,7 @@ impl AsyncSink {
         let (jobs, jobs_receiver) = mpsc::sync_channel(config.queue_capacity);
         let (exited_sender, writer_exited) = mpsc::channel();
         let dropped = Arc::new(AtomicU64::new(0));
+        let progress = Arc::new(AtomicU64::new(0));
 
         let writer = QueueWriter {
             out,
@@ -121,7 +131,9 @@ impl AsyncSink {
             buffer_limit: config.buffer_limit,
             flush_timeout: config.flush_timeout,
             flush_deadline: None,
+            idle_report_interval: config.idle_report_interval,
             dropped: Arc::clone(&dropped),
+            progress: Arc::clone(&progress),
             log_level,
         };
         thread::spawn(move || {
@@ -132,6 +144,7 @@ impl AsyncSink {
         Self {
             jobs: Some(jobs),
             dropped,
+            progress,
             writer_exited: Mutex::new(writer_exited),
             shutdown_timeout: config.shutdown_timeout,
         }
@@ -151,12 +164,26 @@ impl AsyncSink {
 impl Drop for AsyncSink {
     fn drop(&mut self) {
         drop(self.jobs.take());
-        // Either the writer exited (`Disconnected`) or it is detached (`Timeout`).
         let writer_exited = self
             .writer_exited
             .get_mut()
             .unwrap_or_else(PoisonError::into_inner);
-        let _ = writer_exited.recv_timeout(self.shutdown_timeout);
+        // The queue is closed, so a writer that keeps making progress finishes.
+        let mut last_progress = self.progress.load(Ordering::Relaxed);
+        loop {
+            match writer_exited.recv_timeout(self.shutdown_timeout) {
+                Ok(never) => match never {},
+                Err(RecvTimeoutError::Disconnected) => break,
+                Err(RecvTimeoutError::Timeout) => {
+                    let progress = self.progress.load(Ordering::Relaxed);
+                    if progress == last_progress {
+                        // Blocked: detach the writer.
+                        break;
+                    }
+                    last_progress = progress;
+                },
+            }
+        }
     }
 }
 
@@ -169,19 +196,20 @@ struct QueueWriter {
     /// Set while the buffer holds lines, and not moved by later lines, so a steady
     /// stream of entries cannot postpone the flush.
     flush_deadline: Option<Instant>,
+    idle_report_interval: Duration,
     dropped: Arc<AtomicU64>,
+    progress: Arc<AtomicU64>,
     log_level: LogLevel,
 }
 
 impl QueueWriter {
     fn run(mut self, jobs: &Receiver<SerializeJob>) {
         loop {
-            let next = match self.flush_deadline {
-                None => jobs.recv().map_err(|_| RecvTimeoutError::Disconnected),
-                Some(deadline) => {
-                    jobs.recv_timeout(deadline.saturating_duration_since(Instant::now()))
-                },
+            let wait = match self.flush_deadline {
+                None => self.idle_report_interval,
+                Some(deadline) => deadline.saturating_duration_since(Instant::now()),
             };
+            let next = jobs.recv_timeout(wait);
 
             // Written by the writer itself, so the report cannot be dropped too.
             if let Some(report) = dropped_report(self.dropped.swap(0, Ordering::Relaxed)) {
@@ -189,7 +217,10 @@ impl QueueWriter {
             }
 
             match next {
-                Ok(serialize) => self.push_line(&serialize()),
+                Ok(serialize) => {
+                    self.push_line(&serialize());
+                    self.made_progress();
+                },
                 Err(RecvTimeoutError::Timeout) => {},
                 Err(RecvTimeoutError::Disconnected) => break,
             }
@@ -225,8 +256,13 @@ impl QueueWriter {
         if !self.buffer.is_empty() {
             let _ = self.out.write_all(self.buffer.as_bytes());
             self.buffer.clear();
+            self.made_progress();
         }
         self.flush_deadline = None;
+    }
+
+    fn made_progress(&self) {
+        self.progress.fetch_add(1, Ordering::Relaxed);
     }
 }
 
@@ -574,6 +610,23 @@ mod tests {
         }
     }
 
+    /// Writes to a [`TestWriter`], each write taking `delay`.
+    struct SlowWriter {
+        inner: TestWriter,
+        delay: Duration,
+    }
+
+    impl Write for SlowWriter {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            thread::sleep(self.delay);
+            self.inner.write(buf)
+        }
+
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
     struct PanickingWriter;
 
     impl Write for PanickingWriter {
@@ -593,6 +646,7 @@ mod tests {
             buffer_limit: 1,
             queue_capacity,
             shutdown_timeout,
+            idle_report_interval: Duration::from_secs(60),
         }
     }
 
@@ -760,5 +814,66 @@ mod tests {
             "drop should not wait for a blocked writer past the timeout, waited {elapsed:?}"
         );
         drop(gate.open);
+    }
+
+    #[test]
+    fn idle_writer_reports_pending_drop_count() {
+        let output = TestWriter::new();
+        let logger = async_logger(
+            Box::new(output.clone()),
+            LogLevel::TRACE,
+            AsyncConfig {
+                idle_report_interval: Duration::from_millis(10),
+                ..unbuffered(2, Duration::from_secs(5))
+            },
+        );
+
+        // What a caller leaves behind when its `try_send` fails and the writer has
+        // already emptied the queue: a count with nothing queued to wake the writer.
+        async_sink(&logger).dropped.fetch_add(2, Ordering::Relaxed);
+
+        let started = Instant::now();
+        while output.get_buf_contents().is_empty() && started.elapsed() < Duration::from_secs(5) {
+            thread::sleep(Duration::from_millis(5));
+        }
+
+        assert_eq!(
+            written_messages(&output.get_buf_contents()),
+            ["2 log entries were dropped because the stdout log queue was full"],
+            "an idle writer should report a pending drop count without another entry"
+        );
+    }
+
+    #[test]
+    fn drop_waits_for_slow_writer_that_makes_progress() {
+        let output = TestWriter::new();
+        let write_delay = Duration::from_millis(20);
+        let shutdown_timeout = Duration::from_millis(200);
+        let entries = 20;
+        let logger = async_logger(
+            Box::new(SlowWriter {
+                inner: output.clone(),
+                delay: write_delay,
+            }),
+            LogLevel::TRACE,
+            unbuffered(entries, shutdown_timeout),
+        );
+
+        for i in 0..entries {
+            logger.log_any(system_entry(LogLevel::INFO, &format!("entry {i}")));
+        }
+        assert!(
+            write_delay * u32::try_from(entries).expect("entry count fits in u32")
+                > shutdown_timeout,
+            "draining should take longer than the shutdown timeout"
+        );
+        drop(logger);
+
+        let expected: Vec<String> = (0..entries).map(|i| format!("entry {i}")).collect();
+        assert_eq!(
+            written_messages(&output.into_inner_buf()),
+            expected,
+            "drop should wait for every entry while the writer keeps making progress"
+        );
     }
 }

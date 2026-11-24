@@ -33,7 +33,7 @@ Configuration options for native targets (not applicable to WASM):
 
 In `async` mode, logs are buffered and flushed periodically to improve performance.
 Entries wait in a queue of 10,000 entries; when stdout cannot keep up and the queue is full,
-new entries are dropped and a `WARN` system entry reports how many.
+new entries are dropped and a `WARN` system entry reports how many (written only if `CEDARLING_LOG_LEVEL` allows `WARN`).
 In `immediate` mode, each log line is written immediately to stdout.
 
 ### Log type `lock`
