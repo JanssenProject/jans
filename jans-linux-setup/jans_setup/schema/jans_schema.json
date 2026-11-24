@@ -6919,6 +6919,33 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "jansId",
+        "jansType",
+        "lockKey",
+        "jansHost",
+        "jansNum",
+        "creationDate",
+        "jansLastUpd",
+        "exp",
+        "del",
+        "jansStatus",
+        "jansData"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansClusterLock"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "jansNum",
         "jansNodeId",
         "dat",

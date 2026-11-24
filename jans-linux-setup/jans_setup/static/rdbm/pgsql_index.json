@@ -87,6 +87,14 @@
       "(\"jansAggregationType\", \"jansAppTyp\", \"jansMetricTyp\", \"jansStartDate\")"
     ]
   },
+  "jansClusterLock": {
+    "fields": [
+      "jansType"
+    ],
+    "custom": [
+      "(\"del\", \"exp\")"
+    ]
+  },
   "jansToken": {
     "fields": [
       "authzCode",
