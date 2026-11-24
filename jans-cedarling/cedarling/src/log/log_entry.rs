@@ -328,6 +328,9 @@ pub(crate) struct DecisionLogEntry {
     pub policystore_id: SmolStr,
     /// version of policy store
     pub policystore_version: SmolStr,
+    /// SHA-256 digest of the policy archive used for this decision.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub bundle_hash: Option<String>,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
     /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received

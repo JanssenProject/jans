@@ -1204,6 +1204,11 @@ impl Authz {
             base,
             policystore_id: self.config.policy_store.id.as_str().into(),
             policystore_version: self.config.policy_store.get_store_version().into(),
+            bundle_hash: self
+                .config
+                .policy_store
+                .bundle_hash()
+                .map(|hash| hash.to_string()),
             principal: metadata.principal.clone(),
             lock_client_id: None,
             action: metadata.action.clone(),
@@ -2212,6 +2217,43 @@ mod trace_record_tests {
             vec![json!("not_emitted_missing_context"); 3],
             "every item's decision log carries its own status"
         );
+    }
+
+    #[tokio::test]
+    async fn decision_log_uses_bundle_hash_from_evaluated_store() {
+        let CjarStore {
+            store: first,
+            bundle_hash: first_hash,
+        } = parsed_store(&fixtures::minimal_valid()).await;
+        let CjarStore {
+            store: second,
+            bundle_hash: second_hash,
+        } = parsed_store(&fixtures::minimal_valid().with_version("2.0.0")).await;
+        assert_ne!(first_hash, second_hash);
+
+        let log = memory_log();
+        let rebuilder = rebuilder(
+            log.clone(),
+            Arc::new(MetricsCollector::new(MetricsMode::Disabled)),
+        );
+        let snapshot = bootstrap(&rebuilder, first, None).await;
+        let refreshed = rebuilder
+            .rebuild(second, &snapshot)
+            .await
+            .expect("refreshed Authz should build");
+        log.pop_logs();
+
+        for (authz, expected_hash) in [(&snapshot, first_hash), (&refreshed, second_hash)] {
+            authz
+                .authorize_unsigned(&request(AuthorizeOptions::default()))
+                .expect("the decision should be made");
+            let decision_log = log
+                .pop_logs()
+                .into_iter()
+                .find(|entry| entry["log_kind"] == "Decision")
+                .expect("the decision should be logged");
+            assert_eq!(decision_log["bundle_hash"], json!(expected_hash.to_string()));
+        }
     }
 
     #[tokio::test]
