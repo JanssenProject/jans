@@ -6,6 +6,8 @@ import java.util.Objects;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
+import io.jans.shibboleth.trust.config.error.IndexOutOfBounds;
+
 public class AssertionConsumerService {
     
     private final URI location;
@@ -31,6 +33,11 @@ public class AssertionConsumerService {
         if (binding == null ) {
 
             return Result.failure(RequiredValueMissing.forField(AssertionConsumerService.class, "binding"));
+        }
+
+        if (index < 0 || index > 65535) {
+
+            return Result.failure(IndexOutOfBounds.forAssertionConsumerService(index));
         }
 
         return Result.success(new AssertionConsumerService(location, binding,index,isDefault));

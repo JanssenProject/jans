@@ -24,7 +24,7 @@ public class InvalidStatusForOperation extends TrustError {
         return operation;
     }
 
-    public InvalidStatusForOperation whenParentIdUnassigned(TrustStatus currentStatus, String operation) {
+    public static InvalidStatusForOperation whenParentIdUnassigned(TrustStatus currentStatus, String operation) {
 
         return new InvalidStatusForOperation(currentStatus, operation);
     }
