@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:804f98b28c12668e57825acd09d591879a9f79b9297d67f594965467a956b191
+FROM bellsoft/liberica-openjre-alpine:27-36@sha256:e598f7ef012857bc8d679d245ccee4663906c338c37de19b83814cec85e7d263
 
 # ===============
 # Alpine packages
