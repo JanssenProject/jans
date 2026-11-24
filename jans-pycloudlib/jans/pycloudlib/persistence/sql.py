@@ -226,7 +226,7 @@ def _positive_seconds(name: str, value: _t.Any) -> int:
     return seconds
 
 
-class _IndexLockTimeout(Exception):
+class IndexLockTimeoutError(Exception):
     """Raised when the cross-session index lock cannot be acquired within the lock timeout."""
 
 
@@ -332,9 +332,9 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
 
     def drop_index_query(self, table_name: str, index_name: str) -> str:
         """Query to drop an index (left invalid by a failed concurrent build)."""
-        q = self.quote_char
-        escaped = index_name.replace(q, q * 2)
-        return f"DROP INDEX CONCURRENTLY IF EXISTS {q}{escaped}{q}"
+        qchar = self.quote_char
+        escaped = index_name.replace(qchar, qchar * 2)
+        return f"DROP INDEX CONCURRENTLY IF EXISTS {qchar}{escaped}{qchar}"
 
     def set_lock_timeout_query(self, seconds: int) -> str:
         """Query to limit how long a statement waits for a lock."""
@@ -460,9 +460,9 @@ class MysqlAdapter(CloudSqlConnectorMixin):
 
         Part of the adapter interface; not used for MySQL as its index state is never "invalid".
         """
-        q = self.quote_char
-        index_name, table_name = (name.replace(q, q * 2) for name in (index_name, table_name))
-        return f"DROP INDEX {q}{index_name}{q} ON {q}{table_name}{q}"
+        qchar = self.quote_char
+        index_name, table_name = (name.replace(qchar, qchar * 2) for name in (index_name, table_name))
+        return f"DROP INDEX {qchar}{index_name}{qchar} ON {qchar}{table_name}{qchar}"
 
     def set_lock_timeout_query(self, seconds: int) -> str:
         """Query to limit how long a statement waits for a metadata lock."""
@@ -1037,10 +1037,12 @@ class SqlClient(SqlSchemaMixin):
             if state:
                 logger.debug("index %s on %s already exists; skipping", index_name, table_name)
                 return
+            # None: index is missing, False: index exists but is invalid (must be dropped first)
+            is_invalid = state is False
             try:
-                self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=state is False)
+                self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=is_invalid)
                 return
-            except (DatabaseError, _IndexLockTimeout) as exc:
+            except (DatabaseError, IndexLockTimeoutError) as exc:
                 if self._is_lock_contention(exc):
                     if attempt == retries:
                         # do not fail the whole job; the next start retries
@@ -1060,7 +1062,7 @@ class SqlClient(SqlSchemaMixin):
 
     def _is_lock_contention(self, exc: Exception) -> bool:
         """Check whether the error is retryable lock contention (lock timeout, or deadlock on PostgreSQL)."""
-        return isinstance(exc, _IndexLockTimeout) or self.adapter.is_lock_timeout(exc)
+        return isinstance(exc, IndexLockTimeoutError) or self.adapter.is_lock_timeout(exc)
 
     def alter_table(
         self,
@@ -1158,6 +1160,7 @@ class SqlClient(SqlSchemaMixin):
                         if state:
                             logger.debug("index %s on %s became valid; skipping", index_name, table_name)
                             return
+                        # None: index is missing, False: index exists but is invalid
                         drop_first = state is False
 
                     if drop_first:
@@ -1179,19 +1182,19 @@ class SqlClient(SqlSchemaMixin):
         """Acquire the index lock by polling a non-blocking query, for at most ``lock_timeout`` seconds.
 
         Raises:
-            _IndexLockTimeout: The lock is still held by another session after ``lock_timeout`` seconds.
+            IndexLockTimeoutError: The lock is still held by another session after ``lock_timeout`` seconds.
         """
         deadline = time.monotonic() + lock_timeout
         while not conn.execute(text(try_acquire_query)).scalar():
             if time.monotonic() >= deadline:
-                raise _IndexLockTimeout("timed out waiting for the index lock")
+                raise IndexLockTimeoutError("timed out waiting for the index lock")
             time.sleep(0.5)
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
-        q = self.adapter.quote_char
-        escaped = identifier.replace(q, q * 2)
-        return f"{q}{escaped}{q}"
+        qchar = self.adapter.quote_char
+        escaped = identifier.replace(qchar, qchar * 2)
+        return f"{qchar}{escaped}{qchar}"
 
     def row_exists(self, table_name: str, id_: str) -> bool:
         """Check whether a row is exist."""
