@@ -5,7 +5,14 @@ import io.jans.kernel.Result;
 
 public final class NoCertificateInfo implements CertificateInfo {
     
-    public NoCertificateInfo() { }
+    public NoCertificateInfo() { 
+
+        /**
+         * empty constructor. The NoCertificateInfo class simply represents 
+         * manual metadata with no certificate info. This is in order to avoid 
+         * passing null , which will blur the intent we're trying to communicate
+        */
+    }
     
     @Override
     public boolean hasCertificateData() {

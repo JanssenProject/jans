@@ -1,6 +1,7 @@
 package io.jans.shibboleth.trust.config.metadata.manual;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -33,22 +34,42 @@ public class ValidityPeriod {
 
     public static ValidityPeriod secondsFromNow(long seconds) {
 
-        return new ValidityPeriod(Instant.now().plus(seconds,ChronoUnit.SECONDS));
+        Instant expiresIn = Instant.now()
+            .atOffset(ZoneOffset.UTC)
+            .plusSeconds(seconds)
+            .toInstant();
+        
+        return new ValidityPeriod(expiresIn);
     }
 
     public static ValidityPeriod daysFromNow(long days) {
 
-        return new ValidityPeriod(Instant.now().plus(days,ChronoUnit.DAYS));
+        Instant expiresIn = Instant.now()
+            .atOffset(ZoneOffset.UTC)
+            .plusDays(days)
+            .toInstant();
+        
+        return new ValidityPeriod(expiresIn);
     }
 
     public static ValidityPeriod monthsFromNow(long months) {
 
-        return new ValidityPeriod(Instant.now().plus(months,ChronoUnit.MONTHS));
+        Instant expiresIn = Instant.now()
+            .atOffset(ZoneOffset.UTC)
+            .plusMonths(months)
+            .toInstant();
+        
+        return new ValidityPeriod(expiresIn);
     }
 
     public static ValidityPeriod yearsFromNow(long years) {
 
-        return new ValidityPeriod(Instant.now().plus(years,ChronoUnit.YEARS));
+        Instant expiresIn = Instant.now()
+            .atOffset(ZoneOffset.UTC)
+            .plusYears(years)
+            .toInstant();
+        
+        return new ValidityPeriod(expiresIn);
     }
 
     @Override
