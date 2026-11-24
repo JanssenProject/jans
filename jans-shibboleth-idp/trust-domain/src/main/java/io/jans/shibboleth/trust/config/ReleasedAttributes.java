@@ -102,7 +102,7 @@ public class ReleasedAttributes {
 
         public Builder addAll(Collection<ReleasedAttribute> attributes) {
 
-            if (error != null) {
+            if (error != null || attributes == null ) {
 
                 return this;
             }
