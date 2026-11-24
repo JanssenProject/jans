@@ -4,11 +4,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-//! Cross-platform async timers for background tasks.
-//!
-//! Tokio timers require a Tokio runtime; browser WASM builds use [`gloo_timers`] instead.
-//! `clippy.toml` bans the Tokio timers elsewhere, so every timer goes through this module.
+//! Runtime services that differ between native and WASM: timers and task spawning.
+//! `clippy.toml` bans Tokio timers and `tokio::spawn` elsewhere, so they go through here.
 
+use std::future::Future;
 use std::pin::Pin;
 use std::time::Duration;
 
@@ -70,6 +69,103 @@ impl Ticker {
         // No await between the deadline passing and the reset: a cancelled tick keeps
         // the old deadline, a finished one always has a new one.
         self.next.set(sleep(self.period));
+    }
+}
+
+/// Helper function for spawning async tasks
+///
+/// Use this instead of the following:
+/// - [`tokio::spawn`]
+/// - `wasm_bindgen_futures::spawn_local`
+#[cfg(not(target_family = "wasm"))]
+pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
+where
+    F: Future + Send + 'static,
+    F::Output: Send + 'static,
+{
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "native branch of the cross-platform wrapper"
+    )]
+    let handle = tokio::spawn(future);
+    JoinHandle { handle }
+}
+
+/// Helper function for spawning async tasks
+///
+/// Use this instead of the following:
+/// - [`tokio::spawn`]
+/// - [`wasm_bindgen_futures::spawn_local`]
+#[cfg(target_family = "wasm")]
+pub fn spawn_task<F>(future: F) -> JoinHandle<F::Output>
+where
+    F: Future + 'static,
+    F::Output: Send + 'static,
+{
+    let (tx, rx) = futures::channel::oneshot::channel();
+
+    wasm_bindgen_futures::spawn_local({
+        async move {
+            let result = future.await;
+            _ = tx.send(result);
+        }
+    });
+
+    JoinHandle { receiver: rx }
+}
+
+/// A spawned task that did not finish: it panicked or was cancelled.
+#[derive(Debug, thiserror::Error)]
+#[error("{0}")]
+pub struct TaskEnded(String);
+
+/// This is a helper struct for managing the async handles.
+///
+/// This is needed because the WASM bindings need special treatment.
+#[derive(Debug)]
+pub struct JoinHandle<T>
+where
+    T: Send + 'static,
+{
+    #[cfg(not(target_family = "wasm"))]
+    handle: tokio::task::JoinHandle<T>,
+
+    #[cfg(target_family = "wasm")]
+    receiver: futures::channel::oneshot::Receiver<T>,
+}
+
+impl<T> JoinHandle<T>
+where
+    T: Send + 'static,
+{
+    /// Like [`Self::await_result`], for a caller that must not fail with the
+    /// task: an error says why it did not finish.
+    pub async fn try_await_result(self) -> Result<T, TaskEnded> {
+        #[cfg(not(target_family = "wasm"))]
+        {
+            self.handle.await.map_err(|err| TaskEnded(err.to_string()))
+        }
+
+        #[cfg(target_family = "wasm")]
+        {
+            self.receiver
+                .await
+                .map_err(|_| TaskEnded("the task was dropped before completing".to_string()))
+        }
+    }
+
+    pub async fn await_result(self) -> T {
+        #[cfg(not(target_family = "wasm"))]
+        {
+            self.handle.await.expect("Task panicked")
+        }
+
+        #[cfg(target_family = "wasm")]
+        {
+            self.receiver
+                .await
+                .expect("Task was dropped before completing")
+        }
     }
 }
 
@@ -147,6 +243,20 @@ mod tests {
             start.elapsed(),
             Duration::from_secs(35),
             "next tick should come one period after the late one, not burst"
+        );
+    }
+
+    #[tokio::test]
+    async fn cancelled_task_is_an_error_not_a_panic() {
+        let join = spawn_task(std::future::pending::<()>());
+        join.handle.abort();
+        let err = join
+            .try_await_result()
+            .await
+            .expect_err("a cancelled task did not finish");
+        assert!(
+            err.to_string().contains("cancelled"),
+            "the error says the task was cancelled: {err}"
         );
     }
 }
