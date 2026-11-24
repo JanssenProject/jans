@@ -15,6 +15,9 @@ Authorization Server (AS) supports different metric data:
 - Token Issued
 - Audit Logs
 
+The raw metrics that the metric reporter stores are summarized into hourly, daily, weekly and monthly
+rows. See [Metric aggregation](metric-aggregation.md).
+
 ## Statistic Endpoint
 
 Statistic data (MAU, Token Issued) is returned from `/jans-auth/restv1/internal/stat` protected endpoint.

@@ -48,6 +48,7 @@ tags:
 | maxRequestBytes | Maximum accepted TRACE request body size in bytes | [Details](#maxrequestbytes) |
 | maxStringLength | Maximum accepted JSON string length (UTF-16 units) in a TRACE assertion | [Details](#maxstringlength) |
 | messageConsumerType | PubSub consumer service | [Details](#messageconsumertype) |
+| metricAggregationConfiguration | Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply | [Details](#metricaggregationconfiguration) |
 | metricReporterEnabled | Enable metric reporter | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
@@ -408,6 +409,15 @@ tags:
 ## messageConsumerType
 
 - Description: PubSub consumer service
+
+- Required: No
+
+- Default value: None
+
+
+## metricAggregationConfiguration
+
+- Description: Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply
 
 - Required: No
 
