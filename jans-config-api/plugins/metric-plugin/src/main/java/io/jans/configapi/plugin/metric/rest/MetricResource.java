@@ -75,8 +75,8 @@ public class MetricResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.METRIC_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getMetricTypes(
             @Parameter(description = "Application type (jansAppTyp) to narrow the search, for example jans_auth or fido2.") @QueryParam(Constants.APP_TYPE) String appType,
-            @Parameter(description = "Start date/time to narrow the discovery scan. Accepted format ISO-8601 date-time (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy dd-MM-yyyy.", schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) String startDate,
-            @Parameter(description = "End date/time to narrow the discovery scan.", schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) String endDate) {
+            @Parameter(description = "Narrows the discovery scan. " + Constants.START_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) String startDate,
+            @Parameter(description = "Narrows the discovery scan. " + Constants.END_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) String endDate) {
 
         if (logger.isInfoEnabled()) {
             logger.info("Get metric types - appType:{}, startDate:{}, endDate:{}", escapeLog(appType),
@@ -84,7 +84,7 @@ public class MetricResource extends BaseResource {
         }
 
         Date start = metricUtil.parseDateParam(startDate, "start_date");
-        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        Date end = metricUtil.parseEndDateParam(endDate, "end_date");
         metricUtil.validateRange(start, end);
 
         List<MetricTypeInfo> result;
@@ -124,7 +124,7 @@ public class MetricResource extends BaseResource {
         return Response.ok(result).build();
     }
 
-    @Operation(summary = "Get metric entries within a time range.", description = "Returns a page of raw jansMetric entries for a metric type (and, optionally, application type and subtype) within the given date range. When subType is omitted, both plain and per-subtype rows are returned.", operationId = "get-metric-entries", tags = {
+    @Operation(summary = "Get metric entries within a time range.", description = "Returns a page of raw jansMetric entries for a metric type (and, optionally, application type and subtype) within the given date range. When subType is omitted, both plain and per-subtype rows are returned." + Constants.CONTAINMENT_NOTE, operationId = "get-metric-entries", tags = {
             "Metric" }, security = { @SecurityRequirement(name = "oauth2", scopes = { Constants.METRIC_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -139,8 +139,8 @@ public class MetricResource extends BaseResource {
             @Parameter(description = "Metric type (jansMetricTyp), for example user_authentication_success.") @QueryParam(Constants.METRIC_TYPE) @NotNull(message = "The attribute 'metricType' is required for this operation") String metricType,
             @Parameter(description = "Application type (jansAppTyp) to narrow the search, for example jans_auth or fido2.") @QueryParam(Constants.APP_TYPE) String appType,
             @Parameter(description = "Metric subtype (jansMetricSubTyp). When omitted, both plain and per-subtype rows are returned.") @QueryParam(Constants.SUB_TYPE) String subType,
-            @Parameter(description = "Start date/time for entries. Accepted format ISO-8601 date-time (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy dd-MM-yyyy.", schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) @NotNull(message = "The attribute 'start_date' is required for this operation") String startDate,
-            @Parameter(description = "End date/time for entries.", schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
+            @Parameter(description = Constants.START_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) @NotNull(message = "The attribute 'start_date' is required for this operation") String startDate,
+            @Parameter(description = Constants.END_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
             @Parameter(description = "Maximum number of results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(MetricUtil.DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
@@ -157,7 +157,7 @@ public class MetricResource extends BaseResource {
         metricUtil.validateSortBy(sortBy);
         int validatedLimit = metricUtil.validatePagination(limit, startIndex);
         Date start = metricUtil.parseDateParam(startDate, "start_date");
-        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        Date end = metricUtil.parseEndDateParam(endDate, "end_date");
         metricUtil.validateRange(start, end);
 
         PagedResult<MetricDataEntry> pagedResult = null;

@@ -43,9 +43,9 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * Read-only endpoint over jansMetricAggregation data. The producer that writes aggregation rows
- * runs on application nodes and is implemented as a separate task, so this endpoint returns an
- * empty page until such a producer exists.
+ * Read-only endpoint over jansMetricAggregation data: HOURLY, DAILY, WEEKLY and MONTHLY aggregates
+ * that the application nodes compute from jansMetric rows. The response carries each aggregate's
+ * jansData as a JSON object in the {@code data} field.
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
@@ -57,6 +57,34 @@ public class MetricAggregationResource extends BaseResource {
     // Must be a compile-time constant to appear in the @Parameter annotation below - keep this in
     // sync by hand with io.jans.model.metric.MetricAggregationType's values.
     private static final String ALLOWED_AGGREGATION_TYPES = "HOURLY, DAILY, WEEKLY, MONTHLY";
+
+    private static final String AGGREGATIONS_DESCRIPTION = "Returns a page of jansMetricAggregation entries for an "
+            + "aggregation period (HOURLY, DAILY, WEEKLY, MONTHLY) within the given date range. Entries are computed "
+            + "by the application nodes from the raw jansMetric rows, in UTC (weeks are ISO weeks starting Monday). "
+            + "Aggregates are cluster-wide totals per application type, metric type and metric subtype. An entry "
+            + "covers a whole period: jansStartDate is the first millisecond of the period and jansEndDate is the "
+            + "last one (period end minus 1 ms, for example 2026-11-24T23:59:59.999Z for a DAILY entry)."
+            + Constants.CONTAINMENT_NOTE
+            + " The 'data' field of each entry is a JSON object. Counter: {\"kind\":\"counter\",\"count\":13,"
+            + "\"sourceRows\":2,\"nodes\":2,\"complete\":true,\"legacyDelta\":false}. Timer: "
+            + "{\"kind\":\"timer\",\"count\":40,\"rate\":0.0111,\"rateUnit\":\"second\",\"min\":1.0,"
+            + "\"max\":40.0,\"mean\":8.0,\"median\":7.0,\"value75thPercentile\":9.0,\"value95thPercentile\":17.5,"
+            + "\"value98thPercentile\":21.75,\"value99thPercentile\":26.25,\"value999thPercentile\":33.25,"
+            + "\"durationUnit\":\"milliseconds\",\"approximate\":true,\"sourceRows\":2,\"nodes\":2,"
+            + "\"complete\":false,\"legacyDelta\":false}. Fields: count is the number of events in the period "
+            + "(for a timer, the number of timed calls), summed from per-interval deltas; sourceRows is the number "
+            + "of raw rows the aggregate covers; nodes is the number of nodes that reported (in WEEKLY, MONTHLY and "
+            + "DAILY entries it is a lower bound: the largest value among the child entries); complete is true when "
+            + "the entry was computed after its period closed and its source data was complete, so false means the "
+            + "period is still open or data may still arrive; legacyDelta is true when some counts came from raw rows "
+            + "written by an older version without a per-interval count, whose first row of a series counts as 0. "
+            + "Timer fields: rate is count divided by the period length in seconds; min is the smallest and max the "
+            + "largest value reported in any row; mean, median and the percentiles are weighted averages of the "
+            + "per-row values and are approximate (approximate is always true); durationUnit is the unit of min, "
+            + "max, mean, median and the percentiles. A timer with count 0 has null for min, max, mean, median and "
+            + "the percentiles. Rows that arrive after the recompute window (by default the last 2 closed HOURLY periods "
+            + "and the last closed DAILY, WEEKLY and MONTHLY period) are not counted. If 'data' does not hold "
+            + "valid JSON, it is returned as a string.";
 
     @Inject
     Logger logger;
@@ -70,7 +98,7 @@ public class MetricAggregationResource extends BaseResource {
     private class MetricAggregationPagedResult extends PagedResult<MetricAggregationEntry> {
     }
 
-    @Operation(summary = "Get aggregated metric entries within a time range.", description = "Returns a page of jansMetricAggregation entries for an aggregation period (HOURLY, DAILY, WEEKLY, MONTHLY) within the given date range. The aggregation producer runs on application nodes as a separate task; until it is deployed this endpoint returns an empty page.", operationId = "get-metric-aggregations", tags = {
+    @Operation(summary = "Get aggregated metric entries within a time range.", description = AGGREGATIONS_DESCRIPTION, operationId = "get-metric-aggregations", tags = {
             "Metric" }, security = { @SecurityRequirement(name = "oauth2", scopes = { Constants.METRIC_READ_ACCESS }),
                     @SecurityRequirement(name = "oauth2", scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }) })
     @ApiResponses(value = {
@@ -85,8 +113,8 @@ public class MetricAggregationResource extends BaseResource {
             @Parameter(description = "Application type (jansAppTyp) to narrow the search, for example jans_auth or fido2.") @QueryParam(Constants.APP_TYPE) String appType,
             @Parameter(description = "Metric type (jansMetricTyp) to narrow the search.") @QueryParam(Constants.METRIC_TYPE) String metricType,
             @Parameter(description = "Metric subtype (jansMetricSubTyp) to narrow the search.") @QueryParam(Constants.SUB_TYPE) String subType,
-            @Parameter(description = "Start date/time for entries. Accepted format ISO-8601 date-time (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy dd-MM-yyyy.", schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) @NotNull(message = "The attribute 'start_date' is required for this operation") String startDate,
-            @Parameter(description = "End date/time for entries.", schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
+            @Parameter(description = Constants.START_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.START_DATE) @NotNull(message = "The attribute 'start_date' is required for this operation") String startDate,
+            @Parameter(description = Constants.END_DATE_DESCRIPTION, schema = @Schema(type = "string")) @QueryParam(Constants.END_DATE) @NotNull(message = "The attribute 'end_date' is required for this operation") String endDate,
             @Parameter(description = "Maximum number of results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(ApiConstants.LIMIT) int limit,
             @Parameter(description = "The 0-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute to sort by. One of jansStartDate, jansEndDate, creationDate.") @DefaultValue(MetricUtil.DEFAULT_SORT_BY) @QueryParam(ApiConstants.SORT_BY) String sortBy,
@@ -104,7 +132,7 @@ public class MetricAggregationResource extends BaseResource {
         metricUtil.validateSortBy(sortBy);
         int validatedLimit = metricUtil.validatePagination(limit, startIndex);
         Date start = metricUtil.parseDateParam(startDate, "start_date");
-        Date end = metricUtil.parseDateParam(endDate, "end_date");
+        Date end = metricUtil.parseEndDateParam(endDate, "end_date");
         metricUtil.validateRange(start, end);
 
         PagedResult<MetricAggregationEntry> pagedResult;
