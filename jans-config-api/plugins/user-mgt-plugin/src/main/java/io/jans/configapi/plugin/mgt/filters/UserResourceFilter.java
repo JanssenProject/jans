@@ -125,6 +125,7 @@ public class UserResourceFilter extends BaseFilter {
         log.error(" UserResourceFilter - resourceScopes:{}", resourceScopes);
         
         // Fetch current UserRolePermission of user
+        log.error(" UserResourceFilter - getUserInum(introspectionResponse):{}", getUserInum(introspectionResponse));
         List<String> userCurrentScopes = authUtil.getUserRolePermission(getUserInum(introspectionResponse));
         log.error("UserResourceFilter - userCurrentScopes:{}", userCurrentScopes);
 
