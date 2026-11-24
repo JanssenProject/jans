@@ -2,7 +2,6 @@ package io.jans.shibboleth.trust.config.metadata.manual;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import io.jans.kernel.RequiredValueMissing;
