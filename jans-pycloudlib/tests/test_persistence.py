@@ -930,7 +930,7 @@ def test_sql_client_run_index_ddl_does_not_unlock_when_lock_not_acquired(monkeyp
     from unittest.mock import MagicMock
 
     from jans.pycloudlib.persistence.sql import PostgresqlAdapter
-    from jans.pycloudlib.persistence.sql import _IndexLockTimeout
+    from jans.pycloudlib.persistence.sql import IndexLockTimeoutError
 
     conn = MagicMock()
 
@@ -946,7 +946,7 @@ def test_sql_client_run_index_ddl_does_not_unlock_when_lock_not_acquired(monkeyp
     sql_client._pg_has_progress_view = True
     monkeypatch.setattr(type(sql_client), "engine", _fake_engine(conn), raising=False)
 
-    with pytest.raises(_IndexLockTimeout):
+    with pytest.raises(IndexLockTimeoutError):
         sql_client._run_index_ddl("CREATE INDEX CONCURRENTLY x", "t", "x", 0, drop_first=False)
 
     executed = _executed(conn)
@@ -993,7 +993,7 @@ def test_sql_client_run_index_ddl_polls_for_lock_without_blocking(monkeypatch, s
 
 def test_sql_client_create_index_retries_on_index_lock_timeout(monkeypatch, sql_client):
     from jans.pycloudlib.persistence.sql import PostgresqlAdapter
-    from jans.pycloudlib.persistence.sql import _IndexLockTimeout
+    from jans.pycloudlib.persistence.sql import IndexLockTimeoutError
 
     monkeypatch.setattr("jans.pycloudlib.persistence.sql.time.sleep", lambda s: None)
     monkeypatch.setattr(sql_client, "adapter", PostgresqlAdapter())
@@ -1004,7 +1004,7 @@ def test_sql_client_create_index_retries_on_index_lock_timeout(monkeypatch, sql_
     def fake_run(query, table_name, index_name, lock_timeout, drop_first):
         calls.append(1)
         if len(calls) < 3:
-            raise _IndexLockTimeout("held by another loader")
+            raise IndexLockTimeoutError("held by another loader")
 
     monkeypatch.setattr(sql_client, "_run_index_ddl", fake_run)
 
