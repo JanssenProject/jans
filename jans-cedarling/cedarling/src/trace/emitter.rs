@@ -1063,7 +1063,7 @@ async fn sign_batch_offloaded(
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
 ) -> Result<SignedBatch, SignTaskPanicked> {
-    #[allow(
+    #[expect(
         clippy::disallowed_methods,
         reason = "TRACE is rejected on WASM before it starts"
     )]

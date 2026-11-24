@@ -5,7 +5,7 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 //! Runtime services that differ between native and WASM: timers and task spawning.
-//! `clippy.toml` bans Tokio timers and `tokio::spawn` elsewhere, so they go through here.
+//! `clippy.toml` bans the raw Tokio and `spawn_local` calls elsewhere, so they go through here.
 
 use std::future::Future;
 use std::pin::Pin;
@@ -27,7 +27,7 @@ pub(crate) type Sleep = gloo_timers::future::TimeoutFuture;
 pub(crate) fn sleep(duration: Duration) -> Sleep {
     #[cfg(not(target_family = "wasm"))]
     {
-        #[allow(
+        #[expect(
             clippy::disallowed_methods,
             reason = "native branch of the cross-platform wrapper"
         )]
@@ -83,7 +83,7 @@ where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    #[allow(
+    #[expect(
         clippy::disallowed_methods,
         reason = "native branch of the cross-platform wrapper"
     )]
@@ -104,6 +104,10 @@ where
 {
     let (tx, rx) = futures::channel::oneshot::channel();
 
+    #[expect(
+        clippy::disallowed_methods,
+        reason = "WASM branch of the cross-platform wrapper"
+    )]
     wasm_bindgen_futures::spawn_local({
         async move {
             let result = future.await;
