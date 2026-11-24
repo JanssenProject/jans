@@ -1,6 +1,5 @@
 package io.jans.shibboleth.trust.config.error;
 
-import io.jans.shibboleth.trust.config.error.TrustError;
 
 public class IndexOutOfBounds extends TrustError {
     
