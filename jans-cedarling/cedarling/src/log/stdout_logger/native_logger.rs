@@ -37,6 +37,9 @@ const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(1);
 /// caller counts a drop without waking it.
 const IDLE_REPORT_INTERVAL: Duration = Duration::from_secs(1);
 
+/// Most bytes handed to stdout in one write, so each finished write counts as progress for `Drop`.
+const WRITE_CHUNK: usize = 64 * 1024;
+
 /// Mode for stdout logger in native builds.
 /// Supports both immediate and asynchronous logging.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -254,9 +257,13 @@ impl QueueWriter {
 
     fn flush(&mut self) {
         if !self.buffer.is_empty() {
-            let _ = self.out.write_all(self.buffer.as_bytes());
+            for chunk in self.buffer.as_bytes().chunks(WRITE_CHUNK) {
+                if self.out.write_all(chunk).is_err() {
+                    break;
+                }
+                self.made_progress();
+            }
             self.buffer.clear();
-            self.made_progress();
         }
         self.flush_deadline = None;
     }
