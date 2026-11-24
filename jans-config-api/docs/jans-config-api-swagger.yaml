@@ -15693,19 +15693,19 @@ components:
           type: string
         selected:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
         whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -16689,6 +16689,8 @@ components:
         spiffeBundleReadTimeoutMs:
           type: integer
           format: int32
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -16698,8 +16700,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -17459,6 +17459,10 @@ components:
         cimdExpired:
           type: boolean
         tlsClientAuthSubjectDn:
+          type: string
+        accessTokenSigningKid:
+          type: string
+        idTokenSigningKid:
           type: string
         runIntrospectionScriptBeforeJwtCreation:
           type: boolean
@@ -18735,6 +18739,10 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18745,10 +18753,6 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

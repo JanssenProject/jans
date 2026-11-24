@@ -541,13 +541,6 @@ def load(configuration_file, dump_file, key_file):
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
 
-    # check whether config and secret in backend have been initialized
-    should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
-    if should_skip and manager.config.get("hostname") and manager.secret.get("ssl_cert"):
-        # config and secret may have been initialized
-        logger.info("Configmaps and secrets have been initialized")
-        return
-
     with manager.create_lock("configurator-load"):
         logger.info("Loading configmaps and secrets from %s", configuration_file)
 
