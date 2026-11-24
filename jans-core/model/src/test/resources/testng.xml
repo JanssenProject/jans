@@ -7,4 +7,9 @@
             <class name="io.jans.model.authzen.ContextTest"/>
         </classes>
     </test>
+    <test name="Metric Aggregation Model Tests" enabled="true">
+        <classes>
+            <class name="io.jans.model.metric.aggregation.MetricAggregationConfigurationTest"/>
+        </classes>
+    </test>
 </suite>

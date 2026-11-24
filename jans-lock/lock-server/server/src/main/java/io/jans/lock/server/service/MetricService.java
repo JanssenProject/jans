@@ -61,9 +61,20 @@ public class MetricService extends io.jans.service.metric.MetricService {
 	@ReportMetric
 	private PersistenceEntryManager persistenceEntryManager;
 
+	private volatile boolean reporterStarted;
+
 	public void initTimer() {
 		initTimer(this.appConfiguration.getMetricReporterInterval(),
 				this.appConfiguration.getMetricReporterKeepDataDays());
+		this.reporterStarted = true;
+	}
+
+	/**
+	 * @return true after {@link #initTimer()} started the metric reporter. The server does not start it
+	 *         today, although {@code metricReporterEnabled} can be true in the configuration.
+	 */
+	public boolean isReporterStarted() {
+		return reporterStarted;
 	}
 
 	@Override

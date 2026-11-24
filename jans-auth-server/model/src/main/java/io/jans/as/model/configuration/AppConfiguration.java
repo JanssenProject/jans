@@ -18,6 +18,7 @@ import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
 import io.jans.doc.annotation.DocProperty;
+import io.jans.model.metric.aggregation.MetricAggregationConfiguration;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -631,6 +632,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "The days to keep metric reported data")
     private int metricReporterKeepDataDays;
+
+    @DocProperty(description = "Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled (the metric feature flag) and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply")
+    private MetricAggregationConfiguration metricAggregationConfiguration;
 
     @DocProperty(description = "the pairwise ID type")
     private String pairwiseIdType; // persistent, algorithmic
@@ -3053,6 +3057,14 @@ public class AppConfiguration implements Configuration {
 
     public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
         this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+    }
+
+    public MetricAggregationConfiguration getMetricAggregationConfiguration() {
+        return metricAggregationConfiguration;
+    }
+
+    public void setMetricAggregationConfiguration(MetricAggregationConfiguration metricAggregationConfiguration) {
+        this.metricAggregationConfiguration = metricAggregationConfiguration;
     }
 
     public String getPairwiseIdType() {
