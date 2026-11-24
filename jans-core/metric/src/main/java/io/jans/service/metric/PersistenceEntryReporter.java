@@ -20,7 +20,12 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A reporter which stores measurements via the persistence layer
+ * A reporter which stores measurements via the persistence layer.
+ *
+ * <p>Each counter and timer row carries two counts: {@code count} is cumulative since this process
+ * started, and {@code intervalCount} is the number of events since the last row that was written
+ * successfully for the same metric. When a write fails, the reported counts are not remembered, so the
+ * next row covers the failed interval as well.</p>
  *
  * @author Yuriy Movchan Date: 08/03/2015
  */
@@ -29,6 +34,9 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
     private final Clock clock;
     private final MetricService metricService;
     private Date startTime;
+
+    private final Map<String, Long> lastCounterCounts = new HashMap<String, Long>();
+    private final Map<String, Long> lastTimerCounts = new HashMap<String, Long>();
 
     /**
      * Returns a new {@link Builder} for {@link PersistenceEntryReporter}.
@@ -139,7 +147,7 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
         reportImpl(counters, timers);
     }
 
-    private void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
+    private synchronized void reportImpl(SortedMap<String, Counter> counters, SortedMap<String, Timer> timers) {
         if (!metricService.isMetricReporterEnabled()) {
             return;
         }
@@ -150,13 +158,15 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
         Collection<MetricRegistration> registeredMetrics = new ArrayList<MetricRegistration>(metricService.getRegisteredMetrics());
 
         List<MetricEntry> metricEntries = new ArrayList<MetricEntry>();
+        Map<String, Long> reportedCounterCounts = new HashMap<String, Long>();
+        Map<String, Long> reportedTimerCounts = new HashMap<String, Long>();
         if (counters != null && !counters.isEmpty()) {
-            List<MetricEntry> result = buildCounterEntries(counters, registeredMetrics);
+            List<MetricEntry> result = buildCounterEntries(counters, registeredMetrics, reportedCounterCounts);
             metricEntries.addAll(result);
         }
 
         if (timers != null && !timers.isEmpty()) {
-            List<MetricEntry> result = buildTimerEntries(timers, registeredMetrics);
+            List<MetricEntry> result = buildTimerEntries(timers, registeredMetrics, reportedTimerCounts);
             metricEntries.addAll(result);
         }
 
@@ -172,20 +182,34 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
             addMandatoryAttributes(metricService, startTime, endTime, metricEntries, creationTime);
         }
 
-        startTime = currentRunTime;
-
         metricService.add(metricEntries, creationTime);
+
+        startTime = currentRunTime;
+        lastCounterCounts.putAll(reportedCounterCounts);
+        lastTimerCounts.putAll(reportedTimerCounts);
     }
 
-    private List<MetricEntry> buildCounterEntries(SortedMap<String, Counter> counters, Collection<MetricRegistration> registeredMetrics) {
+    static long computeIntervalCount(long count, Long lastReportedCount) {
+        if ((lastReportedCount == null) || (count < lastReportedCount)) {
+            return count;
+        }
+
+        return count - lastReportedCount;
+    }
+
+    private List<MetricEntry> buildCounterEntries(SortedMap<String, Counter> counters, Collection<MetricRegistration> registeredMetrics,
+            Map<String, Long> reportedCounts) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
         for (MetricRegistration metricRegistration : registeredMetrics) {
             Counter counter = counters.get(metricRegistration.getRegistryName());
             if (counter != null) {
+                String registryName = metricRegistration.getRegistryName();
                 long count = counter.getCount();
 
                 CounterMetricData counterMetricData = new CounterMetricData(count);
+                counterMetricData.setIntervalCount(computeIntervalCount(count, lastCounterCounts.get(registryName)));
+                reportedCounts.put(registryName, count);
                 CounterMetricEntry counterMetricEntry = new CounterMetricEntry();
                 counterMetricEntry.setMetricData(counterMetricData);
                 counterMetricEntry.setMetricType(metricRegistration.getMetricType().getValue());
@@ -198,20 +222,25 @@ public final class PersistenceEntryReporter extends ScheduledReporter {
         return result;
     }
 
-    private List<MetricEntry> buildTimerEntries(SortedMap<String, Timer> timers, Collection<MetricRegistration> registeredMetrics) {
+    private List<MetricEntry> buildTimerEntries(SortedMap<String, Timer> timers, Collection<MetricRegistration> registeredMetrics,
+            Map<String, Long> reportedCounts) {
         List<MetricEntry> result = new ArrayList<MetricEntry>();
 
         for (MetricRegistration metricRegistration : registeredMetrics) {
             Timer timer = timers.get(metricRegistration.getRegistryName());
             if (timer != null) {
+                String registryName = metricRegistration.getRegistryName();
+                long count = timer.getCount();
                 Snapshot snapshot = timer.getSnapshot();
 
-                TimerMetricData timerMetricData = new TimerMetricData(timer.getCount(), convertRate(timer.getMeanRate()),
+                TimerMetricData timerMetricData = new TimerMetricData(count, convertRate(timer.getMeanRate()),
                         convertRate(timer.getOneMinuteRate()), convertRate(timer.getFiveMinuteRate()), convertRate(timer.getFifteenMinuteRate()),
                         getRateUnit(), convertDuration(snapshot.getMin()), convertDuration(snapshot.getMax()), convertDuration(snapshot.getMean()),
                         convertDuration(snapshot.getStdDev()), convertDuration(snapshot.getMedian()), convertDuration(snapshot.get75thPercentile()),
                         convertDuration(snapshot.get95thPercentile()), convertDuration(snapshot.get98thPercentile()),
                         convertDuration(snapshot.get99thPercentile()), convertDuration(snapshot.get999thPercentile()), getDurationUnit());
+                timerMetricData.setIntervalCount(computeIntervalCount(count, lastTimerCounts.get(registryName)));
+                reportedCounts.put(registryName, count);
                 TimerMetricEntry timerMetricEntry = new TimerMetricEntry();
                 timerMetricEntry.setMetricData(timerMetricData);
                 timerMetricEntry.setMetricType(metricRegistration.getMetricType().getValue());
