@@ -50,9 +50,6 @@ spec:
       {{- with (include "cn.config.schema" . | fromYaml).volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-        - name: {{ include "config.fullname" . }}-tls-script
-          configMap:
-            name: {{ include "config.fullname" . }}-tls-script
         {{- if .Values.configmap.cnSqlSslEnabled }}
         - name: {{ .Release.Name }}-sql-ssl-ca-cert
           secret:
@@ -96,9 +93,6 @@ spec:
           {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
-          - mountPath: /scripts/tls_generator.py
-            name: {{ include "config.fullname" . }}-tls-script
-            subPath: tls_generator.py
           {{- if .Values.configmap.cnSqlSslEnabled }}
           - name: {{ .Release.Name }}-sql-ssl-ca-cert
             mountPath: /etc/certs/sql_cacert.pem
@@ -139,10 +133,10 @@ spec:
               {{- with .Values.customScripts }}
               {{- toYaml . | replace "- " "" | nindent 14}}
               {{- end }}
-              {{- if .Values.migration.enabled }}
-              /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }} && /usr/bin/python3 /scripts/tls_generator.py
+              {{- if .Values.global.istio.ingress }}
+              /app/scripts/entrypoint.sh load && /usr/bin/python3 /app/scripts/tls_generator.py --namespace={{ .Values.global.istio.namespace | quote }}
               {{- else }}
-              /app/scripts/entrypoint.sh load && /usr/bin/python3 /scripts/tls_generator.py
+              /app/scripts/entrypoint.sh load && /usr/bin/python3 /app/scripts/tls_generator.py --namespace={{ .Release.Namespace | quote }}
               {{- end }}
               {{- if .Values.global.istio.enabled }}
               curl -X POST http://localhost:15020/quitquitquit

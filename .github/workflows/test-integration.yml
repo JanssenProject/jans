@@ -73,7 +73,7 @@ on:
         type: boolean
         default: false
       script_catalog:
-        description: "docs/script-catalog (custom scripts load + behavior; PRs run it only when the catalog changes)"
+        description: "docs/script-catalog (custom scripts load + behavior; nightly always, PRs only when the catalog changes)"
         type: boolean
         default: false
   schedule:
@@ -164,15 +164,18 @@ jobs:
           # .git is rsync'd to the VM (the maven buildnumber plugin needs it); don't carry the token.
           persist-credentials: false
 
-      # Script-catalog tests run only on demand: a PR touching the catalog/harness, or a ticked dispatch.
+      # Script-catalog tests run nightly (so the Zulip report covers them), on a PR touching the
+      # catalog/harness, or on a dispatch with the box (or "all modules") ticked.
       - name: Decide script-catalog tests
         id: catalog
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           run=false
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            run="${{ inputs.script_catalog }}"
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            run=true
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            [ "${{ inputs.script_catalog }}" = "true" ] || [ "${{ inputs.all_modules }}" = "true" ] && run=true
           elif [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch -q --no-tags --depth=1 origin "$BASE_SHA"
             rc=0

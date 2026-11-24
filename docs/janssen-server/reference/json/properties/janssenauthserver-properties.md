@@ -40,7 +40,7 @@ tags:
 | authorizationChallengeEndpoint | The authorization challenge endpoint URL | [Details](#authorizationchallengeendpoint) |
 | authorizationChallengeSessionLifetimeInSeconds | Authorization challenge session lifetime in seconds | [Details](#authorizationchallengesessionlifetimeinseconds) |
 | authorizationChallengeShouldGenerateSession | Boolean value specifying whether to generate session_id (AS object and cookie) during authorization at Authorization Challenge Endpoint | [Details](#authorizationchallengeshouldgeneratesession) |
-| authorizationCodeLifetime | The lifetime of the Authorization Code | [Details](#authorizationcodelifetime) |
+| authorizationCodeLifetime | The authorization code lifetime in seconds. Values that are zero, negative, or greater than 600 use the 600-second maximum | [Details](#authorizationcodelifetime) |
 | authorizationEncryptionAlgValuesSupported | List of authorization encryption algorithms supported by this OP | [Details](#authorizationencryptionalgvaluessupported) |
 | authorizationEncryptionEncValuesSupported | A list of the authorization encryption algorithms supported | [Details](#authorizationencryptionencvaluessupported) |
 | authorizationEndpoint | The authorization endpoint URL | [Details](#authorizationendpoint) |
