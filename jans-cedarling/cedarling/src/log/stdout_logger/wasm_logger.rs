@@ -29,6 +29,12 @@ impl StdOutLogger {
     pub(crate) fn new(log_level: LogLevel, _mode: StdOutLoggerMode) -> Self {
         Self { log_level }
     }
+
+    /// Matches the native logger; every entry is written when logged, so none is pending.
+    #[allow(clippy::unused_self)] // same signature as the native logger
+    pub(crate) fn shut_down(&self) -> std::future::Ready<()> {
+        std::future::ready(())
+    }
 }
 
 // Implementation of LogWriter

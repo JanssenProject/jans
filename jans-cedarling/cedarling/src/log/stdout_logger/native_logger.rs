@@ -5,17 +5,25 @@
 
 //! Implements a logger that writes to standard output (stdout).
 //! Write failures are silently ignored to prevent panics in logging code paths.
+//!
+//! In async mode a writer thread writes the entries. When the process exits it
+//! does not wait for that thread, and Rust offers no way to make it, so entries
+//! still queued at exit are lost. This is a known limitation: awaiting
+//! [`StdOutLogger::shut_down`] (called by `Cedarling::shut_down`) before the
+//! exit writes them.
 
 // Native-only module (WASM uses `wasm_logger`), so threads and `Instant` are available.
 #![allow(clippy::disallowed_methods)]
 
-use std::convert::Infallible;
 use std::io::Write;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, SyncSender};
 use std::sync::{Arc, Mutex, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
+
+use arc_swap::ArcSwapOption;
+use tokio::sync::watch;
 
 use crate::log::interface::{LogWriter, Loggable};
 use crate::log::log_json::LogJson;
@@ -29,9 +37,9 @@ use crate::log::{BaseLogEntry, LogEntry, LogLevel};
 /// for 1 KB entries.
 const QUEUE_CAPACITY: usize = 10_000;
 
-/// How long dropping an async logger waits for the writer to write the queued
-/// entries before it detaches the writer, so a blocked stdout cannot hang the caller.
-const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(1);
+/// How long [`AsyncSink::shut_down`] waits for a writer that makes no progress
+/// before it returns, so a blocked stdout cannot hang the caller.
+const STALL_TIMEOUT: Duration = Duration::from_secs(1);
 
 /// How often an idle writer checks for dropped entries to report, since the
 /// caller counts a drop without waking it.
@@ -88,7 +96,7 @@ struct AsyncConfig {
     flush_timeout: Duration,
     buffer_limit: usize,
     queue_capacity: usize,
-    shutdown_timeout: Duration,
+    stall_timeout: Duration,
     idle_report_interval: Duration,
 }
 
@@ -98,35 +106,37 @@ impl AsyncConfig {
             flush_timeout: Duration::from_millis(timeout_millis),
             buffer_limit,
             queue_capacity: QUEUE_CAPACITY,
-            shutdown_timeout: SHUTDOWN_TIMEOUT,
+            stall_timeout: STALL_TIMEOUT,
             idle_report_interval: IDLE_REPORT_INTERVAL,
         }
     }
 }
 
 /// Hands entries to a writer thread without ever blocking or panicking the caller.
+///
+/// Dropping the sink only closes the queue: the writer keeps writing what is
+/// queued and exits on its own, so a slow or blocked stdout cannot hang
+/// whoever drops the last reference. Waiting for the writer is
+/// [`Self::shut_down`], an explicit call the caller can see in its stack.
 struct AsyncSink {
-    /// `None` only while dropping: closing the queue tells the writer to write
-    /// what is queued and exit.
-    jobs: Option<SyncSender<SerializeJob>>,
-    /// Entries not queued because the queue was full or the writer had exited,
-    /// shared with the writer, which reports and resets it.
+    /// Empty after [`Self::shut_down`]. The writer exits once the queue is empty
+    /// and the last sender is gone: this one, or one a concurrent `send` still holds.
+    jobs: ArcSwapOption<SyncSender<SerializeJob>>,
+    /// Entries not queued because the queue was full, the writer had exited or
+    /// the sink was shut down; shared with the writer, which reports and resets it.
     dropped: Arc<AtomicU64>,
-    /// Bumped by the writer each time it finishes an entry or a write, so `Drop`
-    /// can tell a slow writer from a blocked one.
-    progress: Arc<AtomicU64>,
-    /// Never receives; it disconnects when the writer thread exits. The mutex
-    /// only makes the sink `Sync`, it is never locked.
-    writer_exited: Mutex<Receiver<Infallible>>,
-    shutdown_timeout: Duration,
+    /// Marked changed each time the writer finishes an entry or a write, and
+    /// closed when the writer exits, so a waiter can tell a slow writer from a
+    /// blocked one.
+    progress: watch::Receiver<()>,
+    stall_timeout: Duration,
 }
 
 impl AsyncSink {
     fn spawn(out: BoxedWriter, log_level: LogLevel, config: AsyncConfig) -> Self {
         let (jobs, jobs_receiver) = mpsc::sync_channel(config.queue_capacity);
-        let (exited_sender, writer_exited) = mpsc::channel();
+        let (progress_sender, progress) = watch::channel(());
         let dropped = Arc::new(AtomicU64::new(0));
-        let progress = Arc::new(AtomicU64::new(0));
 
         let writer = QueueWriter {
             out,
@@ -136,57 +146,42 @@ impl AsyncSink {
             flush_deadline: None,
             idle_report_interval: config.idle_report_interval,
             dropped: Arc::clone(&dropped),
-            progress: Arc::clone(&progress),
+            progress: progress_sender,
             log_level,
         };
-        thread::spawn(move || {
-            writer.run(&jobs_receiver);
-            drop(exited_sender);
-        });
+        // `run` owns the writer, so its progress sender closes when the thread
+        // exits, even by a panic.
+        thread::spawn(move || writer.run(&jobs_receiver));
 
         Self {
-            jobs: Some(jobs),
+            jobs: ArcSwapOption::from_pointee(jobs),
             dropped,
             progress,
-            writer_exited: Mutex::new(writer_exited),
-            shutdown_timeout: config.shutdown_timeout,
+            stall_timeout: config.stall_timeout,
         }
     }
 
     fn send(&self, job: SerializeJob) {
         let queued = self
             .jobs
-            .as_ref()
+            .load()
+            .as_deref()
             .is_some_and(|jobs| jobs.try_send(job).is_ok());
         if !queued {
             self.dropped.fetch_add(1, Ordering::Relaxed);
         }
     }
-}
 
-impl Drop for AsyncSink {
-    fn drop(&mut self) {
-        drop(self.jobs.take());
-        let writer_exited = self
-            .writer_exited
-            .get_mut()
-            .unwrap_or_else(PoisonError::into_inner);
-        // The queue is closed, so a writer that keeps making progress finishes.
-        let mut last_progress = self.progress.load(Ordering::Relaxed);
-        loop {
-            match writer_exited.recv_timeout(self.shutdown_timeout) {
-                Ok(never) => match never {},
-                Err(RecvTimeoutError::Disconnected) => break,
-                Err(RecvTimeoutError::Timeout) => {
-                    let progress = self.progress.load(Ordering::Relaxed);
-                    if progress == last_progress {
-                        // Blocked: detach the writer.
-                        break;
-                    }
-                    last_progress = progress;
-                },
-            }
-        }
+    /// Closes the queue and waits until the writer has written every queued
+    /// entry and exited. It waits as long as the writer makes progress, and
+    /// returns once the writer makes none for `stall_timeout`, so a blocked
+    /// stdout cannot hang the caller. Entries logged afterwards are dropped;
+    /// once the writer has exited, a further call returns at once.
+    async fn shut_down(&self) {
+        let mut progress = self.progress.clone();
+        self.jobs.store(None);
+        // `Ok(Err(_))`: the writer exited. `Err(Elapsed)`: it made no progress.
+        while let Ok(Ok(())) = tokio::time::timeout(self.stall_timeout, progress.changed()).await {}
     }
 }
 
@@ -201,7 +196,7 @@ struct QueueWriter {
     flush_deadline: Option<Instant>,
     idle_report_interval: Duration,
     dropped: Arc<AtomicU64>,
-    progress: Arc<AtomicU64>,
+    progress: watch::Sender<()>,
     log_level: LogLevel,
 }
 
@@ -269,7 +264,7 @@ impl QueueWriter {
     }
 
     fn made_progress(&self) {
-        self.progress.fetch_add(1, Ordering::Relaxed);
+        self.progress.send_replace(());
     }
 }
 
@@ -335,6 +330,14 @@ impl StdOutLogger {
             )),
         };
         Self { log_level, sink }
+    }
+
+    /// Writes the entries the async writer still holds; see [`AsyncSink::shut_down`].
+    /// Immediate mode holds none.
+    pub(crate) async fn shut_down(&self) {
+        if let Sink::Async(sink) = &self.sink {
+            sink.shut_down().await;
+        }
     }
 }
 
@@ -463,10 +466,8 @@ mod tests {
         assert_eq!(logged_content, json_str + "\n");
     }
 
-    #[test]
-    fn flush_by_timeout_even_with_continuous_messages() {
-        use std::thread;
-
+    #[tokio::test]
+    async fn flush_by_timeout_even_with_continuous_messages() {
         let pdp_id = PdpID::new();
         let app_name = None;
 
@@ -516,7 +517,7 @@ mod tests {
         logger.log_any(log_entry1.clone());
 
         // Wait for half the timeout - buffer may still be empty or may have flushed early
-        thread::sleep(flush_timeout / 2);
+        tokio::time::sleep(flush_timeout / 2).await;
         let buf_contents = test_writer.get_buf_contents();
         if !buf_contents.is_empty() {
             // Flush may have happened early, ensure it contains the first message
@@ -530,7 +531,7 @@ mod tests {
         logger.log_any(log_entry2);
 
         // Wait for the full timeout plus small margin (timer resets on each log, so wait full timeout after entry2)
-        thread::sleep(flush_timeout + Duration::from_millis(5));
+        tokio::time::sleep(flush_timeout + Duration::from_millis(5)).await;
 
         // Buffer should now contain the first message (may also contain second message)
         let expected_json = json!(log_entry1).to_string() + "\n";
@@ -559,17 +560,16 @@ mod tests {
             logger.log_any(log_entry);
 
             // Wait shorter than timeout
-            thread::sleep(flush_timeout / 4);
+            tokio::time::sleep(flush_timeout / 4).await;
 
             // Verify that previous continuous messages might not be flushed yet,
             // but they shouldn't block the flush of the first message (already verified)
         }
 
         // Wait for final flush
-        thread::sleep(flush_timeout * 2);
+        tokio::time::sleep(flush_timeout * 2).await;
 
-        // Clean up logger
-        drop(logger);
+        logger.shut_down().await;
 
         // Verify that all messages eventually arrived
         let final_content = test_writer.into_inner_buf();
@@ -670,8 +670,8 @@ mod tests {
         }
     }
 
-    #[test]
-    fn flush_preserves_oversized_unicode_line_with_interleaved_writes() {
+    #[tokio::test]
+    async fn flush_preserves_oversized_unicode_line_with_interleaved_writes() {
         let messages: &[String] = &[
             "before".to_string(),
             "🦀".repeat(WRITE_CHUNK),
@@ -691,7 +691,7 @@ mod tests {
         for message in messages {
             logger.log_any(system_entry(LogLevel::INFO, message));
         }
-        drop(logger);
+        logger.shut_down().await;
         let written = written_messages(&output.into_inner_buf());
         assert!(
             written.iter().any(|message| message == "other writer"),
@@ -738,13 +738,36 @@ mod tests {
     }
 
     /// Writes every line as soon as it is queued.
-    fn unbuffered(queue_capacity: usize, shutdown_timeout: Duration) -> AsyncConfig {
+    fn unbuffered(queue_capacity: usize, stall_timeout: Duration) -> AsyncConfig {
         AsyncConfig {
             flush_timeout: Duration::from_secs(60),
             buffer_limit: 1,
             queue_capacity,
-            shutdown_timeout,
+            stall_timeout,
             idle_report_interval: Duration::from_secs(60),
+        }
+    }
+
+    /// Returns once the writer thread has exited, without closing the queue.
+    async fn wait_for_writer_exit(logger: &StdOutLogger) {
+        let mut progress = async_sink(logger).progress.clone();
+        // `changed` fails once the writer's progress sender is gone.
+        tokio::time::timeout(Duration::from_secs(5), async {
+            while progress.changed().await.is_ok() {}
+        })
+        .await
+        .expect("the writer should exit");
+    }
+
+    /// Waits until `output` holds `expected` lines, for checks after the logger is gone.
+    fn wait_for_lines(output: &TestWriter, expected: usize) -> Vec<String> {
+        let started = Instant::now();
+        loop {
+            let written = written_messages(&output.get_buf_contents());
+            if written.len() >= expected || started.elapsed() > Duration::from_secs(5) {
+                return written;
+            }
+            thread::sleep(Duration::from_millis(5));
         }
     }
 
@@ -781,8 +804,8 @@ mod tests {
             .collect()
     }
 
-    #[test]
-    fn full_queue_drops_entries_and_reports_their_count() {
+    #[tokio::test]
+    async fn full_queue_drops_entries_and_reports_their_count() {
         let output = TestWriter::new();
         let Gated { writer, gate } = gated(output.clone());
         let logger = async_logger(
@@ -812,7 +835,7 @@ mod tests {
         );
 
         drop(gate.open);
-        drop(logger);
+        logger.shut_down().await;
 
         assert_eq!(
             written_messages(&output.into_inner_buf()),
@@ -827,8 +850,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn dropped_count_report_obeys_log_level() {
+    #[tokio::test]
+    async fn dropped_count_report_obeys_log_level() {
         let output = TestWriter::new();
         let Gated { writer, gate } = gated(output.clone());
         let logger = async_logger(
@@ -845,7 +868,7 @@ mod tests {
         logger.log_any(system_entry(LogLevel::ERROR, "dropped"));
 
         drop(gate.open);
-        drop(logger);
+        logger.shut_down().await;
 
         assert_eq!(
             written_messages(&output.into_inner_buf()),
@@ -854,8 +877,8 @@ mod tests {
         );
     }
 
-    #[test]
-    fn log_after_writer_exited_does_not_panic() {
+    #[tokio::test]
+    async fn log_after_writer_exited_does_not_panic() {
         let logger = async_logger(
             Box::new(PanickingWriter),
             LogLevel::TRACE,
@@ -863,17 +886,7 @@ mod tests {
         );
 
         logger.log_any(system_entry(LogLevel::INFO, "kills the writer"));
-        let writer_exited = async_sink(&logger)
-            .writer_exited
-            .lock()
-            .unwrap()
-            .recv()
-            .expect_err("the writer should never send");
-        assert_eq!(
-            writer_exited,
-            mpsc::RecvError,
-            "the writer should have exited"
-        );
+        wait_for_writer_exit(&logger).await;
 
         logger.log_any(system_entry(LogLevel::INFO, "after the writer exited"));
 
@@ -885,13 +898,46 @@ mod tests {
     }
 
     #[test]
-    fn drop_with_blocked_writer_returns_after_timeout() {
-        let shutdown_timeout = Duration::from_millis(50);
+    fn drop_with_blocked_writer_returns_at_once_and_writer_finishes_later() {
+        let stall_timeout = Duration::from_secs(5);
+        let output = TestWriter::new();
+        let Gated { writer, gate } = gated(output.clone());
+        let logger = async_logger(
+            Box::new(writer),
+            LogLevel::TRACE,
+            unbuffered(2, stall_timeout),
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "blocks the writer"));
+        gate.first_write_started
+            .recv()
+            .expect("the writer should start writing the first entry");
+        logger.log_any(system_entry(LogLevel::INFO, "queued"));
+
+        let started = Instant::now();
+        drop(logger);
+        let elapsed = started.elapsed();
+        assert!(
+            elapsed < stall_timeout,
+            "drop should not wait for a blocked writer, waited {elapsed:?}"
+        );
+
+        drop(gate.open);
+        assert_eq!(
+            wait_for_lines(&output, 2),
+            ["blocks the writer", "queued"],
+            "the writer should write the queued entries after the logger is dropped"
+        );
+    }
+
+    #[tokio::test]
+    async fn shut_down_with_blocked_writer_returns_after_stall_timeout() {
+        let stall_timeout = Duration::from_millis(50);
         let Gated { writer, gate } = gated(TestWriter::new());
         let logger = async_logger(
             Box::new(writer),
             LogLevel::TRACE,
-            unbuffered(2, shutdown_timeout),
+            unbuffered(2, stall_timeout),
         );
 
         logger.log_any(system_entry(LogLevel::INFO, "blocks the writer"));
@@ -900,18 +946,50 @@ mod tests {
             .expect("the writer should start writing the first entry");
 
         let started = Instant::now();
-        drop(logger);
+        logger.shut_down().await;
         let elapsed = started.elapsed();
 
         assert!(
-            elapsed >= shutdown_timeout,
-            "drop should wait for the writer up to the timeout, waited {elapsed:?}"
+            elapsed >= stall_timeout,
+            "shut_down should wait for the writer up to the stall timeout, waited {elapsed:?}"
         );
         assert!(
             elapsed < Duration::from_secs(5),
-            "drop should not wait for a blocked writer past the timeout, waited {elapsed:?}"
+            "shut_down should not wait for a blocked writer past the stall timeout, \
+             waited {elapsed:?}"
         );
         drop(gate.open);
+    }
+
+    #[tokio::test]
+    async fn log_after_shut_down_is_counted_as_dropped() {
+        let output = TestWriter::new();
+        let logger = async_logger(
+            Box::new(output.clone()),
+            LogLevel::TRACE,
+            unbuffered(2, Duration::from_secs(5)),
+        );
+
+        logger.log_any(system_entry(LogLevel::INFO, "before shut_down"));
+        logger.shut_down().await;
+        logger.log_any(system_entry(LogLevel::INFO, "after shut_down"));
+
+        assert_eq!(
+            async_sink(&logger).dropped.load(Ordering::Relaxed),
+            1,
+            "an entry logged after shut_down should be counted as dropped"
+        );
+        let started = Instant::now();
+        logger.shut_down().await;
+        assert!(
+            started.elapsed() < Duration::from_secs(1),
+            "a second shut_down should return at once"
+        );
+        assert_eq!(
+            written_messages(&output.into_inner_buf()),
+            ["before shut_down"],
+            "only the entry logged before shut_down should be written"
+        );
     }
 
     #[test]
@@ -942,11 +1020,11 @@ mod tests {
         );
     }
 
-    #[test]
-    fn drop_waits_for_slow_writer_that_makes_progress() {
+    #[tokio::test]
+    async fn shut_down_waits_for_slow_writer_that_makes_progress() {
         let output = TestWriter::new();
         let write_delay = Duration::from_millis(20);
-        let shutdown_timeout = Duration::from_millis(200);
+        let stall_timeout = Duration::from_millis(200);
         let entries = 20;
         let logger = async_logger(
             Box::new(SlowWriter {
@@ -954,24 +1032,23 @@ mod tests {
                 delay: write_delay,
             }),
             LogLevel::TRACE,
-            unbuffered(entries, shutdown_timeout),
+            unbuffered(entries, stall_timeout),
         );
 
         for i in 0..entries {
             logger.log_any(system_entry(LogLevel::INFO, &format!("entry {i}")));
         }
         assert!(
-            write_delay * u32::try_from(entries).expect("entry count fits in u32")
-                > shutdown_timeout,
-            "draining should take longer than the shutdown timeout"
+            write_delay * u32::try_from(entries).expect("entry count fits in u32") > stall_timeout,
+            "draining should take longer than the stall timeout"
         );
-        drop(logger);
+        logger.shut_down().await;
 
         let expected: Vec<String> = (0..entries).map(|i| format!("entry {i}")).collect();
         assert_eq!(
             written_messages(&output.into_inner_buf()),
             expected,
-            "drop should wait for every entry while the writer keeps making progress"
+            "shut_down should wait for every entry while the writer keeps making progress"
         );
     }
 }
