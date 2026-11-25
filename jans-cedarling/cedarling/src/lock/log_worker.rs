@@ -8,9 +8,9 @@
 
 use super::log_entry::LockLogEntry;
 use crate::LogWriter;
-use crate::async_sleep::Ticker;
 use crate::lock::transport::{AuditItem, AuditKind, AuditTransport, SendFailure};
 use crate::log::LoggerWeak;
+use crate::rt::Ticker;
 
 use crate::common::retry::{
     Attempt, Backoff, RetryError, RetryPolicy, RetryUntilCancelledError, retry,

@@ -15,7 +15,6 @@ use tokio_util::sync::CancellationToken;
 
 use crate::{
     JwtConfig, LogLevel,
-    async_sleep::sleep,
     common::{
         issuer_utils::IssClaim,
         policy_store::{KeySource, TokenTypes},
@@ -30,9 +29,10 @@ use crate::{
     },
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
     log::{BaseLogEntry, LogEntry, LogWriter, Logger},
+    rt::sleep,
 };
 
-use crate::http::spawn_task;
+use crate::rt::spawn_task;
 
 /// How long a failed JWKS refresh waits before the regular interval starts again.
 const REFRESH_RETRY_DELAY: Duration = Duration::from_secs(10);

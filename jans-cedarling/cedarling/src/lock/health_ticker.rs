@@ -14,11 +14,10 @@ use super::health_registry::HealthRegistry;
 use super::transport::mapping::LockServerHealthEntry;
 use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
-use crate::async_sleep::Ticker;
-use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
 use crate::lock::health_registry::{HealthStatus, SystemHealth};
 use crate::log::{LogWriter, LoggerWeak};
+use crate::rt::{JoinHandle, Ticker, spawn_task};
 
 pub(super) struct HealthTickerParams {
     pub(super) health_url: url::Url,
