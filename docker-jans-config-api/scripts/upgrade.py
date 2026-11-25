@@ -88,8 +88,8 @@ def _transform_api_dynamic_config(conf, seeded_dir_mappings=None):
             "logLevel": "INFO",
             "externalPolicyStoreUri": ""
         }),
-        # absent keys fall back to Java defaults (validation enabled), unlike fresh installs
-        ("userRolePermissionValidationEnabled", False),
+        # match Java defaults so the effective role-permission checks do not change on upgrade
+        ("userRolePermissionValidationEnabled", True),
         ("validateUserInumInIntrospectionFlag", True),
         ("fetchUserRoleInIntrospectionFlag", True),
         ("userRolePermissionExcludedClients", []),
