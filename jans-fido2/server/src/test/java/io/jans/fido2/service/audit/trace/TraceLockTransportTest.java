@@ -9,7 +9,6 @@ package io.jans.fido2.service.audit.trace;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -271,7 +270,7 @@ class TraceLockTransportTest {
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(List.of(ENDPOINT, ENDPOINT), endpointsSeen);
-		verify(lockAuditTokenService, times(2)).getTraceAccessToken(eq(ISSUER), eq("client-a"), eq("enc-a"));
+		verify(lockAuditTokenService, times(2)).getTraceAccessToken(ISSUER, "client-a", "enc-a");
 	}
 
 	@Test

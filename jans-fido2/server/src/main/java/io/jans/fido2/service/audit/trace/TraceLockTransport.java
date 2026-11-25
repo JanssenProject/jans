@@ -198,7 +198,11 @@ public class TraceLockTransport {
 	private Snapshot takeSnapshot() {
 		long generation = configGeneration.get();
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-		String endpoint = fido2Configuration == null ? null : fido2Configuration.getFido2TraceEndpoint();
+		if (fido2Configuration == null) {
+			log.error("Fido2 configuration is not loaded, TRACE record not sent");
+			return null;
+		}
+		String endpoint = fido2Configuration.getFido2TraceEndpoint();
 		if (StringHelper.isEmpty(endpoint)) {
 			log.error("fido2TraceEndpoint is not configured, TRACE record not sent");
 			return null;
