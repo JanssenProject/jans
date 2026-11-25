@@ -91,9 +91,15 @@ public class TraceLockTransport {
 	 * @param recordJson one complete signed TRACE record, as the JSON text that was signed plus its signature
 	 */
 	public Outcome deliver(String recordJson) {
+		// One snapshot for the whole delivery: the endpoint, the issuer and the client credentials are read
+		// here once, and every attempt uses these values. The token is requested for these same credentials,
+		// so it can never be posted to an endpoint from a different configuration.
 		long generation = configGeneration.get();
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		String endpoint = fido2Configuration == null ? null : fido2Configuration.getFido2TraceEndpoint();
+		String issuer = appConfiguration.getIssuer();
+		String clientId = fido2Configuration == null ? null : fido2Configuration.getLockAuditClientId();
+		String encryptedClientSecret = fido2Configuration == null ? null : fido2Configuration.getLockAuditClientPassword();
 		if (StringHelper.isEmpty(endpoint)) {
 			log.error("fido2TraceEndpoint is not configured, TRACE record not sent");
 			return Outcome.NOT_CONFIGURED;
@@ -117,15 +123,19 @@ public class TraceLockTransport {
 				}
 			}
 
-			String accessToken = lockAuditTokenService.getTraceAccessToken();
+			// A reload stops the delivery. The snapshot already keeps the token and endpoint consistent,
+			// so this check is about not continuing under a configuration that was replaced.
+			if (configGeneration.get() != generation) {
+				log.warn("TRACE configuration changed during delivery, record not sent");
+				return Outcome.NOT_CONFIGURED;
+			}
+
+			String accessToken = lockAuditTokenService.getTraceAccessToken(issuer, clientId, encryptedClientSecret);
 			if (accessToken == null) {
 				lastFailure = "no trace.write access token";
 				continue;
 			}
 
-			// The endpoint above and the token just fetched must belong to the same configuration.
-			// If a reload happened since this delivery started, stop instead of posting the token
-			// under a possibly different endpoint.
 			if (configGeneration.get() != generation) {
 				log.warn("TRACE configuration changed during delivery, record not sent");
 				return Outcome.NOT_CONFIGURED;

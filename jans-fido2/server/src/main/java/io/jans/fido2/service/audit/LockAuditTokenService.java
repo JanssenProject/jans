@@ -118,8 +118,55 @@ public class LockAuditTokenService {
 	 * @return a cached access token for {@link #LOCK_TRACE_WRITE_SCOPE}, obtained and cached the same way as
 	 *         {@link #getAccessToken()}, or {@code null} if one could not be obtained.
 	 */
-	public String getTraceAccessToken() {
-		return getAccessToken(LOCK_TRACE_WRITE_SCOPE, cachedTraceToken);
+	public String getTraceAccessToken(String issuer, String clientId, String encryptedClientSecret) {
+		String key = credentialsKey(issuer, clientId, encryptedClientSecret);
+		CachedToken cached = cachedTraceToken.get();
+		if (cached != null && cached.isUsable() && key.equals(cached.credentialsKey)) {
+			return cached.accessToken;
+		}
+		return requestTraceToken(key, issuer, clientId, encryptedClientSecret);
+	}
+
+	/**
+	 * Issues a trace.write token for exactly the given issuer and client. A cached token is reused only
+	 * when it was issued for the same credentials, so a token from one configuration is never posted
+	 * under another.
+	 */
+	private synchronized String requestTraceToken(String key, String issuer, String clientId, String encryptedClientSecret) {
+		CachedToken cached = cachedTraceToken.get();
+		if (cached != null && cached.isUsable() && key.equals(cached.credentialsKey)) {
+			return cached.accessToken;
+		}
+		if (StringHelper.isEmpty(issuer) || StringHelper.isEmpty(clientId) || StringHelper.isEmpty(encryptedClientSecret)) {
+			log.error("Issuer or lockAuditClientId / lockAuditClientPassword is not configured for TRACE delivery");
+			return null;
+		}
+		String clientSecret;
+		try {
+			clientSecret = encryptionService.decrypt(encryptedClientSecret);
+		} catch (EncryptionException e) {
+			log.error("Failed to decrypt lockAuditClientPassword", e);
+			return null;
+		}
+		String tokenEndpoint = resolveTokenEndpoint(issuer);
+		if (tokenEndpoint == null) {
+			return null;
+		}
+		TokenClient tokenClient = new TokenClient(tokenEndpoint);
+		tokenClient.setExecutor(TIMEOUT_ENGINE);
+		TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(LOCK_TRACE_WRITE_SCOPE, clientId, clientSecret);
+		if (tokenResponse == null || tokenResponse.getStatus() != 200 || StringHelper.isEmpty(tokenResponse.getAccessToken())) {
+			log.error("Failed to obtain Lock TRACE access token, status: {}",
+					tokenResponse == null ? "no response" : tokenResponse.getStatus());
+			return null;
+		}
+		cachedTraceToken.set(cacheableToken(tokenResponse, key));
+		return tokenResponse.getAccessToken();
+	}
+
+	/** Identity of the credentials a token was issued for. The secret stays encrypted, so it is never held in clear here. */
+	static String credentialsKey(String issuer, String clientId, String encryptedClientSecret) {
+		return issuer + "|" + clientId + "|" + encryptedClientSecret;
 	}
 
 	private String getAccessToken(String scope, AtomicReference<CachedToken> cache) {
@@ -159,7 +206,7 @@ public class LockAuditTokenService {
 			return null;
 		}
 
-		String tokenEndpoint = resolveTokenEndpoint();
+		String tokenEndpoint = resolveTokenEndpoint(appConfiguration.getIssuer());
 		if (tokenEndpoint == null) {
 			return null;
 		}
@@ -184,22 +231,33 @@ public class LockAuditTokenService {
 	 *         Package-visible so a test can drive it directly without a live token endpoint.
 	 */
 	static CachedToken cacheableToken(TokenResponse tokenResponse) {
+		return cacheableToken(tokenResponse, null);
+	}
+
+	static CachedToken cacheableToken(TokenResponse tokenResponse, String credentialsKey) {
 		Integer expiresIn = tokenResponse.getExpiresIn();
 		if (expiresIn == null || expiresIn <= EXPIRY_SAFETY_BUFFER_SECONDS) {
 			return null;
 		}
 		Instant expiresAt = Instant.now().plusSeconds(expiresIn - EXPIRY_SAFETY_BUFFER_SECONDS);
-		return new CachedToken(tokenResponse.getAccessToken(), expiresAt);
+		return new CachedToken(tokenResponse.getAccessToken(), expiresAt, credentialsKey);
 	}
 
 	/** Package-visible (class and constructor) for the same reason as {@link #cacheableToken}. */
 	static final class CachedToken {
 		private final String accessToken;
 		private final Instant expiresAt;
+		/** Credentials this token was issued for; {@code null} when the cache is not credential-bound (log.write). */
+		private final String credentialsKey;
 
 		CachedToken(String accessToken, Instant expiresAt) {
+			this(accessToken, expiresAt, null);
+		}
+
+		CachedToken(String accessToken, Instant expiresAt, String credentialsKey) {
 			this.accessToken = accessToken;
 			this.expiresAt = expiresAt;
+			this.credentialsKey = credentialsKey;
 		}
 
 		boolean isUsable() {
@@ -216,8 +274,7 @@ public class LockAuditTokenService {
 	 * Discovered once per node and cached, same as jans-lock's OpenIdService — the issuer's token
 	 * endpoint does not change without a redeploy.
 	 */
-	private String resolveTokenEndpoint() {
-		String issuer = appConfiguration.getIssuer();
+	private String resolveTokenEndpoint(String issuer) {
 		if (StringHelper.isEmpty(issuer)) {
 			log.error("Issuer is not configured, cannot discover the token endpoint for Lock audit delivery");
 			return null;

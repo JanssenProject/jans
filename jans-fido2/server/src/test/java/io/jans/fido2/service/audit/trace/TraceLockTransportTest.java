@@ -7,6 +7,7 @@
 package io.jans.fido2.service.audit.trace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ class TraceLockTransportTest {
 	private final List<Integer> responses = new ArrayList<>();
 	private final List<Object> scriptedFailures = new ArrayList<>();
 	private final List<String> tokensSeen = new ArrayList<>();
+	private final List<String> endpointsSeen = new ArrayList<>();
 	private final List<Long> sleeps = new ArrayList<>();
 	private int postCalls;
 
@@ -59,11 +61,12 @@ class TraceLockTransportTest {
 		fido2Configuration = new Fido2Configuration();
 		fido2Configuration.setFido2TraceEndpoint(ENDPOINT);
 		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-		when(lockAuditTokenService.getTraceAccessToken()).thenReturn("trace-token");
+		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn("trace-token");
 
 		transport.poster = (endpoint, token, body) -> {
 			postCalls++;
 			tokensSeen.add(token);
+			endpointsSeen.add(endpoint);
 			if (!scriptedFailures.isEmpty()) {
 				Object next = scriptedFailures.remove(0);
 				if (next instanceof Exception) {
@@ -134,7 +137,7 @@ class TraceLockTransportTest {
 
 	@Test
 	void deliver_ifTokenUnavailableThenAvailable_fetchesTokenAgainWithoutPosting() {
-		when(lockAuditTokenService.getTraceAccessToken()).thenReturn(null, "trace-token");
+		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn(null, "trace-token");
 		responses.add(202);
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
@@ -152,6 +155,28 @@ class TraceLockTransportTest {
 
 		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
 		assertEquals(1, postCalls);
+	}
+
+	@Test
+	void deliver_ifConfigurationReloadsAndTokenIsUnavailable_stopsWithoutRequestingMoreTokens() {
+		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn(null);
+		responses.add(202);
+		transport.sleeper = millis -> transport.onConfigurationUpdate(null);
+
+		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
+		assertEquals(0, postCalls);
+		org.mockito.Mockito.verify(lockAuditTokenService, org.mockito.Mockito.times(1))
+				.getTraceAccessToken(any(), any(), any());
+	}
+
+	@Test
+	void deliver_ifEndpointChangesWithoutReloadEvent_retriesToTheEndpointItStartedWith() {
+		responses.add(503);
+		responses.add(202);
+		transport.sleeper = millis -> fido2Configuration.setFido2TraceEndpoint("https://other.example.com/api/v1/audit/trace");
+
+		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
+		assertEquals(List.of(ENDPOINT, ENDPOINT), endpointsSeen);
 	}
 
 	@Test
