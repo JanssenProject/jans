@@ -14,6 +14,12 @@
             <class name="io.jans.configapi.plugin.mgt.test.UserResourceTest" />
         </classes>
     </test>
+
+    <test name="User-Mgt-Service" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.mgt.service.UserMgmtServiceTest" />
+        </classes>
+    </test>
 	
 
 </suite>
