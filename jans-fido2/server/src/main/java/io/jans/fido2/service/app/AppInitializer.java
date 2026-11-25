@@ -12,6 +12,7 @@ import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
+import io.jans.fido2.service.metric.Fido2MetricAggregationManager;
 import io.jans.fido2.service.metric.Fido2MetricsAggregationScheduler;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -87,6 +88,9 @@ public class AppInitializer {
 
 	@Inject
 	private MetricService metricService;
+
+	@Inject
+	private Fido2MetricAggregationManager metricAggregationManager;
 
 	@Inject
 	private CustomScriptManager customScriptManager;
@@ -174,6 +178,13 @@ public class AppInitializer {
 			log.info("Metric service timer initialized");
 		} catch (Exception e) {
 			log.error("Failed to initialize metric service timer: {}", e.getMessage(), e);
+		}
+
+		try {
+			metricAggregationManager.initTimer();
+			log.info("Metric aggregation timer initialized");
+		} catch (Exception e) {
+			log.error("Failed to initialize metric aggregation timer: {}", e.getMessage(), e);
 		}
 		
 		try {

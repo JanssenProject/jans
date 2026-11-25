@@ -57,6 +57,7 @@ tags:
 | mdsDownloadStartupRetryInterval | Delay in seconds between MDS TOC download retries at server startup when the TOC blob is missing | [Details](#mdsdownloadstartupretryinterval) |
 | mdsTocsFolder | MDS TOC files folder | [Details](#mdstocsfolder) |
 | metadataServers | String value to provide source of URLs with external metadata | [Details](#metadataservers) |
+| metricAggregationConfiguration | Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply | [Details](#metricaggregationconfiguration) |
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
@@ -496,6 +497,15 @@ tags:
 ## metadataServers
 
 - Description: String value to provide source of URLs with external metadata
+
+- Required: No
+
+- Default value: None
+
+
+## metricAggregationConfiguration
+
+- Description: Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply
 
 - Required: No
 
