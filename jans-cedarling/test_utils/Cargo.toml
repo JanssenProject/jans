@@ -9,8 +9,8 @@ publish = false
 pretty_assertions = "1"
 serde_json = { workspace = true }
 jsonwebtoken = { workspace = true }
-p256 = { version = "0.14", default-features = false, features = ["alloc", "ecdsa", "pkcs8"] }
-rand = "0.10.2"
+p256 = { workspace = true, features = ["alloc", "ecdsa", "pkcs8"] }
+rand = { workspace = true }
 serde = { workspace = true }
 
 

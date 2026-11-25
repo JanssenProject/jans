@@ -43,6 +43,9 @@ ed25519-dalek = { version = "3.0.0", default-features = false, features = ["fast
 uniffi = "0.32.1"
 uniffi_macros = "0.32.1"
 zeroize = "1.9.0"
+rand = "0.10.2"
+p256 = { version = "0.14", default-features = false }
+p384 = { version = "0.14", default-features = false }
 
 [workspace.lints.clippy]
 pedantic = "warn"

@@ -20,9 +20,7 @@ pub struct GeneratedKeys {
     pub private_encoding_key: jwt::EncodingKey,
 }
 
-/// Generates a set of private and public keys using ES256
-///
-/// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
+/// Generates a random ES256 signing key shared by all test tokens.
 fn generate_keys() -> GeneratedKeys {
     let kid = 1;
     let signing_key = p256::ecdsa::SigningKey::from_slice(&rand::random::<[u8; 32]>())

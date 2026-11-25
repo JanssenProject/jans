@@ -54,7 +54,7 @@ time = { version = "0.3.53", features = ["wasm-bindgen"] }
 chrono = { workspace = true }
 tokio = { workspace = true, features = ["macros", "time"] }
 tokio-util = { workspace = true }
-rand = "0.10.2"
+rand = { workspace = true }
 smol_str = "0.3.6"
 strum = { version = "0.28.0", features = ["derive"] }
 flate2 = "1.1.9"

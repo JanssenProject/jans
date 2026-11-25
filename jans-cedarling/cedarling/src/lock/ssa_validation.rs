@@ -754,6 +754,25 @@ mod tests {
     }
 
     #[test]
+    fn test_create_decoding_key_hmac_empty_k() {
+        let jwk = json!({
+            "kid": "test-kid",
+            "alg": "HS256",
+            "k": ""
+        });
+
+        let result = create_decoding_key(&jwk, Algorithm::HS256);
+        assert!(
+            matches!(
+                &result,
+                Err(SsaValidationError::JwtError(err))
+                    if matches!(err.kind(), jwt::errors::ErrorKind::InvalidKeyFormat)
+            ),
+            "an empty HMAC secret must be rejected as an invalid key format, got: {result:?}"
+        );
+    }
+
+    #[test]
     fn test_create_decoding_key_unsupported_algorithm() {
         let jwk = json!({
             "kid": "test-kid",
