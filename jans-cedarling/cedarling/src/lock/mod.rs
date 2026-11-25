@@ -213,7 +213,7 @@ pub(crate) const WORKER_HTTP_RETRY_DUR: Duration = Duration::from_secs(10);
 #[derive(Debug)]
 struct WorkerSenderAndHandle {
     tx: mpsc::Sender<AuditItem>,
-    handle: crate::http::JoinHandle<()>,
+    handle: crate::rt::JoinHandle<()>,
 }
 
 #[derive(Clone)]
@@ -275,8 +275,8 @@ async fn fetch_lock_config(
 pub(crate) struct LockService {
     log_worker: Option<WorkerSenderAndHandle>,
     telemetry_worker: Option<WorkerSenderAndHandle>,
-    telemetry_ticker: Option<(CancellationToken, crate::http::JoinHandle<()>)>,
-    health_ticker: Option<(CancellationToken, crate::http::JoinHandle<()>)>,
+    telemetry_ticker: Option<(CancellationToken, crate::rt::JoinHandle<()>)>,
+    health_ticker: Option<(CancellationToken, crate::rt::JoinHandle<()>)>,
     health_registry: Option<HealthRegistry>,
     logger: Option<LoggerWeak>,
     cancel_tkn: CancellationToken,
@@ -623,7 +623,7 @@ fn create_worker(
                 bootstrap_conf.log_max_retries,
                 WORKER_HTTP_RETRY_DUR,
             );
-            let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
+            let handle = crate::rt::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
             Ok(WorkerSenderAndHandle { tx, handle })
         },
@@ -646,7 +646,7 @@ fn create_worker(
                 WORKER_HTTP_RETRY_DUR,
             );
 
-            let handle = crate::http::spawn_task(async move { worker.run(rx, cancel_tkn).await });
+            let handle = crate::rt::spawn_task(async move { worker.run(rx, cancel_tkn).await });
 
             Ok(WorkerSenderAndHandle { tx, handle })
         },
@@ -658,7 +658,7 @@ fn create_health_ticker(
     bootstrap_conf: &LockServiceConfig,
     access_token: &str,
     http_conf: HttpClientConfig,
-) -> Result<(CancellationToken, crate::http::JoinHandle<()>), InitLockServiceError> {
+) -> Result<(CancellationToken, crate::rt::JoinHandle<()>), InitLockServiceError> {
     match bootstrap_conf.transport {
         LockTransport::Rest => {
             let mut headers = HeaderMap::new();

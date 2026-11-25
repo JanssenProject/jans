@@ -6,11 +6,8 @@
 mod body;
 pub(crate) mod cache_headers;
 mod failure;
-mod spawn_task;
 #[cfg(test)]
 pub(crate) mod test_support;
-
-pub use spawn_task::*;
 
 use crate::common::retry::{Backoff, RetryPolicy, retry};
 pub(crate) use body::read_body;

@@ -363,7 +363,7 @@ async fn read_store_offloaded(
 ) -> Result<ParsedPolicyStore, PolicyStoreLoadError> {
     #[cfg(not(target_arch = "wasm32"))]
     {
-        #[allow(clippy::disallowed_methods, reason = "native-only branch")]
+        #[expect(clippy::disallowed_methods, reason = "native-only branch")]
         tokio::task::spawn_blocking(read)
             .await
             .map_err(|e| panic_err(format!("Policy store read task panicked: {e}")))?
@@ -406,7 +406,7 @@ async fn read_cjar_file_offloaded(
     limits: ArchiveLimits,
 ) -> Result<Vec<u8>, PolicyStoreLoadError> {
     let path = path.to_path_buf();
-    #[allow(clippy::disallowed_methods, reason = "native-only function")]
+    #[expect(clippy::disallowed_methods, reason = "native-only function")]
     tokio::task::spawn_blocking(move || read_cjar_file(&path, limits))
         .await
         .map_err(|e| {
