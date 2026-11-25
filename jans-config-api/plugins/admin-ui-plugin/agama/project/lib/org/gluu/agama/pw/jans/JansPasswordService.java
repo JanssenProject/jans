@@ -69,7 +69,7 @@ public class JansPasswordService extends PasswordService {
             // Identity's user may be a partial or pre-login snapshot; merging it would drop attributes.
             User freshUser = userService.getUser(authenticatedUserId);
             if (freshUser != null) {
-                userService.setCustomAttribute(freshUser, INVALID_LOGIN_COUNT_ATTRIBUTE, 0);
+                userService.setCustomAttribute(freshUser, INVALID_LOGIN_COUNT_ATTRIBUTE, "0");
                 userService.updateUser(freshUser);
             }
             logger.info("Invalid login count reset to zero for {} .", authenticatedUserId);

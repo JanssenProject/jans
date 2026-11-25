@@ -39,6 +39,10 @@ public class ScimCustomPerson extends Entry implements Serializable {
     @AttributeName(name = "jansPPID")
     private List<String> ppid;
 
+    @Version
+    @AttributeName(name = "jansVersion", ignoreDuringUpdate = true)
+    private Long version;
+
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true, attributesConfiguration = {
             @AttributeName(name = "inum", ignoreDuringUpdate = true),
             @AttributeName(name = "uid"),
@@ -47,6 +51,14 @@ public class ScimCustomPerson extends Entry implements Serializable {
 
     public Date getCreationDate() {
         return creationDate;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public String getDisplayName() {

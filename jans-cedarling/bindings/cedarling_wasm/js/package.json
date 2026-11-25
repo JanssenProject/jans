@@ -101,7 +101,7 @@
     "@playwright/test": "1.62.1",
     "@types/node": "24.13.3",
     "esbuild": "0.28.2",
-    "eslint": "10.10.0",
+    "eslint": "10.15.0",
     "prettier": "3.9.6",
     "typescript": "7.0.2",
     "yaml": "2.9.0"

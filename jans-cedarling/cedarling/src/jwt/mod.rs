@@ -63,7 +63,7 @@
 mod custom_token;
 mod decode;
 mod error;
-mod http_utils;
+mod fetch;
 mod issuer_index;
 mod key_service;
 mod loading_info;
@@ -98,7 +98,7 @@ use crate::common::policy_store::{
     CustomTokenMetadata, TokenEntityMetadata, TokenTypeKind, TokenTypes, TrustedIssuer,
 };
 
-use self::http_utils::{GetFromUrl, OpenIdConfig};
+use self::fetch::{GetFromUrl, OpenIdConfig};
 use crate::http::HttpClient;
 use crate::log::Logger;
 use chrono::Utc;

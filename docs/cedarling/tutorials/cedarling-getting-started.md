@@ -14,7 +14,7 @@ Cedarling supports both [Token-Based Access Control (TBAC)](../quick-start/cedar
 You can integrate Cedarling into your application using the following language libraries:
 
 - [C](./c.md)
-- [JavaScript](./javascript.md)
+- [JavaScript (WASM)](./javascript.md)
 - [Python](./python.md)
 - [Rust](./rust.md)
 - [Kotlin](./kotlin.md)
@@ -193,7 +193,7 @@ Cedarling provides two authorization methods. Not sure which to use? See the [qu
 
 See the language-specific tutorials for detailed examples of both authorization methods:
 
-- [JavaScript](./javascript.md)
+- [JavaScript (WASM)](./javascript.md)
 - [Python](./python.md)
 - [Rust](./rust.md)
 - [Kotlin](./kotlin.md)

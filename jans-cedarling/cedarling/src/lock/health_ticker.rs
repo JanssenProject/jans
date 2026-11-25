@@ -7,7 +7,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use chrono::Utc;
-use tokio::time::{MissedTickBehavior, interval};
 use tokio_util::sync::CancellationToken;
 use url::Url;
 
@@ -15,6 +14,7 @@ use super::health_registry::HealthRegistry;
 use super::transport::mapping::LockServerHealthEntry;
 use super::transport::{AuditItem, AuditKind, AuditPayload, AuditTransport};
 use crate::app_types::{ApplicationName, PdpID};
+use crate::async_sleep::Ticker;
 use crate::http::{JoinHandle, spawn_task};
 use crate::lock::LockLogEntry;
 use crate::lock::health_registry::{HealthStatus, SystemHealth};
@@ -59,12 +59,10 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
     }
 
     async fn run(self, cancel_tkn: CancellationToken) {
-        let mut ticker = interval(self.interval);
-        ticker.set_missed_tick_behavior(MissedTickBehavior::Delay);
-        ticker.tick().await;
+        let mut ticker = Ticker::new(self.interval);
         loop {
             tokio::select! {
-                _ = ticker.tick() => {
+                () = ticker.tick() => {
                     self.send_health().await;
                 }
                 () = cancel_tkn.cancelled() => {
@@ -85,12 +83,20 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
             status: None,
         };
 
-        let result = self
+        let batch = match self
             .transport
-            .send(&[item], &AuditKind::Health(self.health_url.clone()))
-            .await;
+            .prepare(&[item], &AuditKind::Health(self.health_url.clone()))
+        {
+            Ok(batch) => batch,
+            Err(e) => {
+                logger.log_any(LockLogEntry::error(format!(
+                    "failed to prepare health check for lock server: {e}"
+                )));
+                return;
+            },
+        };
 
-        if let Err(e) = result {
+        if let Err(e) = self.transport.send(&batch).await {
             logger.log_any(LockLogEntry::error(format!(
                 "failed to send health check to lock server: {e}"
             )));
@@ -126,7 +132,7 @@ impl<T: AuditTransport + 'static> HealthTicker<T> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::lock::{health_registry::HealthStatus, transport::TransportResult};
+    use crate::lock::{health_registry::HealthStatus, transport::SendFailure};
     use std::sync::Arc;
     use url::Url;
 
@@ -135,11 +141,18 @@ mod test {
 
     #[async_trait::async_trait]
     impl AuditTransport for NoopTransport {
-        async fn send(
+        type Batch = ();
+        type PrepareError = std::convert::Infallible;
+
+        fn prepare(
             &self,
             _entries: &[AuditItem],
             _audit_kind: &AuditKind,
-        ) -> TransportResult<()> {
+        ) -> Result<(), std::convert::Infallible> {
+            Ok(())
+        }
+
+        async fn send(&self, (): &()) -> Result<(), SendFailure> {
             Ok(())
         }
     }

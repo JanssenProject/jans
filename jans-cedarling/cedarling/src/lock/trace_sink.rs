@@ -19,7 +19,7 @@ use tokio::sync::RwLock;
 use super::LockAccessToken;
 use super::register_client::{TokenSource, request_access_token};
 use crate::TraceEndpoint;
-use crate::http::HttpClient;
+use crate::http::{FinalFailure, HttpClient};
 
 #[cfg(feature = "grpc")]
 pub(super) mod grpc;
@@ -74,7 +74,7 @@ pub(crate) struct BulkItemResult {
 }
 
 /// Why a bulk request has no per-record results.
-#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[derive(Debug, thiserror::Error)]
 pub(crate) enum PostBulkError {
     /// The request did not reach Lock, Lock failed, or Lock or a proxy before
     /// it asks to repeat it: the same bytes may go again.
@@ -96,6 +96,10 @@ pub(crate) enum PostBulkError {
         error: Option<String>,
         reason: Option<String>,
     },
+    /// The request could not be sent as built (a refused redirect, for example), so
+    /// sending the same bytes again fails the same way. Lock never saw it.
+    #[error("TRACE bulk request could not be sent: {0}")]
+    NotSent(FinalFailure),
     /// Lock answered that it processed the request, but the per-record results
     /// cannot be read. Lock may have kept the records, so they are not sent again.
     #[error("Lock Server's answer to the TRACE bulk request cannot be read: {reason}")]

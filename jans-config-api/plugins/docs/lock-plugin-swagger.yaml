@@ -1170,7 +1170,43 @@ components:
           format: int32
         receiptAllocationRetryLimit:
           type: integer
-          description: Maximum retries when allocating a receipt-chain sequence number
+          description: Maximum attempts when claiming one receipt-chain sequence number
+            for a single record on the one-by-one path; the batch path uses rangeAllocationRetryLimit
+          format: int32
+        rangeAllocationRetryLimit:
+          type: integer
+          description: Maximum attempts when reserving a contiguous receipt range
+            for a batch (batchIngestEnabled is true) before the batch falls back to
+            per-record ingest; 0 or less means the default
+          format: int32
+        rangeAllocationBackoffMs:
+          type: integer
+          description: "Base in milliseconds of the jittered exponential backoff before\
+            \ a batch retries its receipt range after losing a position race; retry\
+            \ k waits a random time between 0 and min(base * 2^(k-1), rangeAllocationMaxBackoffMs)\
+            \ with the domain lock released; 0 disables the wait; a negative value\
+            \ means the default"
+          format: int32
+        rangeAllocationMaxBackoffMs:
+          type: integer
+          description: Cap in milliseconds of one backoff wait before a receipt range
+            retry; 0 or less means the default
+          format: int32
+        batchIngestEnabled:
+          type: boolean
+          description: "Write a bulk request, and a single submission, with one atomic\
+            \ database transaction when the store supports it; otherwise, or when\
+            \ disabled, each element is ingested one by one with about three commits\
+            \ per record"
+        batchVerifyThreads:
+          type: integer
+          description: Threads that verify the elements of one batch in parallel when
+            batchIngestEnabled is true; 0 verifies them one after another in the request
+            thread; clamped to 64
+          format: int32
+        postCommitCorrelationThreads:
+          type: integer
+          description: "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64"
           format: int32
         correlationRetryLimit:
           type: integer
@@ -1206,6 +1242,7 @@ components:
           description: "TRACE cryptography implementation: JAVA (BouncyCastle, in-process)\
             \ or NATIVE (jans-trace-core through the jans-trace-java binding); an\
             \ unknown value is treated as JAVA"
+          default: JAVA
       description: TRACE evidence ingestion configuration
     JsonPatch:
       type: object
