@@ -24,6 +24,19 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
+def _is_pod_ready(pod: V1Pod) -> bool:
+    """Check whether a pod is Ready and not terminating.
+
+    A pod without metadata or status is treated as not ready.
+    """
+    if pod.metadata is None or pod.status is None:
+        return False
+    if pod.metadata.deletion_timestamp:
+        return False
+    conditions = pod.status.conditions or []
+    return any(condition.type == "Ready" and condition.status == "True" for condition in conditions)
+
+
 class KubernetesMeta(BaseMeta):
     """A class to interact with a subset of Kubernetes APIs."""
 
@@ -62,8 +75,9 @@ class KubernetesMeta(BaseMeta):
         return self._client
 
     def get_containers(self, label: str) -> list[V1Pod]:
-        """Get list of pods in RUNNING phase based on label in a namespace.
+        """Get list of ready pods based on label in a namespace.
 
+        Only pods in the Running phase that are Ready and not terminating are returned.
         The namespace is resolved from value of `CN_CONTAINER_METADATA_NAMESPACE`
         environment variable.
 
@@ -71,18 +85,21 @@ class KubernetesMeta(BaseMeta):
             label: Label name, i.e. `APP_NAME=jans-auth`.
 
         Returns:
-            List of pod objects.
+            List of Running, Ready, non-terminating pods; empty if the Kubernetes client is not configured.
         """
         field_selector = "status.phase=Running"
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
-        try:
-            pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label, field_selector=field_selector).items
-            # Filter terminating and unready pods from the Running-phase result.
-            pods = [p for p in pods if not p.metadata.deletion_timestamp and any(c.type == "Ready" and c.status == "True" for c in (p.status.conditions or []))]
-        except AttributeError:
+        client = self.client
+        if client is None:
             # client is not set due to missing k8s config
-            pods = []
-        return pods
+            return []
+        pods: list[V1Pod] = client.list_namespaced_pod(
+            namespace, label_selector=label, field_selector=field_selector
+        ).items
+        # A Running pod can still be not Ready (starting, failing readiness probes
+        # or restarting containers) or terminating; pod field selectors cannot
+        # match conditions or deletion, so filter here.
+        return [pod for pod in pods if _is_pod_ready(pod)]
 
     def get_container_ip(self, container: V1Pod) -> str:
         """Get container's IP address.

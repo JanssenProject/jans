@@ -125,9 +125,17 @@ The following sub-commands are supported by the certmanager command:
         - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
         - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
         - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
+        - `privkey-push-retries`: maximum number of extra push rounds of `auth-keys.jks` (default to `3`)
+        - `privkey-push-retry-interval`: wait time in seconds before each extra push round (default to `10`)
         - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
         - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
         - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+
+        The two retry options are used only when `privkey-push-delay` is greater than `0`.
+        Then they must be integers (a negative value counts as `0`) and `privkey-push-retries` must be at most `100` and `privkey-push-retry-interval` must be at most `86400` seconds; otherwise the job stops with an error before any key is changed.
+        After the delay, `auth-keys.jks` is pushed to every auth container listed at that moment (on Kubernetes only Ready pods are listed) and once to each container that was listed before the delay but is not listed now.
+        If the push to a listed container fails, an extra round lists the containers again and pushes to every listed one that does not hold the new `auth-keys.jks` yet.
+        If no container verified the new `auth-keys.jks`, the second `jansRevision` increase and the switch to `privkey-push-strategy` are skipped and a warning is logged.
 
         Example:
 
