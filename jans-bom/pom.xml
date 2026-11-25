@@ -56,7 +56,7 @@
 		<jackson.databind.version>2.22.3</jackson.databind.version>
 		<!-- Jackson 2.20+ dropped the patch segment from jackson-annotations (it ships as 2.22, not 2.22.3). -->
 		<jackson.annotations.version>2.22</jackson.annotations.version>
-		<json.version>20231013</json.version>
+		<json.version>20260814</json.version>
 
 		<log4j.version>2.25.5</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
