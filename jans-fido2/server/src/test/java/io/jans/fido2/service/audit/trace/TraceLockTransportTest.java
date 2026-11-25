@@ -142,6 +142,19 @@ class TraceLockTransportTest {
 	}
 
 	@Test
+	void deliver_ifConfigurationReloadsDuringRetry_stopsBeforePosting() {
+		responses.add(503);
+		responses.add(202);
+		transport.sleeper = millis -> {
+			sleeps.add(millis);
+			transport.onConfigurationUpdate(null);
+		};
+
+		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
+		assertEquals(1, postCalls);
+	}
+
+	@Test
 	void deliver_ifEndpointMissing_sendsNothing() {
 		fido2Configuration.setFido2TraceEndpoint(null);
 

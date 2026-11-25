@@ -7,6 +7,7 @@
 package io.jans.fido2.service.audit.trace;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
@@ -15,8 +16,10 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.audit.LockAuditTokenService;
 import io.jans.fido2.service.audit.LockAuditUrlValidator;
+import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
@@ -77,6 +80,9 @@ public class TraceLockTransport {
 	RecordPoster poster = this::httpPost;
 	Sleeper sleeper = Thread::sleep;
 
+	/** Bumped on every configuration reload. A delivery that sees a different value stops before posting. */
+	private final AtomicLong configGeneration = new AtomicLong();
+
 	private final ClientBuilder clientBuilder = ResteasyClientBuilder.newBuilder()
 			.connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
 			.readTimeout(READ_TIMEOUT_SECONDS, TimeUnit.SECONDS);
@@ -85,6 +91,7 @@ public class TraceLockTransport {
 	 * @param recordJson one complete signed TRACE record, as the JSON text that was signed plus its signature
 	 */
 	public Outcome deliver(String recordJson) {
+		long generation = configGeneration.get();
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		String endpoint = fido2Configuration == null ? null : fido2Configuration.getFido2TraceEndpoint();
 		if (StringHelper.isEmpty(endpoint)) {
@@ -116,6 +123,14 @@ public class TraceLockTransport {
 				continue;
 			}
 
+			// The endpoint above and the token just fetched must belong to the same configuration.
+			// If a reload happened since this delivery started, stop instead of posting the token
+			// under a possibly different endpoint.
+			if (configGeneration.get() != generation) {
+				log.warn("TRACE configuration changed during delivery, record not sent");
+				return Outcome.NOT_CONFIGURED;
+			}
+
 			int status;
 			try {
 				status = poster.post(endpoint, accessToken, recordJson);
@@ -137,6 +152,11 @@ public class TraceLockTransport {
 
 		log.warn("TRACE record not delivered after {} attempts, last failure: {}", MAX_ATTEMPTS, lastFailure);
 		return Outcome.EXHAUSTED;
+	}
+
+	/** Invalidates in-flight deliveries: they check this generation before every POST. */
+	public void onConfigurationUpdate(@Observes @ConfigurationUpdate AppConfiguration updatedConfiguration) {
+		configGeneration.incrementAndGet();
 	}
 
 	static boolean isAccepted(int status) {
