@@ -7,9 +7,14 @@
 package io.jans.fido2.service.audit.trace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +33,8 @@ import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.audit.LockAuditTokenService;
 
 /**
- * Retry and classification for {@link TraceLockTransport}. The HTTP call and the wait are replaced
- * with fakes, so each test pins the exact sequence of attempts, sleeps and outcomes.
+ * Retry and classification for {@link TraceLockTransport}. The HTTP call, the wait and the jitter are
+ * replaced with fakes, so each test pins the exact sequence of attempts, delays and outcomes.
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -49,8 +54,8 @@ class TraceLockTransportTest {
 	private LockAuditTokenService lockAuditTokenService;
 
 	private Fido2Configuration fido2Configuration;
-	private final List<Integer> responses = new ArrayList<>();
-	private final List<Object> scriptedFailures = new ArrayList<>();
+	private final List<TraceLockTransport.PostResult> responses = new ArrayList<>();
+	private final List<Exception> scriptedFailures = new ArrayList<>();
 	private final List<String> tokensSeen = new ArrayList<>();
 	private final List<String> endpointsSeen = new ArrayList<>();
 	private final List<Long> sleeps = new ArrayList<>();
@@ -68,19 +73,32 @@ class TraceLockTransportTest {
 			tokensSeen.add(token);
 			endpointsSeen.add(endpoint);
 			if (!scriptedFailures.isEmpty()) {
-				Object next = scriptedFailures.remove(0);
-				if (next instanceof Exception) {
-					throw (Exception) next;
+				Exception next = scriptedFailures.remove(0);
+				if (next != null) {
+					throw next;
 				}
 			}
 			return responses.remove(0);
 		};
 		transport.sleeper = millis -> sleeps.add(millis);
+		transport.jitter = () -> 1.0;
+	}
+
+	private static TraceLockTransport.PostResult status(int status) {
+		return new TraceLockTransport.PostResult(status, null, null);
+	}
+
+	private static TraceLockTransport.PostResult status(int status, String retryAfter) {
+		return new TraceLockTransport.PostResult(status, retryAfter, null);
+	}
+
+	private static TraceLockTransport.PostResult status(int status, String retryAfter, String body) {
+		return new TraceLockTransport.PostResult(status, retryAfter, body);
 	}
 
 	@Test
 	void deliver_ifLockAccepts_returnsAcceptedAfterOneAttempt() {
-		responses.add(202);
+		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(1, postCalls);
@@ -89,18 +107,18 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void deliver_ifServerErrorThenAccepted_retriesAfterBackoff() {
-		responses.add(503);
-		responses.add(202);
+	void deliver_ifServerErrorThenAccepted_retriesAfterOneSecond() {
+		responses.add(status(503));
+		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(2, postCalls);
-		assertEquals(List.of(200L), sleeps);
+		assertEquals(List.of(1_000L), sleeps);
 	}
 
 	@Test
 	void deliver_ifClientRejects_doesNotRetry() {
-		responses.add(400);
+		responses.add(status(400));
 
 		assertEquals(TraceLockTransport.Outcome.REJECTED, transport.deliver(RECORD));
 		assertEquals(1, postCalls);
@@ -109,36 +127,82 @@ class TraceLockTransportTest {
 
 	@Test
 	void deliver_ifConflict_isRejectedNotRetried() {
-		responses.add(409);
+		responses.add(status(409));
 
 		assertEquals(TraceLockTransport.Outcome.REJECTED, transport.deliver(RECORD));
 		assertEquals(1, postCalls);
 	}
 
 	@Test
-	void deliver_ifAlwaysRateLimited_givesUpAfterMaxAttemptsWithCappedBackoff() {
-		for (int i = 0; i < TraceLockTransport.MAX_ATTEMPTS; i++) {
-			responses.add(429);
-		}
+	void deliver_ifBodySaysNotRetryable_rejectsEvenOnServerError() {
+		responses.add(status(503, null, "{\"error\":{\"retryable\":false}}"));
 
-		assertEquals(TraceLockTransport.Outcome.EXHAUSTED, transport.deliver(RECORD));
-		assertEquals(TraceLockTransport.MAX_ATTEMPTS, postCalls);
-		assertEquals(List.of(200L, 400L, 800L, 1600L), sleeps);
+		assertEquals(TraceLockTransport.Outcome.REJECTED, transport.deliver(RECORD));
+		assertEquals(1, postCalls);
 	}
 
 	@Test
-	void deliver_ifNetworkErrorThenAccepted_retries() {
-		scriptedFailures.add(new java.io.IOException("connection reset"));
-		responses.add(202);
+	void deliver_ifBodySaysRetryable_retriesEvenOnClientError() {
+		responses.add(status(400, null, "{\"retryable\":true}"));
+		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(2, postCalls);
 	}
 
 	@Test
+	void deliver_ifAlwaysRateLimited_givesUpAfterMaxAttemptsWithExponentialDelays() {
+		for (int i = 0; i < TraceLockTransport.MAX_ATTEMPTS; i++) {
+			responses.add(status(429));
+		}
+
+		assertEquals(TraceLockTransport.Outcome.EXHAUSTED, transport.deliver(RECORD));
+		assertEquals(TraceLockTransport.MAX_ATTEMPTS, postCalls);
+		assertEquals(List.of(1_000L, 2_000L, 4_000L, 8_000L), sleeps);
+	}
+
+	@Test
+	void deliver_ifRetryAfterIsLongerThanJitter_waitsForRetryAfter() {
+		responses.add(status(429, "3"));
+		responses.add(status(202));
+
+		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
+		assertEquals(List.of(3_000L), sleeps);
+	}
+
+	@Test
+	void deliver_ifRetryAfterBeyondCap_givesUpWithoutWaiting() {
+		responses.add(status(429, "3600"));
+
+		assertEquals(TraceLockTransport.Outcome.EXHAUSTED, transport.deliver(RECORD));
+		assertEquals(1, postCalls);
+		assertEquals(List.of(), sleeps);
+	}
+
+	@Test
+	void deliver_ifNetworkErrorThenAccepted_retries() {
+		scriptedFailures.add(new IOException("connection reset"));
+		responses.add(status(202));
+
+		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
+		assertEquals(2, postCalls);
+		assertEquals(List.of(1_000L), sleeps);
+	}
+
+	@Test
+	void deliver_ifJitterIsZero_retriesImmediately() {
+		transport.jitter = () -> 0.0;
+		responses.add(status(503));
+		responses.add(status(202));
+
+		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
+		assertEquals(List.of(0L), sleeps);
+	}
+
+	@Test
 	void deliver_ifTokenUnavailableThenAvailable_fetchesTokenAgainWithoutPosting() {
 		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn(null, "trace-token");
-		responses.add(202);
+		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(1, postCalls);
@@ -146,8 +210,8 @@ class TraceLockTransportTest {
 
 	@Test
 	void deliver_ifConfigurationReloadsDuringRetry_stopsBeforePosting() {
-		responses.add(503);
-		responses.add(202);
+		responses.add(status(503));
+		responses.add(status(202));
 		transport.sleeper = millis -> {
 			sleeps.add(millis);
 			transport.onConfigurationUpdate(null);
@@ -160,19 +224,18 @@ class TraceLockTransportTest {
 	@Test
 	void deliver_ifConfigurationReloadsAndTokenIsUnavailable_stopsWithoutRequestingMoreTokens() {
 		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn(null);
-		responses.add(202);
+		responses.add(status(202));
 		transport.sleeper = millis -> transport.onConfigurationUpdate(null);
 
 		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
 		assertEquals(0, postCalls);
-		org.mockito.Mockito.verify(lockAuditTokenService, org.mockito.Mockito.times(1))
-				.getTraceAccessToken(any(), any(), any());
+		verify(lockAuditTokenService, times(1)).getTraceAccessToken(any(), any(), any());
 	}
 
 	@Test
 	void deliver_ifEndpointChangesWithoutReloadEvent_retriesToTheEndpointItStartedWith() {
-		responses.add(503);
-		responses.add(202);
+		responses.add(status(503));
+		responses.add(status(202));
 		transport.sleeper = millis -> fido2Configuration.setFido2TraceEndpoint("https://other.example.com/api/v1/audit/trace");
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
@@ -196,18 +259,30 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void backoff_isExponentialAndCapped() {
-		assertEquals(200L, TraceLockTransport.backoffMillis(1));
-		assertEquals(400L, TraceLockTransport.backoffMillis(2));
-		assertEquals(5_000L, TraceLockTransport.backoffMillis(10));
-		assertEquals(5_000L, TraceLockTransport.backoffMillis(1_000));
+	void backoffCeiling_doublesFromOneSecondAndIsCappedAtFiveMinutes() {
+		assertEquals(1_000L, TraceLockTransport.backoffCeilingMillis(1));
+		assertEquals(2_000L, TraceLockTransport.backoffCeilingMillis(2));
+		assertEquals(4_000L, TraceLockTransport.backoffCeilingMillis(3));
+		assertEquals(300_000L, TraceLockTransport.backoffCeilingMillis(10));
+		assertEquals(300_000L, TraceLockTransport.backoffCeilingMillis(1_000));
 	}
 
 	@Test
-	void retryableStatuses_areTransientOnly() {
-		assertEquals(true, TraceLockTransport.isRetryable(429));
-		assertEquals(true, TraceLockTransport.isRetryable(503));
-		assertEquals(false, TraceLockTransport.isRetryable(401));
-		assertEquals(false, TraceLockTransport.isRetryable(409));
+	void retryAfter_parsesSecondsAndHttpDate() {
+		Instant now = Instant.parse("2026-11-25T10:00:00Z");
+
+		assertEquals(5_000L, TraceLockTransport.parseRetryAfterMillis("5", now));
+		assertEquals(0L, TraceLockTransport.parseRetryAfterMillis(null, now));
+		assertEquals(0L, TraceLockTransport.parseRetryAfterMillis("soon", now));
+		assertEquals(30_000L, TraceLockTransport.parseRetryAfterMillis("Wed, 25 Nov 2026 10:00:30 GMT", now));
+		assertEquals(0L, TraceLockTransport.parseRetryAfterMillis("Wed, 25 Nov 2026 09:00:00 GMT", now));
+	}
+
+	@Test
+	void declaredRetryable_readsMemberOrReturnsNull() {
+		assertNull(TraceLockTransport.declaredRetryable(null));
+		assertNull(TraceLockTransport.declaredRetryable("{\"error\":\"invalid_request\"}"));
+		assertEquals(false, TraceLockTransport.declaredRetryable("{\"error\":{\"retryable\":false}}"));
+		assertEquals(true, TraceLockTransport.declaredRetryable("{\"retryable\":true}"));
 	}
 }

@@ -6,11 +6,19 @@
 
 package io.jans.fido2.service.audit.trace;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.DoubleSupplier;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
@@ -29,9 +37,13 @@ import jakarta.ws.rs.core.Response;
 
 /**
  * Sends one signed TRACE record to the Lock Server's {@code POST /audit/trace} endpoint with the
- * {@code trace.write} scope. Retries transient failures (network errors, 429, 5xx) with capped
- * exponential backoff. Any other status is a rejection and is not retried. The record is sent
- * unchanged, so a retry never alters what Lock hashes or stores.
+ * {@code trace.write} scope.
+ * <p>
+ * Retry follows the GovOps TRACE Collector API (§10.3, RTY-003 to RTY-005): the same bytes are resent
+ * after a delay with full jitter, the delay starts at 1 s, doubles per retry and is capped at 5 min.
+ * A {@code Retry-After} header raises the delay to at least its value. A {@code retryable} member in
+ * the Problem Details body decides retryability when present; otherwise the status code does
+ * (429 and 5xx are retryable, other statuses are not). A record is never altered between attempts.
  * <p>
  * Never throws: callers get an {@link Outcome} and decide what to do with a record that was not
  * accepted.
@@ -39,28 +51,44 @@ import jakarta.ws.rs.core.Response;
 @ApplicationScoped
 public class TraceLockTransport {
 
-	/** Total attempts per record, the first one included. */
+	/** Total attempts per record, the first one included. Bounded, as the standard requires for retries. */
 	static final int MAX_ATTEMPTS = 5;
-	static final long BASE_BACKOFF_MS = 200;
-	static final long MAX_BACKOFF_MS = 5_000;
+	/** RTY-005: initial delay, growth factor 2, cap. */
+	static final long BASE_BACKOFF_MS = 1_000;
+	static final long MAX_BACKOFF_MS = 300_000;
 
 	private static final int CONNECT_TIMEOUT_SECONDS = 5;
 	private static final int READ_TIMEOUT_SECONDS = 10;
 
+	private static final ObjectMapper MAPPER = new ObjectMapper();
+
 	public enum Outcome {
 		/** Lock answered 2xx. */
 		ACCEPTED,
-		/** Lock answered a non-retryable status (4xx other than 429, for example 401, 403, 409). */
+		/** Lock answered a terminal rejection (not retryable, for example 401, 403, 409). */
 		REJECTED,
-		/** Every attempt failed with a retryable error. */
+		/** Retries ran out, or Retry-After asked for longer than the cap. The record is still the caller's to keep. */
 		EXHAUSTED,
 		/** The endpoint is missing or insecure, so nothing was sent. */
 		NOT_CONFIGURED
 	}
 
+	/** Result of one POST: status, the raw Retry-After header and the body, each possibly null. */
+	static final class PostResult {
+		final int status;
+		final String retryAfter;
+		final String body;
+
+		PostResult(int status, String retryAfter, String body) {
+			this.status = status;
+			this.retryAfter = retryAfter;
+			this.body = body;
+		}
+	}
+
 	/** Performs one HTTP POST. Package-visible so tests can replace the network with a fake. */
 	interface RecordPoster {
-		int post(String endpoint, String accessToken, String recordJson) throws Exception;
+		PostResult post(String endpoint, String accessToken, String recordJson) throws Exception;
 	}
 
 	/** Package-visible so tests can skip the real wait. */
@@ -79,6 +107,8 @@ public class TraceLockTransport {
 
 	RecordPoster poster = this::httpPost;
 	Sleeper sleeper = Thread::sleep;
+	/** Full jitter draws from [0, 1). Package-visible so tests can pin it. */
+	DoubleSupplier jitter = Math::random;
 
 	/** Bumped on every configuration reload. A delivery that sees a different value stops before posting. */
 	private final AtomicLong configGeneration = new AtomicLong();
@@ -112,10 +142,11 @@ public class TraceLockTransport {
 		}
 
 		String lastFailure = "none";
+		long delayBeforeNextAttempt = 0;
 		for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
 			if (attempt > 1) {
 				try {
-					sleeper.sleep(backoffMillis(attempt - 1));
+					sleeper.sleep(delayBeforeNextAttempt);
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 					log.warn("Interrupted while retrying TRACE delivery, giving up after {} attempt(s)", attempt - 1);
@@ -133,6 +164,7 @@ public class TraceLockTransport {
 			String accessToken = lockAuditTokenService.getTraceAccessToken(issuer, clientId, encryptedClientSecret);
 			if (accessToken == null) {
 				lastFailure = "no trace.write access token";
+				delayBeforeNextAttempt = jitteredDelay(attempt);
 				continue;
 			}
 
@@ -141,23 +173,31 @@ public class TraceLockTransport {
 				return Outcome.NOT_CONFIGURED;
 			}
 
-			int status;
+			PostResult result;
 			try {
-				status = poster.post(endpoint, accessToken, recordJson);
+				result = poster.post(endpoint, accessToken, recordJson);
 			} catch (Exception e) {
 				lastFailure = e.getClass().getSimpleName();
+				delayBeforeNextAttempt = jitteredDelay(attempt);
 				continue;
 			}
 
-			if (isAccepted(status)) {
-				log.debug("TRACE record accepted by Lock, status: {}, attempt: {}", status, attempt);
+			if (isAccepted(result.status)) {
+				log.debug("TRACE record accepted by Lock, status: {}, attempt: {}", result.status, attempt);
 				return Outcome.ACCEPTED;
 			}
-			if (!isRetryable(status)) {
-				log.warn("Lock rejected TRACE record, status: {}", status);
+			if (!isRetryable(result.status, result.body)) {
+				log.warn("Lock rejected TRACE record, status: {}", result.status);
 				return Outcome.REJECTED;
 			}
-			lastFailure = "status " + status;
+
+			long retryAfterMillis = parseRetryAfterMillis(result.retryAfter, Instant.now());
+			if (retryAfterMillis > MAX_BACKOFF_MS) {
+				log.warn("Lock asked to retry TRACE record after {} ms, beyond the {} ms cap, giving up", retryAfterMillis, MAX_BACKOFF_MS);
+				return Outcome.EXHAUSTED;
+			}
+			delayBeforeNextAttempt = Math.max(jitteredDelay(attempt), retryAfterMillis);
+			lastFailure = "status " + result.status;
 		}
 
 		log.warn("TRACE record not delivered after {} attempts, last failure: {}", MAX_ATTEMPTS, lastFailure);
@@ -169,29 +209,82 @@ public class TraceLockTransport {
 		configGeneration.incrementAndGet();
 	}
 
+	/** Delay before the retry that follows {@code failedAttempt}: full jitter over the exponential ceiling. */
+	long jitteredDelay(int failedAttempt) {
+		return (long) (jitter.getAsDouble() * backoffCeilingMillis(failedAttempt));
+	}
+
 	static boolean isAccepted(int status) {
 		return status >= 200 && status < 300;
 	}
 
-	/** 429 and 5xx are transient. Other 4xx mean the request itself is wrong and will fail the same way again. */
-	static boolean isRetryable(int status) {
+	/**
+	 * A {@code retryable} member in the Problem Details body wins when present (PRB-005). Without one,
+	 * 429 and 5xx are transient and other statuses are terminal.
+	 */
+	static boolean isRetryable(int status, String body) {
+		Boolean declared = declaredRetryable(body);
+		if (declared != null) {
+			return declared;
+		}
 		return status == 429 || status >= 500;
 	}
 
-	/** Backoff before retry {@code retryIndex} (1 for the first retry): base * 2^(retryIndex-1), capped. */
-	static long backoffMillis(int retryIndex) {
-		long shift = Math.min(retryIndex - 1, 20);
+	/** @return the {@code retryable} member of a JSON error body, or {@code null} if the body has none. */
+	static Boolean declaredRetryable(String body) {
+		if (StringHelper.isEmpty(body)) {
+			return null;
+		}
+		try {
+			JsonNode node = MAPPER.readTree(body);
+			JsonNode error = node.has("error") && node.get("error").isObject() ? node.get("error") : node;
+			JsonNode retryable = error.get("retryable");
+			return retryable != null && retryable.isBoolean() ? retryable.booleanValue() : null;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Upper bound of the jitter window before retry {@code failedAttempt}: base * 2^(failedAttempt-1), capped.
+	 */
+	static long backoffCeilingMillis(int failedAttempt) {
+		long shift = Math.min(failedAttempt - 1, 20);
 		return Math.min(BASE_BACKOFF_MS << shift, MAX_BACKOFF_MS);
 	}
 
-	private int httpPost(String endpoint, String accessToken, String recordJson) throws Exception {
+	/**
+	 * RFC 9110 §10.2.3: {@code Retry-After} is either delay-seconds or an HTTP-date.
+	 *
+	 * @return the wait in milliseconds, 0 when absent, unparseable or already past
+	 */
+	static long parseRetryAfterMillis(String value, Instant now) {
+		if (StringHelper.isEmpty(value)) {
+			return 0;
+		}
+		String trimmed = value.trim();
+		try {
+			return Math.max(0L, Long.parseLong(trimmed) * 1_000L);
+		} catch (NumberFormatException e) {
+			// not delay-seconds, try an HTTP-date below
+		}
+		try {
+			Instant at = ZonedDateTime.parse(trimmed, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant();
+			return Math.max(0L, Duration.between(now, at).toMillis());
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
+	private PostResult httpPost(String endpoint, String accessToken, String recordJson) throws Exception {
 		Client client = clientBuilder.build();
 		try {
 			Response response = client.target(endpoint).request()
 					.header("Authorization", "Bearer " + accessToken)
 					.post(Entity.entity(recordJson, MediaType.APPLICATION_JSON));
 			try {
-				return response.getStatus();
+				String body = response.hasEntity() ? response.readEntity(String.class) : null;
+				return new PostResult(response.getStatus(), response.getHeaderString("Retry-After"), body);
 			} finally {
 				response.close();
 			}
