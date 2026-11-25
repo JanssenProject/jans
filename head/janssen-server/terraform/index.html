@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2307,10 +2307,12 @@ logging_level = &quot;TRACE&quot;
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>
