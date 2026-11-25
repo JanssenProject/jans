@@ -84,10 +84,7 @@ jobs:
       # rustsec/audit-check uses the GitHub API to fetch the advisory DB and hits
       # rate limits on PRs. Running cargo-audit directly with a cached advisory DB
       # avoids the API calls entirely.
-      # RUSTSEC-2023-0071: `rsa` Marvin timing sidechannel affects RSA decryption.
-      # Cedarling only uses `jsonwebtoken` for signature verification; the
-      # decryption path is not reachable. No upstream fix available.
-      run: cargo audit --ignore RUSTSEC-2023-0071
+      run: cargo audit
 
   cargo_deny:
     runs-on: ubuntu-latest

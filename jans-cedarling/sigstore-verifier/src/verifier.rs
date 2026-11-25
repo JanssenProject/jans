@@ -1296,10 +1296,9 @@ mod e2e_tests {
             let root = make_root("fulcio-root");
             let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
             let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
-            let ctfe_log_id = crate::crypto::p256_key_id(
-                ctfe_sk.verifying_key().to_encoded_point(false).as_bytes(),
-            )
-            .expect("P-256 uncompressed point is 65 bytes");
+            let ctfe_log_id =
+                crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_sec1_point(false).as_bytes())
+                    .expect("P-256 uncompressed point is 65 bytes");
             let (leaf, leaf_sk) = make_leaf_with_real_sct(
                 &root,
                 &LeafOpts::default(),
@@ -1365,7 +1364,7 @@ mod e2e_tests {
             let id = crate::crypto::p256_key_id(
                 self.rekor_sk
                     .verifying_key()
-                    .to_encoded_point(false)
+                    .to_sec1_point(false)
                     .as_bytes(),
             )
             .expect("P-256 uncompressed point is 65 bytes");
@@ -1431,7 +1430,7 @@ mod e2e_tests {
             let rekor_log_id = crate::crypto::p256_key_id(
                 self.rekor_sk
                     .verifying_key()
-                    .to_encoded_point(false)
+                    .to_sec1_point(false)
                     .as_bytes(),
             )
             .expect("P-256 uncompressed point is 65 bytes");
@@ -1835,7 +1834,7 @@ mod e2e_tests {
         let rekor_sk = SigningKey::from_slice(&[3u8; 32]).unwrap();
         let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).unwrap();
         let ctfe_log_id =
-            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes())
+            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_sec1_point(false).as_bytes())
                 .expect("P-256 uncompressed point is 65 bytes");
 
         let (leaf, leaf_sk) = make_p384_leaf_with_real_sct(

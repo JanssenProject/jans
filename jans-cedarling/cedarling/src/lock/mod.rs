@@ -808,7 +808,12 @@ mod test {
             "iat": 1_111_111_111_u64,
             "jti": "test-jti-123"
         });
-        encode(&header, &claims, &EncodingKey::from_secret(b"test-key")).unwrap()
+        encode(
+            &header,
+            &claims,
+            &EncodingKey::from_secret(b"test-key").unwrap(),
+        )
+        .unwrap()
     }
 
     #[tokio::test]
