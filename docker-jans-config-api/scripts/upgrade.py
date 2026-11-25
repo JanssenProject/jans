@@ -88,6 +88,11 @@ def _transform_api_dynamic_config(conf, seeded_dir_mappings=None):
             "logLevel": "INFO",
             "externalPolicyStoreUri": ""
         }),
+        # absent keys fall back to Java defaults (validation enabled), unlike fresh installs
+        ("userRolePermissionValidationEnabled", False),
+        ("validateUserInumInIntrospectionFlag", True),
+        ("fetchUserRoleInIntrospectionFlag", True),
+        ("userRolePermissionExcludedClients", []),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
