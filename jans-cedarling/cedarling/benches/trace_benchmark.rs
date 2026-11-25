@@ -3,8 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
-// Native-only program, so the WASM-unsafe calls banned in clippy.toml are fine here.
-#![allow(clippy::disallowed_methods)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "native-only program, so the WASM-unsafe calls are fine here"
+)]
 
 //! Cost of TRACE on the authorization path and throughput of the record emitter,
 //! against a mock Lock that accepts every record.

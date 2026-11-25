@@ -29,7 +29,6 @@ use std::time::Duration;
 
 use crate::PolicyStoreConfig;
 use crate::PolicyStoreSource;
-use crate::async_sleep::sleep;
 use crate::authz::Authz;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::{AuthorizationConfig, JwtConfig};
@@ -38,9 +37,10 @@ use crate::common::policy_store::formats::{FormatReport, ParsedPolicyStore, Poli
 use crate::context_data_api::DataStore;
 use crate::http::cache_headers::CacheHeadersState;
 use crate::http::{ConditionalFetch, HeadOutcome, HttpClient};
-use crate::http::{JoinHandle, spawn_task};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
+use crate::rt::sleep;
+use crate::rt::{JoinHandle, spawn_task};
 
 use super::authz_builder::{BuildAuthzError, build_authz};
 
