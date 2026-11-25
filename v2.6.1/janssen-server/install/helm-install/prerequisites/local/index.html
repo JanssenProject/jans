@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2321,7 +2321,7 @@
   <span class="md-ellipsis">
     
   
-  Overview
+  An Overview of The Cedarling
 
     
   </span>
@@ -2677,7 +2677,7 @@
 <p>Start a fresh Ubuntu VM with ports 443 and 80 open, then run:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Helm chart: janssen/janssen</span>
 sudo<span class="w"> </span>su<span class="w"> </span>-
-wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/v2.6.1/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
+wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>chmod<span class="w"> </span>u+x<span class="w"> </span>startjanssendemo.sh<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>./startjanssendemo.sh
 </code></pre></div>
 <p>This installs Docker, MicroK8s, Helm, and Janssen with default settings.</p>
 <h3 id="accessing-endpoints">Accessing Endpoints<a class="headerlink" href="#accessing-endpoints" title="Permanent link">#</a></h3>
@@ -2917,10 +2917,12 @@ wget<span class="w"> </span>https://raw.githubusercontent.com/JanssenProject/jan
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>

@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2189,7 +2189,7 @@
   <span class="md-ellipsis">
     
   
-  Overview
+  An Overview of The Cedarling
 
     
   </span>
@@ -2512,7 +2512,7 @@
 <ol>
 <li>
 <p>Download the installer
-<div class="highlight"><pre><span></span><code>curl https://raw.githubusercontent.com/JanssenProject/jans/v2.6.1/jans-linux-setup/jans_setup/install.py &gt; install.py
+<div class="highlight"><pre><span></span><code>curl https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py &gt; install.py
 </code></pre></div></p>
 </li>
 <li>
@@ -2733,10 +2733,12 @@
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>

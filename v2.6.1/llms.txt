@@ -357,7 +357,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 
 ## Cedarling documentation
 
-- [Overview](https://docs.jans.io/v2.6.1/cedarling/index.md)
+- [An Overview of The Cedarling](https://docs.jans.io/v2.6.1/cedarling/index.md)
 - [Kotlin/Java](https://docs.jans.io/v2.6.1/cedarling/developer/cedarling-kotlin/index.md)
 - [Rust](https://docs.jans.io/v2.6.1/cedarling/developer/cedarling-rust/index.md)
 - [Android](https://docs.jans.io/v2.6.1/cedarling/developer/mobile-apps/cedarling-android/index.md)
@@ -390,7 +390,7 @@ Janssen Project is a Linux Foundation-hosted platform for building identity and 
 - [Getting Started](https://docs.jans.io/v2.6.1/cedarling/tutorials/cedarling-getting-started/index.md)
 - [Golang](https://docs.jans.io/v2.6.1/cedarling/tutorials/go/index.md)
 - [Java](https://docs.jans.io/v2.6.1/cedarling/tutorials/java/index.md)
-- [Javascript](https://docs.jans.io/v2.6.1/cedarling/tutorials/javascript/index.md)
+- [JavaScript (WASM)](https://docs.jans.io/v2.6.1/cedarling/tutorials/javascript/index.md)
 - [Kotlin](https://docs.jans.io/v2.6.1/cedarling/tutorials/kotlin/index.md)
 - [Python](https://docs.jans.io/v2.6.1/cedarling/tutorials/python/index.md)
 - [Rust](https://docs.jans.io/v2.6.1/cedarling/tutorials/rust/index.md)

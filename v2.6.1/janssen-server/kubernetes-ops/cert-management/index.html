@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2103,7 +2103,7 @@
   <span class="md-ellipsis">
     
   
-  Overview
+  An Overview of The Cedarling
 
     
   </span>
@@ -2446,7 +2446,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:2.6.1-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w"> </span><span class="c1"># This may be different in Helm</span>
@@ -2498,7 +2498,7 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 <span class="w">              </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web_https.key</span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">load-web-key-rotation</span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:2.6.1-1</span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen-config-cm</span><span class="w">  </span><span class="c1">#This may be different in Helm</span>
@@ -2593,7 +2593,7 @@ Refer to <a href="../external-secrets-configmaps/#retrieve-secrets">External Sec
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">containers</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">auth-key-rotation</span>
-<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:2.6.1-1</span>
+<span class="w">              </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/cloudtools:replace-janssen-version-1</span>
 <span class="w">              </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">                  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;300Mi&quot;</span>
@@ -2810,10 +2810,12 @@ Refer to <a href="../external-secrets-configmaps/#retrieve-secrets">External Sec
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>
