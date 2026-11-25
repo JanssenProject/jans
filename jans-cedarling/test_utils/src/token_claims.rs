@@ -9,7 +9,8 @@ use std::sync::LazyLock;
 
 use serde::Serialize;
 
-use {jsonwebkey as jwk, jsonwebtoken as jwt};
+use jsonwebtoken as jwt;
+use p256::pkcs8::EncodePrivateKey;
 
 // Represent meta information about entity from cedar-policy schema.
 static ENCODING_KEYS: LazyLock<GeneratedKeys> = LazyLock::new(generate_keys);
@@ -24,26 +25,12 @@ pub struct GeneratedKeys {
 /// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
 fn generate_keys() -> GeneratedKeys {
     let kid = 1;
-    // Generate a private key
-    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
-    jwk.set_algorithm(jwk::Algorithm::ES256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some("some_id".to_string());
-
-    // Generate public key
-    let mut public_key =
-        serde_json::to_value(jwk.key.to_public()).expect("should serialize public key");
-    public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
-    let public_key: jwt::jwk::Jwk =
-        serde_json::from_value(public_key).expect("should deserialize public key");
-
-    let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
-        .expect("should generate encoding key");
-
-    let public_keys = jwt::jwk::JwkSet {
-        keys: vec![public_key],
-    };
-    let _public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
+    let signing_key = p256::ecdsa::SigningKey::from_slice(&rand::random::<[u8; 32]>())
+        .expect("should generate P-256 key");
+    let der = signing_key
+        .to_pkcs8_der()
+        .expect("should encode P-256 key as PKCS#8");
+    let private_key = jwt::EncodingKey::from_ec_der(der.as_bytes());
 
     GeneratedKeys {
         private_key_id: kid.to_string(),
@@ -82,28 +69,11 @@ pub struct KeyPair {
 /// Generates a HS256-signed token using the given claims.
 #[track_caller]
 pub fn generate_keypair_hs256(kid: Option<impl ToString>) -> KeyPair {
-    let mut jwk = jwk::JsonWebKey::new(
-        jwk::Key::try_generate_symmetric(256).expect("invalid symmetric key size"),
-    );
-    jwk.set_algorithm(jwk::Algorithm::HS256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some("some_id".to_string());
-
-    // since this is a symmetric key, the public key is the same as the private
-    let mut decoding_key = serde_json::to_value(jwk.key.clone()).expect("should serialize key");
-
-    // set the key parameters
-    if let Some(kid) = &kid {
-        decoding_key["kid"] = serde_json::Value::String(kid.to_string());
-    }
-    let mut decoding_key: jwt::jwk::Jwk =
-        serde_json::from_value(decoding_key).expect("shold generate decoding key");
-    decoding_key.common.key_algorithm = Some(jwt::jwk::KeyAlgorithm::HS256);
-
-    let encoding_key = match *jwk.key {
-        jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
-        _ => panic!("key mismatch"),
-    };
+    let encoding_key = jwt::EncodingKey::from_secret(&rand::random::<[u8; 32]>())
+        .expect("should create HS256 key");
+    let mut decoding_key = jwt::jwk::Jwk::from_encoding_key(&encoding_key, jwt::Algorithm::HS256)
+        .expect("should derive JWK from HS256 key");
+    decoding_key.common.key_id = kid.as_ref().map(ToString::to_string);
 
     KeyPair {
         kid: kid.map(|s| s.to_string()),

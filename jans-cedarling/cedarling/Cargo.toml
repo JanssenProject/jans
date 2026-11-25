@@ -116,7 +116,6 @@ tonic-web-wasm-client = { version = "0.9.0", optional = true }
 # is used in testing
 test_utils = { workspace = true }
 sigstore-verifier = { workspace = true, features = ["test-support"] }
-jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
 mockito = { workspace = true }
 criterion = { version = "0.8.2", features = ["async_tokio"] }
 tokio = { workspace = true, features = ["rt-multi-thread", "test-util"] }

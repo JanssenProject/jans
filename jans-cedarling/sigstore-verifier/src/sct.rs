@@ -476,7 +476,7 @@ mod tests {
 
         let timestamp: u64 = 1_700_000_000_000;
         let log_id =
-            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes())
+            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_sec1_point(false).as_bytes())
                 .expect("P-256 uncompressed point is 65 bytes");
 
         // Reconstruct the DigitallySigned input exactly as the verifier does,
@@ -504,11 +504,7 @@ mod tests {
 
     fn ctfe_key(sk: &SigningKey) -> CtfeKey {
         CtfeKey {
-            pubkey_bytes: sk
-                .verifying_key()
-                .to_encoded_point(false)
-                .as_bytes()
-                .to_vec(),
+            pubkey_bytes: sk.verifying_key().to_sec1_point(false).as_bytes().to_vec(),
         }
     }
 

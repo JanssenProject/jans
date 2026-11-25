@@ -362,7 +362,7 @@ fn create_decoding_key(
                 let key_data = base64::engine::general_purpose::URL_SAFE_NO_PAD
                     .decode(k)
                     .map_err(SsaValidationError::KeyDecodeError)?;
-                Ok(DecodingKey::from_secret(&key_data))
+                DecodingKey::from_secret(&key_data).map_err(SsaValidationError::JwtError)
             } else {
                 Err(SsaValidationError::InvalidKeyFormat)
             }
