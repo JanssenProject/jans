@@ -9,14 +9,16 @@ package io.jans.fido2.service.audit.trace;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,8 @@ import org.slf4j.Logger;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.service.audit.LockAuditTokenService;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Retry and classification for {@link TraceLockTransport}. The HTTP call, the wait and the jitter are
@@ -41,6 +45,7 @@ import io.jans.fido2.service.audit.LockAuditTokenService;
 class TraceLockTransportTest {
 
 	private static final String ENDPOINT = "https://lock.example.com/api/v1/audit/trace";
+	private static final String ISSUER = "https://issuer.example.com";
 	private static final String RECORD = "{\"event\":{}}";
 
 	@InjectMocks
@@ -55,7 +60,7 @@ class TraceLockTransportTest {
 
 	private Fido2Configuration fido2Configuration;
 	private final List<TraceLockTransport.PostResult> responses = new ArrayList<>();
-	private final List<Exception> scriptedFailures = new ArrayList<>();
+	private final List<RuntimeException> scriptedFailures = new ArrayList<>();
 	private final List<String> tokensSeen = new ArrayList<>();
 	private final List<String> endpointsSeen = new ArrayList<>();
 	private final List<Long> sleeps = new ArrayList<>();
@@ -65,7 +70,10 @@ class TraceLockTransportTest {
 	void setUp() {
 		fido2Configuration = new Fido2Configuration();
 		fido2Configuration.setFido2TraceEndpoint(ENDPOINT);
+		fido2Configuration.setLockAuditClientId("client-a");
+		fido2Configuration.setLockAuditClientPassword("enc-a");
 		when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+		when(appConfiguration.getIssuer()).thenReturn(ISSUER);
 		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn("trace-token");
 
 		transport.poster = (endpoint, token, body) -> {
@@ -73,14 +81,14 @@ class TraceLockTransportTest {
 			tokensSeen.add(token);
 			endpointsSeen.add(endpoint);
 			if (!scriptedFailures.isEmpty()) {
-				Exception next = scriptedFailures.remove(0);
+				RuntimeException next = scriptedFailures.remove(0);
 				if (next != null) {
 					throw next;
 				}
 			}
 			return responses.remove(0);
 		};
-		transport.sleeper = millis -> sleeps.add(millis);
+		transport.sleeper = sleeps::add;
 		transport.jitter = () -> 1.0;
 	}
 
@@ -134,7 +142,7 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void deliver_ifBodySaysNotRetryable_rejectsEvenOnServerError() {
+	void deliver_ifNestedBodySaysNotRetryable_rejectsEvenOnServerError() {
 		responses.add(status(503, null, "{\"error\":{\"retryable\":false}}"));
 
 		assertEquals(TraceLockTransport.Outcome.REJECTED, transport.deliver(RECORD));
@@ -142,12 +150,29 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void deliver_ifBodySaysRetryable_retriesEvenOnClientError() {
-		responses.add(status(400, null, "{\"retryable\":true}"));
+	void deliver_ifNestedBodySaysRetryable_retriesEvenOnClientError() {
+		responses.add(status(400, null, "{\"error\":{\"retryable\":true}}"));
 		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(2, postCalls);
+	}
+
+	@Test
+	void deliver_ifTopLevelRetryableIsTrueButNestedErrorHasNoRetryable_retries() {
+		responses.add(status(400, null, "{\"retryable\":true,\"error\":{\"code\":\"temporarily_unavailable\"}}"));
+		responses.add(status(202));
+
+		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
+		assertEquals(2, postCalls);
+	}
+
+	@Test
+	void deliver_ifTopLevelRetryableIsFalseOnServerError_rejects() {
+		responses.add(status(503, null, "{\"retryable\":false,\"error\":{\"code\":\"collector_unavailable\"}}"));
+
+		assertEquals(TraceLockTransport.Outcome.REJECTED, transport.deliver(RECORD));
+		assertEquals(1, postCalls);
 	}
 
 	@Test
@@ -181,7 +206,7 @@ class TraceLockTransportTest {
 
 	@Test
 	void deliver_ifNetworkErrorThenAccepted_retries() {
-		scriptedFailures.add(new IOException("connection reset"));
+		scriptedFailures.add(new ProcessingException("connection reset"));
 		responses.add(status(202));
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
@@ -214,7 +239,7 @@ class TraceLockTransportTest {
 		responses.add(status(202));
 		transport.sleeper = millis -> {
 			sleeps.add(millis);
-			transport.onConfigurationUpdate(null);
+			transport.onConfigurationReloading(null);
 		};
 
 		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
@@ -225,7 +250,7 @@ class TraceLockTransportTest {
 	void deliver_ifConfigurationReloadsAndTokenIsUnavailable_stopsWithoutRequestingMoreTokens() {
 		when(lockAuditTokenService.getTraceAccessToken(any(), any(), any())).thenReturn(null);
 		responses.add(status(202));
-		transport.sleeper = millis -> transport.onConfigurationUpdate(null);
+		transport.sleeper = millis -> transport.onConfigurationReloading(null);
 
 		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
 		assertEquals(0, postCalls);
@@ -233,13 +258,20 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void deliver_ifEndpointChangesWithoutReloadEvent_retriesToTheEndpointItStartedWith() {
+	void deliver_ifConfigurationChangesDuringRetry_tokenAndEndpointStayFromTheStartingSnapshot() {
 		responses.add(status(503));
 		responses.add(status(202));
-		transport.sleeper = millis -> fido2Configuration.setFido2TraceEndpoint("https://other.example.com/api/v1/audit/trace");
+		transport.sleeper = millis -> {
+			sleeps.add(millis);
+			fido2Configuration.setFido2TraceEndpoint("https://other.example.com/api/v1/audit/trace");
+			fido2Configuration.setLockAuditClientId("client-b");
+			fido2Configuration.setLockAuditClientPassword("enc-b");
+			when(appConfiguration.getIssuer()).thenReturn("https://other-issuer.example.com");
+		};
 
 		assertEquals(TraceLockTransport.Outcome.ACCEPTED, transport.deliver(RECORD));
 		assertEquals(List.of(ENDPOINT, ENDPOINT), endpointsSeen);
+		verify(lockAuditTokenService, times(2)).getTraceAccessToken(eq(ISSUER), eq("client-a"), eq("enc-a"));
 	}
 
 	@Test
@@ -256,6 +288,15 @@ class TraceLockTransportTest {
 
 		assertEquals(TraceLockTransport.Outcome.NOT_CONFIGURED, transport.deliver(RECORD));
 		assertEquals(0, postCalls);
+	}
+
+	@Test
+	void readBody_ifReadingFails_returnsNullSoTheStatusStillDecides() {
+		Response response = mock(Response.class);
+		when(response.hasEntity()).thenReturn(true);
+		when(response.readEntity(String.class)).thenThrow(new ProcessingException("body stream closed"));
+
+		assertNull(TraceLockTransport.readBodyQuietly(response));
 	}
 
 	@Test
@@ -279,10 +320,11 @@ class TraceLockTransportTest {
 	}
 
 	@Test
-	void declaredRetryable_readsMemberOrReturnsNull() {
-		assertNull(TraceLockTransport.declaredRetryable(null));
-		assertNull(TraceLockTransport.declaredRetryable("{\"error\":\"invalid_request\"}"));
-		assertEquals(false, TraceLockTransport.declaredRetryable("{\"error\":{\"retryable\":false}}"));
-		assertEquals(true, TraceLockTransport.declaredRetryable("{\"retryable\":true}"));
+	void declaredRetryable_readsNestedThenTopLevelMemberOrReturnsEmpty() {
+		assertEquals(Optional.empty(), TraceLockTransport.declaredRetryable(null));
+		assertEquals(Optional.empty(), TraceLockTransport.declaredRetryable("{\"error\":\"invalid_request\"}"));
+		assertEquals(Optional.of(false), TraceLockTransport.declaredRetryable("{\"error\":{\"retryable\":false}}"));
+		assertEquals(Optional.of(true), TraceLockTransport.declaredRetryable("{\"retryable\":true}"));
+		assertEquals(Optional.of(false), TraceLockTransport.declaredRetryable("{\"retryable\":true,\"error\":{\"retryable\":false}}"));
 	}
 }

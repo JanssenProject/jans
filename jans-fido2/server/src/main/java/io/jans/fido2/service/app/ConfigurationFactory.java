@@ -57,6 +57,9 @@ public class ConfigurationFactory {
 	private Event<AppConfiguration> configurationUpdateEvent;
 
 	@Inject
+	private Event<AppConfiguration> configurationReloadingEvent;
+
+	@Inject
 	private Event<String> event;
 
 	@Inject
@@ -273,6 +276,11 @@ public class ConfigurationFactory {
 		try {
 			final Conf c = loadConfigurationFromLdap();
 			if (c != null) {
+				// Announce the reload before the new configuration is published, so observers that cache
+				// state derived from the old configuration can invalidate it first.
+				if (this.loaded) {
+					configurationReloadingEvent.select(ConfigurationReloading.Literal.INSTANCE).fire(dynamicConf);
+				}
 				init(c);
 
 				// Destroy old configuration
