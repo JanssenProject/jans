@@ -8,11 +8,10 @@ use std::time::Duration;
 
 use tokio_util::sync::CancellationToken;
 
-use crate::async_sleep::Ticker;
 use crate::authz::metrics::MetricsCollector;
-use crate::http::{JoinHandle, spawn_task};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LoggerWeak, MetricsLogEntry};
+use crate::rt::{JoinHandle, Ticker, spawn_task};
 
 pub(crate) struct TelemetryTicker {
     metrics: Arc<MetricsCollector>,

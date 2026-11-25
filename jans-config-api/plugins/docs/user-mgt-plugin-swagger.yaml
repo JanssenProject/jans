@@ -342,6 +342,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "500":
           description: InternalServerError
           content:
@@ -869,6 +875,8 @@ paths:
           description: Unauthorized
         "404":
           description: Not Found
+        "409":
+          description: Conflict
         "500":
           description: InternalServerError
       security:
@@ -891,10 +899,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     CustomUser:
       type: object
       properties:

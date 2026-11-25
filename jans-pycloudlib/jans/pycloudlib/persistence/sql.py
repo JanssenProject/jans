@@ -8,11 +8,14 @@ import logging
 import os
 import re
 import ssl
+import time
+import zlib
 import typing as _t
 import warnings
 import weakref
 from collections import defaultdict
 from collections.abc import Callable
+from contextlib import nullcontext
 from functools import cached_property
 from pathlib import Path
 from tempfile import NamedTemporaryFile
@@ -196,6 +199,53 @@ class CloudSqlConnectorMixin:
                 self._cloudsql_connector = None
 
 
+#: Leading ``CREATE [UNIQUE] INDEX [CONCURRENTLY] [IF NOT EXISTS]`` of an index query; keywords are
+#: case-insensitive and may be separated by any whitespace.
+_PG_CREATE_INDEX_RE = re.compile(
+    r"^\s*(CREATE\s+(?:UNIQUE\s+)?INDEX)\s+(?:CONCURRENTLY\s+)?(?:IF\s+NOT\s+EXISTS\s+)?",
+    re.IGNORECASE,
+)
+
+
+def _validate_lock_timeout(lock_timeout: int) -> None:
+    """Check that ``lock_timeout`` is a positive integer number of seconds.
+
+    PostgreSQL treats ``lock_timeout = 0`` as "no timeout" (the DDL would wait for a conflicting lock
+    indefinitely) and a fractional value would be truncated, so only a positive ``int`` is accepted;
+    a ``float`` such as ``2.0`` is rejected too.
+
+    Args:
+        lock_timeout: Maximum seconds to wait for a lock.
+
+    Raises:
+        ValueError: ``lock_timeout`` is not a positive ``int``, for example ``0``, ``-1``, ``0.5``,
+            ``None``, ``"10"`` or ``True``.
+    """
+    # bool is a subclass of int, but True is not a timeout
+    if isinstance(lock_timeout, bool) or not isinstance(lock_timeout, int) or lock_timeout < 1:
+        raise ValueError(f"lock_timeout must be a positive integer number of seconds, got {lock_timeout!r}")
+
+
+class IndexLockTimeoutError(Exception):
+    """Raised when a lock is not acquired within the lock timeout.
+
+    Raised by the MySQL index lookup (when the server warns that the lookup timed out on a lock) and by
+    the polling for the PostgreSQL advisory index lock. Other lock timeouts surface as ``DatabaseError``.
+    """
+
+
+def _pg_error_code(exc: DatabaseError) -> _t.Optional[str]:
+    """Get SQLSTATE of a PostgreSQL error, whichever driver (psycopg2 or pg8000) raised it."""
+    orig = exc.orig
+    code = getattr(orig, "pgcode", None) or getattr(orig, "sqlstate", None)
+    if code:
+        return str(code)
+    # pg8000 puts the error fields in a dict as the first argument
+    if orig is not None and orig.args and isinstance(orig.args[0], dict):
+        return orig.args[0].get("C")
+    return None
+
+
 class PostgresqlAdapter(CloudSqlConnectorMixin):
     """Class for PostgreSQL adapter."""
 
@@ -217,6 +267,100 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
     #: Fallback driver name for warning messages
     fallback_driver_name = "psycopg2"
 
+    #: Query to find an index; returns true if the index is valid or another session is still building it
+    #: (so it must not be dropped), false if it is invalid and idle (e.g. left by a failed concurrent build).
+    #: Uses ``current_schema()``, which follows the search_path set for the connection.
+    #: The progress view is cluster-wide and index OIDs are only unique per database (a database created
+    #: from a template reuses them), so it is limited to the current database.
+    index_state_query = (
+        "SELECT (i.indisvalid OR EXISTS ("
+        "SELECT 1 FROM pg_stat_progress_create_index p WHERE p.index_relid = i.indexrelid "
+        "AND p.datname = current_database())) "
+        "FROM pg_index i "
+        "JOIN pg_class c ON c.oid = i.indexrelid "
+        "JOIN pg_class t ON t.oid = i.indrelid "
+        "JOIN pg_namespace n ON n.oid = t.relnamespace "
+        "WHERE n.nspname = current_schema() AND t.relname = :table_name AND c.relname = :index_name"
+    )
+
+    #: Same lookup for PostgreSQL < 12, which has no ``pg_stat_progress_create_index``. Another session that
+    #: builds the same index cannot be detected, which is safe: loaders serialize on the index lock
+    #: (see ``index_lock_queries``), so an invalid index seen under that lock is a failed build.
+    index_state_query_legacy = (
+        "SELECT i.indisvalid "
+        "FROM pg_index i "
+        "JOIN pg_class c ON c.oid = i.indexrelid "
+        "JOIN pg_class t ON t.oid = i.indrelid "
+        "JOIN pg_namespace n ON n.oid = t.relnamespace "
+        "WHERE n.nspname = current_schema() AND t.relname = :table_name AND c.relname = :index_name"
+    )
+
+    #: First ``server_version_num`` that has ``pg_stat_progress_create_index`` (PostgreSQL 12).
+    progress_view_min_version = 120000
+
+    #: Whether index DDL must run outside a transaction (needed by ``CREATE INDEX CONCURRENTLY``).
+    index_ddl_autocommit = True
+
+    def prepare_index_query(self, query: str) -> str:
+        """Make index creation non-blocking for writers.
+
+        A plain ``CREATE INDEX`` takes a SHARE lock, which blocks every writer of the table.
+        ``CONCURRENTLY`` takes SHARE UPDATE EXCLUSIVE instead, so writers keep working. It is
+        self-conflicting and still waits on a running (auto)vacuum; that wait is avoided by checking
+        the catalog first (see ``SqlClient.create_index``), not by ``CONCURRENTLY``.
+        """
+        match = _PG_CREATE_INDEX_RE.match(query)
+        if not match:
+            return query
+        # modifiers already present in the query are consumed by the pattern, so they are never doubled
+        return f"{match.group(1)} CONCURRENTLY IF NOT EXISTS {query[match.end():]}"
+
+    def index_lock_queries(self, table_name: str, index_name: str) -> _t.Optional[tuple[str, str]]:
+        """Queries to acquire and release a cross-session lock for one index.
+
+        The check of the index state, the drop of an invalid index and its (re)creation must not
+        interleave between loaders: otherwise one loader can drop the index another one is building.
+        A session-level advisory lock serializes them.
+
+        The acquire query is non-blocking (``pg_try_advisory_lock``) and callers poll it. A blocking
+        ``pg_advisory_lock`` would hold a snapshot while waiting, and the lock holder's
+        ``CREATE INDEX CONCURRENTLY`` waits for older snapshots, which deadlocks both sessions.
+
+        Returns:
+            Tuple of (try-acquire query, release query).
+        """
+        # two 31-bit keys: a fixed namespace and a hash of the index; collisions only serialize needlessly
+        namespace = zlib.crc32(b"jans.pycloudlib.index") & 0x7FFFFFFF
+        key = zlib.crc32(f"{table_name}.{index_name}".encode()) & 0x7FFFFFFF
+        return (
+            f"SELECT pg_try_advisory_lock({namespace}, {key})",
+            f"SELECT pg_advisory_unlock({namespace}, {key})",
+        )
+
+    def drop_index_query(self, table_name: str, index_name: str) -> str:
+        """Query to drop an index (left invalid by a failed concurrent build)."""
+        qchar = self.quote_char
+        escaped = index_name.replace(qchar, qchar * 2)
+        return f"DROP INDEX CONCURRENTLY IF EXISTS {qchar}{escaped}{qchar}"
+
+    def set_lock_timeout_query(self, seconds: int) -> str:
+        """Query to limit how long a statement waits for a lock."""
+        return f"SET lock_timeout = '{int(seconds)}s'"
+
+    #: Query to restore the default lock timeout.
+    reset_lock_timeout_query = "RESET lock_timeout"
+
+    def is_lock_timeout(self, exc: DatabaseError) -> bool:
+        """Check whether the error is retryable lock contention.
+
+        That is a lock timeout (SQLSTATE 55P03, lock_not_available) or a deadlock detected by
+        PostgreSQL (40P01), where one of the sessions is aborted and the statement can be retried.
+
+        Args:
+            exc: Exception instance.
+        """
+        return _pg_error_code(exc) in ("55P03", "40P01")
+
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
 
@@ -225,7 +369,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
-        if exc.orig.pgcode not in ["42P07"]:
+        if _pg_error_code(exc) not in ["42P07"]:
             raise exc
 
     def on_create_index_error(self, exc: DatabaseError) -> None:
@@ -236,7 +380,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 42P07: relation exists
-        if exc.orig.pgcode not in ["42P07"]:
+        if _pg_error_code(exc) not in ["42P07"]:
             raise exc
 
     def on_insert_into_error(self, exc: DatabaseError) -> None:
@@ -247,7 +391,7 @@ class PostgresqlAdapter(CloudSqlConnectorMixin):
         """
         # re-raise exception UNLESS error code is in the following list
         # - 23505: unique violation
-        if exc.orig.pgcode not in ["23505"]:
+        if _pg_error_code(exc) not in ["23505"]:
             raise exc
 
     @property
@@ -298,6 +442,58 @@ class MysqlAdapter(CloudSqlConnectorMixin):
 
     #: Fallback driver name for warning messages
     fallback_driver_name = "pymysql"
+
+    #: Query to find an index; returns a row if the index exists.
+    index_state_query = (
+        "SELECT 1 FROM information_schema.statistics "
+        "WHERE table_schema = DATABASE() AND table_name = :table_name "
+        "AND LOWER(index_name) = LOWER(:index_name) LIMIT 1"
+    )
+
+    #: Query run right after an index lookup that returned no row. MySQL 5.7 does not fail an
+    #: ``information_schema`` read that times out waiting for a metadata lock: it skips the table and only
+    #: leaves warning 1205, so "no row" does not prove that the index is missing.
+    index_state_warnings_query = "SHOW WARNINGS"
+
+    def is_lock_timeout_warning(self, warning: _t.Sequence[_t.Any]) -> bool:
+        """Check whether a row of ``index_state_warnings_query`` (Level, Code, Message) is a lock timeout (1205)."""
+        return warning[1] == 1205
+
+    #: MySQL DDL commits implicitly and cannot be rolled back; the transaction block only wraps the
+    #: ``SET`` of the lock timeout.
+    index_ddl_autocommit = False
+
+    def prepare_index_query(self, query: str) -> str:
+        """Return the index query unchanged."""
+        return query
+
+    def index_lock_queries(self, table_name: str, index_name: str) -> _t.Optional[tuple[str, str]]:
+        """No cross-session index lock is needed for MySQL (no invalid index state, no drop)."""
+        return None
+
+    def drop_index_query(self, table_name: str, index_name: str) -> str:
+        """Query to drop an index.
+
+        Part of the adapter interface; not used for MySQL as its index state is never "invalid".
+        """
+        qchar = self.quote_char
+        index_name, table_name = (name.replace(qchar, qchar * 2) for name in (index_name, table_name))
+        return f"DROP INDEX {qchar}{index_name}{qchar} ON {qchar}{table_name}{qchar}"
+
+    def set_lock_timeout_query(self, seconds: int) -> str:
+        """Query to limit how long a statement waits for a metadata lock."""
+        return f"SET SESSION lock_wait_timeout = {int(seconds)}"
+
+    #: Query to restore the default lock timeout.
+    reset_lock_timeout_query = "SET SESSION lock_wait_timeout = DEFAULT"
+
+    def is_lock_timeout(self, exc: DatabaseError) -> bool:
+        """Check whether the error is a lock timeout (1205, lock wait timeout exceeded).
+
+        Args:
+            exc: Exception instance.
+        """
+        return bool(exc.orig is not None and exc.orig.args and exc.orig.args[0] == 1205)
 
     def on_create_table_error(self, exc: DatabaseError) -> None:
         """Handle table creation error.
@@ -544,6 +740,8 @@ class SqlClient(SqlSchemaMixin):
         self._metadata: _t.Optional[MetaData] = None
         self._engine = None
         self._closed = False
+        # PostgreSQL only: whether the server has pg_stat_progress_create_index (looked up once)
+        self._pg_has_progress_view: _t.Optional[bool] = None
 
         if as_boolean(os.environ.get("CN_SQL_SSL_ENABLED", "false")):
             self._bootstrap_ssl_assets()
@@ -737,13 +935,15 @@ class SqlClient(SqlSchemaMixin):
         query = f"CREATE TABLE {self.quoted_id(table_name)} ({columns_fmt}, {pk_def})"
 
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
+            # handle the error outside the transaction block, so the failed transaction is rolled back
+            # (not committed) before a duplicate is ignored
+            try:
+                with conn.begin():
                     conn.execute(text(query))
                     # refresh metadata as we have newly created table
                     self.metadata.reflect(conn)
-                except DatabaseError as exc:
-                    self.adapter.on_create_table_error(exc)
+            except DatabaseError as exc:
+                self.adapter.on_create_table_error(exc)
 
     def get_table_mapping(self) -> dict[str, dict[str, str]]:
         """Get mapping of column name and type from all tables."""
@@ -774,20 +974,307 @@ class SqlClient(SqlSchemaMixin):
         # finalized table mapping
         return dict(table_mapping)
 
-    def create_index(self, query: str) -> None:
-        """Create index using raw query."""
+    def get_index_state(
+        self, table_name: str, index_name: str, lock_timeout: _t.Optional[int] = None,
+    ) -> _t.Optional[bool]:
+        """Look up an index in the catalog, which normally takes no lock on the table.
+
+        MySQL 5.7 can wait for a metadata lock held by DDL.
+
+        Args:
+            table_name: Name of the table.
+            index_name: Name of the index.
+            lock_timeout: If given, limits how long the lookup waits for a lock; on MySQL 5.7 a timed-out
+                lookup was measured to take about twice this value. The timeout is reset before the
+                connection returns to the pool. ``None`` keeps the server's default lock timeout. Must be an
+                ``int``; convert configuration strings before calling.
+
+        Returns:
+            ``None`` if the index does not exist, ``False`` if it exists but is invalid
+            (e.g. left by a failed concurrent build), otherwise ``True``.
+
+        Raises:
+            ValueError: ``lock_timeout`` is not a positive integer number of seconds.
+            IndexLockTimeoutError: On MySQL, the lookup timed out waiting for a lock, so it cannot tell
+                whether the index exists.
+            DatabaseError: The lookup failed, including a PostgreSQL lock timeout (SQLSTATE 55P03).
+        """
+        if lock_timeout is None:
+            with self.engine.connect() as conn:
+                return self._index_state_on(conn, table_name, index_name)
+
+        _validate_lock_timeout(lock_timeout)
         with self.engine.connect() as conn:
-            with conn.begin():
+            try:
+                conn.execute(text(self.adapter.set_lock_timeout_query(lock_timeout)))
+                return self._index_state_on(conn, table_name, index_name)
+            finally:
+                # the lookup always runs in a transaction (unlike _run_index_ddl on PostgreSQL, which uses AUTOCOMMIT)
+                # so before the connection goes back to the pool: rollback, RESET, commit (PostgreSQL's rollback undoes
+                # the SET and ends a failed transaction so the RESET can run; MySQL's SET SESSION is not transactional
+                # and needs the RESET)
                 try:
-                    conn.execute(text(query))
+                    conn.rollback()
+                    conn.execute(text(self.adapter.reset_lock_timeout_query))
+                    conn.commit()
+                except DatabaseError as exc:
+                    logger.debug("unable to reset lock timeout; invalidating connection: %s", exc)
+                    conn.invalidate()
+
+    def _index_state_sql(self, conn: _t.Any) -> str:
+        """Pick the index lookup query supported by the server.
+
+        PostgreSQL before 12 has no ``pg_stat_progress_create_index``; using it would fail on every start.
+        """
+        legacy = getattr(self.adapter, "index_state_query_legacy", None)
+        if legacy is None:
+            return self.adapter.index_state_query
+
+        if self._pg_has_progress_view is None:
+            version_num = int(conn.execute(text("SHOW server_version_num")).scalar())
+            self._pg_has_progress_view = version_num >= self.adapter.progress_view_min_version
+        return self.adapter.index_state_query if self._pg_has_progress_view else legacy
+
+    def _index_state_on(self, conn: _t.Any, table_name: str, index_name: str) -> _t.Optional[bool]:
+        """Look up an index state using an existing connection (see ``get_index_state``).
+
+        Raises:
+            IndexLockTimeoutError: On MySQL, the lookup timed out waiting for a lock, so the state is unknown.
+            DatabaseError: The lookup failed, including a PostgreSQL lock timeout (SQLSTATE 55P03).
+        """
+        row = conn.execute(
+            text(self._index_state_sql(conn)),
+            {"table_name": table_name, "index_name": index_name},
+        ).fetchone()
+        if row is None:
+            # must be the next statement on this connection: warnings belong to the previous statement
+            warnings_query = getattr(self.adapter, "index_state_warnings_query", None)
+            if warnings_query and any(
+                self.adapter.is_lock_timeout_warning(warning) for warning in conn.execute(text(warnings_query))
+            ):
+                raise IndexLockTimeoutError(f"timed out waiting for a lock to look up index {index_name}")
+            return None
+        return bool(row[0])
+
+    def create_index(
+        self,
+        query: str,
+        table_name: _t.Optional[str] = None,
+        index_name: _t.Optional[str] = None,
+        lock_timeout: int = 10,
+        retries: int = 3,
+    ) -> None:
+        """Create index using raw query.
+
+        If ``table_name`` and ``index_name`` are given, the index is created only when it
+        does not exist yet, and without holding up writers of the table:
+
+        - the catalog is checked first, because trying the DDL and ignoring "already exists"
+          still takes the table lock, so each start would wait for vacuum or long transactions
+          while every writer queues behind it;
+        - PostgreSQL builds the index ``CONCURRENTLY``;
+        - the catalog lookup and the DDL wait for a lock for a limited time set by ``lock_timeout``
+          (each lock wait is limited to ``lock_timeout`` seconds, on MySQL 5.7 the lookup to about twice
+          that; one attempt can contain several waits, e.g. on PostgreSQL the advisory lock, the DROP
+          and the CREATE) and are tried at most ``retries`` times; if all attempts fail on lock contention
+          (a lock timeout or, on PostgreSQL, a deadlock), a warning is logged and the next start tries again.
+
+        Without the names, the query is run as is and "already exists" errors are ignored.
+
+        Args:
+            query: ``CREATE INDEX`` query.
+            table_name: Name of the table the index belongs to (optional).
+            index_name: Name of the index (optional).
+            lock_timeout: Maximum seconds to wait for a lock (used only when both names are given). Must be
+                an ``int``; convert configuration strings before calling.
+            retries: Number of attempts (used only when both names are given; at least one).
+
+        Raises:
+            ValueError: ``lock_timeout`` is not a positive integer number of seconds.
+            DatabaseError: Any error other than lock contention (a lock timeout and, on PostgreSQL, a
+                deadlock) or "already exists", as decided by the adapter's ``on_create_index_error``.
+                Without the names, only "already exists" is ignored.
+        """
+        _validate_lock_timeout(lock_timeout)
+
+        if table_name is None or index_name is None:
+            with self.engine.connect() as conn:
+                # handle the error after the transaction is rolled back
+                try:
+                    with conn.begin():
+                        conn.execute(text(query))
                 except DatabaseError as exc:
                     self.adapter.on_create_index_error(exc)
+            return
+
+        query = self.adapter.prepare_index_query(query)
+        retries = max(retries, 1)
+        for attempt in range(1, retries + 1):
+            try:
+                # re-read the state: a timed-out concurrent build can leave an invalid index behind
+                state = self.get_index_state(table_name, index_name, lock_timeout=lock_timeout)
+                if state:
+                    logger.debug("index %s on %s already exists; skipping", index_name, table_name)
+                    return
+                # None: index is missing, False: index exists but is invalid (must be dropped first)
+                is_invalid = state is False
+                self._run_index_ddl(query, table_name, index_name, lock_timeout, drop_first=is_invalid)
+                return
+            except (DatabaseError, IndexLockTimeoutError) as exc:
+                if self._is_lock_contention(exc):
+                    if attempt == retries:
+                        # do not fail the whole job; the next start retries
+                        logger.warning(
+                            "could not lock %s to create index %s after %s attempts; will retry on next start",
+                            table_name, index_name, retries,
+                        )
+                        return
+                    logger.warning(
+                        "could not lock %s to create index %s (attempt %s of %s); retrying",
+                        table_name, index_name, attempt, retries,
+                    )
+                    time.sleep(attempt * 5)
+                    continue
+                self.adapter.on_create_index_error(exc)
+                return
+
+    def _is_lock_contention(self, exc: Exception) -> bool:
+        """Check whether the error is retryable lock contention (lock timeout, or deadlock on PostgreSQL)."""
+        return isinstance(exc, IndexLockTimeoutError) or self.adapter.is_lock_timeout(exc)
+
+    def alter_table(
+        self,
+        query: str,
+        table_name: str,
+        lock_timeout: int = 10,
+        retries: int = 3,
+    ) -> bool:
+        """Run an ``ALTER TABLE`` query with a bounded lock wait, retried on lock contention.
+
+        Uses the same lock handling as ``create_index`` with names: the statement waits at most
+        ``lock_timeout`` seconds for a lock, the timeout is reset before the connection returns
+        to the pool, and the statement is tried at most ``retries`` times.
+
+        Args:
+            query: ``ALTER TABLE`` query.
+            table_name: Name of the table being altered.
+            lock_timeout: Maximum seconds to wait for a lock. Must be an ``int``; convert configuration
+                strings before calling.
+            retries: Number of attempts (at least one).
+
+        Returns:
+            ``True`` if the query ran, ``False`` if every attempt failed on lock contention (a lock
+            timeout or, on PostgreSQL, a deadlock); a warning is logged and the next start tries again.
+
+        Raises:
+            ValueError: ``lock_timeout`` is not a positive integer number of seconds.
+            DatabaseError: Any error other than lock contention (a lock timeout and, on PostgreSQL, a
+                deadlock), for the caller to handle.
+        """
+        _validate_lock_timeout(lock_timeout)
+        retries = max(retries, 1)
+        for attempt in range(1, retries + 1):
+            try:
+                # no index is dropped (drop_first=False), so no index name is needed
+                self._run_index_ddl(query, table_name, "", lock_timeout, drop_first=False)
+                return True
+            except DatabaseError as exc:
+                if not self.adapter.is_lock_timeout(exc):
+                    raise
+                if attempt == retries:
+                    logger.warning(
+                        "could not lock %s to alter it after %s attempts; will retry on next start",
+                        table_name, retries,
+                    )
+                    return False
+                logger.warning(
+                    "could not lock %s to alter it (attempt %s of %s); retrying",
+                    table_name, attempt, retries,
+                )
+                time.sleep(attempt * 5)
+        return False
+
+    def _run_index_ddl(
+        self, query: str, table_name: str, index_name: str, lock_timeout: int, drop_first: bool,
+    ) -> None:
+        """Run index DDL once with a bounded lock wait.
+
+        Args:
+            query: Index creation query, already prepared by the adapter.
+            table_name: Name of the table the index belongs to.
+            index_name: Name of the index.
+            lock_timeout: Maximum seconds to wait for a lock.
+            drop_first: Drop the index first (it is invalid, e.g. left by a failed concurrent build).
+
+        When the adapter provides an index lock (PostgreSQL), it is held for the whole operation and the
+        index state is checked again under the lock: the index is skipped if another loader made it valid
+        in the meantime, and dropped only if it is still invalid. This stops concurrent loaders from
+        dropping an index that another one is rebuilding.
+        """
+        with self.engine.connect() as conn:
+            if self.adapter.index_ddl_autocommit:
+                # a pooled connection may already be inside a DBAPI transaction (e.g. pg8000 starts one on the
+                # `pool_pre_ping` query); AUTOCOMMIT does not end it, and CREATE INDEX CONCURRENTLY would fail
+                # with "cannot run inside a transaction block". End it first.
+                conn.connection.rollback()
+                # must be set before the connection starts a transaction
+                conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+                transaction = nullcontext()
+            else:
+                transaction = conn.begin()
+
+            lock_queries = self.adapter.index_lock_queries(table_name, index_name) if index_name else None
+            locked = False
+
+            try:
+                with transaction:
+                    conn.execute(text(self.adapter.set_lock_timeout_query(lock_timeout)))
+
+                    if lock_queries:
+                        # poll without blocking; a blocked statement would hold a snapshot that the
+                        # lock holder's CREATE INDEX CONCURRENTLY waits for (deadlock)
+                        self._acquire_index_lock(conn, lock_queries[0], lock_timeout)
+                        locked = True
+
+                        state = self._index_state_on(conn, table_name, index_name)
+                        if state:
+                            logger.debug("index %s on %s became valid; skipping", index_name, table_name)
+                            return
+                        # None: index is missing, False: index exists but is invalid
+                        drop_first = state is False
+
+                    if drop_first:
+                        conn.execute(text(self.adapter.drop_index_query(table_name, index_name)))
+                    conn.execute(text(query))
+            finally:
+                # the connection goes back to the pool, so do not leave the lock or timeout set on it
+                try:
+                    if locked and lock_queries:
+                        conn.execute(text(lock_queries[1]))
+                    conn.execute(text(self.adapter.reset_lock_timeout_query))
+                except DatabaseError as exc:
+                    # do not return a connection with a lock or lock timeout still set to the pool
+                    logger.debug("unable to release lock or reset lock timeout; invalidating connection: %s", exc)
+                    conn.invalidate()
+
+    @staticmethod
+    def _acquire_index_lock(conn: _t.Any, try_acquire_query: str, lock_timeout: int) -> None:
+        """Acquire the index lock by polling a non-blocking query, for at most ``lock_timeout`` seconds.
+
+        Raises:
+            IndexLockTimeoutError: The lock is still held by another session after ``lock_timeout`` seconds.
+        """
+        deadline = time.monotonic() + lock_timeout
+        while not conn.execute(text(try_acquire_query)).scalar():
+            if time.monotonic() >= deadline:
+                raise IndexLockTimeoutError("timed out waiting for the index lock")
+            time.sleep(0.5)
 
     def quoted_id(self, identifier: str) -> str:
         """Get quoted identifier name."""
-        q = self.adapter.quote_char
-        escaped = identifier.replace(q, q * 2)
-        return f"{q}{escaped}{q}"
+        qchar = self.adapter.quote_char
+        escaped = identifier.replace(qchar, qchar * 2)
+        return f"{qchar}{escaped}{qchar}"
 
     def row_exists(self, table_name: str, id_: str) -> bool:
         """Check whether a row is exist."""
@@ -809,11 +1296,12 @@ class SqlClient(SqlSchemaMixin):
 
         query = table.insert().values(column_mapping)
         with self.engine.connect() as conn:
-            with conn.begin():
-                try:
+            # handle the error after the transaction is rolled back
+            try:
+                with conn.begin():
                     conn.execute(query)
-                except DatabaseError as exc:
-                    self.adapter.on_insert_into_error(exc)
+            except DatabaseError as exc:
+                self.adapter.on_insert_into_error(exc)
 
     def get(self, table_name: str, id_: str, column_names: _t.Union[list[str], None] = None) -> dict[str, _t.Any]:
         """Get a row from a table with matching ID."""
