@@ -11,11 +11,16 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Collections;
+import java.util.concurrent.ThreadLocalRandom;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
-import org.testng.SkipException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -27,33 +32,41 @@ import io.jans.service.test.cluster.FixedClusterNodeService;
 import io.jans.service.test.orm.SqlTestProfile;
 
 /**
- * {@link ClusterNodeService#allocate()} for two node types on one base DN of a real SQL database.
- *
- * <p>Skipped unless the system property {@value SqlTestProfile#PROFILE_PROPERTY} names a profile
- * directory of {@code jans-orm/integration-test}. It also needs an existing node with id 0 of another
- * type under {@code ou=node,o=jans} (a running jans-auth creates it).</p>
- *
- * <p>Both node types are random, so {@code allocate()} never finds an expired node of its own type and
- * never updates an existing row: the only writes are inserts of new rows. Every row of the two types is
- * removed in {@link #cleanUp()}, also after a failure. Rows of other types are compared before and after
- * the test.</p>
- *
- * <p>Both types get a node with an id above the highest id of all types that existed before.</p>
+ * SQL allocation for two types under an isolated test base with a seeded foreign-type node.
+ * Only confirmed inserts owned by this test are removed, including after assertion failures.
  */
 public class ClusterNodeServiceDbTest {
 
-    private static final String BASE_DN = "ou=node,o=jans";
-    private static final int REMOVE_LIMIT = 100;
-
     private final String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    private final String baseDn = "ou=t10-" + suffix + ",ou=node,o=jans";
+    private final List<String> insertedDns = new ArrayList<>();
+    private ClusterNode foreignNode;
     private final String typeA = "t10a-" + suffix;
     private final String typeB = "t10b-" + suffix;
 
     private PersistenceEntryManager entryManager;
+    private PersistenceEntryManager scopedEntryManager;
 
     @BeforeClass
     public void createEntryManager() throws Exception {
         entryManager = SqlTestProfile.createEntryManager();
+        // SQL tables share their first-RDN key space. Scope searches explicitly so live node
+        // allocations cannot affect the test's maximum-ID lookup or foreign-node assertions.
+        scopedEntryManager = (PersistenceEntryManager) Proxy.newProxyInstance(PersistenceEntryManager.class.getClassLoader(),
+                new Class<?>[] { PersistenceEntryManager.class }, (proxy, method, args) -> {
+                    Object[] scoped = args;
+                    if (("findEntries".equals(method.getName()) || "findPagedEntries".equals(method.getName()))
+                            && args.length >= 3 && args[1] == ClusterNode.class && args[2] instanceof Filter) {
+                        scoped = args.clone();
+                        scoped[2] = Filter.createANDFilter((Filter) args[2],
+                                Filter.createSubstringFilter("dn", null, null, "," + baseDn));
+                    }
+                    try {
+                        return method.invoke(entryManager, scoped);
+                    } catch (InvocationTargetException ex) {
+                        throw ex.getCause();
+                    }
+                });
     }
 
     @AfterClass(alwaysRun = true)
@@ -61,36 +74,44 @@ public class ClusterNodeServiceDbTest {
         if (entryManager == null) {
             return;
         }
-
+        RuntimeException errors = new IllegalStateException("Failed to clean up SQL node test");
         try {
-            for (String type : new String[] { typeA, typeB }) {
-                Filter byType = Filter.createEqualityFilter(ClusterNodeService.JANS_TYPE_ATTR_NAME, type);
-                entryManager.remove(BASE_DN, ClusterNode.class, byType, REMOVE_LIMIT);
-                for (ClusterNode left : entryManager.findEntries(BASE_DN, ClusterNode.class, byType)) {
-                    entryManager.remove(left.getDn(), ClusterNode.class);
+            for (String dn : insertedDns) {
+                try {
+                    entryManager.remove(dn, ClusterNode.class);
+                } catch (RuntimeException ex) {
+                    errors.addSuppressed(ex);
                 }
             }
         } finally {
-            entryManager.destroy();
+            try {
+                entryManager.destroy();
+            } catch (RuntimeException ex) {
+                errors.addSuppressed(ex);
+            }
+        }
+        if (errors.getSuppressed().length > 0) {
+            throw errors;
         }
     }
 
     @Test
     public void twoTypesOnOneBaseDnOnDatabase() {
-        Map<String, String> otherNodes = describeNodes(findAllNodes());
-        if (!otherNodes.containsKey(dn(0))) {
-            throw new SkipException("Needs an existing node with id 0 under " + BASE_DN);
-        }
-        assertTrue(findNodes(typeA).isEmpty(), "Random type already exists: " + typeA);
-        assertTrue(findNodes(typeB).isEmpty(), "Random type already exists: " + typeB);
+        foreignNode = new ClusterNode();
+        foreignNode.setId(ThreadLocalRandom.current().nextInt(100_000_000, 1_000_000_000));
+        foreignNode.setDn(dn(foreignNode.getId()));
+        foreignNode.setType("foreign-" + suffix);
+        foreignNode.setLockKey("foreign-" + suffix);
+        foreignNode.setCreationDate(new Date());
+        foreignNode.setLastUpdate(foreignNode.getCreationDate());
+        entryManager.persist(foreignNode);
+        insertedDns.add(foreignNode.getDn());
+        foreignNode = entryManager.find(ClusterNode.class, foreignNode.getDn());
+        Map<String, String> otherNodes = describeNodes(Collections.singletonList(foreignNode));
 
-        FixedClusterNodeService serviceA = new FixedClusterNodeService(entryManager, BASE_DN, typeA, "t10-key-a-" + suffix);
-        FixedClusterNodeService serviceB = new FixedClusterNodeService(entryManager, BASE_DN, typeB, "t10-key-b-" + suffix);
-
-        int maxIdBefore = 0;
-        for (ClusterNode node : findAllNodes()) {
-            maxIdBefore = Math.max(maxIdBefore, node.getId());
-        }
+        FixedClusterNodeService serviceA = trackingService(typeA, "t10-key-a-" + suffix);
+        FixedClusterNodeService serviceB = trackingService(typeB, "t10-key-b-" + suffix);
+        int maxIdBefore = foreignNode.getId();
 
         ClusterNode nodeA = serviceA.allocate();
         ClusterNode nodeB = serviceB.allocate();
@@ -104,7 +125,8 @@ public class ClusterNodeServiceDbTest {
         assertOnlyNode(typeA, nodeA, serviceA.getLockKey());
         assertOnlyNode(typeB, nodeB, serviceB.getLockKey());
 
-        assertEquals(describeNodes(findAllNodes()), otherNodes, "Nodes of other types are unchanged");
+        assertEquals(describeNodes(Collections.singletonList(entryManager.find(ClusterNode.class, foreignNode.getDn()))),
+                otherNodes, "The seeded foreign-type node is unchanged");
     }
 
     private void assertOnlyNode(String type, ClusterNode expected, String lockKey) {
@@ -119,16 +141,22 @@ public class ClusterNodeServiceDbTest {
         return values.isEmpty() ? null : values.get(values.size() - 1);
     }
 
-    private List<ClusterNode> findAllNodes() {
-        return entryManager.findEntries(BASE_DN, ClusterNode.class, Filter.createPresenceFilter("jansNum"));
+    private FixedClusterNodeService trackingService(String type, String key) {
+        return new FixedClusterNodeService(scopedEntryManager, baseDn, type, key) {
+            @Override
+            protected void persist(ClusterNode node) {
+                super.persist(node);
+                insertedDns.add(node.getDn());
+            }
+        };
     }
 
     private List<ClusterNode> findNodes(String type) {
-        return entryManager.findEntries(BASE_DN, ClusterNode.class, Filter.createEqualityFilter(ClusterNodeService.JANS_TYPE_ATTR_NAME, type));
+        return entryManager.findEntries(baseDn, ClusterNode.class, Filter.createEqualityFilter(ClusterNodeService.JANS_TYPE_ATTR_NAME, type));
     }
 
     /**
-     * @return DN to id, type, lock key and creation date of each node, without the test's own types;
+     * @return DN to id, type, lock key and creation date of the seeded foreign node;
      *         {@code jansLastUpd} is left out because live nodes refresh it
      */
     private Map<String, String> describeNodes(List<ClusterNode> nodes) {
@@ -144,8 +172,8 @@ public class ClusterNodeServiceDbTest {
         return result;
     }
 
-    private static String dn(int id) {
-        return String.format("jansNum=%d,%s", id, BASE_DN);
+    private String dn(int id) {
+        return String.format("jansNum=%d,%s", id, baseDn);
     }
 
 }

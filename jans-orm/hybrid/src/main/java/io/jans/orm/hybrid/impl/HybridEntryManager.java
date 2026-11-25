@@ -454,6 +454,12 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
 		return persistenceEntryManager.isTransactionSupported(primaryKey);
 	}
 
+	@Override
+	public boolean isTransactionSupported(String primaryKey, String otherPrimaryKey) {
+		PersistenceEntryManager backend = getEntryManagerForDn(primaryKey);
+		return backend == getEntryManagerForDn(otherPrimaryKey) && backend.isTransactionSupported(primaryKey, otherPrimaryKey);
+	}
+
 	/**
 	 * Delegates the transaction to the backend of {@code primaryKey}. Only writes that map to the same
 	 * backend join it: one transaction cannot span several databases.

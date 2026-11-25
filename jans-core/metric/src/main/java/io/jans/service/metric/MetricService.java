@@ -163,9 +163,14 @@ public abstract class MetricService implements Serializable {
     public void add(List<MetricEntry> metricEntries, Date creationTime) {
         prepareBranch(creationTime, getString());
 
-        for (MetricEntry metricEntry : metricEntries) {
-            getEntryManager().persist(metricEntry);
+        if (metricEntries.isEmpty()) {
+            return;
         }
+        if (!getEntryManager().isAtomicBatchSupported(baseDn())) {
+            throw new IllegalStateException("Metric reporting requires atomic SQL batch persistence");
+        }
+        // The reporter advances its interval baselines only after the entire batch commits.
+        getEntryManager().persistBatch(metricEntries);
     }
 
     public void add(MetricEntry metricEntry) {

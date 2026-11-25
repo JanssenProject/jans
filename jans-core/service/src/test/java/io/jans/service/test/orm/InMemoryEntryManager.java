@@ -192,11 +192,32 @@ public class InMemoryEntryManager implements InvocationHandler {
             }
         }
 
-        return dispatch(name, types, arguments);
+        synchronized (store) {
+            return dispatch(name, types, arguments);
+        }
     }
 
     protected Object dispatch(String name, Class<?>[] types, Object[] args) {
         switch (name) {
+        case "isAtomicBatchSupported":
+        case "isTransactionSupported":
+            return PersistenceEntryManager.PERSITENCE_TYPES.sql.name().equals(persistenceType);
+        case "executeInTransaction":
+            Map<String, Object> before = new java.util.HashMap<>();
+            store.forEach((dn, entry) -> before.put(dn, copy(entry)));
+            try {
+                return ((io.jans.orm.TransactionCallback<?>) args[1]).doInTransaction();
+            } catch (Exception ex) {
+                store.clear();
+                store.putAll(before);
+                if (ex instanceof RuntimeException) {
+                    throw (RuntimeException) ex;
+                }
+                throw new IllegalStateException(ex);
+            }
+        case "findForUpdate":
+            Object locked = store.get(String.valueOf(args[1]));
+            return locked == null ? null : copy(locked);
         case "persist":
             if (types.length == 1) {
                 persist(args[0]);

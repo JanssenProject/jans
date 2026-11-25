@@ -158,7 +158,7 @@ public class ClusterLockServiceDbTest {
         assertEquals(stored.getDn(), claim.getDn());
         assertEquals(stored.getId(), task + "_1");
         assertEquals(stored.getTask(), task);
-        assertEquals(stored.getLockKey(), "map-key");
+        assertEquals(stored.getLockKey(), claim.getLockKey());
         assertEquals(stored.getNodeIdentifier(), "map-node");
         assertEquals(stored.getClusterNodeId(), Integer.valueOf(7));
         assertEquals(stored.getCreationDate().toInstant(), clock.instant());
@@ -229,6 +229,26 @@ public class ClusterLockServiceDbTest {
     }
 
     @Test
+    public void expiredSqlAcquisitionCannotChangeReplacementInSameSlot() {
+        String task = newTask();
+        MutableClock clock = newClock();
+        FixedClusterLockService owner = new FixedClusterLockService(entryManager, "same-service", clock);
+        ClusterLock old = owner.tryClaim(task, "1", LEASE).get();
+        clock.advance(LEASE);
+        assertFalse(owner.heartbeat(old));
+        assertEquals(owner.purgeExpired(task, 1), 1);
+        ClusterLock current = owner.tryClaim(task, "1", LEASE).get();
+        assertFalse(old.getLockKey().equals(current.getLockKey()));
+        assertFalse(owner.heartbeat(old));
+        assertFalse(owner.release(old, ClusterLock.STATUS_DONE, null));
+        assertFalse(owner.saveState(old, state -> "{}"));
+        assertTrue(owner.heartbeat(current));
+        assertTrue(owner.saveState(current, state -> "{}"));
+        assertTrue(owner.release(current, ClusterLock.STATUS_DONE, null));
+        assertEquals(entryManager.find(ClusterLock.class, current.getDn()).getLockKey(), current.getLockKey());
+    }
+
+    @Test
     public void stateRowRoundTrip() {
         String task = newTask();
         MutableClock clock = newClock();
@@ -237,24 +257,26 @@ public class ClusterLockServiceDbTest {
 
         assertEquals(nodeA.loadState(task), Optional.empty());
 
-        assertTrue(nodeA.saveState(task, "{\"HOURLY\":\"first\"}"));
+        ClusterLock first = nodeA.tryClaim(task, "1", LEASE).get();
+        assertTrue(nodeA.saveState(first, current -> "{\"HOURLY\":\"first\"}"));
         ClusterLock state = entryManager.find(ClusterLock.class, nodeA.buildStateDn(task));
         assertEquals(state.getStatus(), ClusterLock.STATUS_STATE);
         assertEquals(state.getDeletable(), Boolean.FALSE);
         assertNull(state.getExpirationDate());
-        assertEquals(state.getLockKey(), "state-a");
+        assertEquals(state.getLockKey(), first.getLockKey());
 
         clock.advance(Duration.ofMinutes(5));
-        assertTrue(nodeB.saveState(task, "{\"HOURLY\":\"second\"}"));
+        ClusterLock second = nodeB.tryClaim(task, "2", LEASE).get();
+        assertTrue(nodeB.saveState(second, current -> "{\"HOURLY\":\"second\"}"));
 
         assertEquals(nodeA.loadState(task), Optional.of("{\"HOURLY\":\"second\"}"));
         state = entryManager.find(ClusterLock.class, nodeA.buildStateDn(task));
-        assertEquals(state.getLockKey(), "state-b");
+        assertEquals(state.getLockKey(), second.getLockKey());
         assertEquals(state.getDeletable(), Boolean.FALSE);
         assertNull(state.getExpirationDate());
         assertEquals(state.getLastUpdate().toInstant(), clock.instant());
         assertEquals(state.getCreationDate().toInstant(), clock.instant().minus(Duration.ofMinutes(5)));
-        assertEquals(findRows(task).size(), 1);
+        assertEquals(findRows(task).size(), 3);
     }
 
     @Test
@@ -266,7 +288,7 @@ public class ClusterLockServiceDbTest {
 
         assertTrue(node.tryClaim(task, "1", Duration.ofSeconds(60)).isPresent());
         assertTrue(node.tryClaim(task, "2", Duration.ofHours(1)).isPresent());
-        assertTrue(node.saveState(task, "{}"));
+        assertTrue(node.saveState(node.find(task, "2").get(), current -> "{}"));
         assertTrue(node.tryClaim(otherTask, "1", Duration.ofSeconds(60)).isPresent());
 
         clock.advance(Duration.ofSeconds(120));

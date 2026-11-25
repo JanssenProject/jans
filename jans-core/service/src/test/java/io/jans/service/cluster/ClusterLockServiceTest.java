@@ -62,7 +62,7 @@ public class ClusterLockServiceTest {
         assertNotNull(stored);
         assertEquals(stored.getId(), TASK + "_5900000");
         assertEquals(stored.getTask(), TASK);
-        assertEquals(stored.getLockKey(), "key-a");
+        assertEquals(stored.getLockKey(), claim.get().getLockKey());
         assertEquals(stored.getNodeIdentifier(), "host-a");
         assertEquals(stored.getClusterNodeId(), Integer.valueOf(3));
         assertEquals(stored.getStatus(), ClusterLock.STATUS_RUNNING);
@@ -77,18 +77,19 @@ public class ClusterLockServiceTest {
     @Test
     public void storeKeepsCopiesNotCallerObjects() {
         ClusterLock claim = nodeA.tryClaim(TASK, "1", LEASE).get();
+        String token = claim.getLockKey();
         claim.setLockKey("changed");
 
-        assertEquals(store.get(claim.getDn(), ClusterLock.class).getLockKey(), "key-a");
+        assertEquals(store.get(claim.getDn(), ClusterLock.class).getLockKey(), token);
     }
 
     @Test
     public void secondClaimOfSameSlotIsRefused() {
-        assertTrue(nodeA.tryClaim(TASK, "1", LEASE).isPresent());
+        ClusterLock first = nodeA.tryClaim(TASK, "1", LEASE).get();
 
         assertFalse(nodeB.tryClaim(TASK, "1", LEASE).isPresent());
         assertFalse(nodeA.tryClaim(TASK, "1", LEASE).isPresent());
-        assertEquals(store.get(nodeA.buildClaimDn(TASK, "1"), ClusterLock.class).getLockKey(), "key-a");
+        assertEquals(store.get(nodeA.buildClaimDn(TASK, "1"), ClusterLock.class).getLockKey(), first.getLockKey());
 
         assertTrue(nodeB.tryClaim(TASK, "2", LEASE).isPresent());
         assertTrue(nodeB.tryClaim("other-task", "1", LEASE).isPresent());
@@ -160,7 +161,7 @@ public class ClusterLockServiceTest {
         assertEquals(stored.getData(), "{\"rows\":5}");
         assertEquals(stored.getLastUpdate().toInstant(), later);
         assertEquals(stored.getExpirationDate().toInstant(), later.plus(ClusterLockService.RELEASED_RETENTION));
-        assertEquals(stored.getLockKey(), "key-a");
+        assertEquals(stored.getLockKey(), claim.getLockKey());
         assertFalse(nodeA.isActive(stored, later));
         assertFalse(nodeA.heartbeat(claim));
     }
@@ -197,21 +198,21 @@ public class ClusterLockServiceTest {
     public void findReturnsClaimOrEmpty() {
         assertFalse(nodeA.find(TASK, "1").isPresent());
 
-        nodeA.tryClaim(TASK, "1", LEASE);
+        ClusterLock first = nodeA.tryClaim(TASK, "1", LEASE).get();
 
         Optional<ClusterLock> found = nodeB.find(TASK, "1");
         assertTrue(found.isPresent());
-        assertEquals(found.get().getLockKey(), "key-a");
+        assertEquals(found.get().getLockKey(), first.getLockKey());
     }
 
     @Test
-    public void findReturnsEmptyOnReadError() {
+    public void findPropagatesReadError() {
         nodeA.tryClaim(TASK, "1", LEASE);
         store.setFailureInjector((method, args) -> "find".equals(method)
                 ? new EntryPersistenceException("Failed to find entry", new SearchException("query failed", new RuntimeException("io")))
                 : null);
 
-        assertFalse(nodeA.find(TASK, "1").isPresent());
+        expectThrows(EntryPersistenceException.class, () -> nodeA.find(TASK, "1"));
     }
 
     @Test
@@ -220,7 +221,7 @@ public class ClusterLockServiceTest {
         nodeA.release(released, ClusterLock.STATUS_DONE, null);
         nodeA.tryClaim(TASK, "2", LEASE);
         nodeA.tryClaim("other-task", "1", LEASE);
-        assertTrue(nodeA.saveState(TASK, "{}"));
+        assertTrue(nodeA.saveState(nodeA.find(TASK, "2").get(), current -> "{}"));
 
         clock.advance(Duration.ofMinutes(30));
         nodeA.tryClaim(TASK, "3", LEASE);
@@ -256,7 +257,8 @@ public class ClusterLockServiceTest {
     public void stateRowIsCreatedUpdatedAndNeverExpires() {
         assertEquals(nodeA.loadState(TASK), Optional.empty());
 
-        assertTrue(nodeA.saveState(TASK, "{\"HOURLY\":\"2026-11-24T09:00:00Z\"}"));
+        ClusterLock first = nodeA.tryClaim(TASK, "1", LEASE).get();
+        assertTrue(nodeA.saveState(first, current -> "{\"HOURLY\":\"2026-11-24T09:00:00Z\"}"));
         ClusterLock state = store.get("jansId=" + TASK + "_state,ou=node,o=jans", ClusterLock.class);
         assertNotNull(state);
         assertEquals(state.getStatus(), ClusterLock.STATUS_STATE);
@@ -265,41 +267,36 @@ public class ClusterLockServiceTest {
         assertNull(state.getTtl());
 
         clock.advance(Duration.ofHours(1));
-        assertTrue(nodeB.saveState(TASK, "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
+        ClusterLock second = nodeB.tryClaim(TASK, "2", LEASE).get();
+        assertTrue(nodeB.saveState(second, current -> "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
 
         assertEquals(nodeA.loadState(TASK), Optional.of("{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
         state = store.get(nodeA.buildStateDn(TASK), ClusterLock.class);
-        assertEquals(state.getLockKey(), "key-b");
+        assertEquals(state.getLockKey(), second.getLockKey());
         assertEquals(state.getCreationDate().toInstant(), START);
         assertNull(state.getExpirationDate());
     }
 
     @Test
-    public void saveStateMergesWhenAnotherNodeCreatedTheRow() {
-        int[] findCalls = new int[1];
-        store.setFailureInjector((method, args) -> {
-            if ("find".equals(method) && (findCalls[0]++ == 0)) {
-                // The first read sees no row; another node inserts it before this node does
-                nodeB.saveState(TASK, "{\"by\":\"b\"}");
-                return InMemoryEntryManager.missing(String.valueOf(args[1]));
-            }
-            return null;
-        });
-
-        assertTrue(nodeA.saveState(TASK, "{\"by\":\"a\"}"));
+    public void failedStateRereadLeavesStoredValueUnchanged() {
+        ClusterLock claim = nodeA.tryClaim(TASK, "1", LEASE).get();
+        assertTrue(nodeA.saveState(claim, current -> "{\"by\":\"a\"}"));
+        store.setFailureInjector((method, args) -> "findForUpdate".equals(method)
+                && String.valueOf(args[1]).equals(nodeA.buildStateDn(TASK))
+                ? new EntryPersistenceException("state read failed") : null);
+        assertFalse(nodeA.saveState(claim, current -> "{}"));
         store.setFailureInjector(null);
-
         assertEquals(nodeA.loadState(TASK), Optional.of("{\"by\":\"a\"}"));
     }
 
     @Test
     public void loadStateThrowsOnReadError() {
-        store.setFailureInjector((method, args) -> "find".equals(method)
+        ClusterLock claim = nodeA.tryClaim(TASK, "1", LEASE).get();
+        store.setFailureInjector((method, args) -> "find".equals(method) || "findForUpdate".equals(method)
                 ? new EntryPersistenceException("Failed to find entry", new SearchException("query failed", new RuntimeException("io")))
                 : null);
-
         expectThrows(EntryPersistenceException.class, () -> nodeA.loadState(TASK));
-        assertFalse(nodeA.saveState(TASK, "{}"));
+        assertFalse(nodeA.saveState(claim, current -> "{}"));
     }
 
     @Test
@@ -323,16 +320,58 @@ public class ClusterLockServiceTest {
             expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(task, "1", LEASE));
         }
 
-        String[] badSlots = { null, "", "1_2", "1,2", "1=2", " 1", "state" };
+        String[] badSlots = { null, "", "1_2", "1,2", "1=2", " 1", "state", "STATE", "State" };
         for (String slot : badSlots) {
             expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, slot, LEASE));
         }
 
         expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, "1", Duration.ZERO));
+        expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, "1", Duration.ofMillis(999)));
+        expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, "1", Duration.ofNanos(1)));
+        expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, "1", Duration.ofSeconds(-1)));
         expectThrows(IllegalArgumentException.class, () -> nodeA.tryClaim(TASK, "1", null));
         assertEquals(store.getCallCount("persist"), 0);
 
         assertTrue(nodeA.tryClaim("a.b-c_d", "2026-11-24T10.00Z", LEASE).isPresent());
+        assertTrue(nodeA.tryClaim(TASK, "1", Duration.ofSeconds(1)).isPresent());
+    }
+
+    @Test
+    public void expiredClaimCannotRenewOrWriteState() {
+        ClusterLock claim = nodeA.tryClaim(TASK, "1", LEASE).get();
+        clock.advance(LEASE);
+        assertFalse(nodeA.heartbeat(claim));
+        assertFalse(nodeA.saveState(claim, current -> "{}"));
+        assertFalse(nodeA.release(claim, ClusterLock.STATUS_DONE, null));
+        assertEquals(store.getCallCount("merge"), 0);
+    }
+
+    @Test
+    public void oldHandleCannotChangeReclaimedSlotOfSameService() {
+        ClusterLock old = nodeA.tryClaim(TASK, "1", LEASE).get();
+        clock.advance(LEASE);
+        assertEquals(nodeA.purgeExpired(TASK, 1), 1);
+        ClusterLock current = nodeA.tryClaim(TASK, "1", LEASE).get();
+        assertFalse(old.getLockKey().equals(current.getLockKey()));
+        assertFalse(nodeA.heartbeat(old));
+        assertFalse(nodeA.release(old, ClusterLock.STATUS_DONE, null));
+        assertFalse(nodeA.saveState(old, state -> "{}"));
+        assertTrue(nodeA.heartbeat(current));
+        assertTrue(nodeA.release(current, ClusterLock.STATUS_DONE, null));
+    }
+
+    @Test
+    public void protectedWriteRollsBackIfLeaseExpiresBeforeCommit() {
+        ClusterLock claim = nodeA.tryClaim(TASK, "1", LEASE).get();
+        String target = nodeA.buildStateDn(TASK);
+        expectThrows(IllegalStateException.class, () -> nodeA.withActiveClaim(claim, store.getEntryManager(), target, () -> {
+            ClusterLock state = new ClusterLock();
+            state.setDn(target);
+            store.getEntryManager().persist(state);
+            clock.advance(LEASE);
+            return null;
+        }));
+        assertFalse(nodeA.loadState(TASK).isPresent());
     }
 
     @Test
@@ -378,7 +417,7 @@ public class ClusterLockServiceTest {
         assertEquals(store.getCallCount("persist"), 0);
 
         store.setPersistenceType(PersistenceEntryManager.PERSITENCE_TYPES.ldap.name());
-        assertTrue(nodeA.tryClaim(TASK, "1", LEASE).isPresent());
+        assertFalse(nodeA.tryClaim(TASK, "1", LEASE).isPresent());
         assertFalse(nodeB.tryClaim(TASK, "1", LEASE).isPresent());
     }
 

@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.lang.reflect.Proxy;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
@@ -35,6 +36,11 @@ import io.jans.model.metric.MetricType;
 import io.jans.model.metric.counter.CounterMetricData;
 import io.jans.model.metric.counter.CounterMetricEntry;
 import io.jans.model.metric.ldap.MetricEntry;
+import io.jans.model.metric.ldap.MetricDataEntry;
+import io.jans.model.metric.MetricAggregationType;
+import io.jans.model.metric.aggregation.AggregateData;
+import io.jans.service.metric.aggregation.MetricAggregator;
+import io.jans.service.metric.aggregation.PeriodMath;
 import io.jans.model.metric.timer.TimerMetricData;
 import io.jans.model.metric.timer.TimerMetricEntry;
 import io.jans.orm.PersistenceEntryManager;
@@ -56,6 +62,7 @@ public class PersistenceEntryReporterTest {
         private final List<MetricRegistration> registrations = new ArrayList<>();
         private final List<List<MetricEntry>> writes = new ArrayList<>();
         private boolean failNextAdd;
+        private PersistenceEntryManager persistence;
 
         @Override
         public Collection<MetricRegistration> getRegisteredMetrics() {
@@ -64,6 +71,10 @@ public class PersistenceEntryReporterTest {
 
         @Override
         public void add(List<MetricEntry> metricEntries, Date creationTime) {
+            if (persistence != null) {
+                super.add(metricEntries, creationTime);
+                return;
+            }
             if (failNextAdd) {
                 failNextAdd = false;
                 throw new IllegalStateException("Simulated write failure");
@@ -98,7 +109,7 @@ public class PersistenceEntryReporterTest {
 
         @Override
         public PersistenceEntryManager getEntryManager() {
-            return null;
+            return persistence;
         }
     }
 
@@ -175,6 +186,64 @@ public class PersistenceEntryReporterTest {
         assertEquals(5, counterData(0, COUNTER_A).getCount());
         assertEquals(12, counterData(1, COUNTER_A).getCount());
         assertEquals(12, counterData(2, COUNTER_A).getCount());
+    }
+
+    @Test
+    public void secondInsertFailureRollsBackBatchAndRetryCountsEventsOnce() throws Exception {
+        Counter first = counter(COUNTER_A);
+        Counter second = counter(COUNTER_B);
+        first.inc(5);
+        second.inc(7);
+        List<MetricEntry> stored = new ArrayList<>();
+        boolean[] failSecond = { true };
+        metricService.persistence = (PersistenceEntryManager) Proxy.newProxyInstance(PersistenceEntryManager.class.getClassLoader(),
+                new Class<?>[] { PersistenceEntryManager.class }, (proxy, method, args) -> {
+                    switch (method.getName()) {
+                    case "hasBranchesSupport":
+                        return false;
+                    case "isAtomicBatchSupported":
+                        return true;
+                    case "persistBatch":
+                        int before = stored.size();
+                        try {
+                            for (Object entry : (List<?>) args[0]) {
+                                if (failSecond[0] && stored.size() == before + 1) {
+                                    failSecond[0] = false;
+                                    throw new IllegalStateException("Second insert failed");
+                                }
+                                stored.add((MetricEntry) entry);
+                            }
+                        } catch (RuntimeException failure) {
+                            stored.subList(before, stored.size()).clear();
+                            throw failure;
+                        }
+                        return null;
+                    default:
+                        throw new AssertionError("Unexpected persistence call: " + method.getName());
+                    }
+                });
+
+        assertThrows(IllegalStateException.class, this::report);
+        assertTrue(stored.isEmpty(), "the first insert rolls back with the second");
+        report();
+        assertEquals(2, stored.size());
+        List<MetricDataEntry> raw = new ArrayList<>();
+        for (MetricEntry entry : stored) {
+            MetricDataEntry row = new MetricDataEntry();
+            row.setId(entry.getId());
+            row.setApplicationType(entry.getApplicationType());
+            row.setMetricType(entry.getMetricType());
+            row.setMetricSubType(entry.getMetricSubType());
+            row.setNodeIdentifier(entry.getNodeIdentifier());
+            row.setEndDate(entry.getEndDate());
+            row.setData(new ObjectMapper().writeValueAsString(((CounterMetricEntry) entry).getMetricData()));
+            raw.add(row);
+        }
+        MetricAggregator aggregator = new MetricAggregator(metricService.baseDn(), "test-node", null);
+        long total = aggregator.aggregateRaw(raw, PeriodMath.bucketContaining(MetricAggregationType.HOURLY,
+                raw.get(0).getEndDate().toInstant()), true, new Date()).stream()
+                .map(entry -> MetricAggregator.readAggregateData(entry.getData())).mapToLong(AggregateData::getCount).sum();
+        assertEquals(12, total);
     }
 
     @Test

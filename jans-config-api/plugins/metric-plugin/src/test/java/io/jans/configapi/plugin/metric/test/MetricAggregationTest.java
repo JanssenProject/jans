@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response.Status;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.testng.annotations.Test;
@@ -69,7 +70,13 @@ public class MetricAggregationTest extends MetricBaseTest {
                 JsonNode data = entry.get("data");
                 if (data != null && data.isTextual()) {
                     String text = data.asText().trim();
-                    assertFalse(text.startsWith("{"), "data is an escaped JSON string: " + text);
+                    JsonNode parsed;
+                    try {
+                        parsed = new ObjectMapper().enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS).readTree(text);
+                    } catch (JsonProcessingException malformed) {
+                        continue; // Damaged JSON is returned as a string by the endpoint.
+                    }
+                    assertFalse(parsed != null && parsed.isObject(), "data is an escaped JSON string: " + text);
                 }
             }
         } catch (JsonProcessingException e) {

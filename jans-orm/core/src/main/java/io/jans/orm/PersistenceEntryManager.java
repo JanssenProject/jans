@@ -174,6 +174,11 @@ public interface PersistenceEntryManager extends EntityManager {
 		return false;
 	}
 
+	/** Whether both DNs participate in the same transaction, including behind a hybrid manager. */
+	default boolean isTransactionSupported(String primaryKey, String otherPrimaryKey) {
+		return isTransactionSupported(primaryKey) && isTransactionSupported(otherPrimaryKey);
+	}
+
 	/**
 	 * Runs {@code callback} in ONE database transaction. Every read and write this entry manager performs
 	 * on the calling thread while the callback runs joins the transaction. The transaction commits when

@@ -47,6 +47,11 @@ public class LockClusterLockService extends ClusterLockService {
 	@Inject
 	private MetricService metricService;
 
+	@Override
+	protected io.jans.orm.PersistenceEntryManager getEntryManager() {
+		return metricService.getEntryManager();
+	}
+
 	/**
 	 * The Lock static configuration has no {@code node} entry. The node branch sits under the same root
 	 * as the configuration branch, so it is derived from {@code baseDn.configuration}.

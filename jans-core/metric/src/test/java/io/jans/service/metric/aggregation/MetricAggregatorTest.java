@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -284,6 +285,48 @@ class MetricAggregatorTest {
     }
 
     @Test
+    void rawTimerStatisticsAreNormalizedToMilliseconds() throws Exception {
+        String milliseconds = timer(1, 1L, 1, 9, 3, 4, 5, 6, 7, 8, 9);
+        ObjectNode seconds = (ObjectNode) defaultMapper.readTree(milliseconds);
+        seconds.put("durationUnit", "seconds");
+        List<MetricDataEntry> rows = Arrays.asList(
+                raw("h1", TIMER_TYPE, null, inHour(10), seconds.toString()),
+                raw("h2", TIMER_TYPE, null, inHour(10), milliseconds));
+
+        assertMixedUnitTimerStatistics((TimerAggregateData) data(only(aggregator.aggregateRaw(rows, HOUR, true, CREATED))));
+    }
+
+    @Test
+    void childTimerStatisticsAreNormalizedToMilliseconds() throws Exception {
+        String milliseconds = timer(1, 1L, 1, 9, 3, 4, 5, 6, 7, 8, 9);
+        MetricAggregationEntry first = only(aggregator.aggregateRaw(Collections.singletonList(
+                raw("h1", TIMER_TYPE, null, inHour(10), milliseconds)), HOUR, true, CREATED));
+        ObjectNode seconds = (ObjectNode) defaultMapper.readTree(first.getData());
+        seconds.put("durationUnit", "seconds");
+        first.setData(seconds.toString());
+        PeriodBucket next = PeriodMath.next(HOUR);
+        MetricAggregationEntry second = only(aggregator.aggregateRaw(Collections.singletonList(
+                raw("h1", TIMER_TYPE, null, next.getStart().plusSeconds(60), milliseconds)), next, true, CREATED));
+
+        assertMixedUnitTimerStatistics((TimerAggregateData) data(only(
+                aggregator.rollup(Arrays.asList(first, second), DAY, DAY.getEnd(), CREATED))));
+    }
+
+    private static void assertMixedUnitTimerStatistics(TimerAggregateData data) {
+        assertEquals("milliseconds", data.getDurationUnit());
+        assertEquals(2, data.getCount());
+        assertEquals(1.0, data.getMin());
+        assertEquals(9000.0, data.getMax());
+        assertEquals(1501.5, data.getMean());
+        assertEquals(2002.0, data.getMedian());
+        assertEquals(2502.5, data.getValue75thPercentile());
+        assertEquals(3003.0, data.getValue95thPercentile());
+        assertEquals(3503.5, data.getValue98thPercentile());
+        assertEquals(4004.0, data.getValue99thPercentile());
+        assertEquals(4504.5, data.getValue999thPercentile());
+    }
+
+    @Test
     void timerRowsWithoutEventsDoNotAffectStatistics() throws Exception {
         List<MetricDataEntry> rows = Arrays.asList(
                 raw("h1", TIMER_TYPE, null, inHour(10), timer(10, 10L, 2, 20, 5, 5, 5, 5, 5, 5, 5)),
@@ -341,11 +384,24 @@ class MetricAggregatorTest {
 
     @Test
     void idWithoutSubTypeUsesEmptyString() {
-        String expected = UUID.nameUUIDFromBytes(("DAILY|app|type||" + DAY.getStart().toEpochMilli()).getBytes(StandardCharsets.UTF_8))
+        String expected = UUID.nameUUIDFromBytes(("5:DAILY3:app4:type0:13:" + DAY.getStart().toEpochMilli()).getBytes(StandardCharsets.UTF_8))
                 .toString();
         assertEquals(expected, MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "type", null, DAY.getStart()));
         assertEquals(expected, MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "type", "", DAY.getStart()));
         assertNotEquals(expected, MetricAggregator.aggregateId(MetricAggregationType.HOURLY, "app", "type", null, DAY.getStart()));
+    }
+
+    @Test
+    void idSeparatesFieldsContainingDelimiters() {
+        String id = MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a|b", "c", DAY.getStart());
+        assertNotEquals(id, MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a", "b|c", DAY.getStart()));
+        assertEquals(id, MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a|b", "c", DAY.getStart()));
+        assertNotEquals(
+                MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app|a", "b", "c", DAY.getStart()),
+                MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a|b", "c", DAY.getStart()));
+        assertNotEquals(
+                MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a:1", "b", DAY.getStart()),
+                MetricAggregator.aggregateId(MetricAggregationType.DAILY, "app", "a", "1:b", DAY.getStart()));
     }
 
     @Test
@@ -498,6 +554,35 @@ class MetricAggregatorTest {
     }
 
     @Test
+    void unreadableChildPreventsOnlyItsKeyFromBeingComplete() throws Exception {
+        List<MetricAggregationEntry> children = hourlyCounters(-1, -1);
+        children.get(0).setData("{broken");
+        MetricAggregationEntry otherKey = only(aggregator.aggregateRaw(Collections.singletonList(
+                raw("h1", "other", null, inHour(10), counter(2, 2))), HOUR, true, CREATED));
+        children.add(otherKey);
+        List<MetricAggregationEntry> daily = aggregator.rollup(children, DAY, DAY.getEnd(), CREATED);
+        assertEquals(2, daily.size());
+        for (MetricAggregationEntry entry : daily) {
+            assertEquals("other".equals(entry.getMetricType()), data(entry).isComplete());
+        }
+    }
+
+    @Test
+    void retentionUsesUtcDaysAcrossDaylightSavingChange() throws Exception {
+        TimeZone original = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"));
+            Date creation = Date.from(at("2026-03-07T12:00:00Z"));
+            MetricAggregationEntry entry = only(aggregator.aggregateRaw(Collections.singletonList(
+                    raw("h1", COUNTER_TYPE, null, inHour(10), counter(2, 2))), HOUR, true, creation));
+            assertEquals(creation.toInstant().plus(Duration.ofDays(90)), entry.getExpirationDate().toInstant());
+            assertEquals(90 * 86400, entry.getTtl());
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
+
+    @Test
     void dailyRollupIsIncompleteWhenAChildIsIncomplete() throws Exception {
         List<MetricAggregationEntry> children = hourlyCounters(-1, 23);
 
@@ -571,6 +656,22 @@ class MetricAggregatorTest {
         assertFalse(monthly.isComplete());
         assertEquals(7 * 24, monthly.getSourceRows());
         assertTrue(data(only(aggregator.rollup(daily, month, month.getEnd(), CREATED))).isComplete());
+    }
+
+    @Test
+    void monthlyRollupIsIncompleteWhenRetentionCutsThroughFirstDay() throws Exception {
+        MetricAggregationConfiguration configuration = new MetricAggregationConfiguration();
+        configuration.setKeepDailyDays(30);
+        MetricAggregator shortRetention = new MetricAggregator(METRIC_BASE_DN, COMPUTING_NODE, configuration);
+        List<MetricAggregationEntry> daily = aggregator.rollup(hourlyCounters(-1, -1), DAY, DAY.getEnd(), CREATED);
+        PeriodBucket month = PeriodMath.bucketContaining(MetricAggregationType.MONTHLY, DAY.getStart());
+        Instant boundary = month.getStart().plus(Duration.ofDays(30));
+
+        assertTrue(data(only(shortRetention.rollup(daily, month, month.getEnd(), Date.from(boundary)))).isComplete());
+        assertFalse(data(only(shortRetention.rollup(daily, month, month.getEnd(), Date.from(boundary.plusMillis(1)))))
+                .isComplete());
+        assertFalse(data(only(shortRetention.rollup(daily, month, month.getEnd(), Date.from(boundary.plus(Duration.ofDays(1))))))
+                .isComplete());
     }
 
     @Test

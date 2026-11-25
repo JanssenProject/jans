@@ -28,6 +28,12 @@ public class ClusterLockService extends io.jans.service.cluster.ClusterLockServi
     @Inject
     private MetricService metricService;
 
+	@Override
+	protected io.jans.orm.PersistenceEntryManager getEntryManager() {
+		// Claims, state and aggregates must use one connection pool for atomic fenced writes.
+		return metricService.getEntryManager();
+	}
+
     @Override
     public String getBaseDn() {
         return staticConfiguration.getBaseDn().getNode();

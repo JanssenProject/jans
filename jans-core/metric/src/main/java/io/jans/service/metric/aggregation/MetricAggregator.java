@@ -20,24 +20,27 @@ import io.jans.model.metric.aggregation.TimerAggregateData;
 import io.jans.model.metric.ldap.MetricAggregationEntry;
 import io.jans.model.metric.ldap.MetricDataEntry;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Pure, deterministic aggregation of metric rows into {@code jansMetricAggregation} entries. It does no
@@ -55,6 +58,8 @@ import java.util.UUID;
  * with count 0. Rows before the period only provide previous counts.</li>
  * <li>Inputs are sorted by a fixed key before any floating-point sum, so the same input in any order
  * gives byte-identical {@code jansData} and the same IDs.</li>
+ * <li>Timer duration statistics from raw rows and child aggregates are normalized to milliseconds
+ * before they are combined; output {@code durationUnit} is always {@code milliseconds}.</li>
  * <li>Periods without rows produce no entry. A period with rows whose counts are all 0 produces an entry
  * with count 0.</li>
  * <li>An entry has {@code jansStartDate} = period start and {@code jansEndDate} = period end minus 1 ms,
@@ -74,8 +79,6 @@ public class MetricAggregator {
 
     public static final String AGGREGATION_OU = "aggregation";
     public static final int MAX_DN_LENGTH = 128;
-
-    private static final String ID_SEPARATOR = "|";
 
     private static final ObjectMapper JSON_MAPPER = JsonMapper.builder()
             .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
@@ -145,16 +148,20 @@ public class MetricAggregator {
     }
 
     /**
-     * Fixed ID of an aggregate: a name-based UUID of
-     * {@code aggregationType|applicationType|metricType|metricSubType-or-empty|periodStartEpochMillis}
-     * in UTF-8. Computing the same period again gives the same ID, so a re-run overwrites the same row.
+     * Fixed ID of an aggregate: a name-based UUID of the aggregation type, application type, metric
+     * type, subtype (null treated as empty), and period start epoch milliseconds. Each field is prefixed
+     * with its character length and a colon, then the name is encoded in UTF-8. Computing the same
+     * period again gives the same ID, so a re-run overwrites the same row.
      */
     public static String aggregateId(MetricAggregationType aggregationType, String applicationType, String metricType,
             String metricSubType, Instant periodStart) {
-        String name = aggregationType.getValue() + ID_SEPARATOR + StringUtils.defaultString(applicationType) + ID_SEPARATOR
-                + StringUtils.defaultString(metricType) + ID_SEPARATOR + StringUtils.defaultString(metricSubType)
-                + ID_SEPARATOR + periodStart.toEpochMilli();
-        return UUID.nameUUIDFromBytes(name.getBytes(StandardCharsets.UTF_8)).toString();
+        StringBuilder name = new StringBuilder();
+        for (String field : new String[] { aggregationType.getValue(), StringUtils.defaultString(applicationType),
+                StringUtils.defaultString(metricType), StringUtils.defaultString(metricSubType),
+                Long.toString(periodStart.toEpochMilli()) }) {
+            name.append(field.length()).append(':').append(field);
+        }
+        return UUID.nameUUIDFromBytes(name.toString().getBytes(StandardCharsets.UTF_8)).toString();
     }
 
     /**
@@ -295,16 +302,53 @@ public class MetricAggregator {
         }
         rawRows.sort(RAW_ROW_ORDER);
 
-        Map<SeriesKey, Long> previousCounts = new HashMap<>();
-        Map<AggregateKey, Accumulator> accumulators = new TreeMap<>();
+        RawAggregation aggregation = newRawAggregation(bucket, complete, creationDate);
         for (RawRow row : rawRows) {
+            aggregation.addRow(row);
+        }
+        return aggregation.finish();
+    }
+
+    /** Starts a bounded-memory aggregation. Pages must be ordered by end date, then row ID per series. */
+    public RawAggregation newRawAggregation(PeriodBucket bucket, boolean complete, Date creationDate) {
+        return new RawAggregation(bucket, complete, creationDate);
+    }
+
+    public final class RawAggregation {
+        private final PeriodBucket bucket;
+        private final boolean complete;
+        private final Date creationDate;
+        private final Map<SeriesKey, Long> previousCounts = new HashMap<>();
+        private final Set<SeriesKey> startedSeries = new HashSet<>();
+        private final Map<AggregateKey, Accumulator> accumulators = new TreeMap<>();
+
+        private RawAggregation(PeriodBucket bucket, boolean complete, Date creationDate) {
+            this.bucket = Objects.requireNonNull(bucket, "bucket");
+            this.complete = complete;
+            this.creationDate = Objects.requireNonNull(creationDate, "creationDate");
+        }
+
+        public void addRows(Collection<MetricDataEntry> rows) {
+            for (MetricDataEntry entry : rows) {
+                RawRow row = RawRow.of(entry);
+                if (row != null && row.entry.getEndDate().toInstant().isBefore(bucket.getEnd())) {
+                    addRow(row);
+                }
+            }
+        }
+
+        private void addRow(RawRow row) {
             SeriesKey seriesKey = new SeriesKey(row.host, row.key);
+            if (row.entry.getEndDate().toInstant().isBefore(bucket.getStart()) && startedSeries.contains(seriesKey)) {
+                return;
+            }
             Long previousCount = previousCounts.put(seriesKey, row.count);
 
             if (!bucket.contains(row.entry.getEndDate().toInstant())) {
-                continue;
+                return;
             }
 
+            startedSeries.add(seriesKey);
             long delta;
             boolean legacy;
             if (row.intervalCount != null) {
@@ -318,19 +362,21 @@ public class MetricAggregator {
             Accumulator accumulator = accumulators.computeIfAbsent(row.key, k -> new Accumulator(row.kind));
             if (!accumulator.kind.equals(row.kind)) {
                 LOG.debug("Skipping metric row of kind {} for key {} of kind {}", row.kind, row.key, accumulator.kind);
-                continue;
+                return;
             }
             accumulator.addRaw(row, delta, legacy);
         }
 
-        List<MetricAggregationEntry> result = new ArrayList<>();
-        for (Map.Entry<AggregateKey, Accumulator> item : accumulators.entrySet()) {
-            Accumulator accumulator = item.getValue();
-            AggregateData data = accumulator.build(bucket, complete, accumulator.hosts.size());
-            result.add(buildEntry(item.getKey(), bucket, data, creationDate));
-        }
+        public List<MetricAggregationEntry> finish() {
+            List<MetricAggregationEntry> result = new ArrayList<>();
+            for (Map.Entry<AggregateKey, Accumulator> item : accumulators.entrySet()) {
+                Accumulator accumulator = item.getValue();
+                AggregateData data = accumulator.build(bucket, complete, accumulator.hosts.size());
+                result.add(buildEntry(item.getKey(), bucket, data, creationDate));
+            }
 
-        return result;
+            return result;
+        }
     }
 
     /**
@@ -340,7 +386,8 @@ public class MetricAggregator {
      *
      * <p>{@code complete} is {@code true} when {@code childWatermark} is at or after the end of the period
      * (the source level has been processed for the whole period; periods without children are empty) and
-     * every child is complete.</p>
+     * every child is complete. Monthly periods must also lie wholly within daily source retention;
+     * otherwise missing expired children cannot be distinguished from empty days.</p>
      *
      * @param children       aggregates of {@link #sourceLevel} whose {@code jansStartDate} lies in the period
      * @param bucket         the period; its type is the target level
@@ -356,6 +403,7 @@ public class MetricAggregator {
         MetricAggregationType sourceLevel = sourceLevel(bucket.getType());
 
         List<ChildRow> childRows = new ArrayList<>();
+        Set<AggregateKey> unreadableKeys = new HashSet<>();
         if (children != null) {
             for (MetricAggregationEntry child : children) {
                 if (child.getAggregationType() != sourceLevel) {
@@ -367,6 +415,7 @@ public class MetricAggregator {
                 }
                 AggregateData data = readAggregateData(child.getData());
                 if (data == null) {
+                    unreadableKeys.add(new AggregateKey(child.getApplicationType(), child.getMetricType(), child.getMetricSubType()));
                     LOG.debug("Skipping aggregate with unreadable data: {}", child.getDn());
                     continue;
                 }
@@ -375,7 +424,8 @@ public class MetricAggregator {
         }
         childRows.sort(CHILD_ROW_ORDER);
 
-        boolean sourceProcessed = childWatermark != null && !childWatermark.isBefore(bucket.getEnd());
+        boolean sourceProcessed = childWatermark != null && !childWatermark.isBefore(bucket.getEnd())
+                && (bucket.getType() != MetricAggregationType.MONTHLY || hasRetainedDailySource(bucket, creationDate.toInstant()));
 
         Map<AggregateKey, Accumulator> accumulators = new TreeMap<>();
         for (ChildRow row : childRows) {
@@ -390,12 +440,20 @@ public class MetricAggregator {
         List<MetricAggregationEntry> result = new ArrayList<>();
         for (Map.Entry<AggregateKey, Accumulator> item : accumulators.entrySet()) {
             Accumulator accumulator = item.getValue();
-            boolean complete = sourceProcessed && accumulator.allChildrenComplete;
+            boolean complete = sourceProcessed && accumulator.allChildrenComplete && !unreadableKeys.contains(item.getKey());
             AggregateData data = accumulator.build(bucket, complete, accumulator.maxChildNodes);
             result.add(buildEntry(item.getKey(), bucket, data, creationDate));
         }
 
         return result;
+    }
+
+    /**
+     * Whether all daily children of a period are still within retention at read time. Keep the exact
+     * cutoff: rounding it down to a day would admit a first day whose rows may already have expired.
+     */
+    boolean hasRetainedDailySource(PeriodBucket bucket, Instant readTime) {
+        return !bucket.getStart().isBefore(readTime.minus(Duration.ofDays(configuration.getKeepDailyDays())));
     }
 
     static long legacyDelta(long count, Long previousCount) {
@@ -422,9 +480,9 @@ public class MetricAggregator {
         entry.setData(toJson(data));
         entry.setNodeIdentifier(nodeIdentifier);
 
-        Date expirationDate = DateUtils.addDays(creationDate, keepDays(type));
-        entry.setExpirationDate(expirationDate);
-        entry.setTtl((int) ((expirationDate.getTime() - creationDate.getTime()) / 1000L));
+        Instant expiration = creationDate.toInstant().plus(Duration.ofDays(keepDays(type)));
+        entry.setExpirationDate(Date.from(expiration));
+        entry.setTtl(Math.toIntExact(Duration.between(creationDate.toInstant(), expiration).getSeconds()));
         entry.setDeletable(true);
 
         return entry;
@@ -576,7 +634,6 @@ public class MetricAggregator {
         private double weighted98th;
         private double weighted99th;
         private double weighted999th;
-        private String durationUnit;
 
         private Accumulator(String kind) {
             this.kind = kind;
@@ -593,11 +650,11 @@ public class MetricAggregator {
             hosts.add(StringUtils.defaultString(row.host));
 
             if (isTimer()) {
-                if (durationUnit == null) {
-                    durationUnit = row.data.path("durationUnit").asText(null);
-                }
                 if (delta > 0) {
-                    addTimerStats(delta, row.stat("min"), row.stat("max"), row.stat("mean"), row.stat("median"),
+                    // intervalCount supplies the weight, not interval-local duration samples.
+                    // These reservoir extrema remain estimates under TimerAggregateData.approximate.
+                    addTimerStats(delta, row.data.path("durationUnit").asText(null),
+                            row.stat("min"), row.stat("max"), row.stat("mean"), row.stat("median"),
                             row.stat("value75thPercentile"), row.stat("value95thPercentile"), row.stat("value98thPercentile"),
                             row.stat("value99thPercentile"), row.stat("value999thPercentile"));
                 }
@@ -613,11 +670,8 @@ public class MetricAggregator {
 
             if (isTimer()) {
                 TimerAggregateData timer = (TimerAggregateData) data;
-                if (durationUnit == null) {
-                    durationUnit = timer.getDurationUnit();
-                }
                 if (timer.getCount() > 0 && timer.getMin() != null) {
-                    addTimerStats(timer.getCount(), timer.getMin(), value(timer.getMax()), value(timer.getMean()),
+                    addTimerStats(timer.getCount(), timer.getDurationUnit(), timer.getMin(), value(timer.getMax()), value(timer.getMean()),
                             value(timer.getMedian()), value(timer.getValue75thPercentile()),
                             value(timer.getValue95thPercentile()), value(timer.getValue98thPercentile()),
                             value(timer.getValue99thPercentile()), value(timer.getValue999thPercentile()));
@@ -625,8 +679,24 @@ public class MetricAggregator {
             }
         }
 
-        private void addTimerStats(long w, double rowMin, double rowMax, double mean, double median, double p75, double p95,
+        private void addTimerStats(long w, String sourceUnit, double rowMin, double rowMax, double mean, double median, double p75, double p95,
                 double p98, double p99, double p999) {
+            if (sourceUnit == null) {
+                throw new IllegalArgumentException("Timer duration unit is required");
+            }
+            // Reporter duration units are lowercase TimeUnit names. Convert floating-point values
+            // before combining them; integer TimeUnit conversion would truncate sub-millisecond values.
+            double scale = TimeUnit.valueOf(sourceUnit.toUpperCase(Locale.ROOT)).toNanos(1)
+                    / (double) TimeUnit.MILLISECONDS.toNanos(1);
+            rowMin *= scale;
+            rowMax *= scale;
+            mean *= scale;
+            median *= scale;
+            p75 *= scale;
+            p95 *= scale;
+            p98 *= scale;
+            p99 *= scale;
+            p999 *= scale;
             weight += w;
             min = min == null ? rowMin : Math.min(min, rowMin);
             max = max == null ? rowMax : Math.max(max, rowMax);
@@ -649,7 +719,7 @@ public class MetricAggregator {
                 TimerAggregateData timer = new TimerAggregateData();
                 long seconds = bucket.getLengthSeconds();
                 timer.setRate(seconds > 0 ? (double) count / seconds : 0d);
-                timer.setDurationUnit(durationUnit);
+                timer.setDurationUnit("milliseconds");
                 if (weight > 0) {
                     timer.setMin(min);
                     timer.setMax(max);

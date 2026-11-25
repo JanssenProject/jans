@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.UnaryOperator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jans.model.cluster.ClusterLock;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.SearchException;
@@ -33,17 +36,16 @@ import io.jans.orm.search.filter.Filter;
 import jakarta.inject.Inject;
 
 /**
- * Cluster claim primitive based only on insert-or-fail.
+ * SQL cluster claims with insert-or-fail acquisition and transactionally fenced writes.
  *
  * <p>A node claims one run slot of a task by inserting an entry with a DN built from the task and the
  * slot key. The insert of an existing DN fails on the backends that support claims, so exactly one
- * node holds each slot. A claim never changes its owner: a later slot uses a new DN. Because of that,
- * read-compare-merge in {@link #heartbeat(ClusterLock)} and {@link #release(ClusterLock, String, String)}
- * is safe without versioned updates or transactions.</p>
+ * node holds each slot. Every acquisition has a unique token in {@code lockKey}. Heartbeat, release,
+ * state saves and protected writes lock the claim row and validate its token and unexpired lease in
+ * the transaction that performs the write.</p>
  *
- * <p>Only backends whose insert fails on an existing DN can hold claims: SQL and LDAP, also behind a
- * hybrid entry manager. Spanner and Couchbase write an insert as an upsert, so {@link #tryClaim} refuses
- * to claim there and logs a warning.</p>
+ * <p>Only SQL is supported. A hybrid manager must route the claim and protected rows to the same
+ * transactional SQL backend. Other backends are refused before inserting a claim.</p>
  *
  * <p>Each task also has one state row ({@code jansId=<task>_state}) for data that must survive between
  * runs. It has no expiration date and {@code del=false}, so neither {@link #purgeExpired} nor an
@@ -80,7 +82,7 @@ public abstract class ClusterLockService {
     private static final Pattern SLOT_KEY_PATTERN = Pattern.compile("[A-Za-z0-9.-]+");
 
     private static final Set<String> INSERT_OR_FAIL_PERSISTENCE_TYPES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            PersistenceEntryManager.PERSITENCE_TYPES.sql.name(), PersistenceEntryManager.PERSITENCE_TYPES.ldap.name())));
+            PersistenceEntryManager.PERSITENCE_TYPES.sql.name())));
 
     static final String WARNING_PERSIST_FAILURE = "persist-failure:";
     static final String WARNING_UNSUPPORTED_BACKEND = "unsupported-backend:";
@@ -89,6 +91,8 @@ public abstract class ClusterLockService {
     private PersistenceEntryManager entryManager;
 
     private volatile Clock clock = Clock.systemUTC();
+
+    private final Set<String> acquisitions = ConcurrentHashMap.newKeySet();
 
     private final ConcurrentMap<String, Instant> lastWarnings = new ConcurrentHashMap<>();
 
@@ -104,8 +108,8 @@ public abstract class ClusterLockService {
      */
     public Optional<ClusterLock> tryClaim(String task, String slotKey, Duration lease) {
         String dn = buildClaimDn(task, slotKey);
-        if ((lease == null) || lease.isNegative() || lease.isZero()) {
-            throw new IllegalArgumentException("Lease must be positive");
+        if ((lease == null) || lease.compareTo(Duration.ofSeconds(1)) < 0) {
+            throw new IllegalArgumentException("Lease must be at least one second");
         }
 
         if (!isClaimSupported()) {
@@ -117,7 +121,7 @@ public abstract class ClusterLockService {
         claim.setDn(dn);
         claim.setId(buildId(task, slotKey));
         claim.setTask(task);
-        claim.setLockKey(getLockKey());
+        claim.setLockKey(UUID.randomUUID().toString());
         claim.setNodeIdentifier(getNodeIdentifier());
         claim.setClusterNodeId(getClusterNodeId());
         claim.setCreationDate(Date.from(now));
@@ -147,6 +151,7 @@ public abstract class ClusterLockService {
         lastWarnings.keySet().removeIf(key -> key.startsWith(WARNING_PERSIST_FAILURE));
         LOG.info("Claimed slot '{}' of task '{}' (node '{}', lease {})", slotKey, task, claim.getNodeIdentifier(), lease);
 
+        acquisitions.add(claim.getLockKey());
         return Optional.of(claim);
     }
 
@@ -159,55 +164,53 @@ public abstract class ClusterLockService {
      */
     public boolean heartbeat(ClusterLock claim) {
         requireClaim(claim);
-
-        ClusterLock stored;
         try {
-            stored = readEntry(claim.getDn()).orElse(null);
+            return withActiveClaim(claim, entryManager(), claim.getDn(), () -> {
+                ClusterLock stored = entryManager().find(ClusterLock.class, claim.getDn());
+                Duration lease = getLease(stored);
+                if (lease == null) {
+                    return false;
+                }
+                Instant now = clock.instant();
+                stored.setLastUpdate(Date.from(now));
+                setExpiration(stored, now, lease);
+                entryManager().merge(stored);
+                claim.setLastUpdate(stored.getLastUpdate());
+                claim.setExpirationDate(stored.getExpirationDate());
+                claim.setTtl(stored.getTtl());
+                return true;
+            });
         } catch (RuntimeException ex) {
-            LOG.info("Lost claim '{}': failed to read it", claim.getDn());
-            LOG.debug("Failed to read claim '{}'", claim.getDn(), ex);
+            LOG.debug("Failed to renew claim '{}'", claim.getDn(), ex);
             return false;
         }
+    }
 
-        if (stored == null) {
-            LOG.info("Lost claim '{}': the entry is missing", claim.getDn());
-            return false;
+    /**
+     * Runs a protected write while holding the claim row lock in the same SQL transaction.
+     * Both the acquisition token and lease are checked before the work and immediately before commit.
+     * Unsupported or differently routed backends fail closed; a pre-write heartbeat is not fencing.
+     */
+    public <T> T withActiveClaim(ClusterLock claim, PersistenceEntryManager writer, String targetDn, TransactionCallback<T> work) {
+        requireClaim(claim);
+        PersistenceEntryManager manager = entryManager();
+        if (writer != manager || !manager.isTransactionSupported(claim.getDn(), targetDn)) {
+            throw new IllegalStateException("Claim and protected write require the same transactional backend");
         }
-        if (!StringUtils.equals(getLockKey(), stored.getLockKey())) {
-            LOG.info("Lost claim '{}': it belongs to node '{}'", claim.getDn(), stored.getNodeIdentifier());
-            return false;
-        }
-        if (!ClusterLock.STATUS_RUNNING.equals(stored.getStatus())) {
-            LOG.debug("Claim '{}' is already released with status '{}'", claim.getDn(), stored.getStatus());
-            return false;
-        }
-
-        Duration lease = getLease(claim);
-        if (lease == null) {
-            lease = getLease(stored);
-        }
-        if (lease == null) {
-            LOG.debug("Claim '{}' has no lease information", claim.getDn());
-            return false;
-        }
-
-        Instant now = clock.instant();
-        stored.setLastUpdate(Date.from(now));
-        setExpiration(stored, now, lease);
-        try {
-            entryManager().merge(stored);
-        } catch (RuntimeException ex) {
-            LOG.info("Lost claim '{}': failed to update it", claim.getDn());
-            LOG.debug("Failed to update claim '{}'", claim.getDn(), ex);
-            return false;
-        }
-
-        claim.setLastUpdate(stored.getLastUpdate());
-        claim.setExpirationDate(stored.getExpirationDate());
-        claim.setTtl(stored.getTtl());
-        LOG.debug("Renewed claim '{}' until {}", claim.getDn(), stored.getExpirationDate());
-
-        return true;
+        return manager.executeInTransaction(claim.getDn(), () -> {
+            ClusterLock stored = manager.findForUpdate(ClusterLock.class, claim.getDn());
+            if (stored == null || !acquisitions.contains(claim.getLockKey())
+                    || !StringUtils.equals(claim.getTask(), stored.getTask())
+                    || !StringUtils.equals(claim.getLockKey(), stored.getLockKey()) || !isActive(stored, clock.instant())) {
+                throw new IllegalStateException("Claim is no longer owned or its lease expired: " + claim.getDn());
+            }
+            T result = work.doInTransaction();
+            // Validate the lease read under the lock, rather than trusting a caller's mutable handle.
+            if (!stored.getExpirationDate().toInstant().isAfter(clock.instant())) {
+                throw new IllegalStateException("Claim expired before commit: " + claim.getDn());
+            }
+            return result;
+        });
     }
 
     /**
@@ -228,47 +231,43 @@ public abstract class ClusterLockService {
         }
 
         try {
-            ClusterLock stored = readEntry(claim.getDn()).orElse(null);
-            if (stored == null) {
-                LOG.debug("Claim '{}' to release is missing", claim.getDn());
-                return false;
-            }
-            if (!StringUtils.equals(getLockKey(), stored.getLockKey())) {
-                LOG.debug("Claim '{}' to release belongs to node '{}'", claim.getDn(), stored.getNodeIdentifier());
-                return false;
-            }
-
-            Instant now = clock.instant();
-            stored.setStatus(status);
-            stored.setData(summaryJson);
-            stored.setLastUpdate(Date.from(now));
-            setExpiration(stored, now, RELEASED_RETENTION);
-            entryManager().merge(stored);
-
-            claim.setStatus(stored.getStatus());
-            claim.setData(stored.getData());
-            claim.setLastUpdate(stored.getLastUpdate());
-            claim.setExpirationDate(stored.getExpirationDate());
-            claim.setTtl(stored.getTtl());
+            withActiveClaim(claim, entryManager(), claim.getDn(), () -> {
+                ClusterLock stored = entryManager().find(ClusterLock.class, claim.getDn());
+                Instant now = clock.instant();
+                stored.setStatus(status);
+                stored.setData(summaryJson);
+                stored.setLastUpdate(Date.from(now));
+                setExpiration(stored, now, RELEASED_RETENTION);
+                entryManager().merge(stored);
+                return null;
+            });
+            claim.setStatus(status);
+            claim.setData(summaryJson);
+            claim.setLastUpdate(Date.from(clock.instant()));
+            setExpiration(claim, claim.getLastUpdate().toInstant(), RELEASED_RETENTION);
+            acquisitions.remove(claim.getLockKey());
+            return true;
         } catch (RuntimeException ex) {
             LOG.debug("Failed to release claim '{}'", claim.getDn(), ex);
             return false;
         }
-
-        LOG.debug("Released claim '{}' with status '{}'", claim.getDn(), status);
-        return true;
     }
 
     /**
-     * @return the claim of the given slot; empty when it does not exist or cannot be read
+     * @return the claim of the given slot; empty only when it does not exist; read failures propagate
      */
     public Optional<ClusterLock> find(String task, String slotKey) {
-        String dn = buildClaimDn(task, slotKey);
+        return readEntry(buildClaimDn(task, slotKey));
+    }
+
+    /** Confirms a release whose response may have been lost, without retrying a released handle. */
+    public boolean isReleaseConfirmed(ClusterLock claim, String status, String summary) {
         try {
-            return readEntry(dn);
+            Optional<ClusterLock> stored = readEntry(claim.getDn());
+            return stored.isPresent() && StringUtils.equals(claim.getLockKey(), stored.get().getLockKey())
+                    && StringUtils.equals(status, stored.get().getStatus()) && StringUtils.equals(summary, stored.get().getData());
         } catch (RuntimeException ex) {
-            LOG.debug("Failed to read claim '{}'", dn, ex);
-            return Optional.empty();
+            return false;
         }
     }
 
@@ -325,45 +324,39 @@ public abstract class ClusterLockService {
     }
 
     /**
-     * Writes the {@code jansData} of the task's state row, and creates the row on first use. Only the
-     * holder of the task's current claim should call it.
+     * Atomically reads and updates the task's state under the caller's unexpired claim. The update
+     * function receives the current stored data under a row lock; a failure aborts the whole write.
      *
      * @return {@code true} when the data was written
      */
-    public boolean saveState(String task, String json) {
+    public boolean saveState(ClusterLock claim, UnaryOperator<String> update) {
+        requireClaim(claim);
+        String task = claim.getTask();
         String dn = buildStateDn(task);
-        Date now = Date.from(clock.instant());
-
         try {
-            Optional<ClusterLock> existing = readEntry(dn);
-            if (existing.isPresent()) {
-                updateState(existing.get(), json, now);
-                return true;
-            }
-
-            ClusterLock state = new ClusterLock();
-            state.setDn(dn);
-            state.setId(buildId(task, STATE_SLOT_KEY));
-            state.setTask(task);
-            state.setStatus(ClusterLock.STATUS_STATE);
-            state.setDeletable(Boolean.FALSE);
-            state.setCreationDate(now);
-            state.setLastUpdate(now);
-            state.setLockKey(getLockKey());
-            state.setNodeIdentifier(getNodeIdentifier());
-            state.setClusterNodeId(getClusterNodeId());
-            state.setData(json);
-            try {
-                entryManager().persist(state);
-            } catch (RuntimeException ex) {
-                if (!isDuplicate(ex)) {
-                    throw ex;
+            return withActiveClaim(claim, entryManager(), dn, () -> {
+                ClusterLock state = entryManager().findForUpdate(ClusterLock.class, dn);
+                Date now = Date.from(clock.instant());
+                if (state != null) {
+                    updateState(state, update.apply(state.getData()), now, claim.getLockKey());
+                } else {
+                    state = new ClusterLock();
+                    state.setDn(dn);
+                    state.setId(buildId(task, STATE_SLOT_KEY));
+                    state.setTask(task);
+                    state.setStatus(ClusterLock.STATUS_STATE);
+                    state.setDeletable(Boolean.FALSE);
+                    state.setCreationDate(now);
+                    state.setLastUpdate(now);
+                    state.setLockKey(claim.getLockKey());
+                    state.setNodeIdentifier(getNodeIdentifier());
+                    state.setClusterNodeId(getClusterNodeId());
+                    state.setData(update.apply(null));
+                    // A concurrent first insert fails this transaction instead of overwriting state.
+                    entryManager().persist(state);
                 }
-                // Another node created the row between the read and the insert
-                updateState(readEntry(dn).orElseThrow(() -> ex), json, now);
-            }
-
-            return true;
+                return true;
+            });
         } catch (RuntimeException ex) {
             LOG.debug("Failed to save state of task '{}'", task, ex);
             return false;
@@ -371,7 +364,7 @@ public abstract class ClusterLockService {
     }
 
     /**
-     * @return {@code true} when the backend that stores the claims fails an insert of an existing DN;
+     * @return {@code true} when SQL insert-or-fail and transactions are available for the claim DN;
      *         otherwise logs a warning (at most once per {@link #WARNING_INTERVAL}) and returns
      *         {@code false}
      */
@@ -384,12 +377,12 @@ public abstract class ClusterLockService {
             return false;
         }
 
-        if (INSERT_OR_FAIL_PERSISTENCE_TYPES.contains(persistenceType)) {
+        if (INSERT_OR_FAIL_PERSISTENCE_TYPES.contains(persistenceType) && entryManager().isTransactionSupported(getBaseDn())) {
             return true;
         }
 
         if (shouldWarn(WARNING_UNSUPPORTED_BACKEND + persistenceType)) {
-            LOG.warn("Cluster claims are not supported on persistence type '{}': its insert does not fail on an existing entry. "
+            LOG.warn("Cluster claims are not supported on persistence type '{}': atomic claim fencing is unavailable. "
                     + "Tasks that need a claim stay idle", persistenceType);
         }
 
@@ -403,7 +396,7 @@ public abstract class ClusterLockService {
     public String buildClaimDn(String task, String slotKey) {
         validateTask(task);
         validateSlotKey(slotKey);
-        if (STATE_SLOT_KEY.equals(slotKey)) {
+        if (STATE_SLOT_KEY.equalsIgnoreCase(slotKey)) {
             throw new IllegalArgumentException("Slot key '" + STATE_SLOT_KEY + "' is reserved for the state row");
         }
 
@@ -497,10 +490,10 @@ public abstract class ClusterLockService {
         }
     }
 
-    private void updateState(ClusterLock state, String json, Date now) {
+    private void updateState(ClusterLock state, String json, Date now, String token) {
         state.setData(json);
         state.setLastUpdate(now);
-        state.setLockKey(getLockKey());
+        state.setLockKey(token);
         state.setNodeIdentifier(getNodeIdentifier());
         state.setClusterNodeId(getClusterNodeId());
         state.setDeletable(Boolean.FALSE);
@@ -516,7 +509,7 @@ public abstract class ClusterLockService {
     static boolean isMissingEntry(EntryPersistenceException ex) {
         Throwable cause = ex.getCause();
         if (cause == null) {
-            return true;
+            return false;
         }
 
         return (cause instanceof SearchException) && (cause.getCause() == null);

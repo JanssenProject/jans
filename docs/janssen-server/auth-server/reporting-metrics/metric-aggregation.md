@@ -29,7 +29,6 @@ The metric reporter switch is different for each application:
 | Application | Metric reporter switch |
 |---|---|
 | jans-auth | the `metric` value in the `featureFlags` list. The `metricReporterEnabled` key that appears in the jans-auth configuration template is not read by jans-auth. |
-| jans-fido2 | `metricReporterEnabled` (default `true`) |
 | jans-lock | `metricReporterEnabled` |
 
 Turning the reporter on is therefore enough to turn aggregation on.
@@ -38,25 +37,28 @@ Turning the reporter on is therefore enough to turn aggregation on.
 aggregation described in [Passkey Telemetry & Metrics](../../fido/passkey-telemetry.md) and does
 not affect the aggregation described here.
 
-jans-lock does not write raw metric rows today, because it never starts its metric reporter.
-The lock aggregation job therefore stays idle until lock reports metrics.
+jans-lock starts its metric reporter before scheduling aggregation when `metricReporterEnabled` is
+true. This aggregation flow is available in jans-auth and jans-lock on SQL; it is not wired into FIDO2.
 
 ## One node per slot
 
 Every node runs the job on a timer, but only one node does the work for each application type and
 each time slot. A node first inserts a claim row into the `jansClusterLock` table. The insert fails
-if another node already holds the claim, and then the node skips the slot. The claim rows delete
-themselves: each claim gets an expiry of one day, and each run purges expired claims of its task.
+if another node already holds the claim, and then the node skips the slot. Each acquisition has a
+unique token. Heartbeats, release, state saves and aggregate writes validate that token and the
+unexpired lease while holding the claim row lock in the same SQL transaction as the write.
+Running claims expire after their lease; released claims are retained for one day. Each run purges
+expired claims of its task. A run reports completion only after release is confirmed.
 Each node that loses a claim insert causes one database server error line (a duplicate key on
 `jansClusterLock`) per slot. This is expected.
 
-Each application type is aggregated separately: jans-auth, jans-fido2 and jans-lock each have their own
+Each application type is aggregated separately: jans-auth and jans-lock each have their own
 claims and their own progress record.
 
 ## Properties
 
 The settings are in the `metricAggregationConfiguration` object of the dynamic configuration of
-jans-auth, jans-fido2 and jans-lock. Every property is optional. A missing property, or a numeric
+jans-auth and jans-lock. Every property is optional. A missing property, or a numeric
 value of 0 or less, gives the default. An upgraded installation without the object works with the
 defaults.
 
@@ -105,19 +107,27 @@ Example:
 - **Rows that arrive after that recompute window are not counted.**
 - Timer percentiles (median, 75th, 95th, 98th, 99th and 99.9th) are weighted averages of the
   percentiles of the raw rows. They are approximate, and the row says so with `"approximate": true`.
-  Counts, minimum and maximum are exact.
+  Minimum, maximum and mean are also reservoir-based estimates: the source snapshots can contain
+  events from before the reporting interval. All duration statistics are normalized to milliseconds.
+  Counts use reporting interval counts, with cumulative deltas for legacy rows.
 - The `jansEndDate` of an aggregation row is the end of its period minus 1 millisecond, the same
   convention as raw rows. For example, a `DAILY` row of 2026-11-24 ends at `2026-11-24T23:59:59.999Z`.
-- Periods without raw rows produce no row.
+- Periods without raw rows produce no row. An unreadable child makes its key's rollup incomplete.
+- Hourly raw rows are processed in bounded pages, carrying per-series cumulative counts between
+  pages. The watermark advances only after every page and aggregate write for a bucket succeeds.
+- Recomputation skips hourly buckets whose raw rows may have expired. Monthly buckets are skipped
+  when daily retention no longer covers the whole month, including a cutoff within its first day.
+- Reporter rows are persisted in one atomic SQL batch. A failed batch leaves interval baselines
+  unchanged and its inserts are rolled back before retry.
 
 The `exp` of a row is set from the `keep*Days` property of its level. Expired rows are removed by
 the periodic data cleaner of the installation.
 
 ## Limits
 
-- **Spanner and Couchbase are not supported.** The claim insert cannot detect a duplicate on these
-  backends, so aggregation refuses to claim and stays idle. The server logs one `WARN` message about
-  this, at most once per hour.
+- **SQL is the only supported backend.** LDAP, Spanner and Couchbase are not supported. Claims,
+  state and aggregates must use the same transactional SQL entry manager; otherwise work is refused.
+  Unsupported claim backends produce a `WARN` message at most once per hour.
 - If the `jansClusterLock` table is missing, aggregation also stays idle. The server logs a `WARN`
   message that the claim insert failed, and the rest of the application is not affected.
 
@@ -191,5 +201,4 @@ aggregation job purges its own expired claims.
 
 - [Reporting and Metrics](README.md)
 - [Janssen Authorization Server properties](../../reference/json/properties/janssenauthserver-properties.md#metricaggregationconfiguration)
-- [Janssen FIDO2 properties](../../reference/json/properties/fido2-properties.md#metricaggregationconfiguration)
 - [Janssen Lock properties](../../reference/json/properties/lock-properties.md#metricaggregationconfiguration)

@@ -28,6 +28,8 @@ public class MetricAggregationRunResult {
         STATE_ERROR,
         /** The run finished; released as {@code done}. */
         DONE,
+        /** Work stopped, but release could not be confirmed; completion is not claimed. */
+        RELEASE_UNCONFIRMED,
         /** The claim was lost during the run (heartbeat failed); the run stopped without release. */
         LOST,
         /** An unexpected error stopped the run; released as {@code failed}. */

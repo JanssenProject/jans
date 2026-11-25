@@ -70,8 +70,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 	}
 
 	/**
-	 * @return true after {@link #initTimer()} started the metric reporter. The server does not start it
-	 *         today, although {@code metricReporterEnabled} can be true in the configuration.
+	 * @return true after {@link #initTimer()} started the metric reporter
 	 */
 	public boolean isReporterStarted() {
 		return reporterStarted;

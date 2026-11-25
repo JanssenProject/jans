@@ -16,10 +16,14 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <li>{@code count}: number of timed events in the period.</li>
  * <li>{@code rate}: {@code count} divided by the period length in seconds; {@code rateUnit} is
  * {@code second}.</li>
- * <li>{@code min} and {@code max}: the smallest row minimum and the largest row maximum.</li>
+ * <li>{@code min} and {@code max}: estimates from the smallest source reservoir minimum and the
+ * largest source reservoir maximum. Reservoirs can include events from before the reporting interval,
+ * so these are not exact period extrema. Child rollups preserve this limitation.</li>
  * <li>{@code mean}, {@code median} and the {@code value*Percentile} values: averages of the source
- * values weighted by the number of events of each source. Percentiles cannot be merged exactly, so
- * {@code approximate} is always {@code true}.</li>
+ * values weighted by the number of events of each source.</li>
+ * <li>{@code approximate}: always {@code true} for generated aggregates and applies to all duration
+ * statistics, including {@code min} and {@code max}. Interval-local duration samples are not available
+ * in the source rows, and percentiles cannot be merged exactly.</li>
  * </ul>
  *
  * <p>Only sources with at least one event contribute to the duration statistics, because the reservoir

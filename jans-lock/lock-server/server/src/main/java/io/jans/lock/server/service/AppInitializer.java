@@ -181,7 +181,9 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
         statTimer.initTimer();
         traceReceiptRepairTimer.initTimer();
-        // Idle until the metric reporter is started: see LockMetricAggregationManager.isEnabled()
+        if (metricService.isMetricReporterEnabled()) {
+            metricService.initTimer();
+        }
         metricAggregationManager.initTimer();
 
         // Initialize Document Store Manager
