@@ -31379,7 +31379,7 @@ All properties are set in the `fido2Configuration` object, the same place as the
 | `fido2TraceChainGenesis` | String | `first_observed` | Planned. `pre_registered` if Lock knows each node's chain genesis in advance, otherwise `first_observed`. |
 | `fido2TraceIncludeCredentialIdHash` | Boolean | `true` | Planned. Include `credential_id_hash`, a hash of the credential ID, rather than the raw credential ID. |
 | `fido2TraceIncludeAttestationDetail` | Boolean | `false` | Planned. Include optional signed attestation and MDS trust detail in each record. |
-| `fido2TraceEndpoint` | String | discovered | Planned. Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace`. |
+| `fido2TraceEndpoint` | String | none | Planned. Lock Server ingestion endpoint, `/jans-lock/api/v1/audit/trace` on your Lock host. Required, must use `https`, and not discovered. |
 | `fido2TraceKeyStorePath` | String | — | Planned. Path to a BCFKS keystore file that holds the Ed25519 producer signing key. The key stays in the file and is never stored in configuration. |
 | `fido2TraceKeyAlias` | String | — | Planned. Alias of the Ed25519 signing key inside `fido2TraceKeyStorePath`. |
 | `fido2TraceKeyStorePassword` | String | — | Planned. Keystore password, encrypted at rest like other client secrets. |
@@ -31477,8 +31477,39 @@ Lock accepts a new key only under a new `kid`, and it never changes a registered
 
 ## Delivery
 
-Records are sent asynchronously and in batches, never one HTTP call per ceremony, and they are kept off the
-ceremony's hot path. Delivery is retried on transport failure.
+Each record is sent to `fido2TraceEndpoint` with a `POST`. The body is the signed JSON, sent unchanged, so Lock
+receives the same bytes on every attempt. The request carries a `trace.write` access token in the
+`Authorization` header.
+
+### Access token
+
+The token is requested with the client-credentials grant from the issuer's token endpoint, using
+`lockAuditClientId` and `lockAuditClientPassword`. That client must have the `trace.write` scope on Lock. Tokens
+are cached per issuer and client, and a token is only used with the credentials it was issued for.
+
+### Retry
+
+Delivery follows the GovOps TRACE Collector API, section 10.3.
+
+- Retried: network failures, HTTP `429`, HTTP `5xx`, and any response whose error body sets
+  `"retryable": true`.
+- Not retried: any other `4xx`, and any response whose error body sets `"retryable": false`. A rejected record
+  is not sent again.
+- A record gets at most 5 attempts. Before retry *k* the producer waits a random time between 0 and
+  `min(1 s × 2^(k-1), 5 min)`.
+- A `Retry-After` header raises the wait to at least its value. A `Retry-After` longer than 5 min ends the
+  delivery without waiting.
+
+### Outcomes
+
+A record is accepted, rejected, or not delivered after its attempts run out. The producer does not store a record
+that was not delivered; the caller decides what happens to it. A reload of the configuration during delivery
+stops the delivery, and nothing more is sent under the old settings.
+
+### Current limits
+
+- Records are sent one at a time. Bulk and batched delivery are not implemented.
+- A `401` is not retried, so a token that Lock revokes stays rejected until the cached copy expires.
 
 # Trust Diagnostics
 
