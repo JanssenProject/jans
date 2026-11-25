@@ -9,7 +9,8 @@ publish = false
 pretty_assertions = "1"
 serde_json = { workspace = true }
 jsonwebtoken = { workspace = true }
-jsonwebkey = { workspace = true, features = ["generate", "jwt-convert"] }
+p256 = { workspace = true, features = ["alloc", "ecdsa", "pkcs8"] }
+rand = { workspace = true }
 serde = { workspace = true }
 
 

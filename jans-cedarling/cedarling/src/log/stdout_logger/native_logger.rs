@@ -12,8 +12,10 @@
 //! [`StdOutLogger::shut_down`] (called by `Cedarling::shut_down`) before the
 //! exit writes them.
 
-// Native-only module (WASM uses `wasm_logger`), so threads and `Instant` are available.
-#![allow(clippy::disallowed_methods)]
+#![expect(
+    clippy::disallowed_methods,
+    reason = "native-only module (WASM uses `wasm_logger`), so threads and `Instant` are available"
+)]
 
 use std::io::Write;
 use std::sync::atomic::{AtomicU64, Ordering};

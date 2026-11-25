@@ -19,7 +19,7 @@ import io.jans.fido2.exception.Fido2RuntimeException;
  * {@link LockAuditClient}'s delivery endpoint — one validator both route through, rather than two
  * copies that can drift.
  */
-final class LockAuditUrlValidator {
+public final class LockAuditUrlValidator {
 
 	private LockAuditUrlValidator() {
 	}
@@ -30,7 +30,7 @@ final class LockAuditUrlValidator {
 	 * @throws Fido2RuntimeException if {@code url} is not a valid URI, or its scheme is not
 	 *         {@code https} (loopback {@code http} is permitted for local development)
 	 */
-	static void requireSecure(String url, String what) {
+	public static void requireSecure(String url, String what) {
 		URI uri;
 		try {
 			uri = new URI(url);

@@ -11,7 +11,7 @@ use std::time::Duration;
 
 use tokio_util::sync::CancellationToken;
 
-use crate::async_sleep::sleep;
+use crate::rt::sleep;
 
 /// The longest delay of [`Backoff::exponential`].
 pub(crate) const MAX_EXPONENTIAL_DELAY: Duration = Duration::from_secs(300);
