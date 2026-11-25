@@ -2878,7 +2878,7 @@
 <h2 id="known-quirks-things-to-watch-out-for">Known Quirks &amp; Things to Watch Out For<a class="headerlink" href="#known-quirks-things-to-watch-out-for" title="Permanent link">#</a></h2>
 <ul>
 <li>The <code>entity_builder</code> relies heavily on the structure of the token metadata unexpected schema changes might break parsing silently.</li>
-<li>WASM build will sometimes fail even if it works on native. One example is you can't just spawn a new task using <code>tokio::spawn</code>. Use the helpers that work on both: <code>crate::http::spawn_task</code> to spawn a task and <code>crate::async_sleep::sleep</code> to wait; <code>tokio::time</code> panics in the browser.</li>
+<li>WASM build will sometimes fail even if it works on native. One example is you can't just spawn a new task using <code>tokio::spawn</code>. Use the helpers that work on both: <code>crate::rt::spawn_task</code> to spawn a task and <code>crate::rt::sleep</code> or <code>crate::rt::Ticker</code> to wait; <code>tokio::time</code> panics in the browser, and <code>clippy.toml</code> bans the raw calls.</li>
 <li>The Lock Server will not recognize the client immediately after DCR. Expect receive some unauthorized responses for the first few seconds if you're testing locally.</li>
 </ul>
 <h2 id="relevant-docs-specs">Relevant Docs &amp; Specs<a class="headerlink" href="#relevant-docs-specs" title="Permanent link">#</a></h2>
@@ -2939,7 +2939,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    November 20, 2026
+    November 25, 2026
   </span>
 
     
