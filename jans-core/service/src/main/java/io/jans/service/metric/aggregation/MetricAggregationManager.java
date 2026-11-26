@@ -1128,7 +1128,7 @@ public abstract class MetricAggregationManager {
     /**
      * State of one run.
      */
-    private final class RunContext {
+    protected final class RunContext {
 
         private final ClusterLockService lockService;
         private final MetricAggregationConfiguration configuration;
