@@ -8,6 +8,8 @@ package io.jans.service.cluster;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.expectThrows;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +22,7 @@ import org.testng.annotations.Test;
 
 import io.jans.model.cluster.ClusterNode;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.test.cluster.FixedClusterNodeService;
 import io.jans.service.test.orm.InMemoryEntryManager;
 
@@ -36,6 +39,25 @@ public class ClusterNodeServiceTest {
     private static final String TYPE_A = "type-a";
     private static final String TYPE_B = "type-b";
     private static final long EXPIRED_MILLIS = ClusterNodeService.DELAY_AFTER_EXPIRATION + 60_000L;
+
+    @Test
+    public void createOnlyInsertDoesNotUseFakeUpsertSemantics() {
+        for (PersistenceEntryManager.PERSITENCE_TYPES type : Arrays.asList(
+                PersistenceEntryManager.PERSITENCE_TYPES.spanner, PersistenceEntryManager.PERSITENCE_TYPES.couchbase)) {
+            InMemoryEntryManager fake = new InMemoryEntryManager(type.name());
+            PersistenceEntryManager manager = fake.getEntryManager();
+            ClusterNode first = node(0, TYPE_A, "key-a", new Date());
+            ClusterNode replacement = node(0, TYPE_B, "key-b", new Date());
+            manager.persistNew(first);
+            first.setLockKey("mutated");
+            EntryPersistenceException failure = expectThrows(EntryPersistenceException.class, () -> manager.persistNew(replacement));
+            assertTrue(ClusterLockService.isDuplicate(failure));
+            assertNode(fake.get(dn(0), ClusterNode.class), 0, TYPE_A, "key-a");
+
+            manager.persist(replacement);
+            assertNode(fake.get(dn(0), ClusterNode.class), 0, TYPE_B, "key-b");
+        }
+    }
 
     @Test
     public void sameTypeGetsNextIdAboveItsOwnLastNode() {

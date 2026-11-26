@@ -219,6 +219,14 @@ public class InMemoryEntryManager implements InvocationHandler {
             Object locked = store.get(String.valueOf(args[1]));
             return locked == null ? null : copy(locked);
         case "persistNew":
+            if (types.length == 1) {
+                String dn = getDn(args[0]);
+                if (store.putIfAbsent(dn, copy(args[0])) != null) {
+                    throw duplicate(dn);
+                }
+                return null;
+            }
+            break;
         case "persist":
             if (types.length == 1) {
                 persist(args[0]);
