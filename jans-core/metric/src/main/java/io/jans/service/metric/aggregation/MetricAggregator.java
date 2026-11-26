@@ -403,6 +403,12 @@ public class MetricAggregator {
      */
     public List<MetricAggregationEntry> rollup(Collection<MetricAggregationEntry> children, PeriodBucket bucket,
             Instant childWatermark, Date creationDate) {
+        return rollup(children, bucket, childWatermark, null, creationDate);
+    }
+
+    /** Includes the first processed source period, so a watermark alone cannot imply earlier coverage. */
+    public List<MetricAggregationEntry> rollup(Collection<MetricAggregationEntry> children, PeriodBucket bucket,
+            Instant childWatermark, Instant sourceStart, Date creationDate) {
         Objects.requireNonNull(bucket, "bucket");
         Objects.requireNonNull(creationDate, "creationDate");
         MetricAggregationType sourceLevel = sourceLevel(bucket.getType());
@@ -430,7 +436,9 @@ public class MetricAggregator {
         childRows.sort(CHILD_ROW_ORDER);
 
         boolean sourceProcessed = childWatermark != null && !childWatermark.isBefore(bucket.getEnd())
-                && (sourceLevel != MetricAggregationType.DAILY || hasRetainedDailySource(bucket, creationDate.toInstant()));
+                && (sourceStart == null || !bucket.getStart().isBefore(sourceStart))
+                && (sourceLevel == MetricAggregationType.DAILY ? hasRetainedDailySource(bucket, creationDate.toInstant())
+                        : !bucket.getStart().isBefore(creationDate.toInstant().minus(Duration.ofDays(keepDays(sourceLevel)))));
 
         Map<AggregateKey, Accumulator> accumulators = new TreeMap<>();
         for (ChildRow row : childRows) {
@@ -568,6 +576,11 @@ public class MetricAggregator {
         }
     }
 
+    /** Whether a raw row can safely contribute statistics or a cumulative-count baseline. */
+    public static boolean isReadableRaw(MetricDataEntry entry) {
+        return RawRow.of(entry) != null;
+    }
+
     private static final class RawRow {
 
         private final MetricDataEntry entry;
@@ -594,6 +607,17 @@ public class MetricAggregator {
             }
             JsonNode data = readObject(entry.getData());
             String kind = detectRawKind(data);
+            if (TimerAggregateData.KIND.equals(kind)) {
+                String unit = data.path("durationUnit").asText(null);
+                if (unit == null) {
+                    return null;
+                }
+                try {
+                    TimeUnit.valueOf(unit.toUpperCase(Locale.ROOT));
+                } catch (IllegalArgumentException unreadableUnit) {
+                    return null;
+                }
+            }
             return kind == null ? null : new RawRow(entry, data, kind);
         }
 

@@ -242,12 +242,14 @@ public abstract class MetricAggregationManager {
             }
 
             Map<MetricAggregationType, Instant> stored;
+            String storedJson;
             try {
                 // Register before reading any sources. A later registration fences this run at commit.
                 if (!lockService.saveState(claim, current -> current)) {
                     throw new IllegalStateException("Failed to register the task writer");
                 }
-                stored = parseState(lockService.loadState(task).orElse(null));
+                storedJson = lockService.loadState(task).orElse(null);
+                stored = parseState(storedJson);
             } catch (RuntimeException ex) {
                 if (shouldWarn("state-read")) {
                     LOG.warn("Metric aggregation for '{}' skips slot {}: failed to read the task state ({}: {})", applicationType, slot,
@@ -261,6 +263,8 @@ public abstract class MetricAggregationManager {
             }
 
             RunContext context = new RunContext(metricService, lockService, configuration, claim, task, applicationType, now);
+            context.coverageStarts.putAll(parseCoverageStarts(storedJson));
+            context.savedCoverageStarts.putAll(context.coverageStarts);
             initWatermarks(context, stored);
             prepareAggregationBranch(context);
 
@@ -273,7 +277,8 @@ public abstract class MetricAggregationManager {
             }
 
             long durationMillis = (System.nanoTime() - startNanos) / 1_000_000L;
-            boolean stateError = !context.saved.equals(context.watermarks);
+            boolean stateError = !context.saved.equals(context.watermarks)
+                    || !context.savedCoverageStarts.equals(context.coverageStarts);
             MetricAggregationRunResult result = new MetricAggregationRunResult(
                     context.lost ? MetricAggregationRunResult.Status.LOST : stateError ? MetricAggregationRunResult.Status.STATE_ERROR : MetricAggregationRunResult.Status.DONE, slot, context.buckets,
                     context.failedBuckets, context.rowsWritten, durationMillis);
@@ -432,6 +437,11 @@ public abstract class MetricAggregationManager {
                 watermark = PeriodMath.bucketStart(level, horizon);
             }
             context.watermarks.put(level, watermark);
+            Instant sourceStart = level == MetricAggregationType.HOURLY ? horizon
+                    : context.coverageStarts.get(MetricAggregator.sourceLevel(level));
+            Instant start = level == MetricAggregationType.HOURLY && context.coverageStarts.containsKey(level)
+                    ? context.coverageStarts.get(level) : firstWholeBucket(level, sourceStart);
+            context.coverageStarts.merge(level, start, (saved, required) -> saved.isAfter(required) ? saved : required);
         }
         context.saved.putAll(stored);
     }
@@ -460,15 +470,24 @@ public abstract class MetricAggregationManager {
         MetricAggregationConfiguration configuration = context.configuration;
         Duration sourceLifetime = Duration.ofDays(getSourceKeepDays(level, configuration));
         Instant retentionFloor = context.now.minus(sourceLifetime);
-        Instant floor = PeriodMath.bucketStart(level, retentionFloor);
-        if ((level == MetricAggregationType.HOURLY || level == MetricAggregationType.MONTHLY)
-                && floor.isBefore(retentionFloor)) {
-            floor = PeriodMath.bucketEnd(level, floor);
+        Instant floor = firstWholeBucket(level, retentionFloor);
+        Instant coverageStart = context.coverageStarts.get(level);
+        if (level != MetricAggregationType.HOURLY) {
+            Instant sourceStart = firstWholeBucket(level, context.coverageStarts.get(MetricAggregator.sourceLevel(level)));
+            if (sourceStart.isAfter(coverageStart)) {
+                coverageStart = sourceStart;
+            }
+        }
+        if (coverageStart.isAfter(floor)) {
+            floor = coverageStart;
         }
         Instant watermark = context.watermarks.get(level);
-        if (watermark.isBefore(floor) && level != MetricAggregationType.WEEKLY) {
+        if (watermark.isBefore(floor)) {
             watermark = floor;
+            coverageStart = floor;
         }
+        context.coverageStarts.put(level, coverageStart);
+        retentionFloor = floor;
 
         Instant limit = level == MetricAggregationType.HOURLY ? null : context.watermarks.get(MetricAggregator.sourceLevel(level));
         List<PeriodBucket> plan = plan(level, watermark, context.now, context.grace, getRecompute(level, configuration),
@@ -522,7 +541,7 @@ public abstract class MetricAggregationManager {
      * Lists the buckets to process at one level, oldest first: the last {@code recompute} closed
      * buckets, plus the closed buckets from the watermark forward, at most {@code maxBuckets} in total.
      * A bucket is closed when {@code now >= end + grace}; when {@code limit} is given, a bucket must also
-     * end at or before it.
+     * end at or before it. With a cap of one, a ready forward bucket takes precedence over recomputation.
      */
     static List<PeriodBucket> plan(MetricAggregationType level, Instant watermark, Instant now, Duration grace, int recompute,
             int maxBuckets, Instant limit) {
@@ -563,6 +582,10 @@ public abstract class MetricAggregationManager {
             bucket = PeriodMath.next(bucket);
         }
 
+        if (maxBuckets == 1 && !bucketForForward(level, watermark, retentionFloor).getEnd().isAfter(upper)) {
+            return new ArrayList<>(Collections.singletonList(bucketForForward(level, watermark, retentionFloor)));
+        }
+
         List<PeriodBucket> result = new ArrayList<>(Math.min(buckets.size(), maxBuckets));
         Iterator<PeriodBucket> iterator = buckets.iterator();
         while (iterator.hasNext() && (result.size() < maxBuckets)) {
@@ -570,6 +593,19 @@ public abstract class MetricAggregationManager {
         }
 
         return result;
+    }
+
+    private static Instant firstWholeBucket(MetricAggregationType level, Instant from) {
+        Instant start = PeriodMath.bucketStart(level, from);
+        return start.isBefore(from) ? PeriodMath.bucketEnd(level, start) : start;
+    }
+
+    private static PeriodBucket bucketForForward(MetricAggregationType level, Instant watermark, Instant retentionFloor) {
+        Instant start = PeriodMath.bucketStart(level, watermark);
+        if (retentionFloor != null && start.isBefore(retentionFloor)) {
+            start = firstWholeBucket(level, retentionFloor);
+        }
+        return PeriodMath.bucketContaining(level, start);
     }
 
     private int processRawBucket(RunContext context, PeriodBucket bucket, PeriodBucket previous, boolean findFirst) {
@@ -581,41 +617,47 @@ public abstract class MetricAggregationManager {
         MetricAggregator.RawAggregation aggregation = context.aggregator.newRawAggregation(bucket,
                 PeriodMath.isClosed(bucket, context.now, context.grace), context.creationDate);
         aggregation.addRows(context.carry.values());
+        Map<String, MetricDataEntry> baselineIndex = new HashMap<>();
+        boolean[] lookbackRead = { false };
         readRawPages(context, bucket.getStart(), bucket.getEnd(), rows -> {
             Set<String> missing = new LinkedHashSet<>();
             for (MetricDataEntry row : rows) {
                 JsonNode data = readObject(row.getData());
-                if (data != null && !data.hasNonNull("intervalCount") && MetricAggregator.detectRawKind(row.getData()) != null
+                if (data != null && !data.hasNonNull("intervalCount") && MetricAggregator.isReadableRaw(row)
                         && !context.carry.containsKey(seriesKey(row))) {
                     missing.add(seriesKey(row));
                 }
             }
             if (!missing.isEmpty()) {
-                readRawPages(context, bucket.getStart().minus(getLegacyLookback()), bucket.getStart(), older -> {
-                    List<MetricDataEntry> baselines = new ArrayList<>();
-                    for (MetricDataEntry row : older) {
-                        if (missing.contains(seriesKey(row))) {
-                            baselines.add(row);
-                        }
+                if (!lookbackRead[0]) {
+                    readRawPages(context, bucket.getStart().minus(getLegacyLookback()), bucket.getStart(),
+                            older -> remember(baselineIndex, older));
+                    lookbackRead[0] = true;
+                }
+                List<MetricDataEntry> baselines = new ArrayList<>();
+                for (String series : missing) {
+                    MetricDataEntry baseline = baselineIndex.get(series);
+                    if (baseline != null) {
+                        baselines.add(baseline);
                     }
-                    aggregation.addRows(baselines);
-                    remember(context.carry, baselines);
-                });
+                }
+                aggregation.addRows(baselines);
+                remember(context.carry, baselines);
             }
             aggregation.addRows(rows);
             remember(context.carry, rows);
         });
         context.carryValid = true;
-        return write(context, aggregation.finish(), findFirst);
+        return write(context, bucket, aggregation.finish(), findFirst);
     }
 
     private int processRollupBucket(RunContext context, PeriodBucket bucket, boolean findFirst) {
         MetricAggregationType sourceLevel = MetricAggregator.sourceLevel(bucket.getType());
         List<MetricAggregationEntry> children = readAggregates(context, sourceLevel, bucket.getStart(), bucket.getEnd());
         List<MetricAggregationEntry> entries = context.aggregator.rollup(children, bucket, context.watermarks.get(sourceLevel),
-                Date.from(getClock().instant()));
+                context.coverageStarts.get(sourceLevel), Date.from(getClock().instant()));
 
-        return write(context, entries, findFirst);
+        return write(context, bucket, entries, findFirst);
     }
 
     /** Keyset paging in the projection's composite SQL order. */
@@ -701,26 +743,57 @@ public abstract class MetricAggregationManager {
      * race with another node) falls back to {@code find} plus {@code merge}. Find-first avoids a failed
      * insert, and with it a database server error log line, for every recomputed row.
      */
-    private int write(RunContext context, List<MetricAggregationEntry> entries, boolean findFirst) {
-        for (MetricAggregationEntry entry : entries) {
-            upsert(context.entryManager, entry, findFirst, work ->
-                    context.lockService.withActiveClaim(context.claim, context.entryManager, entry.getDn(), () -> {
-                        ClusterLock writer = context.entryManager.findForUpdate(ClusterLock.class,
-                                context.lockService.buildStateDn(context.task));
-                        if (writer == null || !context.claim.getLockKey().equals(writer.getLockKey())) {
-                            throw new IllegalStateException("Task writer changed before aggregate commit");
-                        }
-                        if (entry.getStartDate().toInstant().isBefore(getClock().instant().minus(Duration.ofDays(
-                                getSourceKeepDays(entry.getAggregationType(), context.configuration))))) {
-                            throw new IllegalStateException("Retention no longer covers the complete bucket");
-                        }
-                        work.run();
-                        return null;
-                    }));
-            context.rowsWritten++;
+    private int write(RunContext context, PeriodBucket bucket, List<MetricAggregationEntry> entries, boolean findFirst) {
+        Consumer<Runnable> transaction = work -> context.lockService.withActiveClaim(context.claim, context.entryManager,
+                context.aggregator.getAggregationBaseDn(), () -> {
+                    ClusterLock writer = context.entryManager.findForUpdate(ClusterLock.class,
+                            context.lockService.buildStateDn(context.task));
+                    if (writer == null || !context.claim.getLockKey().equals(writer.getLockKey())) {
+                        throw new IllegalStateException("Task writer changed before aggregate commit");
+                    }
+                    checkRetention(context, bucket);
+                    work.run();
+                    checkRetention(context, bucket);
+                    return null;
+                });
+        try {
+            transaction.accept(() -> {
+                for (MetricAggregationEntry entry : entries) {
+                    upsertInTransaction(context.entryManager, entry, findFirst);
+                }
+            });
+        } catch (RuntimeException ex) {
+            if (!ClusterLockService.isDuplicate(ex)) {
+                throw ex;
+            }
+            // PostgreSQL aborts a transaction on a duplicate. Retry the entire bucket only after
+            // rollback, in a fresh fenced transaction which reads existing rows before inserting.
+            transaction.accept(() -> {
+                for (MetricAggregationEntry entry : entries) {
+                    upsertInTransaction(context.entryManager, entry, true);
+                }
+            });
         }
-
+        context.rowsWritten += entries.size();
         return entries.size();
+    }
+
+    private void checkRetention(RunContext context, PeriodBucket bucket) {
+        if (bucket.getStart().isBefore(getClock().instant().minus(Duration.ofDays(
+                getSourceKeepDays(bucket.getType(), context.configuration))))) {
+            throw new IllegalStateException("Retention no longer covers the complete bucket");
+        }
+    }
+
+    private static void upsertInTransaction(PersistenceEntryManager manager, MetricAggregationEntry entry, boolean findFirst) {
+        if (findFirst) {
+            MetricAggregationEntry existing = findExisting(manager, entry.getDn());
+            if (existing != null) {
+                mergeInto(manager, existing, entry);
+                return;
+            }
+        }
+        manager.persist(entry);
     }
 
     static void upsert(PersistenceEntryManager entryManager, MetricAggregationEntry entry, boolean findFirst,
@@ -796,11 +869,12 @@ public abstract class MetricAggregationManager {
     }
 
     private void saveWatermarks(RunContext context) {
-        if (context.saved.equals(context.watermarks)) {
+        if (context.saved.equals(context.watermarks) && context.savedCoverageStarts.equals(context.coverageStarts)) {
             return;
         }
 
         Map<MetricAggregationType, Instant> merged = new EnumMap<>(context.watermarks);
+        Map<MetricAggregationType, Instant> starts = new EnumMap<>(context.coverageStarts);
         // The state is read under a row lock in the same transaction as the claim guard and write.
         // A read/parse failure aborts the transaction; a concurrent saver cannot regress watermarks.
         if (context.lockService.saveState(context.claim, json -> {
@@ -811,11 +885,23 @@ public abstract class MetricAggregationManager {
                     merged.put(entry.getKey(), entry.getValue());
                 }
             }
-            return toStateJson(merged);
+            parseCoverageStarts(json).forEach((level, start) ->
+                    starts.merge(level, start, (mine, stored) -> mine.isAfter(stored) ? mine : stored));
+            Map<String, Object> state = new LinkedHashMap<>();
+            for (MetricAggregationType level : LEVELS) {
+                if (merged.containsKey(level)) {
+                    state.put(level.getValue(), merged.get(level).toString());
+                }
+            }
+            state.put("coverageStarts", readObject(toStateJson(starts)));
+            return toJson(state);
         }, true)) {
             context.watermarks.putAll(merged);
             context.saved.clear();
             context.saved.putAll(merged);
+            context.coverageStarts.putAll(starts);
+            context.savedCoverageStarts.clear();
+            context.savedCoverageStarts.putAll(starts);
         } else {
             LOG.debug("Failed to save the state of task '{}'", context.task);
         }
@@ -901,7 +987,7 @@ public abstract class MetricAggregationManager {
      */
     private static void remember(Map<String, MetricDataEntry> carry, List<MetricDataEntry> rows) {
         for (MetricDataEntry row : rows) {
-            if ((row.getEndDate() == null) || (row.getMetricType() == null) || (MetricAggregator.detectRawKind(row.getData()) == null)) {
+            if (!MetricAggregator.isReadableRaw(row)) {
                 continue;
             }
             carry.merge(seriesKey(row), row, (current, candidate) -> isAfter(candidate, current) ? candidate : current);
@@ -961,6 +1047,12 @@ public abstract class MetricAggregationManager {
         }
 
         return result;
+    }
+
+    private static Map<MetricAggregationType, Instant> parseCoverageStarts(String json) {
+        JsonNode state = readObject(json);
+        JsonNode starts = state == null ? null : state.get("coverageStarts");
+        return parseState(starts == null ? null : starts.toString());
     }
 
     static String toStateJson(Map<MetricAggregationType, Instant> watermarks) {
@@ -1045,6 +1137,8 @@ public abstract class MetricAggregationManager {
 
         private final Map<MetricAggregationType, Instant> watermarks = new EnumMap<>(MetricAggregationType.class);
         private final Map<MetricAggregationType, Instant> saved = new EnumMap<>(MetricAggregationType.class);
+        private final Map<MetricAggregationType, Instant> coverageStarts = new EnumMap<>(MetricAggregationType.class);
+        private final Map<MetricAggregationType, Instant> savedCoverageStarts = new EnumMap<>(MetricAggregationType.class);
         private final Map<MetricAggregationType, Integer> buckets = new EnumMap<>(MetricAggregationType.class);
         private final Map<MetricAggregationType, Integer> failedBuckets = new EnumMap<>(MetricAggregationType.class);
         private final Map<String, MetricDataEntry> carry = new HashMap<>();

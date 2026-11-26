@@ -181,7 +181,7 @@ public class MetricAggregationManagerTest {
         assertEquals(state.get(MetricAggregationType.HOURLY), at("2026-11-24T12:00:00Z"));
         assertEquals(state.get(MetricAggregationType.DAILY), at("2026-11-24T00:00:00Z"));
         assertEquals(state.get(MetricAggregationType.WEEKLY), at("2026-11-23T00:00:00Z"));
-        assertEquals(state.get(MetricAggregationType.MONTHLY), at("2026-11-01T00:00:00Z"));
+        assertEquals(state.get(MetricAggregationType.MONTHLY), at("2026-12-01T00:00:00Z"));
     }
 
     @Test
@@ -373,7 +373,8 @@ public class MetricAggregationManagerTest {
             assertEquals(dailyCount(day), sumHourly(at(day)), day);
             assertTrue(daily(day).isComplete());
         }
-        assertNotNull(store.get(dn(MetricAggregationType.WEEKLY, COUNTER, null, "2026-11-16T00:00:00Z"), MetricAggregationEntry.class));
+        assertNull(store.get(dn(MetricAggregationType.WEEKLY, COUNTER, null, "2026-11-16T00:00:00Z"), MetricAggregationEntry.class),
+                "the first week is only partially covered");
     }
 
     @Test
@@ -381,6 +382,11 @@ public class MetricAggregationManagerTest {
         MetricAggregationConfiguration configuration = config();
         configuration.setKeepDailyDays(54);
         clock.setInstant(at("2026-11-24T00:00:00Z"));
+        FixedClusterLockService seed = lockService("seed");
+        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(), current ->
+                "{\"HOURLY\":\"2026-11-24T00:00:00Z\",\"DAILY\":\"2026-11-24T00:00:00Z\","
+                + "\"MONTHLY\":\"2026-11-01T00:00:00Z\",\"coverageStarts\":{"
+                + "\"HOURLY\":\"2026-10-01T00:00:00Z\",\"DAILY\":\"2026-10-01T00:00:00Z\"}}"));
         TestMetricAggregationManager manager = manager("a", 1, configuration);
 
         MetricAggregationRunResult boundary = manager.runOnce();
@@ -418,7 +424,7 @@ public class MetricAggregationManagerTest {
         MetricAggregationRunResult steady = manager.runOnce();
         assertEquals(steady.getStatus(), Status.DONE);
         assertEquals(initialRawPages.size(), 2, "one query per HOURLY bucket of the recompute window");
-        assertEquals(aggregateQueries.size(), 3, "one query each for the DAILY, WEEKLY and MONTHLY recompute bucket");
+        assertEquals(aggregateQueries.size(), 0, "fresh partial source periods are not recomputed");
         assertEquals(store.getCallCount("persist") - persistsBefore, 1, "only the claim is inserted");
         assertTrue(store.getAll(MetricAggregationEntry.class).isEmpty());
 
@@ -578,6 +584,34 @@ public class MetricAggregationManagerTest {
     // ---------------------------------------------------------------- failures
 
     @Test
+    public void laterLegacySeriesReuseSingleBucketLookbackIndex() {
+        Instant start = at("2026-11-24T10:00:00Z");
+        FixedClusterLockService seed = lockService("seed");
+        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(),
+                current -> "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
+        for (String host : Arrays.asList("h1", "h2")) {
+            store.put(RawMetricRows.row(METRIC_BASE_DN, APP, host, COUNTER, null, start, REPORT,
+                    RawMetricRows.legacyCounter(10), FAR_FUTURE));
+        }
+        store.put(RawMetricRows.row(METRIC_BASE_DN, APP, "h1", COUNTER, null, start.plus(REPORT), REPORT,
+                RawMetricRows.legacyCounter(13), FAR_FUTURE));
+        store.put(RawMetricRows.row(METRIC_BASE_DN, APP, "h2", COUNTER, null, start.plus(REPORT.multipliedBy(2)), REPORT,
+                RawMetricRows.legacyCounter(17), FAR_FUTURE));
+        TestMetricAggregationManager manager = new TestMetricAggregationManager(
+                new TestMetricService(store.getEntryManager(), APP, "agg-node-a"), lockService("a"), config(), REPORT_SECONDS, 1) {
+            @Override
+            protected int getMaxRowsPerQuery() {
+                return 1;
+            }
+        };
+        manager.runOnce();
+        assertEquals(hourly(COUNTER, null, start.toString()).getCount(), 10, "both pages find their own series baseline");
+        long lookbacks = initialRawPages.stream().filter(query -> start.minus(Duration.ofDays(1))
+                .equals(lowerBound(query, "jansEndDate"))).count();
+        assertEquals(lookbacks, 1L, "the whole lookback is read once for the bucket");
+    }
+
+    @Test
     public void hourlyRecomputePreservesAggregateWhenRetentionCutsThroughBucket() {
         Instant start = at("2026-11-23T12:00:00Z");
         String id = MetricAggregator.aggregateId(MetricAggregationType.HOURLY, APP, COUNTER, null, start);
@@ -672,7 +706,7 @@ public class MetricAggregationManagerTest {
     }
 
     @Test
-    public void failedLaterUpsertStillCountsEarlierCommittedRow() {
+    public void failedLaterUpsertRollsBackEveryRowOfBucket() {
         Instant from = at("2026-11-24T10:00:00Z");
         seedCounter("h1", COUNTER, null, from, from.plus(Duration.ofHours(1)), 1);
         seedCounter("h1", "c2", null, from, from.plus(Duration.ofHours(1)), 1);
@@ -680,9 +714,79 @@ public class MetricAggregationManagerTest {
         extraFailure = (name, args) -> "persist".equals(name) && args[0] instanceof MetricAggregationEntry
                 && inserts.incrementAndGet() == 2 ? new EntryPersistenceException("second upsert failed") : null;
         MetricAggregationRunResult result = manager("a", 1).runOnce();
-        assertEquals(result.getRowsWritten(), 1);
+        assertEquals(result.getRowsWritten(), 0);
+        assertTrue(rows(MetricAggregationType.HOURLY).isEmpty());
         assertEquals(result.getFailedBuckets(MetricAggregationType.HOURLY), 1);
         assertEquals(state().get(MetricAggregationType.HOURLY), from, "the failed bucket does not advance the watermark");
+    }
+
+    @Test
+    public void retentionFailureBeforeBucketCommitRollsBackAllRows() {
+        Instant from = at("2026-11-24T10:00:00Z");
+        seedCounter("h1", COUNTER, null, from, from.plus(Duration.ofHours(1)), 1);
+        seedCounter("h1", "c2", null, from, from.plus(Duration.ofHours(1)), 1);
+        AtomicInteger inserts = new AtomicInteger();
+        extraFailure = (name, args) -> {
+            if ("persist".equals(name) && args[0] instanceof MetricAggregationEntry && inserts.incrementAndGet() == 2) {
+                clock.advance(Duration.ofDays(2));
+            }
+            return null;
+        };
+        MetricAggregationRunResult result = manager("a", 1).runOnce();
+        assertEquals(result.getRowsWritten(), 0);
+        assertEquals(result.getFailedBuckets(MetricAggregationType.HOURLY), 1);
+        assertTrue(rows(MetricAggregationType.HOURLY).isEmpty());
+    }
+
+    @Test
+    public void freshTaskSkipsPartialFirstDayAndCompletesWholeDay() {
+        Instant partial = at("2026-11-22T00:00:00Z");
+        Instant full = at("2026-11-23T00:00:00Z");
+        seedCounter("h1", COUNTER, null, partial.plus(Duration.ofHours(14)), full, 1);
+        seedCounter("h1", COUNTER, null, full, full.plus(Duration.ofDays(1)), 1);
+        MetricAggregationConfiguration configuration = config();
+        configuration.setKeepHourlyDays(90);
+        TestMetricAggregationManager manager = manager("a", 2, configuration);
+        assertEquals(manager.runOnce().getStatus(), Status.DONE);
+        assertNull(store.get(dn(MetricAggregationType.DAILY, COUNTER, null, partial.toString()), MetricAggregationEntry.class));
+        assertTrue(daily(full.toString()).isComplete());
+        assertEquals(dailyCount(full.toString()), 24 * 12);
+        clock.advance(Duration.ofSeconds(300));
+        assertEquals(manager.runOnce().getStatus(), Status.DONE);
+        assertTrue(daily(full.toString()).isComplete(), "coverage survives subsequent runs");
+    }
+
+    @org.testng.annotations.DataProvider(name = "expiredLevels")
+    public Object[][] expiredLevels() {
+        return new Object[][] { { MetricAggregationType.DAILY, false }, { MetricAggregationType.DAILY, true },
+                { MetricAggregationType.WEEKLY, false }, { MetricAggregationType.WEEKLY, true } };
+    }
+
+    @Test(dataProvider = "expiredLevels")
+    public void expiredWatermarkStartsAtFirstAdmittedBucket(MetricAggregationType level, boolean fail) {
+        Map<MetricAggregationType, Instant> stored = new EnumMap<>(MetricAggregationType.class);
+        stored.put(MetricAggregationType.HOURLY, at("2026-11-24T12:00:00Z"));
+        stored.put(MetricAggregationType.DAILY, level == MetricAggregationType.DAILY
+                ? at("2026-05-01T00:00:00Z") : at("2026-11-24T00:00:00Z"));
+        stored.put(MetricAggregationType.WEEKLY, at("2026-05-04T00:00:00Z"));
+        FixedClusterLockService seed = lockService("seed");
+        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(),
+                current -> MetricAggregationManager.toStateJson(stored)));
+        MetricAggregationConfiguration configuration = config();
+        configuration.setMaxBucketsPerRun(1);
+        configuration.setKeepHourlyDays(level == MetricAggregationType.DAILY ? 3 : 730);
+        configuration.setKeepDailyDays(14);
+        AtomicInteger queries = new AtomicInteger();
+        if (fail) {
+            extraFailure = (name, args) -> "findEntries".equals(name) && args[1] == MetricAggregationEntry.class
+                    && queries.incrementAndGet() == (level == MetricAggregationType.DAILY ? 1 : 2)
+                    ? new EntryPersistenceException("first eligible bucket failed") : null;
+        }
+        MetricAggregationRunResult result = manager("a", 200, configuration).runOnce();
+        Instant floor = level == MetricAggregationType.DAILY ? at("2026-11-22T00:00:00Z") : at("2026-11-16T00:00:00Z");
+        Instant expected = fail ? floor : PeriodMath.bucketEnd(level, floor);
+        assertEquals(state().get(level), expected);
+        assertEquals(result.getFailedBuckets(level), fail ? 1 : 0);
     }
 
     @Test
@@ -859,6 +963,10 @@ public class MetricAggregationManagerTest {
                 5, null);
         assertEquals(starts(capped).get(0), at("2026-11-20T00:00:00Z"));
         assertEquals(capped.size(), 5);
+
+        List<PeriodBucket> one = MetricAggregationManager.plan(MetricAggregationType.HOURLY, at("2026-11-24T10:00:00Z"),
+                T0, grace, 2, 1, null);
+        assertEquals(starts(one), Arrays.asList(at("2026-11-24T10:00:00Z")), "forward work takes precedence with cap 1");
 
         List<PeriodBucket> notClosed = MetricAggregationManager.plan(MetricAggregationType.HOURLY, at("2026-11-24T12:00:00Z"),
                 at("2026-11-24T13:10:59Z"), grace, 0, 48, null);

@@ -339,6 +339,29 @@ class MetricAggregatorTest {
     }
 
     @Test
+    void invalidTimerUnitsDoNotUpdateLegacyBaselinesOrStatistics() throws Exception {
+        String good = timer(5, null, 1, 9, 3, 4, 5, 6, 7, 8, 9);
+        ObjectNode missing = (ObjectNode) defaultMapper.readTree(timer(100, null, 1, 9, 3, 4, 5, 6, 7, 8, 9));
+        missing.putNull("durationUnit");
+        ObjectNode unsupported = missing.deepCopy();
+        unsupported.put("durationUnit", "unknown");
+        List<MetricDataEntry> rows = Arrays.asList(
+                raw("h1", TIMER_TYPE, null, HOUR.getStart().minusSeconds(1), good),
+                raw("h1", TIMER_TYPE, null, inHour(5), missing.toString()),
+                raw("h1", TIMER_TYPE, null, inHour(6), unsupported.toString()),
+                raw("h1", TIMER_TYPE, null, inHour(10), timer(8, null, 1, 9, 3, 4, 5, 6, 7, 8, 9)));
+        TimerAggregateData result = (TimerAggregateData) data(only(aggregator.aggregateRaw(rows, HOUR, true, CREATED)));
+        assertEquals(3, result.getCount());
+        assertEquals(1, result.getSourceRows());
+        assertEquals("milliseconds", result.getDurationUnit());
+        MetricAggregator.RawAggregation streamed = aggregator.newRawAggregation(HOUR, true, CREATED);
+        for (MetricDataEntry row : rows) {
+            streamed.addRows(Collections.singletonList(row));
+        }
+        assertEquals(3, data(only(streamed.finish())).getCount());
+    }
+
+    @Test
     void timerRowsWithoutEventsDoNotAffectStatistics() throws Exception {
         List<MetricDataEntry> rows = Arrays.asList(
                 raw("h1", TIMER_TYPE, null, inHour(10), timer(10, 10L, 2, 20, 5, 5, 5, 5, 5, 5, 5)),

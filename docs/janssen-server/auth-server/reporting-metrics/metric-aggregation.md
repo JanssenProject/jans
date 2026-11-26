@@ -115,7 +115,11 @@ Example:
   convention as raw rows. For example, a `DAILY` row of 2026-11-24 ends at `2026-11-24T23:59:59.999Z`.
 - Periods without raw rows produce no row. An unreadable child makes its key's rollup incomplete.
 - Hourly raw rows are processed in bounded pages, carrying per-series cumulative counts between
-  pages. The watermark advances only after every page and aggregate write for a bucket succeeds.
+  pages. A bucket-local baseline index reads the lookback once, including baselines for series first
+  encountered on later pages. All aggregate rows of a bucket commit in one fenced SQL transaction;
+  a failed write or retention check rolls back the entire bucket before its watermark can advance.
+- Task state records the first covered source period as well as each end watermark. A fresh task
+  skips partially covered days and weeks, even when source retention is longer than the raw history.
 - A bucket is skipped if its source retention no longer covers the whole period. Hours require raw
   rows, days require hourly rows, and weeks and months require daily rows.
 - Reporter rows are persisted in one atomic SQL batch. A failed batch leaves interval baselines
@@ -192,7 +196,7 @@ To confirm that the table exists:
 === "MySQL"
 
     ```sql
-    DESCRIBE jansClusterLock;
+    DESCRIBE jansdb.jansClusterLock;
     ```
 
 The data cleaner of a VM installation reads its table list when it is installed. An upgraded
