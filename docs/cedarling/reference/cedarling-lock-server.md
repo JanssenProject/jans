@@ -114,6 +114,8 @@ A successful response will contain the following scopes:
 
 To enable Lock Server integration in the Cedarling client, set `CEDARLING_LOCK` to `enabled`, `CEDARLING_LOCK_SERVER_CONFIGURATION_URI` to the Lock Server `.well-known/lock-server-configuration`, and `CEDARLING_LOCK_SSA_JWT` to the SSA created in [Auth Server Setup](#auth-server-setup). All Lock properties are described in [Lock Server integration properties](./cedarling-properties.md#lock-server-integration-properties).
 
+In a browser, Lock Server needs CORS headers and, for the gRPC transport, a gRPC-Web proxy: see [Lock Server and TRACE in the browser](../tutorials/javascript.md#lock-server-and-trace-in-the-browser).
+
 ## Loading Policy Stores from Lock Server
 
 Lock Server can serve `.cjar` policy stores registered as policy sources, for example through the Config API `POST /jans-config-api/lock/policy-stores`. Lock serves each store at `/jans-lock/api/v1/policy/{policy_store_id}`.
