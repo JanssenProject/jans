@@ -70,6 +70,19 @@ class LockMetricAggregationWiringTest {
 	}
 
 	@Test
+	void reporterFlagDefaultsToDisabledWhenMissing() throws Exception {
+		AppConfiguration configuration = new AppConfiguration();
+		MetricService service = new MetricService();
+		set(service, "appConfiguration", configuration);
+
+		assertFalse(service.isMetricReporterEnabled());
+		configuration.setMetricReporterEnabled(true);
+		assertTrue(service.isMetricReporterEnabled());
+		configuration.setMetricReporterEnabled(false);
+		assertFalse(service.isMetricReporterEnabled());
+	}
+
+	@Test
 	void aggregationStaysIdleWhileTheReporterIsNotStarted() throws Exception {
 		MetricService metricService = mock(MetricService.class);
 		when(metricService.isMetricReporterEnabled()).thenReturn(true);

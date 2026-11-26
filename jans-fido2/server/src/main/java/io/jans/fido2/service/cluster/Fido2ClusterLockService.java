@@ -36,6 +36,11 @@ public class Fido2ClusterLockService extends ClusterLockService {
     @Inject
     private MetricService metricService;
 
+    @Override
+    protected io.jans.orm.PersistenceEntryManager getEntryManager() {
+        return metricService.getEntryManager();
+    }
+
     /**
      * The FIDO2 static configuration normally has no {@code node} entry (setting it would switch
      * {@code Fido2MetricsAggregationScheduler} into cluster mode), so the node branch is derived from

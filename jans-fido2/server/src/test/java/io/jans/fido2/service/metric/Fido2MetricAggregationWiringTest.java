@@ -99,6 +99,18 @@ class Fido2MetricAggregationWiringTest {
 	}
 
 	@Test
+	void claimsUseTheMetricEntryManager() throws Exception {
+		MetricService metrics = mock(MetricService.class);
+		io.jans.orm.PersistenceEntryManager persistence = mock(io.jans.orm.PersistenceEntryManager.class);
+		when(metrics.getEntryManager()).thenReturn(persistence);
+		Fido2ClusterLockService service = new Fido2ClusterLockService();
+		set(service, "metricService", metrics);
+		java.lang.reflect.Method getter = service.getClass().getDeclaredMethod("getEntryManager");
+		getter.setAccessible(true);
+		assertSame(persistence, getter.invoke(service));
+	}
+
+	@Test
 	void managerReadsHooksFromAppConfigurationAndGatesOnTheReporter() throws Exception {
 		AppConfiguration appConfiguration = new AppConfiguration();
 		appConfiguration.setMetricReporterEnabled(true);
