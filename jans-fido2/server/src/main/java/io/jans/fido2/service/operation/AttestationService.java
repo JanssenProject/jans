@@ -442,7 +442,7 @@ public class AttestationService {
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
-		TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, traceSessionId);
+		TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, traceSessionId, registrationData);
 
 		return attestationResultResponse;
 
@@ -461,7 +461,7 @@ public class AttestationService {
 			// happened to set it in memory first.
 			Exception auditFailure = persistedAsRegistered ? null : e;
 			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
-			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure, traceSessionId);
+			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure, traceSessionId, registrationData);
 
 			// Re-throw the original exception
 			throw e;

@@ -9,6 +9,7 @@ package io.jans.fido2.service.audit.trace;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -27,7 +28,7 @@ class TraceCeremonyHookTest {
 
 		TraceCeremonyHook.emit(emitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, "sess-1");
 
-		verify(emitter).emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, "sess-1");
+		verify(emitter).emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, "sess-1", null, null);
 	}
 
 	@Test
@@ -37,7 +38,7 @@ class TraceCeremonyHookTest {
 
 		TraceCeremonyHook.emit(emitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, new IllegalStateException("rejected"), "sess-2");
 
-		verify(emitter).emit(TraceRecordBuilder.CeremonyType.ASSERTION, TraceRecordBuilder.Outcome.FAILURE, "sess-2");
+		verify(emitter).emit(TraceRecordBuilder.CeremonyType.ASSERTION, TraceRecordBuilder.Outcome.FAILURE, "sess-2", null, null);
 	}
 
 	@Test
@@ -49,7 +50,7 @@ class TraceCeremonyHookTest {
 
 		TraceCeremonyHook.emit(emitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, null, entry);
 
-		verify(emitter).emit(eq(TraceRecordBuilder.CeremonyType.ASSERTION), eq(TraceRecordBuilder.Outcome.SUCCESS), eq("sess-3"));
+		verify(emitter).emit(eq(TraceRecordBuilder.CeremonyType.ASSERTION), eq(TraceRecordBuilder.Outcome.SUCCESS), eq("sess-3"), isNull(), isNull());
 	}
 
 	@Test
@@ -59,14 +60,14 @@ class TraceCeremonyHookTest {
 
 		TraceCeremonyHook.emit(emitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, null, (Fido2AuthenticationEntry) null);
 
-		verify(emitter).emit(any(), any(), eq(null));
+		verify(emitter).emit(any(), any(), isNull(), isNull(), isNull());
 	}
 
 	@Test
 	void emit_ifEmitterThrows_isolatedFromTheCeremony() {
 		TraceEmitter emitter = mock(TraceEmitter.class);
 		Logger log = mock(Logger.class);
-		doThrow(new IllegalStateException("boom")).when(emitter).emit(any(), any(), any());
+		doThrow(new IllegalStateException("boom")).when(emitter).emit(any(), any(), any(), any(), any());
 
 		assertDoesNotThrow(() -> TraceCeremonyHook.emit(emitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, "sess-4"));
 

@@ -13,11 +13,11 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Supplier;
 
 import org.slf4j.Logger;
@@ -84,11 +84,23 @@ public class TraceEmitter {
 	}
 
 	/**
-	 * Queues one record for a finished ceremony. Never throws and never blocks on signing or delivery.
+	 * Queues one record for a finished ceremony, without authenticator detail. Never throws and never blocks.
 	 *
 	 * @param sessionId the ceremony's session state; no record is built without one
 	 */
 	public void emit(TraceRecordBuilder.CeremonyType type, TraceRecordBuilder.Outcome outcome, String sessionId) {
+		emit(type, outcome, sessionId, null, null);
+	}
+
+	/**
+	 * Queues one record for a finished ceremony. Never throws and never blocks on signing or delivery.
+	 *
+	 * @param sessionId the ceremony's session state; no record is built without one
+	 * @param authenticatorAttachment platform or cross-platform, or null when the ceremony did not report one
+	 * @param credentialId the WebAuthn credential ID (base64url), or null; hashed into the record
+	 */
+	public void emit(TraceRecordBuilder.CeremonyType type, TraceRecordBuilder.Outcome outcome, String sessionId,
+			String authenticatorAttachment, String credentialId) {
 		Fido2Configuration configuration = appConfiguration.getFido2Configuration();
 		if (configuration == null || !configuration.isFido2TraceEnabled()) {
 			return;
@@ -97,7 +109,7 @@ public class TraceEmitter {
 			log.debug("TRACE record skipped: the ceremony has no session");
 			return;
 		}
-		Runnable task = () -> deliver(configuration, type, outcome, sessionId);
+		Runnable task = () -> deliver(configuration, type, outcome, sessionId, authenticatorAttachment, credentialId);
 		try {
 			if (delivery != null) {
 				delivery.execute(task);
@@ -117,11 +129,11 @@ public class TraceEmitter {
 	}
 
 	void deliver(Fido2Configuration configuration, TraceRecordBuilder.CeremonyType type,
-			TraceRecordBuilder.Outcome outcome, String sessionId) {
+			TraceRecordBuilder.Outcome outcome, String sessionId, String authenticatorAttachment, String credentialId) {
 		try {
 			Pipeline current = pipeline(configuration);
 			ObjectNode unsigned = current.builder.build(new TraceRecordBuilder.Ceremony(type, outcome, sessionId,
-					appConfiguration.getIssuer()));
+					appConfiguration.getIssuer(), authenticatorAttachment, credentialId));
 			ObjectNode signed = current.chainState.signAndAdvance(unsigned);
 			// The transport reads the endpoint and credentials from the current configuration. A record queued
 			// under an older configuration would be posted to the new one, so it is dropped instead.
@@ -159,7 +171,7 @@ public class TraceEmitter {
 			Path stateFile = Path.of(configuration.getFido2TraceKeyStorePath()).resolveSibling(CHAIN_STATE_FILE_NAME);
 			TraceChainState chainState = new TraceChainState(stateFile, producerId, signer);
 			TraceRecordBuilder builder = new TraceRecordBuilder(producerId, producerId, Clock.systemUTC(),
-					() -> UUID.randomUUID().toString());
+					() -> UUID.randomUUID().toString(), configuration.isFido2TraceIncludeCredentialIdHash());
 			current = new Pipeline(configuration, builder, chainState);
 			pipelineRef.set(current);
 			return current;

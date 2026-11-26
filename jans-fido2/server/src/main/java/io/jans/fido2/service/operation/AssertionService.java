@@ -546,7 +546,7 @@ public class AssertionService {
 
 		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(),
 				authenticationEntity.getRpId(), keyId, clientOrigin, authenticatorType, null));
-				TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, null, authenticationEntity);
+				TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, null, authenticationEntity, registrationData);
 
 		return assertionResultResponse;
 
@@ -574,7 +574,7 @@ public class AssertionService {
 			String rpId = authenticationEntity != null ? authenticationEntity.getRpId() : null;
 			Exception auditFailure = persistedAsAuthenticated ? null : e;
 			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, rpId, keyId, clientOrigin, authenticatorType, auditFailure));
-			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, auditFailure, authenticationEntity);
+			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, auditFailure, authenticationEntity, registrationData);
 
 			// Re-throw the original exception
 			throw e;

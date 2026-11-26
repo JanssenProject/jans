@@ -9,6 +9,7 @@ package io.jans.fido2.service.audit.trace;
 import org.slf4j.Logger;
 
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 
 /**
  * Call-site helper for the ceremony services. Maps the ceremony's audit failure to a TRACE outcome and
@@ -25,16 +26,30 @@ public final class TraceCeremonyHook {
 	 */
 	public static void emit(TraceEmitter emitter, Logger log, TraceRecordBuilder.CeremonyType type, Exception failure,
 			String sessionId) {
+		emit(emitter, log, type, failure, sessionId, (Fido2RegistrationData) null);
+	}
+
+	public static void emit(TraceEmitter emitter, Logger log, TraceRecordBuilder.CeremonyType type, Exception failure,
+			Fido2AuthenticationEntry entry) {
+		emit(emitter, log, type, failure, entry == null ? null : entry.getSessionStateId(), (Fido2RegistrationData) null);
+	}
+
+	/**
+	 * @param data the credential's registration data; supplies authenticator_attachment and the credential ID. May be null
+	 */
+	public static void emit(TraceEmitter emitter, Logger log, TraceRecordBuilder.CeremonyType type, Exception failure,
+			String sessionId, Fido2RegistrationData data) {
 		try {
 			emitter.emit(type, failure == null ? TraceRecordBuilder.Outcome.SUCCESS : TraceRecordBuilder.Outcome.FAILURE,
-					sessionId);
+					sessionId, data == null ? null : data.getAuthentictatorAttachment(),
+					data == null ? null : data.getPublicKeyId());
 		} catch (RuntimeException e) {
 			log.error("TRACE emission failed; the ceremony outcome is unchanged", e);
 		}
 	}
 
 	public static void emit(TraceEmitter emitter, Logger log, TraceRecordBuilder.CeremonyType type, Exception failure,
-			Fido2AuthenticationEntry entry) {
-		emit(emitter, log, type, failure, entry == null ? null : entry.getSessionStateId());
+			Fido2AuthenticationEntry entry, Fido2RegistrationData data) {
+		emit(emitter, log, type, failure, entry == null ? null : entry.getSessionStateId(), data);
 	}
 }

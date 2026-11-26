@@ -9,6 +9,7 @@ package io.jans.fido2.service.audit.trace;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -48,6 +49,8 @@ public final class TraceRecordBuilder {
     static final String FIELD_SESSION_ISSUER = "session_issuer";
     static final String FIELD_EVENT = "event";
     static final String FIELD_CEREMONY_TYPE = "ceremony_type";
+    static final String FIELD_AUTHENTICATOR_ATTACHMENT = "authenticator_attachment";
+    static final String FIELD_CREDENTIAL_ID_HASH = "credential_id_hash";
     static final String FIELD_CEREMONY_OUTCOME = "ceremony_outcome";
 
     /** Ceremony type: registration or assertion. */
@@ -67,6 +70,8 @@ public final class TraceRecordBuilder {
         private final Outcome outcome;
         private final String sessionId;
         private final String sessionIssuer;
+        private final String authenticatorAttachment;
+        private final String credentialId;
 
         /**
          * @param type registration or assertion
@@ -76,10 +81,33 @@ public final class TraceRecordBuilder {
          * @throws IllegalArgumentException if the session id or issuer is missing or blank
          */
         public Ceremony(CeremonyType type, Outcome outcome, String sessionId, String sessionIssuer) {
+            this(type, outcome, sessionId, sessionIssuer, null, null);
+        }
+
+        /**
+         * @param authenticatorAttachment {@code platform} or {@code cross-platform}; any other value is omitted
+         * @param credentialId the WebAuthn credential ID, base64url; hashed into the record, never stored raw. May be null
+         */
+        public Ceremony(CeremonyType type, Outcome outcome, String sessionId, String sessionIssuer,
+                String authenticatorAttachment, String credentialId) {
             this.type = Objects.requireNonNull(type, "type");
             this.outcome = Objects.requireNonNull(outcome, "outcome");
             this.sessionId = requireNonBlank(sessionId, "session_id");
             this.sessionIssuer = requireIssuer(sessionIssuer);
+            this.authenticatorAttachment = validAttachment(authenticatorAttachment);
+            this.credentialId = credentialId;
+        }
+
+        private static String validAttachment(String value) {
+            return "platform".equals(value) || "cross-platform".equals(value) ? value : null;
+        }
+
+        String getAuthenticatorAttachment() {
+            return authenticatorAttachment;
+        }
+
+        String getCredentialId() {
+            return credentialId;
         }
 
         CeremonyType getType() {
@@ -130,6 +158,7 @@ public final class TraceRecordBuilder {
     private final String producerInstanceId;
     private final Clock clock;
     private final Supplier<String> recordIds;
+    private final boolean includeCredentialIdHash;
 
     /**
      * @param producerId stable producer identifier
@@ -138,10 +167,19 @@ public final class TraceRecordBuilder {
      * @param recordIds source of record_id values; a UUID is generated when none is given
      */
     public TraceRecordBuilder(String producerId, String producerInstanceId, Clock clock, Supplier<String> recordIds) {
+        this(producerId, producerInstanceId, clock, recordIds, true);
+    }
+
+    /**
+     * @param includeCredentialIdHash whether records carry credential_id_hash (fido2TraceIncludeCredentialIdHash)
+     */
+    public TraceRecordBuilder(String producerId, String producerInstanceId, Clock clock, Supplier<String> recordIds,
+            boolean includeCredentialIdHash) {
         this.producerId = requireNonBlankArg(producerId, "producerId");
         this.producerInstanceId = requireNonBlankArg(producerInstanceId, "producerInstanceId");
         this.clock = Objects.requireNonNull(clock, "clock");
         this.recordIds = Objects.requireNonNull(recordIds, "recordIds");
+        this.includeCredentialIdHash = includeCredentialIdHash;
     }
 
     /**
@@ -177,7 +215,25 @@ public final class TraceRecordBuilder {
         ObjectNode event = trace.putObject(FIELD_EVENT);
         event.put(FIELD_CEREMONY_TYPE, ceremony.getType().name());
         event.put(FIELD_CEREMONY_OUTCOME, ceremony.getOutcome().name());
+        if (ceremony.getAuthenticatorAttachment() != null) {
+            event.put(FIELD_AUTHENTICATOR_ATTACHMENT, ceremony.getAuthenticatorAttachment());
+        }
+        if (includeCredentialIdHash && ceremony.getCredentialId() != null) {
+            byte[] raw = decodeCredentialId(ceremony.getCredentialId());
+            if (raw != null) {
+                event.put(FIELD_CREDENTIAL_ID_HASH, TraceHashes.sha256Prefixed(raw));
+            }
+        }
         return record;
+    }
+
+    /** @return the raw credential ID, or null if the value is not base64url (the field is then omitted, not guessed). */
+    private static byte[] decodeCredentialId(String credentialId) {
+        try {
+            return Base64.getUrlDecoder().decode(credentialId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static String requireNonBlankArg(String value, String name) {
