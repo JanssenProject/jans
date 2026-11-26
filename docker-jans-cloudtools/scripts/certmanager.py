@@ -8,9 +8,7 @@ import time
 from collections import Counter
 from collections import deque
 from contextlib import suppress
-from datetime import datetime
 from datetime import timedelta
-from datetime import UTC
 
 import click
 
@@ -24,6 +22,7 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import generate_ssl_ca_certkey
 from jans.pycloudlib.utils import generate_signed_ssl_certkey
+from jans.pycloudlib.utils import utcnow
 
 from settings import LOGGING_CONFIG
 
@@ -207,14 +206,14 @@ class SqlPersistence(BasePersistence):
 
     def create_archived_jwk(self, jwk, lifetime):
         table_name = "jansArchJwk"
-        utc_now = datetime.now(UTC)
+        now = utcnow()
         column_mapping = {
             "doc_id": jwk["kid"],
             "objectClass": table_name,
             "dn": f"jansId={jwk['kid']},ou=archived_jwks,o=jans",
             "jansId": jwk["kid"],
-            "creationDate": utc_now,
-            "exp": utc_now + timedelta(seconds=lifetime),
+            "creationDate": now,
+            "exp": now + timedelta(seconds=lifetime),
             "del": True,
             "jansData": json.dumps(jwk),
             "attr": json.dumps({"attributes": {}}),
