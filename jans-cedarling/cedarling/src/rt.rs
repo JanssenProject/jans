@@ -56,8 +56,8 @@ pub(crate) struct Steps<S, O> {
 ///
 /// On native targets the whole run goes to the blocking pool, and a panicking
 /// step comes back as [`TaskEnded`]. WebAssembly has one thread, so the run stays
-/// on it and hands the thread back to the browser event loop whenever a slice of
-/// [`STEP_SLICE_MILLIS`] has passed; a panic there aborts the module, so the
+/// on it and hands the thread back to the browser event loop ([`Yielder`])
+/// whenever a slice of [`STEP_SLICE_MILLIS`] has passed; a panic there aborts the module, so the
 /// result is always `Ok`.
 pub(crate) async fn run_steps<S, I, O, F>(
     state: S,
@@ -86,6 +86,7 @@ where
         let mut state = state;
         let mut step = step;
         let mut outputs = Vec::with_capacity(items.len());
+        let yielder = Yielder::new();
         let mut slice_start = js_sys::Date::now();
         for item in items {
             // Read on every step: `std::time::Instant` is not available on
@@ -97,7 +98,7 @@ where
             // pays about 0.2% for it, not worth reading only every few steps.
             let now = js_sys::Date::now();
             if now - slice_start >= STEP_SLICE_MILLIS {
-                yield_now().await;
+                yielder.yield_now().await;
                 slice_start = js_sys::Date::now();
             } else if now < slice_start {
                 // The wall clock went back: the slice counts from now.
@@ -125,17 +126,63 @@ fn run_all<S, I, O>(
 
 /// How long [`run_steps`] runs on WebAssembly before it hands the thread back.
 /// Timed rather than counted, so a caller need not know what one step costs.
-/// 4 ms is the shortest wait the browser gives a nested zero timer, so yielding
-/// never waits longer than it worked.
+/// [`Yielder`] resumes at once, so the slice is set for the page, not for a timer:
+/// about one 60 Hz frame, far below the 50 ms after which the browser reports a
+/// long task.
 #[cfg(target_family = "wasm")]
-const STEP_SLICE_MILLIS: f64 = 4.0;
+const STEP_SLICE_MILLIS: f64 = 16.0;
 
-/// Hands the thread back to the browser event loop once. A zero timer rather
-/// than a re-woken future: a wake only reorders the microtask queue, while a
-/// timer lets the event loop run authorization calls and UI events.
+/// Hands the thread back to the browser event loop, so it runs authorization
+/// calls and UI events, and resumes right after them. A re-woken future would
+/// only reorder the microtask queue and never reach the event loop.
+///
+/// A message to self, not a zero timer: from the sixth nested `setTimeout(0)`
+/// the browser waits at least 4 ms. Measured in headless Chrome 157 (release
+/// build), 12 yields in a row: zero timers resumed after 0.01-0.7 ms for the
+/// first six, then after 4.2 ms each; messages through one channel after
+/// 0.02-1.1 ms each, mostly under 0.1 ms. One channel serves a whole run.
 #[cfg(target_family = "wasm")]
-async fn yield_now() {
-    sleep(Duration::ZERO).await;
+struct Yielder {
+    /// `None` where the runtime has no `MessageChannel`; a zero timer then.
+    channel: Option<web_sys::MessageChannel>,
+}
+
+#[cfg(target_family = "wasm")]
+impl Yielder {
+    fn new() -> Self {
+        Self {
+            channel: web_sys::MessageChannel::new().ok(),
+        }
+    }
+
+    async fn yield_now(&self) {
+        // Send a message to ourselves: it resumes the task as the next event loop
+        // task, sooner than a timer, which waits at least 4 ms once nested.
+        let Some(channel) = &self.channel else {
+            sleep(Duration::ZERO).await;
+            return;
+        };
+        let port = channel.port1();
+        // `arrived` resolves when the message is delivered to `port1`; setting
+        // `onmessage` also starts the port.
+        let arrived = js_sys::Promise::new(&mut |resolve, _reject| {
+            port.set_onmessage(Some(&resolve));
+        });
+        if channel
+            .port2()
+            .post_message(&js_sys::wasm_bindgen::JsValue::UNDEFINED)
+            .is_err()
+        {
+            sleep(Duration::ZERO).await;
+            return;
+        }
+        // The yield itself: the task suspends here, as `JsFuture` stays pending
+        // until `arrived` resolves. Meanwhile the event loop runs what is queued
+        // before the message (input, rendering, other promises such as
+        // authorization calls); delivering the message wakes the task, and
+        // `wasm-bindgen-futures` polls it again. The promise is never rejected.
+        let _message = wasm_bindgen_futures::JsFuture::from(arrived).await;
+    }
 }
 
 /// Fires every `period`, starting one `period` after creation.

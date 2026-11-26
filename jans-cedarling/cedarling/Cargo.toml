@@ -92,8 +92,9 @@ tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 gloo-timers = { version = "0.4.0", features = ["futures"] }
-# `Date.now()` for timing work that yields to the browser (`rt::run_steps`)
+# `Date.now()` and a message to self, for work that yields to the browser (`rt::run_steps`)
 js-sys = { workspace = true }
+web-sys = { workspace = true, features = ["MessageChannel", "MessagePort"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = { workspace = true }
