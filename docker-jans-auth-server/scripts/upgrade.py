@@ -5,8 +5,6 @@ import logging.config
 import pathlib
 import os
 from collections import namedtuple
-from datetime import datetime
-from datetime import UTC
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -15,9 +13,9 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import utcnow
 
 from settings import LOGGING_CONFIG
-from utils import parse_lock_swagger_file
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-auth")
@@ -291,7 +289,7 @@ class Upgrade:
             plc_id = os.urandom(22).hex()
             policy_mapping["policy_stores"][ctx["policy_store_id"]]["policies"][plc_id] = {
                 "description": f"Policy for {plc.stem}",
-                "creation_date": datetime.now(UTC).isoformat(),
+                "creation_date": utcnow().isoformat(),
                 "policy_content": generate_base64_contents(plc.read_text(), num_spaces=0)
             }
 
