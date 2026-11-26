@@ -33,7 +33,6 @@ use super::ProducerId;
 use super::chain::{AppendError, ProducerChain};
 use super::record::RecordDraft;
 use super::status::EmitterEvent;
-use crate::async_sleep::sleep;
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::TraceConfig;
 use crate::common::app_types::PdpID;
@@ -41,10 +40,11 @@ use crate::common::retry::{
     Attempt, Backoff, RetryError, RetryPolicy, RetryUntilCancelledError, retry,
     retry_until_cancelled,
 };
-use crate::http::{JoinHandle, spawn_task};
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
+use crate::rt::sleep;
+use crate::rt::{JoinHandle, spawn_task};
 
 /// Lock error ids of a record Lock failed to store: the same bytes may succeed later.
 const TRANSIENT_ERRORS: [&str; 2] = ["storage_failure", "crypto_unavailable"];
@@ -1063,7 +1063,7 @@ async fn sign_batch_offloaded(
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
 ) -> Result<SignedBatch, SignTaskPanicked> {
-    #[allow(
+    #[expect(
         clippy::disallowed_methods,
         reason = "TRACE is rejected on WASM before it starts"
     )]

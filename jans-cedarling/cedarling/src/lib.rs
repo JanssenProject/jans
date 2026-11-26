@@ -18,7 +18,6 @@
 //! For example, why display form fields that a user is not authorized to see?
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
-mod async_sleep;
 mod authz;
 mod bootstrap_config;
 mod common;
@@ -29,6 +28,7 @@ mod init;
 mod jwt;
 mod lock;
 mod log;
+mod rt;
 mod trace;
 // is reexported in hidden bindings module
 #[doc(hidden)]
@@ -118,7 +118,7 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
-    pub use crate::http::spawn_task;
+    pub use crate::rt::spawn_task;
     pub use crate::sparkv;
     pub use serde_json;
     pub use serde_saphyr;

@@ -123,11 +123,7 @@ mod tests {
 
     fn signer() -> (SigningKey, Vec<u8>) {
         let sk = SigningKey::from_slice(&[7u8; 32]).expect("key generation from fixed seed");
-        let pk = sk
-            .verifying_key()
-            .to_encoded_point(false)
-            .as_bytes()
-            .to_vec();
+        let pk = sk.verifying_key().to_sec1_point(false).as_bytes().to_vec();
         (sk, pk)
     }
 
@@ -157,11 +153,7 @@ mod tests {
     fn p384_signer() -> (P384SigningKey, Vec<u8>) {
         let sk =
             P384SigningKey::from_slice(&[7u8; 48]).expect("P-384 key generation from fixed seed");
-        let pk = sk
-            .verifying_key()
-            .to_encoded_point(false)
-            .as_bytes()
-            .to_vec();
+        let pk = sk.verifying_key().to_sec1_point(false).as_bytes().to_vec();
         (sk, pk)
     }
 

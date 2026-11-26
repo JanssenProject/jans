@@ -13,11 +13,8 @@
 	</parent>
 
 	<properties>
-		<!--
-		  Matches the only current consumer (trust-adapters). file-staging-adapters pins a
-		  different Jackson (2.18.9); the two want reconciling when it adopts this module.
-		-->
-		<jackson.version>2.17.2</jackson.version>
+		<!-- 2.18.x line, patched for GHSA-cxp5-3px4-pw24 and related databind advisories. -->
+		<jackson.version>2.18.12</jackson.version>
 	</properties>
 
 	<dependencies>
