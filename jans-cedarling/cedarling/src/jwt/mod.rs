@@ -425,10 +425,10 @@ impl JwtService {
         {
             let cache = token_cache.clone();
             let cancel = jwks_cancel_token.clone();
-            crate::http::spawn_task(async move {
+            crate::rt::spawn_task(async move {
                 loop {
                     tokio::select! {
-                        () = crate::async_sleep::sleep(std::time::Duration::from_secs(30)) => {},
+                        () = crate::rt::sleep(std::time::Duration::from_secs(30)) => {},
                         () = cancel.cancelled() => { break; },
                     }
                     cache.clear_expired();
@@ -691,7 +691,7 @@ impl JwtService {
                 Some(dur) => {
                     tokio::select! {
                         res = process_fut => res?,
-                        () = crate::async_sleep::sleep(dur) => {
+                        () = crate::rt::sleep(dur) => {
                             return Err(CustomTokenError::Timeout(dur).into());
                         },
                     }

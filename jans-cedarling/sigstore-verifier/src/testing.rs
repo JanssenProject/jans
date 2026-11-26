@@ -63,7 +63,7 @@ impl TestSigner {
         let ctfe_sk = SigningKey::from_slice(&[5u8; 32]).expect("fixed CTFE test key");
         let rekor_sk = SigningKey::from_slice(&[3u8; 32]).expect("fixed Rekor test key");
         let ctfe_log_id =
-            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_encoded_point(false).as_bytes())
+            crate::crypto::p256_key_id(ctfe_sk.verifying_key().to_sec1_point(false).as_bytes())
                 .expect("P-256 uncompressed point is 65 bytes");
         let opts = LeafOpts {
             san_uri: Some(Self::IDENTITY),

@@ -23,7 +23,7 @@ extra:
     cookies:
       analytics:
         name: Scarf &amp; Reo.dev analytics
-        checked: false
+        checked: true
   social:
   - icon: fontawesome/brands/github
     link: https://github.com/JanssenProject/jans
