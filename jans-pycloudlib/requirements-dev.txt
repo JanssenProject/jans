@@ -10,3 +10,4 @@ mkdocstrings-python>=0.7.1
 mkdocs-click>=0.8.0
 
 idna>=3.15
+pymdown-extensions>=10.21.3 # not directly required, pinned by Snyk to avoid a vulnerability
