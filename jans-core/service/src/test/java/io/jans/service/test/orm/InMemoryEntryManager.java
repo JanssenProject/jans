@@ -41,7 +41,7 @@ import io.jans.orm.annotation.DN;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.PersistenceException;
-import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.exception.operation.MissingEntrySearchException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
@@ -61,7 +61,7 @@ import io.jans.orm.search.filter.Filter;
  * {@link SQLException} with SQL state 23505. With the persistence type {@code spanner} or
  * {@code couchbase}, {@code persist} overwrites instead, as those backends do.</li>
  * <li>{@code find} and {@code merge} of a missing DN throw {@link EntryPersistenceException} caused by a
- * {@link SearchException} without a cause, as the SQL lookup does.</li>
+ * {@link MissingEntrySearchException} without a cause, as the SQL lookup does.</li>
  * <li>{@code encodeTime} returns ISO-8601 instants; filter values in that format are compared as dates.</li>
  * </ul>
  *
@@ -218,6 +218,7 @@ public class InMemoryEntryManager implements InvocationHandler {
         case "findForUpdate":
             Object locked = store.get(String.valueOf(args[1]));
             return locked == null ? null : copy(locked);
+        case "persistNew":
         case "persist":
             if (types.length == 1) {
                 persist(args[0]);
@@ -421,7 +422,7 @@ public class InMemoryEntryManager implements InvocationHandler {
      */
     public static EntryPersistenceException missing(String dn) {
         return new EntryPersistenceException(String.format("Failed to find entry: '%s'", dn),
-                new SearchException(String.format("Failed to lookup entry by key: '%s'", dn)));
+                new MissingEntrySearchException(String.format("Failed to lookup entry by key: '%s'", dn)));
     }
 
     /**

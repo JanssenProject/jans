@@ -188,11 +188,16 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
     @Override
     public boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException {
+        return addEntry(key, objectClass, attributes, false);
+    }
+
+    @Override
+    public boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes, boolean createOnly) throws DuplicateEntryException, PersistenceException {
         Instant startTime = OperationDurationUtil.instance().now();
 
         TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
 
-        boolean result = addEntryImpl(tableMapping, key, attributes);
+        boolean result = addEntryImpl(tableMapping, key, attributes, createOnly);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("SQL operation: add, duration: {}, table: {}, key: {}, attributes: {}", duration, tableMapping.getTableName(), key, getAttributeNames(attributes));
@@ -200,12 +205,13 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
         return result;
     }
 
-	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
+	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes, boolean createOnly) throws PersistenceException {
 		try {
 			MessageDigest messageDigest = getMessageDigestInstance();
 			Map<String, StructField> columTypes = tableMapping.getColumTypes();
 
-			WriteBuilder mutationBuilder = Mutation.newInsertOrUpdateBuilder(tableMapping.getTableName());
+			WriteBuilder mutationBuilder = createOnly ? Mutation.newInsertBuilder(tableMapping.getTableName())
+                    : Mutation.newInsertOrUpdateBuilder(tableMapping.getTableName());
 			List<Mutation> mutations = new LinkedList<>();
 			for (AttributeData attribute : attributes) {
 				String attributeName = attribute.getName();

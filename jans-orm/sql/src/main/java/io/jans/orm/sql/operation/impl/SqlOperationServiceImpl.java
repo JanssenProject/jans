@@ -62,6 +62,7 @@ import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
 import io.jans.orm.exception.operation.EntryNotFoundException;
 import io.jans.orm.exception.operation.PersistenceException;
+import io.jans.orm.exception.operation.MissingEntrySearchException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
@@ -810,7 +811,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			throw new SearchException(String.format("Failed to lookup query by key: '%s'", key), ex);
 		}
 
-		throw new SearchException(String.format("Failed to lookup entry by key: '%s'", key));
+		throw new MissingEntrySearchException(String.format("Failed to lookup entry by key: '%s'", key));
 	}
 
 	@Override
@@ -1175,8 +1176,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
     private List<AttributeData> getAttributeDataList(TableMapping tableMapping, ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
         try {
-            if ((resultSet == null)) {
-                return null;
+            if (resultSet == null) {
+                throw new EntryConvertationException("Lookup returned no result set");
             }
 
             if (!resultSet.next()) {

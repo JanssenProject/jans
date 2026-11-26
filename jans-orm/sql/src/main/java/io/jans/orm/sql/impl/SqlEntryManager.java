@@ -179,6 +179,11 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     }
 
     @Override
+    public void persistNew(Object entry) {
+        persist(entry);
+    }
+
+    @Override
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
     	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
 

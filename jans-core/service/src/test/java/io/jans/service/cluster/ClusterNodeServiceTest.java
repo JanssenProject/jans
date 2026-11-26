@@ -102,7 +102,7 @@ public class ClusterNodeServiceTest {
         fake.put(node(0, TYPE_A, "key-a0", new Date(now)));
         AtomicBoolean raced = new AtomicBoolean();
         fake.setFailureInjector((method, args) -> {
-            if ("persist".equals(method) && raced.compareAndSet(false, true)) {
+            if ("persistNew".equals(method) && raced.compareAndSet(false, true)) {
                 fake.put(node(1, TYPE_A, "key-a1", new Date(now)));
             }
             return null;

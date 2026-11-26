@@ -63,6 +63,11 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	void persist(Object entry);
 
+	/** Atomically creates an entry, failing without modifying it if its key already exists. */
+	default void persistNew(Object entry) {
+		throw new UnsupportedOperationException("Create-only persistence is unavailable");
+	}
+
 	/**
 	 * Updates {@code entry}. For a class with a {@code @Version} field, on backends that support
 	 * {@link #updateWithVersion(Object)}, the write is conditional on the version read just before it

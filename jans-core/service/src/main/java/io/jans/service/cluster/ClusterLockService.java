@@ -31,7 +31,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.TransactionCallback;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.exception.operation.MissingEntrySearchException;
 import io.jans.orm.search.filter.Filter;
 import jakarta.inject.Inject;
 
@@ -502,17 +502,8 @@ public abstract class ClusterLockService {
         entryManager().merge(state);
     }
 
-    /**
-     * SQL and LDAP report a missing entry as {@link EntryPersistenceException} caused by a
-     * {@link SearchException} that has no cause of its own. A failed query has a deeper cause.
-     */
     static boolean isMissingEntry(EntryPersistenceException ex) {
-        Throwable cause = ex.getCause();
-        if (cause == null) {
-            return false;
-        }
-
-        return (cause instanceof SearchException) && (cause.getCause() == null);
+        return ex.getCause() instanceof MissingEntrySearchException;
     }
 
     private static Throwable getRootCause(Throwable ex) {

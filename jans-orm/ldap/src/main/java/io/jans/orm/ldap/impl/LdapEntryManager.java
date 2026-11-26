@@ -174,6 +174,11 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     }
 
     @Override
+    public void persistNew(Object entry) {
+        persist(entry);
+    }
+
+    @Override
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
         List<Attribute> ldapAttributes = new ArrayList<Attribute>(attributes.size());
         for (AttributeData attribute : attributes) {

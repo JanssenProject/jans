@@ -37,6 +37,7 @@ import com.couchbase.client.java.kv.MutateInOptions;
 import com.couchbase.client.java.kv.MutateInResult;
 import com.couchbase.client.java.kv.MutateInSpec;
 import com.couchbase.client.java.kv.MutationResult;
+import com.couchbase.client.java.kv.InsertOptions;
 import com.couchbase.client.java.kv.UpsertOptions;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
@@ -180,10 +181,15 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
     @Override
     public boolean addEntry(String key, JsonObject jsonObject, Integer expiration) throws DuplicateEntryException, PersistenceException {
+        return addEntry(key, jsonObject, expiration, false);
+    }
+
+    @Override
+    public boolean addEntry(String key, JsonObject jsonObject, Integer expiration, boolean createOnly) throws DuplicateEntryException, PersistenceException {
         Instant startTime = OperationDurationUtil.instance().now();
 
         BucketMapping bucketMapping = connectionProvider.getBucketMappingByKey(key);
-        boolean result = addEntryImpl(bucketMapping, key, jsonObject, expiration);
+        boolean result = addEntryImpl(bucketMapping, key, jsonObject, expiration, createOnly);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("Couchbase operation: add, duration: {}, bucket: {}, key: {}, attributes: {}", duration, bucketMapping.getBucketName(), key, (jsonObject == null) ? null : jsonObject.getNames());
@@ -191,8 +197,15 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         return result;
     }
 
-	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject, Integer expiration) throws PersistenceException {
+	private boolean addEntryImpl(BucketMapping bucketMapping, String key, JsonObject jsonObject, Integer expiration, boolean createOnly) throws PersistenceException {
 		try {
+			if (createOnly) {
+				InsertOptions options = InsertOptions.insertOptions();
+				if (expiration != null) {
+					options.expiry(Duration.ofSeconds(expiration));
+				}
+				return bucketMapping.getBucket().defaultCollection().insert(key, jsonObject, options) != null;
+			}
 			UpsertOptions upsertOptions = UpsertOptions.upsertOptions();
 			if (expiration != null) {
 				upsertOptions = upsertOptions.expiry(Duration.ofSeconds(expiration));

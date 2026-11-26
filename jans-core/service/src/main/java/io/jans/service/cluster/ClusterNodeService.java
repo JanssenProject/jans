@@ -164,7 +164,7 @@ public abstract class ClusterNodeService {
     }
 
     protected void persist(ClusterNode clusterNode) {
-        entryManager.persist(clusterNode);
+        entryManager.persistNew(clusterNode);
     }
 
     public void update(ClusterNode clusterNode) {

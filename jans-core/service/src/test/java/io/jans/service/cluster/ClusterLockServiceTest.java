@@ -455,9 +455,10 @@ public class ClusterLockServiceTest {
     @Test
     public void missingEntryIsToldApartFromReadError() {
         assertTrue(ClusterLockService.isMissingEntry(InMemoryEntryManager.missing("dn")));
-        assertTrue(ClusterLockService.isMissingEntry(new EntryPersistenceException("Failed to find entry: 'dn'")));
+        assertFalse(ClusterLockService.isMissingEntry(new EntryPersistenceException("Failed to find entry: 'dn'")));
         assertFalse(ClusterLockService.isMissingEntry(
                 new EntryPersistenceException("x", new SearchException("Failed to lookup query", new RuntimeException("io")))));
+        assertFalse(ClusterLockService.isMissingEntry(new EntryPersistenceException("x", new SearchException("invalid query"))));
         assertFalse(ClusterLockService.isMissingEntry(new EntryPersistenceException("x", new RuntimeException("io"))));
     }
 
