@@ -31,6 +31,7 @@ jans-trace-core = { path = "jans-trace-core", version = "0.0.0" }
 test_utils = { path = "test_utils" }
 sigstore-verifier = { path = "sigstore-verifier", version = "0.0.0" }
 wasm-bindgen = "0.2.103"
+js-sys = "0.3"
 wasm-bindgen-futures = "0.4.53"
 web-sys = "0.3"
 serde-wasm-bindgen = "0.6"

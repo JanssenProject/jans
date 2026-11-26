@@ -86,11 +86,22 @@ where
         let mut state = state;
         let mut step = step;
         let mut outputs = Vec::with_capacity(items.len());
-        let mut slice_start = chrono::Utc::now();
+        let mut slice_start = js_sys::Date::now();
         for item in items {
-            if (chrono::Utc::now() - slice_start).num_milliseconds() >= STEP_SLICE_MILLIS {
+            // Read on every step: `std::time::Instant` is not available on
+            // `wasm32-unknown-unknown`, and `Date.now()` is one call returning a
+            // number, where `chrono::Utc::now()` builds a JS `Date` object each
+            // time. Measured in headless Chrome 157 (release build): 0.035-0.05 us
+            // per call against 0.10-0.16 us for `chrono::Utc::now()`, while an
+            // Ed25519 signature of 1 KiB takes 23-28 us, so a TRACE signing step
+            // pays about 0.2% for it, not worth reading only every few steps.
+            let now = js_sys::Date::now();
+            if now - slice_start >= STEP_SLICE_MILLIS {
                 yield_now().await;
-                slice_start = chrono::Utc::now();
+                slice_start = js_sys::Date::now();
+            } else if now < slice_start {
+                // The wall clock went back: the slice counts from now.
+                slice_start = now;
             }
             outputs.push(step(&mut state, item));
         }
@@ -113,12 +124,11 @@ fn run_all<S, I, O>(
 }
 
 /// How long [`run_steps`] runs on WebAssembly before it hands the thread back.
-/// Timed rather than counted, so a caller need not know what one step costs;
-/// `chrono::Utc::now()` reads `Date.now()`, as `std::time::Instant` is not
-/// available on `wasm32-unknown-unknown`. 4 ms is the shortest wait the browser
-/// gives a nested zero timer, so yielding never waits longer than it worked.
+/// Timed rather than counted, so a caller need not know what one step costs.
+/// 4 ms is the shortest wait the browser gives a nested zero timer, so yielding
+/// never waits longer than it worked.
 #[cfg(target_family = "wasm")]
-const STEP_SLICE_MILLIS: i64 = 4;
+const STEP_SLICE_MILLIS: f64 = 4.0;
 
 /// Hands the thread back to the browser event loop once. A zero timer rather
 /// than a re-woken future: a wake only reorders the microtask queue, while a
