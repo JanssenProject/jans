@@ -294,8 +294,13 @@ public abstract class MetricAggregationManager {
                 return new MetricAggregationRunResult(MetricAggregationRunResult.Status.RELEASE_UNCONFIRMED, slot, context.buckets,
                         context.failedBuckets, context.rowsWritten, durationMillis);
             }
-            lockService.purgeExpired(task, PURGE_LIMIT);
-            logRun(applicationType, context, result);
+
+            try {
+				lockService.purgeExpired(task, PURGE_LIMIT);
+			} catch (RuntimeException purgeEx) {
+				LOG.debug("Failed to purge expired claims of task '{}'", task, purgeEx);
+			}
+			logRun(applicationType, context, result);
 
             return result;
         } catch (RuntimeException ex) {
