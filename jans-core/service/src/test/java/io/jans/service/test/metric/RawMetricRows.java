@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import io.jans.model.metric.ldap.MetricDataEntry;
+import io.jans.model.metric.ldap.OrderedRawEntry;
 
 /**
  * Builds raw {@code jansMetric} rows the way {@code PersistenceEntryReporter} writes them: the end date is
@@ -34,7 +35,7 @@ public final class RawMetricRows {
             Instant reportTime, Duration interval, String data, Date expirationDate) {
         String id = UUID.nameUUIDFromBytes((applicationType + "|" + host + "|" + metricType + "|" + subType + "|" + reportTime.toEpochMilli())
                 .getBytes(StandardCharsets.UTF_8)).toString();
-        MetricDataEntry entry = new MetricDataEntry();
+        MetricDataEntry entry = new OrderedRawEntry();
         entry.setId(id);
         entry.setDn("uniqueIdentifier=" + id + ",ou=" + PERIOD.format(reportTime) + ",ou=" + applicationType + "," + metricBaseDn);
         entry.setApplicationType(applicationType);

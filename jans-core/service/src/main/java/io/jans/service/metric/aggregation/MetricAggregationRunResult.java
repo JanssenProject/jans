@@ -24,7 +24,7 @@ public class MetricAggregationRunResult {
         NOT_CLAIMED,
         /** The slot was claimed, but an earlier run is still active; released as {@code skipped}. */
         SKIPPED,
-        /** The task state could not be read; released as {@code failed}. */
+        /** The task state could not be read or saved; released as {@code failed}. */
         STATE_ERROR,
         /** The run finished; released as {@code done}. */
         DONE,

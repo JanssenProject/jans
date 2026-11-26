@@ -215,7 +215,12 @@ public class MetricAggregator {
             return null;
         }
         if (node.has("durationUnit")) {
-            return TimerAggregateData.KIND;
+            try {
+                TimeUnit.valueOf(node.path("durationUnit").asText("").toUpperCase(Locale.ROOT));
+                return TimerAggregateData.KIND;
+            } catch (IllegalArgumentException ex) {
+                return null;
+            }
         }
         if (node.has("count")) {
             return CounterAggregateData.KIND;
@@ -386,7 +391,7 @@ public class MetricAggregator {
      *
      * <p>{@code complete} is {@code true} when {@code childWatermark} is at or after the end of the period
      * (the source level has been processed for the whole period; periods without children are empty) and
-     * every child is complete. Monthly periods must also lie wholly within daily source retention;
+     * every child is complete. Weekly and monthly periods must also lie wholly within daily source retention;
      * otherwise missing expired children cannot be distinguished from empty days.</p>
      *
      * @param children       aggregates of {@link #sourceLevel} whose {@code jansStartDate} lies in the period
@@ -425,12 +430,13 @@ public class MetricAggregator {
         childRows.sort(CHILD_ROW_ORDER);
 
         boolean sourceProcessed = childWatermark != null && !childWatermark.isBefore(bucket.getEnd())
-                && (bucket.getType() != MetricAggregationType.MONTHLY || hasRetainedDailySource(bucket, creationDate.toInstant()));
+                && (sourceLevel != MetricAggregationType.DAILY || hasRetainedDailySource(bucket, creationDate.toInstant()));
 
         Map<AggregateKey, Accumulator> accumulators = new TreeMap<>();
         for (ChildRow row : childRows) {
             Accumulator accumulator = accumulators.computeIfAbsent(row.key, k -> new Accumulator(row.data.getKind()));
             if (!accumulator.kind.equals(row.data.getKind())) {
+                unreadableKeys.add(row.key);
                 LOG.debug("Skipping aggregate of kind {} for key {} of kind {}", row.data.getKind(), row.key, accumulator.kind);
                 continue;
             }

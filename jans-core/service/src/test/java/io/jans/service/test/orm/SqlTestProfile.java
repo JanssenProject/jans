@@ -40,6 +40,10 @@ public final class SqlTestProfile {
      * @throws SkipException when the system property {@value #PROFILE_PROPERTY} is not set
      */
     public static PersistenceEntryManager createEntryManager() throws IOException {
+        return createEntryManager(null);
+    }
+
+    public static PersistenceEntryManager createEntryManager(String requiredDatabase) throws IOException {
         String profile = System.getProperty(PROFILE_PROPERTY);
         if (StringUtils.isBlank(profile)) {
             throw new SkipException("DB profile is not set; run with -D" + PROFILE_PROPERTY + "=<profile directory>");
@@ -57,6 +61,16 @@ public final class SqlTestProfile {
             decrypted = PropertiesDecrypter.decryptAllProperties(StringEncrypter.instance(encodeSalt.trim()), sqlProperties);
         } catch (StringEncrypter.EncryptionException ex) {
             throw new IllegalStateException("Failed to decrypt the profile properties", ex);
+        }
+        if (requiredDatabase != null) {
+            String url = decrypted.getProperty("connection.uri", "");
+            if (!url.matches("jdbc:(postgresql|mysql)://[^/?;]+/" + java.util.regex.Pattern.quote(requiredDatabase)
+                    + "(\\?[^;]*)?")) {
+                throw new SkipException("Configure the SQL profile for the dedicated database " + requiredDatabase);
+            }
+            if (url.startsWith("jdbc:mysql:") && !requiredDatabase.equals(decrypted.getProperty("db.schema.name"))) {
+                throw new SkipException("Configure the MySQL schema for " + requiredDatabase);
+            }
         }
         String sslFactoryArg = decrypted.getProperty(SSL_FACTORY_ARG);
         if ((sslFactoryArg != null) && sslFactoryArg.startsWith(FILE_URL_PREFIX)) {

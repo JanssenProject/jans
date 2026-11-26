@@ -151,7 +151,8 @@ public class MetricAggregationManagerDbTest {
             slots.add(done.getSlot());
             clock.advance(Duration.ofSeconds(configuration.getRunIntervalSeconds()));
         }
-        assertEquals(hourlyPerRound, Arrays.asList(20, 20, 8, 2, 2));
+        // The cutoff is halfway through the first hour: only 47 whole hours are retained.
+        assertEquals(hourlyPerRound, Arrays.asList(20, 20, 7, 2, 2));
 
         List<ClusterLock> claims = new ArrayList<>();
         for (ClusterLock entry : entryManager.findEntries(NODE_BASE_DN, ClusterLock.class, Filter.createEqualityFilter("jansType", task))) {

@@ -29,7 +29,7 @@ The metric reporter switch is different for each application:
 | Application | Metric reporter switch |
 |---|---|
 | jans-auth | the `metric` value in the `featureFlags` list. The `metricReporterEnabled` key that appears in the jans-auth configuration template is not read by jans-auth. |
-| jans-lock | `metricReporterEnabled` |
+| jans-lock and FIDO2 | `metricReporterEnabled` |
 
 Turning the reporter on is therefore enough to turn aggregation on.
 
@@ -38,7 +38,8 @@ aggregation described in [Passkey Telemetry & Metrics](../../fido/passkey-teleme
 not affect the aggregation described here.
 
 jans-lock starts its metric reporter before scheduling aggregation when `metricReporterEnabled` is
-true. This aggregation flow is available in jans-auth and jans-lock on SQL; it is not wired into FIDO2.
+true. This aggregation flow is available in jans-auth, jans-lock and FIDO2 on SQL. With both switches enabled, FIDO2 writes these rows to
+`jansMetricAggregation`. Its separate passkey telemetry scheduler writes to `jansFido2MetricsAggregation`.
 
 ## One node per slot
 
@@ -52,13 +53,13 @@ expired claims of its task. A run reports completion only after release is confi
 Each node that loses a claim insert causes one database server error line (a duplicate key on
 `jansClusterLock`) per slot. This is expected.
 
-Each application type is aggregated separately: jans-auth and jans-lock each have their own
+Each application type is aggregated separately: jans-auth, jans-lock and FIDO2 each have their own
 claims and their own progress record.
 
 ## Properties
 
 The settings are in the `metricAggregationConfiguration` object of the dynamic configuration of
-jans-auth and jans-lock. Every property is optional. A missing property, or a numeric
+jans-auth, jans-lock and FIDO2. Every property is optional. A missing property, or a numeric
 value of 0 or less, gives the default. An upgraded installation without the object works with the
 defaults.
 
@@ -115,10 +116,11 @@ Example:
 - Periods without raw rows produce no row. An unreadable child makes its key's rollup incomplete.
 - Hourly raw rows are processed in bounded pages, carrying per-series cumulative counts between
   pages. The watermark advances only after every page and aggregate write for a bucket succeeds.
-- Recomputation skips hourly buckets whose raw rows may have expired. Monthly buckets are skipped
-  when daily retention no longer covers the whole month, including a cutoff within its first day.
+- A bucket is skipped if its source retention no longer covers the whole period. Hours require raw
+  rows, days require hourly rows, and weeks and months require daily rows.
 - Reporter rows are persisted in one atomic SQL batch. A failed batch leaves interval baselines
-  unchanged and its inserts are rolled back before retry.
+  unchanged and its inserts are rolled back before retry. Stores without atomic batch support save
+  raw report rows individually; earlier inserts can survive a later failure.
 
 The `exp` of a row is set from the `keep*Days` property of its level. Expired rows are removed by
 the periodic data cleaner of the installation.
@@ -161,7 +163,7 @@ Replace the schema `public` and the owner `jans` (PostgreSQL), or the database n
 === "MySQL"
 
     ```sql
-    CREATE TABLE `jansClusterLock` (`doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48),
+    CREATE TABLE `jansdb`.`jansClusterLock` (`doc_id` VARCHAR(64) NOT NULL UNIQUE, `objectClass` VARCHAR(48),
       dn VARCHAR(128),
       `jansId` VARCHAR(128) COMMENT "Identifier",
       `jansType` VARCHAR(64) COMMENT "Type of the entry",

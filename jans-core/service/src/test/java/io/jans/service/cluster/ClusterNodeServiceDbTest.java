@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -32,7 +30,7 @@ import io.jans.service.test.cluster.FixedClusterNodeService;
 import io.jans.service.test.orm.SqlTestProfile;
 
 /**
- * SQL allocation for two types under an isolated test base with a seeded foreign-type node.
+ * SQL allocation for two types in the dedicated jans_node_allocation_test database with a seeded foreign-type node.
  * Only confirmed inserts owned by this test are removed, including after assertion failures.
  */
 public class ClusterNodeServiceDbTest {
@@ -45,28 +43,10 @@ public class ClusterNodeServiceDbTest {
     private final String typeB = "t10b-" + suffix;
 
     private PersistenceEntryManager entryManager;
-    private PersistenceEntryManager scopedEntryManager;
 
     @BeforeClass
     public void createEntryManager() throws Exception {
-        entryManager = SqlTestProfile.createEntryManager();
-        // SQL tables share their first-RDN key space. Scope searches explicitly so live node
-        // allocations cannot affect the test's maximum-ID lookup or foreign-node assertions.
-        scopedEntryManager = (PersistenceEntryManager) Proxy.newProxyInstance(PersistenceEntryManager.class.getClassLoader(),
-                new Class<?>[] { PersistenceEntryManager.class }, (proxy, method, args) -> {
-                    Object[] scoped = args;
-                    if (("findEntries".equals(method.getName()) || "findPagedEntries".equals(method.getName()))
-                            && args.length >= 3 && args[1] == ClusterNode.class && args[2] instanceof Filter) {
-                        scoped = args.clone();
-                        scoped[2] = Filter.createANDFilter((Filter) args[2],
-                                Filter.createSubstringFilter("dn", null, null, "," + baseDn));
-                    }
-                    try {
-                        return method.invoke(entryManager, scoped);
-                    } catch (InvocationTargetException ex) {
-                        throw ex.getCause();
-                    }
-                });
+        entryManager = SqlTestProfile.createEntryManager("jans_node_allocation_test");
     }
 
     @AfterClass(alwaysRun = true)
@@ -142,7 +122,7 @@ public class ClusterNodeServiceDbTest {
     }
 
     private FixedClusterNodeService trackingService(String type, String key) {
-        return new FixedClusterNodeService(scopedEntryManager, baseDn, type, key) {
+        return new FixedClusterNodeService(entryManager, baseDn, type, key) {
             @Override
             protected void persist(ClusterNode node) {
                 super.persist(node);

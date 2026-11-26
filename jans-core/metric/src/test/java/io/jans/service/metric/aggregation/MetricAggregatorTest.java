@@ -297,6 +297,18 @@ class MetricAggregatorTest {
     }
 
     @Test
+    void invalidTimerUnitDoesNotReplaceLegacyBaseline() throws Exception {
+        String first = timer(10, null, 1, 2, 1, 1, 1, 1, 1, 1, 1);
+        String invalid = timer(100, null, 1, 2, 1, 1, 1, 1, 1, 1, 1).replace("milliseconds", "invalid");
+        String last = timer(15, null, 1, 2, 1, 1, 1, 1, 1, 1, 1);
+        List<MetricDataEntry> rows = Arrays.asList(raw("h1", TIMER_TYPE, null, inHour(5), first),
+                raw("h1", TIMER_TYPE, null, inHour(10), invalid), raw("h1", TIMER_TYPE, null, inHour(15), last));
+        AggregateData result = data(only(aggregator.aggregateRaw(rows, HOUR, true, CREATED)));
+        assertEquals(5, result.getCount());
+        assertEquals(2, result.getSourceRows());
+    }
+
+    @Test
     void childTimerStatisticsAreNormalizedToMilliseconds() throws Exception {
         String milliseconds = timer(1, 1L, 1, 9, 3, 4, 5, 6, 7, 8, 9);
         MetricAggregationEntry first = only(aggregator.aggregateRaw(Collections.singletonList(
@@ -363,7 +375,7 @@ class MetricAggregatorTest {
         MetricAggregationEntry entry = only(aggregator.aggregateRaw(
                 Collections.singletonList(raw("h1", COUNTER_TYPE, "sub", inHour(10), counter(1, 1))), HOUR, true, CREATED));
 
-        String expectedId = UUID.nameUUIDFromBytes(("HOURLY|" + APP + "|" + COUNTER_TYPE + "|sub|" + HOUR.getStart().toEpochMilli())
+        String expectedId = UUID.nameUUIDFromBytes(("6:HOURLY9:jans_auth22:tkn_access_token_count3:sub13:" + HOUR.getStart().toEpochMilli())
                 .getBytes(StandardCharsets.UTF_8)).toString();
         assertEquals(expectedId, entry.getId());
         assertEquals("uniqueIdentifier=" + expectedId + ",ou=aggregation,ou=statistic,o=metric", entry.getDn());
@@ -565,6 +577,15 @@ class MetricAggregatorTest {
         for (MetricAggregationEntry entry : daily) {
             assertEquals("other".equals(entry.getMetricType()), data(entry).isComplete());
         }
+    }
+
+    @Test
+    void mixedKindsLeaveKeyIncomplete() throws Exception {
+        List<MetricAggregationEntry> children = hourlyCounters(-1, -1);
+        MetricAggregationEntry timerChild = only(aggregator.aggregateRaw(Collections.singletonList(raw("h1", COUNTER_TYPE,
+                null, inHour(10), timer(1, 1L, 1, 1, 1, 1, 1, 1, 1, 1, 1))), HOUR, true, CREATED));
+        children.set(10, timerChild);
+        assertFalse(data(only(aggregator.rollup(children, DAY, DAY.getEnd(), CREATED))).isComplete());
     }
 
     @Test

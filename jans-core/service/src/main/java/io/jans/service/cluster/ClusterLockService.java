@@ -330,12 +330,20 @@ public abstract class ClusterLockService {
      * @return {@code true} when the data was written
      */
     public boolean saveState(ClusterLock claim, UnaryOperator<String> update) {
+        return saveState(claim, update, false);
+    }
+
+    /** When required, only the task writer registered on the state row may change progress. */
+    public boolean saveState(ClusterLock claim, UnaryOperator<String> update, boolean requireWriter) {
         requireClaim(claim);
         String task = claim.getTask();
         String dn = buildStateDn(task);
         try {
             return withActiveClaim(claim, entryManager(), dn, () -> {
                 ClusterLock state = entryManager().findForUpdate(ClusterLock.class, dn);
+                if (requireWriter && (state == null || !claim.getLockKey().equals(state.getLockKey()))) {
+                    throw new IllegalStateException("Task writer changed");
+                }
                 Date now = Date.from(clock.instant());
                 if (state != null) {
                     updateState(state, update.apply(state.getData()), now, claim.getLockKey());

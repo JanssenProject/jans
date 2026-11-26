@@ -351,19 +351,19 @@ public class InMemoryEntryManager implements InvocationHandler {
             int start, int count) {
         List<Object> matched = findEntries(baseDn, entryClass, filter, Integer.MAX_VALUE);
         Comparator<Object> order = Comparator.comparing(InMemoryEntryManager::getDn);
-        if (sortBy != null) {
-            Comparator<Object> bySortAttribute = (left, right) -> {
-                List<Object> leftValues = getValues(left, sortBy);
-                List<Object> rightValues = getValues(right, sortBy);
+        io.jans.orm.annotation.DataEntry mapping = entryClass.getAnnotation(io.jans.orm.annotation.DataEntry.class);
+        String[] keys = sortBy != null ? new String[] { sortBy } : mapping != null ? mapping.sortByName() : new String[0];
+        for (int i = keys.length - 1; i >= 0; i--) {
+            String key = keys[i];
+            Comparator<Object> byAttribute = (left, right) -> {
+                List<Object> leftValues = getValues(left, key);
+                List<Object> rightValues = getValues(right, key);
                 if (leftValues.isEmpty() || rightValues.isEmpty()) {
                     return Boolean.compare(!leftValues.isEmpty(), !rightValues.isEmpty());
                 }
                 return compare(leftValues.get(0), rightValues.get(0));
             };
-            if (sortOrder == SortOrder.DESCENDING) {
-                bySortAttribute = bySortAttribute.reversed();
-            }
-            order = bySortAttribute.thenComparing(order);
+            order = (sortOrder == SortOrder.DESCENDING ? byAttribute.reversed() : byAttribute).thenComparing(order);
         }
         matched.sort(order);
 
