@@ -1,0 +1,182 @@
+<mxfile host="app.diagrams.net" agent="Copilot">
+  <diagram id="cedarling-deployment" name="Cedarling Deployment">
+    <mxGraphModel dx="1625" dy="902" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1680" pageHeight="760" background="#071627" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="browser-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#091b2b;strokeColor=#0e696a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#26d7c6;fontSize=18;fontStyle=1;align=left;verticalAlign=top;spacingLeft=26;spacingTop=18;" value="BROWSER" vertex="1">
+          <mxGeometry height="372" width="408" x="48" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#0a1a2e;strokeColor=#24578a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#5aa4ff;fontSize=18;fontStyle=1;align=left;verticalAlign=top;spacingLeft=26;spacingTop=18;" value="MOBILE DEVICE" vertex="1">
+          <mxGeometry height="372" width="408" x="504" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#191918;strokeColor=#72500d;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#ffbd17;fontSize=18;fontStyle=1;align=left;verticalAlign=top;spacingLeft=26;spacingTop=18;" value="BACKEND" vertex="1">
+          <mxGeometry height="468" width="672" x="960" y="48" as="geometry" />
+        </mxCell>
+        <mxCell id="browser-app-down" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="252" y="216" as="sourcePoint" />
+            <mxPoint x="252" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mobile-app-down" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="708" y="216" as="sourcePoint" />
+            <mxPoint x="708" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-sdk-trunk" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1296" y="216" as="sourcePoint" />
+            <mxPoint x="1296" y="246" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-sdk-branch" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=none;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1041" y="246" as="sourcePoint" />
+            <mxPoint x="1550" y="246" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-rust-arrow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1041" y="246" as="sourcePoint" />
+            <mxPoint x="1041" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-python-arrow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1168" y="246" as="sourcePoint" />
+            <mxPoint x="1168" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-java-arrow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1296" y="246" as="sourcePoint" />
+            <mxPoint x="1296" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-go-arrow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1423" y="246" as="sourcePoint" />
+            <mxPoint x="1423" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-c-arrow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="246" as="sourcePoint" />
+            <mxPoint x="1550" y="276" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="browser-logs" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="276" y="624" />
+            </Array>
+            <mxPoint x="276" y="420" as="sourcePoint" />
+            <mxPoint x="600" y="624" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="browser-policy" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="228" y="672" />
+            </Array>
+            <mxPoint x="600" y="672" as="sourcePoint" />
+            <mxPoint x="228" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mobile-policy" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="660" y="540" />
+              <mxPoint x="564" y="540" />
+            </Array>
+            <mxPoint x="660" y="576" as="sourcePoint" />
+            <mxPoint x="564" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="mobile-evidence" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="804" y="420" as="sourcePoint" />
+            <mxPoint x="804" y="576" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-policy" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1212" y="624" />
+            </Array>
+            <mxPoint x="1080" y="624" as="sourcePoint" />
+            <mxPoint x="1212" y="516" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-evidence" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;dashed=1;dashPattern=8 6;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1440" y="672" />
+            </Array>
+            <mxPoint x="1440" y="516" as="sourcePoint" />
+            <mxPoint x="1080" y="672" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="web-app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Web application&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;JavaScript in the browser&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="360" x="72" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="wasm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#1dd9c7;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Cedarling WASM&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;npm package&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="360" x="72" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#102b49;strokeColor=#55a7ff;strokeWidth=2;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Mobile app&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;iOS or Android&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="360" x="528" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#55a7ff;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Cedarling SDK&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;Swift or Kotlin&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="360" x="528" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-service" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#30230b;strokeColor=#ffbd17;strokeWidth=2;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Backend service&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;embeds a Cedarling SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="624" x="984" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="rust-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Rust&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="116" x="984" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="python-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Python&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="116" x="1110" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="java-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Java&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="116" x="1237" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="go-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Go&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="116" x="1364" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="c-sdk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;C&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;SDK&lt;/font&gt;" vertex="1">
+          <mxGeometry height="108" width="116" x="1492" y="276" as="geometry" />
+        </mxCell>
+        <mxCell id="sidecar" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedarling Sidecar&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 23px;&quot;&gt;AuthZEN API, any language&lt;/font&gt;" vertex="1">
+          <mxGeometry height="84" width="306" x="984" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="plugins" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#ffbd17;strokeWidth=3;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Plugins&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 23px;&quot;&gt;KrakenD gateway, OPA&lt;/font&gt;" vertex="1">
+          <mxGeometry height="84" width="306" x="1302" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="lock-server" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=24;align=center;verticalAlign=middle;spacing=8;shadow=1;" value="&lt;b&gt;Lock Server&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#a987ff&quot;&gt;&lt;b&gt;Evidence Collector&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot; style=&quot;font-size: 23px;&quot;&gt;policy store, logs, telemetry, TRACE evidence&lt;/font&gt;" vertex="1">
+          <mxGeometry height="144" width="480" x="600" y="576" as="geometry" />
+        </mxCell>
+        <mxCell id="browser-logs-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="logs, telemetry" vertex="1">
+          <mxGeometry height="30" width="148" x="356" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="browser-policy-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="policy store" vertex="1">
+          <mxGeometry height="30" width="120" x="354" y="657" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-policy-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="policy store" vertex="1">
+          <mxGeometry height="30" width="120" x="504" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-evidence-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="logs, telemetry, TRACE evidence" vertex="1">
+          <mxGeometry height="30" width="294" x="657" y="474" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-policy-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="policy store" vertex="1">
+          <mxGeometry height="30" width="120" x="1151" y="564" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-evidence-label" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="logs, telemetry, TRACE evidence" vertex="1">
+          <mxGeometry height="30" width="294" x="1293" y="586" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,128 @@
+<mxfile host="app.diagrams.net" agent="Copilot">
+  <diagram id="cedarling-zero-trust-topology" name="Cedarling Zero Trust Topology">
+    <mxGraphModel dx="1458" dy="809" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1494" pageHeight="768" background="#071627" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mobile-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#091b2b;strokeColor=#0e696a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#26d7c6;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=24;spacingTop=16;" value="MOBILE DEVICE" vertex="1">
+          <mxGeometry height="395" width="407" x="319.5" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="idp-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#11152d;strokeColor=#514078;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#a987ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=24;spacingTop=16;" value="IDENTITY PROVIDER" vertex="1">
+          <mxGeometry height="395" width="491" x="961" y="43" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#0a1a2e;strokeColor=#24578a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#5aa4ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=24;spacingTop=16;" value="API GATEWAY" vertex="1">
+          <mxGeometry height="214" width="428" x="287" y="522" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-zone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#0a1a2e;strokeColor=#24578a;strokeWidth=1.5;dashed=1;dashPattern=8 6;fontColor=#5aa4ff;fontSize=16;fontStyle=1;align=left;verticalAlign=top;spacingLeft=24;spacingTop=16;" value="BACKEND APPLICATION" vertex="1">
+          <mxGeometry height="214" width="428" x="778" y="522" as="geometry" />
+        </mxCell>
+        <mxCell id="install-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="256" y="155" as="sourcePoint" />
+            <mxPoint x="341" y="155" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="register-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="705" y="128" as="sourcePoint" />
+            <mxPoint x="981" y="128" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="credentials-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="981" y="170" as="sourcePoint" />
+            <mxPoint x="705" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="register-cedarling-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;endArrow=none;endFill=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1195" y="144" as="sourcePoint" />
+            <mxPoint x="1216" y="144" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="authorize-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="474" y="235" as="sourcePoint" />
+            <mxPoint x="474" y="309" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="token-return-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#a987ff;strokeWidth=2;endArrow=block;endFill=1;startArrow=block;startFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="843" y="357" />
+              <mxPoint x="843" y="213" />
+            </Array>
+            <mxPoint x="981" y="357" as="sourcePoint" />
+            <mxPoint x="705" y="213" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="api-call-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="662" y="235" as="sourcePoint" />
+            <mxPoint x="662" y="522" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gateway-backend-flow" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#7ad9c9;strokeWidth=2;endArrow=block;endFill=1;entryX=-0.002;entryY=0.554;entryDx=0;entryDy=0;entryPerimeter=0;" target="backend-zone">
+          <mxGeometry relative="1" x="0.3579" as="geometry">
+            <mxPoint x="715" y="640" as="sourcePoint" />
+            <mxPoint x="799" y="640" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="app-store" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;App store&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;Google Play,&lt;br&gt;Apple App Store&lt;/font&gt;" vertex="1">
+          <mxGeometry height="96" width="214" x="42" y="107" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-app" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#10343d;strokeColor=#16d8c6;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;App&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;ships with a Software&lt;br&gt;Statement Assertion (SSA)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="140" width="364" x="341" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="mobile-cedarling" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#16d8c6;strokeWidth=3;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedarling&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;gates UI and API calls&lt;/font&gt;" vertex="1">
+          <mxGeometry height="97" width="268" x="341" y="309" as="geometry" />
+        </mxCell>
+        <mxCell id="register" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;/register&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;dynamic client&lt;br&gt;registration&lt;/font&gt;" vertex="1">
+          <mxGeometry height="97" width="214" x="981" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="idp-cedarling" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#a987ff;strokeWidth=3;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedarling&lt;/b&gt;" vertex="1">
+          <mxGeometry height="97" width="214" x="1216" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="token" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#261d4a;strokeColor=#a987ff;strokeWidth=2;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;/token&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;issues access&lt;br&gt;token&lt;/font&gt;" vertex="1">
+          <mxGeometry height="97" width="214" x="981" y="309" as="geometry" />
+        </mxCell>
+        <mxCell id="gateway-cedarling" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#55a7ff;strokeWidth=3;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedarling&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;checks scopes and&lt;br&gt;revocation before forwarding&lt;/font&gt;" vertex="1">
+          <mxGeometry height="118" width="385" x="309" y="581" as="geometry" />
+        </mxCell>
+        <mxCell id="backend-cedarling" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#1a3b63;strokeColor=#55a7ff;strokeWidth=3;fontColor=#ffffff;fontSize=18;align=center;verticalAlign=middle;spacing=6;shadow=1;" value="&lt;b&gt;Cedarling&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#bfd0e4&quot;&gt;re-checks the request,&lt;br&gt;trusts no upstream layer&lt;/font&gt;" vertex="1">
+          <mxGeometry height="118" width="386" x="799" y="581" as="geometry" />
+        </mxCell>
+        <mxCell id="badge-idp" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#a987ff;strokeColor=none;fontColor=#071627;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="1" vertex="1">
+          <mxGeometry height="30" width="30" x="1391" y="104" as="geometry" />
+        </mxCell>
+        <mxCell id="badge-mobile" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#26d7c6;strokeColor=none;fontColor=#071627;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="2" vertex="1">
+          <mxGeometry height="30" width="30" x="570" y="318" as="geometry" />
+        </mxCell>
+        <mxCell id="badge-gateway" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#5aa4ff;strokeColor=none;fontColor=#071627;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="3" vertex="1">
+          <mxGeometry height="30" width="30" x="655" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="badge-backend" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#5aa4ff;strokeColor=none;fontColor=#071627;fontSize=16;fontStyle=1;align=center;verticalAlign=middle;" value="4" vertex="1">
+          <mxGeometry height="30" width="30" x="1146" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="label-install" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="install" vertex="1">
+          <mxGeometry height="27" width="67" x="265" y="118" as="geometry" />
+        </mxCell>
+        <mxCell id="label-register" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="register with SSA" vertex="1">
+          <mxGeometry height="27" width="148" x="761" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="label-client-credentials" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="client credentials" vertex="1">
+          <mxGeometry height="27" width="155" x="773" y="157" as="geometry" />
+        </mxCell>
+        <mxCell id="label-authorize" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="authorize" vertex="1">
+          <mxGeometry height="27" width="83" x="433" y="252" as="geometry" />
+        </mxCell>
+        <mxCell id="label-token" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#514078;strokeWidth=1;fontColor=#b495ff;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="get access token" vertex="1">
+          <mxGeometry height="27" width="140" x="773" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="label-api-call" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=50;fillColor=#081425;strokeColor=#275e5a;strokeWidth=1;fontColor=#7ad9c9;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" value="API call with access token" vertex="1">
+          <mxGeometry height="27" width="221" x="551" y="460" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
