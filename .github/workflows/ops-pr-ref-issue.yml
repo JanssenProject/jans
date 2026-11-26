@@ -140,7 +140,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_MERGED: ${{ github.event.pull_request.merged }}
           REPO_FULL_NAME: ${{ github.repository }}
         run: |
           marker="no open issues were referenced in your PR (#$PR_NUMBER)."
@@ -184,24 +183,26 @@ jobs:
             --jq '.items[].number' )"
           candidates="$( printf '%s\n%s\n' "$body_refs" "$search_hits" | grep . | sort -un || true )"
 
-          if [ "$PR_MERGED" = "true" ]; then
-            reason="completed"
-            comment="Closing: PR #$PR_NUMBER was merged."
-          else
-            reason="not planned"
-            comment="Closing: PR #$PR_NUMBER was closed without merging."
-          fi
+          # Re-read the PR before every attempt: it may have been reopened or merged since this event.
+          close_if_pr_closed() {
+            for attempt in 1 2 3; do
+              pr_state="$( retry gh api "repos/$REPO_FULL_NAME/pulls/$PR_NUMBER" --jq '.state + " " + (.merged | tostring)' )"
+              case "$pr_state" in
+                "closed true") reason="completed"; comment="Closing: PR #$PR_NUMBER was merged." ;;
+                closed*) reason="not planned"; comment="Closing: PR #$PR_NUMBER was closed without merging." ;;
+                *) echo "PR #$PR_NUMBER is open again; leaving issue #$1 open"; return 0 ;;
+              esac
+              echo "Closing issue #$1 ($reason)"
+              gh issue close "$1" --repo "$REPO_FULL_NAME" --reason "$reason" --comment "$comment" && return 0
+              sleep $((attempt * 5))
+            done
+            echo "Failed to close issue #$1" >&2
+            return 1
+          }
 
           for n in $candidates; do
             info="$( issue_info "$n" )"
             if [ "$info" = "$(printf 'open\tfalse\ttrue\ttrue')" ]; then
-              # Narrows the race with a reopen: the check job may already have reused this issue.
-              pr_state="$( retry gh api "repos/$REPO_FULL_NAME/pulls/$PR_NUMBER" --jq '.state' )"
-              if [ "$pr_state" != "closed" ]; then
-                echo "PR #$PR_NUMBER is $pr_state again; leaving issue #$n open"
-                continue
-              fi
-              echo "Closing issue #$n ($reason)"
-              retry gh issue close "$n" --repo "$REPO_FULL_NAME" --reason "$reason" --comment "$comment"
+              close_if_pr_closed "$n"
             fi
           done
