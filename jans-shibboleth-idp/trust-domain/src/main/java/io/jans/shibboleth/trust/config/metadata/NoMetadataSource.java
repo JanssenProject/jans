@@ -20,10 +20,7 @@ public final class NoMetadataSource implements MetadataSource {
     @Override
     public boolean equals(Object o) {
 
-        if ( this == o ) return true;
-        if ( o == null || NoMetadataSource.class != o.getClass() ) return false;
-
-        return true;
+        return this == o || (o != null && getClass() == o.getClass());
     }
 
     @Override
