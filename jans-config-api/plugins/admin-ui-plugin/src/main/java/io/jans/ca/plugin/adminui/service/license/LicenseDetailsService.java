@@ -757,9 +757,7 @@ public class LicenseDetailsService extends BaseService {
                         AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                         adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseConfiguration.getLicenseKey());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
-                        // Since the activation API does not return LicenseUsable
-                        Boolean usable = licenseConfiguration.getLicenseActive() && !licenseConfiguration.getLicenseExpired();
-                        adminConf.getMainSettings().getLicenseConfig().setLicenseUsable(usable);
+                        adminConf.getMainSettings().getLicenseConfig().setLicenseUsable(licenseConfiguration.getLicenseUsable());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
@@ -831,7 +829,6 @@ public class LicenseDetailsService extends BaseService {
                 throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is missing. " + ex.getMessage());
             }
             licenseConfiguration.setTrial(entity.getBoolean("isTrial"));
-            licenseConfiguration.setLicenseUsable(entity.getBoolean("isUsable"));
             try {
                 licenseConfiguration.setLicenseExpired(entity.getBoolean("isExpired"));
                 licenseConfiguration.setLicenseActive(entity.getBoolean("active"));
@@ -840,6 +837,12 @@ public class LicenseDetailsService extends BaseService {
                 licenseConfiguration.setLicenseExpired(false);
                 licenseConfiguration.setLicenseActive(entity.getBoolean("active"));
             }
+            if(entity.has("isUsable")) {
+                licenseConfiguration.setLicenseUsable(entity.getBoolean("isUsable"));
+            } else {
+                licenseConfiguration.setLicenseUsable(licenseConfiguration.getLicenseActive() && !licenseConfiguration.getLicenseExpired());
+            }
+
         } catch (Exception ex) {
             log.error(ex.getMessage());
             throw new RuntimeException("Error in setting licence configuration from persistence", ex);
