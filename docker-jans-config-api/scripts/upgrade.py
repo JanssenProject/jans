@@ -93,6 +93,7 @@ def _transform_api_dynamic_config(conf, seeded_dir_mappings=None):
         ("validateUserInumInIntrospectionFlag", True),
         ("fetchUserRoleInIntrospectionFlag", True),
         ("userRolePermissionExcludedClients", []),
+        ("jwtIntrospectionEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
