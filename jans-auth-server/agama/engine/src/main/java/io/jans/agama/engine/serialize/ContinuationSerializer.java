@@ -46,7 +46,7 @@ public class ContinuationSerializer {
             
         }
         
-        try (   ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream sos = new CustomObjectOutputStream(baos)) {
 
             //Pair is not serialization-friendly, use a 2-length array
@@ -82,7 +82,7 @@ public class ContinuationSerializer {
 
         }
         
-        try (   ByteArrayInputStream bais = new ByteArrayInputStream(data);
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(data);
                 ObjectInputStream sis = new CustomObjectInputStream(bais)) {
             
             Object[] arr = (Object[]) sis.readObject();            
