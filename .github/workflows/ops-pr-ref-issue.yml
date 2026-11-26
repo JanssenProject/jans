@@ -2,6 +2,7 @@
 # It makes sure each PR is targeting an open issue.
 # If the PR does not target an issue , it will open an issue, write a comment and attempt to edit the PR to link it to the issue
 # The author would be asked to update the issues details.
+# When the PR is closed, the auto-created issue is closed too (completed if merged, not planned otherwise).
 
 name: "Ops: PR Issue Ref"
 on:
@@ -14,13 +15,19 @@ on:
       - ".github/workflows/**"
     branches:
       - main
+  # pull_request_target so fork PRs get a token with issues: write; no PR code is checked out.
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
 permissions:
   contents: read
 
 jobs:
   check-prs-issue:
-    if: startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
+    if: github.event_name != 'pull_request_target' && startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
@@ -93,3 +100,50 @@ jobs:
               --repo "$REPO_FULL_NAME"
             exit 0
           fi
+
+  close-autocreated-issue:
+    if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.repository == 'JanssenProject/jans'
+    name: Close auto-created issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Close the issue created for this PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
+          REPO_FULL_NAME: ${{ github.repository }}
+        run: |
+          marker="no open issues were referenced in your PR (#$PR_NUMBER)."
+
+          # The body reference can be edited away, so also search by the marker text.
+          candidates="$( {
+            printf '%s' "$PR_BODY" | grep -o '#[0-9][0-9]*' | tr -d '#'
+            gh api -X GET search/issues \
+              -f q="repo:$REPO_FULL_NAME is:issue is:open in:body \"your PR (#$PR_NUMBER)\"" \
+              --jq '.items[].number' || true
+          } | sort -un )"
+
+          if [ "$PR_MERGED" = "true" ]; then
+            reason="completed"
+            comment="Closing: PR #$PR_NUMBER was merged."
+          else
+            reason="not planned"
+            comment="Closing: PR #$PR_NUMBER was closed without merging."
+          fi
+
+          for n in $candidates; do
+            info="$( gh api "repos/$REPO_FULL_NAME/issues/$n" \
+              --jq '[.state, (.pull_request != null), (.title | test("-autocreated\\s*$")), ((.body // "") | contains("'"$marker"'"))] | @tsv' )" || continue
+            if [ "$info" = "$(printf 'open\tfalse\ttrue\ttrue')" ]; then
+              echo "Closing issue #$n ($reason)"
+              gh issue close "$n" --repo "$REPO_FULL_NAME" --reason "$reason" --comment "$comment"
+            fi
+          done
