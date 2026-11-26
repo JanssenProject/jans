@@ -43,23 +43,89 @@ pub(crate) fn sleep(duration: Duration) -> Sleep {
     }
 }
 
-/// Hands the thread back once, so CPU-bound work split into steps lets other tasks
-/// run between them.
+/// What [`run_steps`] hands back: the state after the last step, and one output
+/// per item, in item order.
+#[derive(Debug)]
+pub(crate) struct Steps<S, O> {
+    pub(crate) state: S,
+    pub(crate) outputs: Vec<O>,
+}
+
+/// Runs `step` on each of `items` in order, threading `state` through, without
+/// holding up other tasks: for CPU-heavy work such as signing or hashing.
 ///
-/// On native targets this is [`tokio::task::yield_now`]. On WebAssembly it is a
-/// zero timer rather than a re-woken future: a wake only reorders the microtask
-/// queue, while a timer lets the browser event loop run authorization calls and
-/// UI events.
-pub(crate) async fn yield_now() {
+/// On native targets the whole run goes to the blocking pool, and a panicking
+/// step comes back as [`TaskEnded`]. WebAssembly has one thread, so the run stays
+/// on it and hands the thread back to the browser event loop whenever a slice of
+/// [`STEP_SLICE_MILLIS`] has passed; a panic there aborts the module, so the
+/// result is always `Ok`.
+pub(crate) async fn run_steps<S, I, O, F>(
+    state: S,
+    items: Vec<I>,
+    step: F,
+) -> Result<Steps<S, O>, TaskEnded>
+where
+    S: Send + 'static,
+    I: Send + 'static,
+    O: Send + 'static,
+    F: FnMut(&mut S, I) -> O + Send + 'static,
+{
     #[cfg(not(target_family = "wasm"))]
     {
-        tokio::task::yield_now().await;
+        #[expect(
+            clippy::disallowed_methods,
+            reason = "native branch of the cross-platform wrapper"
+        )]
+        tokio::task::spawn_blocking(move || run_all(state, items, step))
+            .await
+            .map_err(|err| TaskEnded(err.to_string()))
     }
 
     #[cfg(target_family = "wasm")]
     {
-        sleep(Duration::ZERO).await;
+        let mut state = state;
+        let mut step = step;
+        let mut outputs = Vec::with_capacity(items.len());
+        let mut slice_start = chrono::Utc::now();
+        for item in items {
+            if (chrono::Utc::now() - slice_start).num_milliseconds() >= STEP_SLICE_MILLIS {
+                yield_now().await;
+                slice_start = chrono::Utc::now();
+            }
+            outputs.push(step(&mut state, item));
+        }
+        Ok(Steps { state, outputs })
     }
+}
+
+/// The steps of a native [`run_steps`], on a blocking pool thread.
+#[cfg(not(target_family = "wasm"))]
+fn run_all<S, I, O>(
+    mut state: S,
+    items: Vec<I>,
+    mut step: impl FnMut(&mut S, I) -> O,
+) -> Steps<S, O> {
+    let outputs = items
+        .into_iter()
+        .map(|item| step(&mut state, item))
+        .collect();
+    Steps { state, outputs }
+}
+
+/// How long [`run_steps`] runs on WebAssembly before it hands the thread back.
+/// Timed rather than counted, so a caller need not know what one step costs;
+/// `chrono::Utc::now()` reads `Date.now()`, as `std::time::Instant` is not
+/// available on `wasm32-unknown-unknown`. 4 ms is the shortest wait the browser
+/// gives a nested zero timer, so yielding never waits longer than it worked.
+#[cfg(target_family = "wasm")]
+const STEP_SLICE_MILLIS: i64 = 4;
+
+/// Hands the thread back to the browser event loop once. A zero timer rather
+/// than a re-woken future: a wake only reorders the microtask queue, while a
+/// timer lets the event loop run authorization calls and UI events.
+#[cfg(target_family = "wasm")]
+async fn yield_now() {
+    sleep(Duration::ZERO).await;
 }
 
 /// Fires every `period`, starting one `period` after creation.
@@ -281,6 +347,50 @@ mod tests {
         assert!(
             err.to_string().contains("cancelled"),
             "the error says the task was cancelled: {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn run_steps_threads_state_and_keeps_item_order() {
+        let Steps { state, outputs } = run_steps(0_u32, vec![1_u32, 2, 3], |sum, item| {
+            *sum += item;
+            *sum
+        })
+        .await
+        .expect("steps that do not panic should finish");
+
+        assert_eq!(
+            state, 6,
+            "each step should see the state the previous one left"
+        );
+        assert_eq!(outputs, vec![1, 3, 6], "outputs should follow item order");
+    }
+
+    #[tokio::test]
+    async fn run_steps_runs_off_the_runtime_thread() {
+        let runtime_thread = std::thread::current().id();
+        let Steps { outputs, .. } =
+            run_steps((), vec![(); 3], |(), ()| std::thread::current().id())
+                .await
+                .expect("steps that do not panic should finish");
+
+        assert!(
+            outputs.iter().all(|thread| *thread != runtime_thread),
+            "steps should run on the blocking pool, not on the runtime thread"
+        );
+    }
+
+    #[tokio::test]
+    async fn run_steps_returns_a_panicking_step_as_task_ended() {
+        let err = run_steps((), vec![1, 2], |(), item: u32| {
+            assert!(item < 2, "test step panics");
+        })
+        .await
+        .expect_err("a panicking step should end the run");
+
+        assert!(
+            err.to_string().contains("panicked"),
+            "the error should say the task panicked: {err}"
         );
     }
 }

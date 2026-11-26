@@ -43,7 +43,7 @@ use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKE
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
 use crate::rt::{JoinHandle, spawn_task};
-use crate::rt::{sleep, yield_now};
+use crate::rt::{Steps, TaskEnded, run_steps, sleep};
 
 /// Lock error ids of a record Lock failed to store: the same bytes may succeed later.
 const TRANSIENT_ERRORS: [&str; 2] = ["storage_failure", "crypto_unavailable"];
@@ -272,6 +272,8 @@ enum ChainEnd {
     GenesisLost,
     /// Lock registered it and no longer knows it.
     Forgotten,
+    /// The signing task failed, which took the chain's state with it.
+    SigningFailed,
 }
 
 /// What [`Emitter::settle`] made of one response.
@@ -512,14 +514,32 @@ impl Emitter {
         RoundEnd { chain, outcome }
     }
 
-    async fn sign(&mut self, mut chain: ProducerChain, drafts: Vec<RecordDraft>) -> ProducerChain {
+    async fn sign(&mut self, chain: ProducerChain, drafts: Vec<RecordDraft>) -> ProducerChain {
         if drafts.is_empty() {
             return chain;
         }
         let chain_id = chain.chain_id();
         let first = chain.next_sequence();
         let record_ids: Vec<Uuid> = drafts.iter().map(|draft| draft.record_id).collect();
-        let results = sign_batch(&mut chain, &drafts, self.signer.as_ref(), &self.limits).await;
+        let signed = sign_batch(chain, drafts, Arc::clone(&self.signer), self.limits).await;
+        let SignedBatch { chain, results } = match signed {
+            Ok(signed) => signed,
+            Err(err) => {
+                self.log(
+                    LogLevel::ERROR,
+                    None,
+                    format!(
+                        "TRACE signing task failed: {err}; its {} TRACE records and the producer \
+                         chain {chain_id} are lost",
+                        record_ids.len()
+                    ),
+                );
+                // Counted like any record that could not be signed, so the
+                // emitter counts still add up to what the recorder emitted.
+                self.count(EmitterEvent::SignFailed, record_ids.len());
+                return self.replace_chain(ChainEnd::SigningFailed);
+            },
+        };
         let mut sequence = first;
         for (record_id, result) in record_ids.into_iter().zip(results) {
             match result {
@@ -948,6 +968,7 @@ impl Emitter {
         let cause = match end {
             ChainEnd::GenesisLost => "lost its genesis record",
             ChainEnd::Forgotten => "is no longer registered in Lock Server",
+            ChainEnd::SigningFailed => "could not be signed into",
         };
         self.log(
             LogLevel::WARN,
@@ -1014,29 +1035,31 @@ impl Emitter {
     }
 }
 
-/// Records signed between two yields to the runtime. Counted rather than
-/// timed, as `std::time::Instant` is not available on `wasm32-unknown-unknown`.
-const SIGN_YIELD_EVERY: usize = 16;
+/// What signing hands back: the chain, moved past every signed record, and one
+/// result per draft, in draft order.
+struct SignedBatch {
+    chain: ProducerChain,
+    results: Vec<Result<SignedAssertion, AppendError>>,
+}
 
-/// Signs `drafts` in order on `chain`, one result per draft. A batch of a hundred
-/// records is a few milliseconds of CPU, so it yields every [`SIGN_YIELD_EVERY`]
-/// records and authorization calls sharing the runtime are not held up. Signing
-/// stays on the task rather than on a blocking pool, which WASM does not have,
-/// so both targets sign the same way.
+/// Signs `drafts` in order on `chain`. A batch of a hundred records is a few
+/// milliseconds of CPU, so it runs through [`run_steps`], which keeps it from
+/// stalling the authorization requests that share the runtime. The chain moves
+/// into the run and comes back; a panic takes it with it.
 async fn sign_batch(
-    chain: &mut ProducerChain,
-    drafts: &[RecordDraft],
-    signer: &dyn TraceSigner,
-    limits: &Limits,
-) -> Vec<Result<SignedAssertion, AppendError>> {
-    let mut results = Vec::with_capacity(drafts.len());
-    for (index, draft) in drafts.iter().enumerate() {
-        if index > 0 && index % SIGN_YIELD_EVERY == 0 {
-            yield_now().await;
-        }
-        results.push(chain.append(draft, signer, limits));
-    }
-    results
+    chain: ProducerChain,
+    drafts: Vec<RecordDraft>,
+    signer: Arc<dyn TraceSigner>,
+    limits: Limits,
+) -> Result<SignedBatch, TaskEnded> {
+    let Steps { state, outputs } = run_steps(chain, drafts, move |chain, draft| {
+        chain.append(&draft, signer.as_ref(), &limits)
+    })
+    .await?;
+    Ok(SignedBatch {
+        chain: state,
+        results: outputs,
+    })
 }
 
 #[cfg(test)]
@@ -1044,12 +1067,13 @@ mod tests {
     use std::collections::{HashSet, VecDeque};
     use std::num::NonZeroUsize;
     use std::sync::{Arc, Mutex};
+    use std::thread::ThreadId;
     use std::time::Duration;
 
     use async_trait::async_trait;
     use jans_trace_core::assertion::{SignedAssertion, VerificationContext, parse_batch};
     use jans_trace_core::inputs::compute_bundle_hash;
-    use jans_trace_core::signature::Ed25519Signer;
+    use jans_trace_core::signature::{Ed25519Signer, SignerError, TraceSigner};
     use jans_trace_core::{Digest, Limits};
     use serde_json::Value;
     use tokio::sync::{mpsc, watch};
@@ -1203,6 +1227,47 @@ mod tests {
     impl BulkSink for PanickingLock {
         async fn post_bulk(&self, _body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError> {
             panic!("test sink panics");
+        }
+    }
+
+    /// Signs with the test key and remembers the thread of every signature.
+    struct ThreadRecordingSigner {
+        inner: Ed25519Signer,
+        threads: Mutex<Vec<ThreadId>>,
+    }
+
+    impl TraceSigner for ThreadRecordingSigner {
+        fn kid(&self) -> &str {
+            self.inner.kid()
+        }
+
+        fn sign(&self, message: &[u8]) -> Result<[u8; 64], SignerError> {
+            self.threads
+                .lock()
+                .expect("thread list is not poisoned")
+                .push(std::thread::current().id());
+            self.inner.sign(message)
+        }
+    }
+
+    /// Signs with the test key, then panics from the signature after `ok`.
+    struct PanickingSigner {
+        inner: Ed25519Signer,
+        ok: usize,
+        signed: std::sync::atomic::AtomicUsize,
+    }
+
+    impl TraceSigner for PanickingSigner {
+        fn kid(&self) -> &str {
+            self.inner.kid()
+        }
+
+        fn sign(&self, message: &[u8]) -> Result<[u8; 64], SignerError> {
+            let signed = self
+                .signed
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            assert!(signed < self.ok, "test signer panics");
+            self.inner.sign(message)
         }
     }
 
@@ -2243,6 +2308,32 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn signing_runs_off_the_runtime_thread() {
+        let lock = FakeLock::new([]);
+        let signer = Arc::new(ThreadRecordingSigner {
+            inner: test_signer(),
+            threads: Mutex::new(Vec::new()),
+        });
+        let mut params = params(lock.clone(), metrics());
+        params.signer = signer.clone();
+        let emitter = start(params, 4, [draft()]);
+
+        lock.bodies(1).await;
+        let threads = signer
+            .threads
+            .lock()
+            .expect("thread list is not poisoned")
+            .clone();
+        assert!(!threads.is_empty(), "the record was signed");
+        let runtime_thread = std::thread::current().id();
+        assert!(
+            threads.iter().all(|thread| *thread != runtime_thread),
+            "signing should not run on the runtime thread"
+        );
+        emitter.handle.shut_down().await;
+    }
+
+    #[tokio::test]
     async fn bulk_max_bytes_below_one_record_is_refused() {
         let lock = FakeLock::new([]);
         let mut params = params(lock, metrics());
@@ -2334,5 +2425,52 @@ mod tests {
                  {limit}"
             );
         }
+    }
+
+    #[tokio::test(start_paused = true)]
+    async fn drafts_lost_to_a_panicking_signer_are_counted() {
+        let lock = FakeLock::new([]);
+        let log = memory_log();
+        let metrics = metrics();
+        let mut params = params(lock.clone(), metrics.clone());
+        params.log = log.clone();
+        params.signer = Arc::new(PanickingSigner {
+            inner: test_signer(),
+            ok: 1,
+            signed: std::sync::atomic::AtomicUsize::new(0),
+        });
+        let emitter = start(params, 8, [draft()]);
+        lock.bodies(1).await;
+        for _ in 0..3 {
+            emitter
+                .tx
+                .send(draft())
+                .await
+                .expect("the emitter is running");
+        }
+        emitter.handle.shut_down().await;
+
+        assert_eq!(
+            metrics
+                .snapshot_and_reset()
+                .operational_stats
+                .get("trace.sign_failed"),
+            Some(&3),
+            "the drafts of the batch whose signing failed are counted"
+        );
+        let warnings: Vec<String> = log
+            .pop_logs()
+            .iter()
+            .filter(|entry| entry["level"] == "WARN")
+            .filter_map(|entry| entry["msg"].as_str().map(str::to_string))
+            .filter(|message| message.contains("new chain is opened"))
+            .collect();
+        assert!(
+            !warnings.is_empty()
+                && warnings
+                    .iter()
+                    .all(|message| message.contains("could not be signed into")),
+            "the replaced chain is blamed on signing, not on its genesis record: {warnings:?}"
+        );
     }
 }
