@@ -87,18 +87,14 @@ use init::policy_store_signature::ArchiveVerifier;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::service_factory::ServiceFactoryParams;
 use init::service_factory::ServiceInitError;
-#[cfg(not(target_arch = "wasm32"))]
 use init::service_factory::StartTraceError;
-#[cfg(not(target_arch = "wasm32"))]
 pub use init::service_factory::{InvalidTraceKeyError, LoadProducerKeyError};
 use lock::InitLockServiceError;
 use lock::health_registry::HealthStatus;
 use log::interface::LogWriter;
 use log::{BaseLogEntry, LogEntry};
 pub use log::{LogLevel, LogStorage};
-#[cfg(not(target_arch = "wasm32"))]
 use trace::EmitterHandle;
-#[cfg(not(target_arch = "wasm32"))]
 pub use trace::EmitterInitError;
 pub use trace::{ParseProducerIdError, ParseTraceSigningKidError, ProducerId, TraceSigningKid};
 
@@ -152,16 +148,13 @@ pub enum InitCedarlingError {
     #[error(transparent)]
     TraceSetup(#[from] TraceSetupError),
     /// Error returned when TRACE is enabled but its signing key cannot be loaded.
-    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     TraceKey(#[from] LoadProducerKeyError),
     /// Error returned when TRACE is enabled but its emitter cannot start.
-    #[cfg(not(target_arch = "wasm32"))]
     #[error(transparent)]
     TraceEmitter(#[from] EmitterInitError),
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl From<StartTraceError> for InitCedarlingError {
     fn from(err: StartTraceError) -> Self {
         match err {
@@ -203,7 +196,6 @@ pub struct Cedarling {
     /// Signs and sends TRACE records; `None` when TRACE is disabled or Lock has
     /// no TRACE endpoint. Stopped by [`Self::shut_down`] before the log, as it
     /// writes to the log and sends with the Lock token.
-    #[cfg(not(target_arch = "wasm32"))]
     trace_emitter: Option<Arc<EmitterHandle>>,
 }
 
@@ -301,13 +293,10 @@ impl Cedarling {
             log_service: log.clone(),
             data_store: data.clone(),
             metrics: metrics.clone(),
-            #[cfg(not(target_arch = "wasm32"))]
             trace_sink: initialized.trace_sink,
-            #[cfg(not(target_arch = "wasm32"))]
             pdp_id,
         });
 
-        #[cfg(not(target_arch = "wasm32"))]
         let trace_emitter = service_factory.start_trace().await?;
 
         // Log policy store metadata if available (new format only)
@@ -356,7 +345,6 @@ impl Cedarling {
             data,
             metrics,
             _refresh_handle: refresh_handle,
-            #[cfg(not(target_arch = "wasm32"))]
             trace_emitter,
         })
     }
@@ -569,7 +557,6 @@ impl Cedarling {
 
     /// Closes the connections to the Lock Server and pushes all available logs.
     pub async fn shut_down(&self) {
-        #[cfg(not(target_arch = "wasm32"))]
         if let Some(emitter) = &self.trace_emitter {
             emitter.shut_down().await;
         }

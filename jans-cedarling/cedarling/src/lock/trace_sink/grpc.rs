@@ -8,10 +8,14 @@
 //! one, the REST error body being the status description.
 
 use bytes::Bytes;
+#[cfg(not(target_arch = "wasm32"))]
 use tonic::codegen::http::uri::InvalidUri;
 use tonic::metadata::MetadataValue;
+#[cfg(not(target_arch = "wasm32"))]
 use tonic::transport::{Channel, ClientTlsConfig};
 use tonic::{Code, Request};
+#[cfg(target_arch = "wasm32")]
+use tonic_web_wasm_client::Client as Channel;
 
 use super::{Attempt, BulkItemResult, ErrorBody, PostBulkError, ProblemFlag, RejectedStatus};
 use crate::HttpClientConfig;
@@ -26,15 +30,19 @@ pub(in crate::lock) struct GrpcTraceClient {
     client: TraceServiceClient<Channel>,
 }
 
-/// Why no gRPC client could be built for the TRACE endpoint.
+/// Why no gRPC client could be built for the TRACE endpoint. On WASM the
+/// browser builds the connection when the first request goes, so building the
+/// client cannot fail there.
 #[derive(Debug, thiserror::Error)]
 pub(in crate::lock) enum GrpcTraceClientError {
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("the TRACE endpoint origin {origin} is not a valid gRPC address")]
     InvalidUri {
         origin: String,
         #[source]
         source: InvalidUri,
     },
+    #[cfg(not(target_arch = "wasm32"))]
     #[error("the gRPC TLS configuration for {origin} could not be built")]
     Tls {
         origin: String,
@@ -46,12 +54,23 @@ pub(in crate::lock) enum GrpcTraceClientError {
 impl GrpcTraceClient {
     /// TLS uses the native roots only: `CEDARLING_LOCK_ACCEPT_INVALID_CERTS` is not
     /// honoured, as for the audit gRPC transport. The response cap and timeout are
-    /// the ones REST requests get.
+    /// the ones REST requests get. On WASM requests go over gRPC-Web through the
+    /// browser, which does TLS and timing, as for the audit gRPC transport.
+    #[cfg_attr(
+        target_arch = "wasm32",
+        expect(
+            clippy::unnecessary_wraps,
+            reason = "only the native channel can fail to build"
+        )
+    )]
     pub(in crate::lock) fn new(
         endpoint: &url::Url,
         http_conf: &HttpClientConfig,
     ) -> Result<Self, GrpcTraceClientError> {
         let origin = endpoint.origin().ascii_serialization();
+        #[cfg(target_arch = "wasm32")]
+        let channel = Channel::new(origin);
+        #[cfg(not(target_arch = "wasm32"))]
         let channel = Channel::from_shared(origin.clone())
             .map_err(|source| GrpcTraceClientError::InvalidUri {
                 origin: origin.clone(),

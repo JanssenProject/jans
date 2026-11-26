@@ -137,7 +137,6 @@ mod log_worker;
 mod register_client;
 pub(crate) mod ssa_validation;
 mod telemetry_ticker;
-#[cfg(not(target_arch = "wasm32"))]
 mod trace_sink;
 mod transport;
 pub(crate) use transport::{AuditItem, AuditPayload};
@@ -150,8 +149,8 @@ mod proto {
     tonic::include_proto!("io.jans.lock.audit");
 }
 
-/// Client for Lock's `TraceService`. TRACE is native only, like the sink using it.
-#[cfg(all(feature = "grpc", not(target_arch = "wasm32")))]
+/// Client for Lock's `TraceService`.
+#[cfg(feature = "grpc")]
 mod trace_proto {
     // These lints are disabled because they are triggered by the generated code
     #![allow(unreachable_pub)]
@@ -180,20 +179,14 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
-#[cfg(all(test, not(target_arch = "wasm32")))]
+#[cfg(test)]
 pub(crate) use trace_sink::RejectedStatus;
-#[cfg(not(target_arch = "wasm32"))]
 use trace_sink::rest::RestTraceClient;
-#[cfg(not(target_arch = "wasm32"))]
 pub(crate) use trace_sink::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, TraceSink};
 use transport::{AuditKind, rest::RestTransport};
 
 /// Where TRACE bulk requests go and the transport that carries them.
 #[derive(Debug, Clone, Copy)]
-#[cfg_attr(
-    target_arch = "wasm32",
-    expect(dead_code, reason = "TRACE is refused on WASM before Lock starts")
-)]
 pub(crate) struct TraceRoute<'a> {
     pub(crate) endpoint: &'a TraceEndpoint,
     pub(crate) transport: LockTransport,
@@ -283,7 +276,6 @@ pub(crate) struct LockService {
     lock_origin: url::Origin,
     access_token: LockAccessToken,
     /// Where TRACE records go; `None` when TRACE is off or Lock publishes no endpoint.
-    #[cfg(not(target_arch = "wasm32"))]
     trace_sink: Option<Arc<TraceSink>>,
 }
 
@@ -297,7 +289,6 @@ impl LockService {
         bearer_for_origin(&self.lock_origin, &self.access_token, uri)
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn trace_sink(&self) -> Option<Arc<TraceSink>> {
         self.trace_sink.clone()
     }
@@ -357,7 +348,6 @@ impl LockService {
         )
         .await?;
 
-        #[cfg(not(target_arch = "wasm32"))]
         let trace_sink = create_trace_sink(
             trace,
             &lock_config,
@@ -367,9 +357,6 @@ impl LockService {
             http_conf,
             logger.as_ref(),
         )?;
-        // TRACE is rejected on WASM before Lock starts; the scope above is all it affects.
-        #[cfg(target_arch = "wasm32")]
-        let _ = token.source;
 
         let cancel_tkn = CancellationToken::new();
         let log_worker = match (bootstrap_conf.log_interval, lock_config.audit_endpoints.log) {
@@ -448,7 +435,6 @@ impl LockService {
             cancel_tkn,
             lock_origin: bootstrap_conf.config_uri.origin(),
             access_token: LockAccessToken(token.access_token),
-            #[cfg(not(target_arch = "wasm32"))]
             trace_sink,
         })
     }
@@ -715,7 +701,6 @@ pub enum InitLockServiceError {
 /// The TRACE sink; `None` when TRACE is off, or with a warning when there is no
 /// endpoint the Lock token may go to: Cedarling still decides, and each decision
 /// reports that no record was sent.
-#[cfg(not(target_arch = "wasm32"))]
 fn create_trace_sink(
     trace: Option<TraceRoute<'_>>,
     lock_config: &LockConfig,

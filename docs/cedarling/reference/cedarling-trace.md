@@ -17,8 +17,7 @@ This page covers what Cedarling needs to emit records and how to find out why re
 
 - `CEDARLING_LOCK` set to `enabled`.
 - A `.cjar` policy store: a local `.cjar` file, a `.cjar` URL, Lock Server or a policy store URI. A directory or YAML policy store cannot be used, because each record carries the SHA-256 of the `.cjar` Cedarling loaded.
-- A signing key: `CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`.
-- A native build. TRACE is not supported on WASM.
+- A signing key: `CEDARLING_TRACE_SIGNING_KEY` or `CEDARLING_TRACE_SIGNING_KEY_PEM`. On WASM only `CEDARLING_TRACE_SIGNING_KEY_PEM`, because WASM has no file system.
 - Auth Server and Lock Server set up as below.
 
 If a requirement is not met or a TRACE property is invalid, Cedarling does not start, and the error names the property.

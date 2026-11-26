@@ -18,20 +18,16 @@ use crate::context_data_api::DataStore;
 use crate::log::interface::LogWriter;
 use crate::log::{self, BaseLogEntry, LogEntry};
 use crate::trace::TraceRecorder;
+use std::path::PathBuf;
 use std::sync::Arc;
 #[cfg(not(target_arch = "wasm32"))]
-use std::{fs, io, path::PathBuf};
+use std::{fs, io};
 
-#[cfg(not(target_arch = "wasm32"))]
 use jans_trace_core::signature::{PrivateKeyError, TraceSigner as _};
 
-#[cfg(not(target_arch = "wasm32"))]
 use crate::app_types::PdpID;
-#[cfg(not(target_arch = "wasm32"))]
 use crate::bootstrap_config::TraceSigningKey;
-#[cfg(not(target_arch = "wasm32"))]
 use crate::lock::TraceSink;
-#[cfg(not(target_arch = "wasm32"))]
 use crate::trace::{EmitterHandle, EmitterInitError, EmitterParams, ProducerKey, spawn_emitter};
 
 #[derive(Clone)]
@@ -43,9 +39,7 @@ pub(crate) struct ServiceFactory<'a> {
     metrics: Arc<MetricsCollector>,
     trace: Option<TraceRecorder>,
     /// The Lock TRACE endpoint client; `None` when Lock has no TRACE endpoint.
-    #[cfg(not(target_arch = "wasm32"))]
     trace_sink: Option<Arc<TraceSink>>,
-    #[cfg(not(target_arch = "wasm32"))]
     pdp_id: PdpID,
     container: SingletonContainer,
 }
@@ -58,9 +52,7 @@ pub(crate) struct ServiceFactoryParams<'a> {
     pub(crate) data_store: Arc<DataStore>,
     pub(crate) metrics: Arc<MetricsCollector>,
     /// The Lock TRACE endpoint client; `None` when Lock has no TRACE endpoint.
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) trace_sink: Option<Arc<TraceSink>>,
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) pdp_id: PdpID,
 }
 
@@ -80,9 +72,7 @@ impl<'a> ServiceFactory<'a> {
             log_service,
             data_store,
             metrics,
-            #[cfg(not(target_arch = "wasm32"))]
             trace_sink,
-            #[cfg(not(target_arch = "wasm32"))]
             pdp_id,
         } = params;
         Self {
@@ -92,9 +82,7 @@ impl<'a> ServiceFactory<'a> {
             data_store,
             metrics,
             trace: None,
-            #[cfg(not(target_arch = "wasm32"))]
             trace_sink,
-            #[cfg(not(target_arch = "wasm32"))]
             pdp_id,
             container: SingletonContainer::default(),
         }
@@ -199,7 +187,6 @@ impl<'a> ServiceFactory<'a> {
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 impl ServiceFactory<'_> {
     /// Starts TRACE: loads the signing key, starts the emitter on the Lock TRACE
     /// endpoint and gives the `Authz` built next its recorder. Returns the
@@ -253,11 +240,19 @@ impl ServiceFactory<'_> {
     /// Loads the TRACE signing key; `None` when TRACE is disabled. Runs at
     /// startup so a bad key stops `Cedarling::new` instead of failing every
     /// record later, and logs the `kid` and thumbprint the admin registers in Lock.
+    #[cfg_attr(
+        target_arch = "wasm32",
+        expect(
+            clippy::unused_async,
+            reason = "only reading a key file awaits, and WASM has none"
+        )
+    )]
     async fn trace_key(&self) -> Result<Option<Arc<ProducerKey>>, LoadProducerKeyError> {
         let Some(trace) = &self.bootstrap_config.trace_config else {
             return Ok(None);
         };
-        let (pem, path) = match &trace.signing_key {
+        let (pem, path): (String, Option<&PathBuf>) = match &trace.signing_key {
+            #[cfg(not(target_arch = "wasm32"))]
             TraceSigningKey::File(path) => (read_key_file(path.clone()).await?, Some(path)),
             TraceSigningKey::Pem(pem) => (pem.clone(), None),
         };
@@ -286,7 +281,6 @@ impl ServiceFactory<'_> {
 }
 
 /// Why TRACE did not start.
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum StartTraceError {
     #[error(transparent)]
@@ -296,7 +290,7 @@ pub(crate) enum StartTraceError {
 }
 
 /// Reads the key file on the blocking pool, so startup never blocks a runtime
-/// worker on file I/O.
+/// worker on file I/O. WASM has no file system, so a key file cannot be set there.
 #[cfg(not(target_arch = "wasm32"))]
 async fn read_key_file(path: PathBuf) -> Result<String, LoadProducerKeyError> {
     let task_path = path.clone();
@@ -310,10 +304,10 @@ async fn read_key_file(path: PathBuf) -> Result<String, LoadProducerKeyError> {
 
 /// Why the TRACE signing key could not be loaded. Messages name the property
 /// and path, never key material.
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, thiserror::Error)]
 pub enum LoadProducerKeyError {
     /// The key file could not be read.
+    #[cfg(not(target_arch = "wasm32"))]
     #[error(
         "failed to read the TRACE signing key file `{}` (`CEDARLING_TRACE_SIGNING_KEY`): {source}",
         path.display()
@@ -343,7 +337,6 @@ pub enum LoadProducerKeyError {
 
 /// Why a TRACE signing key is not a usable Ed25519 key. Wraps the core library
 /// error so callers need no dependency on it; the text never carries key material.
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Debug, thiserror::Error)]
 #[error(transparent)]
 pub struct InvalidTraceKeyError(PrivateKeyError);

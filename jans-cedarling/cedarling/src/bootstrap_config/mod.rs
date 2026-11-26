@@ -316,6 +316,15 @@ pub enum BootstrapConfigLoadingError {
     )]
     MissingTraceSigningKey,
 
+    /// Error returned when the TRACE signing key is a file on WASM, which has no
+    /// file system.
+    #[cfg(target_arch = "wasm32")]
+    #[error(
+        "`CEDARLING_TRACE_SIGNING_KEY` (a key file) is not supported on WASM: set the key \
+         itself in `CEDARLING_TRACE_SIGNING_KEY_PEM`"
+    )]
+    TraceSigningKeyFileOnWasm,
+
     /// Error returned when the TRACE producer id would be rejected by Lock.
     #[error(
         "invalid TRACE producer id taken from `{property}`: {source}. Set \

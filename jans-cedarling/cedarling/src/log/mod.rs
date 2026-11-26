@@ -79,7 +79,6 @@ pub(crate) use log_strategy::LogStrategy;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::authz::metrics::MetricsCollector;
 use crate::bootstrap_config::log_config::LogConfig;
-#[cfg(not(target_arch = "wasm32"))]
 use crate::lock::TraceSink;
 use crate::lock::{InitLockServiceError, LockService, TraceRoute};
 use crate::{HttpClientConfig, LockServiceConfig};
@@ -97,7 +96,6 @@ pub(crate) static TEST_LOGGER: LazyLock<Logger> = LazyLock::new(init_test_logger
 /// read back through the logger, because sending TRACE records is not logging.
 pub(crate) struct InitializedLogger {
     pub(crate) log: Logger,
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) trace_sink: Option<Arc<TraceSink>>,
 }
 
@@ -114,7 +112,6 @@ pub(crate) async fn init_logger(
 ) -> Result<InitializedLogger, InitLockServiceError> {
     let logger = Arc::new(LogStrategy::new(config, pdp_id, app_name.clone()));
     let logger_weak = Arc::downgrade(&logger);
-    #[cfg(not(target_arch = "wasm32"))]
     let mut trace_sink = None;
     if let Some(lock_config) = lock_config {
         let lock_service = LockService::new(
@@ -127,15 +124,11 @@ pub(crate) async fn init_logger(
             trace,
         )
         .await?;
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            trace_sink = lock_service.trace_sink();
-        }
+        trace_sink = lock_service.trace_sink();
         logger.set_lock_service(lock_service);
     }
     Ok(InitializedLogger {
         log: logger,
-        #[cfg(not(target_arch = "wasm32"))]
         trace_sink,
     })
 }

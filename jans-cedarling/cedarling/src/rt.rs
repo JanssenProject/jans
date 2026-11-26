@@ -43,6 +43,25 @@ pub(crate) fn sleep(duration: Duration) -> Sleep {
     }
 }
 
+/// Hands the thread back once, so CPU-bound work split into steps lets other tasks
+/// run between them.
+///
+/// On native targets this is [`tokio::task::yield_now`]. On WebAssembly it is a
+/// zero timer rather than a re-woken future: a wake only reorders the microtask
+/// queue, while a timer lets the browser event loop run authorization calls and
+/// UI events.
+pub(crate) async fn yield_now() {
+    #[cfg(not(target_family = "wasm"))]
+    {
+        tokio::task::yield_now().await;
+    }
+
+    #[cfg(target_family = "wasm")]
+    {
+        sleep(Duration::ZERO).await;
+    }
+}
+
 /// Fires every `period`, starting one `period` after creation.
 ///
 /// Replaces `tokio::time::interval` with `MissedTickBehavior::Delay`, which needs a Tokio

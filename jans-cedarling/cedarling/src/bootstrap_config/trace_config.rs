@@ -5,6 +5,7 @@
 
 use std::fmt;
 use std::num::NonZeroUsize;
+#[cfg(not(target_arch = "wasm32"))]
 use std::path::PathBuf;
 
 use url::Url;
@@ -46,7 +47,8 @@ impl TraceConfig {
 }
 
 /// Where the TRACE signing key comes from: an unencrypted PKCS#8 PEM Ed25519
-/// private key, either in a file or inline in the bootstrap configuration.
+/// private key, either in a file or inline in the bootstrap configuration. WASM
+/// has no file system, so there the key can only be inline.
 ///
 /// `Debug` never prints the inline key, so the bootstrap configuration can be
 /// logged safely.
@@ -54,6 +56,7 @@ impl TraceConfig {
 pub enum TraceSigningKey {
     /// PEM file (`CEDARLING_TRACE_SIGNING_KEY`). Takes priority when both are set,
     /// because a file keeps the secret out of the configuration.
+    #[cfg(not(target_arch = "wasm32"))]
     File(PathBuf),
     /// PEM text (`CEDARLING_TRACE_SIGNING_KEY_PEM`), for hosts that inject the
     /// secret as a value rather than a file.
@@ -65,6 +68,7 @@ impl TraceSigningKey {
     #[must_use]
     pub fn property(&self) -> &'static str {
         match self {
+            #[cfg(not(target_arch = "wasm32"))]
             Self::File(_) => "CEDARLING_TRACE_SIGNING_KEY",
             Self::Pem(_) => "CEDARLING_TRACE_SIGNING_KEY_PEM",
         }
@@ -74,6 +78,7 @@ impl TraceSigningKey {
 impl fmt::Debug for TraceSigningKey {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            #[cfg(not(target_arch = "wasm32"))]
             Self::File(path) => f.debug_tuple("File").field(path).finish(),
             Self::Pem(_) => f.write_str("Pem(<redacted>)"),
         }
@@ -104,10 +109,6 @@ pub enum TraceSetupError {
          `bundle_hash` is computed from the archive bytes"
     )]
     RequiresArchivePolicyStore,
-    /// The MVP signs on trusted hosts only, never in the browser.
-    #[cfg(target_arch = "wasm32")]
-    #[error("`CEDARLING_TRACE` is not supported on WASM")]
-    NotSupportedOnWasm,
 }
 
 /// Checks what TRACE needs besides its own properties. Runs when the bootstrap
@@ -117,21 +118,13 @@ pub(crate) fn check_trace_setup(
     lock_enabled: bool,
     policy_store_source: &PolicyStoreSource,
 ) -> Result<(), TraceSetupError> {
-    #[cfg(target_arch = "wasm32")]
-    {
-        let _ = (lock_enabled, policy_store_source);
-        Err(TraceSetupError::NotSupportedOnWasm)
+    if !lock_enabled {
+        return Err(TraceSetupError::RequiresLock);
     }
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        if !lock_enabled {
-            return Err(TraceSetupError::RequiresLock);
-        }
-        if !policy_store_source.is_archive() {
-            return Err(TraceSetupError::RequiresArchivePolicyStore);
-        }
-        Ok(())
+    if !policy_store_source.is_archive() {
+        return Err(TraceSetupError::RequiresArchivePolicyStore);
     }
+    Ok(())
 }
 
 /// Builds the TRACE settings; `None` when TRACE is disabled. Invalid combinations
@@ -164,7 +157,10 @@ fn build_enabled_trace_config(
         not_blank(&raw.trace_signing_key),
         not_blank(&raw.trace_signing_key_pem),
     ) {
+        #[cfg(not(target_arch = "wasm32"))]
         (Some(path), _) => TraceSigningKey::File(path.into()),
+        #[cfg(target_arch = "wasm32")]
+        (Some(_), _) => return Err(BootstrapConfigLoadingError::TraceSigningKeyFileOnWasm),
         (None, Some(pem)) => TraceSigningKey::Pem(pem),
         (None, None) => return Err(BootstrapConfigLoadingError::MissingTraceSigningKey),
     };

@@ -63,10 +63,6 @@ struct WarnedOnce {
 }
 
 impl TraceRecorder {
-    #[cfg_attr(
-        target_arch = "wasm32",
-        expect(dead_code, reason = "TRACE is not started on WASM")
-    )]
     pub(crate) fn new(
         tx: Option<mpsc::Sender<RecordDraft>>,
         log: Logger,
