@@ -52,7 +52,7 @@ derive_more = { workspace = true, features = [
 ] }
 time = { version = "0.3.53", features = ["wasm-bindgen"] }
 chrono = { workspace = true }
-tokio = { workspace = true, features = ["macros", "time"] }
+tokio = { workspace = true, features = ["macros", "sync", "time"] }
 tokio-util = { workspace = true }
 rand = { workspace = true }
 smol_str = "0.3.6"

@@ -208,6 +208,38 @@ fn test_log_stdout_logger() {
     assert_eq!(logged_content, json_str + "\n");
 }
 
+#[cfg(not(target_arch = "wasm32"))]
+#[tokio::test]
+async fn shut_down_writes_entries_held_by_async_stdout_logger() {
+    let test_writer = TestWriter::new();
+    // Neither the timeout nor the buffer limit would flush the entry during the test.
+    let logger = StdOutLogger::new_with(
+        Box::new(test_writer.clone()),
+        LogLevel::TRACE,
+        StdOutLoggerMode::Async {
+            timeout_millis: 60_000,
+            buffer_limit: StdOutLoggerMode::DEFAULT_BUFFER_LIMIT,
+        },
+    );
+    let strategy =
+        LogStrategy::new_with_logger(LogStrategyLogger::StdOut(logger), PdpID::new(), None, None);
+    let entry = LogEntry::new(BaseLogEntry::new_system_opt_request_id(
+        LogLevel::INFO,
+        None,
+    ))
+    .set_message("held by the writer".to_string());
+
+    strategy.log_any(entry);
+    strategy.shut_down().await;
+
+    let written: serde_json::Value = serde_json::from_str(test_writer.get_buf_contents().trim())
+        .expect("shut_down should have written the held entry as one JSON line");
+    assert_eq!(
+        written["msg"], "held by the writer",
+        "shut_down should write the entry the async writer still held"
+    );
+}
+
 #[test]
 fn test_log_storage_for_only_writer() {
     let logger = LogStrategyLogger::Off(NopLogger);
