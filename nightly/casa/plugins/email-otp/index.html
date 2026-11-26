@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2793,7 +2793,7 @@
 <h3 id="plugin">Plugin<a class="headerlink" href="#plugin" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>Download the plugin <a href="https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-0.0.0-nightly-jar-with-dependencies.jar">jar</a> file</p>
+<p>Download the plugin <a href="https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-replace-janssen-version-jar-with-dependencies.jar">jar</a> file</p>
 </li>
 <li>
 <p>Login to Casa using an administrative account</p>
@@ -2815,7 +2815,7 @@
 <h3 id="agama-project">Agama project<a class="headerlink" href="#agama-project" title="Permanent link">#</a></h3>
 <ol>
 <li>
-<p>Download the project <a href="https://github.com/JanssenProject/jans/releases/download/nightly/email_2fa-agama-0.0.0-nightly-project.zip">archive</a></p>
+<p>Download the project <a href="https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/email_2fa-agama-replace-janssen-version-project.zip">archive</a></p>
 </li>
 <li>
 <p>Deploy the project onto the server - you can use TUI for this task</p>
@@ -3029,10 +3029,12 @@
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>

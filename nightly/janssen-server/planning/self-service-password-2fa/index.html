@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2658,7 +2658,7 @@ What's great about this page is that Google lets you manage all your different
 credentials on one page.</p>
 <p>You can build a page like Google on your own website. You need to be able to
 list, add, and remove 2FA credentials for a given user's account. But another
-good option is the <a href="https://docs.jans.io/nightly/casa">Jans Casa</a> web application.</p>
+good option is the <a href="https://docs.jans.io/vreplace-janssen-version/casa">Jans Casa</a> web application.</p>
 
 
   <nav class="md-tags" >
@@ -2862,10 +2862,12 @@ good option is the <a href="https://docs.jans.io/nightly/casa">Jans Casa</a> web
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>

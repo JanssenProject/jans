@@ -88,7 +88,7 @@
   worker-src 'self' blob:;
 "><script>
   (function () {
-    var version = 2;
+    var version = 3;
     if (__md_get("__consent_version") === version) return;
     try {
       localStorage.removeItem(__md_scope.pathname + ".__consent");
@@ -2714,7 +2714,7 @@
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <ol>
 <li>
-<p><a href="https://github.com/JanssenProject/jans/releases/download/nightly/authorized-clients-0.0.0-nightly-jar-with-dependencies.jar">Download the plugin</a></p>
+<p><a href="https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/authorized-clients-replace-janssen-version-jar-with-dependencies.jar">Download the plugin</a></p>
 </li>
 <li>
 <p>Login to Casa using an administrator account</p>
@@ -2907,10 +2907,12 @@
   
     
     
+      
+    
   
   <li class="task-list-item">
     <label class="task-list-control">
-      <input type="checkbox" name="analytics" >
+      <input type="checkbox" name="analytics" checked>
       <span class="task-list-indicator"></span>
       Scarf &amp; Reo.dev analytics
     </label>
