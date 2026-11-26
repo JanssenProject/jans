@@ -24,7 +24,7 @@ env:
   MAVEN_VERSION: 3.9.16
 
 jobs:
-  publish:
+  resolve:
     if: >-
       github.repository == 'JanssenProject/jans' &&
       (github.event_name == 'workflow_dispatch' ||
@@ -33,11 +33,14 @@ jobs:
         github.event.workflow_run.event == 'push' &&
         github.event.workflow_run.head_repository.full_name == github.repository &&
         startsWith(github.event.workflow_run.head_branch, 'v')))
-    name: Publish API references
+    name: Resolve release
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: read
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      sha: ${{ steps.release.outputs.sha }}
+      publish: ${{ steps.release.outputs.publish }}
 
     steps:
       - name: Harden Runner
@@ -71,19 +74,42 @@ jobs:
             echo "ERROR: '${REQUESTED_TAG}' is not a published release." >&2
             exit 1
           fi
+          # Pin one commit so every job documents the same tree, even if the branch moves.
           sha="${RUN_SHA:-}"
           if [ -z "$sha" ] && [ "$DRY_RUN_INPUT" != "true" ]; then
             sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${REQUESTED_TAG}" --jq '.sha')
           fi
-          echo "Documenting ${REQUESTED_TAG} from ${sha:-$GITHUB_REF}"
+          sha="${sha:-$GITHUB_SHA}"
+          publish=true
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DRY_RUN_INPUT" = "true" ]; then
+            publish=false
+          fi
+          echo "Documenting ${REQUESTED_TAG} from ${sha} (publish: ${publish})"
           echo "tag=${REQUESTED_TAG}" >> "$GITHUB_OUTPUT"
           echo "sha=${sha}" >> "$GITHUB_OUTPUT"
-          echo "GENERATED_DIR=${RUNNER_TEMP}/developer-docs-out" >> "$GITHUB_ENV"
+          echo "publish=${publish}" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout ${{ steps.release.outputs.tag }}
+  publish:
+    needs: resolve
+    name: Publish API references
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Set output directory
+        run: echo "GENERATED_DIR=${RUNNER_TEMP}/developer-docs-out" >> "$GITHUB_ENV"
+
+      - name: Checkout ${{ needs.resolve.outputs.tag }}
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ steps.release.outputs.sha }}
+          ref: ${{ needs.resolve.outputs.sha }}
           persist-credentials: false
 
       - name: Set up JDK 17
@@ -139,7 +165,7 @@ jobs:
       - name: Generate javadocs
         env:
           JANS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
         run: bash automation/docs/generate-javadocs.sh . "$GENERATED_DIR" "$RELEASE_TAG"
 
       - name: Generate rustdocs
@@ -159,7 +185,7 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        if: ${{ github.event_name == 'workflow_run' || !inputs.dry_run }}
+        if: ${{ needs.resolve.outputs.publish == 'true' }}
         uses: crazy-max/ghaction-import-gpg@2dc316deee8e90f13e1a351ab510b4d5bc0c82cd # v7.0.0
         with:
           gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
@@ -177,8 +203,8 @@ jobs:
 
       - name: Publish to developer-docs
         env:
-          DEVELOPER_DOCS_TOKEN: ${{ (github.event_name == 'workflow_run' || !inputs.dry_run) && secrets.MOAUTO_WORKFLOW_TOKEN || '' }}
-          RELEASE_TAG: ${{ steps.release.outputs.tag }}
-          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
-          DOCS_SIGN_COMMITS: ${{ (github.event_name == 'workflow_run' || !inputs.dry_run) && '1' || '0' }}
+          DEVELOPER_DOCS_TOKEN: ${{ needs.resolve.outputs.publish == 'true' && secrets.MOAUTO_WORKFLOW_TOKEN || '' }}
+          RELEASE_TAG: ${{ needs.resolve.outputs.tag }}
+          DRY_RUN: ${{ needs.resolve.outputs.publish == 'true' && '0' || '1' }}
+          DOCS_SIGN_COMMITS: ${{ needs.resolve.outputs.publish == 'true' && '1' || '0' }}
         run: bash automation/docs/publish-developer-docs.sh "$GENERATED_DIR" "$RELEASE_TAG"
