@@ -20,6 +20,7 @@
             <class name="io.jans.ca.plugin.adminui.test.services.AdminUISecurityServiceTest" />
             <class name="io.jans.ca.plugin.adminui.test.services.AdminUIServiceTest" />
             <class name="io.jans.ca.plugin.adminui.test.services.WebhookServiceTest" />
+            <class name="io.jans.ca.plugin.adminui.test.utils.CommonUtilsTest" />
         </classes>
     </test>
 	
