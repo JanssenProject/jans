@@ -33,6 +33,7 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.audit.trace.TraceEmitter;
+import io.jans.fido2.service.audit.trace.TraceCeremonyHook;
 import io.jans.fido2.service.audit.trace.TraceRecordBuilder;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -313,6 +314,8 @@ public class AttestationService {
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
 		registrationData = registrationEntry.getRegistrationData();
+		// Captured now, before any step that can fail: the success path clears the session from the entry.
+		traceSessionId = registrationEntry.getSessionStateId();
 
 		// Set username for metrics
 		username = registrationData.getUsername();
@@ -400,7 +403,6 @@ public class AttestationService {
 
         // Get sessionId before cleaning it from registration entry
         String sessionStateId = registrationEntry.getSessionStateId();
-        traceSessionId = sessionStateId;
         registrationEntry.setSessionStateId(null);
 
         
@@ -440,7 +442,7 @@ public class AttestationService {
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
-		traceEmitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, traceSessionId);
+		TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, traceSessionId);
 
 		return attestationResultResponse;
 
@@ -459,8 +461,7 @@ public class AttestationService {
 			// happened to set it in memory first.
 			Exception auditFailure = persistedAsRegistered ? null : e;
 			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
-			traceEmitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure == null ? TraceRecordBuilder.Outcome.SUCCESS : TraceRecordBuilder.Outcome.FAILURE,
-			        traceSessionId);
+			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure, traceSessionId);
 
 			// Re-throw the original exception
 			throw e;

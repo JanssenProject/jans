@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Supplier;
 
@@ -58,7 +59,7 @@ public class TraceEmitter {
 		return thread;
 	});
 
-	private volatile Pipeline pipeline;
+	private final AtomicReference<Pipeline> pipelineRef = new AtomicReference<>();
 
 	/** Everything that depends on one configuration object. A reload replaces the configuration, so this is rebuilt. */
 	static final class Pipeline {
@@ -80,7 +81,11 @@ public class TraceEmitter {
 	 */
 	public void emit(TraceRecordBuilder.CeremonyType type, TraceRecordBuilder.Outcome outcome, String sessionId) {
 		Fido2Configuration configuration = appConfiguration.getFido2Configuration();
-		if (configuration == null || !configuration.isFido2TraceEnabled() || StringHelper.isEmpty(sessionId)) {
+		if (configuration == null || !configuration.isFido2TraceEnabled()) {
+			return;
+		}
+		if (StringHelper.isEmpty(sessionId)) {
+			log.debug("TRACE record skipped: the ceremony has no session");
 			return;
 		}
 		Runnable task = () -> deliver(configuration, type, outcome, sessionId);
@@ -102,19 +107,23 @@ public class TraceEmitter {
 			ObjectNode unsigned = current.builder.build(new TraceRecordBuilder.Ceremony(type, outcome, sessionId,
 					appConfiguration.getIssuer()));
 			ObjectNode signed = current.chainState.signAndAdvance(unsigned);
-			transport.deliver(signed.toString());
+			TraceLockTransport.Outcome result = transport.deliver(signed.toString());
+			if (result != TraceLockTransport.Outcome.ACCEPTED) {
+				log.error("TRACE record {} not delivered to Lock, outcome {}; later records will show a coverage gap",
+						signed.path("record_id").asText(), result);
+			}
 		} catch (RuntimeException e) {
 			log.error("Failed to build or sign a TRACE record, record not sent", e);
 		}
 	}
 
 	private Pipeline pipeline(Fido2Configuration configuration) {
-		Pipeline current = pipeline;
+		Pipeline current = pipelineRef.get();
 		if (current != null && current.configuration == configuration) {
 			return current;
 		}
 		synchronized (this) {
-			current = pipeline;
+			current = pipelineRef.get();
 			if (current != null && current.configuration == configuration) {
 				return current;
 			}
@@ -129,7 +138,7 @@ public class TraceEmitter {
 			TraceRecordBuilder builder = new TraceRecordBuilder(producerId, producerId, Clock.systemUTC(),
 					() -> UUID.randomUUID().toString());
 			current = new Pipeline(configuration, builder, chainState);
-			pipeline = current;
+			pipelineRef.set(current);
 			return current;
 		}
 	}

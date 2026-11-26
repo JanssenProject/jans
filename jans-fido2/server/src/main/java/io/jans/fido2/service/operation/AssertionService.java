@@ -42,6 +42,7 @@ import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
 import io.jans.fido2.service.audit.trace.TraceEmitter;
+import io.jans.fido2.service.audit.trace.TraceCeremonyHook;
 import io.jans.fido2.service.audit.trace.TraceRecordBuilder;
 import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
@@ -545,7 +546,7 @@ public class AssertionService {
 
 		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(),
 				authenticationEntity.getRpId(), keyId, clientOrigin, authenticatorType, null));
-				traceEmitter.emit(TraceRecordBuilder.CeremonyType.ASSERTION, TraceRecordBuilder.Outcome.SUCCESS, authenticationEntity.getSessionStateId());
+				TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, null, authenticationEntity);
 
 		return assertionResultResponse;
 
@@ -573,8 +574,7 @@ public class AssertionService {
 			String rpId = authenticationEntity != null ? authenticationEntity.getRpId() : null;
 			Exception auditFailure = persistedAsAuthenticated ? null : e;
 			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, rpId, keyId, clientOrigin, authenticatorType, auditFailure));
-			traceEmitter.emit(TraceRecordBuilder.CeremonyType.ASSERTION, auditFailure == null ? TraceRecordBuilder.Outcome.SUCCESS : TraceRecordBuilder.Outcome.FAILURE,
-			        authenticationEntity != null ? authenticationEntity.getSessionStateId() : null);
+			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.ASSERTION, auditFailure, authenticationEntity);
 
 			// Re-throw the original exception
 			throw e;
