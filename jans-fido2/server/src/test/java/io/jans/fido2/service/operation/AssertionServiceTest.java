@@ -15,6 +15,7 @@ import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.audit.trace.TraceEmitter;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -89,6 +90,8 @@ class AssertionServiceTest {
     private MetricService metricService;
     @Mock
     private LockAuditEventCollector lockAuditEventCollector;
+    @Mock
+    private TraceEmitter traceEmitter;
     @Mock
     private ChallengeGenerator challengeGenerator;
     @Mock

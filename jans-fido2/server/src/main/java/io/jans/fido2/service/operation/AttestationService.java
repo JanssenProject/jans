@@ -32,6 +32,8 @@ import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.audit.trace.TraceEmitter;
+import io.jans.fido2.service.audit.trace.TraceRecordBuilder;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -127,6 +129,9 @@ public class AttestationService {
 
 	@Inject
 	private LockAuditEventCollector lockAuditEventCollector;
+
+	@Inject
+	private TraceEmitter traceEmitter;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -281,6 +286,8 @@ public class AttestationService {
 		// an unpersisted in-memory status as proof of persistence. This flag is set only once update()
 		// itself has returned, so it — not the in-memory status — is what the audit outcome trusts.
 		boolean persistedAsRegistered = false;
+		// Session of this ceremony, kept for the TRACE record: the success path clears it from the entry.
+		String traceSessionId = null;
 
 		try {
         // Apply external custom scripts
@@ -393,6 +400,7 @@ public class AttestationService {
 
         // Get sessionId before cleaning it from registration entry
         String sessionStateId = registrationEntry.getSessionStateId();
+        traceSessionId = sessionStateId;
         registrationEntry.setSessionStateId(null);
 
         
@@ -432,6 +440,7 @@ public class AttestationService {
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
+		traceEmitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, traceSessionId);
 
 		return attestationResultResponse;
 
@@ -450,6 +459,8 @@ public class AttestationService {
 			// happened to set it in memory first.
 			Exception auditFailure = persistedAsRegistered ? null : e;
 			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
+			traceEmitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure == null ? TraceRecordBuilder.Outcome.SUCCESS : TraceRecordBuilder.Outcome.FAILURE,
+			        traceSessionId);
 
 			// Re-throw the original exception
 			throw e;

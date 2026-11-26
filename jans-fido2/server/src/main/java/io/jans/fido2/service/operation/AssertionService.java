@@ -41,6 +41,8 @@ import io.jans.fido2.model.telemetry.NativeClientTelemetry;
 import io.jans.fido2.model.metric.Fido2MetricsConstants;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.audit.trace.TraceEmitter;
+import io.jans.fido2.service.audit.trace.TraceRecordBuilder;
 import io.jans.fido2.service.app.AbandonedCeremonyPolicy;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
@@ -118,6 +120,9 @@ public class AssertionService {
 
 	@Inject
 	private LockAuditEventCollector lockAuditEventCollector;
+
+	@Inject
+	private TraceEmitter traceEmitter;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -540,6 +545,7 @@ public class AssertionService {
 
 		lockAuditEventCollector.collect(buildAuthenticationAuditEvent(registrationData.getUsername(),
 				authenticationEntity.getRpId(), keyId, clientOrigin, authenticatorType, null));
+				traceEmitter.emit(TraceRecordBuilder.CeremonyType.ASSERTION, TraceRecordBuilder.Outcome.SUCCESS, authenticationEntity.getSessionStateId());
 
 		return assertionResultResponse;
 
@@ -567,6 +573,8 @@ public class AssertionService {
 			String rpId = authenticationEntity != null ? authenticationEntity.getRpId() : null;
 			Exception auditFailure = persistedAsAuthenticated ? null : e;
 			lockAuditEventCollector.collect(buildAuthenticationAuditEvent(username, rpId, keyId, clientOrigin, authenticatorType, auditFailure));
+			traceEmitter.emit(TraceRecordBuilder.CeremonyType.ASSERTION, auditFailure == null ? TraceRecordBuilder.Outcome.SUCCESS : TraceRecordBuilder.Outcome.FAILURE,
+			        authenticationEntity != null ? authenticationEntity.getSessionStateId() : null);
 
 			// Re-throw the original exception
 			throw e;
