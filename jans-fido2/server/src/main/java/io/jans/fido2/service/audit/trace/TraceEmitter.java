@@ -10,9 +10,12 @@ import java.nio.file.Path;
 import java.security.PrivateKey;
 import java.time.Clock;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Supplier;
@@ -53,11 +56,17 @@ public class TraceEmitter {
 	/** Package-visible so tests can supply the key without a keystore file. */
 	Supplier<PrivateKey> keySupplier;
 
-	private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
-		Thread thread = new Thread(r, "trace-emitter");
-		thread.setDaemon(true);
-		return thread;
-	});
+	/** Records waiting for delivery. A full queue drops the newest record and counts it; it never blocks a ceremony. */
+	static final int QUEUE_CAPACITY = 1000;
+
+	private final ExecutorService executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+			new ArrayBlockingQueue<>(QUEUE_CAPACITY), r -> {
+				Thread thread = new Thread(r, "trace-emitter");
+				thread.setDaemon(true);
+				return thread;
+			}, new ThreadPoolExecutor.AbortPolicy());
+
+	private final AtomicLong droppedRecords = new AtomicLong();
 
 	private final AtomicReference<Pipeline> pipelineRef = new AtomicReference<>();
 
@@ -96,8 +105,15 @@ public class TraceEmitter {
 				executor.execute(task);
 			}
 		} catch (RejectedExecutionException e) {
-			log.warn("TRACE emitter is shut down, record not queued");
+			droppedRecords.incrementAndGet();
+			log.error("TRACE record dropped: the delivery queue is full or the emitter is shut down; dropped so far {}",
+					droppedRecords.get());
 		}
+	}
+
+	/** @return the number of records dropped because the queue was full or the emitter was shut down */
+	public long droppedRecords() {
+		return droppedRecords.get();
 	}
 
 	void deliver(Fido2Configuration configuration, TraceRecordBuilder.CeremonyType type,
@@ -107,6 +123,13 @@ public class TraceEmitter {
 			ObjectNode unsigned = current.builder.build(new TraceRecordBuilder.Ceremony(type, outcome, sessionId,
 					appConfiguration.getIssuer()));
 			ObjectNode signed = current.chainState.signAndAdvance(unsigned);
+			// The transport reads the endpoint and credentials from the current configuration. A record queued
+			// under an older configuration would be posted to the new one, so it is dropped instead.
+			if (appConfiguration.getFido2Configuration() != configuration) {
+				log.error("TRACE record {} not sent: the configuration changed after it was signed",
+						signed.path("record_id").asText());
+				return;
+			}
 			TraceLockTransport.Outcome result = transport.deliver(signed.toString());
 			if (result != TraceLockTransport.Outcome.ACCEPTED) {
 				log.error("TRACE record {} not delivered to Lock, outcome {}; later records will show a coverage gap",

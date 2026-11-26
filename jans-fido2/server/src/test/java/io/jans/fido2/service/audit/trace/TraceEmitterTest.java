@@ -6,6 +6,8 @@
 
 package io.jans.fido2.service.audit.trace;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -14,6 +16,9 @@ import static org.mockito.Mockito.when;
 import java.nio.file.Path;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -106,6 +111,30 @@ class TraceEmitterTest {
 		};
 
 		emitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, "sess-1");
+
+		verifyNoInteractions(transport);
+	}
+
+	@Test
+	void emit_ifQueueRejects_countsTheDropAndDoesNotThrow() {
+		emitter.delivery = task -> {
+			throw new RejectedExecutionException("queue full");
+		};
+
+		assertDoesNotThrow(() -> emitter.emit(TraceRecordBuilder.CeremonyType.REGISTRATION, TraceRecordBuilder.Outcome.SUCCESS, "sess-5"));
+
+		assertEquals(1, emitter.droppedRecords());
+		verifyNoInteractions(transport);
+	}
+
+	@Test
+	void deliver_ifConfigurationChangedBeforeTheRecordWasSent_dropsIt() {
+		List<Runnable> queued = new ArrayList<>();
+		emitter.delivery = queued::add;
+		emitter.emit(TraceRecordBuilder.CeremonyType.ASSERTION, TraceRecordBuilder.Outcome.SUCCESS, "sess-6");
+		when(appConfiguration.getFido2Configuration()).thenReturn(new Fido2Configuration());
+
+		queued.forEach(Runnable::run);
 
 		verifyNoInteractions(transport);
 	}
