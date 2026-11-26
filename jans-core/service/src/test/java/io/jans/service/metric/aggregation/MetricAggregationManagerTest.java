@@ -214,9 +214,9 @@ public class MetricAggregationManagerTest {
     }
 
     @Test
-    public void activePreviousSlotGivesSkippedThenNextSlotIsDone() {
+    public void activeRunSurvivesMultipleInterveningSkippedSlots() {
         FixedClusterLockService other = lockService("other");
-        ClusterLock running = other.tryClaim(TASK, Long.toString(slot(T0) - 1), Duration.ofSeconds(600)).get();
+        ClusterLock running = other.tryClaim(TASK, Long.toString(slot(T0) - 1), Duration.ofMinutes(30)).get();
         assertTrue(other.isActive(running, T0));
 
         MetricAggregationRunResult skipped = manager("a", 2).runOnce();
@@ -229,10 +229,20 @@ public class MetricAggregationManagerTest {
         assertTrue(store.getAll(MetricAggregationEntry.class).isEmpty());
         assertNull(store.get(lockService("x").buildStateDn(TASK), ClusterLock.class));
 
-        other.release(running, ClusterLock.STATUS_DONE, null);
+        for (int intervening = 1; intervening <= 2; intervening++) {
+            clock.advance(Duration.ofSeconds(300));
+            assertTrue(other.heartbeat(running));
+            assertEquals(manager("a", 2).runOnce().getStatus(), Status.SKIPPED);
+            assertTrue(claim(slot(T0) + intervening).getData().contains("\"activeSlot\":" + (slot(T0) - 1)));
+            assertTrue(initialRawPages.isEmpty());
+            assertNull(store.get(lockService("x").buildStateDn(TASK), ClusterLock.class),
+                    "skipped runs never take over the task writer");
+        }
+
+        assertTrue(other.release(running, ClusterLock.STATUS_DONE, null));
         clock.advance(Duration.ofSeconds(300));
         assertEquals(manager("a", 2).runOnce().getStatus(), Status.DONE);
-        assertEquals(claim(slot(T0) + 1).getStatus(), ClusterLock.STATUS_DONE);
+        assertEquals(claim(slot(T0) + 3).getStatus(), ClusterLock.STATUS_DONE);
     }
 
     @Test
@@ -334,7 +344,7 @@ public class MetricAggregationManagerTest {
             }
         }
         FixedClusterLockService seedLock = lockService("seed");
-        assertTrue(seedLock.saveState(seedLock.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(), current -> "{\"HOURLY\":\"2026-11-21T12:00:00Z\",\"DAILY\":\"2026-11-21T00:00:00Z\","
+        assertTrue(saveSeedState(seedLock, current -> "{\"HOURLY\":\"2026-11-21T12:00:00Z\",\"DAILY\":\"2026-11-21T00:00:00Z\","
                 + "\"WEEKLY\":\"2026-11-16T00:00:00Z\",\"MONTHLY\":\"2026-11-01T00:00:00Z\"}"));
 
         MetricAggregationConfiguration configuration = config();
@@ -383,7 +393,7 @@ public class MetricAggregationManagerTest {
         configuration.setKeepDailyDays(54);
         clock.setInstant(at("2026-11-24T00:00:00Z"));
         FixedClusterLockService seed = lockService("seed");
-        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(), current ->
+        assertTrue(saveSeedState(seed, current ->
                 "{\"HOURLY\":\"2026-11-24T00:00:00Z\",\"DAILY\":\"2026-11-24T00:00:00Z\","
                 + "\"MONTHLY\":\"2026-11-01T00:00:00Z\",\"coverageStarts\":{"
                 + "\"HOURLY\":\"2026-10-01T00:00:00Z\",\"DAILY\":\"2026-10-01T00:00:00Z\"}}"));
@@ -587,7 +597,7 @@ public class MetricAggregationManagerTest {
     public void laterLegacySeriesReuseSingleBucketLookbackIndex() {
         Instant start = at("2026-11-24T10:00:00Z");
         FixedClusterLockService seed = lockService("seed");
-        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(),
+        assertTrue(saveSeedState(seed,
                 current -> "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
         for (String host : Arrays.asList("h1", "h2")) {
             store.put(RawMetricRows.row(METRIC_BASE_DN, APP, host, COUNTER, null, start, REPORT,
@@ -770,7 +780,7 @@ public class MetricAggregationManagerTest {
                 ? at("2026-05-01T00:00:00Z") : at("2026-11-24T00:00:00Z"));
         stored.put(MetricAggregationType.WEEKLY, at("2026-05-04T00:00:00Z"));
         FixedClusterLockService seed = lockService("seed");
-        assertTrue(seed.saveState(seed.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get(),
+        assertTrue(saveSeedState(seed,
                 current -> MetricAggregationManager.toStateJson(stored)));
         MetricAggregationConfiguration configuration = config();
         configuration.setMaxBucketsPerRun(1);
@@ -817,10 +827,9 @@ public class MetricAggregationManagerTest {
     }
 
     @Test
-    public void previousClaimReadFailurePreventsAggregation() {
-        String previousDn = lockService("x").buildClaimDn(TASK, Long.toString(slot(T0) - 1));
-        extraFailure = (name, args) -> "find".equals(name) && args.length == 2 && previousDn.equals(args[1])
-                ? new EntryPersistenceException("previous claim unavailable", new SQLException("timeout")) : null;
+    public void activeClaimQueryFailurePreventsAggregation() {
+        extraFailure = (name, args) -> "findEntries".equals(name) && args[1] == ClusterLock.class
+                ? new EntryPersistenceException("active claims unavailable", new SQLException("timeout")) : null;
         assertEquals(manager("a", 1).runOnce().getStatus(), Status.FAILED);
         assertTrue(initialRawPages.isEmpty());
         assertTrue(rows(MetricAggregationType.HOURLY).isEmpty());
@@ -1203,6 +1212,15 @@ public class MetricAggregationManagerTest {
             return results;
         } finally {
             executor.shutdownNow();
+        }
+    }
+
+    private boolean saveSeedState(FixedClusterLockService service, java.util.function.UnaryOperator<String> update) {
+        ClusterLock claim = service.tryClaim(TASK, "seed", Duration.ofMinutes(10)).get();
+        try {
+            return service.saveState(claim, update);
+        } finally {
+            assertTrue(service.release(claim, ClusterLock.STATUS_DONE, null));
         }
     }
 

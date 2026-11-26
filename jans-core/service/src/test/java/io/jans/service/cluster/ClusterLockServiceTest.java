@@ -195,6 +195,22 @@ public class ClusterLockServiceTest {
     }
 
     @Test
+    public void activeClaimSearchExcludesSelfReleasedExpiredAndOtherTasks() {
+        nodeA.tryClaim(TASK, "current", LEASE).get();
+        nodeB.tryClaim("other-task", "1", LEASE).get();
+        ClusterLock released = nodeB.tryClaim(TASK, "skipped", LEASE).get();
+        assertTrue(nodeB.release(released, ClusterLock.STATUS_SKIPPED, null));
+        nodeB.tryClaim(TASK, "expired", Duration.ofSeconds(1)).get();
+        clock.advance(Duration.ofSeconds(2));
+        assertFalse(nodeA.findActive(TASK, "current", clock.instant()).isPresent());
+
+        ClusterLock running = nodeB.tryClaim(TASK, "older", LEASE).get();
+        assertEquals(nodeA.findActive(TASK, "current", clock.instant()).get().getId(), running.getId());
+        assertTrue(nodeB.release(running, ClusterLock.STATUS_DONE, null));
+        assertFalse(nodeA.findActive(TASK, "current", clock.instant()).isPresent());
+    }
+
+    @Test
     public void findReturnsClaimOrEmpty() {
         assertFalse(nodeA.find(TASK, "1").isPresent());
 

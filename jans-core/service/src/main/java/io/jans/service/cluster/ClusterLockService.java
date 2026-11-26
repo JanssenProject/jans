@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -258,6 +259,21 @@ public abstract class ClusterLockService {
      */
     public Optional<ClusterLock> find(String task, String slotKey) {
         return readEntry(buildClaimDn(task, slotKey));
+    }
+
+    /** Finds another running, unexpired claim of the task. Read failures propagate to the caller. */
+    public Optional<ClusterLock> findActive(String task, String excludedSlotKey, Instant now) {
+        buildClaimDn(task, excludedSlotKey);
+        String baseDn = getBaseDn();
+        Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansType", task),
+                Filter.createEqualityFilter("jansStatus", ClusterLock.STATUS_RUNNING),
+                Filter.createNOTFilter(Filter.createEqualityFilter("jansId", buildId(task, excludedSlotKey))),
+                Filter.createNOTFilter(Filter.createLessOrEqualFilter("exp", entryManager().encodeTime(baseDn, Date.from(now)))));
+        List<ClusterLock> active = entryManager().findEntries(baseDn, ClusterLock.class, filter, 1);
+        if (active == null) {
+            throw new EntryPersistenceException("Active task claims could not be read");
+        }
+        return active.isEmpty() ? Optional.empty() : Optional.of(active.get(0));
     }
 
     /** Confirms a release whose response may have been lost, without retrying a released handle. */

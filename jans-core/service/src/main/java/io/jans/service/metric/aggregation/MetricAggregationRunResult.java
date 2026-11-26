@@ -22,7 +22,7 @@ public class MetricAggregationRunResult {
         DISABLED,
         /** Another node holds the slot, or the claim could not be inserted. */
         NOT_CLAIMED,
-        /** The slot was claimed, but an earlier run is still active; released as {@code skipped}. */
+        /** The slot was claimed, but another run of the task is still active; released as {@code skipped}. */
         SKIPPED,
         /** The task state could not be read or saved; released as {@code failed}. */
         STATE_ERROR,

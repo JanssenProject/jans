@@ -73,7 +73,7 @@ import jakarta.inject.Inject;
  * <li>Claim slot {@code floor(now / runIntervalSeconds)} of task {@code metric-aggregation_<appType>}.
  * Return when another node holds it, or when the claim cannot be inserted (for example a missing
  * {@code jansClusterLock} table, or a backend without insert-or-fail).</li>
- * <li>When the claim of the previous slot is still active, release the new claim as {@code skipped}.</li>
+ * <li>When another claim of the task is still active, release the new claim as {@code skipped}.</li>
  * <li>Read the watermarks from the task state row. A watermark is the end of the last processed bucket of
  * a level. A missing state row starts each level at the raw-data horizon ({@code now -
  * metricReporterKeepDataDays}, aligned down to the level). Plan the closed buckets of the recompute
@@ -230,14 +230,16 @@ public abstract class MetricAggregationManager {
             }
             claim = claimed.get();
 
-            if (isPreviousSlotActive(lockService, task, slot, now)) {
+            Optional<ClusterLock> active = lockService.findActive(task, slotKey, getClock().instant());
+            if (active.isPresent()) {
+                Object activeSlot = activeSlotKey(active.get());
                 Map<String, Object> summary = new LinkedHashMap<>();
                 summary.put(SUMMARY_SLOT, slot);
-                summary.put(SUMMARY_ACTIVE_SLOT, slot - 1);
+                summary.put(SUMMARY_ACTIVE_SLOT, activeSlot);
                 if (!releaseClaim(lockService, claim, ClusterLock.STATUS_SKIPPED, toJson(summary))) {
                     return MetricAggregationRunResult.of(MetricAggregationRunResult.Status.RELEASE_UNCONFIRMED, slot);
                 }
-                LOG.info("Metric aggregation for '{}' skips slot {}: the run of slot {} is still active", applicationType, slot, slot - 1);
+                LOG.info("Metric aggregation for '{}' skips slot {}: the run of slot {} is still active", applicationType, slot, activeSlot);
                 return MetricAggregationRunResult.of(MetricAggregationRunResult.Status.SKIPPED, slot);
             }
 
@@ -425,13 +427,13 @@ public abstract class MetricAggregationManager {
         return seconds > 0 ? seconds : DEFAULT_REPORTER_INTERVAL_SECONDS;
     }
 
-    private boolean isPreviousSlotActive(ClusterLockService lockService, String task, long slot, Instant now) {
-        if (slot <= 0) {
-            return false;
+    private static Object activeSlotKey(ClusterLock claim) {
+        String key = claim.getId().substring(claim.getTask().length() + 1);
+        try {
+            return Long.valueOf(key);
+        } catch (NumberFormatException nonNumericSlot) {
+            return key;
         }
-
-        Optional<ClusterLock> previous = lockService.find(task, Long.toString(slot - 1));
-        return previous.isPresent() && lockService.isActive(previous.get(), now);
     }
 
     private void initWatermarks(RunContext context, Map<MetricAggregationType, Instant> stored) {
