@@ -187,6 +187,9 @@ public abstract class MetricAggregationManager {
      * @return the run result, or {@code null} when the slot was already handled by this instance
      */
     public MetricAggregationRunResult runOnSchedule() {
+        if (!isEnabled()) {
+            return MetricAggregationRunResult.of(MetricAggregationRunResult.Status.DISABLED, -1);
+        }
         Instant now = getClock().instant();
         MetricAggregationConfiguration configuration = snapshotConfiguration();
         long slot = slotOf(now, configuration.getRunIntervalSeconds());
@@ -202,6 +205,9 @@ public abstract class MetricAggregationManager {
      * Runs one aggregation cycle for the current slot. Never throws for persistence errors.
      */
     public MetricAggregationRunResult runOnce() {
+        if (!isEnabled()) {
+            return MetricAggregationRunResult.of(MetricAggregationRunResult.Status.DISABLED, -1);
+        }
         return runOnce(getClock().instant(), snapshotConfiguration());
     }
 

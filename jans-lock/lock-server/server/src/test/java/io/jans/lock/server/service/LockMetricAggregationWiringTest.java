@@ -99,6 +99,7 @@ class LockMetricAggregationWiringTest {
 
 		assertFalse(manager.isEnabled());
 		assertEquals(MetricAggregationRunResult.Status.DISABLED, manager.runOnce().getStatus());
+		assertEquals(MetricAggregationRunResult.Status.DISABLED, manager.runOnSchedule().getStatus());
 		verifyNoInteractions(lockService);
 	}
 
