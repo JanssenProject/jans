@@ -3,6 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![expect(
+    clippy::disallowed_methods,
+    reason = "native-only program, so the WASM-unsafe calls are fine here"
+)]
 #![allow(clippy::cast_precision_loss)]
 
 use cedarling::{

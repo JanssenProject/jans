@@ -4,6 +4,77 @@ ignore-interior-mutability = ["cedar_policy::Entity"]
 path = "std::time::SystemTime::now"
 reason = "may not work correctly in WASM, use chrono::Utc::now() instead"
 
+# WASM runs Cedarling without a Tokio runtime and without threads. Tokio timers and the std
+# calls below compile for `wasm32-unknown-unknown` but panic there at runtime, so only this lint
+# catches them. Tokio spawn functions do not exist on WASM at all (no `rt` feature); banning them
+# moves that build break from the WASM CI job to the developer's native `cargo clippy`.
+# Use the cross-platform wrappers instead. Native-only code opts out with a scoped
+# `#[expect(clippy::disallowed_methods, reason = "...")]` that says why it never runs on WASM.
+
+[[disallowed-methods]]
+path = "tokio::time::sleep"
+reason = "panics on WASM (no Tokio timer), use crate::rt::sleep instead"
+
+[[disallowed-methods]]
+path = "tokio::time::sleep_until"
+reason = "panics on WASM (no Tokio timer), use crate::rt::sleep instead"
+
+[[disallowed-methods]]
+path = "tokio::time::interval"
+reason = "panics on WASM (no Tokio timer), use crate::rt::Ticker instead"
+
+[[disallowed-methods]]
+path = "tokio::time::interval_at"
+reason = "panics on WASM (no Tokio timer), use crate::rt::Ticker instead"
+
+[[disallowed-methods]]
+path = "tokio::time::timeout"
+reason = "panics on WASM (no Tokio timer), select! against crate::rt::sleep instead"
+
+[[disallowed-methods]]
+path = "tokio::time::timeout_at"
+reason = "panics on WASM (no Tokio timer), select! against crate::rt::sleep instead"
+
+[[disallowed-methods]]
+path = "tokio::spawn"
+allow-invalid = true # absent on WASM
+reason = "does not exist on WASM, use crate::rt::spawn_task instead"
+
+[[disallowed-methods]]
+path = "tokio::task::spawn"
+allow-invalid = true # absent on WASM
+reason = "does not exist on WASM, use crate::rt::spawn_task instead"
+
+[[disallowed-methods]]
+path = "tokio::task::spawn_local"
+allow-invalid = true # absent on WASM
+reason = "does not exist on WASM and needs a LocalSet on native, use crate::rt::spawn_task instead"
+
+[[disallowed-methods]]
+path = "tokio::task::spawn_blocking"
+allow-invalid = true # absent on WASM
+reason = "does not exist on WASM, allow it only in native-only code and say why"
+
+[[disallowed-methods]]
+path = "wasm_bindgen_futures::spawn_local"
+reason = "WASM-only, use crate::rt::spawn_task so native and WASM share one call"
+
+[[disallowed-methods]]
+path = "std::time::Instant::now"
+reason = "panics on wasm32-unknown-unknown, use chrono::Utc::now() instead"
+
+[[disallowed-methods]]
+path = "tokio::time::Instant::now"
+reason = "panics on wasm32-unknown-unknown (calls std::time::Instant::now), use chrono::Utc::now() instead"
+
+[[disallowed-methods]]
+path = "std::thread::sleep"
+reason = "panics on WASM and blocks the async runtime on native, use crate::rt::sleep instead"
+
+[[disallowed-methods]]
+path = "std::thread::spawn"
+reason = "panics on WASM (no threads), use crate::rt::spawn_task instead"
+
 ## Temporarily allow std::eprintln/std::eprint.
 ## These are used during bootstrap before the logger is available (see JwtConfigRaw -> JwtConfig).
 ## TODO: Reinstate these disallowed-macros once bootstrap has a way to surface warnings via Logger.

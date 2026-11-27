@@ -3,6 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![expect(
+    clippy::disallowed_methods,
+    reason = "native-only program, so the WASM-unsafe calls are fine here"
+)]
+
 //! Cross-platform benchmark harness for the Rust binding.
 //!
 //! Reads the shared manifest at `bindings/benchmarks/fixtures/scenarios.json`

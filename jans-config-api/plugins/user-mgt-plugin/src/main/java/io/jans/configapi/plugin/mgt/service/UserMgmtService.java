@@ -19,6 +19,7 @@ import io.jans.configapi.service.auth.DatabaseService;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.exception.VersionMismatchException;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -83,6 +84,7 @@ public class UserMgmtService {
     private static final String BIRTH_DATE = "birthdate";
     private static final String MOBILE = "mobile";
     public static final String ADMIN_UI_ROLE = "jansAdminUIRole";
+    static final int MAX_UPDATE_ATTEMPTS = 5;
 
     /**
      * Obtain the base Distinguished Name (DN) under which people (user) entries are
@@ -257,21 +259,55 @@ public class UserMgmtService {
             return null;
         }
 
-        User user = userService.getUserByInum(inum);
-        if (user == null) {
-            return null;
+        boolean setsStatus = patchSetsStatus(userPatchRequest);
+        GluuStatus readStatus = null;
+        VersionMismatchException conflict = null;
+        for (int attempt = 1;; attempt++) {
+            User user = userService.getUserByInum(inum);
+            if (user == null) {
+                return null;
+            }
+            if (conflict == null) {
+                readStatus = user.getStatus();
+            } else if (setsStatus && user.getStatus() != readStatus) {
+                // the requested status was chosen against the first read; don't let it override a newer one
+                throw conflict;
+            }
+            user = applyPatch(user, userPatchRequest, allowRoleChange);
+            try {
+                return saveWithVersion(user);
+            } catch (VersionMismatchException ex) {
+                checkRetry(user, attempt, ex);
+                conflict = ex;
+            }
         }
+    }
 
+    private boolean patchSetsStatus(UserPatchRequest userPatchRequest) {
+        if (StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())
+                && Jackson.isFieldPresent(userPatchRequest.getJsonPatchString(), "status")) {
+            return true;
+        }
+        List<CustomObjectAttribute> customAttributes = userPatchRequest.getCustomAttributes();
+        return customAttributes != null && customAttributes.stream()
+                .anyMatch(attribute -> attribute != null && AttributeConstants.JANS_STATUS.equalsIgnoreCase(attribute.getName()));
+    }
+
+    private User applyPatch(User user, UserPatchRequest userPatchRequest, boolean allowRoleChange)
+            throws JsonPatchException, IOException {
         logger.debug("User to be patched- user:{}", user);
         Set<String> rolesBeforePatch = getAdminUIRoles(user);
         final String dnBeforePatch = user.getDn();
         final String inumBeforePatch = user.getAttribute("inum");
+        // version is @JsonIgnore, so the JSON patch round trip drops it; also stops a patch from setting it
+        final Long versionRead = user.getVersion();
         // apply direct patch for basic attributes
         if (StringUtils.isNotEmpty(userPatchRequest.getJsonPatchString())) {
             logger.debug("Patch basic attributes");
             user = Jackson.applyPatch(userPatchRequest.getJsonPatchString(), user);
             logger.debug("User after patching basic attributes - user:{}", user);
         }
+        user.setVersion(versionRead);
 
         // patch for customAttributes
         if (userPatchRequest.getCustomAttributes() != null && !userPatchRequest.getCustomAttributes().isEmpty()) {
@@ -291,21 +327,8 @@ public class UserMgmtService {
             throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
         }
 
-        // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
-        user = userService.updateUser(user);
-
-        // remove inactive claims
-        if (user != null) {
-            List<User> users = new ArrayList<>();
-            users.add(user);
-            users = this.verifyCustomAttributes(users);
-            user = users.get(0);
-        }
-
-        logger.info("User after patch user:{}", user);
         return user;
-
     }
 
     public Set<String> getAdminUIRoles(User user) {
@@ -527,19 +550,75 @@ public class UserMgmtService {
     }
 
     public User updateUser(User user) {
+        return updateUser(user, userService.getUserByDn(user.getDn()), true, user.getStatus() == null);
+    }
+
+    /**
+     * Replace the stored user with {@code user}, conditional on the version of {@code read}, the
+     * caller's read of the entry. {@code keepStoredStatus} writes the stored status instead of the
+     * one on {@code user}. On a concurrent write the entry is re-read and the write retried on its
+     * version, unless the request sets a status and the stored status changed since {@code read}:
+     * that conflict is thrown.
+     */
+    public User updateUser(User user, User read, boolean allowRoleChange, boolean keepStoredStatus) {
         logger.info("\n Updating user:{}", user);
-        user = userService.updateUser(user);
-        logger.info("Updated user:{} \n", user);
-        // remove inactive claims
-        if (user != null) {
-            List<User> users = new ArrayList<>();
-            users.add(user);
-            users = this.verifyCustomAttributes(users);
-            if (users != null && !users.isEmpty()) {
-                user = users.get(0);
+        if (read == null) {
+            return null;
+        }
+        User base = read;
+        for (int attempt = 1;; attempt++) {
+            user.setVersion(base.getVersion());
+            if (keepStoredStatus) {
+                user.setStatus(base.getStatus());
+            }
+            if (!allowRoleChange && !getAdminUIRoles(base).equals(getAdminUIRoles(user))) {
+                throw new InvalidAttributeException("Not authorized to change '" + ADMIN_UI_ROLE + "'");
+            }
+            try {
+                return saveWithVersion(user);
+            } catch (VersionMismatchException ex) {
+                base = reReadForRetry(user, read, keepStoredStatus, attempt, ex);
+                if (base == null) {
+                    return null;
+                }
             }
         }
-        return user;
+    }
+
+    private User reReadForRetry(User user, User read, boolean keepStoredStatus, int attempt,
+            VersionMismatchException ex) {
+        checkRetry(user, attempt, ex);
+        User current = userService.getUserByDn(user.getDn());
+        // the requested status was chosen against the read; don't let it override a newer one
+        if (current != null && !keepStoredStatus && current.getStatus() != read.getStatus()) {
+            throw ex;
+        }
+        return current;
+    }
+
+    private User saveWithVersion(User user) {
+        user.setUpdatedAt(new Date());
+        try {
+            persistenceEntryManager.updateWithVersion(user);
+        } catch (io.jans.orm.exception.UnsupportedOperationException ex) {
+            logger.debug("Versioned update not supported, falling back to merge: {}", ex.getMessage());
+            persistenceEntryManager.merge(user);
+        }
+        User updated = userService.getUserByDn(user.getDn());
+        logger.info("Updated user:{} \n", updated);
+        // remove inactive claims
+        if (updated != null) {
+            removeInActiveCustomAttribute(updated.getCustomAttributes());
+        }
+        return updated;
+    }
+
+    private void checkRetry(User user, int attempt, VersionMismatchException ex) {
+        if (attempt >= MAX_UPDATE_ATTEMPTS) {
+            logger.warn("User:{} still changing after {} update attempts", user.getDn(), attempt);
+            throw ex;
+        }
+        logger.debug("User:{} changed since read (attempt {}), retrying", user.getDn(), attempt);
     }
 
     public List<User> verifyCustomAttributes(List<User> users) {

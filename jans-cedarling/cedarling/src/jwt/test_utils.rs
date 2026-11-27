@@ -7,7 +7,7 @@
 
 use std::sync::{Arc, LazyLock};
 
-use super::http_utils::OpenIdConfig;
+use super::fetch::OpenIdConfig;
 use super::status_list::{self, StatusBitSize};
 use super::validation::RefJwtStatusList;
 use crate::common::issuer_utils::IssClaim;
@@ -19,7 +19,7 @@ use serde::Serialize;
 use serde_json::{Value, json};
 use url::Url;
 
-use {jsonwebkey as jwk, jsonwebtoken as jwt};
+use jsonwebtoken as jwt;
 
 /// A pair of encoding and decoding keys.
 #[derive(Clone)]
@@ -38,37 +38,17 @@ impl KeyPair {
 
 #[derive(Debug, thiserror::Error)]
 pub(crate) enum KeyGenerationError {
-    #[error("Failed to serialize the decoding key onto the right struct")]
-    SerializeDecodingKey(#[from] serde_json::Error),
-    #[error("The given key was generated with the wrong algorithm")]
-    KeyMismatch,
+    #[error("Failed to build the HS256 key: {0}")]
+    Key(#[from] jwt::errors::Error),
 }
 
 /// Generates a HS256-signed token using the given claims.
 pub(crate) fn generate_keypair_hs256(
     kid: Option<impl ToString>,
 ) -> Result<KeyPair, KeyGenerationError> {
-    let mut jwk = jwk::JsonWebKey::new(
-        jwk::Key::try_generate_symmetric(256).expect("invalid symmetric key size"),
-    );
-    jwk.set_algorithm(jwk::Algorithm::HS256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some("some_id".to_string());
-
-    // since this is a symmetric key, the public key is the same as the private
-    let mut decoding_key = serde_json::to_value(jwk.key.clone())?;
-
-    // set the key parameters
-    if let Some(kid) = &kid {
-        decoding_key["kid"] = serde_json::Value::String(kid.to_string());
-    }
-    let mut decoding_key: jwt::jwk::Jwk = serde_json::from_value(decoding_key)?;
-    decoding_key.common.key_algorithm = Some(jwt::jwk::KeyAlgorithm::HS256);
-
-    let encoding_key = match *jwk.key {
-        jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
-        _ => Err(KeyGenerationError::KeyMismatch)?,
-    };
+    let encoding_key = jwt::EncodingKey::from_secret(&rand::random::<[u8; 32]>())?;
+    let mut decoding_key = jwt::jwk::Jwk::from_encoding_key(&encoding_key, jwt::Algorithm::HS256)?;
+    decoding_key.common.key_id = kid.as_ref().map(ToString::to_string);
 
     Ok(KeyPair {
         kid: kid.map(|s| s.to_string()),

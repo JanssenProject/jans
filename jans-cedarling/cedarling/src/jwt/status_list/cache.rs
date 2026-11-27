@@ -15,7 +15,6 @@ use url::Url;
 
 use crate::{
     LogLevel, LogWriter,
-    async_sleep::sleep,
     common::issuer_utils::IssClaim,
     http::HttpClient,
     jwt::{
@@ -27,6 +26,7 @@ use crate::{
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
     },
     log::Logger,
+    rt::sleep,
 };
 
 use super::{StatusList, StatusListJwt, StatusListJwtStr, UnboundReason, UpdateStatusListError};
@@ -211,7 +211,7 @@ impl StatusListCache {
             http_client: http_client.clone(),
             cancel_tkn,
         };
-        crate::http::spawn_task(keep_status_list_updated(
+        crate::rt::spawn_task(keep_status_list_updated(
             // callback is called on updated status list
             move || {
                 token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));

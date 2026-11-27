@@ -72,7 +72,7 @@
 //! before performing Dynamic Client Registration. The validated SSA JWT
 //! is then included in the DCR request to the Identity Provider.
 
-use crate::http_utils::HttpRequestError;
+use crate::http::HttpClientError;
 use crate::{
     http::HttpClient,
     jwt::{DecodeJwtError, DecodedJwt, decode_jwt},
@@ -362,7 +362,7 @@ fn create_decoding_key(
                 let key_data = base64::engine::general_purpose::URL_SAFE_NO_PAD
                     .decode(k)
                     .map_err(SsaValidationError::KeyDecodeError)?;
-                Ok(DecodingKey::from_secret(&key_data))
+                DecodingKey::from_secret(&key_data).map_err(SsaValidationError::JwtError)
             } else {
                 Err(SsaValidationError::InvalidKeyFormat)
             }
@@ -434,7 +434,7 @@ pub(crate) enum SsaValidationError {
 
     /// Failed to fetch JWKS due to network or HTTP errors
     #[error("failed to fetch JWKS (network/HTTP error): {0}")]
-    JwksFetchError(HttpRequestError),
+    JwksFetchError(HttpClientError),
 
     /// Missing key ID (kid) in JWT header
     #[error("missing key ID (kid) in JWT header")]
@@ -751,6 +751,25 @@ mod tests {
 
         let result = create_decoding_key(&jwk, Algorithm::HS256);
         assert!(matches!(result, Err(SsaValidationError::InvalidKeyFormat)));
+    }
+
+    #[test]
+    fn test_create_decoding_key_hmac_empty_k() {
+        let jwk = json!({
+            "kid": "test-kid",
+            "alg": "HS256",
+            "k": ""
+        });
+
+        let result = create_decoding_key(&jwk, Algorithm::HS256);
+        assert!(
+            matches!(
+                &result,
+                Err(SsaValidationError::JwtError(err))
+                    if matches!(err.kind(), jwt::errors::ErrorKind::InvalidKeyFormat)
+            ),
+            "an empty HMAC secret must be rejected as an invalid key format, got: {result:?}"
+        );
     }
 
     #[test]

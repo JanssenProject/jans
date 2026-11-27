@@ -3,46 +3,49 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+mod body;
 pub(crate) mod cache_headers;
-mod spawn_task;
+mod failure;
+#[cfg(test)]
+pub(crate) mod test_support;
 
-pub use spawn_task::*;
-
-use crate::http_utils::{
-    Backoff, HttpRequestError, HttpRequestReasonError, Sender, read_response_capped,
-};
+use crate::common::retry::{Backoff, RetryPolicy, retry};
+pub(crate) use body::read_body;
+use body::read_json;
 use cache_headers::CacheHeadersState;
+pub use failure::HttpRequestError;
+/// Tests outside `http` build status failures by hand.
+#[cfg(test)]
+pub(crate) use failure::RedactedUrl;
+use failure::attempt;
+pub(crate) use failure::{
+    AttemptFailure, FinalFailure, HttpClientError, ReadBodyError, RetryableFailure, SendError,
+};
 pub(crate) use reqwest::RequestBuilder;
 use reqwest::{Client, ClientBuilder};
-#[cfg(test)]
-use serde::Deserialize;
 use std::time::Duration;
 use thiserror::Error;
 
 /// A wrapper around `reqwest::Client` providing HTTP request functionality
 /// with retry logic using exponential backoff.
 ///
-/// The `HttpClient` struct allows for sending GET requests with a retry mechanism
-/// that attempts to fetch the requested resource up to a maximum number of times
-/// if an error occurs, using the `Sender` and `Backoff` utilities from `http_utils`.
+/// GET requests are retried with backoff, up to a maximum number of times, when the
+/// failure may clear (see [`HttpClient::get_with_retry_with`]).
 ///
 /// Structure is thread safe, feel free to clone.
 #[derive(Debug, Clone)]
 pub(crate) struct HttpClient {
     pub(crate) raw_client: Client,
-    // used in non-test builds via create_sender()
-    #[allow(unused)]
-    retry_delay: Duration,
-    #[allow(unused)]
-    max_retries: u32,
-    max_response_size_bytes: Option<u64>,
     conf: HttpClientConfig,
+    /// Whether a retried request repeats a `401`, see [`HttpClient::retrying_unauthorized`].
+    retry_unauthorized: bool,
 }
 
 /// Configuration for [`HttpClient`] — controls retry behavior and per-request timeout.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HttpClientConfig {
-    /// Maximum number of times a failed request is retried before giving up.
+    /// Maximum number of times a request that failed on the network, or with `408`,
+    /// `429` or `5xx`, is retried before giving up.
     pub max_retries: u32,
     /// Base delay between retries; actual delay grows exponentially with each attempt.
     pub retry_delay: Duration,
@@ -83,10 +86,20 @@ impl HttpClientConfig {
     pub const DEFAULT_MAX_RESPONSE_SIZE_BYTES: u64 = 10 * 1024 * 1024;
 }
 
+impl HttpClientConfig {
+    /// Retries a request `max_retries` times, the delay doubling from `retry_delay`.
+    pub(crate) fn retry_policy(&self) -> RetryPolicy {
+        RetryPolicy {
+            backoff: Backoff::exponential(self.retry_delay),
+            max_retries: self.max_retries,
+        }
+    }
+}
+
 impl Default for HttpClientConfig {
     fn default() -> Self {
         Self {
-            max_retries: 3,
+            max_retries: Self::DEFAULT_MAX_RETRIES,
             retry_delay: Self::DEFAULT_RETRY_DELAY,
             #[cfg(not(target_arch = "wasm32"))]
             request_timeout: Self::DEFAULT_REQUEST_TIMEOUT,
@@ -179,11 +192,19 @@ impl HttpClient {
 
         Ok(Self {
             raw_client,
-            retry_delay: conf.retry_delay,
-            max_retries: conf.max_retries,
-            max_response_size_bytes: conf.max_response_size_bytes,
             conf,
+            retry_unauthorized: false,
         })
+    }
+
+    /// This client, with a `401` on a retried request repeated like a `5xx`. For a
+    /// client carrying Lock's token: Lock refuses a client for a few seconds after
+    /// registering it.
+    pub(crate) fn retrying_unauthorized(self) -> Self {
+        Self {
+            retry_unauthorized: true,
+            ..self
+        }
     }
 
     /// A client with the same limits but without this client's default headers,
@@ -191,65 +212,18 @@ impl HttpClient {
     ///
     /// Rebuilt from [`HttpClientConfig`] alone: any other setting of the builder
     /// passed to [`HttpClient::new_with_builder`] (proxy, root certificates,
-    /// accepting invalid certificates) is not carried over.
+    /// accepting invalid certificates) is not carried over. Nor is
+    /// [`HttpClient::retrying_unauthorized`]: it is for the token left out.
     pub(crate) fn without_default_headers(&self) -> Result<Self, InitializeHttpClientError> {
         Self::new(self.conf)
-    }
-
-    /// Per-response body size cap for callers that read a raw [`reqwest::Response`]
-    /// (e.g. when they need to inspect headers before consuming the body).
-    pub(crate) fn max_response_size_bytes(&self) -> Option<u64> {
-        self.max_response_size_bytes
-    }
-
-    /// Creates a new Sender with the configured backoff strategy.
-    pub(crate) fn create_sender(&self) -> Sender {
-        let backoff = {
-            #[cfg(not(test))]
-            {
-                Backoff::new_exponential(self.retry_delay, Some(self.max_retries))
-            }
-            // Faster backoff for tests, but still respects max_retries count.
-            #[cfg(test)]
-            {
-                Backoff::new_exponential(Duration::from_millis(10), Some(self.max_retries))
-            }
-        };
-        Sender::new(backoff).with_max_response_size(self.max_response_size_bytes)
-    }
-
-    /// Sends a GET request to the specified URI with retry logic. Returns the
-    /// response body as a string wrapped in [`Response`], which the caller can
-    /// then deserialize. Test-only: production callers use [`Self::get_bytes`]
-    /// or [`Self::get_json`].
-    #[cfg(test)]
-    pub(crate) async fn get(&self, uri: &str) -> Result<Response, HttpClientError> {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        let text = sender.send_text(|| client.get(uri)).await?;
-        Ok(Response { text })
     }
 
     pub(crate) async fn get_json<T>(&self, uri: &str) -> Result<T, HttpClientError>
     where
         T: serde::de::DeserializeOwned,
     {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send(|| client.get(uri)).await
-    }
-
-    /// Sends a GET request to the specified URI with retry logic, returning raw bytes.
-    ///
-    /// This method will attempt to fetch the resource up to the configured `max_retries`,
-    /// with exponential backoff between each attempt. Useful for fetching binary content
-    /// like archive files. Test-only: production callers use [`Self::get_with_retry`]
-    /// so they can capture response headers alongside the body.
-    #[cfg(test)]
-    pub(crate) async fn get_bytes(&self, uri: &str) -> Result<Vec<u8>, HttpClientError> {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send_bytes(|| client.get(uri)).await
+        let response = self.get_with_retry(uri).await?;
+        read_json(response, self.conf.max_response_size_bytes).await
     }
 
     // Execute POST request
@@ -260,14 +234,13 @@ impl HttpClient {
         T: serde::de::DeserializeOwned,
         F: FnOnce(&Client) -> RequestBuilder,
     {
-        let mut sender = self.create_sender();
-        let client = &self.raw_client;
-        sender.send_once(move || builder_fn(client)).await
+        let response = AttemptFailure::check(builder_fn(&self.raw_client).send().await)?;
+        read_json(response, self.conf.max_response_size_bytes).await
     }
 
     /// Sends a GET request with retry logic and returns the raw [`reqwest::Response`].
     ///
-    /// Unlike `get`, `get_json`, or `get_bytes`, this method gives the caller access to
+    /// Unlike `get_json`, this method gives the caller access to
     /// response headers and lets them decide how to consume the body. Use it when you
     /// need to inspect headers (e.g. `Cache-Control`, `Content-Type`) before reading
     /// the payload.
@@ -275,12 +248,14 @@ impl HttpClient {
         &self,
         uri: &str,
     ) -> Result<reqwest::Response, HttpClientError> {
-        let mut sender = self.create_sender();
-        sender.send_with_retry(|| self.raw_client.get(uri)).await
+        self.get_with_retry_with(uri, |request| request).await
     }
 
-    /// Sends a GET request with retry logic, allowing the caller to modify the
-    /// [`RequestBuilder`] before dispatch (e.g. to add custom headers).
+    /// Sends a GET request, letting the caller modify the [`RequestBuilder`] before
+    /// dispatch (e.g. to add custom headers). Only network failures, `408`, `429` and
+    /// `5xx` are retried: any other `4xx`, an invalid URL or a refused redirect would
+    /// fail the same way again, so it returns at once instead of holding startup
+    /// through the backoff.
     pub(crate) async fn get_with_retry_with<F>(
         &self,
         uri: &str,
@@ -289,8 +264,12 @@ impl HttpClient {
     where
         F: Fn(RequestBuilder) -> RequestBuilder,
     {
-        let mut sender = self.create_sender();
-        sender.send_with_retry(|| f(self.raw_client.get(uri))).await
+        let response = retry(self.conf.retry_policy(), || {
+            let request = f(self.raw_client.get(uri));
+            async move { attempt(request.send().await, self.retry_unauthorized) }
+        })
+        .await?;
+        Ok(response)
     }
 
     /// Fetches `uri` as raw bytes, honoring any previously captured cache
@@ -337,13 +316,9 @@ impl HttpClient {
             });
         }
 
-        // Enforce the configured body-size cap. Old prod path
-        // (get_bytes → send_bytes → read_response_capped) bounded this; raw
-        // `response.bytes()` here would let a hostile / misconfigured upstream
-        // buffer multi-GB bodies into the worker on every refresh tick.
-        let bytes = read_response_capped(response, self.max_response_size_bytes)
-            .await
-            .map_err(|reason| HttpRequestError::new(reason, Some(status)))?;
+        // Enforce the configured body-size cap: raw `response.bytes()` here would let
+        // a hostile or misconfigured upstream buffer multi-GB bodies on every refresh tick.
+        let bytes = self.read_response_capped(response).await?;
 
         Ok(ConditionalFetch::Modified {
             bytes,
@@ -361,10 +336,7 @@ impl HttpClient {
         &self,
         response: reqwest::Response,
     ) -> Result<Vec<u8>, HttpClientError> {
-        let status = response.status();
-        read_response_capped(response, self.max_response_size_bytes)
-            .await
-            .map_err(|reason| HttpRequestError::new(reason, Some(status)))
+        read_body(response, self.conf.max_response_size_bytes).await
     }
 
     /// Sends a HEAD request and parses the response headers into a
@@ -378,41 +350,33 @@ impl HttpClient {
     /// same tick or simply runs again on the next interval. Burning the retry
     /// budget on a probe would only delay the downgrade.
     pub(crate) async fn head_validators(&self, uri: &str) -> Result<HeadOutcome, HttpClientError> {
-        let response = self.raw_client.head(uri).send().await.map_err(|e| {
-            // No retry path — this is a single probe by design. We reuse
-            // `MaxRetriesExceeded` because the surrounding refresh-worker
-            // classifier (`HttpRequestError::is_max_retries_exceeded()`) uses
-            // it to route transport failures into the `NetworkError` metric
-            // bucket. `retry_count(0)` keeps `Display` from claiming we
-            // retried.
-            let msg = format!("HEAD probe send() failed: {e}");
-            HttpRequestError::new(HttpRequestReasonError::MaxRetriesExceeded, None)
-                .with_retry_count(0)
-                .with_last_error(msg)
-        })?;
-        let status = response.status();
-        if status == reqwest::StatusCode::METHOD_NOT_ALLOWED
-            || status == reqwest::StatusCode::NOT_IMPLEMENTED
+        let result = self.raw_client.head(uri).send().await;
+        // Checked before the failure is sorted: whether a status is retried has no
+        // bearing on whether it means "no HEAD here".
+        if let Ok(response) = &result
+            && matches!(
+                response.status(),
+                reqwest::StatusCode::METHOD_NOT_ALLOWED | reqwest::StatusCode::NOT_IMPLEMENTED
+            )
         {
             return Ok(HeadOutcome::NotSupported);
         }
-        if !status.is_success() {
-            // Any other 4xx/5xx — auth failure, missing resource, server
-            // error — is a real failure, not "HEAD returned no useful
-            // validators". Surface it as a typed `HttpStatusError` so the
-            // worker's `fetch_error` classifier routes it into the
-            // `HttpError` metric bucket rather than counting it toward
-            // `degraded_count` as a strategy ineffectiveness signal.
-            let msg = format!("HEAD probe rejected with status {status}");
-            return Err(HttpRequestError::new(
-                HttpRequestReasonError::HttpStatusError,
-                Some(status),
-            )
-            .with_retry_count(0)
-            .with_last_error(msg));
+        // Any other failure (auth, missing resource, server error) is a real failure,
+        // not "HEAD returned no validators", so it is not counted as a degraded strategy.
+        let response = AttemptFailure::check(result)?;
+        // A `3xx` left after redirects (a `304` to a request with no validators, say)
+        // describes no current version, so its headers are not trusted either.
+        if !response.status().is_success() {
+            return Err(AttemptFailure::Final(FinalFailure::Status {
+                status: response.status(),
+                url: Box::new(failure::RedactedUrl::new(response.url())),
+            })
+            .into());
         }
-        let validators = CacheHeadersState::from_headers(response.headers(), chrono::Utc::now());
-        Ok(HeadOutcome::Headers(validators))
+        Ok(HeadOutcome::Headers(CacheHeadersState::from_headers(
+            response.headers(),
+            chrono::Utc::now(),
+        )))
     }
 }
 
@@ -442,34 +406,14 @@ pub(crate) enum HeadOutcome {
     NotSupported,
 }
 
-/// Wrapper around a text response body — lets callers defer JSON deserialization
-/// to a stage where they hold the response. Returned by [`HttpClient::get`].
-/// Test-only.
-#[cfg(test)]
-#[derive(Debug)]
-pub(crate) struct Response {
-    text: String,
-}
-
-#[cfg(test)]
-impl Response {
-    pub(crate) fn json<'a, T>(&'a self) -> Result<T, serde_json::Error>
-    where
-        T: Deserialize<'a>,
-    {
-        serde_json::from_str::<'a, T>(&self.text)
-    }
-}
-
-/// Error type for the [`HttpClient`] - re-export from [`http_utils`] for compatibility
-pub(crate) type HttpClientError = HttpRequestError;
-
 #[cfg(all(test, not(target_arch = "wasm32")))]
 mod test {
     use crate::http::cache_headers::CacheHeadersState;
-    use crate::http::{HttpClient, HttpClientConfig};
+    use crate::http::{AttemptFailure, FinalFailure, ReadBodyError, RetryableFailure, SendError};
+    use crate::http::{HttpClient, HttpClientConfig, HttpClientError};
 
     use mockito::Server;
+    use reqwest::StatusCode;
     use serde_json::json;
     use std::time::Duration;
     use test_utils::assert_eq;
@@ -477,7 +421,8 @@ mod test {
     const HTTP_CONF: HttpClientConfig = HttpClientConfig {
         max_retries: 3,
         request_timeout: Duration::from_millis(500),
-        retry_delay: Duration::from_secs(5),
+        // Short, so the retry tests finish in milliseconds.
+        retry_delay: Duration::from_millis(10),
         max_response_size_bytes: None,
     };
 
@@ -556,21 +501,21 @@ mod test {
             .expect(1)
             .create_async()
             .await;
-        let client = HttpClient::new(HttpClientConfig {
-            max_retries: 0,
-            ..HTTP_CONF
-        })
-        .expect("Should create HttpClient.");
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
 
         let err = client
             .get(&format!("{}/jwks", server.url()))
             .await
             .expect_err("a redirect to plain http on another host must not be followed");
 
+        // The refused redirect would be refused again, so the request is sent once.
         redirect.assert_async().await;
         assert!(
-            format!("{err:?}").contains("error following redirect"),
-            "the request must fail on the refused redirect, got: {err:?}"
+            matches!(
+                err,
+                HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+            ),
+            "the refused redirect must fail at once as an invalid request, got: {err:?}"
         );
     }
 
@@ -611,41 +556,354 @@ mod test {
     }
 
     #[tokio::test]
-    async fn errors_when_max_http_retries_exceeded() {
+    async fn connection_failure_is_retried_until_exhausted() {
+        let closed = super::test_support::ClosedPort::new();
         let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
-        let response = client.get("0.0.0.0").await;
+        let err = client
+            .get(&closed.url("/"))
+            .await
+            .expect_err("nothing listens on the port");
 
         assert!(
-            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
-            "Expected error due to MaxRetriesExceeded: {response:?}"
+            matches!(
+                err,
+                HttpClientError::Send(SendError::RetriesExhausted {
+                    retries: 3,
+                    last: RetryableFailure::Transport(_),
+                })
+            ),
+            "a refused connection must be retried 3 times, got: {err:?}"
         );
     }
 
     #[tokio::test]
-    async fn retries_on_http_error_status_then_fails() {
-        let mut mock_server = Server::new_async().await;
+    async fn client_error_status_fails_after_one_request() {
+        for status in [400u16, 401, 403, 404] {
+            let mut server = Server::new_async().await;
+            let mock = server
+                .mock("GET", "/store")
+                .with_status(status.into())
+                .expect(1)
+                .create_async()
+                .await;
+            let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
 
-        // The new implementation retries on HTTP error status codes too,
-        // so we expect multiple attempts before MaxRetriesExceeded
-        let mock_endpoint_fut = mock_server
-            .mock("GET", "/.well-known/openid-configuration")
-            .with_status(500)
-            .expect_at_least(1)
-            .create_async();
+            let err = client
+                .get(&format!("{}/store", server.url()))
+                .await
+                .expect_err("a 4xx must fail");
 
-        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
+            mock.assert_async().await;
+            assert!(
+                matches!(
+                    err,
+                    HttpClientError::Send(SendError::Final(FinalFailure::Status { status: got, .. }))
+                        if got.as_u16() == status
+                ),
+                "HTTP {status} would be answered the same way again, got: {err:?}"
+            );
+        }
+    }
 
-        let link = &format!("{}/.well-known/openid-configuration", mock_server.url());
-        let client_fut = client.get(link);
+    /// Lock refuses a client for a few seconds after registering it, so a client
+    /// carrying its token repeats a `401`; a `403` stays final.
+    #[tokio::test]
+    async fn client_retrying_unauthorized_repeats_only_401() {
+        let mut server = Server::new_async().await;
+        let refused = server
+            .mock("GET", "/store")
+            .with_status(401)
+            .expect(1)
+            .create_async()
+            .await;
+        let accepted = server
+            .mock("GET", "/store")
+            .with_status(200)
+            .expect(1)
+            .create_async()
+            .await;
+        let forbidden = server
+            .mock("GET", "/forbidden")
+            .with_status(403)
+            .expect(1)
+            .create_async()
+            .await;
+        let client = HttpClient::new(HTTP_CONF)
+            .expect("Should create HttpClient.")
+            .retrying_unauthorized();
 
-        let (mock_endpoint, response) = join!(mock_endpoint_fut, client_fut);
+        client
+            .get(&format!("{}/store", server.url()))
+            .await
+            .expect("the request after the 401 succeeds");
+        let err = client
+            .get(&format!("{}/forbidden", server.url()))
+            .await
+            .expect_err("a 403 must fail");
 
+        refused.assert_async().await;
+        accepted.assert_async().await;
+        forbidden.assert_async().await;
         assert!(
-            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
-            "Expected error due to MaxRetriesExceeded after retrying on HTTP errors: {response:?}"
+            matches!(
+                err,
+                HttpClientError::Send(SendError::Final(FinalFailure::Status {
+                    status: StatusCode::FORBIDDEN,
+                    ..
+                }))
+            ),
+            "only a 401 is repeated, got: {err:?}"
+        );
+    }
+
+    #[tokio::test]
+    async fn retryable_status_is_retried_until_exhausted() {
+        for status in [408u16, 429, 503] {
+            let mut server = Server::new_async().await;
+            let mock = server
+                .mock("GET", "/store")
+                .with_status(status.into())
+                .expect(4)
+                .create_async()
+                .await;
+            let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
+
+            let err = client
+                .get(&format!("{}/store", server.url()))
+                .await
+                .expect_err("a retryable status that never clears must fail");
+
+            mock.assert_async().await;
+            assert!(
+                matches!(
+                    err,
+                    HttpClientError::Send(SendError::RetriesExhausted {
+                        retries: 3,
+                        last: RetryableFailure::Status { status: got, .. },
+                    }) if got.as_u16() == status
+                ),
+                "HTTP {status} must be sent once and retried 3 times, got: {err:?}"
+            );
+        }
+    }
+
+    #[tokio::test]
+    async fn retries_follow_the_configured_delay_and_count() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .with_status(503)
+            .expect(3)
+            .create_async()
+            .await;
+        let retry_delay = Duration::from_millis(60);
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 2,
+            retry_delay,
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+
+        let started = std::time::Instant::now();
+        let err = client
+            .get(&format!("{}/store", server.url()))
+            .await
+            .expect_err("a 503 that never clears must fail");
+
+        mock.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                HttpClientError::Send(SendError::RetriesExhausted { retries: 2, .. })
+            ),
+            "max_retries: 2 means 2 retries, got {err:?}"
+        );
+        let waited = retry_delay + retry_delay * 2;
+        assert!(
+            started.elapsed() >= waited,
+            "the retries wait the configured {retry_delay:?}, then twice that: at least \
+             {waited:?}, waited {:?}",
+            started.elapsed()
+        );
+    }
+
+    #[tokio::test]
+    async fn public_error_keeps_the_message_and_cause() {
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
+        let err = client
+            .get_bytes("0.0.0.0")
+            .await
+            .expect_err("a URL without a scheme cannot be requested");
+        let message = err.to_string();
+        assert!(
+            message.contains("relative URL without a base"),
+            "the message carries the cause: {message}"
         );
 
-        mock_endpoint.assert();
+        let public = crate::HttpRequestError::from(err);
+
+        assert_eq!(
+            public.to_string(),
+            message,
+            "the public error shows the same message, cause included"
+        );
+        assert!(
+            matches!(
+                public.kind(),
+                HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+            ),
+            "the crate can still sort the failure, got {public:?}"
+        );
+    }
+
+    /// Userinfo, query and fragment can carry credentials, so error messages leave
+    /// them out and keep where the request went.
+    fn assert_redacted(message: &str, kept: &str) {
+        for secret in ["alice", "hunter2", "sig=", "token-in-fragment"] {
+            assert!(
+                !message.contains(secret),
+                "the error must not show `{secret}`: {message}"
+            );
+        }
+        assert!(
+            message.contains(kept),
+            "the error must still name `{kept}`: {message}"
+        );
+    }
+
+    #[tokio::test]
+    async fn status_error_redacts_the_url() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_query(mockito::Matcher::Any)
+            .with_status(404)
+            .expect(1)
+            .create_async()
+            .await;
+        let url = server.url().replacen("http://", "http://alice:hunter2@", 1)
+            + "/store?sig=abc#token-in-fragment";
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
+
+        let err = client.get(&url).await.expect_err("a 404 must fail");
+
+        mock.assert_async().await;
+        assert_redacted(&err.to_string(), &format!("{}/store", server.url()));
+    }
+
+    #[tokio::test]
+    async fn body_read_error_names_the_redacted_url() {
+        let mut server = Server::new_async().await;
+        let mock = server
+            .mock("GET", "/store")
+            .match_query(mockito::Matcher::Any)
+            .with_status(200)
+            .with_body(vec![0u8; 4096])
+            .expect(1)
+            .create_async()
+            .await;
+        let client = HttpClient::new(HttpClientConfig {
+            max_response_size_bytes: Some(1024),
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+        let url = format!("{}/store?sig=abc#token-in-fragment", server.url());
+
+        let err = client
+            .get_bytes(&url)
+            .await
+            .expect_err("a body over the cap must fail");
+
+        mock.assert_async().await;
+        assert!(
+            matches!(
+                err,
+                HttpClientError::ReadBody {
+                    error: ReadBodyError::TooLarge { .. },
+                    ..
+                }
+            ),
+            "expected a TooLarge read error, got {err:?}"
+        );
+        assert_redacted(&err.to_string(), &format!("{}/store", server.url()));
+    }
+
+    #[tokio::test]
+    async fn connection_error_redacts_the_url() {
+        let closed = super::test_support::ClosedPort::new();
+        let url = closed
+            .url("/store")
+            .replacen("http://", "http://alice:hunter2@", 1)
+            + "?sig=abc#token-in-fragment";
+        let client = HttpClient::new(HttpClientConfig {
+            max_retries: 0,
+            ..HTTP_CONF
+        })
+        .expect("Should create HttpClient.");
+
+        let err = client
+            .get(&url)
+            .await
+            .expect_err("the port refuses connections");
+
+        assert_redacted(&err.to_string(), &closed.url("/store"));
+    }
+
+    #[tokio::test]
+    async fn invalid_url_fails_without_retry() {
+        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
+        let err = client
+            .get_bytes("0.0.0.0")
+            .await
+            .expect_err("a URL without a scheme cannot be requested");
+        assert!(
+            matches!(
+                err,
+                HttpClientError::Send(SendError::Final(FinalFailure::InvalidRequest(_)))
+            ),
+            "an invalid URL is the same on every attempt, got: {err:?}"
+        );
+        assert!(
+            err.to_string().contains("relative URL without a base"),
+            "the message must name the cause, not only 'builder error': {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn post_json_sends_once() {
+        for (status, retryable) in [(400u16, false), (503, true)] {
+            let mut server = Server::new_async().await;
+            let mock = server
+                .mock("POST", "/token")
+                .with_status(status.into())
+                .expect(1)
+                .create_async()
+                .await;
+            let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
+            let url = format!("{}/token", server.url());
+
+            let err = client
+                .post_json::<serde_json::Value, _>(|c| c.post(&url))
+                .await
+                .expect_err("a failure status must fail");
+
+            mock.assert_async().await;
+            let matched = match &err {
+                HttpClientError::Attempt(AttemptFailure::Retryable(RetryableFailure::Status {
+                    status: got,
+                    ..
+                })) => retryable && got.as_u16() == status,
+                HttpClientError::Attempt(AttemptFailure::Final(FinalFailure::Status {
+                    status: got,
+                    ..
+                })) => !retryable && got.as_u16() == status,
+                _ => false,
+            };
+            assert!(
+                matched,
+                "a POST is never repeated; HTTP {status} must be sorted retryable={retryable}, got: {err:?}"
+            );
+        }
     }
 
     #[tokio::test]
@@ -674,11 +932,10 @@ mod test {
     async fn get_bytes_retries_on_http_error_status() {
         let mut mock_server = Server::new_async().await;
 
-        // The new implementation retries on HTTP error status codes too
         let mock_endpoint = mock_server
             .mock("GET", "/error-binary")
             .with_status(500)
-            .expect_at_least(1)
+            .expect(4)
             .create_async();
 
         let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient.");
@@ -687,20 +944,19 @@ mod test {
         let (req_result, mock_result) = join!(req_fut, mock_endpoint);
 
         assert!(
-            matches!(req_result, Err(ref e) if e.is_max_retries_exceeded()),
-            "Expected MaxRetriesExceeded after retrying on HTTP error status: {req_result:?}"
+            matches!(
+                req_result,
+                Err(HttpClientError::Send(SendError::RetriesExhausted {
+                    retries: 3,
+                    last: RetryableFailure::Status {
+                        status: StatusCode::INTERNAL_SERVER_ERROR,
+                        ..
+                    },
+                }))
+            ),
+            "Expected a 500 retried 3 times: {req_result:?}"
         );
         mock_result.assert();
-    }
-
-    #[tokio::test]
-    async fn get_bytes_max_retries_exceeded() {
-        let client = HttpClient::new(HTTP_CONF).expect("Should create HttpClient");
-        let response = client.get_bytes("0.0.0.0").await;
-        assert!(
-            matches!(response, Err(ref e) if e.is_max_retries_exceeded()),
-            "Expected error due to MaxRetriesExceeded: {response:?}"
-        );
     }
 
     /// A server that accepts TCP connections but never sends a response would
@@ -1032,12 +1288,9 @@ mod test {
             .await
             .expect_err("expected non-success status to yield an error");
         assert!(
-            err.is_http_status_error(),
-            "expected HttpStatusError for {status}, got {err:?}"
-        );
-        assert!(
-            !err.is_max_retries_exceeded(),
-            "must not classify as network error for {status}",
+            matches!(err, HttpClientError::Attempt(_))
+                && err.status_code().map(|got| got.as_u16()) == Some(status),
+            "the probe is sent once and keeps HTTP {status}, got {err:?}"
         );
         mock.assert_async().await;
     }
@@ -1055,6 +1308,13 @@ mod test {
     #[tokio::test]
     async fn head_validators_500_propagates_as_error() {
         assert_head_status_propagates_as_error(500).await;
+    }
+
+    /// A `304` must not pass as validators: a matching `ETag` on it would report
+    /// the store unchanged and clear the refresh worker's failure streak.
+    #[tokio::test]
+    async fn head_validators_304_propagates_as_error() {
+        assert_head_status_propagates_as_error(304).await;
     }
 
     #[tokio::test]
@@ -1085,11 +1345,15 @@ mod test {
             .get_bytes_conditional(&url, &CacheHeadersState::default())
             .await
             .expect_err("body over the cap must surface as an error, not be silently buffered");
-        let msg = err.to_string();
         assert!(
-            msg.contains("response body exceeds the configured limit")
-                || msg.contains("ResponseTooLarge"),
-            "cap-exceeded must surface as a ResponseTooLarge error, got: {msg}",
+            matches!(
+                err,
+                HttpClientError::ReadBody {
+                    error: crate::http::ReadBodyError::TooLarge { limit: 1024, .. },
+                    ..
+                }
+            ),
+            "cap-exceeded must surface as a TooLarge read error, got: {err:?}",
         );
         mock.assert_async().await;
     }

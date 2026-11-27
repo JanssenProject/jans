@@ -6,6 +6,9 @@
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
 #![allow(clippy::missing_errors_doc)]
+// The WASM-unsafe calls banned in clippy.toml are fine in unit tests, which only run natively.
+// The non-test build is still linted, so production code cannot rely on this.
+#![cfg_attr(test, allow(clippy::disallowed_methods))]
 
 //! # Cedarling
 //! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
@@ -15,18 +18,17 @@
 //! For example, why display form fields that a user is not authorized to see?
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
-mod async_sleep;
 mod authz;
 mod bootstrap_config;
 mod common;
 mod context_data_api;
 mod entity_builder;
 mod http;
-mod http_utils;
 mod init;
 mod jwt;
 mod lock;
 mod log;
+mod rt;
 mod trace;
 // is reexported in hidden bindings module
 #[doc(hidden)]
@@ -74,7 +76,7 @@ pub use common::policy_store::validate::{
     Diagnostic, LevelResult, ValidateInfraError, ValidationReport,
 };
 pub use common::policy_store::{PolicyEffect, PolicyMetadata};
-pub use http::HttpClientConfig;
+pub use http::{HttpClientConfig, HttpRequestError};
 use init::ServiceFactory;
 use init::policy_store::{LoadOptions, LoadedPolicyStore, load_policy_store};
 use init::policy_store_refresh::{
@@ -116,7 +118,7 @@ pub mod bindings {
     pub use super::log::{
         AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
-    pub use crate::http::spawn_task;
+    pub use crate::rt::spawn_task;
     pub use crate::sparkv;
     pub use serde_json;
     pub use serde_saphyr;
@@ -232,8 +234,13 @@ impl Cedarling {
         let app_name = (!config.application_name.is_empty())
             .then(|| ApplicationName::from(config.application_name.clone()));
 
-        let telemetry_active = config
+        // One config for the metrics mode and the workers, so a zero telemetry
+        // interval neither starts a ticker nor takes the metrics from the host.
+        let lock_config = config
             .lock_config
+            .as_ref()
+            .map(LockServiceConfig::with_zero_intervals_disabled);
+        let telemetry_active = lock_config
             .as_ref()
             .is_some_and(|c| c.telemetry_interval.is_some());
         let metrics_mode = resolve_metrics_mode(
@@ -246,7 +253,7 @@ impl Cedarling {
             &config.log_config,
             pdp_id,
             app_name,
-            config.lock_config.as_ref(),
+            lock_config.as_ref(),
             metrics.clone(),
             config.http_client_config,
             config
@@ -725,7 +732,7 @@ fn policy_store_http_client(
         reqwest::Client::builder().default_headers(headers),
         config.http_client_config,
     )?;
-    Ok(Some(client))
+    Ok(Some(client.retrying_unauthorized()))
 }
 
 /// Spawn the background policy-store refresh worker if the source is a remote
@@ -1072,7 +1079,7 @@ impl Cedarling {
                 );
 
                 match e {
-                    PolicyStoreLoadError::FetchFromLockServer(_)
+                    PolicyStoreLoadError::Fetch(_)
                     | PolicyStoreLoadError::Archive(_)
                     | PolicyStoreLoadError::Directory(_) => {
                         Err(ValidateInfraError::Io(std::io::Error::other(err_str)))

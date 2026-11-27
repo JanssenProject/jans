@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:7b0cd77df19f413034a437f081ac4c3db892e6ce3d3cde56c76d5c51cf7b071a
+FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:804f98b28c12668e57825acd09d591879a9f79b9297d67f594965467a956b191
 
 # ===============
 # Alpine packages
@@ -16,7 +16,7 @@ RUN apk update \
 RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # janssenproject/jans SHA commit
-ARG JANS_SOURCE_VERSION=beec597356bb1c5a41e6041831fd72b68c01f70d
+ARG JANS_SOURCE_VERSION=b250079b46f821a2d92fa019fe49446e9389d526
 ENV JANS_SOURCE_VERSION=${JANS_SOURCE_VERSION}
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
