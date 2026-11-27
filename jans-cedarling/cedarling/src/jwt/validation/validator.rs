@@ -129,7 +129,9 @@ impl JwtValidator {
         let token_kind = TokenKind::StatusList;
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = true;
+        // The status list parser checks `exp` with this validator's leeway, so its
+        // error names the date the list expired.
+        validation.validate_exp = false;
         validation.validate_nbf = true;
 
         // we will validate the missing claims in another function since the

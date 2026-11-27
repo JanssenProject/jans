@@ -120,6 +120,11 @@ pub(crate) enum UpdateStatusListError {
     UnboundStatusList { url: String, reason: UnboundReason },
     #[error("the status list JWT from '{url}' has `typ` {found:?}, expected `statuslist+jwt`")]
     UnexpectedTyp { url: String, found: Option<String> },
+    #[error("the status list JWT from '{url}' is past its {expiry}")]
+    Expired {
+        url: String,
+        expiry: StatusListExpiry,
+    },
 }
 
 /// Which claim ties a status list JWT to another list or issuer.

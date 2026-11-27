@@ -127,8 +127,10 @@ struct ParsedStatusList {
 }
 
 /// Validates a fetched status list JWT and parses its list: signature and
-/// registered claims first, then `typ` and the binding to its URI and issuer, in
-/// the order of [draft-ietf-oauth-status-list-21 §8.3] steps 3 and 4.
+/// registered claims first, then `typ`, the binding to its URI and issuer, and
+/// `exp` against `now`, in the order of [draft-ietf-oauth-status-list-21 §8.3]
+/// steps 3 and 4. `exp` is checked here rather than by the validator, so the
+/// error names the date the list expired.
 ///
 /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
 fn parse_status_list_jwt(
@@ -137,6 +139,7 @@ fn parse_status_list_jwt(
     decoding_key: Option<Arc<DecodingKey>>,
     iss: &IssClaim,
     status_list_url: &Url,
+    now: u64,
 ) -> Result<ParsedStatusList, UpdateStatusListError> {
     let validated_jwt = validator.validate_jwt(&jwt.0, decoding_key)?;
 
@@ -159,10 +162,15 @@ fn parse_status_list_jwt(
             reason,
         }
     })?;
-    Ok(ParsedStatusList {
-        ttl_secs: status_list_jwt.ttl,
-        list: status_list_jwt.into_cached(validator.leeway_secs())?,
-    })
+    let ttl_secs = status_list_jwt.ttl;
+    let list = status_list_jwt.into_cached(validator.leeway_secs())?;
+    if let Some(expiry) = list.expiry().filter(|expiry| expiry.has_passed(now)) {
+        return Err(UpdateStatusListError::Expired {
+            url: status_list_url.to_string(),
+            expiry,
+        });
+    }
+    Ok(ParsedStatusList { list, ttl_secs })
 }
 
 /// Waits the refresh interval, but no longer than until the cached list's `exp`,
@@ -553,7 +561,14 @@ impl StatusListSource {
                 alg: header.alg,
             })?;
 
-        parse_status_list_jwt(&jwt, &validator, decoding_key, &self.iss, &self.url)
+        parse_status_list_jwt(
+            &jwt,
+            &validator,
+            decoding_key,
+            &self.iss,
+            &self.url,
+            jsonwebtoken::get_current_timestamp(),
+        )
     }
 }
 

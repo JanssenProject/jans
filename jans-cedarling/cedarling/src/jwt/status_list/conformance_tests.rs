@@ -18,7 +18,6 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use jsonwebtoken::Algorithm;
-use jsonwebtoken::errors::ErrorKind;
 use serde_json::json;
 use tokio_util::sync::{CancellationToken, DropGuard};
 
@@ -596,14 +595,18 @@ async fn rejects_list_expired_at_fetch() {
         "a list whose `exp` passed beyond the leeway is refused, so the token that \
          references it is rejected",
     );
+    let refusal = unavailable_cause(&err);
     assert!(
         matches!(
-            unavailable_cause(&err),
-            Some(UpdateStatusListError::ValidateJwtError(
-                ValidateJwtError::ValidateJwt(e)
-            )) if *e.kind() == ErrorKind::ExpiredSignature
+            refusal,
+            Some(UpdateStatusListError::Expired { url, .. }) if *url == case.list_uri()
         ),
-        "an expired status list JWT must be refused, got: {err:?}"
+        "an expired status list JWT must be refused, naming the list, got: {err:?}"
+    );
+    let message = refusal.map(ToString::to_string).unwrap_or_default();
+    assert!(
+        message.contains("is past its `exp` ") && message.contains(" of clock-skew leeway"),
+        "the admin must see the `exp` date and the leeway, got: {message}"
     );
 }
 

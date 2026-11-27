@@ -139,7 +139,8 @@ impl TryFrom<StatusListJwt> for StatusList {
 
 impl StatusListJwt {
     /// Parses the list and keeps its expiry next to it, so the two are replaced
-    /// together. `leeway_secs` is the clock-skew leeway the JWT was validated with.
+    /// together. `leeway_secs` is the clock-skew leeway of the validator that
+    /// checked the JWT, so `exp` gets the same leeway as `nbf`.
     pub(super) fn into_cached(
         self,
         leeway_secs: u64,
