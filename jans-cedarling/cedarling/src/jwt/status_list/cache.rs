@@ -23,7 +23,7 @@ use crate::{
         key_service::KeyService,
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
-        validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
+        validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidateJwtError, ValidatorInfo},
     },
     log::Logger,
     rt::sleep,
@@ -96,6 +96,60 @@ fn check_bound_to(
         }),
         _ => Ok(()),
     }
+}
+
+/// The JWT type a status list JWT MUST carry, per [draft-ietf-oauth-status-list-21 §5.1].
+///
+/// [draft-ietf-oauth-status-list-21 §5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
+const STATUS_LIST_TYP: &str = "statuslist+jwt";
+
+/// `typ` is a media type, so it compares without case, and a value without `/`
+/// stands for `application/<value>` ([RFC 7515 §4.1.9]).
+///
+/// [RFC 7515 §4.1.9]: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9
+fn is_status_list_typ(typ: &str) -> bool {
+    let subtype = match typ.split_once('/') {
+        Some((media_type, subtype)) if media_type.eq_ignore_ascii_case("application") => subtype,
+        Some(_) => return false,
+        None => typ,
+    };
+    subtype.eq_ignore_ascii_case(STATUS_LIST_TYP)
+}
+
+/// Validates a fetched status list JWT and returns its claims: signature and
+/// registered claims first, then `typ` and the binding to its URI and issuer, in
+/// the order of [draft-ietf-oauth-status-list-21 §8.3] steps 3 and 4.
+///
+/// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+fn validate_status_list_jwt(
+    jwt: &StatusListJwtStr,
+    validator: &JwtValidator,
+    decoding_key: Option<Arc<DecodingKey>>,
+    iss: &IssClaim,
+    status_list_url: &Url,
+) -> Result<StatusListJwt, UpdateStatusListError> {
+    let validated_jwt = validator.validate_jwt(&jwt.0, decoding_key)?;
+
+    let typ = jsonwebtoken::decode_header(&jwt.0)
+        .map_err(ValidateJwtError::from)?
+        .typ;
+    if !typ.as_deref().is_some_and(is_status_list_typ) {
+        return Err(UpdateStatusListError::UnexpectedTyp {
+            url: status_list_url.to_string(),
+            found: typ,
+        });
+    }
+
+    let status_list_jwt: StatusListJwt = validated_jwt
+        .try_into()
+        .map_err(DecodeJwtError::DeserializeClaims)?;
+    check_bound_to(&status_list_jwt, iss, status_list_url).map_err(|reason| {
+        UpdateStatusListError::UnboundStatusList {
+            url: status_list_url.to_string(),
+            reason,
+        }
+    })?;
+    Ok(status_list_jwt)
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
@@ -179,16 +233,13 @@ impl StatusListCache {
                     status_list_url.to_string(),
                 ))?;
 
-        let status_list_jwt: StatusListJwt = validator
-            .validate_jwt(&status_list_jwt.0, decoding_key.clone())?
-            .try_into()
-            .map_err(DecodeJwtError::DeserializeClaims)?;
-        check_bound_to(&status_list_jwt, &iss, status_list_url).map_err(|reason| {
-            UpdateStatusListError::UnboundStatusList {
-                url: status_list_url.to_string(),
-                reason,
-            }
-        })?;
+        let status_list_jwt = validate_status_list_jwt(
+            &status_list_jwt,
+            &validator,
+            decoding_key.clone(),
+            &iss,
+            status_list_url,
+        )?;
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -294,32 +345,19 @@ where
                 },
             };
 
-        let result = validator.validate_jwt(&status_list_jwt.0, decoding_key.clone());
-        let validated_jwt = match result {
-            Ok(validated_jwt) => validated_jwt,
+        let status_list_jwt = match validate_status_list_jwt(
+            &status_list_jwt,
+            &validator,
+            decoding_key.clone(),
+            &iss,
+            &status_list_url,
+        ) {
+            Ok(jwt) => jwt,
             Err(e) => {
                 handle_err("validate the updated status list JWT from", &e);
                 continue;
             },
         };
-
-        let status_list_jwt: StatusListJwt = match validated_jwt.try_into() {
-            Ok(jwt) => jwt,
-            Err(e) => {
-                handle_err("deserialize the updated status list JWT from", &e);
-                continue;
-            },
-        };
-        if let Err(reason) = check_bound_to(&status_list_jwt, &iss, &status_list_url) {
-            handle_err(
-                "bind the updated status list JWT",
-                &UpdateStatusListError::UnboundStatusList {
-                    url: status_list_url.to_string(),
-                    reason,
-                },
-            );
-            continue;
-        }
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
         ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
@@ -444,6 +482,41 @@ mod test {
             &bound_url(),
         )
         .expect("iss is optional in a status list JWT, so a matching sub alone must bind it");
+    }
+
+    /// The status list `typ` MUST be `statuslist+jwt`
+    /// ([draft-ietf-oauth-status-list-21 §5.1]); as a media type it compares
+    /// without case and may carry the `application/` prefix ([RFC 7515 §4.1.9]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
+    /// [RFC 7515 §4.1.9]: https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9
+    #[test]
+    fn status_list_typ_matches_as_media_type() {
+        for typ in [
+            "statuslist+jwt",
+            "StatusList+JWT",
+            "application/statuslist+jwt",
+            "Application/StatusList+JWT",
+        ] {
+            assert!(
+                is_status_list_typ(typ),
+                "`{typ}` names the status list media type and must be accepted"
+            );
+        }
+        for typ in [
+            "JWT",
+            "jwt",
+            "",
+            "text/statuslist+jwt",
+            "statuslist+cwt",
+            "application/",
+            "statuslist+jwt ",
+        ] {
+            assert!(
+                !is_status_list_typ(typ),
+                "`{typ}` is not the status list media type and must be refused"
+            );
+        }
     }
 
     #[test]

@@ -165,6 +165,7 @@ impl From<TokenTypeHeader> for Option<String> {
 /// What [`MockServer::serve_status_list`] puts into the status list JWT.
 /// The default is a well-formed list: `typ: statuslist+jwt`, `iat`, `exp` one
 /// hour after the fetch and `ttl: 300`.
+#[derive(Clone, Copy)]
 pub(crate) struct MockStatusList<'a> {
     pub bits: StatusBitSize,
     pub list: &'a [u8],
