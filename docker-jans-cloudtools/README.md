@@ -131,10 +131,16 @@ The following sub-commands are supported by the certmanager command:
         - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
         - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
-        The two retry options are used only when `privkey-push-delay` is greater than `0`.
-        Then they must be integers (a negative value counts as `0`) and `privkey-push-retries` must be at most `100` and `privkey-push-retry-interval` must be at most `86400` seconds; otherwise the job stops with an error before any key is changed.
+        The two retry options have an effect only when `privkey-push-delay` is greater than `0`. Then:
+
+        - both must be integers (a negative value counts as `0`);
+        - `privkey-push-retries` must be at most `100`, and `privkey-push-retry-interval` at most `86400` seconds;
+        - `privkey-push-retries` x `privkey-push-retry-interval` must be less than `interval` in seconds (for example below `172800` for `interval:48`). This limits the wait between the retry rounds; `privkey-push-delay` is not counted.
+
+        Otherwise the job stops with an error before any key is changed.
+
         After the delay, `auth-keys.jks` is pushed to every auth container listed at that moment (on Kubernetes only Ready pods are listed) and once to each container that was listed before the delay but is not listed now.
-        If the push to a listed container fails, an extra round lists the containers again and pushes to every listed one that does not hold the new `auth-keys.jks` yet.
+        If the push to a listed container fails, or the listing fails, an extra round lists the containers again and pushes to every listed one that does not hold the new `auth-keys.jks` yet.
         If no container verified the new `auth-keys.jks`, the second `jansRevision` increase and the switch to `privkey-push-strategy` are skipped and a warning is logged.
 
         Example:

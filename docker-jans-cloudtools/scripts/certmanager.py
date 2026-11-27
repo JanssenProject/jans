@@ -321,7 +321,11 @@ class AuthHandler:
 
         ``copy_to_container`` does not report the exit status of the remote ``tar``, so a failed or partial
         extraction is not raised. The checksum of the remote file is compared with the local one instead.
-        On mismatch the previous JKS (``<jks_fn>.backup``) is restored so the container keeps a loadable keystore.
+        On a failed push after the backup was verified, the previous JKS (``<jks_fn>.backup``) is restored so the
+        container keeps a loadable keystore.
+
+        A container whose JKS already equals the local one (for example one restarted after the secret was updated)
+        is counted as verified without a backup or a copy.
 
         Returns True only if the remote file matches the local one.
         """
@@ -329,14 +333,20 @@ class AuthHandler:
         backup_ok = False
 
         try:
+            with open(jks_fn, "rb") as jks_file:
+                local_sum = hashlib.sha256(jks_file.read()).hexdigest()
+
+            # a container (re)started after the secret was updated loaded the new JKS already; its backup from an
+            # earlier round is gone with its old file system, so the backup check below would fail on every round
+            if self._remote_sha256(container, jks_fn) == local_sum:
+                logger.info("%s:%s already holds the new JKS", name, jks_fn)
+                return True
+
             self._ensure_verified_backup(container, jks_fn)
             backup_ok = True
 
             logger.info("creating new %s:%s", name, jks_fn)
             self.meta_client.copy_to_container(container, jks_fn)
-
-            with open(jks_fn, "rb") as jks_file:
-                local_sum = hashlib.sha256(jks_file.read()).hexdigest()
 
             remote_sum = self._remote_sha256(container, jks_fn)
 
@@ -372,7 +382,7 @@ class AuthHandler:
             return
 
         logger.info("creating backup of %s:%s", name, jks_fn)
-        self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+        self.meta_client.exec_cmd(container, f"cp -p {jks_fn} {jks_fn}.backup")
 
         # only a backup created and verified by this attempt may be used for restore; an old
         # `.backup` left by an earlier rotation must never overwrite the current JKS
@@ -386,7 +396,8 @@ class AuthHandler:
         """Restore the verified backup of the previous JKS after a failed push and log whether it worked."""
         name = self.meta_client.get_container_name(container)
         try:
-            self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
+            # -p keeps the pre-rotation modification time, so jks_sync.py (CN_SYNC_JKS_ENABLED) pulls the new JKS later
+            self.meta_client.exec_cmd(container, f"cp -p {jks_fn}.backup {jks_fn}")
             # make sure the restore really happened, otherwise a partial JKS may remain on the container
             restored_sum = self._remote_sha256(container, jks_fn)
             backup_sum = self._remote_sha256(container, f"{jks_fn}.backup")
@@ -406,17 +417,17 @@ class AuthHandler:
                 jks_fn, name, exc,
             )
 
-    def _list_auth_containers(self) -> dict[str, Any]:
+    def _list_auth_containers(self) -> dict[str, Any] | None:
         """Return the auth-server containers the meta client lists now, keyed by container name (in list order).
 
         Called only after the delay, when the new keys are already in persistence and secrets, so a failed listing
-        must not stop the job: it is logged and counts as an empty list.
+        must not stop the job: it is logged and None is returned.
         """
         try:
             containers = self.meta_client.get_containers("APP_NAME=auth-server")
         except Exception as exc:  # noqa: BLE001 - the meta client may be Kubernetes or Docker
-            logger.warning("unable to list auth-server containers; reason=%s; treating none as listed", exc)
-            return {}
+            logger.warning("unable to list auth-server containers; reason=%s", exc)
+            return None
         return {self.meta_client.get_container_name(container): container for container in containers}
 
     def _push_jks_to_pending(self, jks_fn: str, containers: dict[str, Any], updated_names: set[str]) -> list[str]:
@@ -437,11 +448,16 @@ class AuthHandler:
 
     def _push_jks_to_unlisted(
         self, jks_fn: str, known_containers: list[Any], listed_containers: dict[str, Any], updated_names: set[str],
+        listing_failed: bool,
     ) -> list[str]:
         """Make one push attempt to each of ``known_containers`` whose name is not in ``listed_containers``.
 
         Adds the names that verified the new JKS to ``updated_names``; returns the names that failed. Called in
-        round 1 only: a failure here does not start another round.
+        round 1 only: a failure here does not start another round, and a container that is not listed in any round
+        is not tried again.
+
+        On Kubernetes only Running, Ready, not terminating pods are listed, but exec and copy also reach a pod that
+        is not Ready; an attempt on a container that is gone fails and is logged.
         """
         unlisted_containers = {}
         for container in known_containers:
@@ -452,13 +468,16 @@ class AuthHandler:
         if not unlisted_containers:
             return []
 
-        logger.info(
-            "pushing %s once to containers listed before the delay but not now: %s", jks_fn, ", ".join(unlisted_containers),
-        )
+        reason = "listed before the delay" if listing_failed else "listed before the delay but not now"
+        logger.info("pushing %s once to containers %s: %s", jks_fn, reason, ", ".join(unlisted_containers))
         return self._push_jks_to_pending(jks_fn, unlisted_containers, updated_names)
 
     def _retry_options_are_valid(self) -> bool:
-        """Log every error and return False when a retry option is not an integer or is above its upper bound."""
+        """Log every error and return False when a retry option is not an integer or is above its upper bound.
+
+        Also False when, with both within bounds, their product (the longest wait between rounds, not counting
+        ``privkey-push-delay``) is not below the rotation interval (``interval`` hours).
+        """
         if None in (self.privkey_push_retries, self.privkey_push_retry_interval):
             logger.error(
                 "privkey-push-retries and privkey-push-retry-interval must be integers; got %r and %r",
@@ -479,56 +498,50 @@ class AuthHandler:
                 MAX_PRIVKEY_PUSH_RETRY_INTERVAL, self.privkey_push_retry_interval,
             )
             is_valid = False
+
+        rotation_interval_hours = to_non_negative_int(self.rotation_interval)
+        # an `interval` that is not a positive integer is left to the code that uses it, as before
+        if is_valid and rotation_interval_hours:
+            rotation_interval_seconds = rotation_interval_hours * 3600
+            longest_wait_seconds = self.privkey_push_retries * self.privkey_push_retry_interval
+            if longest_wait_seconds >= rotation_interval_seconds:
+                logger.error(
+                    "privkey-push-retries x privkey-push-retry-interval must be less than the rotation interval "
+                    "(%s seconds); got %s x %s = %s seconds",
+                    rotation_interval_seconds, self.privkey_push_retries, self.privkey_push_retry_interval,
+                    longest_wait_seconds,
+                )
+                is_valid = False
         return is_valid
 
-    def push_jks_with_retry(self, jks_fn: str, known_containers: list[Any]) -> int:
-        """Push the new JKS to the auth-server containers after the delay; return how many verified it.
+    def _log_failed_round(
+        self, round_number: int, total_rounds: int, jks_fn: str, listing_failed: bool, failed_names: list[str],
+    ) -> None:
+        """Warn that a round failed and that the next one starts after the retry interval.
 
-        Round 1 pushes to every container the meta client lists now, then makes one attempt on each of
-        ``known_containers`` (the list taken before the delay) that is not listed now. On Kubernetes only Running,
-        Ready, not terminating pods are listed, but exec and copy also reach a pod that is not Ready; an attempt on
-        a container that is gone fails and is logged.
+        A failed listing was already logged with its reason by ``_list_auth_containers``, so it is not repeated.
+        """
+        if listing_failed:
+            logger.warning(
+                "round %s of %s: listing failed; next round in %s seconds",
+                round_number, total_rounds, self.privkey_push_retry_interval,
+            )
+        else:
+            logger.warning(
+                "round %s of %s: unable to push %s to %s; next round in %s seconds",
+                round_number, total_rounds, jks_fn, ", ".join(failed_names), self.privkey_push_retry_interval,
+            )
 
-        After a round in which a listed container failed, up to ``privkey_push_retries`` more rounds follow, each
-        ``privkey_push_retry_interval`` seconds after the previous one. Each lists the containers again and pushes
-        to every listed one that has not verified the new JKS yet, including containers listed for the first time;
-        a container that is no longer listed is not tried again. A listing that fails is logged and counts as empty.
+    def _log_not_verified(self, jks_fn: str, failed_names: set[str], updated_names: set[str]) -> None:
+        """Log one warning naming every container that had a failed attempt and never verified the new JKS.
 
-        At the end one warning names every container that had a failed attempt and did not verify the new JKS.
         Such a container, if it still runs, keeps its previous JKS until it is restarted (it then loads the new one
         from the secret): it keeps signing with the previous keys, which stay published in the JWKS, but it cannot
         sign with an algorithm added in this rotation, nor decrypt requests encrypted to the new keys. A container
-        whose restore failed or could not be verified may hold an incomplete JKS; that is logged as an error. A
-        container that is never listed (not before the delay, not in any round) is not pushed and not named.
-
-        Returns the number of containers that verified the new JKS, whether or not they are still listed: the
-        reload makes each container read its own keystore file again, so a container that kept its previous JKS keeps
-        signing with the previous keys, and a container that is gone needs no reload. Never raises because of a
-        single container or a failed listing.
+        whose restore failed or could not be verified may hold an incomplete JKS; that is logged as an error by
+        ``_restore_jks_backup``. A container that was never listed (not before the delay, not in any round) was
+        never pushed to and is not named.
         """
-        updated_names = set()
-        failed_names = set()
-        total_rounds = self.privkey_push_retries + 1
-
-        for round_number in range(1, total_rounds + 1):
-            listed_containers = self._list_auth_containers()
-            round_failed_names = self._push_jks_to_pending(jks_fn, listed_containers, updated_names)
-            failed_names.update(round_failed_names)
-
-            if round_number == 1:
-                failed_names.update(
-                    self._push_jks_to_unlisted(jks_fn, known_containers, listed_containers, updated_names)
-                )
-
-            if not round_failed_names or round_number == total_rounds:
-                break
-
-            logger.warning(
-                "round %s of %s: unable to push %s to %s; next round in %s seconds",
-                round_number, total_rounds, jks_fn, ", ".join(round_failed_names), self.privkey_push_retry_interval,
-            )
-            time.sleep(self.privkey_push_retry_interval)
-
         not_updated_names = sorted(failed_names - updated_names)
         if not_updated_names:
             logger.warning(
@@ -537,6 +550,47 @@ class AuthHandler:
                 "rotation or decrypt with the new keys",
                 jks_fn, ", ".join(not_updated_names),
             )
+
+    def push_jks_with_retry(self, jks_fn: str, known_containers: list[Any]) -> int:
+        """Push the new JKS to the auth-server containers after the delay; return how many verified it.
+
+        Round 1 pushes to every container listed now, then once to each of ``known_containers`` (the list taken
+        before the delay) that is not listed now. After a round in which a push or the listing failed, up to
+        ``privkey_push_retries`` more rounds follow, each ``privkey_push_retry_interval`` seconds after the previous
+        one. A round lists again and pushes to every listed container that has not verified the new JKS yet,
+        including ones listed for the first time; a round whose listing fails pushes to no listed container.
+
+        Returns the number of containers that verified the new JKS, listed or not: a container that is gone needs
+        no reload, and one that kept its previous JKS keeps signing with the previous keys. Never raises because of
+        a single container or a failed listing.
+        """
+        updated_names = set()
+        failed_names = set()
+        total_rounds = self.privkey_push_retries + 1
+
+        for round_number in range(1, total_rounds + 1):
+            listed_containers = self._list_auth_containers()
+            listing_failed = listed_containers is None
+            if listing_failed:
+                listed_containers = {}
+
+            round_failed_names = self._push_jks_to_pending(jks_fn, listed_containers, updated_names)
+            failed_names.update(round_failed_names)
+
+            if round_number == 1:
+                failed_names.update(
+                    self._push_jks_to_unlisted(
+                        jks_fn, known_containers, listed_containers, updated_names, listing_failed,
+                    )
+                )
+
+            if round_number == total_rounds or not (listing_failed or round_failed_names):
+                break
+
+            self._log_failed_round(round_number, total_rounds, jks_fn, listing_failed, round_failed_names)
+            time.sleep(self.privkey_push_retry_interval)
+
+        self._log_not_verified(jks_fn, failed_names, updated_names)
         return len(updated_names)
 
     def get_merged_keys(self, exp_hours):

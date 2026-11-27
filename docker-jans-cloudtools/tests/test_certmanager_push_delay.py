@@ -13,7 +13,7 @@ from collections import namedtuple
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
-certmanager = pytest.importorskip("certmanager")
+import certmanager  # noqa: E402
 
 
 class GoneError(Exception):
@@ -38,10 +38,16 @@ class FakeMeta:
         self.flaky = {}           # pod -> number of copy attempts that fail before it starts working
         self.not_ready = set()    # Running but not Ready: reachable by exec/copy, left out of get_containers
         self.on_list = None       # called without arguments at each get_containers call, before listing
+        self.mtimes = {}  # (pod, path) -> fake modification time; a file not in here was written before the job
+        self.clock = 0    # fake time, advanced by every write that does not keep the source's time
 
     def _check(self, container):
         if container not in self.pods or container in self.fail_on:
             raise GoneError(f'pods "{container}" not found')
+
+    def _stamp(self, container, path):
+        self.clock += 1
+        self.mtimes[(container, path)] = self.clock
 
     def get_containers(self, label):
         if self.on_list:
@@ -56,8 +62,14 @@ class FakeMeta:
         parts = cmd.split()
         pod_files = self.files.setdefault(container, {})
         if parts[0] == "cp":
-            if parts[1] in pod_files:
-                pod_files[parts[2]] = pod_files[parts[1]]
+            keeps_mtime = parts[1] == "-p"
+            source_path, target_path = parts[-2:]
+            if source_path in pod_files:
+                pod_files[target_path] = pod_files[source_path]
+                if keeps_mtime:
+                    self.mtimes[(container, target_path)] = self.mtimes.get((container, source_path), 0)
+                else:
+                    self._stamp(container, target_path)
         elif parts[0] == "sha256sum":
             if parts[1] not in pod_files:
                 return DockerResult(1, b"") if self.docker_style else "sha256sum: no such file"
@@ -77,6 +89,7 @@ class FakeMeta:
         if container in self.partial:
             data = data[:1]
         self.files.setdefault(container, {})[path] = data
+        self._stamp(container, path)
         if path.endswith(".jks"):
             self.jks_pushed.append(container)
 
@@ -152,12 +165,18 @@ def _skip_sleeps(monkeypatch):
     monkeypatch.setattr(certmanager.time, "sleep", lambda seconds: None)
 
 
+def _is_copy(cmd, source_path, target_path):
+    """True for a `cp` command from source_path to target_path, whatever options it has"""
+    parts = cmd.split()
+    return parts[0] == "cp" and parts[-2:] == [source_path, target_path]
+
+
 def _make_restore_do_nothing(meta, jks):
-    """the restore command `cp <jks>.backup <jks>` returns normally on every container but copies nothing"""
+    """the restore command (`cp` from <jks>.backup to <jks>) returns normally on every container but copies nothing"""
     original_exec_cmd = meta.exec_cmd
 
     def exec_cmd(container, cmd):
-        if cmd == f"cp {jks}.backup {jks}":
+        if _is_copy(cmd, f"{jks}.backup", jks):
             return ""
         return original_exec_cmd(container, cmd)
 
@@ -323,7 +342,9 @@ def test_failed_restore_is_logged_as_error(handler, monkeypatch, caplog):
     assert handler.backend.revisions == [11, 12]
 
 
-def test_summary_for_a_container_whose_restore_could_not_be_verified_has_the_restore_caveat(handler, monkeypatch, caplog):
+def test_summary_for_a_container_whose_restore_could_not_be_verified_has_the_restore_caveat(
+    handler, monkeypatch, caplog,
+):
     """the final warning names the container and says that a container whose restore failed is the exception to
     "keeps its previous keys" """
     meta = handler.meta_client
@@ -351,7 +372,7 @@ def test_restore_command_that_raises_is_logged_as_error_and_the_job_goes_on(hand
     original_exec_cmd = meta.exec_cmd
 
     def exec_cmd(container, cmd):
-        if container == "auth-a" and cmd == f"cp {jks}.backup {jks}":
+        if container == "auth-a" and _is_copy(cmd, f"{jks}.backup", jks):
             raise GoneError("connection reset")
         return original_exec_cmd(container, cmd)
 
@@ -363,7 +384,8 @@ def test_restore_command_that_raises_is_logged_as_error_and_the_job_goes_on(hand
 
     errors = [record.getMessage() for record in caplog.records if record.levelname == "ERROR"]
     assert len(errors) == 1
-    assert errors[0].startswith("unable to restore previous") and "auth-a" in errors[0] and "connection reset" in errors[0]
+    assert errors[0].startswith("unable to restore previous")
+    assert "auth-a" in errors[0] and "connection reset" in errors[0]
     assert handler.backend.revisions == [11, 12]
 
 
@@ -377,7 +399,10 @@ def _backup_step_does_nothing():
 
 @pytest.mark.parametrize(
     "backup_step",
-    [pytest.param(_backup_step_raises, id="backup-raises"), pytest.param(_backup_step_does_nothing, id="backup-does-nothing")],
+    [
+        pytest.param(_backup_step_raises, id="backup-raises"),
+        pytest.param(_backup_step_does_nothing, id="backup-does-nothing"),
+    ],
 )
 def test_stale_backup_is_not_restored_when_backup_step_fails(handler, monkeypatch, backup_step):
     """the backup step raises or silently does nothing (the .backup keeps stale content) -> the copy never starts and
@@ -388,7 +413,7 @@ def test_stale_backup_is_not_restored_when_backup_step_fails(handler, monkeypatc
     original_exec_cmd = meta.exec_cmd
 
     def exec_cmd(container, cmd):
-        if container == "auth-a" and cmd == f"cp {jks} {jks}.backup":
+        if container == "auth-a" and _is_copy(cmd, jks, f"{jks}.backup"):
             return backup_step()
         return original_exec_cmd(container, cmd)
 
@@ -403,13 +428,14 @@ def test_stale_backup_is_not_restored_when_backup_step_fails(handler, monkeypatc
     assert handler.backend.revisions == [11, 12]
 
 
-def test_failed_pod_is_retried_and_receives_jks(handler, monkeypatch):
+def test_failed_pod_is_retried_and_receives_jks(handler, monkeypatch, caplog):
     """transient failure on one container: job must not fail, it must get the new JKS on a later round"""
     meta = handler.meta_client
     meta.flaky["auth-b"] = 2
     sleeps = _record_sleeps(monkeypatch)
 
-    handler.patch()
+    with caplog.at_level("WARNING"):
+        handler.patch()
 
     assert meta.files["auth-b"][handler.jks_path] == b"jks"
     assert meta.jks_pushed.count("auth-a") == 1 and meta.jks_pushed.count("auth-c") == 1
@@ -418,6 +444,12 @@ def test_failed_pod_is_retried_and_receives_jks(handler, monkeypatch):
     assert handler.backend.revisions == [11, 12]
     # delay + two retry waits of the default 10 seconds
     assert sleeps == [60, 10, 10]
+    # the warning of a failed round names the round, the JKS, the failing container and the wait
+    round_warnings = [record.getMessage() for record in caplog.records if record.getMessage().startswith("round ")]
+    assert round_warnings == [
+        f"round 1 of 4: unable to push {handler.jks_path} to auth-b; next round in 10 seconds",
+        f"round 2 of 4: unable to push {handler.jks_path} to auth-b; next round in 10 seconds",
+    ]
 
 
 def test_pod_that_never_recovers_does_not_fail_job(handler, monkeypatch):
@@ -436,8 +468,7 @@ def test_pod_that_never_recovers_does_not_fail_job(handler, monkeypatch):
 
 
 def test_pod_that_never_recovers_is_named_once_with_the_impact(handler, monkeypatch, caplog):
-    """one final warning names the container and says what it cannot do until it is restarted; a container that recovered in
-    a later round is not named"""
+    """one final warning names the container and what it cannot do until restarted; a recovered one is not named"""
     handler.meta_client.flaky["auth-b"] = 999
     handler.meta_client.flaky["auth-c"] = 1
     _skip_sleeps(monkeypatch)
@@ -514,9 +545,9 @@ def test_retry_keeps_original_backup_after_failed_copy_and_restore(handler, monk
     backups = []
 
     def exec_cmd(container, cmd):
-        if container == "auth-a" and cmd == f"cp {jks} {jks}.backup":
+        if container == "auth-a" and _is_copy(cmd, jks, f"{jks}.backup"):
             backups.append(meta.files["auth-a"][jks])
-        if container == "auth-a" and cmd == f"cp {jks}.backup {jks}":
+        if container == "auth-a" and _is_copy(cmd, f"{jks}.backup", jks):
             return ""  # restore silently does nothing, partial JKS stays on the pod
         return original_exec_cmd(container, cmd)
 
@@ -590,7 +621,7 @@ def test_unreadable_checksums_after_restore_are_not_counted_as_verified(handler,
 
     def exec_cmd(container, cmd):
         nonlocal restore_ran
-        if container == "auth-a" and cmd == f"cp {jks}.backup {jks}":
+        if container == "auth-a" and _is_copy(cmd, f"{jks}.backup", jks):
             restore_ran = True
         elif container == "auth-a" and restore_ran and cmd.startswith("sha256sum"):
             return unreadable
@@ -635,7 +666,10 @@ def test_unreadable_remote_checksum_after_copy_is_a_failure_and_restores_the_pre
     summaries = _not_verified_summaries(caplog)
     assert len(summaries) == 1 and "auth-a" in summaries[0] and "auth-b" not in summaries[0]
     assert meta.files["auth-a"][jks] == b"old-jks"
-    assert any("checksum mismatch" in message and "remote=n/a" in message and "auth-a" in message for message in messages)
+    assert any(
+        "checksum mismatch" in message and "remote=n/a" in message and "auth-a" in message
+        for message in messages
+    )
     assert any(message.startswith("restored previous") and "auth-a" in message for message in messages)
     assert handler.backend.revisions == [11, 12]
 
@@ -779,7 +813,7 @@ def test_unlisted_pod_pushed_again_in_a_retry_round_reuses_its_original_backup(h
     original_exec_cmd = meta.exec_cmd
 
     def exec_cmd(container, cmd):
-        if container == "auth-c" and cmd == f"cp {jks} {jks}.backup":
+        if container == "auth-c" and _is_copy(cmd, jks, f"{jks}.backup"):
             backups_of_auth_c.append(cmd)
         return original_exec_cmd(container, cmd)
 
@@ -830,7 +864,8 @@ LISTING_ERRORS = [
 
 @pytest.mark.parametrize("listing_error", LISTING_ERRORS)
 def test_listing_failure_after_delay_still_pushes_every_known_pod(handler, monkeypatch, caplog, listing_error):
-    """every listing after the delay raises: the job goes on, every container of the old list gets the new JKS once"""
+    """every listing after the delay raises: the job goes on, every container of the old list gets the new JKS once,
+    and every remaining round lists again"""
     meta = handler.meta_client
 
     def fail_listing():
@@ -840,19 +875,28 @@ def test_listing_failure_after_delay_still_pushes_every_known_pod(handler, monke
         if sleep_number == PUSH_DELAY_SLEEP:
             meta.on_list = fail_listing
 
-    _record_sleeps(monkeypatch, break_listing_after_delay)
+    sleeps = _record_sleeps(monkeypatch, break_listing_after_delay)
 
-    with caplog.at_level("WARNING"):
+    with caplog.at_level("INFO"):
         handler.patch()  # must not raise
 
     messages = [record.getMessage() for record in caplog.records]
     assert meta.jks_pushed == ["auth-a", "auth-b", "auth-c"]
     assert handler.backend.revisions == [11, 12]
-    assert any(message.startswith("unable to list auth-server containers") for message in messages)
+    # the delay, then one wait before each of the default 3 extra rounds, because every listing fails
+    assert sleeps == [60, 10, 10, 10]
+    assert sum(message.startswith("unable to list auth-server containers") for message in messages) == 4
+    assert any(
+        message.startswith("pushing")
+        and message.endswith("once to containers listed before the delay: auth-a, auth-b, auth-c")
+        for message in messages
+    )
+    assert not any("but not now" in message for message in messages)
 
 
-def test_listing_failure_in_retry_round_ends_the_retries(handler, monkeypatch, caplog):
-    """auth-b fails in round 1 and the listing of round 2 raises: no further round, auth-b is named, reload runs"""
+def test_listing_failure_in_retry_round_is_followed_by_another_round(handler, monkeypatch, caplog):
+    """auth-b fails in round 1 and the listing of round 2 raises: round 3 lists again and pushes to auth-b, so
+    nothing is named as not verified and the reload runs"""
     meta = handler.meta_client
     meta.flaky["auth-b"] = 1
 
@@ -862,6 +906,8 @@ def test_listing_failure_in_retry_round_ends_the_retries(handler, monkeypatch, c
     def break_listing_before_round_two(sleep_number):
         if sleep_number == FIRST_RETRY_SLEEP:
             meta.on_list = fail_listing
+        elif sleep_number == FIRST_RETRY_SLEEP + 1:
+            meta.on_list = None
 
     sleeps = _record_sleeps(monkeypatch, break_listing_before_round_two)
 
@@ -869,11 +915,35 @@ def test_listing_failure_in_retry_round_ends_the_retries(handler, monkeypatch, c
         handler.patch()  # must not raise
 
     messages = [record.getMessage() for record in caplog.records]
+    assert sleeps == [60, 10, 10]
+    assert meta.files["auth-b"][handler.jks_path] == b"jks"
+    assert any(message.startswith("round 2 of 4: listing failed; next round in 10 seconds") for message in messages)
+    assert _not_verified_summaries(caplog) == []
+    assert handler.backend.revisions == [11, 12]
+
+
+def test_pod_added_during_delay_is_pushed_when_the_first_listing_after_the_delay_fails(handler, monkeypatch):
+    """the listing of round 1 raises, so the pod added during the delay is unknown; a failed listing is a failed round,
+    so round 2 lists again and pushes to it"""
+    meta = handler.meta_client
+
+    def fail_listing():
+        raise GoneError("connection refused")
+
+    def add_pod_and_break_listing(sleep_number):
+        if sleep_number == PUSH_DELAY_SLEEP:
+            meta.pods.append("auth-d")
+            meta.files["auth-d"] = {handler.jks_path: b"old-jks"}
+            meta.on_list = fail_listing
+        elif sleep_number == FIRST_RETRY_SLEEP:
+            meta.on_list = None
+
+    sleeps = _record_sleeps(monkeypatch, add_pod_and_break_listing)
+
+    handler.patch()
+
+    assert meta.jks_pushed == ["auth-a", "auth-b", "auth-c", "auth-d"]
     assert sleeps == [60, 10]
-    assert meta.files["auth-b"][handler.jks_path] == b"old-jks"
-    assert any(message.startswith("unable to list auth-server containers") for message in messages)
-    summaries = _not_verified_summaries(caplog)
-    assert len(summaries) == 1 and "auth-b" in summaries[0]
     assert handler.backend.revisions == [11, 12]
 
 
@@ -929,15 +999,18 @@ BOUNDED_RETRY_OPTIONS = [
     pytest.param("privkey-push-retries", 100, id="retries"),
     pytest.param("privkey-push-retry-interval", 86400, id="interval"),
 ]
-# the same, with the waits of a job that has one failing pod while that option is at its bound (the interval defaults to 10)
+# the same, with the other options of the run and the waits of a job that has one failing pod while that option is at
+# its bound; with the interval at its bound one extra round keeps the total wait below the default 48 hours
 OPTIONS_AT_THEIR_MAXIMUM = [
-    pytest.param("privkey-push-retries", 100, [60, 10], id="retries"),
-    pytest.param("privkey-push-retry-interval", 86400, [60, 86400], id="interval"),
+    pytest.param("privkey-push-retries", 100, {}, [60, 10], id="retries"),
+    pytest.param("privkey-push-retry-interval", 86400, {"privkey-push-retries": "1"}, [60, 86400], id="interval"),
 ]
 
 
 @pytest.mark.parametrize("option, maximum", BOUNDED_RETRY_OPTIONS)
-def test_retry_option_above_the_maximum_stops_patch_before_keys_are_rotated(handler, monkeypatch, caplog, option, maximum):
+def test_retry_option_above_the_maximum_stops_patch_before_keys_are_rotated(
+    handler, monkeypatch, caplog, option, maximum,
+):
     """with a push delay, a retry option one above its maximum stops the job with an error before anything changes"""
     too_big_handler = _handler_with_options(handler, {"privkey-push-delay": "60", option: str(maximum + 1)})
     _skip_sleeps(monkeypatch)
@@ -970,10 +1043,13 @@ def test_both_retry_options_above_their_maximum_log_both_errors_retries_first(ha
     assert "privkey-push-retry-interval" in errors[1] and "86401" in errors[1]
 
 
-@pytest.mark.parametrize("option, maximum, sleeps_at_maximum", OPTIONS_AT_THEIR_MAXIMUM)
-def test_retry_option_of_exactly_the_maximum_is_accepted(handler, monkeypatch, option, maximum, sleeps_at_maximum):
+@pytest.mark.parametrize("option, maximum, other_options, sleeps_at_maximum", OPTIONS_AT_THEIR_MAXIMUM)
+def test_retry_option_of_exactly_the_maximum_is_accepted(
+    handler, monkeypatch, option, maximum, other_options, sleeps_at_maximum,
+):
     """a retry option equal to its maximum is allowed: the job runs (auth-b fails once, so the extra round runs)"""
-    maximum_handler = _handler_with_options(handler, {"privkey-push-delay": "60", option: str(maximum)})
+    options = {"privkey-push-delay": "60", option: str(maximum), **other_options}
+    maximum_handler = _handler_with_options(handler, options)
     handler.meta_client.flaky["auth-b"] = 1
     sleeps = _record_sleeps(monkeypatch)
 
@@ -1016,3 +1092,139 @@ def test_negative_retry_options_count_as_zero(handler, monkeypatch, options, exp
 
     assert sleeps == expected_sleeps
     assert handler.meta_client.jks_pushed == expected_pushed
+
+
+def test_container_restarted_between_rounds_with_the_new_jks_counts_as_verified(handler, monkeypatch, caplog):
+    """auth-b fails in round 1 and restarts: it loads the new JKS from the secret and its `.backup` is gone with its old
+    file system; round 2 counts it as verified without a backup or a copy"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    meta.flaky["auth-b"] = 1
+
+    def restart_auth_b(sleep_number):
+        if sleep_number == FIRST_RETRY_SLEEP:
+            meta.files["auth-b"] = {jks: b"jks"}
+
+    sleeps = _record_sleeps(monkeypatch, restart_auth_b)
+
+    with caplog.at_level("INFO"):
+        handler.patch()
+
+    messages = [record.getMessage() for record in caplog.records]
+    assert sleeps == [60, 10]
+    assert meta.jks_pushed.count("auth-b") == 0
+    assert _not_verified_summaries(caplog) == []
+    assert any("already holds the new JKS" in message and "auth-b" in message for message in messages)
+
+
+def test_reload_runs_when_every_container_restarted_with_the_new_jks_after_failing(handler, monkeypatch, caplog):
+    """every container fails in round 1 and restarts with the new JKS: all count as verified, so the reload runs"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    for pod in meta.pods:
+        meta.flaky[pod] = 1
+
+    def restart_every_pod(sleep_number):
+        if sleep_number == FIRST_RETRY_SLEEP:
+            for pod in meta.pods:
+                meta.files[pod] = {jks: b"jks"}
+
+    _record_sleeps(monkeypatch, restart_every_pod)
+
+    with caplog.at_level("WARNING"):
+        handler.patch()
+
+    messages = [record.getMessage() for record in caplog.records]
+    assert handler.backend.revisions == [11, 12]
+    assert not any("skipping reload" in message for message in messages)
+
+
+def test_restored_jks_keeps_its_modification_time_from_before_the_rotation(handler, monkeypatch):
+    """a failed push restores the previous JKS with its old modification time: jks_sync.should_sync_jks() pulls the
+    new JKS only while the file is older than auth_key_rotated_at, so a restore that stamps "now" would hide it"""
+    meta = handler.meta_client
+    jks = handler.jks_path
+    handler.privkey_push_retries = 0
+    meta.partial.add("auth-a")
+    _skip_sleeps(monkeypatch)
+
+    handler.patch()
+
+    assert meta.files["auth-a"][jks] == b"old-jks"
+    assert meta.mtimes.get(("auth-a", jks), 0) == 0
+
+
+@pytest.mark.parametrize(
+    ("options", "expected_seconds"),
+    [
+        pytest.param(
+            {"interval": "1", "privkey-push-retries": "1", "privkey-push-retry-interval": "3600"}, "3600",
+            id="equal-to-interval-option",
+        ),
+        pytest.param(
+            {"privkey-push-retries": "2", "privkey-push-retry-interval": "86400"}, "172800",
+            id="equal-to-default-48-hours",
+        ),
+    ],
+)
+def test_retry_total_of_at_least_the_rotation_interval_stops_patch_before_keys_are_rotated(
+    handler, monkeypatch, caplog, options, expected_seconds,
+):
+    """with a push delay, retries x retry interval that reaches the rotation interval stops the job with one error that
+    names both options and the limit in seconds, before anything changes"""
+    capped_handler = _handler_with_options(handler, {"privkey-push-delay": "60", **options})
+    _skip_sleeps(monkeypatch)
+
+    with caplog.at_level("ERROR"), pytest.raises(SystemExit) as exit_info:
+        capped_handler.patch()
+
+    errors = [record.getMessage() for record in caplog.records if record.levelname == "ERROR"]
+    assert exit_info.value.code == 1
+    assert capped_handler.backend.revisions == []
+    assert handler.meta_client.jks_pushed == []
+    assert len(errors) == 1
+    assert "privkey-push-retries" in errors[0] and "privkey-push-retry-interval" in errors[0]
+    assert f"({expected_seconds} seconds)" in errors[0]
+
+
+def test_retry_total_below_the_rotation_interval_is_accepted(handler, monkeypatch):
+    """one second below the rotation interval of 1 hour is allowed: the job runs (auth-b fails once, so the extra round
+    runs)"""
+    options = {
+        "privkey-push-delay": "60", "interval": "1", "privkey-push-retries": "1", "privkey-push-retry-interval": "3599",
+    }
+    accepted_handler = _handler_with_options(handler, options)
+    handler.meta_client.flaky["auth-b"] = 1
+    sleeps = _record_sleeps(monkeypatch)
+
+    accepted_handler.patch()
+
+    assert sleeps == [60, 3599]
+    assert handler.meta_client.jks_pushed == ["auth-a", "auth-c", "auth-b"]
+    assert accepted_handler.backend.revisions == [11, 12]
+
+
+@pytest.mark.parametrize("interval", ["0", "-3"])
+def test_rotation_interval_that_is_not_a_positive_integer_does_not_cap_the_retries(handler, monkeypatch, interval):
+    """an `interval` of 0 or a negative number leaves the retry options uncapped, as before: the job runs with the
+    default retries"""
+    uncapped_handler = _handler_with_options(handler, {"privkey-push-delay": "60", "interval": interval})
+    _skip_sleeps(monkeypatch)
+
+    uncapped_handler.patch()  # must not raise
+
+    assert uncapped_handler.backend.revisions == [11, 12]
+
+
+def test_rotation_interval_that_is_not_an_integer_is_left_to_the_code_that_uses_it(handler, monkeypatch):
+    """the retry check does not judge a non-integer `interval`; patch() then fails at int() as it did before, with no
+    key rotated and nothing pushed"""
+    text_handler = _handler_with_options(handler, {"privkey-push-delay": "60", "interval": "abc"})
+    _skip_sleeps(monkeypatch)
+
+    assert text_handler._retry_options_are_valid() is True
+    with pytest.raises(ValueError):
+        text_handler.patch()
+
+    assert text_handler.backend.revisions == []
+    assert handler.meta_client.jks_pushed == []
