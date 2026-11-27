@@ -165,7 +165,7 @@ public class GrantService {
 
             statusListPool.execute(() -> {
                 final Integer index = token.getAttributes().getStatusListIndex();
-                if (index != null && index > 0) {
+                if (index != null && index >= 0) {
                     statusListIndexService.updateStatusAtIndexes(Lists.newArrayList(index), TokenStatus.INVALID);
                 }
             });

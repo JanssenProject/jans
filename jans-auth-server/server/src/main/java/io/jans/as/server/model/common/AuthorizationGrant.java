@@ -161,6 +161,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
         idToken.setReferenceId(executionContext.getTokenReferenceId());
         idToken.setStatusListIndex(statusListIndex);
+        statusListIndexService.registerTokenExpiration(statusListIndex, idToken.getExpirationDate());
         if (log.isTraceEnabled())
             log.trace("Created id_token: {}", idToken.getCode());
         return idToken;
@@ -326,6 +327,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
                 accessToken.setCode(accessTokenCode);
             }
+
+            Date accessTokenExpiration = accessToken.getExpirationDate();
+            if (jwtSigner != null) {
+                accessTokenExpiration = StatusListIndexService.latest(accessTokenExpiration,jwtSigner.getJwt().getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+            }
+            statusListIndexService.registerTokenExpiration(statusListIndex, accessTokenExpiration);
 
             final TokenEntity tokenEntity = asToken(accessToken);
             tokenEntity.getAttributes().getAttributes().putAll(context.getAttributes());

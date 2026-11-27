@@ -3,16 +3,11 @@ package io.jans.ca.plugin.adminui.model.auth;
 public class LicenseResponse {
     private boolean licenseEnabled;
     private String productName;
-    private String productCode;
     private String licenseType;
     private int maxActivations;
     private String licenseKey;
     private boolean licenseActive;
     private String validityPeriod;
-    private String companyName;
-    private String customerEmail;
-    private String customerFirstName;
-    private String customerLastName;
     private Long licenseMAUThreshold;
 
     private boolean licenseExpired;
@@ -39,14 +34,6 @@ public class LicenseResponse {
 
     public void setProductName(String productName) {
         this.productName = productName;
-    }
-
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
     }
 
     public String getLicenseType() {
@@ -81,38 +68,6 @@ public class LicenseResponse {
         this.validityPeriod = validityPeriod;
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getCustomerEmail() {
-        return customerEmail;
-    }
-
-    public void setCustomerEmail(String customerEmail) {
-        this.customerEmail = customerEmail;
-    }
-
-    public String getCustomerFirstName() {
-        return customerFirstName;
-    }
-
-    public void setCustomerFirstName(String customerFirstName) {
-        this.customerFirstName = customerFirstName;
-    }
-
-    public String getCustomerLastName() {
-        return customerLastName;
-    }
-
-    public void setCustomerLastName(String customerLastName) {
-        this.customerLastName = customerLastName;
-    }
-
     public boolean getLicenseExpired() {
         return licenseExpired;
     }
@@ -138,16 +93,11 @@ public class LicenseResponse {
         return "LicenseResponse{" +
                 "licenseEnabled=" + licenseEnabled +
                 ", productName='" + productName + '\'' +
-                ", productCode='" + productCode + '\'' +
                 ", licenseType='" + licenseType + '\'' +
                 ", maxActivations=" + maxActivations +
                 ", licenseKey='" + licenseKey + '\'' +
                 ", licenseActive=" + licenseActive +
                 ", validityPeriod='" + validityPeriod + '\'' +
-                ", companyName='" + companyName + '\'' +
-                ", customerEmail='" + customerEmail + '\'' +
-                ", customerFirstName='" + customerFirstName + '\'' +
-                ", customerLastName='" + customerLastName + '\'' +
                 ", licenseExpired='" + licenseExpired + '\'' +
                 '}';
     }

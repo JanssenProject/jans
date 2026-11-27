@@ -4,7 +4,6 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use chrono::Duration;
-use serde_json::Value;
 use std::sync::Mutex;
 
 use crate::sparkv::{BTreeSparKV, Config as ConfigSparKV};
@@ -12,19 +11,17 @@ use crate::sparkv::{BTreeSparKV, Config as ConfigSparKV};
 use super::LogLevel;
 use super::err_log_entry::ErrorLogEntry;
 use super::interface::{LogStorage, LogWriter, Loggable, composite_key};
+use super::log_json::LogJson;
 use crate::app_types::{ApplicationName, PdpID};
 use crate::bootstrap_config::log_config::MemoryLogConfig;
 use crate::log::BaseLogEntry;
 use crate::log::loggable_fn::LoggableFn;
 
-mod memory_calc;
-use memory_calc::calculate_memory_usage;
-
 const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    storage: Mutex<BTreeSparKV<serde_json::Value>>,
+    storage: Mutex<BTreeSparKV<LogJson>>,
     log_level: LogLevel,
     pdp_id: PdpID,
     app_name: Option<ApplicationName>,
@@ -58,7 +55,7 @@ impl MemoryLogger {
         MemoryLogger {
             storage: Mutex::new(BTreeSparKV::with_config_and_sizer(
                 sparkv_config,
-                Some(calculate_memory_usage),
+                Some(|json: &LogJson| json.as_str().len()),
             )),
             log_level,
             pdp_id,
@@ -69,7 +66,7 @@ impl MemoryLogger {
     fn log_entry<T: Loggable>(&self, entry: &T) {
         let entry_id = entry.get_id().to_string();
         let index_keys = entry.get_index_keys();
-        let json = to_json_value(entry);
+        let json = LogJson::from_loggable(entry);
 
         let err = {
             let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
@@ -126,17 +123,6 @@ mod fallback {
     }
 }
 
-fn to_json_value<T: Loggable>(entry: &T) -> Value {
-    match serde_json::to_value(entry) {
-        Ok(json) => json,
-        Err(err) => {
-            let err_msg = format!("failed to serialize log entry to JSON: {err}");
-            serde_json::to_value(ErrorLogEntry::from_loggable(entry, err_msg.clone()))
-                .expect(&err_msg)
-        },
-    }
-}
-
 // Implementation of LogWriter
 impl LogWriter for MemoryLogger {
     fn log_any<T: Loggable>(&self, entry: T) {
@@ -163,7 +149,7 @@ impl LogWriter for MemoryLogger {
 impl MemoryLogger {
     /// Locks the storage with expired entries purged, so reads that bypass
     /// sparkv's per-key expiry check (drain, keys, index lookups) honor `log_ttl`.
-    fn live_storage(&self) -> std::sync::MutexGuard<'_, BTreeSparKV<serde_json::Value>> {
+    fn live_storage(&self) -> std::sync::MutexGuard<'_, BTreeSparKV<LogJson>> {
         let mut storage = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
         storage.clear_expired();
         storage
@@ -175,7 +161,7 @@ impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<serde_json::Value> {
         self.live_storage()
             .drain()
-            .map(|(_k, value)| value)
+            .map(|(_k, json)| json.to_value())
             .collect()
     }
 
@@ -184,7 +170,7 @@ impl LogStorage for MemoryLogger {
             .lock()
             .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get(id)
-            .cloned()
+            .map(LogJson::to_value)
     }
 
     fn get_log_ids(&self) -> Vec<String> {
@@ -194,14 +180,14 @@ impl LogStorage for MemoryLogger {
     fn get_logs_by_tag(&self, tag: &str) -> Vec<serde_json::Value> {
         self.live_storage()
             .get_by_index_key(tag)
-            .map(std::borrow::ToOwned::to_owned)
+            .map(LogJson::to_value)
             .collect()
     }
 
     fn get_logs_by_request_id(&self, request_id: &str) -> Vec<serde_json::Value> {
         self.live_storage()
             .get_by_index_key(request_id)
-            .map(std::borrow::ToOwned::to_owned)
+            .map(LogJson::to_value)
             .collect()
     }
 
@@ -214,7 +200,7 @@ impl LogStorage for MemoryLogger {
 
         self.live_storage()
             .get_by_index_key(&key)
-            .map(std::borrow::ToOwned::to_owned)
+            .map(LogJson::to_value)
             .collect()
     }
 }
@@ -496,6 +482,42 @@ mod tests {
             None,
         );
         assert_eq!(logger.storage.lock().unwrap().config.max_item_size, 10_000);
+    }
+
+    #[test]
+    fn max_item_size_counts_json_length() {
+        let entry = LogEntry::new(BaseLogEntry::new_decision_opt_request_id(None))
+            .set_message("some message".to_string());
+        let json_len = json!(entry).to_string().len();
+        let logger_with_max_item_size = |max_item_size| {
+            MemoryLogger::new(
+                MemoryLogConfig {
+                    log_ttl: 60,
+                    max_items: None,
+                    max_item_size: Some(max_item_size),
+                },
+                LogLevel::TRACE,
+                PdpID::new(),
+                None,
+            )
+        };
+        let id = entry.get_id().to_string();
+
+        let logger = logger_with_max_item_size(json_len);
+        logger.log_any(entry.clone());
+        assert_eq!(
+            logger.get_log_by_id(&id),
+            Some(json!(entry)),
+            "an entry as long as max_item_size should be stored"
+        );
+
+        let logger = logger_with_max_item_size(json_len - 1);
+        logger.log_any(entry);
+        assert_eq!(
+            logger.get_log_by_id(&id),
+            None,
+            "an entry longer than max_item_size should not be stored"
+        );
     }
 
     #[test]

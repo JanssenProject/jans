@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.config.WebKeysConfiguration;
@@ -214,6 +215,20 @@ public class AuthorizationGrantTest {
         final ArgumentCaptor<TokenEntity> captor = ArgumentCaptor.forClass(TokenEntity.class);
         verify(grantService).persist(captor.capture());
         assertEquals("inum-1", captor.getValue().getAttributes().getAttributes().get("user_inum"));
+    }
+
+    @Test
+    public void createAccessToken_whenStatusListEnabled_shouldRegisterTokenExpiration() {
+        when(appConfiguration.getAccessTokenLifetime()).thenReturn(300);
+        when(errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)).thenReturn(true);
+        when(statusListIndexService.next()).thenReturn(5);
+        when(externalUpdateTokenService.modifyAccessToken(any(AccessToken.class), any(ExternalUpdateTokenContext.class))).thenReturn(true);
+        authorizationGrant.init(new User(), AuthorizationGrantType.CLIENT_CREDENTIALS, new Client(), new Date());
+
+        final AccessToken accessToken = authorizationGrant.createAccessToken(new ExecutionContext());
+
+        assertNotNull(accessToken);
+        verify(statusListIndexService).registerTokenExpiration(5, accessToken.getExpirationDate());
     }
 
     private static Client ephemeralClient() {
