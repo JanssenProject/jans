@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:a16eb904aa472d560ff3fb6a77de0efc3482be938210d2caef0bd1f89c10d356
+FROM bellsoft/liberica-openjdk-alpine:17.0.21@sha256:d2a7df63eacdba722b47e628cafb3b433c4a2f7369d73db6f3925fa8b2b49d03
 
 # ===============
 # Alpine packages
@@ -271,7 +271,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="2.6.1-1" \
+    org.opencontainers.image.version="2.6.1-3" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

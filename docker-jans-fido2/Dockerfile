@@ -1,7 +1,7 @@
 # =================================
 # Main Image
 # =================================
-FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:7b0cd77df19f413034a437f081ac4c3db892e6ce3d3cde56c76d5c51cf7b071a
+FROM bellsoft/liberica-openjre-alpine:17.0.21@sha256:804f98b28c12668e57825acd09d591879a9f79b9297d67f594965467a956b191
 
 # ===============
 # Alpine packages
@@ -225,7 +225,7 @@ EXPOSE $CN_FIDO2_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="2.6.1-1" \
+    org.opencontainers.image.version="2.6.1-3" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
