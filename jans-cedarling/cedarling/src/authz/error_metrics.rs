@@ -7,7 +7,7 @@ use crate::{
     AuthorizeError, DataError,
     authz::{BatchValidationError, BuildContextError, MultiIssuerValidationError},
     entity_builder::{BuildUnsignedEntityError, MultiIssuerEntityError},
-    jwt::{CustomTokenError, UnknownTokenMapping, ValidateJwtError},
+    jwt::{CustomTokenError, StatusCheckError, UnknownTokenMapping, ValidateJwtError},
 };
 
 /// Trait for error types that map to a telemetry metric key.
@@ -105,9 +105,21 @@ impl ErrorMetricKey for ValidateJwtError {
             Self::MissingValidator(_) => "jwt.missing_validator",
             Self::ValidateJwt(_) => "jwt.validation_failed",
             Self::MissingClaims(_) => "jwt.missing_claims",
-            Self::GetJwtStatus(_) | Self::DeserializeStatusClaim(_) => "jwt.status_check_failed",
-            Self::RejectJwtStatus(_) => "jwt.status_rejected",
-            Self::MissingStatusList => "jwt.missing_status_list",
+            Self::DeserializeStatusClaim(_) => "jwt.status_list_check_failed",
+            Self::Status(err) => err.metric_key(),
+        }
+    }
+}
+
+impl ErrorMetricKey for StatusCheckError {
+    fn metric_key(&self) -> &'static str {
+        match self {
+            // the issuer publishes no list the token can be checked against
+            Self::NoStatusList { .. } | Self::ForeignStatusList { .. } => "jwt.status_list_missing",
+            // the issuer's list could not be loaded or refreshed in time
+            Self::Unavailable { .. } | Self::Expired { .. } => "jwt.status_list_unavailable",
+            Self::Rejected { .. } => "jwt.status_list_rejected",
+            Self::IdxOutOfBounds { .. } => "jwt.status_list_check_failed",
         }
     }
 }

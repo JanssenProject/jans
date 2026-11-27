@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use std::collections::HashMap;
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
@@ -23,6 +24,10 @@ use crate::sparkv::{Config, HashMapSparKV};
 #[derive(Clone)]
 pub(crate) struct TokenCache {
     cache: Option<Arc<RwLock<HashMapSparKV<Arc<Token>>>>>,
+    /// How many times the tokens of each `iss` were invalidated. It is part of
+    /// the key of that issuer's tokens, so a token validated before an
+    /// invalidation is saved under a key no later lookup uses.
+    issuer_epochs: Arc<RwLock<HashMap<IssClaim, u64>>>,
     max_ttl: usize,
     logger: Option<Logger>,
     metrics: Arc<MetricsCollector>,
@@ -70,6 +75,7 @@ impl TokenCache {
 
         Self {
             cache,
+            issuer_epochs: Arc::default(),
             max_ttl,
             logger,
             metrics,
@@ -88,54 +94,64 @@ impl TokenCache {
         }
     }
 
-    /// Attempts to find a token in the cache.
-    ///
-    /// Returns `Some(Arc<Token>)` if the token is found in cache and not expired,
-    /// otherwise returns `None`.
-    pub(crate) fn find(&self, kind: &TokenKind, jwt: &str) -> Option<Arc<Token>> {
-        let Some(cache) = &self.cache else {
-            self.metrics.record_cache_miss();
-            return None;
-        };
-
-        let key = hash_jwt_token(kind, jwt);
-        let result = cache
+    /// Looks up a JWT of the trusted issuer whose `iss` is `iss`. The key holds
+    /// the issuer's current epoch, so a token validated against a status list
+    /// that changes before the token is saved is saved under a key that
+    /// [`Self::invalidate_issuer`] already retired.
+    pub(crate) fn lookup_jwt(&self, kind: &TokenKind, jwt: &str, iss: &IssClaim) -> Lookup<'_> {
+        let epoch = self
+            .issuer_epochs
             .read()
-            .expect("token cache mutex shouldn't be poisoned")
-            .get(&key)
-            .map(std::borrow::ToOwned::to_owned);
-        if result.is_some() {
-            self.metrics.record_cache_hit();
-        } else {
-            self.metrics.record_cache_miss();
-        }
-        result
+            .expect("issuer epochs lock shouldn't be poisoned")
+            .get(iss)
+            .copied()
+            .unwrap_or_default();
+        self.lookup(hash_jwt_token(kind, jwt, Some(epoch)), CachedKind::Jwt)
     }
 
-    /// Saves a token to the cache with appropriate TTL.
+    /// Looks up a custom token. Its kind already names the processor and the
+    /// policy store generation it was processed for, so a swap retires its key.
+    pub(crate) fn lookup_custom(&self, kind: &TokenKind, jwt: &str) -> Lookup<'_> {
+        self.lookup(hash_jwt_token(kind, jwt, None), CachedKind::Custom)
+    }
+
+    fn lookup(&self, key: String, kind: CachedKind) -> Lookup<'_> {
+        let found = self.cache.as_ref().and_then(|cache| {
+            cache
+                .read()
+                .expect("token cache mutex shouldn't be poisoned")
+                .get(&key)
+                .map(std::borrow::ToOwned::to_owned)
+        });
+        if let Some(token) = found {
+            self.metrics.record_cache_hit();
+            Lookup::Hit(token)
+        } else {
+            self.metrics.record_cache_miss();
+            Lookup::Miss(CacheMiss {
+                cache: self,
+                key,
+                kind,
+            })
+        }
+    }
+
+    /// Saves a token under `key` with appropriate TTL.
     ///
     /// The TTL is determined as follows:
     /// 1. If the token has a valid `exp` claim, the entry TTL is the time until
     ///    expiration (clamped by `max_ttl` when it is > 0).
     /// 2. If the token has no `exp` claim and `max_ttl` is > 0, `max_ttl` is used.
     /// 3. If `max_ttl` is 0, the token cache is disabled and no token is cached.
-    pub(crate) fn save(&self, kind: &TokenKind, jwt: &str, token: Arc<Token>, now: DateTime<Utc>) {
-        self.save_with_expiration(kind, jwt, token, now, None);
-    }
-
-    /// Saves a token whose expiration is supplied out-of-band rather than read
-    /// from an `exp` claim.
     ///
-    /// Used by the custom-token path: a
-    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) reports expiration
-    /// through [`ProcessedTokenClaims::expiration`](crate::ProcessedTokenClaims),
-    /// leaving the claims it returns untouched. `expiration` takes precedence over
-    /// an `exp` claim; `None` falls back to the claim, so the TTL rules above are
-    /// unchanged.
-    pub(crate) fn save_with_expiration(
+    /// `expiration`, when given, takes precedence over an `exp` claim: a
+    /// [`CustomTokenProcessor`](crate::CustomTokenProcessor) reports it through
+    /// [`ProcessedTokenClaims::expiration`](crate::ProcessedTokenClaims), leaving
+    /// the claims it returns untouched.
+    fn save(
         &self,
-        kind: &TokenKind,
-        jwt: &str,
+        key: &str,
+        kind: CachedKind,
         token: Arc<Token>,
         now: DateTime<Utc>,
         expiration: Option<i64>,
@@ -156,20 +172,18 @@ impl TokenCache {
             return;
         };
 
-        let key = hash_jwt_token(kind, jwt);
-
         // Extract issuer for indexing; custom-token entries additionally carry a
         // marker index so `clear_custom_tokens` can flush them without touching JWTs.
         let mut index_keys =
             vec![IndexKey::Iss(token.normalized_issuer().into_owned()).index_value()];
-        if matches!(kind, TokenKind::AuthorizeCustom { .. }) {
+        if kind == CachedKind::Custom {
             index_keys.push(IndexKey::Custom.index_value());
         }
 
         let result = cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
-            .set_with_ttl(&key, token, Duration::seconds(duration), &index_keys);
+            .set_with_ttl(key, token, Duration::seconds(duration), &index_keys);
         if let Err(err) = result {
             self.log_warn(format!("could not set token to token cache: {err}"));
         }
@@ -231,16 +245,63 @@ impl TokenCache {
             .remove_by_index(&IndexKey::Custom.index_value());
     }
 
-    /// Remove tokens from cache by index key
-    pub(crate) fn invalidate_by_index(&self, index_key: &IndexKey) {
+    /// Retires the cached tokens of `iss`: bumps its epoch, so no later lookup
+    /// finds them or a token validated before this call, and frees their entries.
+    pub(crate) fn invalidate_issuer(&self, iss: &IssClaim) {
+        *self
+            .issuer_epochs
+            .write()
+            .expect("issuer epochs lock shouldn't be poisoned")
+            .entry(iss.clone())
+            .or_default() += 1;
+
         let Some(cache) = &self.cache else {
             return;
         };
-
         cache
             .write()
             .expect("token cache mutex shouldn't be poisoned")
-            .remove_by_index(&index_key.index_value());
+            .remove_by_index(&IndexKey::Iss(iss.clone()).index_value());
+    }
+}
+
+/// What [`TokenCache::lookup_jwt`] or [`TokenCache::lookup_custom`] found.
+pub(crate) enum Lookup<'a> {
+    Hit(Arc<Token>),
+    Miss(CacheMiss<'a>),
+}
+
+/// A token that was not cached. It is saved through this miss, under the key
+/// the lookup computed before the token was validated.
+pub(crate) struct CacheMiss<'a> {
+    cache: &'a TokenCache,
+    key: String,
+    kind: CachedKind,
+}
+
+/// Which lookup a [`CacheMiss`] came from; custom-token entries carry a marker
+/// index so `clear_custom_tokens` can flush them without touching JWTs.
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum CachedKind {
+    Jwt,
+    Custom,
+}
+
+impl CacheMiss<'_> {
+    pub(crate) fn save(self, token: Arc<Token>, now: DateTime<Utc>) {
+        self.cache.save(&self.key, self.kind, token, now, None);
+    }
+
+    /// Saves a token whose expiration is supplied out-of-band rather than read
+    /// from an `exp` claim; `None` falls back to the claim.
+    pub(crate) fn save_with_expiration(
+        self,
+        token: Arc<Token>,
+        now: DateTime<Utc>,
+        expiration: Option<i64>,
+    ) {
+        self.cache
+            .save(&self.key, self.kind, token, now, expiration);
     }
 }
 
@@ -249,7 +310,7 @@ impl TokenCache {
 /// Pre-hashing JWT keys reduces their size from potentially kilobytes down to
 /// ~20 bytes, saving memory in the backing `HashMap` and making subsequent hash
 /// computations cheaper during lookups.
-fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
+fn hash_jwt_token(kind: &TokenKind, jwt: &str, issuer_epoch: Option<u64>) -> String {
     use core::hash::BuildHasher;
     use std::hash::Hasher;
     use std::sync::LazyLock;
@@ -268,6 +329,7 @@ fn hash_jwt_token(kind: &TokenKind, jwt: &str) -> String {
 
     kind.hash(&mut hasher);
     jwt.hash(&mut hasher);
+    issuer_epoch.hash(&mut hasher);
 
     hasher.finish().to_string()
 }
@@ -328,6 +390,96 @@ mod tests {
         )]))
     }
 
+    fn access_token_kind() -> TokenKind<'static> {
+        TokenKind::AuthorizeMultiIssuer("Acme::Access_Token".into())
+    }
+
+    fn iss(value: &str) -> IssClaim {
+        IssClaim::new(value)
+    }
+
+    impl<'a> Lookup<'a> {
+        fn hit(self) -> Option<Arc<Token>> {
+            match self {
+                Lookup::Hit(token) => Some(token),
+                Lookup::Miss(_) => None,
+            }
+        }
+
+        fn miss(self) -> Option<CacheMiss<'a>> {
+            match self {
+                Lookup::Hit(_) => None,
+                Lookup::Miss(miss) => Some(miss),
+            }
+        }
+    }
+
+    /// A token validated before its issuer's cached tokens were invalidated, for
+    /// example against a status list that a refresh then replaced, is saved
+    /// under a retired key, so it is not served.
+    #[test]
+    fn token_validated_before_its_issuer_was_invalidated_is_not_served() {
+        let now = Utc::now();
+        let cache = token_cache(600);
+        let kind = access_token_kind();
+        let idp = iss("https://idp.example.com");
+
+        let miss = cache
+            .lookup_jwt(&kind, "jwt", &idp)
+            .miss()
+            .expect("nothing is cached yet");
+        cache.invalidate_issuer(&idp);
+        miss.save(token_with_exp(now, 3600), now);
+
+        assert!(
+            cache.lookup_jwt(&kind, "jwt", &idp).hit().is_none(),
+            "a token validated before the invalidation must not be served"
+        );
+
+        cache
+            .lookup_jwt(&kind, "jwt", &idp)
+            .miss()
+            .expect("the stale token is not served")
+            .save(token_with_exp(now, 3600), now);
+        assert!(
+            cache.lookup_jwt(&kind, "jwt", &idp).hit().is_some(),
+            "a token validated after the invalidation is served"
+        );
+    }
+
+    /// Invalidating one issuer leaves the tokens of another, including one being
+    /// validated meanwhile.
+    #[test]
+    fn invalidating_an_issuer_keeps_tokens_of_another() {
+        let now = Utc::now();
+        let cache = token_cache(600);
+        let kind = access_token_kind();
+        let acme = iss("https://acme.example.com");
+        let other = iss("https://other.example.com");
+
+        cache
+            .lookup_jwt(&kind, "cached", &acme)
+            .miss()
+            .expect("nothing is cached yet")
+            .save(token_with_exp(now, 3600), now);
+        let in_flight = cache
+            .lookup_jwt(&kind, "in-flight", &acme)
+            .miss()
+            .expect("nothing is cached yet");
+
+        cache.invalidate_issuer(&other);
+        in_flight.save(token_with_exp(now, 3600), now);
+
+        assert!(
+            cache.lookup_jwt(&kind, "cached", &acme).hit().is_some(),
+            "a token of another issuer stays cached"
+        );
+        assert!(
+            cache.lookup_jwt(&kind, "in-flight", &acme).hit().is_some(),
+            "a token of another issuer validated meanwhile is cached"
+        );
+    }
+
     #[test]
     fn clear_custom_tokens_evicts_only_custom_entries() {
         let now = Utc::now();
@@ -341,17 +493,32 @@ mod tests {
             processor: 0,
         };
 
-        cache.save(&jwt_kind, "jwt-payload", token.clone(), now);
-        cache.save(&custom_kind, "custom-payload", token, now);
+        let idp = iss("https://idp.example.com");
+        cache
+            .lookup_jwt(&jwt_kind, "jwt-payload", &idp)
+            .miss()
+            .expect("nothing is cached yet")
+            .save(token.clone(), now);
+        cache
+            .lookup_custom(&custom_kind, "custom-payload")
+            .miss()
+            .expect("nothing is cached yet")
+            .save(token, now);
 
         cache.clear_custom_tokens();
 
         assert!(
-            cache.find(&custom_kind, "custom-payload").is_none(),
+            cache
+                .lookup_custom(&custom_kind, "custom-payload")
+                .hit()
+                .is_none(),
             "clear_custom_tokens should evict custom-token entries"
         );
         assert!(
-            cache.find(&jwt_kind, "jwt-payload").is_some(),
+            cache
+                .lookup_jwt(&jwt_kind, "jwt-payload", &idp)
+                .hit()
+                .is_some(),
             "clear_custom_tokens should leave JWT entries cached"
         );
     }
@@ -362,10 +529,18 @@ mod tests {
         let cache = token_cache(0);
         let token = token_with_exp(now, 3600);
 
-        cache.save(&TokenKind::StatusList, "jwt", token, now);
+        let idp = iss("https://idp.example.com");
+        cache
+            .lookup_jwt(&TokenKind::StatusList, "jwt", &idp)
+            .miss()
+            .expect("a disabled cache finds nothing")
+            .save(token, now);
 
         assert!(
-            cache.find(&TokenKind::StatusList, "jwt").is_none(),
+            cache
+                .lookup_jwt(&TokenKind::StatusList, "jwt", &idp)
+                .hit()
+                .is_none(),
             "max_ttl=0 should disable token cache even when the token has exp"
         );
     }
@@ -376,10 +551,18 @@ mod tests {
         let cache = token_cache(0);
         let token = token(HashMap::new());
 
-        cache.save(&TokenKind::StatusList, "jwt", token, now);
+        let idp = iss("https://idp.example.com");
+        cache
+            .lookup_jwt(&TokenKind::StatusList, "jwt", &idp)
+            .miss()
+            .expect("a disabled cache finds nothing")
+            .save(token, now);
 
         assert!(
-            cache.find(&TokenKind::StatusList, "jwt").is_none(),
+            cache
+                .lookup_jwt(&TokenKind::StatusList, "jwt", &idp)
+                .hit()
+                .is_none(),
             "max_ttl=0 should not cache tokens without exp"
         );
     }

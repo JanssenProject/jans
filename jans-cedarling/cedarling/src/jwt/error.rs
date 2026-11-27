@@ -7,7 +7,6 @@ use crate::jwt::trusted_issuers_loader::TrustedIssuerLoaderError;
 
 use super::fetch::HttpError;
 use super::key_service;
-use super::status_list::UpdateStatusListError;
 use super::validation::ValidateJwtError;
 
 #[derive(Debug, thiserror::Error)]
@@ -32,8 +31,6 @@ pub(crate) enum JwtServiceInitError {
     PrepareKeys(#[from] key_service::KeyServiceError),
     #[error("failed to GET the openid configuration for the trusted issuers: {0}")]
     GetOpenidConfigurations(#[from] HttpError),
-    #[error("failed to update JWT status list: {0}")]
-    UpdateStatusList(#[from] UpdateStatusListError),
     #[error("failed to load trusted issuers: {0}")]
     LoadTrustedIssuers(#[from] TrustedIssuerLoaderError),
     #[error(transparent)]

@@ -11,7 +11,7 @@ use crate::common::policy_store::TokenEntityMetadata;
 use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
 use crate::jwt::key_service::DecodingKeyInfo;
 use crate::jwt::{
-    Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
+    Arc, IssuerStatusList, OwnedValidatorInfo, StatusCheckError, TokenKind, ValidatorInfo,
 };
 use jsonwebtoken::errors::{ErrorKind, new_error};
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
@@ -75,7 +75,8 @@ pub(crate) struct JwtValidator {
     required_claims: HashSet<String>,
     validate_signature: bool,
     validate_status_list: bool,
-    status_list_cache: StatusListCache,
+    /// The status list of the token's issuer; `None` when it publishes none.
+    status_list: Option<Arc<IssuerStatusList>>,
 }
 
 impl JwtValidator {
@@ -85,7 +86,7 @@ impl JwtValidator {
         tkn_name: &'a str,
         token_metadata: &TokenEntityMetadata,
         algorithm: Algorithm,
-        status_lists: StatusListCache,
+        status_list: Option<Arc<IssuerStatusList>>,
         validate_signature: bool,
         validate_status_list: bool,
     ) -> (Self, ValidatorInfo<'a>) {
@@ -112,7 +113,7 @@ impl JwtValidator {
             required_claims,
             validate_signature,
             validate_status_list,
-            status_list_cache: status_lists,
+            status_list,
         };
 
         (validator, key)
@@ -128,7 +129,9 @@ impl JwtValidator {
         let token_kind = TokenKind::StatusList;
 
         let mut validation = Validation::new(algorithm);
-        validation.validate_exp = true;
+        // The status list parser checks `exp` with this validator's leeway, so its
+        // error names the date the list expired.
+        validation.validate_exp = false;
         validation.validate_nbf = true;
 
         // we will validate the missing claims in another function since the
@@ -151,23 +154,29 @@ impl JwtValidator {
 
         let validator = JwtValidator {
             validation,
-            expected_iss: iss.cloned(),
+            // `iss` is optional in a status list JWT (draft-ietf-oauth-status-list-21
+            // §5.1); the caller refuses one that names another issuer.
+            expected_iss: None,
             required_claims,
             validate_signature,
             validate_status_list: false,
-            status_list_cache: StatusListCache::default(),
+            status_list: None,
         };
 
         (validator, key)
     }
 
+    /// The clock-skew leeway, in seconds, this validator allows on `exp` and `nbf`.
+    pub(crate) fn leeway_secs(&self) -> u64 {
+        self.validation.leeway
+    }
+
     /// Validates JWT by checking:
     /// - The JWT's Signature
     /// - If the claims are valid (e.g. the JWT isn't expired)
-    /// - If the status of the JWT isn't [`invalid`] or [`suspended`].
+    /// - If the status of the JWT, when it has one, is [`valid`].
     ///
-    /// [`invalid`]: JwtStatus::Invalid
-    /// [`suspended`]: JwtStatus::Suspended
+    /// [`valid`]: crate::jwt::status_list::JwtStatus::Valid
     pub(crate) fn validate_jwt(
         &self,
         jwt: &str,
@@ -193,13 +202,15 @@ impl JwtValidator {
         self.validate_iss(&validated_jwt.claims)?;
 
         // Custom implementation of requiring custom claims
-        let missing_claims = self
+        let mut missing_claims = self
             .required_claims
             .iter()
             .filter(|claim| validated_jwt.claims.get(claim).is_none())
             .cloned()
             .collect::<Vec<String>>();
         if !missing_claims.is_empty() {
+            // `required_claims` is a set; sorting keeps the error the same for the same token.
+            missing_claims.sort_unstable();
             Err(ValidateJwtError::MissingClaims(missing_claims))?;
         }
 
@@ -211,19 +222,17 @@ impl JwtValidator {
                 return Ok(validated_jwt);
             };
 
-            let jwt_status = {
-                self.status_list_cache
-                    .status_lists
-                    .read()
-                    .expect("obtain status list read lock")
-                    .get(&ref_status_list.uri)
-                    .ok_or(ValidateJwtError::MissingStatusList)?
-                    .get_status(ref_status_list.idx)?
+            let Some(status_list) = &self.status_list else {
+                return Err(StatusCheckError::NoStatusList {
+                    uri: ref_status_list.uri,
+                }
+                .into());
             };
-
-            if !jwt_status.is_valid() {
-                return Err(ValidateJwtError::RejectJwtStatus(jwt_status));
-            }
+            status_list.check_status(
+                &ref_status_list.uri,
+                ref_status_list.idx,
+                jwt::get_current_timestamp(),
+            )?;
         }
 
         Ok(validated_jwt)
@@ -353,28 +362,30 @@ pub enum ValidateJwtError {
     MissingValidator(OwnedValidatorInfo),
     #[error("failed to validate the JWT: {0}")]
     ValidateJwt(#[from] jwt::errors::Error),
-    #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
+    #[error(
+        "validation failed since the JWT is missing the following required claims: {}",
+        .0.join(", ")
+    )]
     MissingClaims(Vec<String>),
-    #[error("failed to get the status for the JWT: {0}")]
-    GetJwtStatus(#[from] JwtStatusError),
-    #[error("the token is rejected because it's status is: {0}")]
-    RejectJwtStatus(JwtStatus),
-    #[error("there isn't a status list available for the token")]
-    MissingStatusList,
-    #[error("failed to deserialize the JWT's status claim: {0}")]
+    #[error(transparent)]
+    Status(#[from] StatusCheckError),
+    #[error(
+        "the token's `status` claim is not a status list reference \
+         (`{{\"status_list\": {{\"idx\": <number>, \"uri\": <string>}}}}`): {0}"
+    )]
     DeserializeStatusClaim(#[from] serde_json::Error),
 }
 
 #[cfg(test)]
 mod test {
-    use std::collections::{HashMap, HashSet};
-    use std::sync::LazyLock;
+    use std::collections::HashSet;
+    use std::sync::{Arc, LazyLock};
 
     use crate::common::issuer_utils::IssClaim;
     use crate::common::policy_store::TokenEntityMetadata;
-    use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
+    use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusCheckError, StatusList};
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
-    use crate::jwt::{StatusListCache, test_utils::*};
+    use crate::jwt::{IssuerStatusList, test_utils::*};
     use jsonwebtoken::Algorithm;
     use serde_json::json;
     use test_utils::assert_eq;
@@ -413,7 +424,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             false,
             false,
         );
@@ -451,7 +462,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             false,
             false,
         );
@@ -487,7 +498,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -527,7 +538,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -577,7 +588,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -621,7 +632,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -662,7 +673,7 @@ mod test {
             "access_token",
             &TEST_TKN_ENTITY_METADATA,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -706,7 +717,7 @@ mod test {
             "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -728,7 +739,7 @@ mod test {
             "access_token",
             &tkn_entity_metadata,
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -744,6 +755,37 @@ mod test {
                 if missing_claims == vec!["nbf".to_string()]
             ),
             "expected an error due to missing `nbf` claim"
+        );
+    }
+
+    /// The error names every missing claim in a stable order, so the log line is
+    /// the same for the same token.
+    #[test]
+    fn missing_claims_are_reported_in_order() {
+        let iss = "127.0.0.1";
+        let keys = generate_keys();
+        let token = generate_token_using_claims(&json!({ "iss": iss }), &keys)
+            .expect("Should generate token using keys");
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims =
+            HashSet::from(["sub", "nbf", "iat"].map(std::convert::Into::into));
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_entity_metadata,
+            Algorithm::HS256,
+            None,
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(keys.decoding_key().unwrap()))
+            .expect_err("the token lacks three required claims");
+
+        assert!(
+            matches!(&err, ValidateJwtError::MissingClaims(claims) if claims == &["iat", "nbf", "sub"]),
+            "every missing claim is reported, sorted, got: {err:?}"
         );
     }
 
@@ -768,14 +810,13 @@ mod test {
             .generate_token_with_hs256sig(&mut claims, Some(0))
             .unwrap();
 
-        let status_lists: StatusListCache = HashMap::from([(
-            server.status_list_endpoint().unwrap().to_string(),
+        let status_lists = Some(Arc::new(IssuerStatusList::for_test(
+            server.status_list_endpoint().unwrap().as_str(),
             StatusList {
                 bit_size,
                 list: status_list.to_vec(),
             },
-        )])
-        .into();
+        )));
 
         let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&iss),
@@ -794,8 +835,10 @@ mod test {
         assert!(
             matches!(
                 err,
-                ValidateJwtError::RejectJwtStatus(ref status)
-                    if *status == JwtStatus::Invalid
+                ValidateJwtError::Status(StatusCheckError::Rejected {
+                    status: JwtStatus::Invalid,
+                    ..
+                })
             ),
             "GOT {err:?}: {err}"
         );
@@ -808,6 +851,45 @@ mod test {
             token_id: "jti".into(),
             required_claims: HashSet::new(),
         }
+    }
+
+    /// A token with a `status` claim from an issuer that publishes no status list
+    /// cannot be checked, so it is rejected, naming the list it referenced.
+    #[test]
+    fn rejects_status_token_from_issuer_without_status_list() {
+        let keys = generate_keys();
+        let iss = "https://issuer.example.com";
+        let uri = "https://issuer.example.com/statuslist/1";
+        let claims = json!({
+            "iss": iss,
+            "sub": "1234567890",
+            "exp": u64::MAX,
+            "status": {"status_list": {"idx": 0, "uri": uri}},
+        });
+        let token =
+            generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_meta_no_required_claims(),
+            Algorithm::HS256,
+            None,
+            true,
+            true,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(keys.decoding_key().unwrap()))
+            .expect_err("the issuer has no status list to check the token against");
+        assert!(
+            matches!(
+                &err,
+                ValidateJwtError::Status(StatusCheckError::NoStatusList { uri: found })
+                    if found == uri
+            ),
+            "the rejection must name the referenced list, got: {err:?}"
+        );
     }
 
     /// Expired token (exp=0) is rejected even when "exp" is not in `required_claims`.
@@ -831,7 +913,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             false,
             false,
         );
@@ -870,7 +952,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -909,7 +991,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             false,
             false,
         );
@@ -948,7 +1030,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -987,7 +1069,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -1024,7 +1106,7 @@ mod test {
             "access_token",
             &tkn_meta_no_required_claims(),
             Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );
@@ -1061,14 +1143,13 @@ mod test {
             .generate_token_with_hs256sig(&mut claims, Some(0))
             .unwrap();
 
-        let status_lists: StatusListCache = HashMap::from([(
-            server.status_list_endpoint().unwrap().to_string(),
+        let status_lists = Some(Arc::new(IssuerStatusList::for_test(
+            server.status_list_endpoint().unwrap().as_str(),
             StatusList {
                 bit_size: 2u8.try_into().unwrap(),
                 list: vec![0b1010_1010],
             },
-        )])
-        .into();
+        )));
 
         let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
             Some(&iss),
@@ -1087,8 +1168,10 @@ mod test {
         assert!(
             matches!(
                 err,
-                ValidateJwtError::RejectJwtStatus(ref status)
-                    if *status == JwtStatus::Suspended
+                ValidateJwtError::Status(StatusCheckError::Rejected {
+                    status: JwtStatus::Suspended,
+                    ..
+                })
             ),
             "GOT {err:?}: {err}"
         );

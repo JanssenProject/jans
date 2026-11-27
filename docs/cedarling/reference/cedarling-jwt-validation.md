@@ -193,10 +193,28 @@ The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps tha
 
 - The effective interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`.
 - Without a `ttl` claim, the max value is used, so the cache cannot go stale forever.
+- If the list's `exp` comes sooner, Cedarling refreshes it at its `exp`. The list stays in use for 60 more seconds of clock-skew leeway, which covers the fetch and its retries.
+- An issuer `ttl` below `5` seconds counts as `5` seconds.
 - `0` or an unset variable means the default, `300` seconds.
 - Non-zero values below `5` seconds are raised to `5` seconds.
 
-Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
+If the Status List cannot be loaded at startup, the issuer still loads: Cedarling logs an error naming the issuer and the cause, rejects only the tokens that reference that list, and retries in the background, at the `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` interval.
+
+If a background refresh fails (network error, 5xx response, or an invalid status list body), Cedarling logs an error and retries at the next interval. Until then:
+
+- A cached list that has not reached its `exp` plus the leeway stays in use.
+- A cached list without `exp`, or one past its `exp` plus the leeway, is dropped, and tokens that reference it are rejected until a refresh succeeds (**fail-closed**).
+
+A revoked token is therefore never accepted based on an expired list, at the cost of temporarily denying valid tokens when the issuer's status endpoint stays unreachable after the list expires. Serving `exp` lets Cedarling ride out short outages of that endpoint.
+
+### Status List JWT Requirements
+
+Cedarling uses a Status List JWT only if it meets the [Status List Token](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1) rules. Otherwise it refuses the list and rejects the tokens that reference it. The issuer must serve:
+
+- the JOSE header `typ: statuslist+jwt`;
+- a `sub` claim equal to the status list URL, and an `iat` claim;
+- an `iss` claim, when present, equal to the trusted issuer;
+- optionally, but recommended, `exp` and `ttl` claims: they set how long Cedarling uses the list (see above).
 
 ## JWT Validation Flow Diagram
 
@@ -204,7 +222,7 @@ JWTs (JSON Web Tokens) contain authorization information that the Cedarling uses
 
 - **Claims**, such as `exp`: always checked.
 - **Signature**: checked against the issuer's JWKS when `CEDARLING_JWT_SIG_VALIDATION` is enabled. When it is disabled, the JWT is decoded without verification.
-- **Status**: checked against the issuer's Status List when `CEDARLING_JWT_STATUS_VALIDATION` is enabled and the issuer publishes a `status_list_endpoint`. The `Invalid` and `Suspended` statuses fail validation.
+- **Status**: checked against the issuer's Status List when `CEDARLING_JWT_STATUS_VALIDATION` is enabled and the issuer publishes a `status_list_endpoint`. Only the `VALID` status (`0x00`) passes. `INVALID`, `SUSPENDED`, application-specific and reserved values fail validation.
 
 A token that fails any check is dropped. Cedarling logs the failure when the configured logger is enabled.
 

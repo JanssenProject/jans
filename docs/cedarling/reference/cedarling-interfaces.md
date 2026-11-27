@@ -498,7 +498,7 @@ This interface is particularly useful when `CEDARLING_TRUSTED_ISSUER_LOADER_TYPE
 
 - `loaded_trusted_issuer_ids()` — Returns the set of issuer IDs that have been successfully loaded.
 
-- `failed_trusted_issuer_ids()` — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count.
+- `failed_trusted_issuer_ids()` — Returns the set of issuer IDs that encountered errors during loading. Failed issuers are still counted toward total processing count. An issuer whose Status List cannot be loaded is not failed: it is loaded, and only its tokens that reference that list are rejected until the list loads (see [Status List Refresh Cadence](./cedarling-jwt-validation.md#status-list-refresh-cadence)).
 
 ### Example
 

@@ -81,7 +81,9 @@ pub use custom_token::{CustomTokenError, CustomTokenProcessor, ProcessedTokenCla
 pub(crate) use decode::*;
 pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
+pub(crate) use status_list::StatusCheckError;
 pub(crate) use token::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
+use token_cache::Lookup;
 pub(crate) use token_cache::TokenCache;
 pub(crate) use validation::ValidateJwtError;
 
@@ -106,7 +108,7 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
-use status_list::{JwtStatus, JwtStatusError, StatusListCache};
+use status_list::{IssuerStatusList, StatusListRegistry};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
@@ -386,7 +388,7 @@ impl JwtService {
 
         warn_if_jwt_validation_disabled(jwt_config, logger.as_ref());
 
-        let status_lists = StatusListCache::default();
+        let status_lists = StatusListRegistry::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
         let key_service = Arc::new(KeyService::new());
@@ -613,9 +615,14 @@ impl JwtService {
     ) -> Result<TokenOutcome, MultiIssuerValidationError> {
         let token_kind = TokenKind::AuthorizeMultiIssuer(Cow::Borrowed(&ctx.token.mapping));
 
-        if let Some(cedar_token) = self.token_cache.find(&token_kind, &ctx.token.payload) {
-            return Ok(TokenOutcome::Validated(cedar_token));
-        }
+        let miss = match self.token_cache.lookup_jwt(
+            &token_kind,
+            &ctx.token.payload,
+            trusted_iss.iss_claim(),
+        ) {
+            Lookup::Hit(cedar_token) => return Ok(TokenOutcome::Validated(cedar_token)),
+            Lookup::Miss(miss) => miss,
+        };
 
         // Validate JWT using existing single token validation
         match self.validate_single_token(&token_kind, &ctx.token.payload) {
@@ -629,12 +636,7 @@ impl JwtService {
                 let cedar_token =
                     Arc::new(Token::new(claims, TokenIssuer::Jwt(trusted_iss.clone())));
 
-                self.token_cache.save(
-                    &token_kind,
-                    &ctx.token.payload,
-                    cedar_token.clone(),
-                    ctx.now,
-                );
+                miss.save(cedar_token.clone(), ctx.now);
 
                 Ok(TokenOutcome::Validated(cedar_token))
             },
@@ -679,9 +681,10 @@ impl JwtService {
         };
 
         // Serve a still-valid cached result if present.
-        if let Some(cached) = self.token_cache.find(&token_kind, &input.payload) {
-            return Ok(cached);
-        }
+        let miss = match self.token_cache.lookup_custom(&token_kind, &input.payload) {
+            Lookup::Hit(cached) => return Ok(cached),
+            Lookup::Miss(miss) => miss,
+        };
 
         let started = Utc::now();
         let outcome: Result<Arc<Token>, MultiIssuerValidationError> = async {
@@ -737,13 +740,7 @@ impl JwtService {
             let cedar_token = Arc::new(Token::new(claims, TokenIssuer::Custom(meta)));
 
             if cacheable {
-                self.token_cache.save_with_expiration(
-                    &token_kind,
-                    &input.payload,
-                    cedar_token.clone(),
-                    now,
-                    expiration,
-                );
+                miss.save_with_expiration(cedar_token.clone(), now, expiration);
             }
 
             Ok(cedar_token)

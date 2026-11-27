@@ -12,27 +12,33 @@
 //! in the JWT's status index (`idx`).
 
 mod cache;
+#[cfg(test)]
+mod conformance_tests;
 mod error;
 #[cfg(test)]
 mod ietf_test_samples;
 
 pub(super) use cache::*;
+pub(crate) use error::StatusCheckError;
 pub(super) use error::*;
 
 use super::validation::ValidatedJwt;
 use crate::common::issuer_utils::IssClaim;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
+use chrono::{DateTime, SecondsFormat, Utc};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
 use std::fmt::Display;
 use std::io::Read;
+use std::sync::Arc;
+use std::time::Duration;
 
 #[derive(Debug, PartialEq, Clone)]
 pub(super) struct StatusList {
     /// The number of bits used to encode a single status
-    pub bit_size: StatusBitSize,
+    pub(super) bit_size: StatusBitSize,
     /// The status list
-    pub list: Vec<u8>,
+    pub(super) list: Vec<u8>,
 }
 
 impl StatusList {
@@ -62,24 +68,20 @@ impl StatusList {
         })
     }
 
-    /// Returns the status of the jwt at the given index (`idx`)
+    /// Returns the status at `index`; an index past the end gives no status
+    /// ([draft-ietf-oauth-status-list-21 §8.3] step 6).
     ///
-    /// Validation rules can be found in [`IETF Status List Spec. sec. 8.3 v10`]
-    ///
-    /// [`IETF Status List Spec. sec. 8.3 v10`]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#section-8.3
-    pub(super) fn get_status(&self, index: usize) -> Result<JwtStatus, JwtStatusError> {
-        let scale = (8 / self.bit_size.0) as usize;
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    fn get_status(&self, index: usize) -> Result<JwtStatus, IdxOutOfBounds> {
+        let per_byte = self.bit_size.statuses_per_byte();
 
-        let byte_idx = index / scale;
-        let byte = self
-            .list
-            .get(byte_idx)
-            .ok_or(JwtStatusError::StatusListIdxOutOfBounds)?;
+        let byte = self.list.get(index / per_byte).ok_or(IdxOutOfBounds {
+            len: self.list.len().saturating_mul(per_byte),
+        })?;
 
-        let bit_idx = u8::try_from(index % scale)?;
-
-        let raw_status = get_status_from_byte(*byte, self.bit_size, bit_idx)?;
-        Ok(JwtStatus::from(raw_status))
+        Ok(JwtStatus::from(
+            self.bit_size.status_in_byte(*byte, index % per_byte),
+        ))
     }
 }
 
@@ -133,93 +135,218 @@ impl TryFrom<StatusListJwt> for StatusList {
     }
 }
 
-impl TryFrom<ValidatedJwt> for StatusList {
-    type Error = ParseStatusListError;
-
-    fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
-        let list = jwt
-            .claims
-            .get("lst")
-            .ok_or(ParseStatusListError::JwtMissingListClaim)?
-            .to_string();
-
-        let bits = jwt
-            .claims
-            .get("bits")
-            .ok_or(ParseStatusListError::JwtMissingBitsClaim)?;
-        let bits = bits
-            .as_u64()
-            .ok_or(ParseStatusListError::JwtInvalidBitsType(bits.clone()))?;
-
-        Self::parse(&list, u8::try_from(bits)?)
+impl StatusListJwt {
+    /// Parses the list and keeps its expiry next to it, so the two are replaced
+    /// together. `leeway_secs` is the clock-skew leeway of the validator that
+    /// checked the JWT, so `exp` gets the same leeway as `nbf`.
+    pub(super) fn into_cached(
+        self,
+        leeway_secs: u64,
+    ) -> Result<CachedStatusList, ParseStatusListError> {
+        let expiry = self.exp.map(|exp| StatusListExpiry { exp, leeway_secs });
+        Ok(CachedStatusList {
+            list: self.try_into()?,
+            expiry,
+        })
     }
 }
 
-/// Retrieves the status nibble/byte value from the given list byte.
+/// When a status list stops being usable: its `exp` plus the clock-skew leeway
+/// it was accepted with. After that it "MUST NOT be relied upon any longer"
+/// ([draft-ietf-oauth-status-list-21 §13.7]).
 ///
-/// [`StatusBitSize`] is normally only constructed with `1`, `2`, `4`, or `8` via
-/// [`TryFrom`]. If the invariant is violated, this returns
-/// [`JwtStatusError::InvalidStatusListEncoding`] so callers fail closed instead of
-/// treating corrupt data as valid.
-fn get_status_from_byte(
-    byte: u8,
-    bit_size: StatusBitSize,
-    bit_idx: u8,
-) -> Result<u8, JwtStatusError> {
-    match bit_size {
-        StatusBitSize(8) => Ok(byte),
-        StatusBitSize(1) => {
-            let offset = bit_idx;
-            Ok((byte >> offset) & 0b0000_0001)
-        },
-        StatusBitSize(2) => {
-            let offset = bit_idx * 2;
-            Ok((byte >> offset) & 0b0000_0011)
-        },
-        StatusBitSize(4) => {
-            let offset = bit_idx * 4;
-            Ok((byte >> offset) & 0b0000_1111)
-        },
-        StatusBitSize(_) => {
-            debug_assert!(
-                false,
-                "status bit size can only be 1, 2, 4, or 8; see https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
-            );
-            Err(JwtStatusError::InvalidStatusListEncoding)
-        },
+/// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct StatusListExpiry {
+    exp: u64,
+    leeway_secs: u64,
+}
+
+impl StatusListExpiry {
+    /// The last second, in Unix time, at which the list may still be used.
+    fn usable_until(self) -> u64 {
+        self.exp.saturating_add(self.leeway_secs)
+    }
+
+    pub(super) fn has_passed(self, now: u64) -> bool {
+        now > self.usable_until()
+    }
+
+    /// Time from `now` until `exp`, when the issuer expects a newer list to be
+    /// fetched; zero once it has passed.
+    pub(super) fn until_exp(self, now: u64) -> Duration {
+        Duration::from_secs(self.exp.saturating_sub(now))
     }
 }
 
-/// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>
+impl Display for StatusListExpiry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "`exp` {} plus {} s of clock-skew leeway",
+            UnixTime(self.exp),
+            self.leeway_secs
+        )
+    }
+}
+
+/// A Unix time in seconds, shown as an RFC 3339 date for the log.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub(super) struct UnixTime(u64);
+
+impl Display for UnixTime {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match i64::try_from(self.0)
+            .ok()
+            .and_then(|secs| DateTime::<Utc>::from_timestamp(secs, 0))
+        {
+            Some(date) => write!(f, "{}", date.to_rfc3339_opts(SecondsFormat::Secs, true)),
+            None => write!(f, "{}", self.0),
+        }
+    }
+}
+
+/// A status list Cedarling could not keep: the last refresh failed and the
+/// cached list, if any, was dropped.
+#[derive(Debug, Clone)]
+pub struct UnavailableStatusList {
+    since: UnixTime,
+    cause: Arc<UpdateStatusListError>,
+}
+
+impl UnavailableStatusList {
+    pub(super) fn new(since: u64, cause: Arc<UpdateStatusListError>) -> Self {
+        Self {
+            since: UnixTime(since),
+            cause,
+        }
+    }
+
+    /// When the list became unavailable.
+    pub(super) fn since(&self) -> UnixTime {
+        self.since
+    }
+
+    /// The most recent failure to fetch or validate the list.
+    pub(super) fn cause(&self) -> &UpdateStatusListError {
+        &self.cause
+    }
+
+    /// Records a later failure, keeping the time the list became unavailable.
+    pub(super) fn with_cause(&self, cause: Arc<UpdateStatusListError>) -> Self {
+        Self {
+            since: self.since,
+            cause,
+        }
+    }
+}
+
+/// What Cedarling holds for one status list URI.
+#[derive(Debug, Clone)]
+pub(super) enum StatusListState {
+    Usable(CachedStatusList),
+    Unavailable(UnavailableStatusList),
+}
+
+#[cfg(test)]
+impl StatusListState {
+    pub(super) fn as_usable(&self) -> Option<&CachedStatusList> {
+        match self {
+            Self::Usable(list) => Some(list),
+            Self::Unavailable(_) => None,
+        }
+    }
+}
+
+/// A parsed status list as Cedarling caches it, with the expiry of the JWT it
+/// came from.
+#[derive(Debug, PartialEq, Clone)]
+pub(super) struct CachedStatusList {
+    list: StatusList,
+    /// `None` when the JWT has no `exp`, which is RECOMMENDED but not required.
+    expiry: Option<StatusListExpiry>,
+}
+
+impl CachedStatusList {
+    /// Whether both lists give every token the same status, whatever their
+    /// expiry: a token that passed one passes the other.
+    pub(super) fn has_same_statuses(&self, other: &Self) -> bool {
+        self.list == other.list
+    }
+
+    pub(super) fn expiry(&self) -> Option<StatusListExpiry> {
+        self.expiry
+    }
+
+    /// Returns the status at `index`, or an error once the list has expired:
+    /// an expired list gives no statement about the token
+    /// ([draft-ietf-oauth-status-list-21 §8.3] step 4).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    fn status_at(&self, index: usize, now: u64) -> Result<JwtStatus, StatusAtError> {
+        if let Some(expiry) = self.expiry.filter(|expiry| expiry.has_passed(now)) {
+            return Err(StatusAtError::Expired(expiry));
+        }
+        Ok(self.list.get_status(index)?)
+    }
+}
+
+/// A list that never expires, for tests that check statuses only.
+#[cfg(test)]
+impl From<StatusList> for CachedStatusList {
+    fn from(list: StatusList) -> Self {
+        Self { list, expiry: None }
+    }
+}
+
+/// A status value from a status list, as [draft-ietf-oauth-status-list-21 §7.1]
+/// defines them.
+///
+/// [draft-ietf-oauth-status-list-21 §7.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-7.1
 #[derive(Debug, PartialEq)]
 pub enum JwtStatus {
+    /// `0x00`
     Valid,
+    /// `0x01`: the token is revoked.
     Invalid,
+    /// `0x02`: the token is temporarily invalid.
     Suspended,
-    /// Status Type values in the range 0x0B until 0x0F are permanently reserved as
-    /// application specific.
-    ///
-    /// For Cedarling's, use-case we simply ignore these.
-    Custom(u8),
+    /// `0x03` or `0x0C` to `0x0F`, whose processing the draft leaves to each
+    /// application. Cedarling gives them no meaning, so it can make no statement
+    /// about the token.
+    ApplicationSpecific(u8),
+    /// Any other value, which the draft reserves for future registration.
+    Reserved(u8),
 }
 
 impl JwtStatus {
-    /// Helper function to figure out if the JWT is stull valid based on it's status
-    pub fn is_valid(&self) -> bool {
-        match self {
-            JwtStatus::Valid | JwtStatus::Custom(_) => true,
-            JwtStatus::Invalid | JwtStatus::Suspended => false,
-        }
+    /// Only `VALID` lets the token through: for any other value, including one
+    /// Cedarling does not know, no statement about the token can be made and it
+    /// is rejected ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    fn is_valid(&self) -> bool {
+        matches!(self, JwtStatus::Valid)
     }
 }
 
 impl Display for JwtStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            JwtStatus::Valid => write!(f, "valid"),
-            JwtStatus::Invalid => write!(f, "invalid"),
-            JwtStatus::Suspended => write!(f, "suspended"),
-            JwtStatus::Custom(status) => write!(f, "custom ({status})"),
+            JwtStatus::Valid => write!(f, "VALID (0x00)"),
+            JwtStatus::Invalid => write!(f, "INVALID (0x01): the token is revoked"),
+            JwtStatus::Suspended => {
+                write!(f, "SUSPENDED (0x02): the token is temporarily invalid")
+            },
+            JwtStatus::ApplicationSpecific(status) => write!(
+                f,
+                "{status:#04x}, an application-specific status that Cedarling does not support"
+            ),
+            JwtStatus::Reserved(status) => write!(
+                f,
+                "{status:#04x}, a value the status list specification reserves for future \
+                 registration"
+            ),
         }
     }
 }
@@ -227,33 +354,70 @@ impl Display for JwtStatus {
 impl From<u8> for JwtStatus {
     fn from(value: u8) -> Self {
         match value {
-            0 => Self::Valid,
-            1 => Self::Invalid,
-            2 => Self::Suspended,
-            _ => Self::Custom(value),
+            0x00 => Self::Valid,
+            0x01 => Self::Invalid,
+            0x02 => Self::Suspended,
+            0x03 | 0x0C..=0x0F => Self::ApplicationSpecific(value),
+            _ => Self::Reserved(value),
         }
     }
 }
 
-/// Newtype that enforces valid status bit size.
+/// The number of bits that encode one status: the `bits` of a status list, which
+/// is 1, 2, 4 or 8 ([draft-ietf-oauth-status-list-21 §4.1]).
 ///
-/// Use [`StatusBitSize::try_from<u8>`] to initialize.
+/// [draft-ietf-oauth-status-list-21 §4.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-4.1
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct StatusBitSize(u8);
+pub(crate) enum StatusBitSize {
+    One,
+    Two,
+    Four,
+    Eight,
+}
+
+impl StatusBitSize {
+    fn bits(self) -> u8 {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+            Self::Four => 4,
+            Self::Eight => 8,
+        }
+    }
+
+    fn statuses_per_byte(self) -> usize {
+        usize::from(8 / self.bits())
+    }
+
+    /// The status at `slot` of `byte`, counting from the least significant bits
+    /// ([draft-ietf-oauth-status-list-21 §4.1]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §4.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-4.1
+    fn status_in_byte(self, byte: u8, slot: usize) -> u8 {
+        let bits = self.bits();
+        let mask = u8::MAX >> (8 - bits);
+        // `slot` is below `statuses_per_byte`, so the shift stays below 8.
+        let shift = slot * usize::from(bits);
+        (byte >> shift) & mask
+    }
+}
 
 impl From<StatusBitSize> for u8 {
     fn from(value: StatusBitSize) -> Self {
-        value.0
+        value.bits()
     }
 }
 
 impl TryFrom<u8> for StatusBitSize {
     type Error = ParseStatusListError;
 
-    fn try_from(bit: u8) -> Result<Self, Self::Error> {
-        match bit {
-            1 | 2 | 4 | 8 => Ok(Self(bit)),
-            bit => Err(ParseStatusListError::InvalidBitSize(bit)),
+    fn try_from(bits: u8) -> Result<Self, Self::Error> {
+        match bits {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            4 => Ok(Self::Four),
+            8 => Ok(Self::Eight),
+            bits => Err(ParseStatusListError::InvalidBitSize(bits)),
         }
     }
 }
@@ -279,6 +443,110 @@ mod test {
     use crate::jwt::test_utils::MockServer;
     use jsonwebtoken::{Algorithm, Validation, decode};
     use test_utils::assert_eq;
+
+    /// The status value ranges of [draft-ietf-oauth-status-list-21 §7.1], checked
+    /// at each boundary.
+    ///
+    /// [draft-ietf-oauth-status-list-21 §7.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-7.1
+    #[test]
+    fn status_values_follow_draft_21_ranges() {
+        let cases = [
+            (0x00, JwtStatus::Valid),
+            (0x01, JwtStatus::Invalid),
+            (0x02, JwtStatus::Suspended),
+            (0x03, JwtStatus::ApplicationSpecific(0x03)),
+            (0x04, JwtStatus::Reserved(0x04)),
+            (0x0B, JwtStatus::Reserved(0x0B)),
+            (0x0C, JwtStatus::ApplicationSpecific(0x0C)),
+            (0x0F, JwtStatus::ApplicationSpecific(0x0F)),
+            (0x10, JwtStatus::Reserved(0x10)),
+            (0xFF, JwtStatus::Reserved(0xFF)),
+        ];
+        for (value, expected) in cases {
+            assert_eq!(
+                JwtStatus::from(value),
+                expected,
+                "status value {value:#04x} is classified by draft-21 section 7.1"
+            );
+        }
+    }
+
+    /// Only `VALID` lets a token through; any other value gives no statement
+    /// about the token, which is then rejected ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    #[test]
+    fn only_valid_status_is_valid() {
+        assert!(
+            JwtStatus::Valid.is_valid(),
+            "VALID must let the token through"
+        );
+        for value in 0x01..=0xFF {
+            assert!(
+                !JwtStatus::from(value).is_valid(),
+                "status value {value:#04x} must reject the token"
+            );
+        }
+    }
+
+    /// A cached list "MUST NOT be relied upon any longer" once its `exp` passes
+    /// ([draft-ietf-oauth-status-list-21 §13.7]); the same clock-skew leeway as
+    /// at fetch applies. A list without `exp` does not expire ([§5.1]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    /// [§5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
+    #[test]
+    fn cached_list_expires_after_exp_plus_leeway() {
+        let list = StatusList {
+            bit_size: 1u8.try_into().expect("valid bit size"),
+            list: vec![0],
+        };
+        let expiry = StatusListExpiry {
+            exp: 1_000,
+            leeway_secs: 60,
+        };
+        let cached = CachedStatusList {
+            list: list.clone(),
+            expiry: Some(expiry),
+        };
+
+        let status = cached
+            .status_at(0, 1_060)
+            .expect("the list is usable through `exp` plus leeway");
+        assert_eq!(
+            status,
+            JwtStatus::Valid,
+            "index 0 holds VALID while the list is usable"
+        );
+
+        let err = cached
+            .status_at(0, 1_061)
+            .expect_err("the list has expired one second after `exp` plus leeway");
+        assert!(
+            matches!(err, StatusAtError::Expired(found) if found == expiry),
+            "an expired list must report its expiry, got: {err:?}"
+        );
+
+        CachedStatusList::from(list)
+            .status_at(0, u64::MAX)
+            .expect("a list without `exp` never expires");
+    }
+
+    /// The admin reads times in the log as dates; a value past what a date can
+    /// hold is shown as the raw number rather than lost.
+    #[test]
+    fn unix_time_reads_as_a_date() {
+        assert_eq!(
+            UnixTime(1_767_225_600).to_string(),
+            "2026-01-01T00:00:00Z",
+            "a Unix time is shown as an RFC 3339 date in UTC"
+        );
+        assert_eq!(
+            UnixTime(u64::MAX).to_string(),
+            u64::MAX.to_string(),
+            "a time no date can hold is shown as the number"
+        );
+    }
 
     #[test]
     fn test_status_list_decompression() {
