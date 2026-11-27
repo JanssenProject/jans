@@ -11,6 +11,37 @@ DEVELOPER_DOCS_BRANCH=${DEVELOPER_DOCS_BRANCH:-main}
 DEVELOPER_DOCS_URL=${DEVELOPER_DOCS_URL:-https://github.com/${DEVELOPER_DOCS_REPO}.git}
 DEVELOPER_DOCS_PUSH_URL=${DEVELOPER_DOCS_PUSH_URL:-https://x-access-token@github.com/${DEVELOPER_DOCS_REPO}.git}
 KEEP=(".git" ".github" "LICENSE" "README.md" "automation")
+# One landing entry per binding section: "<slug>/<entry page>|<title>".
+SECTIONS=(
+    "cedarling/index.html|Cedarling Rust, WASM and UniFFI"
+    "cedarling-python/index.html|Cedarling Python"
+    "cedarling-java/index.html|Cedarling Java/Kotlin"
+    "cedarling-c/index.html|Cedarling C"
+    "cedarling-go/cedarling_go.html|Cedarling Go"
+    "cedarling-js/index.html|Cedarling JavaScript/TypeScript"
+)
+
+# The publish replaces the whole site, so a missing section would silently vanish.
+missing=0
+for slug in ${EXPECTED_SECTIONS:-}; do
+    page=""
+    for section in "${SECTIONS[@]}"; do
+        if [ "${section%%/*}" = "$slug" ]; then
+            page=${section%%|*}
+            break
+        fi
+    done
+    if [ -z "$page" ]; then
+        echo "ERROR: '$slug' is not a known docs section." >&2
+        missing=1
+    elif [ ! -f "$GENERATED_DIRECTORY/$page" ]; then
+        echo "ERROR: expected section '$slug' has no $page." >&2
+        missing=1
+    fi
+done
+if [ "$missing" -ne 0 ]; then
+    exit 1
+fi
 
 WORK_DIR=$(mktemp -d)
 trap 'rm -rf "$WORK_DIR"' EXIT
@@ -39,32 +70,28 @@ cp -r "$GENERATED_DIRECTORY"/. "$CLONE_DIR"/
 
 cd "$CLONE_DIR"
 write_landing_page() {
-    local entries=()
-    if [ -f cedarling/index.html ]; then
-        entries+=("cedarling/index.html|Cedarling Rust, WASM and UniFFI")
-    fi
-    if [ -f cedarling-python/index.html ]; then
-        entries+=("cedarling-python/index.html|Cedarling Python")
-    fi
-    if [ -f cedarling-c/index.html ]; then
-        entries+=("cedarling-c/index.html|Cedarling C")
-    fi
-    if [ -f cedarling-go/cedarling_go.html ]; then
-        entries+=("cedarling-go/cedarling_go.html|Cedarling Go")
-    fi
-    if [ -f cedarling-js/index.html ]; then
-        entries+=("cedarling-js/index.html|Cedarling JavaScript/TypeScript")
-    fi
-    if [ -f cedarling-java/index.html ]; then
-        entries+=("cedarling-java/index.html|Cedarling Java/Kotlin")
-    fi
-    local page
+    local entries=() modules=() prune=() section page root
+    for section in "${SECTIONS[@]}"; do
+        if [ -f "${section%%|*}" ]; then
+            entries+=("$section")
+        fi
+        prune+=(-not -path "./${section%%/*}/*")
+    done
+    for kept in "${KEEP[@]}"; do
+        prune+=(-not -path "./$kept/*")
+    done
+
+    # Module javadocs: link each tree's top index.html, not the pages nested below it.
     while IFS= read -r page; do
-        entries+=("${page#./}|${page#./}")
-    done < <(find . -mindepth 2 -name index.html \
-        -not -path "./cedarling/*" -not -path "./cedarling-c/*" -not -path "./cedarling-js/*" \
-        -not -path "./cedarling-java/*" -not -path "./cedarling-python/*" \
-        -not -path "./.git/*" | sort)
+        page=${page#./}
+        for root in ${modules[@]+"${modules[@]}"}; do
+            if [[ "$page" == "${root%/index.html}/"* ]]; then
+                continue 2
+            fi
+        done
+        modules+=("$page")
+    done < <(find . -mindepth 2 -name index.html "${prune[@]}" |
+        awk -F/ '{ print NF "\t" $0 }' | LC_ALL=C sort -k1,1n -k2 | cut -f2-)
 
     {
         echo '<!DOCTYPE html>'
@@ -77,10 +104,18 @@ write_landing_page() {
         echo "  <h1>Janssen API references (${RELEASE_TAG})</h1>"
         echo '  <ul>'
         local entry
-        for entry in "${entries[@]}"; do
+        for entry in ${entries[@]+"${entries[@]}"}; do
             echo "    <li><a href=\"${entry%%|*}\">${entry#*|}</a></li>"
         done
         echo '  </ul>'
+        if [ ${#modules[@]} -gt 0 ]; then
+            echo '  <h2>Java modules</h2>'
+            echo '  <ul>'
+            while IFS= read -r page; do
+                echo "    <li><a href=\"${page}\">${page%/index.html}</a></li>"
+            done < <(printf '%s\n' "${modules[@]}" | LC_ALL=C sort)
+            echo '  </ul>'
+        fi
         echo '</body>'
         echo '</html>'
     } > index.html
