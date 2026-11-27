@@ -42,6 +42,12 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
+// Linked only to turn on the `js`/`wasm_js` backend of the `getrandom`
+// versions that dependencies pull in; no code calls them directly.
+#[cfg(target_arch = "wasm32")]
+use getrandom_02 as _;
+#[cfg(target_arch = "wasm32")]
+use getrandom_03 as _;
 use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 
