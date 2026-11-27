@@ -20,7 +20,7 @@ use crate::{
     http::HttpClient,
     jwt::{
         IssuerConfig, TokenCache,
-        decode::{DecodeJwtError, decode_jwt},
+        decode::decode_jwt,
         key_service::{DecodingKeyInfo, KeyService},
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
@@ -31,9 +31,9 @@ use crate::{
 };
 
 use super::{
-    CachedStatusList, IdxOutOfBounds, StatusAtError, StatusCheckError, StatusListExpiry,
-    StatusListJwt, StatusListJwtStr, StatusListState, UnavailableStatusList, UnboundReason,
-    UnixTime, UpdateStatusListError,
+    CachedStatusList, IdxOutOfBounds, ParseStatusListJwtError, StatusAtError, StatusCheckError,
+    StatusListExpiry, StatusListJwt, StatusListJwtStr, StatusListState, UnavailableStatusList,
+    UnboundReason, UnixTime, UpdateStatusListError,
 };
 
 struct StatusListUpdateCtx {
@@ -140,35 +140,25 @@ fn parse_status_list_jwt(
     iss: &IssClaim,
     status_list_url: &Url,
     now: u64,
-) -> Result<ParsedStatusList, UpdateStatusListError> {
+) -> Result<ParsedStatusList, ParseStatusListJwtError> {
     let validated_jwt = validator.validate_jwt(&jwt.0, decoding_key)?;
 
     let typ = jsonwebtoken::decode_header(&jwt.0)
         .map_err(ValidateJwtError::from)?
         .typ;
     if !typ.as_deref().is_some_and(is_status_list_typ) {
-        return Err(UpdateStatusListError::UnexpectedTyp {
-            url: status_list_url.to_string(),
-            found: typ,
-        });
+        return Err(ParseStatusListJwtError::UnexpectedTyp { found: typ });
     }
 
     let status_list_jwt: StatusListJwt = validated_jwt
         .try_into()
-        .map_err(DecodeJwtError::DeserializeClaims)?;
-    check_bound_to(&status_list_jwt, iss, status_list_url).map_err(|reason| {
-        UpdateStatusListError::UnboundStatusList {
-            url: status_list_url.to_string(),
-            reason,
-        }
-    })?;
+        .map_err(ParseStatusListJwtError::DeserializeClaims)?;
+    check_bound_to(&status_list_jwt, iss, status_list_url)
+        .map_err(ParseStatusListJwtError::Unbound)?;
     let ttl_secs = status_list_jwt.ttl;
     let list = status_list_jwt.into_cached(validator.leeway_secs())?;
     if let Some(expiry) = list.expiry().filter(|expiry| expiry.has_passed(now)) {
-        return Err(UpdateStatusListError::Expired {
-            url: status_list_url.to_string(),
-            expiry,
-        });
+        return Err(ParseStatusListJwtError::Expired(expiry));
     }
     Ok(ParsedStatusList { list, ttl_secs })
 }
@@ -566,6 +556,10 @@ impl StatusListSource {
             &self.url,
             jsonwebtoken::get_current_timestamp(),
         )
+        .map_err(|reason| UpdateStatusListError::Refused {
+            url: self.url.to_string(),
+            reason,
+        })
     }
 }
 

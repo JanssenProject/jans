@@ -86,8 +86,11 @@ pub enum StatusCheckError {
     },
 }
 
+/// Why a status list could not be fetched or used.
 #[derive(Debug, Error)]
 pub(crate) enum UpdateStatusListError {
+    #[error("failed to get status list JWT: {0}")]
+    GetStatusListJwt(#[source] HttpError),
     #[error("failed to decode the status list JWT: {0}")]
     DecodeStatusListJwt(#[from] DecodeJwtError),
     #[error(
@@ -95,23 +98,39 @@ pub(crate) enum UpdateStatusListError {
          CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED"
     )]
     UnsupportedAlgorithm { url: String, alg: Algorithm },
-    #[error("failed to validate statuslist JWT: {0}")]
-    ValidateJwtError(#[from] ValidateJwtError),
-    #[error("failed to parse status list: {0}")]
-    ParseStatusList(#[from] ParseStatusListError),
-    #[error("failed to get status list JWT: {0}")]
-    GetStatusListJwt(#[source] HttpError),
-    #[error(
-        "the status list JWT from '{url}' is not bound to that endpoint and its issuer: {reason}"
-    )]
-    UnboundStatusList { url: String, reason: UnboundReason },
-    #[error("the status list JWT from '{url}' has `typ` {found:?}, expected `statuslist+jwt`")]
-    UnexpectedTyp { url: String, found: Option<String> },
-    #[error("the status list JWT from '{url}' is past its {expiry}")]
-    Expired {
+    #[error("the status list JWT from '{url}' is refused: {reason}")]
+    Refused {
         url: String,
-        expiry: StatusListExpiry,
+        #[source]
+        reason: ParseStatusListJwtError,
     },
+}
+
+/// Why a fetched status list JWT fails the checks of
+/// [draft-ietf-oauth-status-list-21 §8.3] steps 3 and 4.
+///
+/// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+#[derive(Debug, Error)]
+pub(crate) enum ParseStatusListJwtError {
+    #[error(transparent)]
+    Validate(#[from] ValidateJwtError),
+    #[error("{}, expected `statuslist+jwt`", describe_typ(.found.as_deref()))]
+    UnexpectedTyp { found: Option<String> },
+    #[error("its claims are not those of a status list JWT: {0}")]
+    DeserializeClaims(#[source] serde_json::Error),
+    #[error("it is not bound to that endpoint and its issuer: {0}")]
+    Unbound(UnboundReason),
+    #[error("its status list cannot be read: {0}")]
+    ParseList(#[from] ParseStatusListError),
+    #[error("it is past its {0}")]
+    Expired(StatusListExpiry),
+}
+
+fn describe_typ(found: Option<&str>) -> String {
+    match found {
+        Some(typ) => format!("its `typ` is '{typ}'"),
+        None => "it has no `typ`".to_owned(),
+    }
 }
 
 /// Which claim ties a status list JWT to another list or issuer.

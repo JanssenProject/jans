@@ -22,8 +22,8 @@ use serde_json::json;
 use tokio_util::sync::{CancellationToken, DropGuard};
 
 use super::{
-    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListRegistry, UnboundReason,
-    UpdateStatusListError,
+    InitForIssArgs, JwtStatus, ParseStatusListJwtError, StatusBitSize, StatusCheckError,
+    StatusListRegistry, UnboundReason, UpdateStatusListError,
 };
 use crate::JwtConfig;
 use crate::common::policy_store::token_types::EntityTypeName;
@@ -88,6 +88,14 @@ fn unavailable_cause(err: &ValidateJwtError) -> Option<&UpdateStatusListError> {
         ValidateJwtError::Status(StatusCheckError::Unavailable { unavailable, .. }) => {
             Some(unavailable.cause())
         },
+        _ => None,
+    }
+}
+
+/// Why the status list at `uri` was refused, when `err` says it was.
+fn refusal_reason<'a>(err: &'a ValidateJwtError, uri: &str) -> Option<&'a ParseStatusListJwtError> {
+    match unavailable_cause(err) {
+        Some(UpdateStatusListError::Refused { url, reason }) if url == uri => Some(reason),
         _ => None,
     }
 }
@@ -440,8 +448,8 @@ async fn rejects_list_with_wrong_typ() {
     );
     assert!(
         matches!(
-            unavailable_cause(&err),
-            Some(UpdateStatusListError::UnexpectedTyp { found, .. })
+            refusal_reason(&err, &case.list_uri()),
+            Some(ParseStatusListJwtError::UnexpectedTyp { found })
                 if found.as_deref() == Some("JWT")
         ),
         "a status list JWT with the wrong `typ` must be refused, got: {err:?}"
@@ -467,10 +475,19 @@ async fn rejects_list_without_typ() {
     );
     assert!(
         matches!(
-            unavailable_cause(&err),
-            Some(UpdateStatusListError::UnexpectedTyp { found: None, .. })
+            refusal_reason(&err, &case.list_uri()),
+            Some(ParseStatusListJwtError::UnexpectedTyp { found: None })
         ),
         "a status list JWT without `typ` must be refused, got: {err:?}"
+    );
+    assert_eq!(
+        unavailable_cause(&err).map(ToString::to_string),
+        Some(format!(
+            "the status list JWT from '{}' is refused: it has no `typ`, expected \
+             `statuslist+jwt`",
+            case.list_uri()
+        )),
+        "the admin must see which list was refused and why"
     );
 }
 
@@ -494,8 +511,8 @@ async fn rejects_list_without_iat() {
         .expect_err("a list without `iat` is refused, so the token that references it is rejected");
     assert!(
         matches!(
-            unavailable_cause(&err),
-            Some(UpdateStatusListError::ValidateJwtError(
+            refusal_reason(&err, &case.list_uri()),
+            Some(ParseStatusListJwtError::Validate(
                 ValidateJwtError::MissingClaims(claims)
             )) if claims == &["iat"]
         ),
@@ -566,11 +583,9 @@ async fn rejects_list_from_another_iss() {
     );
     assert!(
         matches!(
-            unavailable_cause(&err),
-            Some(UpdateStatusListError::UnboundStatusList {
-                reason: UnboundReason::Iss { found },
-                ..
-            }) if found.as_str() == other
+            refusal_reason(&err, &case.list_uri()),
+            Some(ParseStatusListJwtError::Unbound(UnboundReason::Iss { found }))
+                if found.as_str() == other
         ),
         "a status list JWT with another `iss` must be refused, naming that `iss`, got: {err:?}"
     );
@@ -595,15 +610,16 @@ async fn rejects_list_expired_at_fetch() {
         "a list whose `exp` passed beyond the leeway is refused, so the token that \
          references it is rejected",
     );
-    let refusal = unavailable_cause(&err);
     assert!(
         matches!(
-            refusal,
-            Some(UpdateStatusListError::Expired { url, .. }) if *url == case.list_uri()
+            refusal_reason(&err, &case.list_uri()),
+            Some(ParseStatusListJwtError::Expired(_))
         ),
         "an expired status list JWT must be refused, naming the list, got: {err:?}"
     );
-    let message = refusal.map(ToString::to_string).unwrap_or_default();
+    let message = unavailable_cause(&err)
+        .map(ToString::to_string)
+        .unwrap_or_default();
     assert!(
         message.contains("is past its `exp` ") && message.contains(" of clock-skew leeway"),
         "the admin must see the `exp` date and the leeway, got: {message}"
