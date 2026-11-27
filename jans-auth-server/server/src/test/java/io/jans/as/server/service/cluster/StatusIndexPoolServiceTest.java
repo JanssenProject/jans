@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -36,6 +37,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -70,6 +72,8 @@ public class StatusIndexPoolServiceTest {
     @Mock
     private PersistenceEntryManager entryManager;
 
+    private long claimConfirmDelay;
+
     @BeforeMethod
     public void setUp() {
         BaseDnConfiguration baseDn = new BaseDnConfiguration();
@@ -80,6 +84,69 @@ public class StatusIndexPoolServiceTest {
         lenient().when(appConfiguration.getIdTokenLifetime()).thenReturn(3600);
         lenient().when(appConfiguration.getLogoutStatusJwtLifetime()).thenReturn(86400);
         service.init();
+        claimConfirmDelay = AbstractStatusIndexPoolService.CLAIM_CONFIRM_DELAY;
+        AbstractStatusIndexPoolService.CLAIM_CONFIRM_DELAY = 0;
+    }
+
+    @AfterMethod
+    public void tearDown() {
+        AbstractStatusIndexPoolService.CLAIM_CONFIRM_DELAY = claimConfirmDelay;
+    }
+
+    @Test
+    public void extendExpiration_whenConcurrentWriterLowersExpiration_shouldWriteAgain() {
+        Date current = new Date(System.currentTimeMillis() + HOUR);
+        Date target = new Date(System.currentTimeMillis() + 24 * HOUR);
+        Date lowered = new Date(System.currentTimeMillis() + 2 * HOUR);
+        StatusIndexPoolExpiration first = expiration(current);
+        StatusIndexPoolExpiration reloadedLowered = expiration(lowered);
+        StatusIndexPoolExpiration second = expiration(lowered);
+        StatusIndexPoolExpiration reloadedTarget = expiration(target);
+        when(entryManager.find(eq(StatusIndexPoolExpiration.class), anyString())).thenReturn(first, reloadedLowered, second, reloadedTarget);
+
+        Date result = service.extendExpiration(service.createDn(0), target);
+
+        assertEquals(result, target);
+        verify(entryManager, times(2)).merge(any(StatusIndexPoolExpiration.class));
+    }
+
+    @Test
+    public void extendExpiration_whenExpirationIsLoweredOnEveryAttempt_shouldReturnStoredValue() {
+        Date target = new Date(System.currentTimeMillis() + 24 * HOUR);
+        Date lowered = new Date(System.currentTimeMillis() + HOUR);
+        String dn = service.createDn(0);
+        when(entryManager.find(eq(StatusIndexPoolExpiration.class), anyString())).thenAnswer(invocation -> {
+            StatusIndexPoolExpiration entry = new StatusIndexPoolExpiration();
+            entry.setDn(dn);
+            entry.setExpirationDate(lowered);
+            return entry;
+        });
+
+        Date result = service.extendExpiration(service.createDn(0), target);
+
+        assertEquals(result, lowered);
+        verify(entryManager, times(AbstractStatusIndexPoolService.ATTEMPT_LIMIT)).merge(any(StatusIndexPoolExpiration.class));
+    }
+
+    @Test
+    public void allocate_whenClaimIsOverwrittenDuringConfirmation_shouldNotReuseIt() throws Exception {
+        StatusIndexPool queried = pool(0, new Date(System.currentTimeMillis() - 25 * HOUR));
+        StatusIndexPool reloaded = pool(0, new Date(System.currentTimeMillis() - 25 * HOUR));
+        StatusIndexPool locked = pool(0, new Date(System.currentTimeMillis() + 600 * 1000L));
+        locked.setLockKey(LOCK_KEY);
+        locked.setNodeId(NODE_ID);
+        StatusIndexPool takenOver = pool(0, new Date(System.currentTimeMillis() + 600 * 1000L));
+        takenOver.setLockKey("another-node-lock-key");
+        takenOver.setNodeId(3);
+        when(entryManager.findEntries(eq(BASE_DN), eq(StatusIndexPool.class), any(Filter.class)))
+                .thenReturn(new ArrayList<>(Collections.singletonList(queried)));
+        when(entryManager.find(StatusIndexPool.class, queried.getDn())).thenReturn(reloaded, locked, takenOver);
+        mockNewPoolCreation(1);
+
+        StatusIndexPool allocated = service.allocate(NODE_ID);
+
+        assertEquals(allocated.getId(), Integer.valueOf(1));
+        verify(service, never()).markAllIndexesAsValid(anyList());
     }
 
     @Test

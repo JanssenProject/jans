@@ -39,6 +39,7 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
     public static long DELAY_AFTER_EXPIRATION = 3 * 60 * 60 * 1000L; // 3 hours
     public static long LOCK_WAIT_BEFORE_UPDATE = 3 * 1000L; // 30 seconds
     public static long DELAY_IF_LOCKED = 500; // 50 milliseconds
+    public static long CLAIM_CONFIRM_DELAY = 200; // milliseconds
 
     @Inject
     private Logger log;
@@ -257,8 +258,10 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
                 // Load pool after update
                 T lockedPool = getPoolByDn(pool.getDn());
 
-                // If lock is ours reset entry and return it
-                if (isLockedByNode(lockedPool, nodeId)) {
+                // If lock is ours and still ours after a pause (another node that read the pool before our
+                // write may overwrite the lock right after it), reset entry and return it
+                if (isLockedByNode(lockedPool, nodeId) && isClaimConfirmed(pool.getDn(), nodeId)) {
+                    lockedPool = getPoolByDn(pool.getDn());
                     log.debug("{} Re-using existing status index pool {}, node {}, LOCK_KEY {}", logPrefix, lockedPool.getId(), nodeId, LOCK_KEY);
 
                     markAllIndexesAsValid(lockedPool.enumerateAllIndexes());
@@ -332,6 +335,18 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
 
         // This should not happens
         throw new EntryPersistenceException(String.format("%s Failed to allocate StatusIndexPool for node %s!!!", logPrefix, nodeId));
+    }
+
+    private boolean isClaimConfirmed(String poolDn, int nodeId) {
+        if (CLAIM_CONFIRM_DELAY > 0) {
+            try {
+                Thread.sleep(CLAIM_CONFIRM_DELAY);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        return isLockedByNode(getPoolByDn(poolDn), nodeId);
     }
 
     private static boolean isLockedByNode(AbstractIndexPool pool, int nodeId) {

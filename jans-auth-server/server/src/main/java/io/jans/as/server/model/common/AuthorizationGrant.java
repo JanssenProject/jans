@@ -328,7 +328,11 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 accessToken.setCode(accessTokenCode);
             }
 
-            statusListIndexService.registerTokenExpiration(statusListIndex, accessToken.getExpirationDate());
+            Date accessTokenExpiration = accessToken.getExpirationDate();
+            if (jwtSigner != null) {
+                accessTokenExpiration = StatusListIndexService.latest(accessTokenExpiration,jwtSigner.getJwt().getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+            }
+            statusListIndexService.registerTokenExpiration(statusListIndex, accessTokenExpiration);
 
             final TokenEntity tokenEntity = asToken(accessToken);
             tokenEntity.getAttributes().getAttributes().putAll(context.getAttributes());

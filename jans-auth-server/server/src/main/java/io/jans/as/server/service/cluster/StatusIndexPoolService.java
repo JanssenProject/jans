@@ -68,23 +68,39 @@ public class StatusIndexPoolService extends AbstractStatusIndexPoolService<Statu
         return max;
     }
 
+    /**
+     * Calls are serialized within this node, and each write is verified by reading the stored value back. If a
+     * concurrent writer stored a lower value, the write is repeated, so a raised expiration is not lost.
+     */
     @Override
-    public Date extendExpiration(String poolDn, Date expirationDate) {
-        final StatusIndexPoolExpiration entry = entryManager.find(StatusIndexPoolExpiration.class, poolDn);
-        if (entry == null) {
-            return null;
+    public synchronized Date extendExpiration(String poolDn, Date expirationDate) {
+        Date stored = null;
+        for (int attempt = 1; attempt <= ATTEMPT_LIMIT; attempt++) {
+            final StatusIndexPoolExpiration entry = entryManager.find(StatusIndexPoolExpiration.class, poolDn);
+            if (entry == null) {
+                return null;
+            }
+
+            final Date current = entry.getExpirationDate();
+            if (current != null && !current.before(expirationDate)) {
+                return current;
+            }
+
+            entry.setExpirationDate(expirationDate);
+            entry.setLastUpdate(new Date());
+            entryManager.merge(entry);
+
+            final StatusIndexPoolExpiration reloaded = entryManager.find(StatusIndexPoolExpiration.class, poolDn);
+            stored = reloaded != null ? reloaded.getExpirationDate() : null;
+            if (stored != null && !stored.before(expirationDate)) {
+                log.debug("{} Extended expiration of status index pool {} from {} to {}, attempt {}", logPrefix(), poolDn, current, stored, attempt);
+                return stored;
+            }
+            log.debug("{} Expiration of status index pool {} was lowered concurrently to {}, attempt {}", logPrefix(), poolDn, stored, attempt);
         }
 
-        final Date current = entry.getExpirationDate();
-        if (current != null && !current.before(expirationDate)) {
-            return current;
-        }
-
-        entry.setExpirationDate(expirationDate);
-        entry.setLastUpdate(new Date());
-        entryManager.merge(entry);
-        log.debug("{} Extended expiration of status index pool {} from {} to {}", logPrefix(), poolDn, current, expirationDate);
-        return expirationDate;
+        log.error("{} Unable to extend expiration of status index pool {} to {}", logPrefix(), poolDn, expirationDate);
+        return stored;
     }
 
     @Override

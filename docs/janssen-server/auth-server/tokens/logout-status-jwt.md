@@ -101,7 +101,13 @@ A pool is handed out again (and all its indexes are reset to `VALID`) only when 
   (`accessTokenLifetime`, `idTokenLifetime`, `logoutStatusJwtLifetime`) but not less than 3 hours after its expiration.
 
 This guarantees that a revoked token keeps `INVALID` status until it expires,
-even if its lifetime is overridden by client configuration or custom script.
+even if its lifetime (or its `exp` claim) is overridden by client configuration or custom script.
+Token issuance is not delayed by this: the pool expiration is updated asynchronously and the update is retried on failure.
+
+The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
+Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above.
+If such a token has a longer lifetime overridden by client configuration or custom script,
+its index can be reused before it expires, until that token expires.
 
 
 ## Disabling Logout Status JWT Using Feature Flag
