@@ -164,10 +164,9 @@ impl JwtValidator {
     /// Validates JWT by checking:
     /// - The JWT's Signature
     /// - If the claims are valid (e.g. the JWT isn't expired)
-    /// - If the status of the JWT isn't [`invalid`] or [`suspended`].
+    /// - If the status of the JWT, when it has one, is [`valid`].
     ///
-    /// [`invalid`]: JwtStatus::Invalid
-    /// [`suspended`]: JwtStatus::Suspended
+    /// [`valid`]: JwtStatus::Valid
     pub(crate) fn validate_jwt(
         &self,
         jwt: &str,
@@ -357,7 +356,7 @@ pub enum ValidateJwtError {
     MissingClaims(Vec<String>),
     #[error("failed to get the status for the JWT: {0}")]
     GetJwtStatus(#[from] JwtStatusError),
-    #[error("the token is rejected because it's status is: {0}")]
+    #[error("the token is rejected because its status list entry is {0}")]
     RejectJwtStatus(JwtStatus),
     #[error("there isn't a status list available for the token")]
     MissingStatusList,

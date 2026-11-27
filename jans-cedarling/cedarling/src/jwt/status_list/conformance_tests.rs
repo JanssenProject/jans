@@ -281,7 +281,9 @@ async fn rejects_application_specific_status_0x03() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Custom(0x03)))
+            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(
+                JwtStatus::ApplicationSpecific(0x03)
+            ))
         ),
         "an application-specific status must reject the token, got: {err:?}"
     );
@@ -307,7 +309,9 @@ async fn rejects_application_specific_status_0x0c() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Custom(0x0C)))
+            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(
+                JwtStatus::ApplicationSpecific(0x0C)
+            ))
         ),
         "an application-specific status must reject the token, got: {err:?}"
     );
@@ -333,7 +337,9 @@ async fn rejects_reserved_status_0x05() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Custom(0x05)))
+            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Reserved(
+                0x05
+            )))
         ),
         "a reserved status must reject the token, got: {err:?}"
     );
@@ -359,7 +365,9 @@ async fn rejects_reserved_status_0xff() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Custom(0xFF)))
+            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Reserved(
+                0xFF
+            )))
         ),
         "a reserved status must reject the token, got: {err:?}"
     );

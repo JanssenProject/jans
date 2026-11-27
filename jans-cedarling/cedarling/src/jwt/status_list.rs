@@ -192,36 +192,54 @@ fn get_status_from_byte(
     }
 }
 
-/// See: <https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-10.html#name-status-types>
+/// A status value from a status list, as [draft-ietf-oauth-status-list-21 §7.1]
+/// defines them.
+///
+/// [draft-ietf-oauth-status-list-21 §7.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-7.1
 #[derive(Debug, PartialEq)]
 pub enum JwtStatus {
+    /// `0x00`
     Valid,
+    /// `0x01`: the token is revoked.
     Invalid,
+    /// `0x02`: the token is temporarily invalid.
     Suspended,
-    /// Status Type values in the range 0x0B until 0x0F are permanently reserved as
-    /// application specific.
-    ///
-    /// For Cedarling's, use-case we simply ignore these.
-    Custom(u8),
+    /// `0x03` or `0x0C` to `0x0F`, whose processing the draft leaves to each
+    /// application. Cedarling gives them no meaning, so it can make no statement
+    /// about the token.
+    ApplicationSpecific(u8),
+    /// Any other value, which the draft reserves for future registration.
+    Reserved(u8),
 }
 
 impl JwtStatus {
-    /// Helper function to figure out if the JWT is stull valid based on it's status
+    /// Only `VALID` lets the token through: for any other value, including one
+    /// Cedarling does not know, no statement about the token can be made and it
+    /// is rejected ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
     pub fn is_valid(&self) -> bool {
-        match self {
-            JwtStatus::Valid | JwtStatus::Custom(_) => true,
-            JwtStatus::Invalid | JwtStatus::Suspended => false,
-        }
+        matches!(self, JwtStatus::Valid)
     }
 }
 
 impl Display for JwtStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            JwtStatus::Valid => write!(f, "valid"),
-            JwtStatus::Invalid => write!(f, "invalid"),
-            JwtStatus::Suspended => write!(f, "suspended"),
-            JwtStatus::Custom(status) => write!(f, "custom ({status})"),
+            JwtStatus::Valid => write!(f, "VALID (0x00)"),
+            JwtStatus::Invalid => write!(f, "INVALID (0x01): the token is revoked"),
+            JwtStatus::Suspended => {
+                write!(f, "SUSPENDED (0x02): the token is temporarily invalid")
+            },
+            JwtStatus::ApplicationSpecific(status) => write!(
+                f,
+                "{status:#04x}, an application-specific status that Cedarling does not support"
+            ),
+            JwtStatus::Reserved(status) => write!(
+                f,
+                "{status:#04x}, a value the status list specification reserves for future \
+                 registration"
+            ),
         }
     }
 }
@@ -229,10 +247,11 @@ impl Display for JwtStatus {
 impl From<u8> for JwtStatus {
     fn from(value: u8) -> Self {
         match value {
-            0 => Self::Valid,
-            1 => Self::Invalid,
-            2 => Self::Suspended,
-            _ => Self::Custom(value),
+            0x00 => Self::Valid,
+            0x01 => Self::Invalid,
+            0x02 => Self::Suspended,
+            0x03 | 0x0C..=0x0F => Self::ApplicationSpecific(value),
+            _ => Self::Reserved(value),
         }
     }
 }
@@ -281,6 +300,51 @@ mod test {
     use crate::jwt::test_utils::MockServer;
     use jsonwebtoken::{Algorithm, Validation, decode};
     use test_utils::assert_eq;
+
+    /// The status value ranges of [draft-ietf-oauth-status-list-21 §7.1], checked
+    /// at each boundary.
+    ///
+    /// [draft-ietf-oauth-status-list-21 §7.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-7.1
+    #[test]
+    fn status_values_follow_draft_21_ranges() {
+        let cases = [
+            (0x00, JwtStatus::Valid),
+            (0x01, JwtStatus::Invalid),
+            (0x02, JwtStatus::Suspended),
+            (0x03, JwtStatus::ApplicationSpecific(0x03)),
+            (0x04, JwtStatus::Reserved(0x04)),
+            (0x0B, JwtStatus::Reserved(0x0B)),
+            (0x0C, JwtStatus::ApplicationSpecific(0x0C)),
+            (0x0F, JwtStatus::ApplicationSpecific(0x0F)),
+            (0x10, JwtStatus::Reserved(0x10)),
+            (0xFF, JwtStatus::Reserved(0xFF)),
+        ];
+        for (value, expected) in cases {
+            assert_eq!(
+                JwtStatus::from(value),
+                expected,
+                "status value {value:#04x} is classified by draft-21 section 7.1"
+            );
+        }
+    }
+
+    /// Only `VALID` lets a token through; any other value gives no statement
+    /// about the token, which is then rejected ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    #[test]
+    fn only_valid_status_is_valid() {
+        assert!(
+            JwtStatus::Valid.is_valid(),
+            "VALID must let the token through"
+        );
+        for value in 0x01..=0xFF {
+            assert!(
+                !JwtStatus::from(value).is_valid(),
+                "status value {value:#04x} must reject the token"
+            );
+        }
+    }
 
     #[test]
     fn test_status_list_decompression() {
