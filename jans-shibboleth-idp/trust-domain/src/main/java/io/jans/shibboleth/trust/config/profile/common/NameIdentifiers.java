@@ -25,9 +25,9 @@ public class NameIdentifiers {
     public static NameIdentifiers of(List<String> nameIds) {
 
         List<String> newNameIds = nameIds.stream()
-            .map( nameId -> { return nameId.trim(); } )
-            .filter( nameId -> { return !nameId.isBlank();} )
-            .collect(Collectors.toList());
+            .map( String::trim )
+            .filter( nameId -> !nameId.isBlank() )
+            .toList();
         
         return new NameIdentifiers(newNameIds);
     }
@@ -95,7 +95,7 @@ public class NameIdentifiers {
 
         List<String> remaining = this.nameIds.stream()
             .filter( n -> !toRemove.contains(n))
-            .collect(Collectors.toList());
+            .toList();
         
         return new NameIdentifiers(remaining);
     }

@@ -31,9 +31,9 @@ public final class InterceptorFlows {
         }
 
         List<String> newflows = flows.stream()
-            .map(flow -> { return flow.trim(); })
-            .filter( flow -> { return !flow.isBlank(); })
-            .collect(Collectors.toList());
+            .map(String::trim)
+            .filter( flow -> !flow.isBlank() )
+            .toList();
         
         return new InterceptorFlows(newflows);
     }
@@ -124,7 +124,7 @@ public final class InterceptorFlows {
 
         List<String> remaining = this.flows.stream()
             .filter(f -> !toRemove.contains(f))
-            .collect(Collectors.toList());
+            .toList();
         
         return new InterceptorFlows(remaining);
     }

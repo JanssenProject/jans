@@ -88,7 +88,24 @@ public record Saml2EcpProfileConfiguration(
         return new Builder(config);
     }
 
-    public static class Builder {
+    public static class Builder extends Steps<Builder> {
+
+        public Builder(Saml2EcpProfileConfiguration config) {
+
+            super(config);
+        }
+    }
+
+    /**
+     * Fluent assembly steps backing {@link Builder}.
+     *
+     * <p>This type deliberately lives as a private nested class so the type-safe fluent surface of the
+     * builder does not inflate the public contract of {@link Builder}, and so that each class stays small
+     * and specialized: {@link Builder} is a thin self-typed facade, while this class owns the state and
+     * the per-policy setter steps. Every step returns the concrete builder type {@code B} so chaining and
+     * assignments keep their original types.</p>
+     */
+    private static class Steps<B extends Steps<B>> {
 
         private final CommonConfigurationSupport.Builder common;
         private final SamlConfigurationSupport.Builder saml;
@@ -96,7 +113,7 @@ public record Saml2EcpProfileConfiguration(
         private final Saml2ConfigurationSupport.Builder saml2;
         private final Saml2SsoConfigurationSupport.Builder saml2Sso;
 
-        public Builder(Saml2EcpProfileConfiguration config) {
+        private Steps(Saml2EcpProfileConfiguration config) {
 
             common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
             saml  = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
@@ -105,118 +122,124 @@ public record Saml2EcpProfileConfiguration(
             saml2Sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport()) : Saml2SsoConfigurationSupport.builder();
         }
 
-        public Builder status(ProfileStatus status) {
+        @SuppressWarnings("unchecked")
+        protected B self() {
+
+            return (B) this;
+        }
+
+        public B status(ProfileStatus status) {
 
             common.status(status);
-            return this;
+            return self();
         }
 
-        public Builder inboundFlows(InterceptorFlows flows) {
+        public B inboundFlows(InterceptorFlows flows) {
 
             common.inboundFlows(flows);
-            return this;
+            return self();
         }
 
-        public Builder outboundFlows(InterceptorFlows flows) {
+        public B outboundFlows(InterceptorFlows flows) {
 
             common.outboundFlows(flows);
-            return this;
+            return self();
         }
 
-        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+        public B messageSigningPolicy(MessageSigningPolicy policy) {
 
             saml.messageSigningPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+        public B assertionSigningPolicy(AssertionSigningPolicy policy) {
 
             samlAssertion.assertionSigningPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
+        public B assertionTimeCondition(AssertionTimeCondition condition) {
 
             samlAssertion.assertionTimeCondition(condition);
-            return this;
+            return self();
         }
 
-        public Builder assertionLifetime(Duration lifetime) {
+        public B assertionLifetime(Duration lifetime) {
 
             samlAssertion.assertionLifetime(lifetime);
-            return this;
+            return self();
         }
 
-        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
+        public B requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
 
             saml2.requestSignatureValidationPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
+        public B encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
 
             saml2.encryptionFallbackPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
+        public B nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
 
             saml2.nameIdEncryptionPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
+        public B authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
 
             saml2Sso.authenticationResultReusePolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
+        public B assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
 
             saml2Sso.assertionEncryptionPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
+        public B attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
 
             saml2Sso.attributeEncryptionPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder maximumSPSessionLifetime(Duration lifetime) {
+        public B maximumSPSessionLifetime(Duration lifetime) {
 
             saml2Sso.maximumSPSessionLifetime(lifetime);
-            return this;
+            return self();
         }
 
-        public Builder endpointValidationPolicy(EndpointValidationPolicy policy) {
+        public B endpointValidationPolicy(EndpointValidationPolicy policy) {
 
             saml2Sso.endpointValidationPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder attributeStatementPolicy(AttributeStatementPolicy policy) {
+        public B attributeStatementPolicy(AttributeStatementPolicy policy) {
 
             saml2Sso.attributeStatementPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
+        public B friendlyNameRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
 
             saml2Sso.friendlyNameRandomizationPolicy(policy);
-            return this;
+            return self();
         }
 
-        public Builder nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
+        public B nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
 
             saml2Sso.nameIdFormatPrecedence(nameIdentifiers);
-            return this;
+            return self();
         }
 
-        public Builder requestSigningRequirement(RequestSigningRequirement requirement) {
+        public B requestSigningRequirement(RequestSigningRequirement requirement) {
 
             saml2Sso.requestSigningRequirement(requirement);
-            return this;
+            return self();
         }
 
         public Result<Saml2EcpProfileConfiguration> build() {
