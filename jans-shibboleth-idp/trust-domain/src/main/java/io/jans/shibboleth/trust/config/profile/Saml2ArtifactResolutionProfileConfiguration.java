@@ -1,18 +1,8 @@
 package io.jans.shibboleth.trust.config.profile;
 
-import io.jans.shibboleth.trust.config.profile.capabilities.AssertionEncryptionPolicyCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.AttributeEncryptionPolicyCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.Saml2ConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.SamlConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.common.AssertionEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.ProfileType;
-import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
-import io.jans.kernel.RequiredValueMissing;
+import io.jans.shibboleth.trust.config.profile.capabilities.*;
+import io.jans.shibboleth.trust.config.profile.common.*;
+import io.jans.shibboleth.trust.config.profile.support.*;
 import io.jans.kernel.Result;
 
 import java.util.Objects;
@@ -25,7 +15,7 @@ public record Saml2ArtifactResolutionProfileConfiguration(
     AssertionEncryptionPolicy assertionEncryptionPolicy,
     AttributeEncryptionPolicy attributeEncryptionPolicy)
     implements CommonConfigurationCapable, SamlConfigurationCapable, Saml2ConfigurationCapable,
-        AssertionEncryptionPolicyCapable, AttributeEncryptionPolicyCapable {
+        AssertionEncryptionPolicyCapable, AttributeEncryptionPolicyCapable, ProfileConfigurationAccess {
 
     public Saml2ArtifactResolutionProfileConfiguration {
 
@@ -70,48 +60,20 @@ public record Saml2ArtifactResolutionProfileConfiguration(
     }
 
     private static class Steps<B extends Steps<B>>
+        extends AbstractBuilderSteps<B>
         implements CommonBuilderSteps<B>, SamlBuilderSteps<B>, Saml2BuilderSteps<B> {
 
-        private final CommonConfigurationSupport.Builder common;
-        private final SamlConfigurationSupport.Builder saml;
-        private final Saml2ConfigurationSupport.Builder saml2;
         private AssertionSigningPolicy assertionSigningPolicy;
         private AssertionEncryptionPolicy assertionEncryptionPolicy;
         private AttributeEncryptionPolicy attributeEncryptionPolicy;
 
         private Steps(Saml2ArtifactResolutionProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
-            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
-            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport()) : Saml2ConfigurationSupport.builder();
+            super(config);
 
             assertionSigningPolicy = config != null ? config.assertionSigningPolicy : null;
             assertionEncryptionPolicy = config != null ? config.assertionEncryptionPolicy : null;
             attributeEncryptionPolicy = config != null ? config.attributeEncryptionPolicy : null;
-        }
-
-        @Override
-        public CommonConfigurationSupport.Builder commonBuilder() {
-
-            return common;
-        }
-
-        @Override
-        public SamlConfigurationSupport.Builder samlBuilder() {
-
-            return saml;
-        }
-
-        @Override
-        public Saml2ConfigurationSupport.Builder saml2Builder() {
-
-            return saml2;
-        }
-
-        @SuppressWarnings("unchecked")
-        protected B self() {
-
-            return (B) this;
         }
 
         public B assertionSigningPolicy(AssertionSigningPolicy policy) {
@@ -134,46 +96,21 @@ public record Saml2ArtifactResolutionProfileConfiguration(
 
         public Result<Saml2ArtifactResolutionProfileConfiguration> build() {
 
-            CommonConfigurationSupport commonValue;
-            SamlConfigurationSupport samlValue;
-            Saml2ConfigurationSupport saml2Value;
-
             try {
 
-                commonValue = Builders.require(common.build());
-                samlValue = Builders.require(saml.build());
-                saml2Value = Builders.require(saml2.build());
+                return Result.success(new Saml2ArtifactResolutionProfileConfiguration(
+                    Builders.require(commonBuilder().build()),
+                    Builders.require(samlBuilder().build()),
+                    Builders.require(saml2Builder().build()),
+                    Builders.require(assertionSigningPolicy, Saml2ArtifactResolutionProfileConfiguration.class, "assertionSigningPolicy"),
+                    Builders.require(assertionEncryptionPolicy, Saml2ArtifactResolutionProfileConfiguration.class, "assertionEncryptionPolicy"),
+                    Builders.require(attributeEncryptionPolicy, Saml2ArtifactResolutionProfileConfiguration.class, "attributeEncryptionPolicy")
+                ));
             }
             catch (Builders.Failure failure) {
 
                 return Result.failure(failure.error);
             }
-
-            if (assertionSigningPolicy == null) {
-
-                return Result.failure(
-                    RequiredValueMissing.forField(
-                        Saml2ArtifactResolutionProfileConfiguration.class, "assertionSigningPolicy"));
-            }
-
-            if (assertionEncryptionPolicy == null) {
-
-                return Result.failure(
-                    RequiredValueMissing.forField(
-                        Saml2ArtifactResolutionProfileConfiguration.class, "assertionEncryptionPolicy"));
-            }
-
-            if (attributeEncryptionPolicy == null) {
-
-                return Result.failure(
-                    RequiredValueMissing.forField(
-                        Saml2ArtifactResolutionProfileConfiguration.class, "attributeEncryptionPolicy"));
-            }
-
-            return Result.success(new Saml2ArtifactResolutionProfileConfiguration(
-                commonValue, samlValue, saml2Value,
-                assertionSigningPolicy, assertionEncryptionPolicy, attributeEncryptionPolicy)
-            );
         }
     }
 }

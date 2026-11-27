@@ -1,19 +1,8 @@
 package io.jans.shibboleth.trust.config.profile;
 
-import io.jans.shibboleth.trust.config.profile.capabilities.AuthenticationConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.Saml2ConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.Saml2SsoConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.SamlAssertionConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.capabilities.SamlConfigurationCapable;
-import io.jans.shibboleth.trust.config.profile.common.AuthenticationResultReusePolicy;
-import io.jans.shibboleth.trust.config.profile.common.ProfileType;
-import io.jans.shibboleth.trust.config.profile.support.AuthenticationConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.Saml2SsoConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
-import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
+import io.jans.shibboleth.trust.config.profile.capabilities.*;
+import io.jans.shibboleth.trust.config.profile.common.*;
+import io.jans.shibboleth.trust.config.profile.support.*;
 import io.jans.kernel.Result;
 
 import java.util.Objects;
@@ -26,7 +15,8 @@ public record Saml2SsoProfileConfiguration(
     SamlAssertionConfigurationSupport samlAssertionConfigurationSupport,
     Saml2SsoConfigurationSupport saml2SsoConfigurationSupport)
     implements CommonConfigurationCapable, AuthenticationConfigurationCapable, SamlConfigurationCapable,
-        SamlAssertionConfigurationCapable, Saml2ConfigurationCapable, Saml2SsoConfigurationCapable {
+        SamlAssertionConfigurationCapable, Saml2ConfigurationCapable, Saml2SsoConfigurationCapable,
+        ProfileConfigurationAccess {
 
     public Saml2SsoProfileConfiguration {
 
@@ -72,73 +62,20 @@ public record Saml2SsoProfileConfiguration(
     }
 
     private static class Steps<B extends Steps<B>>
+        extends AbstractBuilderSteps<B>
         implements CommonBuilderSteps<B>, AuthenticationBuilderSteps<B>, SamlBuilderSteps<B>,
         Saml2BuilderSteps<B>, SamlAssertionBuilderSteps<B>, Saml2SsoBuilderSteps<B> {
 
-        private final CommonConfigurationSupport.Builder common;
-        private final AuthenticationConfigurationSupport.Builder auth;
-        private final SamlConfigurationSupport.Builder saml;
-        private final Saml2ConfigurationSupport.Builder saml2;
-        private final SamlAssertionConfigurationSupport.Builder samlAssertion;
-        private final Saml2SsoConfigurationSupport.Builder saml2sso;
-
         private Steps(Saml2SsoProfileConfiguration config) {
 
-            common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
-            auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport()) : AuthenticationConfigurationSupport.builder();
-            saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
-            saml2 = config != null ? Saml2ConfigurationSupport.from(config.saml2ConfigurationSupport()) : Saml2ConfigurationSupport.builder();
-            samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport()) : SamlAssertionConfigurationSupport.builder();
-            saml2sso = config != null ? Saml2SsoConfigurationSupport.from(config.saml2SsoConfigurationSupport()) : Saml2SsoConfigurationSupport.builder();
-        }
-
-        @Override
-        public CommonConfigurationSupport.Builder commonBuilder() {
-
-            return common;
-        }
-
-        @Override
-        public AuthenticationConfigurationSupport.Builder authenticationBuilder() {
-
-            return auth;
-        }
-
-        @Override
-        public SamlConfigurationSupport.Builder samlBuilder() {
-
-            return saml;
-        }
-
-        @Override
-        public Saml2ConfigurationSupport.Builder saml2Builder() {
-
-            return saml2;
-        }
-
-        @Override
-        public SamlAssertionConfigurationSupport.Builder samlAssertionBuilder() {
-
-            return samlAssertion;
-        }
-
-        @Override
-        public Saml2SsoConfigurationSupport.Builder saml2SsoBuilder() {
-
-            return saml2sso;
-        }
-
-        @SuppressWarnings("unchecked")
-        protected B self() {
-
-            return (B) this;
+            super(config);
         }
 
         @Override
         public B authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
 
-            auth.authenticationResultReusePolicy(policy);
-            saml2sso.authenticationResultReusePolicy(policy);
+            authenticationBuilder().authenticationResultReusePolicy(policy);
+            saml2SsoBuilder().authenticationResultReusePolicy(policy);
 
             return self();
         }
@@ -148,12 +85,12 @@ public record Saml2SsoProfileConfiguration(
             try {
 
                 return Result.success(new Saml2SsoProfileConfiguration(
-                    Builders.require(common.build()),
-                    Builders.require(auth.build()),
-                    Builders.require(saml.build()),
-                    Builders.require(saml2.build()),
-                    Builders.require(samlAssertion.build()),
-                    Builders.require(saml2sso.build())
+                    Builders.require(commonBuilder().build()),
+                    Builders.require(authenticationBuilder().build()),
+                    Builders.require(samlBuilder().build()),
+                    Builders.require(saml2Builder().build()),
+                    Builders.require(samlAssertionBuilder().build()),
+                    Builders.require(saml2SsoBuilder().build())
                 ));
             }
             catch (Builders.Failure failure) {
