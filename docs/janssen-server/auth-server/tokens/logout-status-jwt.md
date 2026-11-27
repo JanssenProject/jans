@@ -102,12 +102,20 @@ A pool is handed out again (and all its indexes are reset to `VALID`) only when 
 
 This guarantees that a revoked token keeps `INVALID` status until it expires,
 even if its lifetime (or its `exp` claim) is overridden by client configuration or custom script.
-Token issuance is not delayed by this: the pool expiration is updated asynchronously and the update is retried on failure.
+Token issuance is not delayed by this: the pool expiration is updated asynchronously.
+If the update fails, AS retries it up to 6 attempts in total, with a delay that doubles after each attempt
+(1, 2, 4, 8 and 16 seconds). Pending retries are kept in memory only.
 
-The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
-Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above.
-If such a token has a longer lifetime overridden by client configuration or custom script,
-its index can be reused before it expires, until that token expires.
+The guarantee has these exceptions:
+
+- If all attempts fail (for example, persistence is unavailable for longer than about 30 seconds) or the AS node
+  restarts before the update succeeds, the pool expiration is not extended for that token.
+  The token is still issued. If its lifetime is longer than the globally configured lifetimes listed above,
+  its index can be reused before it expires. AS logs an error when it gives up.
+- The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
+  Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above.
+  If such a token has a longer lifetime overridden by client configuration or custom script,
+  its index can be reused before it expires, until that token expires.
 
 
 ## Disabling Logout Status JWT Using Feature Flag
