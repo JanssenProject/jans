@@ -486,11 +486,11 @@ public class SsaRestWebServiceValidatorTest {
         ssaCreateRequest.setOneTimeUse(true);
         ssaCreateRequest.setRotateSsa(true);
         WebApplicationException webApplicationException = new WebApplicationException("Test exception");
-        when(errorResponseFactory.createBadRequestException(any(), anyString())).thenThrow(webApplicationException);
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenThrow(webApplicationException);
 
         WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.validateSsaCreateRequest(ssaCreateRequest));
         assertNotNull(ex);
-        verify(errorResponseFactory).createBadRequestException(eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true"));
+        verify(errorResponseFactory).createWebApplicationException(eq(Response.Status.BAD_REQUEST), eq(SsaErrorResponseType.INVALID_SSA_METADATA), eq("Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true"));
     }
 
     private static TokenEntity tokenEntityWithAttributes(java.util.Map<String, String> attributes) {

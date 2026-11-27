@@ -13,7 +13,7 @@ fn main() {
     let package_name = env::var("CARGO_PKG_NAME").unwrap();
     let output_file = target_dir()
         .join("include")
-        .join(format!("{}.h", package_name));
+        .join(format!("{package_name}.h"));
 
     std::fs::create_dir_all(output_file.parent().unwrap()).unwrap();
 

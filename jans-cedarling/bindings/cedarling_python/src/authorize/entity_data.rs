@@ -33,6 +33,10 @@ use serde_pyobject::from_pyobject;
 ///     Initialize a new EntityData from a dictionary.
 ///     The dictionary should contain a `cedar_entity_mapping` field with `entity_type` and `id` subfields.
 #[derive(Clone, serde::Deserialize)]
+#[allow(
+    clippy::unsafe_derive_deserialize,
+    reason = "the only `unsafe` is in code that `pyclass` generates"
+)]
 #[pyclass(from_py_object)]
 pub struct EntityData {
     /// Cedar entity mapping info
@@ -46,6 +50,10 @@ pub struct EntityData {
 
 /// Cedar entity mapping information
 #[derive(Clone, serde::Deserialize)]
+#[allow(
+    clippy::unsafe_derive_deserialize,
+    reason = "the only `unsafe` is in code that `pyclass` generates"
+)]
 #[pyclass(from_py_object)]
 pub struct CedarEntityMapping {
     /// entity type name
@@ -71,8 +79,7 @@ type EntityDataAttrs = HashMap<String, serde_json::Value>;
 fn get_payload(object: Bound<'_, PyDict>) -> PyResult<EntityDataAttrs> {
     from_pyobject(object).map_err(|err| {
         PyRuntimeError::new_err(format!(
-            "Failed to convert to rust HashMap<String, serde_json::Value>: {}",
-            err
+            "Failed to convert to rust HashMap<String, serde_json::Value>: {err}"
         ))
     })
 }
@@ -85,9 +92,7 @@ impl EntityData {
         cedar_entity_mapping: CedarEntityMapping,
         kwargs: Option<Bound<'_, PyDict>>,
     ) -> PyResult<Self> {
-        let attributes = kwargs
-            .map(|dict| get_payload(dict))
-            .unwrap_or(Ok(HashMap::new()))?;
+        let attributes = kwargs.map_or(Ok(HashMap::new()), |dict| get_payload(dict))?;
 
         Ok(Self {
             cedar_mapping: cedar_entity_mapping,

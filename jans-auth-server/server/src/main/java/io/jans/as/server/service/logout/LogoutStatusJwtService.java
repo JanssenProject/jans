@@ -8,6 +8,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.server.model.common.AuthorizationGrant;
@@ -132,6 +133,9 @@ public class LogoutStatusJwtService {
                         .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.ACCESS_DENIED, reason))
                         .build());
             }
+
+            statusListIndexService.registerTokenExpiration(statusListIndex, StatusListIndexService.latest(
+                    logoutStatusJwt.getExpirationDate(), jwt.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME)));
 
             final String jwtString = jwtSigner.sign().toString();
             if (log.isDebugEnabled())

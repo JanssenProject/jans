@@ -60,12 +60,10 @@ strum = { version = "0.28.0", features = ["derive"] }
 flate2 = "1.1.9"
 async-trait = "0.1.89"
 futures = "0.3.32"
-config = "0.15.25"
 ahash = { version = "0.8.12", default-features = false, features = [
     "no-rng",
     "std",
 ] }
-vfs = "0.13.0"
 # aes-crypto is intentionally excluded from zip default features.
 # cedarling only reads/writes zip archives with Deflated compression;
 # AES-encrypted zip support is not required.
@@ -88,6 +86,8 @@ sigstore-verifier = { workspace = true }
 sha2 = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+config = "0.15.25"
+vfs = "0.13.0"
 tonic = { version = "0.14.6", optional = true, features = ["tls-native-roots"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]

@@ -4,6 +4,10 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+#![allow(
+    clippy::missing_panics_doc,
+    reason = "test helpers panic on a broken fixture so the test fails at once"
+)]
 
 mod sort_json;
 pub mod token_claims;
@@ -25,10 +29,11 @@ pub struct MockServer {
     pub base_idp_url: String,
     // we need to store server to avoid drop
     #[allow(dead_code)]
-    mock_server: Server,
+    server: Server,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
+#[must_use]
 pub fn gen_mock_server() -> MockServer {
     // only when we define `mockito::ServerOpts` it different
     // by default it gets random port
@@ -64,6 +69,6 @@ pub fn gen_mock_server() -> MockServer {
         oidc_endpoint,
         jwks_endpoint,
         base_idp_url: mock_server.url(),
-        mock_server,
+        server: mock_server,
     }
 }

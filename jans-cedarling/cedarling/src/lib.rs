@@ -5,7 +5,6 @@
 
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
-#![allow(clippy::missing_errors_doc)]
 // The WASM-unsafe calls banned in clippy.toml are fine in unit tests, which only run natively.
 // The non-test build is still linted, so production code cannot rely on this.
 #![cfg_attr(test, allow(clippy::disallowed_methods))]
@@ -42,6 +41,12 @@ pub mod blocking;
 #[cfg(test)]
 mod tests;
 
+// Linked only to turn on the `js`/`wasm_js` backend of the `getrandom`
+// versions that dependencies pull in; no code calls them directly.
+#[cfg(target_arch = "wasm32")]
+use getrandom_02 as _;
+#[cfg(target_arch = "wasm32")]
+use getrandom_03 as _;
 use std::collections::{HashMap, HashSet};
 use std::{fmt::Write, sync::Arc};
 

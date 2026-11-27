@@ -2,6 +2,7 @@
 # It makes sure each PR is targeting an open issue.
 # If the PR does not target an issue , it will open an issue, write a comment and attempt to edit the PR to link it to the issue
 # The author would be asked to update the issues details.
+# When the PR is closed, the auto-created issue is closed too (completed if merged, not planned otherwise).
 
 name: "Ops: PR Issue Ref"
 on:
@@ -14,13 +15,19 @@ on:
       - ".github/workflows/**"
     branches:
       - main
+  # pull_request_target so fork PRs get a token with issues: write; no PR code is checked out.
+  pull_request_target:
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
 permissions:
   contents: read
 
 jobs:
   check-prs-issue:
-    if: startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
+    if: github.event_name != 'pull_request_target' && startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
@@ -46,13 +53,33 @@ jobs:
           REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
         run: |
 
+          # Close an auto-created issue if the PR closed while this job ran (the close job may have missed it).
+          reconcile_with_pr() {
+            pr_state="$( gh api "repos/$REPO_FULL_NAME/pulls/$PR_NUMBER" --jq '.state + " " + (.merged | tostring)' )"
+            case "$pr_state" in
+              "closed true")
+                gh issue close "$1" --repo "$REPO_FULL_NAME" --reason completed --comment "Closing: PR #$PR_NUMBER was merged." ;;
+              closed*)
+                gh issue close "$1" --repo "$REPO_FULL_NAME" --reason "not planned" --comment "Closing: PR #$PR_NUMBER was closed without merging." ;;
+            esac
+          }
+
           issue_found=""
+          export MARKER="no open issues were referenced in your PR (#$PR_NUMBER)."
 
           for issue in $( echo "$PR_TITLE $PR_BODY" | grep -o '#[0-9][0-9]*' ); do
-            if check_issue="$( gh api "repos/$REPO_FULL_NAME/issues/${issue#"#"}" )" \
-                && [ "$( echo "$check_issue" | python3 -c "import sys, json; data = json.load(sys.stdin); print(
-                  'node_id' in data and 'state' in data and data['node_id'].find('I_') == 0 and data['state'] == 'open'
-                )" )" = "True" ]; then
+            check_issue="$( gh api "repos/$REPO_FULL_NAME/issues/${issue#"#"}" )" || continue
+            status="$( echo "$check_issue" | python3 -c "import os, sys, json; d = json.load(sys.stdin)
+          is_issue = d.get('node_id', '').startswith('I_')
+          own = (d.get('title') or '').rstrip().endswith('-autocreated') and os.environ['MARKER'] in (d.get('body') or '')
+          print('open' if is_issue and d.get('state') == 'open' else 'reopen' if is_issue and own else 'no')" )"
+            if [ "$status" = "open" ]; then
+              issue_found="$issue"
+              break
+            elif [ "$status" = "reopen" ]; then
+              # PR reopened after the close job closed its auto-created issue: reuse it.
+              gh issue reopen "${issue#"#"}" --repo "$REPO_FULL_NAME"
+              reconcile_with_pr "${issue#"#"}"
               issue_found="$issue"
               break
             fi
@@ -91,5 +118,91 @@ jobs:
             printf "%s\nCloses #%s, " "$PR_BODY" "$ISSUE_NUMBER" | gh pr edit "$PR_NUMBER" \
               --body-file - \
               --repo "$REPO_FULL_NAME"
+
+            reconcile_with_pr "$ISSUE_NUMBER"
             exit 0
           fi
+
+  close-autocreated-issue:
+    if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.repository == 'JanssenProject/jans'
+    name: Close auto-created issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@8d3c67de8e2fe68ef647c8db1e6a09f647780f40 # v2.19.0
+        with:
+          egress-policy: audit
+
+      - name: Close the issue created for this PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_FULL_NAME: ${{ github.repository }}
+        run: |
+          marker="no open issues were referenced in your PR (#$PR_NUMBER)."
+
+          retry() {
+            for attempt in 1 2 3; do
+              if out="$( "$@" )"; then
+                [ -n "$out" ] && printf '%s\n' "$out"
+                return 0
+              fi
+              sleep $((attempt * 5))
+            done
+            echo "Failed after 3 attempts: $*" >&2
+            return 1
+          }
+
+          # Prints "missing" for a reference that is not an issue, fails on any other API error.
+          issue_info() {
+            errf="$(mktemp)"
+            for attempt in 1 2 3; do
+              # Capture per attempt: a failed call can print an error body to stdout.
+              if out="$( gh api "repos/$REPO_FULL_NAME/issues/$1" \
+                  --jq '[.state, (.pull_request != null), (.title | test("-autocreated\\s*$")), ((.body // "") | contains("'"$marker"'"))] | @tsv' 2>"$errf" )"; then
+                printf '%s\n' "$out"
+                return 0
+              fi
+              if grep -q 'HTTP 404\|HTTP 410' "$errf"; then
+                echo missing
+                return 0
+              fi
+              sleep $((attempt * 5))
+            done
+            cat "$errf" >&2
+            return 1
+          }
+
+          body_refs="$( printf '%s' "$PR_BODY" | grep -o '#[0-9][0-9]*' | tr -d '#' || true )"
+          # The body reference can be edited away, so also search by the marker text.
+          search_hits="$( retry gh api -X GET search/issues \
+            -f q="repo:$REPO_FULL_NAME is:issue is:open in:body \"your PR (#$PR_NUMBER)\"" \
+            --jq '.items[].number' )"
+          candidates="$( printf '%s\n%s\n' "$body_refs" "$search_hits" | grep . | sort -un || true )"
+
+          # Re-read the PR before every attempt: it may have been reopened or merged since this event.
+          close_if_pr_closed() {
+            for attempt in 1 2 3; do
+              pr_state="$( retry gh api "repos/$REPO_FULL_NAME/pulls/$PR_NUMBER" --jq '.state + " " + (.merged | tostring)' )"
+              case "$pr_state" in
+                "closed true") reason="completed"; comment="Closing: PR #$PR_NUMBER was merged." ;;
+                closed*) reason="not planned"; comment="Closing: PR #$PR_NUMBER was closed without merging." ;;
+                *) echo "PR #$PR_NUMBER is open again; leaving issue #$1 open"; return 0 ;;
+              esac
+              echo "Closing issue #$1 ($reason)"
+              gh issue close "$1" --repo "$REPO_FULL_NAME" --reason "$reason" --comment "$comment" && return 0
+              sleep $((attempt * 5))
+            done
+            echo "Failed to close issue #$1" >&2
+            return 1
+          }
+
+          for n in $candidates; do
+            info="$( issue_info "$n" )"
+            if [ "$info" = "$(printf 'open\tfalse\ttrue\ttrue')" ]; then
+              close_if_pr_closed "$n"
+            fi
+          done

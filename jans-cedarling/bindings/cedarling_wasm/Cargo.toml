@@ -24,7 +24,6 @@ cedarling = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
-wasm-bindgen-test = "0.3.76"
 
 # NOTE: profile settings (lto/opt-level/strip/codegen-units) for the WASM build
 # are NOT set here — Cargo ignores [profile.*] in non-root workspace members.
@@ -46,3 +45,7 @@ wasm-opt = [
 [dev-dependencies]
 # is used in testing
 test_utils = { workspace = true }
+wasm-bindgen-test = "0.3.76"
+
+[lints]
+workspace = true

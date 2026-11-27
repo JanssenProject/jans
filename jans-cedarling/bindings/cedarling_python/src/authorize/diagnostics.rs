@@ -46,7 +46,7 @@ impl From<&cedar_policy::Diagnostics> for Diagnostics {
             .collect();
 
         Self {
-            reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
+            reason: value.reason().map(ToString::to_string).collect(),
             errors,
         }
     }

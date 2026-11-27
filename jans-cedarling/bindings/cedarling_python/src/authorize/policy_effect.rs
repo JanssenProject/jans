@@ -29,6 +29,10 @@ pub enum PolicyEffect {
 }
 
 #[pymethods]
+#[allow(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "pyo3 methods take `&self`"
+)]
 impl PolicyEffect {
     /// Get the string representation of the effect
     fn __str__(&self) -> &'static str {
@@ -49,7 +53,7 @@ impl PolicyEffect {
             PolicyEffect::Permit => "Permit",
             PolicyEffect::Forbid => "Forbid",
         };
-        format!("PolicyEffect.{}", variant_name)
+        format!("PolicyEffect.{variant_name}")
     }
 }
 

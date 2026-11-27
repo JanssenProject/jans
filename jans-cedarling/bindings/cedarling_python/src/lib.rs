@@ -7,6 +7,14 @@
 #![cfg(not(target_arch = "wasm32"))]
 // looks like the problem in usage PyResult from pyo3 and operator `?`
 #![allow(clippy::useless_conversion)]
+#![allow(
+    clippy::doc_markdown,
+    reason = "doc comments become Python docstrings written in reStructuredText"
+)]
+#![allow(
+    clippy::needless_pass_by_value,
+    reason = "pyo3 extracts Python arguments as owned values"
+)]
 
 use pyo3::prelude::*;
 use pyo3::Bound;

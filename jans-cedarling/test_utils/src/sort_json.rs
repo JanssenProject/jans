@@ -25,7 +25,7 @@ fn sort_json(value: &mut Value) {
 
         *map = sorted_map;
     } else if let Value::Array(arr) = value {
-        arr.sort_by_key(|a| a.to_string()); // Sort the array elements
+        arr.sort_by_key(ToString::to_string); // Sort the array elements
 
         for item in arr.iter_mut() {
             sort_json(item); // Sort each element in the array
@@ -35,6 +35,7 @@ fn sort_json(value: &mut Value) {
 
 /// Trait to sort JSON objects
 pub trait SortedJson {
+    #[must_use]
     fn sorted(self) -> Self;
 }
 
