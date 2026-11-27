@@ -586,3 +586,62 @@ async fn refreshes_list_by_exp_when_ttl_is_absent() {
         "the refreshed list must reject the revoked token, got: {err:?}"
     );
 }
+
+/// A failed refresh does not end a list before its `exp`: until then it may be
+/// relied upon ([§13.7]), and `ttl` only says when a newer list may be available.
+/// Cedarling keeps using it and retries.
+///
+/// [§13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+#[tokio::test(flavor = "multi_thread")]
+async fn keeps_unexpired_list_when_refresh_fails() {
+    let mut mock = MockServer::new_with_defaults()
+        .await
+        .expect("mock server should start");
+    mock.serve_status_list(MockStatusList {
+        list: &[0],
+        ttl_secs: Some(1),
+        ..Default::default()
+    });
+    let loaded = load_status_list(&mock, NO_REFRESH)
+        .await
+        .expect("a well-formed list loads");
+
+    mock.fail_status_list_endpoint();
+    tokio::time::sleep(Duration::from_millis(2500)).await;
+
+    validate_referenced_token(&mut mock, &loaded, 0).expect(
+        "the refresh at `ttl` failed but the list has not reached its `exp`, so a VALID \
+         entry is still accepted",
+    );
+}
+
+/// A list without `exp` has no point up to which it may be relied upon, so a
+/// failed refresh drops it and the tokens that reference it are rejected
+/// ([§8.3] closing paragraph).
+///
+/// [§8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+#[tokio::test(flavor = "multi_thread")]
+async fn drops_list_without_exp_when_refresh_fails() {
+    let mut mock = MockServer::new_with_defaults()
+        .await
+        .expect("mock server should start");
+    mock.serve_status_list(MockStatusList {
+        list: &[0],
+        exp_offset_secs: None,
+        ttl_secs: Some(1),
+        ..Default::default()
+    });
+    let loaded = load_status_list(&mock, NO_REFRESH)
+        .await
+        .expect("a well-formed list loads");
+
+    mock.fail_status_list_endpoint();
+    tokio::time::sleep(Duration::from_millis(2500)).await;
+
+    let err = validate_referenced_token(&mut mock, &loaded, 0)
+        .expect_err("the list has no `exp` and could not be refreshed, so the token is rejected");
+    assert!(
+        matches!(err, ValidateJwtError::MissingStatusList),
+        "the list must be dropped (fail closed), got: {err:?}"
+    );
+}

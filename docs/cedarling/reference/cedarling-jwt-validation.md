@@ -197,7 +197,12 @@ The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps tha
 - `0` or an unset variable means the default, `300` seconds.
 - Non-zero values below `5` seconds are raised to `5` seconds.
 
-Cedarling applies **fail-closed** semantics: if a background refresh fails (network error, 5xx response, or an invalid status list body) the cached status list is dropped and all tokens that reference it are rejected until the next successful refresh. Likewise, a cached list is never used past its `exp` plus the leeway: until a newer list arrives, tokens that reference it are rejected. This prevents a revoked token from being accepted based on stale data at the cost of temporarily denying valid tokens when the issuer's status endpoint is unreachable.
+If a background refresh fails (network error, 5xx response, or an invalid status list body), Cedarling logs an error and retries at the next interval. Until then:
+
+- A cached list that has not reached its `exp` plus the leeway stays in use.
+- A cached list without `exp`, or one past its `exp` plus the leeway, is dropped, and tokens that reference it are rejected until a refresh succeeds (**fail-closed**).
+
+A revoked token is therefore never accepted based on an expired list, at the cost of temporarily denying valid tokens when the issuer's status endpoint stays unreachable after the list expires. Serving `exp` lets Cedarling ride out short outages of that endpoint.
 
 ### Status List JWT Requirements
 

@@ -315,9 +315,43 @@ impl StatusListCache {
     }
 }
 
+/// What the refresh task does with the cached list after a refresh failed.
+#[derive(Debug, PartialEq)]
+enum AfterFailedRefresh {
+    /// The list has not expired, so it may still be relied upon
+    /// ([draft-ietf-oauth-status-list-21 §13.7]): keep it and retry.
+    ///
+    /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    Keep(StatusListExpiry),
+    /// The list has expired or has no `exp`: drop it, so the tokens that
+    /// reference it are rejected.
+    Drop,
+}
+
+fn after_failed_refresh(expiry: Option<StatusListExpiry>, now: u64) -> AfterFailedRefresh {
+    match expiry.filter(|expiry| !expiry.has_passed(now)) {
+        Some(expiry) => AfterFailedRefresh::Keep(expiry),
+        None => AfterFailedRefresh::Drop,
+    }
+}
+
+/// Fetches the list again and runs every check the first fetch ran.
+async fn refetch_status_list(
+    status_list_url: &Url,
+    http_client: &HttpClient,
+    validator: &JwtValidator,
+    decoding_key: Option<Arc<DecodingKey>>,
+    iss: &IssClaim,
+) -> Result<ParsedStatusList, UpdateStatusListError> {
+    let jwt = StatusListJwtStr::get_from_url(status_list_url, http_client)
+        .await
+        .map_err(UpdateStatusListError::GetStatusListJwt)?;
+    parse_status_list_jwt(&jwt, validator, decoding_key, iss, status_list_url)
+}
+
 /// Keeps the status list from the given URL updated, refreshing it every
-/// `refresh_interval` and no later than its expiry.
-/// `cb` will be called when status list updated
+/// `refresh_interval` and no later than its expiry. `cb` clears the token cache
+/// whenever the cached list changes or stops being usable.
 async fn keep_status_list_updated<F>(cb: F, ctx: StatusListUpdateCtx)
 where
     F: Fn(),
@@ -335,35 +369,7 @@ where
         http_client,
         cancel_tkn,
     } = ctx;
-
-    // If a refresh fails, drop the cached list instead of serving a stale one.
-    // Tokens that need it then get rejected until a refresh works again. We also
-    // clear the token cache so a token already cached as valid gets re-checked.
-    let fail_closed = || {
-        let removed = {
-            let mut lists = status_lists.write().expect("obtain status list write lock");
-            lists.remove(status_list_url.as_str()).is_some()
-        };
-        if removed {
-            logger.log_any(JwtLogEntry::new(
-                format!(
-                    "dropped the cached status list for '{0}' after a failed refresh; \
-                     tokens that reference it will be rejected until it refreshes successfully",
-                    status_list_url.as_str(),
-                ),
-                Some(LogLevel::WARN),
-            ));
-            cb();
-        }
-    };
-
-    let handle_err = |msg: &str, err: &dyn std::fmt::Display| {
-        logger.log_any(JwtLogEntry::new(
-            format!("failed to {msg} for '{0}': {err}", status_list_url.as_str()),
-            Some(LogLevel::ERROR),
-        ));
-        fail_closed();
-    };
+    let url = status_list_url.as_str();
 
     loop {
         let wait = next_refresh_in(
@@ -384,37 +390,54 @@ where
         {
             logger.log_any(JwtLogEntry::new(
                 format!(
-                    "the cached status list for '{0}' is past its {expired}; tokens that \
+                    "the cached status list for '{url}' is past its {expired}; tokens that \
                      reference it will be rejected until it refreshes successfully",
-                    status_list_url.as_str(),
                 ),
                 Some(LogLevel::WARN),
             ));
             cb();
         }
-        // From here on the old expiry is handled; a failed refresh below drops the
-        // list, and later waits follow the refresh interval, not a passed `exp`.
-        expiry = None;
 
-        let status_list_jwt =
-            match StatusListJwtStr::get_from_url(&status_list_url, &http_client).await {
-                Ok(jwt) => jwt,
-                Err(e) => {
-                    handle_err("fetch an updated status list from", &e);
-                    continue;
-                },
-            };
-
-        let parsed = match parse_status_list_jwt(
-            &status_list_jwt,
+        let parsed = match refetch_status_list(
+            &status_list_url,
+            &http_client,
             &validator,
             decoding_key.clone(),
             &iss,
-            &status_list_url,
-        ) {
+        )
+        .await
+        {
             Ok(parsed) => parsed,
-            Err(e) => {
-                handle_err("validate the updated status list JWT from", &e);
+            Err(err) => {
+                let now = jsonwebtoken::get_current_timestamp();
+                let outcome = match after_failed_refresh(expiry, now) {
+                    AfterFailedRefresh::Keep(expiry) => format!(
+                        "the cached list stays in use until its {expiry}; next attempt in {} s",
+                        next_refresh_in(refresh_interval, Some(expiry), now).as_secs(),
+                    ),
+                    AfterFailedRefresh::Drop => {
+                        // the list is gone or never expires: later attempts follow
+                        // the refresh interval
+                        expiry = None;
+                        let removed = status_lists
+                            .write()
+                            .expect("obtain status list write lock")
+                            .remove(url)
+                            .is_some();
+                        if removed {
+                            cb();
+                        }
+                        format!(
+                            "no usable list is cached, so tokens that reference it are \
+                             rejected until it refreshes successfully; next attempt in {} s",
+                            refresh_interval.as_secs(),
+                        )
+                    },
+                };
+                logger.log_any(JwtLogEntry::new(
+                    format!("failed to refresh the status list from '{url}': {err}; {outcome}"),
+                    Some(LogLevel::ERROR),
+                ));
                 continue;
             },
         };
@@ -422,14 +445,12 @@ where
         // refreshed JWT no longer has `ttl`, use the max directly.
         refresh_interval = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
         expiry = parsed.list.expiry();
-        let updated_status_list = parsed.list;
 
-        {
-            let mut lists = status_lists.write().expect("obtain status list write lock");
+        status_lists
+            .write()
+            .expect("obtain status list write lock")
             // insert, not update: re-creates the entry if a failed refresh dropped it
-            lists.insert(status_list_url.to_string(), updated_status_list);
-        }
-        // call callback on updated status list
+            .insert(url.to_string(), parsed.list);
         cb();
     }
 }
@@ -618,6 +639,34 @@ mod test {
         );
     }
 
+    /// After a failed refresh a list is kept while it may still be relied upon,
+    /// up to its `exp` plus leeway ([draft-ietf-oauth-status-list-21 §13.7]); a list
+    /// that has expired or has no `exp` is dropped.
+    ///
+    /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    #[test]
+    fn failed_refresh_keeps_list_until_it_expires() {
+        let expiry = StatusListExpiry {
+            exp: 1_000,
+            leeway_secs: 60,
+        };
+        assert_eq!(
+            after_failed_refresh(Some(expiry), 1_060),
+            AfterFailedRefresh::Keep(expiry),
+            "the list is usable through `exp` plus leeway, so it is kept"
+        );
+        assert_eq!(
+            after_failed_refresh(Some(expiry), 1_061),
+            AfterFailedRefresh::Drop,
+            "the list has expired, so it is dropped"
+        );
+        assert_eq!(
+            after_failed_refresh(None, 1_000),
+            AfterFailedRefresh::Drop,
+            "a list without `exp` has no usable-until point, so it is dropped"
+        );
+    }
+
     #[test]
     fn zero_ttl_is_floored() {
         let max = Duration::from_secs(300);
@@ -748,91 +797,6 @@ mod test {
                     list: vec![0b0000_0001],
                 },
                 "the status list was not updated",
-            );
-        }
-    }
-
-    /// When the status endpoint becomes unavailable, the background refresh
-    /// fails closed: it drops the cached status list so tokens that depend on
-    /// it are rejected instead of being checked against stale revocation data.
-    #[tokio::test]
-    async fn refresh_failure_evicts_status_list() {
-        let http_client = HttpClient::new(HttpClientConfig {
-            max_retries: 0,
-            retry_delay: Duration::from_millis(3),
-            request_timeout: Duration::from_millis(500),
-            max_response_size_bytes: None,
-        })
-        .expect("http client should be constructed");
-
-        let validators = JwtValidatorCache::default();
-        let key_service = KeyService::default();
-        let mut mock_server = MockServer::new_with_defaults().await.unwrap();
-        key_service
-            .fetch_keys(
-                &mock_server.openid_config().issuer,
-                &mock_server.openid_config().jwks_uri,
-                None,
-                http_client.clone(),
-            )
-            .await
-            .unwrap();
-        mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
-        let status_list = StatusListCache::default();
-
-        let ti = TrustedIssuer::from_configuration(
-            "some_iss",
-            mock_server.openid_config_endpoint().unwrap(),
-        )
-        .expect("test configuration endpoint should derive an iss");
-
-        let iss_config = IssuerConfig {
-            policy: Arc::new(ti),
-            tokens: HashMap::new(),
-            openid_config: Some(mock_server.openid_config()),
-        };
-        validators.init_for_iss(
-            &iss_config,
-            &JwtConfig {
-                jwks: None,
-                jwt_sig_validation: false,
-                jwt_status_validation: true,
-                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
-                ..Default::default()
-            },
-            &status_list,
-            None,
-        );
-        status_list
-            .init_for_iss(
-                &iss_config,
-                InitForIssArgs {
-                    validators: &validators,
-                    key_service: &key_service,
-                    token_cache: TokenCache::default(),
-                    logger: None,
-                    http_client,
-                    refresh_interval_max: Duration::from_millis(200),
-                    cancel_tkn: CancellationToken::new(),
-                },
-            )
-            .await
-            .unwrap();
-
-        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
-
-        // init cached the list; now make the endpoint fail and let one refresh run.
-        mock_server.fail_status_list_endpoint();
-        tokio::time::sleep(Duration::from_millis(600)).await;
-
-        {
-            let lists = status_list
-                .status_lists
-                .read()
-                .expect("obtain status_lists read lock");
-            assert!(
-                !lists.contains_key(&status_list_uri),
-                "a failed refresh should drop the cached status list (fail closed)",
             );
         }
     }
