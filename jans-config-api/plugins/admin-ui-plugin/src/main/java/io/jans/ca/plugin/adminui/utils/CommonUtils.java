@@ -22,11 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -85,7 +83,7 @@ public class CommonUtils {
      * @param responseCode    numeric response code
      * @param responseMessage human-readable response message
      * @param node            JSON node to use as the response object, may be null
-     * @return                a GenericResponse instance populated with the given values
+     * @return a GenericResponse instance populated with the given values
      */
     public static GenericResponse createGenericResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
         GenericResponse genericResponse = new GenericResponse();
@@ -99,10 +97,10 @@ public class CommonUtils {
     /**
      * Creates a GenericResponse populated with the provided success flag, response code, message, and byte array.
      *
-     * @param result whether the response indicates success
-     * @param responseCode numeric response code
+     * @param result          whether the response indicates success
+     * @param responseCode    numeric response code
      * @param responseMessage human-readable response message
-     * @param byteArray payload bytes to attach to the response
+     * @param byteArray       payload bytes to attach to the response
      * @return the populated GenericResponse with `responseCode`, `responseMessage`, `success`, and `responseBytes` set
      */
     public static GenericResponse createResponseWithByteArray(boolean result, int responseCode, String responseMessage, byte[] byteArray) {
@@ -209,19 +207,27 @@ public class CommonUtils {
 
     // Method to convert ISO datetime to formatted string (yyyy-MM-dd)
     public static String convertIsoToDateString(String isoDateTime) {
-        Instant instant = Instant.parse(isoDateTime);
-        LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        LocalDateTime localDate;
+        try {
+            localDate = Instant.parse(isoDateTime).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        } catch (DateTimeParseException exception) {
+            localDate = LocalDateTime.parse(isoDateTime);
+        }
+        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
     }
 
     // Method to convert formatted string (yyyy-MM-dd) back to LocalDate
-    public static LocalDate convertStringToLocalDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(dateString, formatter);
+    public static LocalDateTime convertStringToLocalDate(String dateString) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            return LocalDateTime.parse(dateString, formatter);
+        } catch (DateTimeParseException exception) {
+            return LocalDate.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE).atStartOfDay();
+        }
     }
 
-    public static String convertLocalDateToString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static String convertLocalDateToString(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return date.format(formatter);
     }
 
@@ -306,7 +312,7 @@ public class CommonUtils {
     /**
      * Checks the expiration and audience claims required for an Admin UI UJWT.
      *
-     * @param claims the parsed UJWT claims
+     * @param claims        the parsed UJWT claims
      * @param configuration the Admin UI configuration containing accepted client IDs
      * @return {@code true} when the UJWT is not expired and targets an accepted client
      */
@@ -352,7 +358,7 @@ public class CommonUtils {
     public static String toUrlEncodedString(Map<String, String> params) {
         return params.entrySet()
                 .stream()
-                .filter(e -> e.getValue() !=null)
+                .filter(e -> e.getValue() != null)
                 .map(e ->
                         URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" +
                                 URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)

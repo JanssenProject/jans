@@ -2903,7 +2903,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/admin-ui/license/isActive",
+      "path": "/jans-config-api/admin-ui/license/check",
       "conditions": [
         {
           "httpMethods": [

@@ -168,7 +168,7 @@ public class SsaRestWebServiceValidator {
                 Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().after(ssa.getExpirationDate()) ||
                 !ssa.getState().equals(SsaState.ACTIVE)) {
             log.warn("Ssa jti: '{}' is null or status (expired, used or revoked)", jti);
-            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_JTI, "Invalid JTI or not exists");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_JTI, "Invalid JTI or not exists");
         }
         return ssa;
     }
@@ -187,11 +187,11 @@ public class SsaRestWebServiceValidator {
     public void validateSsaCreateRequest(SsaCreateRequest createRequest) {
         if (createRequest.getLifetime() != null && createRequest.getLifetime() < 1) {
             log.warn("SSA Metadata validation: 'lifetime' cannot be 0 or negative");
-            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata");
         }
         if (Boolean.TRUE.equals(createRequest.getOneTimeUse()) && Boolean.TRUE.equals(createRequest.getRotateSsa())) {
             log.warn("SSA Metadata validation: 'one_time_use' and 'rotate_ssa' cannot both be true");
-            throw errorResponseFactory.createBadRequestException(SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SSA_METADATA, "Invalid SSA Metadata: 'one_time_use' and 'rotate_ssa' cannot both be true");
         }
     }
 }

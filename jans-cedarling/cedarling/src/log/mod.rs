@@ -53,6 +53,7 @@ mod err_log_entry;
 pub(crate) mod interface;
 
 mod log_entry;
+mod log_json;
 mod log_level;
 pub(crate) mod log_strategy;
 pub(crate) mod loggable_fn;

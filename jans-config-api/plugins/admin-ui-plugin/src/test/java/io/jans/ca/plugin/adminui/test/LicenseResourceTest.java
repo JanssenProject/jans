@@ -24,13 +24,13 @@ public class LicenseResourceTest extends AdminUIBaseTest {
     /**
      * Test License Details
      */
-    @Parameters({ "test.issuer", "checkActiveLicenseURL" })
+    @Parameters({ "test.issuer", "licenseDetailsURL" })
     @Test
-    public void getLicenseDetails(final String issuer, final String checkActiveLicenseURL) {
-        log.info("getLicenseDetails() - accessToken:{}, issuer:{}, checkActiveLicenseURL:{}", accessToken, issuer,
-                checkActiveLicenseURL);
+    public void getLicenseDetails(final String issuer, final String licenseDetailsURL) {
+        log.info("getLicenseDetails() - accessToken:{}, issuer:{}, licenseDetailsURL:{}", accessToken, issuer,
+                licenseDetailsURL);
 
-        Builder request = getResteasyService().getClientBuilder(issuer + checkActiveLicenseURL);
+        Builder request = getResteasyService().getClientBuilder(issuer + licenseDetailsURL);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
 
@@ -38,7 +38,7 @@ public class LicenseResourceTest extends AdminUIBaseTest {
         log.info("\n\n Response for getLicenseDetails -  response:{}, response.getStatus():{}", response,
                 response.getStatus());
         assertEquals(response.getStatus(), Status.OK.getStatusCode());
-
+        response.close();
     }
 
 }

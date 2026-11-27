@@ -79,7 +79,7 @@ the Cedarling will use the default value as specified in the property definition
 - **`CEDARLING_LOG_TTL`** : in case of `memory` store, TTL (time to live) of log entities in seconds.
 - **`CEDARLING_LOG_MAX_ITEMS`** : Maximum number of log entities that can be stored using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
 - **`CEDARLING_LOG_MAX_ITEM_SIZE`** : Maximum size of a single log entity in bytes using Memory logger. If used `0` value means no limit. And If missed or None, default value is applied.
-- **`CEDARLING_STDOUT_MODE`** : Logging mode for stdout logger: `async` or `immediate` (default). Only applicable for native targets (not WASM). Defaults to `immediate`.
+- **`CEDARLING_STDOUT_MODE`** : Logging mode for stdout logger: `async` or `immediate` (default). Only applicable for native targets (not WASM). Defaults to `immediate`. In `async` mode entries wait in a queue of 10,000 entries; when stdout cannot keep up and the queue is full, new entries are dropped, and a `WARN` system entry reports how many (written only if `CEDARLING_LOG_LEVEL` allows `WARN`). Entries still queued when the process exits are lost; call `shut_down` before exiting to write them.
 - **`CEDARLING_STDOUT_TIMEOUT_MILLIS`** : Flush timeout in milliseconds for async stdout logging. Only applicable for native targets (not WASM). Defaults to 100 ms.
 - **`CEDARLING_STDOUT_BUFFER_LIMIT`** : Buffer size limit in bytes for async stdout logging. Only applicable for native targets (not WASM). Defaults to 1 MB (2^20 bytes).
 

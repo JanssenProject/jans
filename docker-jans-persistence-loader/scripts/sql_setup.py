@@ -7,9 +7,9 @@ from string import Template
 from pathlib import Path
 
 from sqlalchemy import text
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import DBAPIError, OperationalError
 
-from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import IndexLockTimeoutError, SqlClient, resolve_db_schema_name
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -20,6 +20,16 @@ FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("persistence-loader")
+
+# seconds the lookup of a unique index may wait for a lock; if it gives up, the index is created with a plain
+# unique-index statement, which waits for the table lock
+UNIQUE_INDEX_LOOKUP_LOCK_TIMEOUT_SECONDS = 10
+
+# number of leading positions of the JSON ``v`` array that get a virtual column and an index on MySQL < 8.0
+MYSQL_VIRTUAL_COLUMN_POSITIONS = 4
+
+# MySQL error 1060 (ER_DUP_FIELDNAME): duplicate column name
+MYSQL_DUPLICATE_COLUMN_ERROR = 1060
 
 
 class SQLBackend:
@@ -106,28 +116,16 @@ class SQLBackend:
             if column_type == "TEXT":
                 # set key length to 255
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (255))"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 if self.client.get_server_version() < (8, 0):
                     # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
                     # switch to virtual column instead
-                    for i in range(4):
-                        index_str_fmt = f"{column_name}_mem_idx_{i}"
-                        query = " ".join([
-                            f"ALTER TABLE {self.client.quoted_id(table_name)}",
-                            f"ADD COLUMN {self.client.quoted_id(index_str_fmt)} CHAR(128) AS ({column_name}->'$.v[{i}]')",
-                            f", ADD INDEX ({self.client.quoted_id(index_str_fmt)})"
-                        ])
-                        try:
-                            self.client.create_index(query)
-                        except OperationalError as exc:
-                            # re-raise exception if the code isn't one of the following code
-                            # 1060 - duplicate column error
-                            if exc.orig.args[0] not in [1060]:
-                                raise exc
+                    for position in range(MYSQL_VIRTUAL_COLUMN_POSITIONS):
+                        self.create_mysql_virtual_column_index(table_name, column_name, position, column_mapping)
                 else:
                     for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                         index_str_fmt = Template(index_str).safe_substitute({
@@ -135,7 +133,7 @@ class SQLBackend:
                         })
                         name = f"{table_name}_json_{i}"
                         query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD INDEX {self.client.quoted_id(name)} (({index_str_fmt}))"
-                        self.client.create_index(query)
+                        self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
@@ -143,7 +141,82 @@ class SQLBackend:
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
+
+    def create_mysql_virtual_column_index(self, table_name: str, column_name: str, position: int, column_mapping: dict):
+        """Index one element of a JSON column through a virtual column, because MySQL < 8.0 cannot index a CAST.
+
+        The column and its index are added by two statements: combined in one ``ALTER TABLE`` they need
+        ``LOCK=SHARED``, which blocks writers of the table while the index is built; separately each runs with
+        ``LOCK=NONE``. Each statement still needs the table's metadata lock for a moment, and while it waits for it,
+        later statements on the table, writers included, wait behind it. ``alter_table`` and ``create_index`` of the
+        library limit that wait to their ``lock_timeout`` per attempt and make at most ``retries`` attempts (see the defaults
+        of those arguments).
+
+        Args:
+            table_name: Name of the table.
+            column_name: Name of the JSON column.
+            position: Position of the element in the column's ``v`` array.
+            column_mapping: Columns of the table as read by ``create_indexes``; a virtual column listed here
+                is not added again.
+
+        Raises:
+            OperationalError: The column could not be added for a MySQL reason other than lock contention or
+                a duplicate column (see ``add_mysql_virtual_column``).
+            DatabaseError: Any other error of the column or the index statement, other than lock contention or
+                "already exists".
+        """
+        virtual_column = f"{column_name}_mem_idx_{position}"
+        expression = f"{column_name}->'$.v[{position}]'"
+
+        if virtual_column not in column_mapping:
+            column_added = self.add_mysql_virtual_column(table_name, virtual_column, expression)
+            if not column_added:
+                logger.warning(
+                    "Virtual column %s was not added to %s because the table could not be locked (see the warning "
+                    "above); its index is skipped and the next start retries",
+                    virtual_column, table_name,
+                )
+                return
+
+        # the index is named after its column, which is also the name MySQL gives an index created without a name,
+        # so an existing index of that kind is found and not created again
+        query = (
+            f"ALTER TABLE {self.client.quoted_id(table_name)} "
+            f"ADD INDEX {self.client.quoted_id(virtual_column)} ({self.client.quoted_id(virtual_column)})"
+        )
+        self.client.create_index(query, table_name, virtual_column)
+
+    def add_mysql_virtual_column(self, table_name: str, virtual_column: str, expression: str) -> bool:
+        """Add a virtual ``CHAR(128)`` column without an index (see ``create_mysql_virtual_column_index``).
+
+        Args:
+            table_name: Name of the table.
+            virtual_column: Name of the new column.
+            expression: SQL expression that generates the column's value, used as is.
+
+        Returns:
+            ``True`` if the column was added, or if another loader added it after the columns were read
+            (duplicate column, ``MYSQL_DUPLICATE_COLUMN_ERROR``); ``False`` if the table could not be locked in any
+            attempt (the library has logged a warning).
+
+        Raises:
+            OperationalError: A MySQL error other than a duplicate column or a lock timeout, for example 1054 (unknown column).
+            DatabaseError: Any other error of the ``ALTER TABLE``, unchanged, for example ``ProgrammingError``
+                1146 (table does not exist).
+        """
+        query = (
+            f"ALTER TABLE {self.client.quoted_id(table_name)} "
+            f"ADD COLUMN {self.client.quoted_id(virtual_column)} CHAR(128) AS ({expression})"
+        )
+        try:
+            return self.client.alter_table(query, table_name)
+        except OperationalError as exc:
+            # another loader added the column after the columns were read
+            error_code = exc.orig.args[0] if exc.orig is not None and exc.orig.args else None
+            if error_code != MYSQL_DUPLICATE_COLUMN_ERROR:
+                raise
+            return True
 
     def create_pgsql_indexes(self, table_name: str, column_mapping: dict):
         fields = self.get_index_fields(table_name)
@@ -156,7 +229,7 @@ class SQLBackend:
 
             if column_type.lower() != "jsonb":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
-                self.client.create_index(query)
+                self.client.create_index(query, table_name, index_name)
             else:
                 for i, index_str in enumerate(self.sql_indexes["__common__"]["JSON"], start=1):
                     index_str_fmt = Template(index_str).safe_substitute({
@@ -164,12 +237,12 @@ class SQLBackend:
                     })
                     name = f"{table_name}_json_{i}"
                     query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {index_str_fmt}"
-                    self.client.create_index(query)
+                    self.client.create_index(query, table_name, name)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {custom}"
-            self.client.create_index(query)
+            self.client.create_index(query, table_name, name)
 
     def create_indexes(self):
         # exclude tables that created externally https://github.com/JanssenProject/jans/issues/10512
@@ -185,17 +258,81 @@ class SQLBackend:
                 self.create_mysql_indexes(table_name, column_mapping)
 
     def create_unique_indexes(self):
+        """Create the unique indexes of ``jansPerson`` that do not exist yet.
+
+        Unique indexes are constraints, not only a help for queries: a finished loader must mean that they exist.
+        So, unlike the other indexes, which go through the library's bounded path (built concurrently on PostgreSQL)
+        and are skipped with a warning while their table stays locked, a missing unique index is built with a plain
+        unique-index statement (``CREATE UNIQUE INDEX`` or ``ALTER TABLE ... ADD UNIQUE INDEX``), which waits for its
+        table lock without a bound; on PostgreSQL it also blocks writers of the table while it is built, once. A lookup
+        first skips indexes that exist, so later starts send no statement and do not wait for the table lock.
+
+        An invalid index (PostgreSQL) is only reported in the log, see ``unique_index_exists``.
+        """
         for table_name, column in [
             ("jansPerson", "mail"),
             ("jansPerson", "uid"),
         ]:
             index_name = f"{table_name.lower()}_{column.lower()}_unique_idx"
 
+            if self.unique_index_exists(table_name, column, index_name):
+                continue
+
             if self.client.dialect == "mysql":
                 query = f"ALTER TABLE {self.client.quoted_id(table_name)} ADD UNIQUE INDEX {self.client.quoted_id(index_name)} ({self.client.quoted_id(column)})"
             else:
                 query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
             self.client.create_index(query)
+
+    def unique_index_exists(self, table_name: str, column: str, index_name: str) -> bool:
+        """Look up a unique index, so that a start sends no statement for an index that exists.
+
+        Args:
+            table_name: Name of the table.
+            column: Name of the column whose values the index keeps unique.
+            index_name: Name of the unique index.
+
+        Returns:
+            ``True`` if the index exists, or (PostgreSQL 12 and later) is still being built by a session whose
+            progress this database role can see. An invalid index with no visible build (PostgreSQL only) also
+            returns ``True``, but is reported in the log and left alone: the loader neither drops nor rebuilds it.
+            ``False`` if it does not exist, or if the lookup failed (for example it timed
+            out waiting for a lock): the caller then creates the index with a plain unique-index statement, which
+            waits for the table lock and ignores "already exists".
+
+        An invalid unique index may not reject duplicates. This loader does not build unique indexes concurrently,
+        so an invalid one comes from a concurrent build run elsewhere: one that failed, or one that runs in a
+        session this database role cannot see.
+        """
+        try:
+            state = self.client.get_index_state(
+                table_name, index_name, lock_timeout=UNIQUE_INDEX_LOOKUP_LOCK_TIMEOUT_SECONDS,
+            )
+        except (DBAPIError, IndexLockTimeoutError) as exc:
+            logger.warning(
+                "Could not look up unique index %s on %s (%s); creating it with a plain unique-index statement, "
+                "which waits for the table lock",
+                index_name, table_name, exc,
+            )
+            return False
+
+        # get_index_state returns None if the index is missing; True if it is valid or (PostgreSQL 12 and later) still
+        # being built by a session whose progress this database role can see; False (PostgreSQL only) if it is invalid
+        # with no visible build: the build failed, or it runs in a session this role cannot see
+        if state is None:
+            return False
+        if not state:
+            qualified_name = f"{self.client.quoted_id(resolve_db_schema_name())}.{self.client.quoted_id(index_name)}"
+            logger.error(
+                "Unique index %s on %s is invalid, so duplicate %s values may be accepted. A CREATE UNIQUE INDEX "
+                "CONCURRENTLY of it failed or is still running in another session. The loader leaves the index "
+                "alone and continues. If no build of it is running (see pg_stat_activity, or on PostgreSQL 12 and "
+                "later pg_stat_progress_create_index, as a superuser or a member of pg_read_all_stats), remove duplicate "
+                "%s values if there are any, drop the index with DROP INDEX CONCURRENTLY %s and start the loader again, which "
+                "then builds it.",
+                index_name, table_name, column, column, qualified_name,
+            )
+        return True
 
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
