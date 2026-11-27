@@ -112,6 +112,67 @@ async fn test_http_retry_waits_in_browser() {
     );
 }
 
+/// TRACE producer key, the same test key the native TRACE tests sign with.
+static TRACE_KEY_PEM: &str = include_str!("../../../test_files/trace/producer_ed25519.pem");
+
+/// Smallest configuration with TRACE enabled: Lock and the `.cjar` policy store
+/// are on port 1, which never listens, so startup fails at the first request.
+fn trace_config(key_property: &str, key: &str) -> JsValue {
+    let mut config = json!({
+        "CEDARLING_APPLICATION_NAME": "cedarling-browser",
+        "CEDARLING_POLICY_STORE_URI": "http://127.0.0.1:1/policy-store.cjar",
+        "CEDARLING_LOCK": "enabled",
+        "CEDARLING_LOCK_SERVER_CONFIGURATION_URI":
+            "http://127.0.0.1:1/.well-known/lock-server-configuration",
+        "CEDARLING_TRACE": "enabled",
+        "CEDARLING_HTTP_REQUEST_MAX_RETRIES": 0,
+        "CEDARLING_LOG_TYPE": "std_out",
+        "CEDARLING_JWT_SIG_VALIDATION": "disabled",
+        "CEDARLING_JWT_STATUS_VALIDATION": "disabled",
+    });
+    config[key_property] = json!(key);
+    serde_wasm_bindgen::to_value(&config).expect("the config converts to JsValue")
+}
+
+/// TRACE runs in the browser: a configuration with an inline key passes the
+/// TRACE checks, and startup goes on to Lock Server.
+#[wasm_bindgen_test]
+async fn test_trace_with_inline_key_starts_in_browser() {
+    let err = init(trace_config(
+        "CEDARLING_TRACE_SIGNING_KEY_PEM",
+        TRACE_KEY_PEM,
+    ))
+    .await
+    .err()
+    .expect("an unreachable Lock Server must fail startup");
+
+    let message = format!("{err:?}");
+    assert!(
+        message.contains("lock-server-configuration"),
+        "startup must get past the TRACE checks and fail on Lock Server: {message}"
+    );
+}
+
+/// The browser has no file system, so a key file is refused when the
+/// configuration is read, naming the property to use instead.
+#[wasm_bindgen_test]
+async fn test_trace_key_file_is_refused_in_browser() {
+    let err = init(trace_config(
+        "CEDARLING_TRACE_SIGNING_KEY",
+        "/etc/cedarling/trace-key.pem",
+    ))
+    .await
+    .err()
+    .expect("a TRACE key file must fail startup in the browser");
+
+    let message = format!("{err:?}");
+    assert!(
+        message.contains("is not supported on WASM")
+            && message.contains("CEDARLING_TRACE_SIGNING_KEY_PEM"),
+        "the error must refuse the key file and name the inline key property: {message}"
+    );
+}
+
 /// The browser refuses a URL with credentials and quotes it in its error, which
 /// reqwest keeps as the cause: the startup error must not show them.
 #[wasm_bindgen_test]

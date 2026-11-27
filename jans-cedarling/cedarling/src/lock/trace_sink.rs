@@ -55,7 +55,8 @@ impl ProblemFlag {
 }
 
 /// Sends one bulk body to Lock. A trait so the emitter is tested without HTTP.
-#[async_trait]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 pub(crate) trait BulkSink: Send + Sync {
     /// Results of a processed request, in request order.
     async fn post_bulk(&self, body: &Bytes) -> Result<Vec<BulkItemResult>, PostBulkError>;
@@ -272,7 +273,8 @@ enum Attempt {
     Unauthorized,
 }
 
-#[async_trait]
+#[cfg_attr(not(any(target_arch = "wasm32", target_arch = "wasm64")), async_trait)]
+#[cfg_attr(any(target_arch = "wasm32", target_arch = "wasm64"), async_trait(?Send))]
 impl BulkSink for TraceSink {
     /// The token is not requested per call: the stored one is used, and a new one
     /// is requested only when Lock answers `401`, i.e. about once per token

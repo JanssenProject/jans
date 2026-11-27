@@ -400,6 +400,67 @@ For wrappers with `jsonString()`, you can keep a JSON copy. Generated wrappers
 also implement `[Symbol.dispose]()` for runtimes with explicit resource
 management.
 
+## Lock Server and TRACE in the browser
+
+In a browser, Cedarling reaches Lock Server and the Auth Server through the
+page's `fetch`, so the browser's rules apply to every request. Node.js and edge
+workers are not affected by the CORS and certificate points below. Lock Server
+setup is in [Lock Server integration](../reference/cedarling-lock-server.md),
+TRACE setup in [Cedarling TRACE](../reference/cedarling-trace.md).
+
+### CORS
+
+Lock Server does not send CORS headers, so the page cannot read its answers.
+Cedarling then does not start: it fails to get the Lock Server configuration,
+and the browser console shows a CORS error.
+
+In the proxy in front of Lock Server, add CORS to the Lock Server configuration
+endpoint (`/.well-known/lock-server-configuration`) and to the endpoints it
+lists (audit, TRACE and policy store endpoints):
+
+- allow the application's origin and the methods `GET`, `POST` and `OPTIONS`
+- allow the request headers `Authorization` and `Content-Type`
+- expose `Retry-After`: without it, TRACE cannot read how long Lock Server asks
+  it to wait and retries on its own backoff
+
+The Auth Server endpoints that Cedarling uses for client registration and
+tokens send CORS headers themselves. A browser extension whose host permissions
+include Lock Server is not subject to CORS.
+
+### gRPC transport
+
+In a browser, `CEDARLING_LOCK_TRANSPORT=grpc` and `CEDARLING_TRACE_TRANSPORT=grpc`
+send gRPC-Web, which Lock Server does not serve. Lock Server answers with plain
+gRPC, which the browser cannot read: TRACE logs `TRACE bulk request failed: gRPC
+Unknown: invalid content type: application/grpc` and drops the records. Use
+`rest`, the default, or put a proxy that translates gRPC-Web to gRPC in front
+of the `io.jans.lock.*` services, such as the Envoy `grpc_web` filter or the
+Traefik `grpcWeb` middleware. That proxy must also answer CORS for those
+services.
+
+### Certificates
+
+`CEDARLING_LOCK_ACCEPT_INVALID_CERTS` has no effect in a browser. The browser
+must trust the certificates of Lock Server and the Auth Server.
+
+### TRACE signing key
+
+The browser has no file system, so the key can only be set inline with
+`CEDARLING_TRACE_SIGNING_KEY_PEM`. Whoever can open the page can read that key
+and sign records as the producer it is registered for. Use TRACE in the browser
+where the page's users are trusted, for example a demo or an internal tool. For
+records that must stand as evidence, run Cedarling on a server.
+
+### Page lifetime
+
+Records wait in memory until they are sent. When the page closes, the records
+not yet sent are lost. Where the application can, await `cedarling.shutDown()`
+before the page goes away: it sends what is queued once, without retries.
+
+Each page load starts a new producer chain. With
+`chainRegistrationMode: FIRST_OBSERVED`, Lock Server registers a chain for
+every load.
+
 ## Choose a runtime
 
 | Runtime | Package entry | How to initialize |

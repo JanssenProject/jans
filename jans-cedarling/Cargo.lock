@@ -773,6 +773,7 @@ dependencies = [
  "gloo-timers",
  "hdrhistogram",
  "jans-trace-core",
+ "js-sys",
  "jsonschema",
  "jsonwebtoken",
  "mockito",

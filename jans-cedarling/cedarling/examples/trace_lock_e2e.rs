@@ -20,6 +20,7 @@
 //! - `TRACE_PRODUCER_ID`: default `cedarling-fleet-1`
 //! - `LOCK_ACCEPT_INVALID_CERTS`: `true` skips TLS certificate checks, for a local Lock with a
 //!   self-signed certificate; default `false`
+//! - `TRACE_TRANSPORT`: `rest` or `grpc`, how the bulk requests go; default `rest`
 //!
 //! Run: `cargo run --example trace_lock_e2e`
 
@@ -116,6 +117,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
     let producer_id =
         std::env::var("TRACE_PRODUCER_ID").unwrap_or_else(|_| "cedarling-fleet-1".to_string());
+    let trace_transport = match std::env::var("TRACE_TRANSPORT").as_deref() {
+        Err(_) | Ok("rest") => LockTransport::Rest,
+        Ok("grpc") => LockTransport::Grpc,
+        Ok(other) => {
+            return Err(format!("TRACE_TRANSPORT must be rest or grpc, not {other}").into());
+        },
+    };
 
     let lock_config = LockServiceConfig {
         log_level: LogLevel::WARN,
@@ -165,7 +173,7 @@ fn bootstrap_config() -> Result<BootstrapConfig, Box<dyn std::error::Error>> {
             signing_key: TraceSigningKey::File(PathBuf::from(env("TRACE_KEY_FILE")?)),
             signing_kid: None,
             endpoint: TraceEndpoint::Discovered,
-            transport: LockTransport::Rest,
+            transport: trace_transport,
             bulk_max_records: NonZeroUsize::new(100).expect("non-zero"),
             bulk_max_bytes: NonZeroUsize::new(4_194_304).expect("non-zero"),
         }),

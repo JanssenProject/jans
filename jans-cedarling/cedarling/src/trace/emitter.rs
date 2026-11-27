@@ -25,7 +25,6 @@ use jans_trace_core::Limits;
 use jans_trace_core::assertion::{SignedAssertion, batch_body};
 use jans_trace_core::signature::TraceSigner;
 use tokio::sync::mpsc;
-use tokio::task::JoinError;
 use tokio_util::sync::CancellationToken;
 use uuid7::Uuid;
 
@@ -43,8 +42,8 @@ use crate::common::retry::{
 use crate::lock::{BulkItemResult, BulkSink, PostBulkError, RequestRefusal, WORKER_HTTP_RETRY_DUR};
 use crate::log::interface::LogWriter;
 use crate::log::{BaseLogEntry, LogEntry, LogLevel, Logger};
-use crate::rt::sleep;
 use crate::rt::{JoinHandle, spawn_task};
+use crate::rt::{Steps, TaskEnded, run_steps, sleep};
 
 /// Lock error ids of a record Lock failed to store: the same bytes may succeed later.
 const TRANSIENT_ERRORS: [&str; 2] = ["storage_failure", "crypto_unavailable"];
@@ -522,8 +521,7 @@ impl Emitter {
         let chain_id = chain.chain_id();
         let first = chain.next_sequence();
         let record_ids: Vec<Uuid> = drafts.iter().map(|draft| draft.record_id).collect();
-        let signed =
-            sign_batch_offloaded(chain, drafts, Arc::clone(&self.signer), self.limits).await;
+        let signed = sign_batch(chain, drafts, Arc::clone(&self.signer), self.limits).await;
         let SignedBatch { chain, results } = match signed {
             Ok(signed) => signed,
             Err(err) => {
@@ -531,7 +529,8 @@ impl Emitter {
                     LogLevel::ERROR,
                     None,
                     format!(
-                        "{err}; its {} TRACE records and the producer chain {chain_id} are lost",
+                        "TRACE signing task failed: {err}; its {} TRACE records and the producer \
+                         chain {chain_id} are lost",
                         record_ids.len()
                     ),
                 );
@@ -1036,46 +1035,31 @@ impl Emitter {
     }
 }
 
-/// What a signing task hands back: the chain, moved past every signed record,
-/// and one result per draft, in draft order.
+/// What signing hands back: the chain, moved past every signed record, and one
+/// result per draft, in draft order.
 struct SignedBatch {
     chain: ProducerChain,
     results: Vec<Result<SignedAssertion, AppendError>>,
 }
 
-/// The signing task panicked, and the chain it held is gone with it.
-#[derive(Debug, thiserror::Error)]
-#[error("TRACE signing task failed: {0}")]
-struct SignTaskPanicked(JoinError);
-
-/// Signs `drafts` in order on `chain`, off the async runtime: a batch of a
-/// hundred records is a few milliseconds of CPU, which would stall the
-/// authorization requests sharing the runtime. The chain moves into the task
-/// and comes back.
-///
-/// Native only, as TRACE is off on WASM. When it comes there, a `cfg(wasm32)`
-/// branch signs inline and calls `tokio::task::yield_now()` every n records,
-/// counted rather than timed, as `std::time::Instant` is not available on
-/// `wasm32-unknown-unknown`.
-async fn sign_batch_offloaded(
-    mut chain: ProducerChain,
+/// Signs `drafts` in order on `chain`. A batch of a hundred records is a few
+/// milliseconds of CPU, so it runs through [`run_steps`], which keeps it from
+/// stalling the authorization requests that share the runtime. The chain moves
+/// into the run and comes back; a panic takes it with it.
+async fn sign_batch(
+    chain: ProducerChain,
     drafts: Vec<RecordDraft>,
     signer: Arc<dyn TraceSigner>,
     limits: Limits,
-) -> Result<SignedBatch, SignTaskPanicked> {
-    #[expect(
-        clippy::disallowed_methods,
-        reason = "TRACE is rejected on WASM before it starts"
-    )]
-    tokio::task::spawn_blocking(move || {
-        let results = drafts
-            .iter()
-            .map(|draft| chain.append(draft, signer.as_ref(), &limits))
-            .collect();
-        SignedBatch { chain, results }
+) -> Result<SignedBatch, TaskEnded> {
+    let Steps { state, outputs } = run_steps(chain, drafts, move |chain, draft| {
+        chain.append(&draft, signer.as_ref(), &limits)
     })
-    .await
-    .map_err(SignTaskPanicked)
+    .await?;
+    Ok(SignedBatch {
+        chain: state,
+        results: outputs,
+    })
 }
 
 #[cfg(test)]

@@ -668,7 +668,7 @@ AuthorizeOptions options = new AuthorizeOptions(
 AuthorizeResult result = adapter.authorizeUnsigned(principalJson, action, resource, context, options);
 ```
 
-The WASM and C bindings take the request as JSON, so `options` is the member shown above. TRACE is not supported on WASM, so there `options` has no effect. In Go, set the `Options` field of the request struct:
+The WASM and C bindings take the request as JSON, so `options` is the member shown above. In Go, set the `Options` field of the request struct:
 
 ```go
 request := cedarling_go.RequestUnsigned{

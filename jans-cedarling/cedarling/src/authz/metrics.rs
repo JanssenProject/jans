@@ -973,7 +973,6 @@ impl MetricsCollector {
     }
 
     /// Counts `count` occurrences of what the TRACE emitter did.
-    #[cfg(not(target_arch = "wasm32"))]
     pub(crate) fn record_trace_emitter(&self, event: EmitterEvent, count: usize) {
         if !self.mode.collects() {
             return;

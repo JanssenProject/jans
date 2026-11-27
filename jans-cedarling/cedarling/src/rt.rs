@@ -43,6 +43,148 @@ pub(crate) fn sleep(duration: Duration) -> Sleep {
     }
 }
 
+/// What [`run_steps`] hands back: the state after the last step, and one output
+/// per item, in item order.
+#[derive(Debug)]
+pub(crate) struct Steps<S, O> {
+    pub(crate) state: S,
+    pub(crate) outputs: Vec<O>,
+}
+
+/// Runs `step` on each of `items` in order, threading `state` through, without
+/// holding up other tasks: for CPU-heavy work such as signing or hashing.
+///
+/// On native targets the whole run goes to the blocking pool, and a panicking
+/// step comes back as [`TaskEnded`]. WebAssembly has one thread, so the run stays
+/// on it and hands the thread back to the browser event loop ([`Yielder`])
+/// whenever a slice of [`STEP_SLICE_MILLIS`] has passed; a panic there aborts the module, so the
+/// result is always `Ok`.
+pub(crate) async fn run_steps<S, I, O, F>(
+    state: S,
+    items: Vec<I>,
+    step: F,
+) -> Result<Steps<S, O>, TaskEnded>
+where
+    S: Send + 'static,
+    I: Send + 'static,
+    O: Send + 'static,
+    F: FnMut(&mut S, I) -> O + Send + 'static,
+{
+    #[cfg(not(target_family = "wasm"))]
+    {
+        #[expect(
+            clippy::disallowed_methods,
+            reason = "native branch of the cross-platform wrapper"
+        )]
+        tokio::task::spawn_blocking(move || run_all(state, items, step))
+            .await
+            .map_err(|err| TaskEnded(err.to_string()))
+    }
+
+    #[cfg(target_family = "wasm")]
+    {
+        let mut state = state;
+        let mut step = step;
+        let mut outputs = Vec::with_capacity(items.len());
+        let yielder = Yielder::new();
+        let mut slice_start = js_sys::Date::now();
+        for item in items {
+            // Read on every step: `std::time::Instant` is not available on
+            // `wasm32-unknown-unknown`, and `Date.now()` is one call returning a
+            // number, where `chrono::Utc::now()` builds a JS `Date` object each
+            // time. Measured in headless Chrome 157 (release build): 0.035-0.05 us
+            // per call against 0.10-0.16 us for `chrono::Utc::now()`, while an
+            // Ed25519 signature of 1 KiB takes 23-28 us, so a TRACE signing step
+            // pays about 0.2% for it, not worth reading only every few steps.
+            let now = js_sys::Date::now();
+            if now - slice_start >= STEP_SLICE_MILLIS {
+                yielder.yield_now().await;
+                slice_start = js_sys::Date::now();
+            } else if now < slice_start {
+                // The wall clock went back: the slice counts from now.
+                slice_start = now;
+            }
+            outputs.push(step(&mut state, item));
+        }
+        Ok(Steps { state, outputs })
+    }
+}
+
+/// The steps of a native [`run_steps`], on a blocking pool thread.
+#[cfg(not(target_family = "wasm"))]
+fn run_all<S, I, O>(
+    mut state: S,
+    items: Vec<I>,
+    mut step: impl FnMut(&mut S, I) -> O,
+) -> Steps<S, O> {
+    let outputs = items
+        .into_iter()
+        .map(|item| step(&mut state, item))
+        .collect();
+    Steps { state, outputs }
+}
+
+/// How long [`run_steps`] runs on WebAssembly before it hands the thread back.
+/// Timed rather than counted, so a caller need not know what one step costs.
+/// [`Yielder`] resumes at once, so the slice is set for the page, not for a timer:
+/// about one 60 Hz frame, far below the 50 ms after which the browser reports a
+/// long task.
+#[cfg(target_family = "wasm")]
+const STEP_SLICE_MILLIS: f64 = 16.0;
+
+/// Hands the thread back to the browser event loop, so it runs authorization
+/// calls and UI events, and resumes right after them. A re-woken future would
+/// only reorder the microtask queue and never reach the event loop.
+///
+/// A message to self, not a zero timer: from the sixth nested `setTimeout(0)`
+/// the browser waits at least 4 ms. Measured in headless Chrome 157 (release
+/// build), 12 yields in a row: zero timers resumed after 0.01-0.7 ms for the
+/// first six, then after 4.2 ms each; messages through one channel after
+/// 0.02-1.1 ms each, mostly under 0.1 ms. One channel serves a whole run.
+#[cfg(target_family = "wasm")]
+struct Yielder {
+    /// `None` where the runtime has no `MessageChannel`; a zero timer then.
+    channel: Option<web_sys::MessageChannel>,
+}
+
+#[cfg(target_family = "wasm")]
+impl Yielder {
+    fn new() -> Self {
+        Self {
+            channel: web_sys::MessageChannel::new().ok(),
+        }
+    }
+
+    async fn yield_now(&self) {
+        // Send a message to ourselves: it resumes the task as the next event loop
+        // task, sooner than a timer, which waits at least 4 ms once nested.
+        let Some(channel) = &self.channel else {
+            sleep(Duration::ZERO).await;
+            return;
+        };
+        let port = channel.port1();
+        // `arrived` resolves when the message is delivered to `port1`; setting
+        // `onmessage` also starts the port.
+        let arrived = js_sys::Promise::new(&mut |resolve, _reject| {
+            port.set_onmessage(Some(&resolve));
+        });
+        if channel
+            .port2()
+            .post_message(&js_sys::wasm_bindgen::JsValue::UNDEFINED)
+            .is_err()
+        {
+            sleep(Duration::ZERO).await;
+            return;
+        }
+        // The yield itself: the task suspends here, as `JsFuture` stays pending
+        // until `arrived` resolves. Meanwhile the event loop runs what is queued
+        // before the message (input, rendering, other promises such as
+        // authorization calls); delivering the message wakes the task, and
+        // `wasm-bindgen-futures` polls it again. The promise is never rejected.
+        let _message = wasm_bindgen_futures::JsFuture::from(arrived).await;
+    }
+}
+
 /// Fires every `period`, starting one `period` after creation.
 ///
 /// Replaces `tokio::time::interval` with `MissedTickBehavior::Delay`, which needs a Tokio
@@ -262,6 +404,50 @@ mod tests {
         assert!(
             err.to_string().contains("cancelled"),
             "the error says the task was cancelled: {err}"
+        );
+    }
+
+    #[tokio::test]
+    async fn run_steps_threads_state_and_keeps_item_order() {
+        let Steps { state, outputs } = run_steps(0_u32, vec![1_u32, 2, 3], |sum, item| {
+            *sum += item;
+            *sum
+        })
+        .await
+        .expect("steps that do not panic should finish");
+
+        assert_eq!(
+            state, 6,
+            "each step should see the state the previous one left"
+        );
+        assert_eq!(outputs, vec![1, 3, 6], "outputs should follow item order");
+    }
+
+    #[tokio::test]
+    async fn run_steps_runs_off_the_runtime_thread() {
+        let runtime_thread = std::thread::current().id();
+        let Steps { outputs, .. } =
+            run_steps((), vec![(); 3], |(), ()| std::thread::current().id())
+                .await
+                .expect("steps that do not panic should finish");
+
+        assert!(
+            outputs.iter().all(|thread| *thread != runtime_thread),
+            "steps should run on the blocking pool, not on the runtime thread"
+        );
+    }
+
+    #[tokio::test]
+    async fn run_steps_returns_a_panicking_step_as_task_ended() {
+        let err = run_steps((), vec![1, 2], |(), item: u32| {
+            assert!(item < 2, "test step panics");
+        })
+        .await
+        .expect_err("a panicking step should end the run");
+
+        assert!(
+            err.to_string().contains("panicked"),
+            "the error should say the task panicked: {err}"
         );
     }
 }
