@@ -4,9 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use thiserror::Error;
-use url::Url;
 
-use super::StatusListExpiry;
+use super::{JwtStatus, StatusListExpiry, UnavailableStatusList};
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::{decode::DecodeJwtError, fetch::HttpError, validation::ValidateJwtError};
 
@@ -32,22 +31,66 @@ pub enum ParseStatusListError {
     DecompressedSizeExceeded(u64),
 }
 
+/// Why [`StatusList::get_status`](super::StatusList::get_status) gave no status.
+#[derive(Debug, PartialEq, Error)]
+pub(super) enum GetStatusError {
+    #[error("the index is outside the list, which holds {len} entries")]
+    IdxOutOfBounds { len: usize },
+    #[error("the list is cached with an unsupported bit size")]
+    UnsupportedBitSize,
+}
+
+/// Why [`CachedStatusList::status_at`](super::CachedStatusList::status_at) gave
+/// no status.
+#[derive(Debug, PartialEq, Error)]
+pub(super) enum StatusAtError {
+    #[error("the list is past its {0}")]
+    Expired(StatusListExpiry),
+    #[error(transparent)]
+    Get(#[from] GetStatusError),
+}
+
+/// Why a token with a `status` claim fails the status check. Each message names
+/// the status list, so an admin can compare it with what the issuer serves.
 #[derive(Debug, Error)]
-pub enum JwtStatusError {
-    #[error("failed to deserialze jwt status list: {0}")]
-    DeserializeStatusList(#[from] serde_json::Error),
-    #[error("the `uri` of the `status_list` claim is invalid: {0}")]
-    InvalidStatusListUri(#[from] url::ParseError),
-    #[error("the `idx` of the `status_list` claim is out of bounds")]
-    StatusListIdxOutOfBounds,
-    #[error("failed to convert bit index: {0}")]
-    BitIndexConversion(#[from] std::num::TryFromIntError),
-    #[error("corrupt or unsupported status list bit-size encoding")]
-    InvalidStatusListEncoding,
-    #[error("status list for {0} is missing")]
-    MissingStatusList(Url),
-    #[error("the status list is past its {0} and no refreshed list has replaced it yet")]
-    ExpiredStatusList(StatusListExpiry),
+pub enum StatusCheckError {
+    #[error(
+        "the token references the status list '{uri}', which no trusted issuer serves; \
+         compare its `status.status_list.uri` claim with the issuer's \
+         `status_list_endpoint`"
+    )]
+    UnknownStatusList { uri: String },
+    #[error(
+        "the status list '{uri}' has been unavailable since {}: {}; tokens that reference \
+         it are rejected until a refresh succeeds",
+        unavailable.since(),
+        unavailable.cause()
+    )]
+    Unavailable {
+        uri: String,
+        unavailable: UnavailableStatusList,
+    },
+    #[error(
+        "the status list '{uri}' is past its {expiry} and no refreshed list has replaced \
+         it yet"
+    )]
+    Expired {
+        uri: String,
+        expiry: StatusListExpiry,
+    },
+    #[error(
+        "the token's index {idx} is outside the status list '{uri}', which holds {len} \
+         entries"
+    )]
+    IdxOutOfBounds { uri: String, idx: usize, len: usize },
+    #[error("the status list '{uri}' is cached with an unsupported bit size")]
+    UnsupportedBitSize { uri: String },
+    #[error("entry {idx} of the status list '{uri}' is {status}")]
+    Rejected {
+        uri: String,
+        idx: usize,
+        status: JwtStatus,
+    },
 }
 
 #[derive(Debug, Error)]

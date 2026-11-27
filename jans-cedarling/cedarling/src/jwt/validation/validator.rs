@@ -11,7 +11,7 @@ use crate::common::policy_store::TokenEntityMetadata;
 use crate::jwt::decode::{DecodeJwtError, DecodedJwt};
 use crate::jwt::key_service::DecodingKeyInfo;
 use crate::jwt::{
-    Arc, JwtStatus, JwtStatusError, OwnedValidatorInfo, StatusListCache, TokenKind, ValidatorInfo,
+    Arc, OwnedValidatorInfo, StatusCheckError, StatusListCache, TokenKind, ValidatorInfo,
 };
 use jsonwebtoken::errors::{ErrorKind, new_error};
 use jsonwebtoken::{self as jwt, Algorithm, DecodingKey, Validation};
@@ -171,7 +171,7 @@ impl JwtValidator {
     /// - If the claims are valid (e.g. the JWT isn't expired)
     /// - If the status of the JWT, when it has one, is [`valid`].
     ///
-    /// [`valid`]: JwtStatus::Valid
+    /// [`valid`]: crate::jwt::status_list::JwtStatus::Valid
     pub(crate) fn validate_jwt(
         &self,
         jwt: &str,
@@ -215,19 +215,11 @@ impl JwtValidator {
                 return Ok(validated_jwt);
             };
 
-            let jwt_status = {
-                self.status_list_cache
-                    .status_lists
-                    .read()
-                    .expect("obtain status list read lock")
-                    .get(&ref_status_list.uri)
-                    .ok_or(ValidateJwtError::MissingStatusList)?
-                    .status_at(ref_status_list.idx, jwt::get_current_timestamp())?
-            };
-
-            if !jwt_status.is_valid() {
-                return Err(ValidateJwtError::RejectJwtStatus(jwt_status));
-            }
+            self.status_list_cache.check_status(
+                &ref_status_list.uri,
+                ref_status_list.idx,
+                jwt::get_current_timestamp(),
+            )?;
         }
 
         Ok(validated_jwt)
@@ -359,13 +351,12 @@ pub enum ValidateJwtError {
     ValidateJwt(#[from] jwt::errors::Error),
     #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
     MissingClaims(Vec<String>),
-    #[error("failed to get the status for the JWT: {0}")]
-    GetJwtStatus(#[from] JwtStatusError),
-    #[error("the token is rejected because its status list entry is {0}")]
-    RejectJwtStatus(JwtStatus),
-    #[error("there isn't a status list available for the token")]
-    MissingStatusList,
-    #[error("failed to deserialize the JWT's status claim: {0}")]
+    #[error(transparent)]
+    Status(#[from] StatusCheckError),
+    #[error(
+        "the token's `status` claim is not a status list reference \
+         (`{{\"status_list\": {{\"idx\": <number>, \"uri\": <string>}}}}`): {0}"
+    )]
     DeserializeStatusClaim(#[from] serde_json::Error),
 }
 
@@ -376,7 +367,7 @@ mod test {
 
     use crate::common::issuer_utils::IssClaim;
     use crate::common::policy_store::TokenEntityMetadata;
-    use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusList};
+    use crate::jwt::status_list::{JwtStatus, StatusBitSize, StatusCheckError, StatusList};
     use crate::jwt::validation::{JwtValidator, ValidateJwtError, ValidatedJwt};
     use crate::jwt::{StatusListCache, test_utils::*};
     use jsonwebtoken::Algorithm;
@@ -798,8 +789,10 @@ mod test {
         assert!(
             matches!(
                 err,
-                ValidateJwtError::RejectJwtStatus(ref status)
-                    if *status == JwtStatus::Invalid
+                ValidateJwtError::Status(StatusCheckError::Rejected {
+                    status: JwtStatus::Invalid,
+                    ..
+                })
             ),
             "GOT {err:?}: {err}"
         );
@@ -1091,8 +1084,10 @@ mod test {
         assert!(
             matches!(
                 err,
-                ValidateJwtError::RejectJwtStatus(ref status)
-                    if *status == JwtStatus::Suspended
+                ValidateJwtError::Status(StatusCheckError::Rejected {
+                    status: JwtStatus::Suspended,
+                    ..
+                })
             ),
             "GOT {err:?}: {err}"
         );

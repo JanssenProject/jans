@@ -30,7 +30,8 @@ use crate::{
 };
 
 use super::{
-    CachedStatusList, StatusListExpiry, StatusListJwt, StatusListJwtStr, UnboundReason,
+    CachedStatusList, GetStatusError, StatusAtError, StatusCheckError, StatusListExpiry,
+    StatusListJwt, StatusListJwtStr, StatusListState, UnavailableStatusList, UnboundReason,
     UpdateStatusListError,
 };
 
@@ -51,7 +52,7 @@ struct StatusListUpdateCtx {
     iss: IssClaim,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<JwtValidator>,
-    status_lists: Arc<RwLock<HashMap<String, CachedStatusList>>>,
+    status_lists: Arc<RwLock<HashMap<String, StatusListState>>>,
     logger: Option<Logger>,
     http_client: HttpClient,
     cancel_tkn: CancellationToken,
@@ -187,10 +188,63 @@ fn next_refresh_in(
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
-    pub status_lists: Arc<RwLock<HashMap<StatusListUri, CachedStatusList>>>,
+    pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusListState>>>,
 }
 
 impl StatusListCache {
+    /// Checks the status of a token whose `status` claim points at entry `idx` of
+    /// the list at `uri`. Only VALID passes; every other outcome names the list
+    /// and why no statement about the token can be made
+    /// ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    pub(crate) fn check_status(
+        &self,
+        uri: &str,
+        idx: usize,
+        now: u64,
+    ) -> Result<(), StatusCheckError> {
+        let lists = self
+            .status_lists
+            .read()
+            .expect("obtain status list read lock");
+        let list = match lists.get(uri) {
+            Some(StatusListState::Usable(list)) => list,
+            Some(StatusListState::Unavailable(unavailable)) => {
+                return Err(StatusCheckError::Unavailable {
+                    uri: uri.to_string(),
+                    unavailable: unavailable.clone(),
+                });
+            },
+            None => {
+                return Err(StatusCheckError::UnknownStatusList {
+                    uri: uri.to_string(),
+                });
+            },
+        };
+        let status = list.status_at(idx, now).map_err(|err| {
+            let uri = uri.to_string();
+            match err {
+                StatusAtError::Expired(expiry) => StatusCheckError::Expired { uri, expiry },
+                StatusAtError::Get(GetStatusError::IdxOutOfBounds { len }) => {
+                    StatusCheckError::IdxOutOfBounds { uri, idx, len }
+                },
+                StatusAtError::Get(GetStatusError::UnsupportedBitSize) => {
+                    StatusCheckError::UnsupportedBitSize { uri }
+                },
+            }
+        })?;
+        if status.is_valid() {
+            Ok(())
+        } else {
+            Err(StatusCheckError::Rejected {
+                uri: uri.to_string(),
+                idx,
+                status,
+            })
+        }
+    }
+
     /// Initializes the statuslist for the given issuer
     ///
     /// An issuer with no `status_list_endpoint`, including every static-form
@@ -308,7 +362,10 @@ impl StatusListCache {
                 .status_lists
                 .write()
                 .expect("acquire status_lists write lock");
-            status_lists.insert(status_list_url.to_string(), status_list);
+            status_lists.insert(
+                status_list_url.to_string(),
+                StatusListState::Usable(status_list),
+            );
         }
 
         Ok(())
@@ -333,6 +390,24 @@ fn after_failed_refresh(expiry: Option<StatusListExpiry>, now: u64) -> AfterFail
         Some(expiry) => AfterFailedRefresh::Keep(expiry),
         None => AfterFailedRefresh::Drop,
     }
+}
+
+/// Records that the list at `uri` could not be refreshed, keeping the time it
+/// first became unavailable. Returns whether a usable list was replaced, so the
+/// caller knows to clear the tokens validated against it.
+fn mark_unavailable(
+    status_lists: &mut HashMap<StatusListUri, StatusListState>,
+    uri: &str,
+    now: u64,
+    cause: Arc<UpdateStatusListError>,
+) -> bool {
+    let (unavailable, was_usable) = match status_lists.get(uri) {
+        Some(StatusListState::Unavailable(unavailable)) => (unavailable.with_cause(cause), false),
+        Some(StatusListState::Usable(_)) => (UnavailableStatusList::new(now, cause), true),
+        None => (UnavailableStatusList::new(now, cause), false),
+    };
+    status_lists.insert(uri.to_string(), StatusListState::Unavailable(unavailable));
+    was_usable
 }
 
 /// Fetches the list again and runs every check the first fetch ran.
@@ -409,6 +484,7 @@ where
         {
             Ok(parsed) => parsed,
             Err(err) => {
+                let err = Arc::new(err);
                 let now = jsonwebtoken::get_current_timestamp();
                 let outcome = match after_failed_refresh(expiry, now) {
                     AfterFailedRefresh::Keep(expiry) => format!(
@@ -419,12 +495,13 @@ where
                         // the list is gone or never expires: later attempts follow
                         // the refresh interval
                         expiry = None;
-                        let removed = status_lists
-                            .write()
-                            .expect("obtain status list write lock")
-                            .remove(url)
-                            .is_some();
-                        if removed {
+                        let was_usable = mark_unavailable(
+                            &mut status_lists.write().expect("obtain status list write lock"),
+                            url,
+                            now,
+                            err.clone(),
+                        );
+                        if was_usable {
                             cb();
                         }
                         format!(
@@ -450,8 +527,17 @@ where
             .write()
             .expect("obtain status list write lock")
             // insert, not update: re-creates the entry if a failed refresh dropped it
-            .insert(url.to_string(), parsed.list);
+            .insert(url.to_string(), StatusListState::Usable(parsed.list));
         cb();
+    }
+}
+
+#[cfg(test)]
+impl StatusListCache {
+    fn from_states(states: HashMap<StatusListUri, StatusListState>) -> Self {
+        Self {
+            status_lists: Arc::new(RwLock::new(states)),
+        }
     }
 }
 
@@ -461,7 +547,7 @@ impl From<HashMap<String, super::StatusList>> for StatusListCache {
     fn from(status_lists: HashMap<String, super::StatusList>) -> Self {
         let status_lists = status_lists
             .into_iter()
-            .map(|(uri, list)| (uri, CachedStatusList::from(list)))
+            .map(|(uri, list)| (uri, StatusListState::Usable(list.into())))
             .collect();
         Self {
             status_lists: Arc::new(RwLock::new(status_lists)),
@@ -492,6 +578,20 @@ mod test {
             "status_list": { "bits": 1, "lst": "eNrbuRgAAhcBXQ" },
         }))
         .expect("status list JWT claims should deserialize")
+    }
+
+    /// The list cached for `uri`, which the test expects to be usable.
+    #[track_caller]
+    fn usable_list(cache: &StatusListCache, uri: &str) -> StatusList {
+        cache
+            .status_lists
+            .read()
+            .expect("obtain status_lists read lock")
+            .get(uri)
+            .and_then(StatusListState::as_usable)
+            .expect("a usable status list should be cached")
+            .list
+            .clone()
     }
 
     fn bound_url() -> Url {
@@ -667,6 +767,53 @@ mod test {
         );
     }
 
+    /// A list that could not be refreshed stays marked unavailable from its first
+    /// failure, with the latest cause, so the admin sees since when and why.
+    #[test]
+    fn unavailable_list_keeps_first_failure_time_and_latest_cause() {
+        let uri = "https://idp.example.com/statuslist/1";
+        let usable = StatusListState::Usable(
+            StatusList {
+                bit_size: 1u8.try_into().expect("valid bit size"),
+                list: vec![0],
+            }
+            .into(),
+        );
+        let cache = StatusListCache::from_states(HashMap::from([(uri.to_string(), usable)]));
+
+        let replaced_usable = mark_unavailable(
+            &mut cache.status_lists.write().expect("write lock"),
+            uri,
+            1_767_225_600,
+            Arc::new(UpdateStatusListError::MissingValidator("first".into())),
+        );
+        assert!(
+            replaced_usable,
+            "the usable list was replaced, so the token cache must be cleared"
+        );
+        let replaced_usable = mark_unavailable(
+            &mut cache.status_lists.write().expect("write lock"),
+            uri,
+            1_767_225_900,
+            Arc::new(UpdateStatusListError::MissingValidator("second".into())),
+        );
+        assert!(
+            !replaced_usable,
+            "the list was already unavailable, nothing to clear"
+        );
+
+        let err = cache
+            .check_status(uri, 0, 1_767_226_000)
+            .expect_err("an unavailable list gives no statement about the token");
+        assert_eq!(
+            err.to_string(),
+            "the status list 'https://idp.example.com/statuslist/1' has been unavailable since \
+             2026-01-01T00:00:00Z: missing validator for the statuslist JWT from 'second'; \
+             tokens that reference it are rejected until a refresh succeeds",
+            "the rejection names the list, the first failure time and the latest cause"
+        );
+    }
+
     #[test]
     fn zero_ttl_is_floored() {
         let max = Duration::from_secs(300);
@@ -755,24 +902,14 @@ mod test {
         let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
 
         // Check if the status list is the same as we first generated
-        {
-            let lists = status_list
-                .status_lists
-                .read()
-                .expect("obtain status_lists read lock");
-            let status_list = lists
-                .get(&status_list_uri)
-                .expect("should have a status list");
-
-            assert_eq!(
-                status_list.list,
-                StatusList {
-                    bit_size: 1u8.try_into().unwrap(),
-                    list: vec![0b1111_1110],
-                },
-                "the status list is wrong",
-            );
-        }
+        assert_eq!(
+            usable_list(&status_list, &status_list_uri),
+            StatusList {
+                bit_size: 1u8.try_into().unwrap(),
+                list: vec![0b1111_1110],
+            },
+            "the status list is wrong",
+        );
 
         // Update the status in the server
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b0000_0001], None);
@@ -781,24 +918,14 @@ mod test {
         tokio::time::sleep(Duration::from_millis(600)).await;
 
         // Check if the status list got updated
-        {
-            let lists = status_list
-                .status_lists
-                .read()
-                .expect("obtain status_lists read lock");
-            let status_list = lists
-                .get(&status_list_uri)
-                .expect("should have a status list");
-
-            assert_eq!(
-                status_list.list,
-                StatusList {
-                    bit_size: 1u8.try_into().unwrap(),
-                    list: vec![0b0000_0001],
-                },
-                "the status list was not updated",
-            );
-        }
+        assert_eq!(
+            usable_list(&status_list, &status_list_uri),
+            StatusList {
+                bit_size: 1u8.try_into().unwrap(),
+                list: vec![0b0000_0001],
+            },
+            "the status list was not updated",
+        );
     }
 
     /// When the Status List JWT has no `ttl` claim, the bootstrap-config
@@ -879,15 +1006,8 @@ mod test {
 
         tokio::time::sleep(Duration::from_millis(600)).await;
 
-        let lists = status_list
-            .status_lists
-            .read()
-            .expect("obtain status_lists read lock");
-        let got = lists
-            .get(&status_list_uri)
-            .expect("should have a status list");
         assert_eq!(
-            got.list,
+            usable_list(&status_list, &status_list_uri),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
@@ -981,15 +1101,8 @@ mod test {
         // the loop honored min(ttl, refresh_interval_max).
         tokio::time::sleep(Duration::from_millis(600)).await;
 
-        let lists = status_list
-            .status_lists
-            .read()
-            .expect("obtain status_lists read lock");
-        let got = lists
-            .get(&status_list_uri)
-            .expect("should have a status list");
         assert_eq!(
-            got.list,
+            usable_list(&status_list, &status_list_uri),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],

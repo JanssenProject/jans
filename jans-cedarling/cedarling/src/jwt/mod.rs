@@ -81,6 +81,7 @@ pub use custom_token::{CustomTokenError, CustomTokenProcessor, ProcessedTokenCla
 pub(crate) use decode::*;
 pub(crate) use error::*;
 pub use loading_info::TrustedIssuerLoadingInfo;
+pub(crate) use status_list::StatusCheckError;
 pub(crate) use token::{CustomTokenIssuerMeta, Token, TokenClaims, TokenIssuer};
 pub(crate) use token_cache::TokenCache;
 pub(crate) use validation::ValidateJwtError;
@@ -106,7 +107,7 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
-use status_list::{JwtStatus, JwtStatusError, StatusListCache};
+use status_list::StatusListCache;
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};

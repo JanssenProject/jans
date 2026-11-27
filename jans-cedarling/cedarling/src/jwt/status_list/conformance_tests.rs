@@ -23,7 +23,7 @@ use serde_json::json;
 use tokio_util::sync::{CancellationToken, DropGuard};
 
 use super::{
-    InitForIssArgs, JwtStatus, JwtStatusError, StatusBitSize, StatusListCache,
+    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListCache,
     UpdateStatusListError,
 };
 use crate::JwtConfig;
@@ -68,7 +68,7 @@ struct LoadedStatusList {
 }
 
 #[derive(Debug)]
-enum StatusCheckError {
+enum CaseError {
     /// The status list JWT was refused when it was fetched.
     Fetch(UpdateStatusListError),
     /// The Referenced Token was refused when it was validated.
@@ -167,6 +167,15 @@ fn validate_referenced_token(
     let token = mock
         .generate_token_with_hs256sig(&mut claims, Some(idx))
         .expect("referenced token should be signed");
+    validate_token(mock, loaded, &token)
+}
+
+/// Validates `token` with the validator Cedarling built for the mock issuer.
+fn validate_token(
+    mock: &MockServer,
+    loaded: &LoadedStatusList,
+    token: &str,
+) -> Result<ValidatedJwt, ValidateJwtError> {
     let iss = mock.issuer();
     let validator = loaded
         .validators
@@ -177,24 +186,21 @@ fn validate_referenced_token(
         })
         .expect("a validator is built for the issuer's Referenced Tokens");
     validator.validate_jwt(
-        &token,
+        token,
         Some(mock.jwt_decoding_key().expect("mock decoding key")),
     )
 }
 
 /// Serves `list`, loads it and validates a Referenced Token at index `idx`.
-async fn check_status(
-    list: MockStatusList<'_>,
-    idx: usize,
-) -> Result<ValidatedJwt, StatusCheckError> {
+async fn check_status(list: MockStatusList<'_>, idx: usize) -> Result<ValidatedJwt, CaseError> {
     let mut mock = MockServer::new_with_defaults()
         .await
         .expect("mock server should start");
     mock.serve_status_list(list);
     let loaded = load_status_list(&mock, NO_REFRESH)
         .await
-        .map_err(StatusCheckError::Fetch)?;
-    validate_referenced_token(&mut mock, &loaded, idx).map_err(StatusCheckError::Validate)
+        .map_err(CaseError::Fetch)?;
+    validate_referenced_token(&mut mock, &loaded, idx).map_err(CaseError::Validate)
 }
 
 /// Status `0x00` is VALID ([§7.1]).
@@ -230,7 +236,10 @@ async fn rejects_invalid_status() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Invalid))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::Invalid,
+                ..
+            }))
         ),
         "an INVALID entry must reject the token with that status, got: {err:?}"
     );
@@ -254,7 +263,10 @@ async fn rejects_suspended_status() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Suspended))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::Suspended,
+                ..
+            }))
         ),
         "a SUSPENDED entry must reject the token with that status, got: {err:?}"
     );
@@ -281,9 +293,10 @@ async fn rejects_application_specific_status_0x03() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(
-                JwtStatus::ApplicationSpecific(0x03)
-            ))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::ApplicationSpecific(0x03),
+                ..
+            }))
         ),
         "an application-specific status must reject the token, got: {err:?}"
     );
@@ -309,9 +322,10 @@ async fn rejects_application_specific_status_0x0c() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(
-                JwtStatus::ApplicationSpecific(0x0C)
-            ))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::ApplicationSpecific(0x0C),
+                ..
+            }))
         ),
         "an application-specific status must reject the token, got: {err:?}"
     );
@@ -337,9 +351,10 @@ async fn rejects_reserved_status_0x05() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Reserved(
-                0x05
-            )))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::Reserved(0x05),
+                ..
+            }))
         ),
         "a reserved status must reject the token, got: {err:?}"
     );
@@ -365,9 +380,10 @@ async fn rejects_reserved_status_0xff() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::RejectJwtStatus(JwtStatus::Reserved(
-                0xFF
-            )))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::Reserved(0xFF),
+                ..
+            }))
         ),
         "a reserved status must reject the token, got: {err:?}"
     );
@@ -391,9 +407,11 @@ async fn rejects_index_out_of_bounds() {
     assert!(
         matches!(
             err,
-            StatusCheckError::Validate(ValidateJwtError::GetJwtStatus(
-                JwtStatusError::StatusListIdxOutOfBounds
-            ))
+            CaseError::Validate(ValidateJwtError::Status(StatusCheckError::IdxOutOfBounds {
+                idx: 8,
+                len: 8,
+                ..
+            }))
         ),
         "an out-of-bounds index must reject the token, got: {err:?}"
     );
@@ -419,7 +437,7 @@ async fn rejects_list_with_wrong_typ() {
     assert!(
         matches!(
             &err,
-            StatusCheckError::Fetch(UpdateStatusListError::UnexpectedTyp { found, .. })
+            CaseError::Fetch(UpdateStatusListError::UnexpectedTyp { found, .. })
                 if found.as_deref() == Some("JWT")
         ),
         "a status list JWT with the wrong `typ` must be refused, got: {err:?}"
@@ -445,7 +463,7 @@ async fn rejects_list_without_iat() {
     assert!(
         matches!(
             &err,
-            StatusCheckError::Fetch(UpdateStatusListError::ValidateJwtError(
+            CaseError::Fetch(UpdateStatusListError::ValidateJwtError(
                 ValidateJwtError::MissingClaims(claims)
             )) if claims == &["iat"]
         ),
@@ -490,7 +508,7 @@ async fn rejects_list_expired_at_fetch() {
     assert!(
         matches!(
             &err,
-            StatusCheckError::Fetch(UpdateStatusListError::ValidateJwtError(
+            CaseError::Fetch(UpdateStatusListError::ValidateJwtError(
                 ValidateJwtError::ValidateJwt(e)
             )) if *e.kind() == ErrorKind::ExpiredSignature
         ),
@@ -547,7 +565,10 @@ async fn rejects_token_once_cached_list_expires() {
     let err = validate_referenced_token(&mut mock, &loaded, 0)
         .expect_err("the cached list expired and no fresh copy exists, so the token is rejected");
     assert!(
-        matches!(err, ValidateJwtError::MissingStatusList),
+        matches!(
+            err,
+            ValidateJwtError::Status(StatusCheckError::Unavailable { .. })
+        ),
         "the expired list must be dropped (fail closed), got: {err:?}"
     );
 }
@@ -582,7 +603,13 @@ async fn refreshes_list_by_exp_when_ttl_is_absent() {
     let err = validate_referenced_token(&mut mock, &loaded, 0)
         .expect_err("the list was refreshed at its `exp`, so the revocation is seen");
     assert!(
-        matches!(err, ValidateJwtError::RejectJwtStatus(JwtStatus::Invalid)),
+        matches!(
+            err,
+            ValidateJwtError::Status(StatusCheckError::Rejected {
+                status: JwtStatus::Invalid,
+                ..
+            })
+        ),
         "the refreshed list must reject the revoked token, got: {err:?}"
     );
 }
@@ -641,7 +668,50 @@ async fn drops_list_without_exp_when_refresh_fails() {
     let err = validate_referenced_token(&mut mock, &loaded, 0)
         .expect_err("the list has no `exp` and could not be refreshed, so the token is rejected");
     assert!(
-        matches!(err, ValidateJwtError::MissingStatusList),
+        matches!(
+            err,
+            ValidateJwtError::Status(StatusCheckError::Unavailable { .. })
+        ),
         "the list must be dropped (fail closed), got: {err:?}"
+    );
+}
+
+/// The status list a token references is resolved from its `uri` ([§8.3] step 2);
+/// a URI no trusted issuer serves gives no statement about the token, which is
+/// rejected ([§8.3] closing paragraph), naming the URI it asked for.
+///
+/// [§8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+#[tokio::test]
+async fn rejects_token_referencing_unknown_list() {
+    let mut mock = MockServer::new_with_defaults()
+        .await
+        .expect("mock server should start");
+    mock.serve_status_list(MockStatusList {
+        list: &[0],
+        ..Default::default()
+    });
+    let loaded = load_status_list(&mock, NO_REFRESH)
+        .await
+        .expect("a well-formed list loads");
+
+    let unknown_uri = "https://unknown.example.com/statuslist/1";
+    let mut claims = json!({
+        "sub": "some_user",
+        "exp": chrono::Utc::now().timestamp() + 3600,
+        "status": {"status_list": {"idx": 0, "uri": unknown_uri}},
+    });
+    let token = mock
+        .generate_token_with_hs256sig(&mut claims, None)
+        .expect("referenced token should be signed");
+
+    let err = validate_token(&mock, &loaded, &token)
+        .expect_err("no trusted issuer serves that list, so the token is rejected");
+    assert!(
+        matches!(
+            &err,
+            ValidateJwtError::Status(StatusCheckError::UnknownStatusList { uri })
+                if uri == unknown_uri
+        ),
+        "the rejection must name the unknown list, got: {err:?}"
     );
 }
