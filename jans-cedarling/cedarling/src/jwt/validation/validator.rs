@@ -202,13 +202,15 @@ impl JwtValidator {
         self.validate_iss(&validated_jwt.claims)?;
 
         // Custom implementation of requiring custom claims
-        let missing_claims = self
+        let mut missing_claims = self
             .required_claims
             .iter()
             .filter(|claim| validated_jwt.claims.get(claim).is_none())
             .cloned()
             .collect::<Vec<String>>();
         if !missing_claims.is_empty() {
+            // `required_claims` is a set; sorting keeps the error the same for the same token.
+            missing_claims.sort_unstable();
             Err(ValidateJwtError::MissingClaims(missing_claims))?;
         }
 
@@ -360,7 +362,10 @@ pub enum ValidateJwtError {
     MissingValidator(OwnedValidatorInfo),
     #[error("failed to validate the JWT: {0}")]
     ValidateJwt(#[from] jwt::errors::Error),
-    #[error("validation failed since the JWT is missing the following required claims: {0:#?}")]
+    #[error(
+        "validation failed since the JWT is missing the following required claims: {}",
+        .0.join(", ")
+    )]
     MissingClaims(Vec<String>),
     #[error(transparent)]
     Status(#[from] StatusCheckError),
@@ -750,6 +755,43 @@ mod test {
                 if missing_claims == vec!["nbf".to_string()]
             ),
             "expected an error due to missing `nbf` claim"
+        );
+    }
+
+    /// The error names every missing claim on one line, in a stable order, so a
+    /// log line is readable and the same for the same token.
+    #[test]
+    fn missing_claims_are_listed_on_one_line_in_order() {
+        let iss = "127.0.0.1";
+        let keys = generate_keys();
+        let token = generate_token_using_claims(&json!({ "iss": iss }), &keys)
+            .expect("Should generate token using keys");
+        let mut tkn_entity_metadata = TEST_TKN_ENTITY_METADATA.clone();
+        tkn_entity_metadata.required_claims =
+            HashSet::from(["sub", "nbf", "iat"].map(std::convert::Into::into));
+        let (validator, _) = JwtValidator::new_multi_issuer_tkn_validator(
+            Some(&IssClaim::new(iss)),
+            "access_token",
+            &tkn_entity_metadata,
+            Algorithm::HS256,
+            None,
+            true,
+            false,
+        );
+
+        let err = validator
+            .validate_jwt(&token, Some(keys.decoding_key().unwrap()))
+            .expect_err("the token lacks three required claims");
+
+        assert!(
+            matches!(&err, ValidateJwtError::MissingClaims(claims) if claims == &["iat", "nbf", "sub"]),
+            "every missing claim is reported, sorted, got: {err:?}"
+        );
+        assert_eq!(
+            err.to_string(),
+            "validation failed since the JWT is missing the following required claims: iat, nbf, \
+             sub",
+            "the claims are listed on one line"
         );
     }
 
