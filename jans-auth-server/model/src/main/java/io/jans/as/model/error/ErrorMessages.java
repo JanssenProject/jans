@@ -63,6 +63,10 @@ public class ErrorMessages {
     @XmlElement(name = "error")
     private List<ErrorMessage> ssa;
 
+    @XmlElementWrapper(name = "attestation")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> attestation;
+
     public List<ErrorMessage> getAuthorize() {
         return authorize;
     }
@@ -149,5 +153,13 @@ public class ErrorMessages {
 
     public void setSsa(List<ErrorMessage> ssa) {
         this.ssa = ssa;
+    }
+
+    public List<ErrorMessage> getAttestation() {
+        return attestation;
+    }
+
+    public void setAttestation(List<ErrorMessage> attestation) {
+        this.attestation = attestation;
     }
 }

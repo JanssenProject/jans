@@ -71,6 +71,46 @@ public class BaseDnConfiguration {
     private String node;
     @XmlElement(name = "statusIndexPool")
     private String statusIndexPool;
+    @XmlElement(name = "attestationChallenges")
+    private String attestationChallenges;
+    @XmlElement(name = "attestations")
+    private String attestations;
+    @XmlElement(name = "keyAttestationStates")
+    private String keyAttestationStates;
+    @XmlElement(name = "keyGenerations")
+    private String keyGenerations;
+
+    public String getAttestationChallenges() {
+        return attestationChallenges;
+    }
+
+    public void setAttestationChallenges(String attestationChallenges) {
+        this.attestationChallenges = attestationChallenges;
+    }
+
+    public String getAttestations() {
+        return attestations;
+    }
+
+    public void setAttestations(String attestations) {
+        this.attestations = attestations;
+    }
+
+    public String getKeyAttestationStates() {
+        return keyAttestationStates;
+    }
+
+    public void setKeyAttestationStates(String keyAttestationStates) {
+        this.keyAttestationStates = keyAttestationStates;
+    }
+
+    public String getKeyGenerations() {
+        return keyGenerations;
+    }
+
+    public void setKeyGenerations(String keyGenerations) {
+        this.keyGenerations = keyGenerations;
+    }
 
     public String getArchivedJwks() {
         return archivedJwks;

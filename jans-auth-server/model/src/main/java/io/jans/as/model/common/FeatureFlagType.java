@@ -96,7 +96,10 @@ public enum FeatureFlagType {
     IDENTITY_ASSERTION_AUTHZ_GRANT("identity_assertion_authz_grant"),
     @DocFeatureFlag(description = "Enable/Disable SPIFFE-based client authentication (X.509-SVID mutual-TLS and JWT-SVID assertion), per draft-ietf-oauth-spiffe-client-auth",
             defaultValue = "Disabled")
-    SPIFFE_CLIENT_AUTH("spiffe_client_auth");
+    SPIFFE_CLIENT_AUTH("spiffe_client_auth"),
+    @DocFeatureFlag(description = "Enables the attestation endpoint (`/attestation/challenge` and `/attestation`) that appraises hardware evidence (TPM / TEE) for an agent key. For details, see the [Attestation endpoint documentation](../../../auth-server/endpoints/attestation.md).",
+            defaultValue = "Disabled")
+    ATTESTATION("attestation");
 
     private final String value;
 
