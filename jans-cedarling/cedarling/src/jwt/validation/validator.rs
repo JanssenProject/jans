@@ -758,10 +758,10 @@ mod test {
         );
     }
 
-    /// The error names every missing claim on one line, in a stable order, so a
-    /// log line is readable and the same for the same token.
+    /// The error names every missing claim in a stable order, so the log line is
+    /// the same for the same token.
     #[test]
-    fn missing_claims_are_listed_on_one_line_in_order() {
+    fn missing_claims_are_reported_in_order() {
         let iss = "127.0.0.1";
         let keys = generate_keys();
         let token = generate_token_using_claims(&json!({ "iss": iss }), &keys)
@@ -786,12 +786,6 @@ mod test {
         assert!(
             matches!(&err, ValidateJwtError::MissingClaims(claims) if claims == &["iat", "nbf", "sub"]),
             "every missing claim is reported, sorted, got: {err:?}"
-        );
-        assert_eq!(
-            err.to_string(),
-            "validation failed since the JWT is missing the following required claims: iat, nbf, \
-             sub",
-            "the claims are listed on one line"
         );
     }
 

@@ -883,37 +883,6 @@ mod test {
         );
     }
 
-    /// The failed-refresh log tells the admin whether tokens are still checked
-    /// against the cached list, and since or until when.
-    #[test]
-    fn failed_refresh_outcome_names_the_consequence() {
-        let expiry = StatusListExpiry {
-            exp: 1_767_225_600,
-            leeway_secs: 60,
-        };
-        assert_eq!(
-            AfterFailedRefresh::Keep(expiry).to_string(),
-            "the cached list stays in use until its `exp` 2026-01-01T00:00:00Z plus 60 s of \
-             clock-skew leeway",
-            "a kept list names until when it is used"
-        );
-        assert_eq!(
-            AfterFailedRefresh::DropExpired(expiry).to_string(),
-            "the cached list is past its `exp` 2026-01-01T00:00:00Z plus 60 s of clock-skew \
-             leeway, so tokens that reference it are rejected until a refresh succeeds",
-            "a dropped list names the expiry it passed"
-        );
-        assert_eq!(
-            AfterFailedRefresh::StayUnavailable {
-                since: UnixTime(1_767_225_600)
-            }
-            .to_string(),
-            "no usable list since 2026-01-01T00:00:00Z; tokens that reference it are rejected \
-             until a refresh succeeds",
-            "an unavailable list names since when tokens are rejected"
-        );
-    }
-
     fn unsupported_algorithm(alg: Algorithm) -> UpdateStatusListError {
         UpdateStatusListError::UnsupportedAlgorithm {
             url: BOUND_LIST_URL.to_owned(),

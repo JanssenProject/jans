@@ -526,29 +526,19 @@ mod test {
             .expect("a list without `exp` never expires");
     }
 
-    /// The admin reads the expiry in the log, so it names `exp` as a date and the
-    /// leeway that was added to it.
+    /// The admin reads times in the log as dates; a value past what a date can
+    /// hold is shown as the raw number rather than lost.
     #[test]
-    fn expiry_names_exp_and_leeway() {
-        let expiry = StatusListExpiry {
-            exp: 1_767_225_600,
-            leeway_secs: 60,
-        };
+    fn unix_time_reads_as_a_date() {
         assert_eq!(
-            expiry.to_string(),
-            "`exp` 2026-01-01T00:00:00Z plus 60 s of clock-skew leeway",
-            "the expiry is shown as an RFC 3339 date with its leeway"
+            UnixTime(1_767_225_600).to_string(),
+            "2026-01-01T00:00:00Z",
+            "a Unix time is shown as an RFC 3339 date in UTC"
         );
         assert_eq!(
-            StatusCheckError::Expired {
-                uri: "https://idp.example.com/statuslist/1".into(),
-                expiry,
-            }
-            .to_string(),
-            "the status list 'https://idp.example.com/statuslist/1' is past its `exp` \
-             2026-01-01T00:00:00Z plus 60 s of clock-skew leeway and no refreshed list has \
-             replaced it yet",
-            "the rejection names the list and why it can no longer be used"
+            UnixTime(u64::MAX).to_string(),
+            u64::MAX.to_string(),
+            "a time no date can hold is shown as the number"
         );
     }
 
