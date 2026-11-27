@@ -1477,7 +1477,7 @@ mod test {
         let _ = client.get(oidc_url.as_str()).send().await.unwrap();
 
         // the issuer publishes a status list endpoint that answers 500
-        server.fail_status_list_endpoint();
+        server.fail_status_list_endpoint(1);
         server.update_openid_config_with_status_list_endpoint();
 
         let jwt_config = JwtConfig {

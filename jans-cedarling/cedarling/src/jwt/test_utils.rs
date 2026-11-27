@@ -169,7 +169,8 @@ impl From<TokenTypeHeader> for Option<String> {
 pub(crate) struct MockStatusList<'a> {
     pub bits: StatusBitSize,
     pub list: &'a [u8],
-    pub typ: TokenTypeHeader,
+    /// `None` omits the `typ` header.
+    pub typ: Option<TokenTypeHeader>,
     /// `exp` relative to the time of the fetch; `None` omits the claim.
     pub exp_offset_secs: Option<i64>,
     /// `None` omits the claim.
@@ -182,7 +183,7 @@ impl Default for MockStatusList<'_> {
         Self {
             bits: StatusBitSize::try_from(1).expect("1 is a valid status bit size"),
             list: &[],
-            typ: TokenTypeHeader::StatusListJwt,
+            typ: Some(TokenTypeHeader::StatusListJwt),
             exp_offset_secs: Some(3600),
             ttl_secs: Some(300),
             with_iat: true,
@@ -305,7 +306,7 @@ impl MockServer {
         let header = jwt::Header {
             alg: self.keys.alg,
             kid: self.keys.kid.clone(),
-            typ: typ.into(),
+            typ: typ.and_then(Option::<String>::from),
             ..Default::default()
         };
         let encoding_key = self.keys.encoding_key.clone();
@@ -335,29 +336,48 @@ impl MockServer {
                 .to_vec()
         };
 
-        let endpoint = Some(
-            self.server
-                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
-                .with_status(200)
-                .with_header("content-type", "application/statuslist+jwt")
-                .with_body_from_request(move |_| build_jwt_claims())
-                .expect_at_least(1)
-                .create(),
-        );
-        self.endpoints.status_list = endpoint;
+        let endpoint = self
+            .server
+            .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+            .with_status(200)
+            .with_header("content-type", "application/statuslist+jwt")
+            .with_body_from_request(move |_| build_jwt_claims())
+            .expect_at_least(1)
+            .create();
+        self.replace_status_list_endpoint(endpoint);
+    }
+
+    /// Makes `endpoint` the only status list mock. A dropped `Mock` stays on the
+    /// server, and mockito prefers an older mock that still misses its expected
+    /// hits, so the old one is removed explicitly.
+    fn replace_status_list_endpoint(&mut self, endpoint: Mock) {
+        if let Some(old) = self.endpoints.status_list.replace(endpoint) {
+            old.remove();
+        }
+    }
+
+    /// Whether the status list endpoint got the requests its mock expects, such as
+    /// the `expected_attempts` of [`Self::fail_status_list_endpoint`].
+    pub(crate) fn status_list_endpoint_matched(&self) -> bool {
+        self.endpoints
+            .status_list
+            .as_ref()
+            .is_some_and(Mock::matched)
     }
 
     /// Replaces the status list endpoint mock with one that always returns 500,
     /// simulating an unavailable status endpoint so the background refresh fails.
-    /// Dropping the previous `Mock` removes it from the server.
-    pub(crate) fn fail_status_list_endpoint(&mut self) {
-        let endpoint = Some(
-            self.server
-                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
-                .with_status(500)
-                .create(),
-        );
-        self.endpoints.status_list = endpoint;
+    ///
+    /// [`Self::status_list_endpoint_matched`] turns true once Cedarling has tried
+    /// `expected_attempts` times.
+    pub(crate) fn fail_status_list_endpoint(&mut self, expected_attempts: usize) {
+        let endpoint = self
+            .server
+            .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
+            .with_status(500)
+            .expect_at_least(expected_attempts)
+            .create();
+        self.replace_status_list_endpoint(endpoint);
     }
 
     /// Updates the `OpenID` configuration mock to include the status list endpoint.
