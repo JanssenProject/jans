@@ -660,6 +660,114 @@ public class MetricAggregationManagerTest {
         assertNotNull(claim(expectedSlot));
     }
 
+    @org.testng.annotations.DataProvider(name = "pageRenewalCases")
+    public Object[][] pageRenewalCases() {
+        return new Object[][] { { false, false }, { true, false }, { false, true }, { true, true } };
+    }
+
+    @Test(dataProvider = "pageRenewalCases")
+    public void pageReadsRenewClaimAndStopOnRenewalFailure(boolean legacy, boolean failRenewal) {
+        Instant start = at("2026-11-24T10:00:00Z");
+        assertTrue(saveSeedState(lockService("seed"),
+                current -> "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
+        if (legacy) {
+            for (int i = 1; i <= 3; i++) {
+                store.put(RawMetricRows.row(METRIC_BASE_DN, APP, "h1", COUNTER, null,
+                        start.minus(Duration.ofMinutes(20 - 5L * i)), REPORT, RawMetricRows.legacyCounter(i), FAR_FUTURE));
+            }
+            for (int i = 1; i <= 2; i++) {
+                store.put(RawMetricRows.row(METRIC_BASE_DN, APP, "h1", COUNTER, null, start.plus(REPORT.multipliedBy(i)),
+                        REPORT, RawMetricRows.legacyCounter(3 + 2L * i), FAR_FUTURE));
+            }
+        } else {
+            seedCounter("h1", COUNTER, null, start, start.plus(Duration.ofHours(1)), 1);
+        }
+        AtomicInteger pages = new AtomicInteger();
+        AtomicInteger renewals = new AtomicInteger();
+        AtomicInteger lookbackRenewals = new AtomicInteger();
+        boolean[] inLookback = { false };
+        extraFailure = (name, args) -> {
+            if ("findEntries".equals(name) && args.length == 9 && args[1] == OrderedRawEntry.class) {
+                Filter range = (Filter) args[2];
+                if (range.getFilters()[0].getType() == FilterType.AND) {
+                    range = range.getFilters()[0];
+                }
+                inLookback[0] = lowerBound(range, "jansEndDate").isBefore(start);
+                pages.incrementAndGet();
+                clock.advance(Duration.ofSeconds(20));
+            }
+            return null;
+        };
+        FixedClusterLockService renewing = new FixedClusterLockService(store.getEntryManager(), "a", clock) {
+            @Override
+            public boolean heartbeat(ClusterLock claim) {
+                renewals.incrementAndGet();
+                if (inLookback[0]) {
+                    lookbackRenewals.incrementAndGet();
+                }
+                return !failRenewal && super.heartbeat(claim);
+            }
+        };
+        MetricAggregationConfiguration configuration = leaseConfig(60);
+        configuration.setMaxBucketsPerRun(1);
+        TestMetricAggregationManager manager = new TestMetricAggregationManager(
+                new TestMetricService(store.getEntryManager(), APP, "agg-node-a"), renewing, configuration, REPORT_SECONDS, 1) {
+            @Override
+            protected int getMaxRowsPerQuery() {
+                return 1;
+            }
+        };
+        MetricAggregationRunResult result = manager.runOnce();
+        if (failRenewal) {
+            assertEquals(result.getStatus(), Status.LOST);
+            assertEquals(result.getRowsWritten(), 0);
+            assertTrue(rows(MetricAggregationType.HOURLY).isEmpty());
+            assertEquals(state().get(MetricAggregationType.HOURLY), start);
+            assertEquals(pages.get(), 2, "reading stops as soon as renewal fails");
+            assertEquals(renewals.get(), 1, "a failed renewal is not retried by the bucket error handler");
+        } else {
+            assertEquals(result.getStatus(), Status.DONE);
+            assertTrue(Duration.between(T0, clock.instant()).getSeconds() > 60, "the scan outlasts the initial lease");
+            assertEquals(hourly(COUNTER, null, start.toString()).getCount(), legacy ? 4 : 12);
+            assertEquals(state().get(MetricAggregationType.HOURLY), start.plus(Duration.ofHours(1)));
+        }
+        if (legacy) {
+            assertTrue(lookbackRenewals.get() > 0, "the legacy lookback renews the same claim");
+        }
+    }
+
+    @Test
+    public void pageThatOutlastsLeaseCannotRecoverOrPublishBucket() {
+        Instant start = at("2026-11-24T10:00:00Z");
+        assertTrue(saveSeedState(lockService("seed"),
+                current -> "{\"HOURLY\":\"2026-11-24T10:00:00Z\"}"));
+        seedCounter("h1", COUNTER, null, start, start.plus(Duration.ofHours(1)), 1);
+        AtomicInteger renewals = new AtomicInteger();
+        FixedClusterLockService expired = new FixedClusterLockService(store.getEntryManager(), "a", clock) {
+            @Override
+            public boolean heartbeat(ClusterLock claim) {
+                renewals.incrementAndGet();
+                return super.heartbeat(claim);
+            }
+        };
+        extraFailure = (name, args) -> {
+            if ("findEntries".equals(name) && args.length == 9 && args[1] == OrderedRawEntry.class) {
+                clock.advance(Duration.ofSeconds(60));
+            }
+            return null;
+        };
+        MetricAggregationConfiguration configuration = leaseConfig(60);
+        configuration.setMaxBucketsPerRun(1);
+        TestMetricAggregationManager manager = new TestMetricAggregationManager(
+                new TestMetricService(store.getEntryManager(), APP, "agg-node-a"), expired, configuration, REPORT_SECONDS, 1);
+        MetricAggregationRunResult result = manager.runOnce();
+        assertEquals(result.getStatus(), Status.LOST);
+        assertEquals(result.getRowsWritten(), 0);
+        assertTrue(rows(MetricAggregationType.HOURLY).isEmpty());
+        assertEquals(state().get(MetricAggregationType.HOURLY), start);
+        assertEquals(renewals.get(), 0, "an expired claim must not be renewed");
+    }
+
     @Test
     public void laterRawPageFailureLeavesBucketUnwrittenAndRetryable() {
         Instant from = at("2026-11-24T10:00:00Z");

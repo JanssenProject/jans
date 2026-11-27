@@ -534,7 +534,7 @@ public abstract class MetricAggregationManager {
                     context.firstFailure = bucket + ": " + ex.getClass().getName() + ": " + ex.getMessage();
                 }
                 LOG.debug("Metric aggregation for '{}' failed in {}", context.applicationType, bucket, ex);
-                if (!context.lockService.heartbeat(context.claim)) {
+                if (!context.lost && !context.lockService.heartbeat(context.claim)) {
                     context.lost = true;
                 }
                 break;
@@ -684,8 +684,10 @@ public abstract class MetricAggregationManager {
         Filter pageFilter = range;
         MetricDataEntry cursor = null;
         while (true) {
+            renewClaimWhilePaging(context);
             List<OrderedRawEntry> page = manager.findEntries(baseDn, OrderedRawEntry.class, pageFilter, (String[]) null,
                     null, SortOrder.ASCENDING, 0, pageSize, pageSize);
+            renewClaimWhilePaging(context);
             if (page == null) {
                 throw new IllegalStateException("Raw metric page was not returned");
             }
@@ -697,6 +699,7 @@ public abstract class MetricAggregationManager {
                 throw new IllegalStateException("Raw metric page did not advance");
             }
             consume.accept(new ArrayList<>(page));
+            renewClaimWhilePaging(context);
             if (page.size() < pageSize) {
                 return;
             }
@@ -706,6 +709,21 @@ public abstract class MetricAggregationManager {
                     Filter.createNOTFilter(Filter.createLessOrEqualFilter("jansEndDate", end)),
                     Filter.createANDFilter(Filter.createEqualityFilter("jansEndDate", end),
                             Filter.createNOTFilter(Filter.createLessOrEqualFilter("uniqueIdentifier", cursor.getId())))));
+        }
+    }
+
+    /** Shared by bucket and lookback reads; renew with half the lease still available. */
+    private void renewClaimWhilePaging(RunContext context) {
+        Instant now = getClock().instant();
+        Instant lastUpdate = context.claim.getLastUpdate().toInstant();
+        Instant expiration = context.claim.getExpirationDate().toInstant();
+        Instant renewAt = lastUpdate.plus(Duration.between(lastUpdate, expiration).dividedBy(2));
+        if (now.isBefore(renewAt)) {
+            return;
+        }
+        if (!now.isBefore(expiration) || !context.lockService.heartbeat(context.claim)) {
+            context.lost = true;
+            throw new IllegalStateException("Claim lost while reading raw metric pages");
         }
     }
 
