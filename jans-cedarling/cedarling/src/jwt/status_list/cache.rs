@@ -29,13 +29,18 @@ use crate::{
     rt::sleep,
 };
 
-use super::{StatusList, StatusListJwt, StatusListJwtStr, UnboundReason, UpdateStatusListError};
+use super::{
+    CachedStatusList, StatusListExpiry, StatusListJwt, StatusListJwtStr, UnboundReason,
+    UpdateStatusListError,
+};
 
 /// The value of the `status_list_uri` claim from a JWT
 type StatusListUri = String;
 
 struct StatusListUpdateCtx {
     ttl: Duration,
+    /// Expiry of the list cached at start.
+    expiry: Option<StatusListExpiry>,
     /// Upper bound on the refresh interval. The Status List JWT's `ttl`
     /// claim is honored when present, but capped to this value; when the JWT omits
     /// `ttl`, this value is used directly.
@@ -44,7 +49,7 @@ struct StatusListUpdateCtx {
     iss: IssClaim,
     decoding_key: Option<Arc<DecodingKey>>,
     validator: Arc<JwtValidator>,
-    status_lists: Arc<RwLock<HashMap<String, StatusList>>>,
+    status_lists: Arc<RwLock<HashMap<String, CachedStatusList>>>,
     logger: Option<Logger>,
     http_client: HttpClient,
     cancel_tkn: CancellationToken,
@@ -116,18 +121,24 @@ fn is_status_list_typ(typ: &str) -> bool {
     subtype.eq_ignore_ascii_case(STATUS_LIST_TYP)
 }
 
-/// Validates a fetched status list JWT and returns its claims: signature and
+/// A status list JWT that passed every check, ready to cache.
+struct ParsedStatusList {
+    list: CachedStatusList,
+    ttl_secs: Option<u64>,
+}
+
+/// Validates a fetched status list JWT and parses its list: signature and
 /// registered claims first, then `typ` and the binding to its URI and issuer, in
 /// the order of [draft-ietf-oauth-status-list-21 §8.3] steps 3 and 4.
 ///
 /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
-fn validate_status_list_jwt(
+fn parse_status_list_jwt(
     jwt: &StatusListJwtStr,
     validator: &JwtValidator,
     decoding_key: Option<Arc<DecodingKey>>,
     iss: &IssClaim,
     status_list_url: &Url,
-) -> Result<StatusListJwt, UpdateStatusListError> {
+) -> Result<ParsedStatusList, UpdateStatusListError> {
     let validated_jwt = validator.validate_jwt(&jwt.0, decoding_key)?;
 
     let typ = jsonwebtoken::decode_header(&jwt.0)
@@ -149,13 +160,32 @@ fn validate_status_list_jwt(
             reason,
         }
     })?;
-    Ok(status_list_jwt)
+    Ok(ParsedStatusList {
+        ttl_secs: status_list_jwt.ttl,
+        list: status_list_jwt.into_cached(validator.leeway_secs())?,
+    })
+}
+
+/// Waits the refresh interval, but no longer than until the cached list expires,
+/// so a list is refreshed by its `exp` even without a `ttl`
+/// ([draft-ietf-oauth-status-list-21 §13.7]).
+///
+/// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+fn next_refresh_in(
+    refresh_interval: Duration,
+    expiry: Option<StatusListExpiry>,
+    now: u64,
+) -> Duration {
+    match expiry {
+        Some(expiry) => refresh_interval.min(expiry.remaining(now).max(MIN_REFRESH_INTERVAL)),
+        None => refresh_interval,
+    }
 }
 
 /// Contains an `Arc<RwLock<_>>` internally so clone should be fine
 #[derive(Debug, Default, Clone)]
 pub(crate) struct StatusListCache {
-    pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusList>>>,
+    pub status_lists: Arc<RwLock<HashMap<StatusListUri, CachedStatusList>>>,
 }
 
 impl StatusListCache {
@@ -233,7 +263,7 @@ impl StatusListCache {
                     status_list_url.to_string(),
                 ))?;
 
-        let status_list_jwt = validate_status_list_jwt(
+        let parsed = parse_status_list_jwt(
             &status_list_jwt,
             &validator,
             decoding_key.clone(),
@@ -247,11 +277,12 @@ impl StatusListCache {
         // always request a *more frequent* refresh, but never a less frequent one.
         // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
-        let status_list: StatusList = status_list_jwt.try_into()?;
+        let ttl = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
+        let status_list = parsed.list;
 
         let ctx = StatusListUpdateCtx {
             ttl,
+            expiry: status_list.expiry(),
             refresh_interval_max,
             status_list_url: status_list_url.clone(),
             iss: iss.clone(),
@@ -290,6 +321,7 @@ where
 {
     let StatusListUpdateCtx {
         mut ttl,
+        mut expiry,
         refresh_interval_max,
         status_list_url,
         iss,
@@ -332,9 +364,29 @@ where
 
     loop {
         tokio::select! {
-            () = sleep(ttl) => {},
+            () = sleep(next_refresh_in(ttl, expiry, jsonwebtoken::get_current_timestamp())) => {},
             () = cancel_tkn.cancelled() => break,
         }
+
+        // The validator already rejects tokens against the expired list; clearing
+        // the token cache stops tokens validated before it expired from being
+        // served while the refresh below runs.
+        if let Some(expired) =
+            expiry.filter(|expiry| expiry.has_passed(jsonwebtoken::get_current_timestamp()))
+        {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "the cached status list for '{0}' is past its {expired}; tokens that \
+                     reference it will be rejected until it refreshes successfully",
+                    status_list_url.as_str(),
+                ),
+                Some(LogLevel::WARN),
+            ));
+            cb();
+        }
+        // From here on the old expiry is handled; a failed refresh below drops the
+        // list, and later waits follow the refresh interval, not a passed `exp`.
+        expiry = None;
 
         let status_list_jwt =
             match StatusListJwtStr::get_from_url(&status_list_url, &http_client).await {
@@ -345,14 +397,14 @@ where
                 },
             };
 
-        let status_list_jwt = match validate_status_list_jwt(
+        let parsed = match parse_status_list_jwt(
             &status_list_jwt,
             &validator,
             decoding_key.clone(),
             &iss,
             &status_list_url,
         ) {
-            Ok(jwt) => jwt,
+            Ok(parsed) => parsed,
             Err(e) => {
                 handle_err("validate the updated status list JWT from", &e);
                 continue;
@@ -360,15 +412,9 @@ where
         };
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
-        ttl = effective_refresh_interval(status_list_jwt.ttl, refresh_interval_max);
-
-        let updated_status_list: StatusList = match status_list_jwt.try_into() {
-            Ok(status_list) => status_list,
-            Err(e) => {
-                handle_err("parse the updated status list JWT from", &e);
-                continue;
-            },
-        };
+        ttl = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
+        expiry = parsed.list.expiry();
+        let updated_status_list = parsed.list;
 
         {
             let mut lists = status_lists.write().expect("obtain status list write lock");
@@ -380,8 +426,14 @@ where
     }
 }
 
-impl From<HashMap<String, StatusList>> for StatusListCache {
-    fn from(status_lists: HashMap<String, StatusList>) -> Self {
+/// Caches lists that never expire, for tests that check statuses only.
+#[cfg(test)]
+impl From<HashMap<String, super::StatusList>> for StatusListCache {
+    fn from(status_lists: HashMap<String, super::StatusList>) -> Self {
+        let status_lists = status_lists
+            .into_iter()
+            .map(|(uri, list)| (uri, CachedStatusList::from(list)))
+            .collect();
         Self {
             status_lists: Arc::new(RwLock::new(status_lists)),
         }
@@ -396,6 +448,7 @@ mod test {
     use crate::JwtConfig;
     use crate::common::policy_store::TrustedIssuer;
     use crate::http::HttpClientConfig;
+    use crate::jwt::status_list::StatusList;
     use crate::jwt::test_utils::MockServer;
     use std::collections::HashSet;
     use std::time::Duration;
@@ -519,6 +572,44 @@ mod test {
         }
     }
 
+    /// A list is refreshed no later than its `exp` ([draft-ietf-oauth-status-list-21 §13.7]):
+    /// the refresh waits the interval, cut short at the second after `exp` plus
+    /// leeway, and never less than [`MIN_REFRESH_INTERVAL`].
+    ///
+    /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    #[test]
+    fn next_refresh_is_cut_short_by_expiry() {
+        let interval = Duration::from_secs(300);
+        let now = 1_000;
+        let expiry = |exp| {
+            Some(StatusListExpiry {
+                exp,
+                leeway_secs: 60,
+            })
+        };
+
+        assert_eq!(
+            next_refresh_in(interval, None, now),
+            interval,
+            "a list without `exp` is refreshed by the interval alone"
+        );
+        assert_eq!(
+            next_refresh_in(interval, expiry(1_010), now),
+            Duration::from_secs(71),
+            "the list is usable through second 1070, so it is refreshed at 1071"
+        );
+        assert_eq!(
+            next_refresh_in(interval, expiry(5_000), now),
+            interval,
+            "a list that expires after the interval is refreshed by the interval"
+        );
+        assert_eq!(
+            next_refresh_in(interval, expiry(900), now),
+            MIN_REFRESH_INTERVAL,
+            "an already expired list is refreshed after the floor, not in a busy loop"
+        );
+    }
+
     #[test]
     fn zero_ttl_is_floored() {
         let max = Duration::from_secs(300);
@@ -617,7 +708,7 @@ mod test {
                 .expect("should have a status list");
 
             assert_eq!(
-                *status_list,
+                status_list.list,
                 StatusList {
                     bit_size: 1u8.try_into().unwrap(),
                     list: vec![0b1111_1110],
@@ -643,7 +734,7 @@ mod test {
                 .expect("should have a status list");
 
             assert_eq!(
-                *status_list,
+                status_list.list,
                 StatusList {
                     bit_size: 1u8.try_into().unwrap(),
                     list: vec![0b0000_0001],
@@ -824,7 +915,7 @@ mod test {
             .get(&status_list_uri)
             .expect("should have a status list");
         assert_eq!(
-            *got,
+            got.list,
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
@@ -926,7 +1017,7 @@ mod test {
             .get(&status_list_uri)
             .expect("should have a status list");
         assert_eq!(
-            *got,
+            got.list,
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],

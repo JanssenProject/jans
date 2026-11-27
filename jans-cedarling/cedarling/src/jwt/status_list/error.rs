@@ -6,6 +6,7 @@
 use thiserror::Error;
 use url::Url;
 
+use super::StatusListExpiry;
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::{decode::DecodeJwtError, fetch::HttpError, validation::ValidateJwtError};
 
@@ -45,8 +46,8 @@ pub enum JwtStatusError {
     InvalidStatusListEncoding,
     #[error("status list for {0} is missing")]
     MissingStatusList(Url),
-    #[error("status list for {0} needs to be updated")]
-    ExpiredStatusList(Url),
+    #[error("the status list is past its {0} and no refreshed list has replaced it yet")]
+    ExpiredStatusList(StatusListExpiry),
 }
 
 #[derive(Debug, Error)]

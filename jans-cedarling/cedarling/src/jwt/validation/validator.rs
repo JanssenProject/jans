@@ -161,6 +161,11 @@ impl JwtValidator {
         (validator, key)
     }
 
+    /// The clock-skew leeway, in seconds, this validator allows on `exp` and `nbf`.
+    pub(crate) fn leeway_secs(&self) -> u64 {
+        self.validation.leeway
+    }
+
     /// Validates JWT by checking:
     /// - The JWT's Signature
     /// - If the claims are valid (e.g. the JWT isn't expired)
@@ -217,7 +222,7 @@ impl JwtValidator {
                     .expect("obtain status list read lock")
                     .get(&ref_status_list.uri)
                     .ok_or(ValidateJwtError::MissingStatusList)?
-                    .get_status(ref_status_list.idx)?
+                    .status_at(ref_status_list.idx, jwt::get_current_timestamp())?
             };
 
             if !jwt_status.is_valid() {

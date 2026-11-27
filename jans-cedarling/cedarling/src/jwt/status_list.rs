@@ -24,10 +24,12 @@ pub(super) use error::*;
 use super::validation::ValidatedJwt;
 use crate::common::issuer_utils::IssClaim;
 use base64::prelude::{BASE64_URL_SAFE_NO_PAD, Engine};
+use chrono::{DateTime, SecondsFormat, Utc};
 use flate2::read::ZlibDecoder;
 use serde::Deserialize;
 use std::fmt::Display;
 use std::io::Read;
+use std::time::Duration;
 
 #[derive(Debug, PartialEq, Clone)]
 pub(super) struct StatusList {
@@ -132,6 +134,100 @@ impl TryFrom<StatusListJwt> for StatusList {
 
     fn try_from(jwt: StatusListJwt) -> Result<Self, Self::Error> {
         Self::parse(&jwt.status_list.list, jwt.status_list.bits)
+    }
+}
+
+impl StatusListJwt {
+    /// Parses the list and keeps its expiry next to it, so the two are replaced
+    /// together. `leeway_secs` is the clock-skew leeway the JWT was validated with.
+    pub(super) fn into_cached(
+        self,
+        leeway_secs: u64,
+    ) -> Result<CachedStatusList, ParseStatusListError> {
+        let expiry = self.exp.map(|exp| StatusListExpiry { exp, leeway_secs });
+        Ok(CachedStatusList {
+            list: self.try_into()?,
+            expiry,
+        })
+    }
+}
+
+/// When a status list stops being usable: its `exp` plus the clock-skew leeway
+/// it was accepted with. After that it "MUST NOT be relied upon any longer"
+/// ([draft-ietf-oauth-status-list-21 §13.7]).
+///
+/// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct StatusListExpiry {
+    exp: u64,
+    leeway_secs: u64,
+}
+
+impl StatusListExpiry {
+    /// The last second, in Unix time, at which the list may still be used.
+    fn usable_until(self) -> u64 {
+        self.exp.saturating_add(self.leeway_secs)
+    }
+
+    pub(super) fn has_passed(self, now: u64) -> bool {
+        now > self.usable_until()
+    }
+
+    /// Time from `now` until [`Self::has_passed`] turns true.
+    pub(super) fn remaining(self, now: u64) -> Duration {
+        Duration::from_secs(self.usable_until().saturating_add(1).saturating_sub(now))
+    }
+}
+
+impl Display for StatusListExpiry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let exp = i64::try_from(self.exp)
+            .ok()
+            .and_then(|secs| DateTime::<Utc>::from_timestamp(secs, 0));
+        match exp {
+            Some(exp) => write!(
+                f,
+                "`exp` {}",
+                exp.to_rfc3339_opts(SecondsFormat::Secs, true)
+            ),
+            None => write!(f, "`exp` {}", self.exp),
+        }?;
+        write!(f, " plus {} s of clock-skew leeway", self.leeway_secs)
+    }
+}
+
+/// A parsed status list as Cedarling caches it, with the expiry of the JWT it
+/// came from.
+#[derive(Debug, PartialEq, Clone)]
+pub(super) struct CachedStatusList {
+    list: StatusList,
+    /// `None` when the JWT has no `exp`, which is RECOMMENDED but not required.
+    expiry: Option<StatusListExpiry>,
+}
+
+impl CachedStatusList {
+    pub(super) fn expiry(&self) -> Option<StatusListExpiry> {
+        self.expiry
+    }
+
+    /// Returns the status at `index`, or an error once the list has expired:
+    /// an expired list gives no statement about the token
+    /// ([draft-ietf-oauth-status-list-21 §8.3] step 4).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+    pub(super) fn status_at(&self, index: usize, now: u64) -> Result<JwtStatus, JwtStatusError> {
+        if let Some(expiry) = self.expiry.filter(|expiry| expiry.has_passed(now)) {
+            return Err(JwtStatusError::ExpiredStatusList(expiry));
+        }
+        self.list.get_status(index)
+    }
+}
+
+/// A list that never expires, for tests that check statuses only.
+#[cfg(test)]
+impl From<StatusList> for CachedStatusList {
+    fn from(list: StatusList) -> Self {
+        Self { list, expiry: None }
     }
 }
 
@@ -344,6 +440,70 @@ mod test {
                 "status value {value:#04x} must reject the token"
             );
         }
+    }
+
+    /// A cached list "MUST NOT be relied upon any longer" once its `exp` passes
+    /// ([draft-ietf-oauth-status-list-21 §13.7]); the same clock-skew leeway as
+    /// at fetch applies. A list without `exp` does not expire ([§5.1]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    /// [§5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
+    #[test]
+    fn cached_list_expires_after_exp_plus_leeway() {
+        let list = StatusList {
+            bit_size: 1u8.try_into().expect("valid bit size"),
+            list: vec![0],
+        };
+        let expiry = StatusListExpiry {
+            exp: 1_000,
+            leeway_secs: 60,
+        };
+        let cached = CachedStatusList {
+            list: list.clone(),
+            expiry: Some(expiry),
+        };
+
+        let status = cached
+            .status_at(0, 1_060)
+            .expect("the list is usable through `exp` plus leeway");
+        assert_eq!(
+            status,
+            JwtStatus::Valid,
+            "index 0 holds VALID while the list is usable"
+        );
+
+        let err = cached
+            .status_at(0, 1_061)
+            .expect_err("the list has expired one second after `exp` plus leeway");
+        assert!(
+            matches!(err, JwtStatusError::ExpiredStatusList(found) if found == expiry),
+            "an expired list must report its expiry, got: {err:?}"
+        );
+
+        CachedStatusList::from(list)
+            .status_at(0, u64::MAX)
+            .expect("a list without `exp` never expires");
+    }
+
+    /// The admin reads the expiry in the log, so it names `exp` as a date and the
+    /// leeway that was added to it.
+    #[test]
+    fn expiry_names_exp_and_leeway() {
+        let expiry = StatusListExpiry {
+            exp: 1_767_225_600,
+            leeway_secs: 60,
+        };
+        assert_eq!(
+            expiry.to_string(),
+            "`exp` 2026-01-01T00:00:00Z plus 60 s of clock-skew leeway",
+            "the expiry is shown as an RFC 3339 date with its leeway"
+        );
+        assert_eq!(
+            JwtStatusError::ExpiredStatusList(expiry).to_string(),
+            "the status list is past its `exp` 2026-01-01T00:00:00Z plus 60 s of clock-skew \
+             leeway and no refreshed list has replaced it yet",
+            "the rejection says why the list can no longer be used"
+        );
     }
 
     #[test]
