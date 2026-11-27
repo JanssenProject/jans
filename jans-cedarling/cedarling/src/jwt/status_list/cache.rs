@@ -33,7 +33,7 @@ use crate::{
 use super::{
     CachedStatusList, GetStatusError, StatusAtError, StatusCheckError, StatusListExpiry,
     StatusListJwt, StatusListJwtStr, StatusListState, UnavailableStatusList, UnboundReason,
-    UpdateStatusListError,
+    UnixTime, UpdateStatusListError,
 };
 
 struct StatusListUpdateCtx {
@@ -426,22 +426,50 @@ async fn first_load(source: &StatusListSource, refresh_interval_max: Duration) -
 }
 
 /// What the refresh task does with the cached list after a refresh failed.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, derive_more::Display)]
 enum AfterFailedRefresh {
     /// The list has not expired, so it may still be relied upon
     /// ([draft-ietf-oauth-status-list-21 §13.7]): keep it and retry.
     ///
     /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
+    #[display("the cached list stays in use until its {_0}")]
     Keep(StatusListExpiry),
-    /// The list has expired or has no `exp`: drop it, so the tokens that
-    /// reference it are rejected.
-    Drop,
+    /// The list has expired: drop it, so the tokens that reference it are rejected.
+    #[display(
+        "the cached list is past its {_0}, so tokens that reference it are rejected until a \
+         refresh succeeds"
+    )]
+    DropExpired(StatusListExpiry),
+    /// The list has no `exp`, so nothing says it may still be relied upon: drop it.
+    #[display(
+        "the cached list has no `exp`, so it is no longer used and tokens that reference it are \
+         rejected until a refresh succeeds"
+    )]
+    DropWithoutExp,
+    /// No list is in use: it stays unavailable, with the latest cause.
+    #[display(
+        "no usable list since {since}; tokens that reference it are rejected until a refresh \
+         succeeds"
+    )]
+    StayUnavailable { since: UnixTime },
 }
 
-fn after_failed_refresh(expiry: Option<StatusListExpiry>, now: u64) -> AfterFailedRefresh {
-    match expiry.filter(|expiry| !expiry.has_passed(now)) {
-        Some(expiry) => AfterFailedRefresh::Keep(expiry),
-        None => AfterFailedRefresh::Drop,
+impl AfterFailedRefresh {
+    fn keeps_list(&self) -> bool {
+        matches!(self, Self::Keep(_))
+    }
+}
+
+fn after_failed_refresh(state: &StatusListState, now: u64) -> AfterFailedRefresh {
+    match state {
+        StatusListState::Unavailable(unavailable) => AfterFailedRefresh::StayUnavailable {
+            since: unavailable.since(),
+        },
+        StatusListState::Usable(list) => match list.expiry() {
+            None => AfterFailedRefresh::DropWithoutExp,
+            Some(expiry) if expiry.has_passed(now) => AfterFailedRefresh::DropExpired(expiry),
+            Some(expiry) => AfterFailedRefresh::Keep(expiry),
+        },
     }
 }
 
@@ -484,6 +512,8 @@ impl<F: Fn()> StatusListWriter<F> {
 }
 
 /// Where one issuer's status list comes from, and what checks it.
+#[derive(derive_more::Display)]
+#[display("the status list '{url}' of the trusted issuer '{iss}'")]
 struct StatusListSource {
     url: Url,
     iss: IssClaim,
@@ -537,7 +567,6 @@ async fn keep_status_list_updated<F: Fn()>(writer: StatusListWriter<F>, ctx: Sta
         logger,
         cancel_tkn,
     } = ctx;
-    let url = source.url.as_str();
 
     loop {
         let wait = next_refresh_in(
@@ -552,19 +581,12 @@ async fn keep_status_list_updated<F: Fn()>(writer: StatusListWriter<F>, ctx: Sta
 
         // The validator already rejects tokens against the expired list; clearing
         // the token cache stops tokens validated before it expired from being
-        // served while the refresh below runs.
-        if let Some(expired) = writer
+        // served while the refresh below runs. A failed refresh logs the expiry.
+        if writer
             .list
             .expiry()
-            .filter(|expiry| expiry.has_passed(jsonwebtoken::get_current_timestamp()))
+            .is_some_and(|expiry| expiry.has_passed(jsonwebtoken::get_current_timestamp()))
         {
-            logger.log_any(JwtLogEntry::new(
-                format!(
-                    "the cached status list for '{url}' is past its {expired}; tokens that \
-                     reference it will be rejected until it refreshes successfully",
-                ),
-                Some(LogLevel::WARN),
-            ));
             writer.expired();
         }
 
@@ -573,22 +595,16 @@ async fn keep_status_list_updated<F: Fn()>(writer: StatusListWriter<F>, ctx: Sta
             Err(err) => {
                 let err = Arc::new(err);
                 let now = jsonwebtoken::get_current_timestamp();
-                let outcome = match after_failed_refresh(writer.list.expiry(), now) {
-                    AfterFailedRefresh::Keep(expiry) => format!(
-                        "the cached list stays in use until its {expiry}; next attempt in {} s",
-                        next_refresh_in(refresh_interval, Some(expiry), now).as_secs(),
-                    ),
-                    AfterFailedRefresh::Drop => {
-                        writer.mark_unavailable(now, err.clone());
-                        format!(
-                            "no usable list is cached, so tokens that reference it are \
-                             rejected until it refreshes successfully; next attempt in {} s",
-                            refresh_interval.as_secs(),
-                        )
-                    },
-                };
+                let outcome = after_failed_refresh(&writer.list.state.load(), now);
+                if !outcome.keeps_list() {
+                    writer.mark_unavailable(now, err.clone());
+                }
+                let next_attempt = next_refresh_in(refresh_interval, writer.list.expiry(), now);
                 logger.log_any(JwtLogEntry::new(
-                    format!("failed to refresh the status list from '{url}': {err}; {outcome}"),
+                    format!(
+                        "failed to refresh {source}: {err}; {outcome}; next attempt in {} s",
+                        next_attempt.as_secs(),
+                    ),
                     Some(LogLevel::ERROR),
                 ));
                 continue;
@@ -824,20 +840,71 @@ mod test {
             exp: 1_000,
             leeway_secs: 60,
         };
+        let usable = |expiry| {
+            StatusListState::Usable(CachedStatusList {
+                list: StatusList {
+                    bit_size: 1u8.try_into().expect("valid bit size"),
+                    list: vec![0],
+                },
+                expiry,
+            })
+        };
         assert_eq!(
-            after_failed_refresh(Some(expiry), 1_060),
+            after_failed_refresh(&usable(Some(expiry)), 1_060),
             AfterFailedRefresh::Keep(expiry),
             "the list is usable through `exp` plus leeway, so it is kept"
         );
         assert_eq!(
-            after_failed_refresh(Some(expiry), 1_061),
-            AfterFailedRefresh::Drop,
+            after_failed_refresh(&usable(Some(expiry)), 1_061),
+            AfterFailedRefresh::DropExpired(expiry),
             "the list has expired, so it is dropped"
         );
         assert_eq!(
-            after_failed_refresh(None, 1_000),
-            AfterFailedRefresh::Drop,
+            after_failed_refresh(&usable(None), 1_000),
+            AfterFailedRefresh::DropWithoutExp,
             "a list without `exp` has no usable-until point, so it is dropped"
+        );
+        let unavailable = StatusListState::Unavailable(UnavailableStatusList::new(
+            900,
+            Arc::new(unsupported_algorithm(Algorithm::HS256)),
+        ));
+        assert_eq!(
+            after_failed_refresh(&unavailable, 1_000),
+            AfterFailedRefresh::StayUnavailable {
+                since: UnixTime(900)
+            },
+            "an unavailable list stays unavailable since its first failure"
+        );
+    }
+
+    /// The failed-refresh log tells the admin whether tokens are still checked
+    /// against the cached list, and since or until when.
+    #[test]
+    fn failed_refresh_outcome_names_the_consequence() {
+        let expiry = StatusListExpiry {
+            exp: 1_767_225_600,
+            leeway_secs: 60,
+        };
+        assert_eq!(
+            AfterFailedRefresh::Keep(expiry).to_string(),
+            "the cached list stays in use until its `exp` 2026-01-01T00:00:00Z plus 60 s of \
+             clock-skew leeway",
+            "a kept list names until when it is used"
+        );
+        assert_eq!(
+            AfterFailedRefresh::DropExpired(expiry).to_string(),
+            "the cached list is past its `exp` 2026-01-01T00:00:00Z plus 60 s of clock-skew \
+             leeway, so tokens that reference it are rejected until a refresh succeeds",
+            "a dropped list names the expiry it passed"
+        );
+        assert_eq!(
+            AfterFailedRefresh::StayUnavailable {
+                since: UnixTime(1_767_225_600)
+            }
+            .to_string(),
+            "no usable list since 2026-01-01T00:00:00Z; tokens that reference it are rejected \
+             until a refresh succeeds",
+            "an unavailable list names since when tokens are rejected"
         );
     }
 
