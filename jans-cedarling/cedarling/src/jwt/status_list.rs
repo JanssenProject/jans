@@ -173,9 +173,10 @@ impl StatusListExpiry {
         now > self.usable_until()
     }
 
-    /// Time from `now` until [`Self::has_passed`] turns true.
-    pub(super) fn remaining(self, now: u64) -> Duration {
-        Duration::from_secs(self.usable_until().saturating_add(1).saturating_sub(now))
+    /// Time from `now` until `exp`, when the issuer expects a newer list to be
+    /// fetched; zero once it has passed.
+    pub(super) fn until_exp(self, now: u64) -> Duration {
+        Duration::from_secs(self.exp.saturating_sub(now))
     }
 }
 

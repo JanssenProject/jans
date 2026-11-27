@@ -60,8 +60,12 @@ fn bits(value: u8) -> StatusBitSize {
 /// The entity type the mock issuer's Referenced Tokens are mapped to.
 const REFERENCED_TOKEN_TYPE: &str = "Jans::Access_Token";
 
+/// Refresh interval for tests that need the refresh task to run within seconds;
+/// below the 5 s floor, which applies to an issuer's `ttl` but not to the max.
+const FAST_REFRESH: Duration = Duration::from_secs(1);
+
 /// How long a test waits for the background refresh before it fails.
-const WAIT_LIMIT: Duration = Duration::from_secs(10);
+const WAIT_LIMIT: Duration = Duration::from_secs(15);
 
 /// Polls `check` every 50 ms until it returns `Some`, or gives up after
 /// [`WAIT_LIMIT`]. Tests wait for the background refresh this way, so a slow
@@ -604,7 +608,9 @@ async fn rejects_token_once_cached_list_expires() {
 }
 
 /// Without `ttl`, the Relying Party SHOULD check for updates no later than `exp`
-/// ([§13.7]), even when the configured refresh interval is longer.
+/// ([§13.7]), even when the configured refresh interval is longer. Cedarling
+/// refreshes at `exp` itself, not once the clock-skew leeway after it has run
+/// out, so a healthy issuer leaves no window in which tokens are rejected.
 ///
 /// [§13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
 #[tokio::test(flavor = "multi_thread")]
@@ -612,7 +618,7 @@ async fn refreshes_list_by_exp_when_ttl_is_absent() {
     let mut case = Case::load(
         MockStatusList {
             list: &[0],
-            exp_offset_secs: Some(exp_offset_expiring_soon()),
+            exp_offset_secs: Some(3),
             ttl_secs: None,
             ..Default::default()
         },
@@ -632,8 +638,8 @@ async fn refreshes_list_by_exp_when_ttl_is_absent() {
         .await;
     assert!(
         err.is_some(),
-        "the list must be refreshed at its `exp`, well before the 60 s refresh interval, \
-         so the revocation is seen"
+        "the list must be refreshed at its `exp`, well before the 60 s refresh interval and \
+         the 60 s leeway, so the revocation is seen"
     );
 }
 
@@ -647,10 +653,9 @@ async fn keeps_unexpired_list_when_refresh_fails() {
     let mut case = Case::load(
         MockStatusList {
             list: &[0],
-            ttl_secs: Some(1),
             ..Default::default()
         },
-        NO_REFRESH,
+        FAST_REFRESH,
     )
     .await;
 
@@ -659,11 +664,11 @@ async fn keeps_unexpired_list_when_refresh_fails() {
     let refreshed = wait_for(|| case.mock.status_list_endpoint_matched().then_some(())).await;
     assert!(
         refreshed.is_some(),
-        "the list must be refreshed at its `ttl`, and both attempts must fail"
+        "the list must be refreshed, and both attempts must fail"
     );
 
     case.validate(0).expect(
-        "the refresh at `ttl` failed but the list has not reached its `exp`, so a VALID \
+        "the refreshes failed but the list has not reached its `exp`, so a VALID \
          entry is still accepted",
     );
 }
@@ -679,10 +684,9 @@ async fn drops_list_without_exp_when_refresh_fails() {
         MockStatusList {
             list: &[0],
             exp_offset_secs: None,
-            ttl_secs: Some(1),
             ..Default::default()
         },
-        NO_REFRESH,
+        FAST_REFRESH,
     )
     .await;
 

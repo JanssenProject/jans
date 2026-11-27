@@ -193,7 +193,8 @@ The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps tha
 
 - The effective interval is `min(ttl, CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX)`.
 - Without a `ttl` claim, the max value is used, so the cache cannot go stale forever.
-- If the list expires sooner, Cedarling refreshes it when it expires: at its `exp` plus 60 seconds of clock-skew leeway.
+- If the list's `exp` comes sooner, Cedarling refreshes it at its `exp`. The list stays in use for 60 more seconds of clock-skew leeway, which covers the fetch and its retries.
+- An issuer `ttl` below `5` seconds counts as `5` seconds.
 - `0` or an unset variable means the default, `300` seconds.
 - Non-zero values below `5` seconds are raised to `5` seconds.
 

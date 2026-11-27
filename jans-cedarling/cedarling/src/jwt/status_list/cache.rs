@@ -59,9 +59,14 @@ pub(crate) struct InitForIssArgs {
     pub cancel_tkn: CancellationToken,
 }
 
-/// Floor for an issuer-requested `ttl`, so `ttl: 0` cannot turn the refresh
-/// worker into a busy loop.
-const MIN_REFRESH_INTERVAL: Duration = Duration::from_secs(1);
+/// Floor for an issuer-requested `ttl` and for a retry while a list nears its
+/// expiry, so a small `ttl` or an outage cannot turn the refresh task into a busy
+/// loop ([draft-ietf-oauth-status-list-21 §11.5] asks clients to bound these
+/// values). It is the same floor as for `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX`.
+///
+/// [draft-ietf-oauth-status-list-21 §11.5]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-11.5
+const MIN_REFRESH_INTERVAL: Duration =
+    Duration::from_secs(crate::jwt_config::MIN_STATUS_LIST_REFRESH_SECS);
 
 /// Resolve effective refresh interval as `min(jwt_ttl, refresh_interval_max)`,
 /// or `refresh_interval_max` when the JWT omits `ttl`. Never below
@@ -160,9 +165,11 @@ fn parse_status_list_jwt(
     })
 }
 
-/// Waits the refresh interval, but no longer than until the cached list expires,
+/// Waits the refresh interval, but no longer than until the cached list's `exp`,
 /// so a list is refreshed by its `exp` even without a `ttl`
-/// ([draft-ietf-oauth-status-list-21 §13.7]).
+/// ([draft-ietf-oauth-status-list-21 §13.7]). The clock-skew leeway after `exp`
+/// then covers the fetch and its retries, so a healthy issuer never leaves a
+/// window in which tokens are rejected.
 ///
 /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
 fn next_refresh_in(
@@ -171,7 +178,7 @@ fn next_refresh_in(
     now: u64,
 ) -> Duration {
     match expiry {
-        Some(expiry) => refresh_interval.min(expiry.remaining(now).max(MIN_REFRESH_INTERVAL)),
+        Some(expiry) => refresh_interval.min(expiry.until_exp(now).max(MIN_REFRESH_INTERVAL)),
         None => refresh_interval,
     }
 }
@@ -765,8 +772,8 @@ mod test {
     }
 
     /// A list is refreshed no later than its `exp` ([draft-ietf-oauth-status-list-21 §13.7]):
-    /// the refresh waits the interval, cut short at the second after `exp` plus
-    /// leeway, and never less than [`MIN_REFRESH_INTERVAL`].
+    /// the refresh waits the interval, cut short at `exp`, and never less than
+    /// [`MIN_REFRESH_INTERVAL`].
     ///
     /// [draft-ietf-oauth-status-list-21 §13.7]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-13.7
     #[test]
@@ -787,8 +794,13 @@ mod test {
         );
         assert_eq!(
             next_refresh_in(interval, expiry(1_010), now),
-            Duration::from_secs(71),
-            "the list is usable through second 1070, so it is refreshed at 1071"
+            Duration::from_secs(10),
+            "the list is refreshed at its `exp`, while the leeway still covers the fetch"
+        );
+        assert_eq!(
+            next_refresh_in(interval, expiry(1_002), now),
+            MIN_REFRESH_INTERVAL,
+            "a refresh, or a retry near `exp`, waits at least the floor"
         );
         assert_eq!(
             next_refresh_in(interval, expiry(5_000), now),
@@ -934,6 +946,11 @@ mod test {
         assert_eq!(
             effective_refresh_interval(Some(0), max),
             MIN_REFRESH_INTERVAL
+        );
+        assert_eq!(
+            effective_refresh_interval(Some(1), max),
+            Duration::from_secs(5),
+            "an issuer's `ttl` below the 5 s floor of the bootstrap max is raised to it"
         );
         assert_eq!(
             effective_refresh_interval(Some(0), Duration::from_millis(200)),
