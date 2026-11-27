@@ -219,6 +219,7 @@ tags:
 | logoutStatusJwtSigningAlgValuesSupported | This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Logout Status JWT at Authorization Endpoint to encode the claims in a JWT | [Details](#logoutstatusjwtsigningalgvaluessupported) |
 | maxPerRoute | Set the maximum number of concurrent connections per route | [Details](#maxperroute) |
 | maxTotal | Set the maximum number of total open connections | [Details](#maxtotal) |
+| metricAggregationConfiguration | Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled (the metric feature flag) and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply | [Details](#metricaggregationconfiguration) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | mtlsAuthorizationChallengeEndpoint | URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint | [Details](#mtlsauthorizationchallengeendpoint) |
@@ -2232,6 +2233,15 @@ tags:
 - Required: No
 
 - Default value: 200
+
+
+## metricAggregationConfiguration
+
+- Description: Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled (the metric feature flag) and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply
+
+- Required: No
+
+- Default value: None
 
 
 ## metricReporterInterval

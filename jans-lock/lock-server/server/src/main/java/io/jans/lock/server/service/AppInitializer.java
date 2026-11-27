@@ -113,6 +113,9 @@ public class AppInitializer {
     private MetricService metricService;
 
     @Inject
+    private LockMetricAggregationManager metricAggregationManager;
+
+    @Inject
     private StatusCheckerTimer statusCheckerTimer;
 
 	@Inject
@@ -178,6 +181,10 @@ public class AppInitializer {
 		customScriptManager.initTimer(supportedCustomScriptTypes);
         statTimer.initTimer();
         traceReceiptRepairTimer.initTimer();
+        if (metricService.isMetricReporterEnabled()) {
+            metricService.initTimer();
+        }
+        metricAggregationManager.initTimer();
 
         // Initialize Document Store Manager
         documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_LOCK_TYPE));

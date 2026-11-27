@@ -21,9 +21,41 @@ paths:
       - Metric
       summary: Get aggregated metric entries within a time range.
       description: "Returns a page of jansMetricAggregation entries for an aggregation\
-        \ period (HOURLY, DAILY, WEEKLY, MONTHLY) within the given date range. The\
-        \ aggregation producer runs on application nodes as a separate task; until\
-        \ it is deployed this endpoint returns an empty page."
+        \ period (HOURLY, DAILY, WEEKLY, MONTHLY) within the given date range. Entries\
+        \ are computed by the application nodes from the raw jansMetric rows, in UTC\
+        \ (weeks are ISO weeks starting Monday). Aggregates are cluster-wide totals\
+        \ per application type, metric type and metric subtype. An entry covers a\
+        \ whole period: jansStartDate is the first millisecond of the period and jansEndDate\
+        \ is the last one (period end minus 1 ms, for example 2026-11-24T23:59:59.999Z\
+        \ for a DAILY entry). The date range is a containment filter: an entry matches\
+        \ only when it lies completely inside the range (jansStartDate >= start_date\
+        \ AND jansEndDate <= end_date). An entry that starts before start_date or\
+        \ ends after end_date is not returned, so a request for a partial period does\
+        \ not return that period's entry. The 'data' field of each entry is a JSON\
+        \ object. Counter: {\"kind\":\"counter\",\"count\":13,\"sourceRows\":2,\"\
+        nodes\":2,\"complete\":true,\"legacyDelta\":false}. Timer: {\"kind\":\"timer\"\
+        ,\"count\":40,\"rate\":0.0111,\"rateUnit\":\"second\",\"min\":1.0,\"max\"\
+        :40.0,\"mean\":8.0,\"median\":7.0,\"value75thPercentile\":9.0,\"value95thPercentile\"\
+        :17.5,\"value98thPercentile\":21.75,\"value99thPercentile\":26.25,\"value999thPercentile\"\
+        :33.25,\"durationUnit\":\"milliseconds\",\"approximate\":true,\"sourceRows\"\
+        :2,\"nodes\":2,\"complete\":false,\"legacyDelta\":false}. Fields: count is\
+        \ the number of events in the period (for a timer, the number of timed calls),\
+        \ summed from per-interval deltas; sourceRows is the number of raw rows the\
+        \ aggregate covers; nodes is the number of nodes that reported (in WEEKLY,\
+        \ MONTHLY and DAILY entries it is a lower bound: the largest value among the\
+        \ child entries); complete is true when the entry was computed after its period\
+        \ closed and its source data was complete, so false means the period is still\
+        \ open or data may still arrive; legacyDelta is true when some counts came\
+        \ from raw rows written by an older version without a per-interval count,\
+        \ whose first row of a series counts as 0. Timer fields: rate is count divided\
+        \ by the period length in seconds; min is the smallest and max the largest\
+        \ value reported in any row; mean, median and the percentiles are weighted\
+        \ averages of the per-row values and are approximate (approximate is always\
+        \ true); durationUnit is the unit of min, max, mean, median and the percentiles.\
+        \ A timer with count 0 has null for min, max, mean, median and the percentiles.\
+        \ Rows that arrive after the recompute window (by default the last 2 closed\
+        \ HOURLY periods and the last closed DAILY, WEEKLY and MONTHLY period) are\
+        \ not counted. If 'data' does not hold valid JSON, it is returned as a string."
       operationId: get-metric-aggregations
       parameters:
       - name: aggregationType
@@ -50,14 +82,21 @@ paths:
           type: string
       - name: start_date
         in: query
-        description: "Start date/time for entries. Accepted format ISO-8601 date-time\
-          \ (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy dd-MM-yyyy."
+        description: "Start date/time. Accepted formats: ISO-8601 date-time (e.g.\
+          \ 2026-08-01T00:00:00Z), ISO-8601 date (e.g. 2026-08-01) or legacy dd-MM-yyyy;\
+          \ a date means 00:00:00.000 UTC of that day. Only entries with jansStartDate\
+          \ on or after this instant match."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for entries.
+        description: "End date/time, inclusive. Same formats as start_date. A date-time\
+          \ without a fractional second (e.g. 2026-08-01T23:59:59Z) is read as the\
+          \ end of that second (23:59:59.999), and a date (e.g. 2026-08-01) as the\
+          \ end of that day (23:59:59.999 UTC), because entries end 1 ms before a\
+          \ period boundary. A date-time with a non-zero fractional second is used\
+          \ as given. Only entries with jansEndDate on or before this instant match."
         required: true
         schema:
           type: string
@@ -138,7 +177,11 @@ paths:
       summary: Get metric entries within a time range.
       description: "Returns a page of raw jansMetric entries for a metric type (and,\
         \ optionally, application type and subtype) within the given date range. When\
-        \ subType is omitted, both plain and per-subtype rows are returned."
+        \ subType is omitted, both plain and per-subtype rows are returned. The date\
+        \ range is a containment filter: an entry matches only when it lies completely\
+        \ inside the range (jansStartDate >= start_date AND jansEndDate <= end_date).\
+        \ An entry that starts before start_date or ends after end_date is not returned,\
+        \ so a request for a partial period does not return that period's entry."
       operationId: get-metric-entries
       parameters:
       - name: metricType
@@ -161,14 +204,21 @@ paths:
           type: string
       - name: start_date
         in: query
-        description: "Start date/time for entries. Accepted format ISO-8601 date-time\
-          \ (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy dd-MM-yyyy."
+        description: "Start date/time. Accepted formats: ISO-8601 date-time (e.g.\
+          \ 2026-08-01T00:00:00Z), ISO-8601 date (e.g. 2026-08-01) or legacy dd-MM-yyyy;\
+          \ a date means 00:00:00.000 UTC of that day. Only entries with jansStartDate\
+          \ on or after this instant match."
         required: true
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time for entries.
+        description: "End date/time, inclusive. Same formats as start_date. A date-time\
+          \ without a fractional second (e.g. 2026-08-01T23:59:59Z) is read as the\
+          \ end of that second (23:59:59.999), and a date (e.g. 2026-08-01) as the\
+          \ end of that day (23:59:59.999 UTC), because entries end 1 ms before a\
+          \ period boundary. A date-time with a non-zero fractional second is used\
+          \ as given. Only entries with jansEndDate on or before this instant match."
         required: true
         schema:
           type: string
@@ -234,14 +284,20 @@ paths:
           type: string
       - name: start_date
         in: query
-        description: "Start date/time to narrow the discovery scan. Accepted format\
-          \ ISO-8601 date-time (e.g. 2026-08-01T00:00:00Z), ISO-8601 date, or legacy\
-          \ dd-MM-yyyy."
+        description: "Narrows the discovery scan. Start date/time. Accepted formats:\
+          \ ISO-8601 date-time (e.g. 2026-08-01T00:00:00Z), ISO-8601 date (e.g. 2026-08-01)\
+          \ or legacy dd-MM-yyyy; a date means 00:00:00.000 UTC of that day. Only\
+          \ entries with jansStartDate on or after this instant match."
         schema:
           type: string
       - name: end_date
         in: query
-        description: End date/time to narrow the discovery scan.
+        description: "Narrows the discovery scan. End date/time, inclusive. Same formats\
+          \ as start_date. A date-time without a fractional second (e.g. 2026-08-01T23:59:59Z)\
+          \ is read as the end of that second (23:59:59.999), and a date (e.g. 2026-08-01)\
+          \ as the end of that day (23:59:59.999 UTC), because entries end 1 ms before\
+          \ a period boundary. A date-time with a non-zero fractional second is used\
+          \ as given. Only entries with jansEndDate on or before this instant match."
         schema:
           type: string
       responses:
@@ -266,6 +322,8 @@ paths:
         - https://jans.io/oauth/config/read-all
 components:
   schemas:
+    JsonNode:
+      type: object
     MetricAggregationEntry:
       type: object
       properties:
@@ -292,8 +350,6 @@ components:
           type: string
         metricSubType:
           type: string
-        data:
-          type: string
         creationDate:
           type: string
           format: date-time
@@ -307,6 +363,8 @@ components:
           format: int32
         deletable:
           type: boolean
+        data:
+          $ref: "#/components/schemas/JsonNode"
     MetricAggregationPagedResult:
       type: object
       properties:
@@ -323,8 +381,6 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/MetricAggregationEntry"
-    JsonNode:
-      type: object
     MetricDataEntry:
       type: object
       properties:

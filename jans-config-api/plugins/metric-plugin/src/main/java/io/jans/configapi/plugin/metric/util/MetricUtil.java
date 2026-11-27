@@ -111,6 +111,24 @@ public class MetricUtil {
         }
     }
 
+    /**
+     * Parses an end_date parameter as an inclusive bound, see
+     * {@link MetricDateUtil#parseEndDateTime(String)}.
+     */
+    public Date parseEndDateParam(String value, String paramName) {
+        if (StringUtils.isBlank(value)) {
+            return null;
+        }
+        try {
+            return MetricDateUtil.toDate(MetricDateUtil.parseEndDateTime(value));
+        } catch (DateTimeParseException dtpe) {
+            throwBadRequestException(
+                    "Invalid '" + paramName + "' value '" + value + "'. " + MetricDateUtil.ACCEPTED_FORMATS_MESSAGE,
+                    "INVALID_DATE");
+            return null;
+        }
+    }
+
     public void validateRange(Date start, Date end) {
         if (start != null && end != null && start.after(end)) {
             throwBadRequestException("start_date must be before or equal to end_date.", "INVALID_DATE_RANGE");

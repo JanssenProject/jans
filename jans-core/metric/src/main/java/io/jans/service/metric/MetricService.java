@@ -163,8 +163,15 @@ public abstract class MetricService implements Serializable {
     public void add(List<MetricEntry> metricEntries, Date creationTime) {
         prepareBranch(creationTime, getString());
 
-        for (MetricEntry metricEntry : metricEntries) {
-            getEntryManager().persist(metricEntry);
+        if (metricEntries.isEmpty()) {
+            return;
+        }
+        if (getEntryManager().isAtomicBatchSupported(baseDn())) {
+            getEntryManager().persistBatch(metricEntries);
+        } else {
+            for (MetricEntry entry : metricEntries) {
+                getEntryManager().persist(entry);
+            }
         }
     }
 

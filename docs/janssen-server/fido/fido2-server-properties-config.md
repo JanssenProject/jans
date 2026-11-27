@@ -27,6 +27,7 @@ The following properties represent the dynamic configuration for the Janssen FID
 | `metricReporterInterval` | `300` | The interval for the legacy jans-core metric reporter daemon in seconds. |
 | `metricReporterKeepDataDays` | `15` | The retention period in days for legacy metric reporter records stored in persistence. |
 | `metricReporterEnabled` | `true` | Boolean value specifying whether to enable the legacy jans-core metric reporter. |
+| `metricAggregationConfiguration` | Object | Settings of the aggregation job that summarizes raw metric rows into hourly, daily, weekly and monthly rows. All properties are optional. See [Metric aggregation](../auth-server/reporting-metrics/metric-aggregation.md). |
 | `fido2MetricsEnabled` | `true` | Master switch for passkey telemetry collection. If `false`, no metric entries are stored. See [Passkey Telemetry & Metrics](passkey-telemetry.md). |
 | `fido2MetricsAggregationEnabled` | `true` | Enables the scheduled hourly/daily/weekly/monthly aggregation jobs for passkey telemetry. The times those jobs run are fixed by cron expressions packaged with the server, not by dynamic configuration — see [Aggregation schedule](passkey-telemetry.md#aggregation-schedule). |
 | `fido2MetricsRetentionDays` | `90` | Retention period in days for passkey metric entries and aggregations before automatic cleanup. |

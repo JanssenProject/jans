@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.jans.as.model.configuration.Configuration;
 import io.jans.doc.annotation.DocProperty;
+import io.jans.model.metric.aggregation.MetricAggregationConfiguration;
 import jakarta.enterprise.inject.Vetoed;
 /**
  * Represents the configuration JSON file.
@@ -70,6 +71,9 @@ public class AppConfiguration implements Configuration, Serializable {
 	
 	@DocProperty(description = "Boolean value specifying whether metric reporter is enabled")
     private boolean metricReporterEnabled = true;
+	
+	@DocProperty(description = "Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply")
+    private MetricAggregationConfiguration metricAggregationConfiguration;
 	
 	@DocProperty(description = "Boolean value specifying whether FIDO2 passkey metrics collection is enabled", defaultValue = "true")
     private boolean fido2MetricsEnabled = true;
@@ -203,6 +207,14 @@ public class AppConfiguration implements Configuration, Serializable {
 
 	public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
 		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+	}
+
+	public MetricAggregationConfiguration getMetricAggregationConfiguration() {
+		return metricAggregationConfiguration;
+	}
+
+	public void setMetricAggregationConfiguration(MetricAggregationConfiguration metricAggregationConfiguration) {
+		this.metricAggregationConfiguration = metricAggregationConfiguration;
 	}
 
 	public boolean getMetricReporterEnabled() {

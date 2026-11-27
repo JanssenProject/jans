@@ -84,11 +84,25 @@ public abstract class ClusterNodeService {
     }
 
     /**
-     * returns last TokenPool or null if none
+     * returns the ClusterNode of this type with the highest id or null if none
      *
-     * @return TokenPool
+     * @return ClusterNode
      */
     public ClusterNode getClusterNodeLast() {
+        return findClusterNodeLast(getTypeFilter());
+    }
+
+    /**
+     * returns the ClusterNode of any type with the highest id or null if none. Node DNs do not contain
+     * the type, so all types share one id space.
+     *
+     * @return ClusterNode
+     */
+    public ClusterNode getClusterNodeLastOfAllTypes() {
+        return findClusterNodeLast(Filter.createPresenceFilter("jansNum"));
+    }
+
+    private ClusterNode findClusterNodeLast(Filter filter) {
         String clusterNodesBaseDn = getBaseClusterNodeDn();
 
         int count = 1;
@@ -97,8 +111,7 @@ public abstract class ClusterNodeService {
         }
 
         PagedResult<ClusterNode> pagedResult = entryManager.findPagedEntries(clusterNodesBaseDn, ClusterNode.class,
-                Filter.createEqualityFilter(JANS_TYPE_ATTR_NAME, getClusterNodeType()), null, "jansNum", SortOrder.DESCENDING,
-                0, count, count);
+                filter, null, "jansNum", SortOrder.DESCENDING, 0, count, count);
         if (pagedResult.getEntriesCount() >= 1) {
             return pagedResult.getEntries().get(0);
         }
@@ -151,7 +164,7 @@ public abstract class ClusterNodeService {
     }
 
     protected void persist(ClusterNode clusterNode) {
-        entryManager.persist(clusterNode);
+        entryManager.persistNew(clusterNode);
     }
 
     public void update(ClusterNode clusterNode) {
@@ -193,12 +206,13 @@ public abstract class ClusterNodeService {
             }
         }
 
-        // There are no free entries. server need to add new one with next index
+        // There are no free entries. server need to add new one with next index. The index must be above
+        // the nodes of all types, because the DN of a node does not contain its type
         int attempt = 1;
         do {
             log.info("Attempting to persist new node. Attempt {} out of {} ...", attempt, ATTEMPT_LIMIT);
 
-            ClusterNode lastClusterNode = getClusterNodeLast();
+            ClusterNode lastClusterNode = getClusterNodeLastOfAllTypes();
             log.info("lastClusterNode - {}, getLockKey() {}", lastClusterNode != null ? lastClusterNode.getId() : -1, getLockKey());
 
             Integer lastClusterNodeIndex = lastClusterNode == null ? 0 : lastClusterNode.getId() + 1;

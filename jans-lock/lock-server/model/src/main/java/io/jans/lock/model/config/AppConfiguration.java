@@ -15,6 +15,7 @@ import io.jans.doc.annotation.DocProperty;
 import io.jans.lock.model.config.grpc.GrpcConfiguration;
 import io.jans.lock.model.trace.config.TraceConfiguration;
 import io.jans.model.conf.Configuration;
+import io.jans.model.metric.aggregation.MetricAggregationConfiguration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
@@ -109,6 +110,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable metric reporter")
     @Schema(description = "Enable metric reporter")
     private Boolean metricReporterEnabled;
+
+    @DocProperty(description = "Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply")
+    @Schema(description = "Metric aggregation settings. Builds HOURLY, DAILY, WEEKLY and MONTHLY rows in jansMetricAggregation from raw metric rows. Runs only when the metric reporter is enabled and metricAggregationConfiguration.enabled is true (default true). When the property is missing, all defaults apply")
+    private MetricAggregationConfiguration metricAggregationConfiguration;
 
     // Period in seconds
     @DocProperty(description = "Time interval for the Clean Service in seconds")
@@ -331,6 +336,14 @@ public class AppConfiguration implements Configuration {
 
     public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
         this.metricReporterEnabled = metricReporterEnabled;
+    }
+
+    public MetricAggregationConfiguration getMetricAggregationConfiguration() {
+        return metricAggregationConfiguration;
+    }
+
+    public void setMetricAggregationConfiguration(MetricAggregationConfiguration metricAggregationConfiguration) {
+        this.metricAggregationConfiguration = metricAggregationConfiguration;
     }
 
     public int getCleanServiceInterval() {

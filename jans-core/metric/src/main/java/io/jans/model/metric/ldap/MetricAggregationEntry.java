@@ -6,6 +6,12 @@
 
 package io.jans.model.metric.ldap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.TextNode;
+
 import io.jans.model.metric.MetricAggregationType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -28,6 +34,8 @@ import java.util.Date;
 @DataEntry(sortBy = "startDate", sortByName = "jansStartDate")
 @ObjectClass(value = "jansMetricAggregation")
 public class MetricAggregationEntry {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @DN
     private String dn;
@@ -144,8 +152,27 @@ public class MetricAggregationEntry {
         this.metricSubType = metricSubType;
     }
 
+    @JsonIgnore
     public String getData() {
         return data;
+    }
+
+    /**
+     * Exposes the raw jansData string as parsed JSON, so that a REST response carries a JSON object
+     * instead of an escaped string. jansData is written by the aggregation producer as JSON, but a
+     * foreign or damaged row may hold text, so parse failures fall back to a text node rather than
+     * raising an error.
+     */
+    @JsonProperty("data")
+    public JsonNode getDataAsJson() {
+        if (data == null) {
+            return null;
+        }
+        try {
+            return OBJECT_MAPPER.readTree(data);
+        } catch (Exception e) {
+            return TextNode.valueOf(data);
+        }
     }
 
     public void setData(String data) {

@@ -28,6 +28,20 @@
 	"metricReporterInterval": 300,
 	"metricReporterKeepDataDays": 15,
 	"metricReporterEnabled": true,
+	"metricAggregationConfiguration": {
+		"enabled": true,
+		"runIntervalSeconds": 300,
+		"maxBucketsPerRun": 48,
+		"recomputeHourly": 2,
+		"recomputeDaily": 1,
+		"recomputeWeekly": 1,
+		"recomputeMonthly": 1,
+		"keepHourlyDays": 90,
+		"keepDailyDays": 730,
+		"keepWeeklyDays": 1825,
+		"keepMonthlyDays": 3650,
+		"leaseSeconds": 600
+	},
 	"statEnabled": true,
 	"errorReasonEnabled": false,
 	"grpcConfiguration": {

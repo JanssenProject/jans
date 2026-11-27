@@ -57,6 +57,8 @@ public interface SpannerOperationService extends PersistenceOperationService {
 
     boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes) throws DuplicateEntryException, PersistenceException;
 
+    boolean addEntry(String key, String objectClass, Collection<AttributeData> attributes, boolean createOnly) throws DuplicateEntryException, PersistenceException;
+
     boolean updateEntry(String key, String objectClass, List<AttributeDataModification> mods) throws UnsupportedOperationException, PersistenceException;
 
     boolean delete(String key, String objectClass) throws EntryNotFoundException;

@@ -26,9 +26,8 @@ import java.util.List;
 
 /**
  * Read-only access to {@code jansMetricAggregation} entries: pre-computed HOURLY/DAILY/WEEKLY/
- * MONTHLY aggregates of jansMetric data. The producer that writes these rows runs on application
- * nodes and is implemented separately; this service only reads, so it returns an empty page until
- * a producer exists.
+ * MONTHLY aggregates of jansMetric data. The application nodes write these rows (see
+ * io.jans.service.metric.aggregation); this service only reads them.
  *
  * @author Yuriy Movchan Date: 07/27/2015
  */
@@ -61,7 +60,9 @@ public class MetricAggregationService {
      * @param metricType      optional jansMetricTyp filter
      * @param subType         optional jansMetricSubTyp filter
      * @param startDate       inclusive lower bound on jansStartDate
-     * @param endDate         inclusive upper bound on jansEndDate
+     * @param endDate         inclusive upper bound on jansEndDate; aggregate rows end at period end minus 1 ms,
+     *                        so callers pass an end bound that is already widened to the end of its second
+     *                        (see MetricDateUtil#parseEndDateTime)
      */
     public PagedResult<MetricAggregationEntry> findEntries(MetricAggregationType aggregationType, String appType,
             String metricType, String subType, Date startDate, Date endDate, String sortBy, SortOrder sortOrder,

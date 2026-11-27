@@ -16293,6 +16293,8 @@ components:
         metricReporterKeepDataDays:
           type: integer
           format: int32
+        metricAggregationConfiguration:
+          $ref: "#/components/schemas/MetricAggregationConfiguration"
         pairwiseIdType:
           type: string
         pairwiseCalculationKey:
@@ -16878,6 +16880,44 @@ components:
           type: boolean
         tokenMessagesChannel:
           type: string
+    MetricAggregationConfiguration:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        runIntervalSeconds:
+          type: integer
+          format: int32
+        maxBucketsPerRun:
+          type: integer
+          format: int32
+        recomputeHourly:
+          type: integer
+          format: int32
+        recomputeDaily:
+          type: integer
+          format: int32
+        recomputeWeekly:
+          type: integer
+          format: int32
+        recomputeMonthly:
+          type: integer
+          format: int32
+        keepHourlyDays:
+          type: integer
+          format: int32
+        keepDailyDays:
+          type: integer
+          format: int32
+        keepWeeklyDays:
+          type: integer
+          format: int32
+        keepMonthlyDays:
+          type: integer
+          format: int32
+        leaseSeconds:
+          type: integer
+          format: int32
     RateLimitConfig:
       type: object
       properties:
@@ -18739,10 +18779,6 @@ components:
           $ref: "#/components/schemas/TokenAttributes"
         dpop:
           type: string
-        accessToken:
-          type: boolean
-        logoutStatusJwt:
-          type: boolean
         tokenTypeEnum:
           type: string
           enum:
@@ -18753,6 +18789,10 @@ components:
           - AUTHORIZATION_CODE
           - LOGOUT_STATUS_JWT
           - TX_TOKEN
+        accessToken:
+          type: boolean
+        logoutStatusJwt:
+          type: boolean
     TokenEntityPagedResult:
       type: object
       properties:

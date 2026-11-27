@@ -29,6 +29,11 @@ import java.util.Date;
  */
 public class MetricDateUtil {
 
+    // Raw jansMetric rows and jansMetricAggregation rows end 1 ms before the period end
+    // (hh:59:59.999), and the data stores milliseconds. A whole-second end bound is therefore
+    // widened to the last millisecond of that second.
+    private static final int LAST_MILLISECOND_NANOS = 999_000_000;
+
     private static final String LEGACY_DATE_FORMAT = "dd-MM-yyyy";
     private static final DateTimeFormatter LEGACY_FORMATTER = DateTimeFormatter.ofPattern(LEGACY_DATE_FORMAT);
 
@@ -77,6 +82,40 @@ public class MetricDateUtil {
 
         // Legacy dd-MM-yyyy
         return LocalDate.parse(trimmed, LEGACY_FORMATTER).atStartOfDay();
+    }
+
+    /**
+     * Parses an end bound and makes it inclusive up to the last millisecond of the precision the
+     * caller gave. Rows end 1 ms before a period boundary (for example 23:59:59.999), so the plain
+     * value of {@code 2026-08-01T23:59:59Z} (23:59:59.000) would miss them.
+     * <ul>
+     * <li>a date-time without a fractional second (or with .000) ends at the end of that second:
+     * {@code 2026-08-01T23:59:59Z} becomes 23:59:59.999;</li>
+     * <li>a date-time with a non-zero fractional second is used as given;</li>
+     * <li>a date only (ISO-8601 or legacy dd-MM-yyyy) ends at the end of that day: 23:59:59.999.</li>
+     * </ul>
+     *
+     * @param value the raw query-parameter value
+     * @return the inclusive end bound (UTC wall-clock), or null if value is blank
+     * @throws DateTimeParseException if value does not match any supported format
+     */
+    public static LocalDateTime parseEndDateTime(String value) throws DateTimeParseException {
+        LocalDateTime parsed = parseDateTime(value);
+        if (parsed == null) {
+            return null;
+        }
+        if (isDateOnly(value.trim())) {
+            return parsed.toLocalDate().atTime(23, 59, 59, LAST_MILLISECOND_NANOS);
+        }
+        if (parsed.getNano() == 0) {
+            return parsed.withNano(LAST_MILLISECOND_NANOS);
+        }
+        return parsed;
+    }
+
+    private static boolean isDateOnly(String trimmed) {
+        // A date-time always contains the 'T' separator; the two date-only formats never do.
+        return trimmed.indexOf('T') < 0 && trimmed.indexOf('t') < 0;
     }
 
     /**

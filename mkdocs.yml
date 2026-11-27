@@ -447,6 +447,7 @@ nav:
       - VM Service Status: janssen-server/vm-ops/checking-service-status.md
     - Monitoring:
       - Monitoring: janssen-server/auth-server/reporting-metrics/README.md
+      - Metric Aggregation: janssen-server/auth-server/reporting-metrics/metric-aggregation.md
       - SCIM Monitoring: janssen-server/scim/monitoring.md
     - Testing:
       - Testing Guide: contribute/testing.md

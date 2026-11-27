@@ -147,6 +147,9 @@ public class AppInitializer {
     private MetricService metricService;
 
     @Inject
+    private MetricAggregationManager metricAggregationManager;
+
+    @Inject
     private CustomScriptManager customScriptManager;
 
     @Inject
@@ -254,6 +257,7 @@ public class AppInitializer {
         // Schedule timer tasks
         clusterManager.initTimer();
         metricService.initTimer();
+        metricAggregationManager.initTimer();
         configurationFactory.initTimer();
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();

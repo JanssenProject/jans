@@ -10,7 +10,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.model.metric.MetricData;
 
 /**
- * Timer metric data class
+ * Timer metric data class.
+ *
+ * <p>{@code count} is cumulative since the reporting process started; it is reset only by a process
+ * restart. {@code intervalCount} is the number of timed events in the reporting interval of the row
+ * that holds this data. Rows written by older versions do not contain {@code intervalCount}; when such
+ * a row is read, the field is 0. The rates and the duration statistics come from the timer's decaying
+ * reservoir, not from exact values for the interval.</p>
  *
  * @author Yuriy Movchan Date: 07/30/2015
  */
@@ -20,6 +26,8 @@ public class TimerMetricData extends MetricData {
     private static final long serialVersionUID = -2322501012136295255L;
 
     private long count;
+
+    private long intervalCount;
 
     private double meanRate;
     private double oneMinuteRate, fiveMinuteRate, fifteenMinuteRate;
@@ -60,6 +68,14 @@ public class TimerMetricData extends MetricData {
 
     public void setCount(long count) {
         this.count = count;
+    }
+
+    public long getIntervalCount() {
+        return intervalCount;
+    }
+
+    public void setIntervalCount(long intervalCount) {
+        this.intervalCount = intervalCount;
     }
 
     public double getMeanRate() {
@@ -193,7 +209,7 @@ public class TimerMetricData extends MetricData {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("TimerMetricData [count=").append(count).append(", meanRate=").append(meanRate).append(", oneMinuteRate=")
+        builder.append("TimerMetricData [count=").append(count).append(", intervalCount=").append(intervalCount).append(", meanRate=").append(meanRate).append(", oneMinuteRate=")
                 .append(oneMinuteRate).append(", fiveMinuteRate=").append(fiveMinuteRate).append(", fifteenMinuteRate=").append(fifteenMinuteRate)
                 .append(", rateUnit=").append(rateUnit).append(", min=").append(min).append(", max=").append(max).append(", mean=").append(mean)
                 .append(", stdDev=").append(stdDev).append(", median=").append(median).append(", value75thPercentile=").append(value75thPercentile)

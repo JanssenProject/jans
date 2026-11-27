@@ -415,6 +415,11 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
     }
 
 	@Override
+    public void persistNew(Object entry) {
+        getEntryManagerForDn(getDNValue(entry, entry.getClass())).persistNew(entry);
+    }
+
+    @Override
     public void persist(Object entry) {
         Class<?> entryClass = entry.getClass();
         Object dnValue = getDNValue(entry, entryClass);
@@ -452,6 +457,12 @@ public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperat
 	public boolean isTransactionSupported(String primaryKey) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
 		return persistenceEntryManager.isTransactionSupported(primaryKey);
+	}
+
+	@Override
+	public boolean isTransactionSupported(String primaryKey, String otherPrimaryKey) {
+		PersistenceEntryManager backend = getEntryManagerForDn(primaryKey);
+		return backend == getEntryManagerForDn(otherPrimaryKey) && backend.isTransactionSupported(primaryKey, otherPrimaryKey);
 	}
 
 	/**

@@ -179,7 +179,17 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
     }
 
     @Override
+    public void persistNew(Object entry) {
+        var insert = prepareInsert(entry);
+        persist(insert.getDn(), insert.getObjectClasses(), insert.getAttributes(), insert.getExpiration(), true);
+    }
+
+    @Override
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
+        persist(dn, objectClasses, attributes, expiration, false);
+    }
+
+    private void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration, boolean createOnly) {
     	ArrayList<AttributeData> resultAttributes = new ArrayList<>(attributes.size() + 1);
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -224,7 +234,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
             resultAttributes.add(new AttributeData(SpannerOperationService.DN, dn));
             resultAttributes.add(new AttributeData(SpannerOperationService.DOC_ID, parsedKey.getKey()));
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClass(objectClasses), resultAttributes);
+            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClass(objectClasses), resultAttributes, createOnly);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
             }

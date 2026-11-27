@@ -172,7 +172,17 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
     }
 
     @Override
+    public void persistNew(Object entry) {
+        var insert = prepareInsert(entry);
+        persist(insert.getDn(), insert.getObjectClasses(), insert.getAttributes(), insert.getExpiration(), true);
+    }
+
+    @Override
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
+        persist(dn, objectClasses, attributes, expiration, false);
+    }
+
+    private void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration, boolean createOnly) {
         JsonObject jsonObject = JsonObject.create();
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -212,7 +222,7 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 
         // Persist entry
         try {
-            boolean result = getOperationService().addEntry(toCouchbaseKey(dn).getKey(), jsonObject, expiration);
+            boolean result = getOperationService().addEntry(toCouchbaseKey(dn).getKey(), jsonObject, expiration, createOnly);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: %s", dn));
             }

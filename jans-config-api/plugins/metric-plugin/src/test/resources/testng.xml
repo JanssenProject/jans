@@ -16,6 +16,13 @@
         </classes>
     </test>
 
+    <test name="MetricDateUtil" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.plugin.metric.test.MetricDateUtilTest" />
+            <class name="io.jans.configapi.plugin.metric.rest.MetricAggregationResourceTest" />
+        </classes>
+    </test>
+
     <test name="MetricAggregation" enabled="true">
         <classes>
             <class name="io.jans.configapi.plugin.metric.test.MetricAggregationTest" />
