@@ -19,7 +19,7 @@ public class AbstractIndexPool extends BaseEntry {
     @AttributeName(ignoreDuringUpdate = true, name = "jansNum")
     private Integer id;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jansNodeId")
+    @AttributeName(name = "jansNodeId")
     private Integer nodeId;
 
     @AttributeName(name = "dat")
@@ -42,6 +42,9 @@ public class AbstractIndexPool extends BaseEntry {
 
     @Transient
     private transient AtomicInteger currentIndex = new AtomicInteger(-1);
+
+    @Transient
+    private transient Date issueUntil;
 
     public Integer getId() {
         return id;
@@ -91,6 +94,25 @@ public class AbstractIndexPool extends BaseEntry {
         this.lockKey = lockKey;
     }
 
+    /**
+     * In-memory deadline after which the owning node stops issuing indexes from this pool. Persisted
+     * expiration date ("exp") is the reuse boundary instead: it covers the latest expiration of any token
+     * that holds an index from this pool, so it can be later than this deadline.
+     *
+     * @return issue deadline or null if not set (then expiration date is used)
+     */
+    public Date getIssueUntil() {
+        return issueUntil;
+    }
+
+    public void setIssueUntil(Date issueUntil) {
+        this.issueUntil = issueUntil;
+    }
+
+    public boolean containsIndex(int index) {
+        return startIndex != null && endIndex != null && index >= startIndex && index <= endIndex;
+    }
+
     public List<Integer> enumerateAllIndexes() {
         List<Integer> indexes = new ArrayList<>();
         for (int i = getStartIndex(); i <= getEndIndex(); i++ ) {
@@ -118,7 +140,8 @@ public class AbstractIndexPool extends BaseEntry {
 
     public int nextIndex() {
         // This block not used for while and were expired already
-        if ((expirationDate == null) || expirationDate.before(new Date())) {
+        final Date issueDeadline = issueUntil != null ? issueUntil : expirationDate;
+        if ((issueDeadline == null) || issueDeadline.before(new Date())) {
             return -1;
         }
 
