@@ -1206,7 +1206,11 @@ components:
           format: int32
         postCommitCorrelationThreads:
           type: integer
-          description: "Threads that update the derived flags of neighboring records after a batch commit when batchIngestEnabled is true, so the response normally does not wait for them, though a task runs in the request thread when the pool queue is full; 0 updates them in the request thread before the response; clamped to 64"
+          description: "Threads that update the derived flags of neighboring records\
+            \ after a batch commit when batchIngestEnabled is true, so the response\
+            \ normally does not wait for them, though a task runs in the request thread\
+            \ when the pool queue is full; 0 updates them in the request thread before\
+            \ the response; clamped to 64"
           format: int32
         correlationRetryLimit:
           type: integer
