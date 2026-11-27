@@ -75,9 +75,8 @@ fn error_message_to_c_ptr(message: &str) -> *mut c_char {
 
 impl CedarlingResult {
     pub fn success(data: String) -> Self {
-        let c_string = match CString::new(data) {
-            Ok(s) => s,
-            Err(_) => return Self::error(CedarlingErrorCode::Internal, "Invalid string data"),
+        let Ok(c_string) = CString::new(data) else {
+            return Self::error(CedarlingErrorCode::Internal, "Invalid string data");
         };
 
         CedarlingResult {
@@ -137,12 +136,11 @@ impl CedarlingStringArray {
                         }
                     }
                     set_last_error(&format!(
-                        "CedarlingStringArray::try_new failed: CString::new error: {}",
-                        e
+                        "CedarlingStringArray::try_new failed: CString::new error: {e}"
                     ));
                     return Err(CedarlingErrorCode::Internal);
                 },
-            };
+            }
         }
 
         let mut boxed = c_strings.into_boxed_slice();

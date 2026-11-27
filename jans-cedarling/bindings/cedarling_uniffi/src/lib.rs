@@ -3,6 +3,10 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 #![cfg(not(target_arch = "wasm32"))]
+#![allow(
+    clippy::needless_pass_by_value,
+    reason = "uniffi passes foreign arguments as owned values"
+)]
 
 use cedarling::{
     self as core, BootstrapConfig, BootstrapConfigRaw, DataApi, DataEntry as CoreDataEntry,
@@ -135,10 +139,10 @@ pub enum EntityError {
     JsonConversionPayload(String, String),
 }
 
-/// TokenInput for multi-issuer authorization
+/// `TokenInput` for multi-issuer authorization
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct TokenInput {
-    /// Token mapping type (e.g., "Jans::Access_Token", "Acme::DolphinToken")
+    /// Token mapping type (e.g., `"Jans::Access_Token"`, `"Acme::DolphinToken"`)
     pub mapping: String,
     /// JWT token string
     pub payload: String,
@@ -191,7 +195,7 @@ impl From<AuthorizeOptions> for core::AuthorizeOptions {
 
 /// `None` options are the same as default options.
 fn options_to_core(options: Option<AuthorizeOptions>) -> core::AuthorizeOptions {
-    options.map(Into::into).unwrap_or_default()
+    options.map_or_else(core::AuthorizeOptions::default, Into::into)
 }
 
 /// One `{resource, action, context}` triple in a batch authorization request.
@@ -222,7 +226,7 @@ pub struct DataEntry {
     pub access_count: u64,
 }
 
-/// Statistics about the DataStore
+/// Statistics about the `DataStore`
 #[derive(Debug, Clone, uniffi::Record)]
 pub struct DataStoreStats {
     /// Number of entries currently stored
@@ -275,7 +279,7 @@ impl TryFrom<CoreDataEntry> for DataEntry {
     fn try_from(entry: CoreDataEntry) -> Result<Self, Self::Error> {
         // Use serde_json::to_string for stable serialization of CedarType
         let data_type = serde_json::to_string(&entry.data_type).map_err(|e| {
-            DataError::SerializationError(format!("Failed to serialize data_type: {}", e))
+            DataError::SerializationError(format!("Failed to serialize data_type: {e}"))
         })?;
         // Remove quotes from the serialized string (serde_json adds quotes for enum strings)
         let data_type = data_type.trim_matches('"').to_string();
@@ -284,15 +288,14 @@ impl TryFrom<CoreDataEntry> for DataEntry {
             key: entry.key,
             value: JsonValue {
                 value: serde_json::to_string(&entry.value).map_err(|e| {
-                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                    DataError::SerializationError(format!("Failed to serialize value: {e}"))
                 })?,
             },
             data_type,
             created_at: entry.created_at.to_rfc3339(),
             expires_at: entry
                 .expires_at
-                .map(|dt| dt.to_rfc3339())
-                .unwrap_or_default(),
+                .map_or_else(String::new, |dt| dt.to_rfc3339()),
             access_count: entry.access_count,
         })
     }
@@ -468,7 +471,7 @@ impl Cedarling {
         let config: BootstrapConfig =
             cedarling::BootstrapConfig::load_from_file(&path).map_err(|e| {
                 CedarlingError::InitializationFailed {
-                    error_msg: format!("Failed to read the file: {}", e),
+                    error_msg: format!("Failed to read the file: {e}"),
                 }
             })?;
 
@@ -654,6 +657,7 @@ impl Cedarling {
     }
     //Get all log ids
     #[uniffi::method]
+    #[must_use]
     pub fn get_log_ids(&self) -> Vec<String> {
         let log_ids = self.inner.get_log_ids();
         let mut result = Vec::with_capacity(log_ids.len());
@@ -682,8 +686,8 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Get logs by request_id.
-    /// Return log entries that match the given request_id.
+    /// Get logs by `request_id`.
+    /// Return log entries that match the given `request_id`.
     #[uniffi::method]
     pub fn get_logs_by_request_id(&self, request_id: &str) -> Result<Vec<String>, LogError> {
         let logs = self.inner.get_logs_by_request_id(request_id);
@@ -698,9 +702,9 @@ impl Cedarling {
         Ok(result)
     }
 
-    /// Get log by request_id and tag, like composite key `request_id` + `log_kind`.
+    /// Get log by `request_id` and tag, like composite key `request_id` + `log_kind`.
     /// Tag can be `log_kind`, `log_level`.
-    /// Return log entries that match the given request_id and tag.
+    /// Return log entries that match the given `request_id` and tag.
     #[uniffi::method]
     pub fn get_logs_by_request_id_and_tag(
         &self,
@@ -737,7 +741,7 @@ impl Cedarling {
         ttl_secs: Option<i64>,
     ) -> Result<(), DataError> {
         let json_value: Value = value.try_into().map_err(|e| {
-            DataError::SerializationError(format!("Failed to parse JSON value: {}", e))
+            DataError::SerializationError(format!("Failed to parse JSON value: {e}"))
         })?;
 
         let ttl = ttl_secs
@@ -760,7 +764,7 @@ impl Cedarling {
         match result.map_err(DataError::from)? {
             Some(value) => Ok(Some(JsonValue {
                 value: serde_json::to_string(&value).map_err(|e| {
-                    DataError::SerializationError(format!("Failed to serialize value: {}", e))
+                    DataError::SerializationError(format!("Failed to serialize value: {e}"))
                 })?,
             })),
             None => Ok(None),
@@ -796,7 +800,7 @@ impl Cedarling {
     }
 
     /// List all entries with their metadata.
-    /// Returns a list of DataEntry objects.
+    /// Returns a list of `DataEntry` objects.
     #[uniffi::method]
     pub fn list_data_ctx(&self) -> Result<Vec<DataEntry>, DataError> {
         let result: Result<_, core::DataError> = self.inner.list_data_ctx();
@@ -833,36 +837,43 @@ impl Cedarling {
     /// `None` when the store carries no ID. The value is an opaque,
     /// source-dependent string; it may change after a background refresh.
     #[uniffi::method]
+    #[must_use]
     pub fn policy_store_id(&self) -> Option<String> {
         self.inner.policy_store_id()
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
         self.inner.is_trusted_issuer_loaded_by_name(issuer_name)
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
         self.inner.is_trusted_issuer_loaded_by_iss(iss_claim)
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn total_issuers(&self) -> i64 {
         i64::try_from(self.inner.total_issuers()).unwrap_or(i64::MAX)
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn loaded_trusted_issuers_count(&self) -> i64 {
         i64::try_from(self.inner.loaded_trusted_issuers_count()).unwrap_or(i64::MAX)
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn loaded_trusted_issuer_ids(&self) -> Vec<String> {
         self.inner.loaded_trusted_issuer_ids().into_iter().collect()
     }
 
     #[uniffi::method]
+    #[must_use]
     pub fn failed_trusted_issuer_ids(&self) -> Vec<String> {
         self.inner.failed_trusted_issuer_ids().into_iter().collect()
     }

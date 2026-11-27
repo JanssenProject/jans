@@ -47,5 +47,5 @@ wasm-opt = [
 test_utils = { workspace = true }
 wasm-bindgen-test = "0.3.76"
 
-# Opt out of workspace pedantic lints until this crate is cleaned up.
 [lints]
+workspace = true

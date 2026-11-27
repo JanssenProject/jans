@@ -53,6 +53,10 @@ pub enum CedarType {
 }
 
 #[pymethods]
+#[allow(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "pyo3 methods take `&self`"
+)]
 impl CedarType {
     /// Get the string representation of the type
     fn __str__(&self) -> &'static str {
@@ -89,7 +93,7 @@ impl CedarType {
             CedarType::DateTime => "DateTime",
             CedarType::Duration => "Duration",
         };
-        format!("CedarType.{}", variant_name)
+        format!("CedarType.{variant_name}")
     }
 }
 

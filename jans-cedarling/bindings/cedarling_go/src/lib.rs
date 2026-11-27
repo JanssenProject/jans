@@ -201,7 +201,11 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
 
     fn pop_logs(instance_id: usize) -> Vec<String> {
         let instance = get_instance_or_return!(instance_id);
-        instance.pop_logs().iter().map(|v| v.to_string()).collect()
+        instance
+            .pop_logs()
+            .iter()
+            .map(ToString::to_string)
+            .collect()
     }
 
     fn get_log_by_id(instance_id: usize, id: String) -> String {
@@ -209,17 +213,13 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         instance
             .get_log_by_id(&id)
             .iter()
-            .map(|v| v.to_string())
+            .map(ToString::to_string)
             .collect()
     }
 
     fn get_log_ids(instance_id: usize) -> Vec<String> {
         let instance = get_instance_or_return!(instance_id);
-        instance
-            .get_log_ids()
-            .iter()
-            .map(|v| v.to_string())
-            .collect()
+        instance.get_log_ids().clone()
     }
 
     fn get_logs_by_tag(instance_id: usize, tag: String) -> Vec<String> {
@@ -227,7 +227,7 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         instance
             .get_logs_by_tag(&tag)
             .iter()
-            .map(|v| v.to_string())
+            .map(ToString::to_string)
             .collect()
     }
 
@@ -236,7 +236,7 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         instance
             .get_logs_by_request_id(&request_id)
             .iter()
-            .map(|v| v.to_string())
+            .map(ToString::to_string)
             .collect()
     }
 
@@ -245,7 +245,7 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
         instance
             .get_logs_by_request_id_and_tag(&id, &tag)
             .iter()
-            .map(|v| v.to_string())
+            .map(ToString::to_string)
             .collect()
     }
 
@@ -262,11 +262,11 @@ impl cedarling_interface::G2RCall for cedarling_interface::G2RCallImpl {
     ) -> Result {
         let instance = get_instance!(instance_id);
         let value: serde_json::Value = from_json_str!(value_json);
-        let ttl = if ttl_nanos > 0 {
-            Some(std::time::Duration::from_nanos(ttl_nanos as u64))
-        } else {
-            None
-        };
+        // Zero or negative means no TTL.
+        let ttl = u64::try_from(ttl_nanos)
+            .ok()
+            .filter(|&nanos| nanos > 0)
+            .map(std::time::Duration::from_nanos);
         match instance.push_data_ctx(&key, value, ttl) {
             Ok(()) => Result::success(()),
             Err(e) => Result::error(e),

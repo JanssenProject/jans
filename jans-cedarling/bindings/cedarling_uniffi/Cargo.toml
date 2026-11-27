@@ -30,5 +30,5 @@ rustls-platform-verifier = "0.7"
 [package.metadata.cargo-machete]
 ignored = ["uniffi_macros"]
 
-# Opt out of workspace pedantic lints until this crate is cleaned up.
 [lints]
+workspace = true

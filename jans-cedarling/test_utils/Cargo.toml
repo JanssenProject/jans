@@ -17,5 +17,5 @@ serde = { workspace = true }
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 mockito = { workspace = true }
 
-# Opt out of workspace pedantic lints until this crate is cleaned up.
 [lints]
+workspace = true

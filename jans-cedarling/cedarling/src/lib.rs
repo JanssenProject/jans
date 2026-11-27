@@ -5,7 +5,6 @@
 
 #![deny(missing_docs)]
 #![warn(unreachable_pub)]
-#![allow(clippy::missing_errors_doc)]
 // The WASM-unsafe calls banned in clippy.toml are fine in unit tests, which only run natively.
 // The non-test build is still linted, so production code cannot rely on this.
 #![cfg_attr(test, allow(clippy::disallowed_methods))]

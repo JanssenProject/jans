@@ -11,8 +11,19 @@ use std::ptr;
 mod c_interface;
 mod types;
 
-use c_interface::*;
-use types::*;
+use c_interface::{
+    authorize_multi_issuer, authorize_multi_issuer_batch, authorize_unsigned,
+    authorize_unsigned_batch, cleanup_runtime, context_clear, context_get, context_get_entry,
+    context_list, context_push, context_remove, context_stats, create_instance,
+    create_instance_with_env, drop_instance, failed_trusted_issuer_ids, get_log_by_id, get_log_ids,
+    get_logs_by_request_id, get_logs_by_request_id_and_tag, get_logs_by_tag, initialize_runtime,
+    is_trusted_issuer_loaded_by_iss, is_trusted_issuer_loaded_by_name, loaded_trusted_issuer_ids,
+    loaded_trusted_issuers_count, policy_store_id, pop_logs, shutdown_instance, total_issuers,
+};
+use types::{
+    CedarlingErrorCode, CedarlingInstanceResult, CedarlingResult, CedarlingStringArray,
+    c_string_to_string, clear_last_error, get_last_error, set_last_error,
+};
 
 /// Prevent Rust panics from crossing the C ABI (undefined behavior for the C caller).
 macro_rules! ffi_guard_int {
@@ -290,7 +301,7 @@ pub unsafe extern "C" fn cedarling_authorize_multi_issuer(
 ///
 /// The request body is a JSON object of the shape
 /// `{ "principal": {...} | null, "items": [ { "resource": {...}, "action": "...",
-/// "context": {...} }, ... ] }`. The response body carries `batch_id` (UUIDv7
+/// "context": {...} }, ... ] }`. The response body carries `batch_id` (`UUIDv7`
 /// string) alongside `results` — one `AuthorizeResult` per input item, in
 /// input order. Batch-level failures (validation, principal parse) return an
 /// error; per-item failures are returned as `Err` (`BatchItemError`) entries
@@ -777,16 +788,15 @@ pub unsafe extern "C" fn cedarling_get_logs_by_tag(
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
 
-        let tag_str = match c_string_to_string(tag) {
-            Ok(s) => s,
-            Err(_) => unsafe {
+        let Ok(tag_str) = c_string_to_string(tag) else {
+            unsafe {
                 set_last_error("Invalid tag string");
                 *result = CedarlingStringArray {
                     items: ptr::null_mut(),
                     count: 0,
                 };
                 return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+            }
         };
 
         match get_logs_by_tag(instance_id, &tag_str) {
@@ -833,16 +843,15 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id(
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
 
-        let request_id_str = match c_string_to_string(request_id) {
-            Ok(s) => s,
-            Err(_) => unsafe {
+        let Ok(request_id_str) = c_string_to_string(request_id) else {
+            unsafe {
                 set_last_error("Invalid request_id string");
                 *result = CedarlingStringArray {
                     items: ptr::null_mut(),
                     count: 0,
                 };
                 return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+            }
         };
 
         match get_logs_by_request_id(instance_id, &request_id_str) {
@@ -900,28 +909,26 @@ pub unsafe extern "C" fn cedarling_get_logs_by_request_id_and_tag(
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
 
-        let request_id_str = match c_string_to_string(request_id) {
-            Ok(s) => s,
-            Err(_) => unsafe {
+        let Ok(request_id_str) = c_string_to_string(request_id) else {
+            unsafe {
                 set_last_error("Invalid request_id string");
                 *result = CedarlingStringArray {
                     items: ptr::null_mut(),
                     count: 0,
                 };
                 return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+            }
         };
 
-        let tag_str = match c_string_to_string(tag) {
-            Ok(s) => s,
-            Err(_) => unsafe {
+        let Ok(tag_str) = c_string_to_string(tag) else {
+            unsafe {
                 set_last_error("Invalid tag string");
                 *result = CedarlingStringArray {
                     items: ptr::null_mut(),
                     count: 0,
                 };
                 return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+            }
         };
 
         match get_logs_by_request_id_and_tag(instance_id, &request_id_str, &tag_str) {
@@ -963,13 +970,10 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_name(
             unsafe { *out_result = false };
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
-        let issuer_id_str = match c_string_to_string(issuer_id) {
-            Ok(s) => s,
-            Err(_) => {
-                set_last_error("invalid issuer_id C string");
-                unsafe { *out_result = false };
-                return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+        let Ok(issuer_id_str) = c_string_to_string(issuer_id) else {
+            set_last_error("invalid issuer_id C string");
+            unsafe { *out_result = false };
+            return CedarlingErrorCode::InvalidArgument as c_int;
         };
         match is_trusted_issuer_loaded_by_name(instance_id, &issuer_id_str) {
             Ok(loaded) => unsafe {
@@ -1007,13 +1011,10 @@ pub unsafe extern "C" fn cedarling_is_trusted_issuer_loaded_by_iss(
             unsafe { *out_result = false };
             return CedarlingErrorCode::InvalidArgument as c_int;
         }
-        let iss_claim_str = match c_string_to_string(iss_claim) {
-            Ok(s) => s,
-            Err(_) => {
-                set_last_error("invalid iss_claim C string");
-                unsafe { *out_result = false };
-                return CedarlingErrorCode::InvalidArgument as c_int;
-            },
+        let Ok(iss_claim_str) = c_string_to_string(iss_claim) else {
+            set_last_error("invalid iss_claim C string");
+            unsafe { *out_result = false };
+            return CedarlingErrorCode::InvalidArgument as c_int;
         };
         match is_trusted_issuer_loaded_by_iss(instance_id, &iss_claim_str) {
             Ok(loaded) => unsafe {
@@ -1078,15 +1079,16 @@ pub unsafe extern "C" fn cedarling_get_policy_store_id(
         unsafe { *out_id = ptr::null_mut() };
         match policy_store_id(instance_id) {
             Ok(None) => CedarlingErrorCode::Success as c_int,
-            Ok(Some(id)) => match std::ffi::CString::new(id) {
-                Ok(c_id) => unsafe {
-                    *out_id = c_id.into_raw();
-                    CedarlingErrorCode::Success as c_int
-                },
-                Err(_) => {
+            Ok(Some(id)) => {
+                if let Ok(c_id) = std::ffi::CString::new(id) {
+                    unsafe {
+                        *out_id = c_id.into_raw();
+                        CedarlingErrorCode::Success as c_int
+                    }
+                } else {
                     set_last_error("policy store ID contains an interior NUL byte");
                     CedarlingErrorCode::Internal as c_int
-                },
+                }
             },
             Err(code) => code as c_int,
         }
@@ -1214,7 +1216,7 @@ pub unsafe extern "C" fn cedarling_free_string(str_ptr: *mut c_char) {
                 let _ = std::ffi::CString::from_raw(str_ptr);
             }
         }
-    })
+    });
 }
 /// Free a [`CedarlingStringArray`] produced on the success path of log or issuer-ID functions.
 ///
@@ -1246,7 +1248,7 @@ pub unsafe extern "C" fn cedarling_free_string_array(array: *mut CedarlingString
             array_ref.items = ptr::null_mut();
             array_ref.count = 0;
         }
-    })
+    });
 }
 
 /// Release `data` and `error_message` inside a [`CedarlingResult`] filled by this library.
@@ -1275,7 +1277,7 @@ pub unsafe extern "C" fn cedarling_free_result(result: *mut CedarlingResult) {
                 result_ref.error_message = ptr::null_mut();
             }
         }
-    })
+    });
 }
 
 /// Release `error_message` inside a [`CedarlingInstanceResult`] filled by this library.
@@ -1300,7 +1302,7 @@ pub unsafe extern "C" fn cedarling_free_instance_result(result: *mut CedarlingIn
             }
             result_ref.instance_id = 0;
         }
-    })
+    });
 }
 
 /// Returns a thread-local auxiliary error string for failures that are **not** already described in
@@ -1317,7 +1319,7 @@ pub extern "C" fn cedarling_get_last_error() -> *mut c_char {
 /// Clears the thread-local string read by [`cedarling_get_last_error`].
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_clear_last_error() {
-    ffi_guard_void!({ clear_last_error() })
+    ffi_guard_void!({ clear_last_error() });
 }
 
 /// Returns the Cedarling library version as a NUL-terminated static string.
@@ -1327,7 +1329,11 @@ pub extern "C" fn cedarling_clear_last_error() {
 /// `cedarling_free_string` or any other deallocation function.
 #[unsafe(no_mangle)]
 pub extern "C" fn cedarling_version() -> *const c_char {
-    ffi_guard_ptr_const!({ concat!(env!("CARGO_PKG_VERSION"), "\0").as_ptr() as *const c_char })
+    ffi_guard_ptr_const!({
+        concat!(env!("CARGO_PKG_VERSION"), "\0")
+            .as_ptr()
+            .cast::<c_char>()
+    })
 }
 
 /// Shut down and remove **all** Cedarling instances held by the library, then clear this thread's
@@ -1344,7 +1350,7 @@ pub extern "C" fn cedarling_cleanup() {
         let _ = cleanup_runtime();
         // Keep historical behavior: reset caller-visible last error state.
         clear_last_error();
-    })
+    });
 }
 
 #[cfg(test)]
@@ -1413,7 +1419,7 @@ mod tests {
         // SAFETY: both were allocated by this library and are freed once.
         unsafe {
             cedarling_free_string(last_error);
-            cedarling_free_result(&mut result);
+            cedarling_free_result(&raw mut result);
         }
         assert!(
             result.error_message.is_null(),

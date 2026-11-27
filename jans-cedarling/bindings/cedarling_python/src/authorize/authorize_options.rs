@@ -56,5 +56,7 @@ impl From<AuthorizeOptions> for cedarling::AuthorizeOptions {
 /// Converts the optional `options` attribute of a request wrapper; `None` is
 /// the same as default options.
 pub(crate) fn to_cedarling(options: Option<&AuthorizeOptions>) -> cedarling::AuthorizeOptions {
-    options.cloned().map(Into::into).unwrap_or_default()
+    options
+        .cloned()
+        .map_or_else(cedarling::AuthorizeOptions::default, Into::into)
 }

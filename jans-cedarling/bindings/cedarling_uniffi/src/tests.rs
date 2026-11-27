@@ -68,11 +68,7 @@ fn test_authorize_unsigned_success() {
         )
         .expect("Should be executed successfully.");
 
-    assert!(
-        result.decision,
-        "authz result should be ALLOW: {:?}",
-        result
-    );
+    assert!(result.decision, "authz result should be ALLOW: {result:?}");
 }
 
 fn create_test_cedarling() -> Cedarling {
@@ -184,7 +180,7 @@ fn test_data_api_push_and_get() {
         .push_data_ctx(
             "key3".to_string(),
             JsonValue {
-                value: r#"[1, 2, 3]"#.to_string(),
+                value: r"[1, 2, 3]".to_string(),
             },
             None,
         )
@@ -379,7 +375,7 @@ fn test_data_api_list_data_ctx() {
         .push_data_ctx(
             "key3".to_string(),
             JsonValue {
-                value: r#"[1, 2, 3]"#.to_string(),
+                value: r"[1, 2, 3]".to_string(),
             },
             None,
         )
@@ -447,7 +443,7 @@ fn test_data_api_invalid_key() {
     let cedarling = create_test_cedarling();
 
     let result = cedarling.push_data_ctx(
-        "".to_string(),
+        String::new(),
         JsonValue {
             value: r#""value""#.to_string(),
         },
@@ -477,7 +473,7 @@ fn test_trusted_issuer_loading_info_defaults() {
         "loaded count {loaded} should not exceed total {total}"
     );
     assert_eq!(
-        loaded_ids.len() as i64,
+        i64::try_from(loaded_ids.len()).expect("loaded ids length fits in i64"),
         loaded,
         "loaded ids length should match loaded_trusted_issuers_count"
     );
@@ -566,7 +562,9 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
         BatchItemUnsignedOutcome::Success { result } => {
             assert!(result.decision, "item 0 must allow");
         },
-        other => panic!("item 0 must be Success, got: {other:?}"),
+        other @ BatchItemUnsignedOutcome::Failed { .. } => {
+            panic!("item 0 must be Success, got: {other:?}")
+        },
     }
     match &response.results[1] {
         BatchItemUnsignedOutcome::Failed { error } => {
@@ -579,13 +577,17 @@ fn test_authorize_unsigned_batch_ordered_mixed_decisions() {
                 "error index must match malformed batch item position"
             );
         },
-        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+        other @ BatchItemUnsignedOutcome::Success { .. } => {
+            panic!("item 1 must be Failed(action_parse), got: {other:?}")
+        },
     }
     match &response.results[2] {
         BatchItemUnsignedOutcome::Success { result } => {
             assert!(result.decision, "item 2 must allow");
         },
-        other => panic!("item 2 must be Success, got: {other:?}"),
+        other @ BatchItemUnsignedOutcome::Failed { .. } => {
+            panic!("item 2 must be Success, got: {other:?}")
+        },
     }
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
 }
@@ -627,7 +629,9 @@ fn test_authorize_unsigned_batch_context_defaults_when_none() {
             result.decision,
             "None context defaults to {{}} and the is_ok=true principal must Allow"
         ),
-        other => panic!("must be Success, got: {other:?}"),
+        other @ BatchItemUnsignedOutcome::Failed { .. } => {
+            panic!("must be Success, got: {other:?}")
+        },
     }
 }
 
@@ -789,7 +793,9 @@ fn test_authorize_multi_issuer_batch_bad_action_surfaces_error_at_that_item() {
                 "error item_index must match its position in the batch"
             );
         },
-        other => panic!("item 1 must be Failed(action_parse), got: {other:?}"),
+        other @ BatchItemMultiIssuerOutcome::Success { .. } => {
+            panic!("item 1 must be Failed(action_parse), got: {other:?}")
+        },
     }
     assert!(!response.batch_id.is_empty(), "batch_id must be populated");
 }
