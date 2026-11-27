@@ -6,7 +6,6 @@ import io.jans.shibboleth.trust.config.profile.support.*;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-import java.time.Duration;
 import java.util.Objects;
 
 public record ShibbolethSsoProfileConfiguration(
@@ -37,13 +36,6 @@ public record ShibbolethSsoProfileConfiguration(
 
     }
 
-    //saml assertion configuration 
-    @Override
-    public AssertionTimeCondition getAssertionTimeCondition () {
-
-        return samlAssertionConfigurationSupport.assertionTimeCondition();
-    }
-
     public AttributeStatementPolicy getAttributeStatementPolicy() {
 
         return attributeStatementPolicy;
@@ -64,7 +56,17 @@ public record ShibbolethSsoProfileConfiguration(
         return new Builder(config);
     }
 
-    public static class Builder {
+    public static class Builder extends Steps<Builder> {
+
+        public Builder(ShibbolethSsoProfileConfiguration config) {
+
+            super(config);
+        }
+    }
+
+    private static class Steps<B extends Steps<B>>
+        implements CommonBuilderSteps<B>, AuthenticationBuilderSteps<B>, SamlBuilderSteps<B>,
+        SamlAssertionBuilderSteps<B> {
 
         private final CommonConfigurationSupport.Builder common;
         private final AuthenticationConfigurationSupport.Builder auth;
@@ -73,111 +75,75 @@ public record ShibbolethSsoProfileConfiguration(
         private AttributeStatementPolicy attributeStatementPolicy;
         private NameIdentifiers nameIdFormatPrecedence;
 
-        public Builder(ShibbolethSsoProfileConfiguration config) {
+        private Steps(ShibbolethSsoProfileConfiguration config) {
 
             common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
             auth = config != null ? AuthenticationConfigurationSupport.from(config.authenticationConfigurationSupport()) : AuthenticationConfigurationSupport.builder();
             saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
             samlAssertion = config != null ? SamlAssertionConfigurationSupport.from(config.samlAssertionConfigurationSupport()) : SamlAssertionConfigurationSupport.builder();
-            attributeStatementPolicy = config != null ?  config.attributeStatementPolicy : null;
+            attributeStatementPolicy = config != null ? config.attributeStatementPolicy : null;
             nameIdFormatPrecedence = config != null ? config.nameIdFormatPrecedence : null;
         }
 
-        public Builder status(ProfileStatus status) {
+        @Override
+        public CommonConfigurationSupport.Builder commonBuilder() {
 
-            common.status(status);
-            return this;
+            return common;
         }
 
-        public Builder inboundFlows(InterceptorFlows flows) {
+        @Override
+        public AuthenticationConfigurationSupport.Builder authenticationBuilder() {
 
-            common.inboundFlows(flows);
-            return this;
+            return auth;
         }
 
-        public Builder outboundFlows(InterceptorFlows flows) {
+        @Override
+        public SamlConfigurationSupport.Builder samlBuilder() {
 
-            common.outboundFlows(flows);
-            return this;
+            return saml;
         }
 
-        public Builder postAuthenticationFlows(InterceptorFlows flows) {
+        @Override
+        public SamlAssertionConfigurationSupport.Builder samlAssertionBuilder() {
 
-            auth.postAuthenticationFlows(flows);
-            return this;
+            return samlAssertion;
         }
 
-        public Builder authenticationResultReusePolicy(AuthenticationResultReusePolicy policy) {
+        @SuppressWarnings("unchecked")
+        protected B self() {
 
-            auth.authenticationResultReusePolicy(policy);
-            return this;
+            return (B) this;
         }
 
-        public Builder maximumAuthenticationAge(Duration age) {
-
-            auth.maximumAuthenticationAge(age);
-            return this;
-        }
-
-        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
-
-            saml.messageSigningPolicy(policy);
-            return this;
-        }
-
-        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
-
-            samlAssertion.assertionSigningPolicy(policy);
-            return this;
-        }
-
-        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
-
-            samlAssertion.assertionTimeCondition(condition);
-            return this;
-        }
-
-        public Builder assertionLifetime(Duration lifetime) {
-
-            samlAssertion.assertionLifetime(lifetime);
-            return this;
-        }
-
-        public Builder attributeStatementPolicy(AttributeStatementPolicy policy) {
+        public B attributeStatementPolicy(AttributeStatementPolicy policy) {
 
             attributeStatementPolicy = policy;
-            return this;
+            return self();
         }
 
-        public Builder nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
+        public B nameIdFormatPrecedence(NameIdentifiers nameIdentifiers) {
 
             nameIdFormatPrecedence = nameIdentifiers;
-            return this;
+            return self();
         }
 
         public Result<ShibbolethSsoProfileConfiguration> build() {
 
-            Result<CommonConfigurationSupport> commonResult = common.build();
-            if (commonResult.isFailure()) {
+            CommonConfigurationSupport commonValue;
+            AuthenticationConfigurationSupport authValue;
+            SamlConfigurationSupport samlValue;
+            SamlAssertionConfigurationSupport samlAssertionValue;
 
-                return Result.failure(commonResult.getError());
+            try {
+
+                commonValue = Builders.require(common.build());
+                authValue = Builders.require(auth.build());
+                samlValue = Builders.require(saml.build());
+                samlAssertionValue = Builders.require(samlAssertion.build());
             }
+            catch (Builders.Failure failure) {
 
-            Result<AuthenticationConfigurationSupport> authResult = auth.build();
-            if (authResult.isFailure()) {
-                return Result.failure(authResult.getError());
-            }
-
-            Result<SamlConfigurationSupport> samlResult = saml.build();
-            if (samlResult.isFailure()) {
-
-                return Result.failure(samlResult.getError());
-            }
-
-            Result<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
-            if (samlAssertionResult.isFailure()) {
-
-                return Result.failure(samlAssertionResult.getError());
+                return Result.failure(failure.error);
             }
 
             if (attributeStatementPolicy == null) {
@@ -193,10 +159,9 @@ public record ShibbolethSsoProfileConfiguration(
             }
 
             return Result.success(new ShibbolethSsoProfileConfiguration(
-                commonResult.getValue(),authResult.getValue(),samlResult.getValue(),
-                samlAssertionResult.getValue(), attributeStatementPolicy,nameIdFormatPrecedence
+                commonValue, authValue, samlValue,
+                samlAssertionValue, attributeStatementPolicy, nameIdFormatPrecedence
             ));
         }
-
     }
 }

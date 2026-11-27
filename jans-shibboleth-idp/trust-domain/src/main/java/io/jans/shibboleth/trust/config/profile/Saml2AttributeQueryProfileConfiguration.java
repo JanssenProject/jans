@@ -1,21 +1,15 @@
 package io.jans.shibboleth.trust.config.profile;
 
+import io.jans.shibboleth.trust.config.profile.capabilities.AssertionEncryptionPolicyCapable;
+import io.jans.shibboleth.trust.config.profile.capabilities.AttributeEncryptionPolicyCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.CommonConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.Saml2ConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.SamlAssertionConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.capabilities.SamlConfigurationCapable;
 import io.jans.shibboleth.trust.config.profile.common.AssertionEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.AssertionTimeCondition;
 import io.jans.shibboleth.trust.config.profile.common.AttributeEncryptionPolicy;
-import io.jans.shibboleth.trust.config.profile.common.EncryptionFallbackPolicy;
 import io.jans.shibboleth.trust.config.profile.common.FriendlyNameRandomizationPolicy;
-import io.jans.shibboleth.trust.config.profile.common.InterceptorFlows;
-import io.jans.shibboleth.trust.config.profile.common.MessageSigningPolicy;
-import io.jans.shibboleth.trust.config.profile.common.NameIdEncryptionPolicy;
 import io.jans.shibboleth.trust.config.profile.common.ProfileType;
-import io.jans.shibboleth.trust.config.profile.common.ProfileStatus;
-import io.jans.shibboleth.trust.config.profile.common.RequestSignatureValidationPolicy;
 import io.jans.shibboleth.trust.config.profile.support.CommonConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.Saml2ConfigurationSupport;
 import io.jans.shibboleth.trust.config.profile.support.SamlAssertionConfigurationSupport;
@@ -23,7 +17,6 @@ import io.jans.shibboleth.trust.config.profile.support.SamlConfigurationSupport;
 import io.jans.kernel.RequiredValueMissing;
 import io.jans.kernel.Result;
 
-import java.time.Duration;
 import java.util.Objects;
 
 public record Saml2AttributeQueryProfileConfiguration(
@@ -35,7 +28,7 @@ public record Saml2AttributeQueryProfileConfiguration(
     AttributeEncryptionPolicy attributeEncryptionPolicy,
     FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy)
     implements CommonConfigurationCapable, SamlConfigurationCapable, SamlAssertionConfigurationCapable,
-        Saml2ConfigurationCapable {
+        Saml2ConfigurationCapable, AssertionEncryptionPolicyCapable, AttributeEncryptionPolicyCapable {
 
     public Saml2AttributeQueryProfileConfiguration {
 
@@ -56,29 +49,6 @@ public record Saml2AttributeQueryProfileConfiguration(
     }
     //End Saml Assertion configuration
 
-    @Override 
-    public EncryptionFallbackPolicy getEncryptionFallbackPolicy() {
-
-        return saml2ConfigurationSupport.encryptionFallbackPolicy();
-    }
-
-    @Override 
-    public NameIdEncryptionPolicy getNameIdEncryptionPolicy() {
-
-        return saml2ConfigurationSupport.nameIdEncryptionPolicy();
-    }
-    //End Saml2 Configuration 
-
-    public AssertionEncryptionPolicy getAssertionEncryptionPolicy() {
-
-        return assertionEncryptionPolicy;
-    }
-
-    public AttributeEncryptionPolicy getAttributeEncryptionPolicy() {
-
-        return attributeEncryptionPolicy;
-    }
-
     public FriendlyNameRandomizationPolicy getFriendlyNameRandomizationPolicy() {
 
         return friendlyNameRandomizationPolicy;
@@ -93,8 +63,17 @@ public record Saml2AttributeQueryProfileConfiguration(
 
         return new Builder(config);
     }
-    
-    public static class Builder {
+
+    public static class Builder extends Steps<Builder> {
+
+        public Builder(Saml2AttributeQueryProfileConfiguration config) {
+
+            super(config);
+        }
+    }
+
+    private static class Steps<B extends Steps<B>>
+        implements CommonBuilderSteps<B>, SamlBuilderSteps<B>, Saml2BuilderSteps<B>, SamlAssertionBuilderSteps<B> {
 
         private final CommonConfigurationSupport.Builder common;
         private final SamlConfigurationSupport.Builder saml;
@@ -104,7 +83,7 @@ public record Saml2AttributeQueryProfileConfiguration(
         private AttributeEncryptionPolicy attributeEncryptionPolicy;
         private FriendlyNameRandomizationPolicy friendlyNameRandomizationPolicy;
 
-        public Builder(Saml2AttributeQueryProfileConfiguration config) {
+        private Steps(Saml2AttributeQueryProfileConfiguration config) {
 
             common = config != null ? CommonConfigurationSupport.from(config.commonConfigurationSupport()) : CommonConfigurationSupport.builder();
             saml = config != null ? SamlConfigurationSupport.from(config.samlConfigurationSupport()) : SamlConfigurationSupport.builder();
@@ -116,112 +95,71 @@ public record Saml2AttributeQueryProfileConfiguration(
             friendlyNameRandomizationPolicy = config != null ? config.friendlyNameRandomizationPolicy : null;
         }
 
-        public Builder status(ProfileStatus status) {
+        @Override
+        public CommonConfigurationSupport.Builder commonBuilder() {
 
-            common.status(status);
-            return this;
+            return common;
         }
 
-        public Builder inboundFlows(InterceptorFlows flows) {
+        @Override
+        public SamlConfigurationSupport.Builder samlBuilder() {
 
-            common.inboundFlows(flows);
-            return this;
+            return saml;
         }
 
-        public Builder outboundFlows(InterceptorFlows flows) {
+        @Override
+        public Saml2ConfigurationSupport.Builder saml2Builder() {
 
-            common.outboundFlows(flows);
-            return this;
+            return saml2;
         }
 
-        public Builder messageSigningPolicy(MessageSigningPolicy policy) {
+        @Override
+        public SamlAssertionConfigurationSupport.Builder samlAssertionBuilder() {
 
-            saml.messageSigningPolicy(policy);
-            return this;
+            return samlAssertion;
         }
 
-        public Builder assertionSigningPolicy(AssertionSigningPolicy policy) {
+        @SuppressWarnings("unchecked")
+        protected B self() {
 
-            samlAssertion.assertionSigningPolicy(policy);
-            return this;
+            return (B) this;
         }
 
-        public Builder assertionTimeCondition(AssertionTimeCondition condition) {
-
-            samlAssertion.assertionTimeCondition(condition);
-            return this;
-        }
-
-        public Builder assertionLifetime(Duration lifetime) {
-
-            samlAssertion.assertionLifetime(lifetime);
-            return this;
-        }
-
-        public Builder requestSignatureValidationPolicy(RequestSignatureValidationPolicy policy) {
-
-            saml2.requestSignatureValidationPolicy(policy);
-            return this;
-        }
-
-        public Builder encryptionFallbackPolicy(EncryptionFallbackPolicy policy) {
-
-            saml2.encryptionFallbackPolicy(policy);
-            return this;
-        }
-
-        public Builder nameIdEncryptionPolicy(NameIdEncryptionPolicy policy) {
-
-            saml2.nameIdEncryptionPolicy(policy);
-            return this;
-        }
-
-        public Builder assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
+        public B assertionEncryptionPolicy(AssertionEncryptionPolicy policy) {
 
             assertionEncryptionPolicy = policy;
-            return this;
+            return self();
         }
 
-        public Builder attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
+        public B attributeEncryptionPolicy(AttributeEncryptionPolicy policy) {
 
             attributeEncryptionPolicy = policy;
-            return this;
+            return self();
         }
 
-        public Builder friendlyRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
+        public B friendlyRandomizationPolicy(FriendlyNameRandomizationPolicy policy) {
 
             friendlyNameRandomizationPolicy = policy;
-            return this;
+            return self();
         }
 
         public Result<Saml2AttributeQueryProfileConfiguration> build() {
-            
-            Result<CommonConfigurationSupport> commonResult = common.build();
 
-            if (commonResult.isFailure()) {
+            CommonConfigurationSupport commonValue;
+            SamlConfigurationSupport samlValue;
+            SamlAssertionConfigurationSupport samlAssertionValue;
+            Saml2ConfigurationSupport saml2Value;
 
-                return Result.failure(commonResult.getError());
+            try {
+
+                commonValue = Builders.require(common.build());
+                samlValue = Builders.require(saml.build());
+                samlAssertionValue = Builders.require(samlAssertion.build());
+                saml2Value = Builders.require(saml2.build());
             }
+            catch (Builders.Failure failure) {
 
-            Result<SamlConfigurationSupport> samlResult = saml.build();
-
-            if (samlResult.isFailure()) {
-
-                return Result.failure(samlResult.getError());
-            }
-
-            Result<SamlAssertionConfigurationSupport> samlAssertionResult = samlAssertion.build();
-
-            if (samlAssertionResult.isFailure()) {
-
-                return Result.failure(samlAssertionResult.getError());
-            }
-
-            Result<Saml2ConfigurationSupport> saml2Result = saml2.build();
-
-            if (saml2Result.isFailure()) {
-
-                return Result.failure(saml2Result.getError());
+                return Result.failure(failure.error);
             }
 
             if (assertionEncryptionPolicy == null) {
@@ -246,10 +184,9 @@ public record Saml2AttributeQueryProfileConfiguration(
             }
 
             return Result.success(new Saml2AttributeQueryProfileConfiguration(
-                commonResult.getValue(),samlResult.getValue(),samlAssertionResult.getValue(),
-                saml2Result.getValue(),assertionEncryptionPolicy,attributeEncryptionPolicy,friendlyNameRandomizationPolicy
+                commonValue, samlValue, samlAssertionValue,
+                saml2Value, assertionEncryptionPolicy, attributeEncryptionPolicy, friendlyNameRandomizationPolicy
             ));
-
         }
     }
 }
