@@ -3,6 +3,7 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+use jsonwebtoken::Algorithm;
 use thiserror::Error;
 
 use super::{JwtStatus, StatusListExpiry, UnavailableStatusList};
@@ -102,8 +103,11 @@ pub enum StatusCheckError {
 pub(crate) enum UpdateStatusListError {
     #[error("failed to decode the status list JWT: {0}")]
     DecodeStatusListJwt(#[from] DecodeJwtError),
-    #[error("missing validator for the statuslist JWT from '{0}'")]
-    MissingValidator(String),
+    #[error(
+        "the status list JWT from '{url}' is signed with {alg:?}, which is not listed in \
+         CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED"
+    )]
+    UnsupportedAlgorithm { url: String, alg: Algorithm },
     #[error("failed to validate statuslist JWT: {0}")]
     ValidateJwtError(#[from] ValidateJwtError),
     #[error("failed to parse status list: {0}")]

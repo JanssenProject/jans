@@ -152,7 +152,9 @@ impl JwtValidator {
 
         let validator = JwtValidator {
             validation,
-            expected_iss: iss.cloned(),
+            // `iss` is optional in a status list JWT (draft-ietf-oauth-status-list-21
+            // §5.1); the caller refuses one that names another issuer.
+            expected_iss: None,
             required_claims,
             validate_signature,
             validate_status_list: false,

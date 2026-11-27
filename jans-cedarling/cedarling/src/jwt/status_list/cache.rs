@@ -21,7 +21,7 @@ use crate::{
     jwt::{
         IssuerConfig, TokenCache,
         decode::{DecodeJwtError, decode_jwt},
-        key_service::KeyService,
+        key_service::{DecodingKeyInfo, KeyService},
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidateJwtError, ValidatorInfo},
@@ -495,34 +495,33 @@ struct StatusListSource {
 impl StatusListSource {
     /// Fetches the list and runs every check on it. The validator and the key are
     /// looked up on each fetch, so a list signed with a rotated key still loads.
+    /// Both belong to the trusted issuer that publishes the list, not to the `iss`
+    /// the response names: `iss` is optional in a status list JWT
+    /// ([draft-ietf-oauth-status-list-21 §5.1]), and a different one is refused
+    /// after the signature check.
+    ///
+    /// [draft-ietf-oauth-status-list-21 §5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
     async fn fetch(&self) -> Result<ParsedStatusList, UpdateStatusListError> {
         let jwt = StatusListJwtStr::get_from_url(&self.url, &self.http_client)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let decoded_jwt = decode_jwt(&jwt.0)?;
-        let decoding_key = self.key_service.get_key(&decoded_jwt.decoding_key_info());
-
-        let decoded_jwt_iss = decoded_jwt.iss();
-        // The response must not pick another trusted issuer's validator.
-        if let Some(decoded) = decoded_jwt_iss
-            .as_ref()
-            .filter(|decoded| **decoded != self.iss)
-        {
-            return Err(UpdateStatusListError::UnboundStatusList {
-                url: self.url.to_string(),
-                reason: UnboundReason::Iss {
-                    found: decoded.clone(),
-                },
-            });
-        }
+        let header = decode_jwt(&jwt.0)?.header;
+        let decoding_key = self.key_service.get_key(&DecodingKeyInfo {
+            issuer: Some(self.iss.clone()),
+            kid: header.kid,
+            algorithm: header.alg,
+        });
         let validator = self
             .validators
             .get(&ValidatorInfo {
-                iss: decoded_jwt_iss.as_ref(),
+                iss: Some(&self.iss),
                 token_kind: TokenKind::StatusList,
-                algorithm: decoded_jwt.header.alg,
+                algorithm: header.alg,
             })
-            .ok_or_else(|| UpdateStatusListError::MissingValidator(self.url.to_string()))?;
+            .ok_or_else(|| UpdateStatusListError::UnsupportedAlgorithm {
+                url: self.url.to_string(),
+                alg: header.alg,
+            })?;
 
         parse_status_list_jwt(&jwt, &validator, decoding_key, &self.iss, &self.url)
     }
@@ -842,6 +841,13 @@ mod test {
         );
     }
 
+    fn unsupported_algorithm(alg: Algorithm) -> UpdateStatusListError {
+        UpdateStatusListError::UnsupportedAlgorithm {
+            url: BOUND_LIST_URL.to_owned(),
+            alg,
+        }
+    }
+
     fn usable_issuer_list() -> Arc<IssuerStatusList> {
         Arc::new(IssuerStatusList::for_test(
             BOUND_LIST_URL,
@@ -862,7 +868,7 @@ mod test {
             list: usable_issuer_list(),
             on_change: || cleared.set(cleared.get() + 1),
         };
-        let cause = || Arc::new(UpdateStatusListError::MissingValidator("x".into()));
+        let cause = || Arc::new(unsupported_algorithm(Algorithm::HS256));
 
         writer.mark_unavailable(1_000, cause());
         assert_eq!(cleared.get(), 1, "a usable list became unavailable");
@@ -902,11 +908,11 @@ mod test {
         };
         writer.mark_unavailable(
             1_767_225_600,
-            Arc::new(UpdateStatusListError::MissingValidator("first".into())),
+            Arc::new(unsupported_algorithm(Algorithm::ES256)),
         );
         writer.mark_unavailable(
             1_767_225_900,
-            Arc::new(UpdateStatusListError::MissingValidator("second".into())),
+            Arc::new(unsupported_algorithm(Algorithm::HS256)),
         );
 
         let err = writer
@@ -916,8 +922,10 @@ mod test {
         assert_eq!(
             err.to_string(),
             "the status list 'https://idp.example.com/statuslist/1' has been unavailable since \
-             2026-01-01T00:00:00Z: missing validator for the statuslist JWT from 'second'; \
-             tokens that reference it are rejected until a refresh succeeds",
+             2026-01-01T00:00:00Z: the status list JWT from \
+             'https://idp.example.com/statuslist/1' is signed with HS256, which is not listed in \
+             CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED; tokens that reference it are rejected \
+             until a refresh succeeds",
             "the rejection names the list, the first failure time and the latest cause"
         );
     }

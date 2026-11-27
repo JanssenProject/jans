@@ -163,8 +163,8 @@ impl From<TokenTypeHeader> for Option<String> {
 }
 
 /// What [`MockServer::serve_status_list`] puts into the status list JWT.
-/// The default is a well-formed list: `typ: statuslist+jwt`, `iat`, `exp` one
-/// hour after the fetch and `ttl: 300`.
+/// The default is a well-formed list: `typ: statuslist+jwt`, `iss` of the mock
+/// issuer, `iat`, `exp` one hour after the fetch and `ttl: 300`.
 #[derive(Clone, Copy)]
 pub(crate) struct MockStatusList<'a> {
     pub bits: StatusBitSize,
@@ -176,6 +176,17 @@ pub(crate) struct MockStatusList<'a> {
     /// `None` omits the claim.
     pub ttl_secs: Option<u64>,
     pub with_iat: bool,
+    pub iss: MockStatusListIss<'a>,
+}
+
+/// The `iss` claim of a [`MockStatusList`].
+#[derive(Clone, Copy)]
+pub(crate) enum MockStatusListIss<'a> {
+    /// The mock issuer itself.
+    Issuer,
+    /// No `iss` claim.
+    Absent,
+    Other(&'a str),
 }
 
 impl Default for MockStatusList<'_> {
@@ -187,6 +198,7 @@ impl Default for MockStatusList<'_> {
             exp_offset_secs: Some(3600),
             ttl_secs: Some(300),
             with_iat: true,
+            iss: MockStatusListIss::Issuer,
         }
     }
 }
@@ -296,11 +308,16 @@ impl MockServer {
             exp_offset_secs,
             ttl_secs,
             with_iat,
+            iss,
         } = spec;
         let bits: u8 = bits.into();
         let lst = status_list::compress_and_encode(list);
         let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
-        let iss = self.server.url();
+        let iss = match iss {
+            MockStatusListIss::Issuer => Some(self.server.url()),
+            MockStatusListIss::Absent => None,
+            MockStatusListIss::Other(iss) => Some(iss.to_owned()),
+        };
         let header = jwt::Header {
             alg: self.keys.alg,
             kid: self.keys.kid.clone(),
@@ -316,8 +333,10 @@ impl MockServer {
                   "bits": bits,
                   "lst": lst,
                 },
-                "iss": iss,
             });
+            if let Some(iss) = &iss {
+                claims["iss"] = json!(iss);
+            }
             if let Some(offset) = exp_offset_secs {
                 claims["exp"] = json!(now + offset);
             }

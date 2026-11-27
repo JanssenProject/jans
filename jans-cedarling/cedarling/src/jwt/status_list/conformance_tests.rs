@@ -23,7 +23,7 @@ use serde_json::json;
 use tokio_util::sync::{CancellationToken, DropGuard};
 
 use super::{
-    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListRegistry,
+    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListRegistry, UnboundReason,
     UpdateStatusListError,
 };
 use crate::JwtConfig;
@@ -33,7 +33,7 @@ use crate::http::{HttpClient, HttpClientConfig};
 use crate::jwt::IssuerConfig;
 use crate::jwt::TokenCache;
 use crate::jwt::key_service::KeyService;
-use crate::jwt::test_utils::{MockServer, MockStatusList, TokenTypeHeader};
+use crate::jwt::test_utils::{MockServer, MockStatusList, MockStatusListIss, TokenTypeHeader};
 use crate::jwt::validation::{
     JwtValidatorCache, TokenKind, ValidateJwtError, ValidatedJwt, ValidatorInfo,
 };
@@ -521,6 +521,60 @@ async fn accepts_list_without_exp() {
     .await;
     case.validate(0)
         .expect("a list without `exp` has no expiry, so a VALID entry is accepted");
+}
+
+/// `iss` is not among the claims a status list JWT MUST carry ([§5.1]), and its
+/// Status Issuer may differ from the token's Issuer ([§11.3]); a list without
+/// `iss` is checked with the keys of the trusted issuer that publishes it.
+///
+/// [§5.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-5.1
+/// [§11.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-11.3
+#[tokio::test]
+async fn accepts_list_without_iss() {
+    let mut case = Case::load(
+        MockStatusList {
+            list: &[0],
+            iss: MockStatusListIss::Absent,
+            ..Default::default()
+        },
+        NO_REFRESH,
+    )
+    .await;
+    case.validate(0).expect(
+        "a list without `iss` is verified with its issuer's keys, so a VALID entry is accepted",
+    );
+}
+
+/// A status list whose `iss` names another issuer is not the list of the trusted
+/// issuer that publishes it, so it fails validation ([§8.3] step 4) and the token
+/// that references it is rejected.
+///
+/// [§8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
+#[tokio::test]
+async fn rejects_list_from_another_iss() {
+    let other = "https://other.example.com";
+    let mut case = Case::load(
+        MockStatusList {
+            list: &[0],
+            iss: MockStatusListIss::Other(other),
+            ..Default::default()
+        },
+        NO_REFRESH,
+    )
+    .await;
+    let err = case.validate(0).expect_err(
+        "a list of another issuer is refused, so the token that references it is rejected",
+    );
+    assert!(
+        matches!(
+            unavailable_cause(&err),
+            Some(UpdateStatusListError::UnboundStatusList {
+                reason: UnboundReason::Iss { found },
+                ..
+            }) if found.as_str() == other
+        ),
+        "a status list JWT with another `iss` must be refused, naming that `iss`, got: {err:?}"
+    );
 }
 
 /// An expired status list MUST NOT be used ([§8.3] step 4, [§13.7]).
