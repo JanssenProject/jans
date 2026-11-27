@@ -11,6 +11,8 @@ import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
+import io.jans.model.custom.script.type.attestation.AttestationType;
+import io.jans.model.custom.script.type.attestation.DummyAttestationType;
 import io.jans.model.custom.script.type.authz.ConsentGatheringType;
 import io.jans.model.custom.script.type.authz.DummyConsentGatheringType;
 import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
@@ -142,6 +144,7 @@ public enum CustomScriptType implements AttributeEnum {
     FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),
     LOCK_EXTENSION("lock_extension", "Lock Extension", LockExtensionType.class, CustomScript.class, "LockExtension", new DummyLockExtensionType()),
     SHIB_POST_AUTHN_APPROVAL("shib_post_authn_approval", "Shibboleth Post Authentication Approval", ShibPostAuthnApprovalType.class, CustomScript.class, "ShibPostAuthnApproval", new DummyShibPostAuthnApprovalType()),
+    ATTESTATION("attestation", "Attestation", AttestationType.class, CustomScript.class, "Attestation", new DummyAttestationType()),
     ;
 
     private String value;

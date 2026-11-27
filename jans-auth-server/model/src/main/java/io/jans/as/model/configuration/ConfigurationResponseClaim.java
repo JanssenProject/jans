@@ -103,6 +103,11 @@ public final class ConfigurationResponseClaim {
     // SSA
     public static final String SSA_ENDPOINT = "ssa_endpoint";
 
+    // Attestation endpoint (hardware-anchored agent identity)
+    public static final String ATTESTATION_ENDPOINT = "attestation_endpoint";
+    public static final String ATTESTATION_CHALLENGE_ENDPOINT = "attestation_challenge_endpoint";
+    public static final String ATTESTATION_EVIDENCE_FORMATS_SUPPORTED = "attestation_evidence_formats_supported";
+
     // Client ID Metadata Document (CIMD)
     public static final String CLIENT_ID_METADATA_DOCUMENT_SUPPORTED = "client_id_metadata_document_supported";
 

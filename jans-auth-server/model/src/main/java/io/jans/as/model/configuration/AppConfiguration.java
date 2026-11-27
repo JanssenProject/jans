@@ -1081,6 +1081,70 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Read timeout in milliseconds for SPIFFE Bundle Endpoint fetch", defaultValue = "10000")
     private Integer spiffeBundleReadTimeoutMs = 10000;
 
+    // Attestation endpoint (hardware-anchored agent identity)
+    @DocProperty(description = "Lifetime in seconds of an attestation challenge (nonce) issued by `/attestation/challenge`", defaultValue = "300")
+    private Integer attestationChallengeLifetimeSeconds = 300;
+
+    @DocProperty(description = "Default validity window in seconds of an attestation assessment (`expires_at - appraised_at`). A script may only shorten it", defaultValue = "900")
+    private Integer attestationAssessmentLifetimeSeconds = 900;
+
+    @DocProperty(description = "Oldest `appraised_at` (seconds) of a key attestation state accepted for token issuance", defaultValue = "300")
+    private Integer attestationMaxAgeForIssuanceSeconds = 300;
+
+    @DocProperty(description = "When true, every token issuance consumes the key attestation state, so one appraisal authorizes exactly one issuance", defaultValue = "false")
+    private Boolean attestationRequireFreshPerIssuance = false;
+
+    @DocProperty(description = "When true, attestation verdicts with status `warning` are accepted by enrollment and issuance", defaultValue = "false")
+    private Boolean attestationAcceptWarning = false;
+
+    @DocProperty(description = "Evidence formats accepted by `/attestation` and advertised in discovery", defaultValue = "[\"azure-cvm-sev-snp+json\", \"tpm2-quote+json\", \"eat+jwt\"]")
+    private List<String> attestationEvidenceFormatsSupported;
+
+    @DocProperty(description = "Maximum size in bytes of an `/attestation` request body", defaultValue = "65536")
+    private Integer attestationMaxEvidenceBytes = 65536;
+
+    @DocProperty(description = "When true, the raw evidence is stored with the assessment (it may contain platform identifiers). Its digest is always stored", defaultValue = "false")
+    private Boolean attestationStoreEvidence = false;
+
+    @DocProperty(description = "When true, the platform verifier result JWT is stored with the assessment for later re-verification", defaultValue = "true")
+    private Boolean attestationStoreVerifierResult = true;
+
+    @DocProperty(description = "When true, the platform verifier result JWT is returned to the agent in the `/attestation` response", defaultValue = "false")
+    private Boolean attestationEchoVerifierResult = false;
+
+    @DocProperty(description = "Name of the attestation script to use. When empty, enabled attestation scripts are tried in level order until one claims the evidence format")
+    private String attestationScriptName;
+
+    @DocProperty(description = "Server-side attestation verifier trust anchors and claim paths. A script `verifier_kind` must name one of these profiles")
+    private List<AttestationVerifierProfile> attestationVerifierProfiles;
+
+    @DocProperty(description = "Maximum number of `processing -> pending` transitions of a challenge after infrastructure failures (verifier unavailable)", defaultValue = "3")
+    private Integer attestationChallengeMaxRetries = 3;
+
+    @DocProperty(description = "Lease in seconds a node holds on a challenge while it appraises evidence", defaultValue = "30")
+    private Integer attestationProcessingLeaseSeconds = 30;
+
+    @DocProperty(description = "Retention in seconds of attestation assessments (evidence log) after appraisal, independent of their authorization validity", defaultValue = "31536000")
+    private Integer attestationRetentionSeconds = 31536000;
+
+    @DocProperty(description = "When true, verifier profiles with maturity `experimental` cannot produce an `affirming` verdict", defaultValue = "false")
+    private Boolean attestationRejectExperimentalProfiles = false;
+
+    @DocProperty(description = "Allowed clock skew in seconds for attestation time comparisons (verifier result `exp`/`nbf`)", defaultValue = "60")
+    private Integer attestationClockSkewSeconds = 60;
+
+    @DocProperty(description = "Maximum response size in bytes accepted from a platform verifier", defaultValue = "1048576")
+    private Integer attestationVerifierMaxResponseSize = 1048576;
+
+    @DocProperty(description = "Consecutive platform verifier failures that open the circuit breaker for that verifier host", defaultValue = "5")
+    private Integer attestationVerifierCircuitBreakerThreshold = 5;
+
+    @DocProperty(description = "Seconds the platform verifier circuit breaker stays open before a trial call is allowed", defaultValue = "30")
+    private Integer attestationVerifierCircuitBreakerOpenSeconds = 30;
+
+    @DocProperty(description = "Interval in seconds of the timer that returns challenges with expired processing leases to `pending`", defaultValue = "30")
+    private Integer attestationChallengeRepairIntervalSeconds = 30;
+
     public Boolean getUseOpenidSubAttributeValueForPairwiseLocalAccountId() {
         if (useOpenidSubAttributeValueForPairwiseLocalAccountId == null) useOpenidSubAttributeValueForPairwiseLocalAccountId = false;
         return useOpenidSubAttributeValueForPairwiseLocalAccountId;
@@ -4147,6 +4211,196 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationResponseIssParameterSupported(Boolean authorizationResponseIssParameterSupported) {
         this.authorizationResponseIssParameterSupported = authorizationResponseIssParameterSupported;
+    }
+
+    public Integer getAttestationChallengeLifetimeSeconds() {
+        if (attestationChallengeLifetimeSeconds == null) attestationChallengeLifetimeSeconds = 300;
+        return attestationChallengeLifetimeSeconds;
+    }
+
+    public void setAttestationChallengeLifetimeSeconds(Integer attestationChallengeLifetimeSeconds) {
+        this.attestationChallengeLifetimeSeconds = attestationChallengeLifetimeSeconds;
+    }
+
+    public Integer getAttestationAssessmentLifetimeSeconds() {
+        if (attestationAssessmentLifetimeSeconds == null) attestationAssessmentLifetimeSeconds = 900;
+        return attestationAssessmentLifetimeSeconds;
+    }
+
+    public void setAttestationAssessmentLifetimeSeconds(Integer attestationAssessmentLifetimeSeconds) {
+        this.attestationAssessmentLifetimeSeconds = attestationAssessmentLifetimeSeconds;
+    }
+
+    public Integer getAttestationMaxAgeForIssuanceSeconds() {
+        if (attestationMaxAgeForIssuanceSeconds == null) attestationMaxAgeForIssuanceSeconds = 300;
+        return attestationMaxAgeForIssuanceSeconds;
+    }
+
+    public void setAttestationMaxAgeForIssuanceSeconds(Integer attestationMaxAgeForIssuanceSeconds) {
+        this.attestationMaxAgeForIssuanceSeconds = attestationMaxAgeForIssuanceSeconds;
+    }
+
+    public Boolean getAttestationRequireFreshPerIssuance() {
+        if (attestationRequireFreshPerIssuance == null) attestationRequireFreshPerIssuance = false;
+        return attestationRequireFreshPerIssuance;
+    }
+
+    public void setAttestationRequireFreshPerIssuance(Boolean attestationRequireFreshPerIssuance) {
+        this.attestationRequireFreshPerIssuance = attestationRequireFreshPerIssuance;
+    }
+
+    public Boolean getAttestationAcceptWarning() {
+        if (attestationAcceptWarning == null) attestationAcceptWarning = false;
+        return attestationAcceptWarning;
+    }
+
+    public void setAttestationAcceptWarning(Boolean attestationAcceptWarning) {
+        this.attestationAcceptWarning = attestationAcceptWarning;
+    }
+
+    public List<String> getAttestationEvidenceFormatsSupported() {
+        if (attestationEvidenceFormatsSupported == null) {
+            attestationEvidenceFormatsSupported = new ArrayList<>(Arrays.asList("azure-cvm-sev-snp+json", "tpm2-quote+json", "eat+jwt"));
+        }
+        return attestationEvidenceFormatsSupported;
+    }
+
+    public void setAttestationEvidenceFormatsSupported(List<String> attestationEvidenceFormatsSupported) {
+        this.attestationEvidenceFormatsSupported = attestationEvidenceFormatsSupported;
+    }
+
+    public Integer getAttestationMaxEvidenceBytes() {
+        if (attestationMaxEvidenceBytes == null) attestationMaxEvidenceBytes = 65536;
+        return attestationMaxEvidenceBytes;
+    }
+
+    public void setAttestationMaxEvidenceBytes(Integer attestationMaxEvidenceBytes) {
+        this.attestationMaxEvidenceBytes = attestationMaxEvidenceBytes;
+    }
+
+    public Boolean getAttestationStoreEvidence() {
+        if (attestationStoreEvidence == null) attestationStoreEvidence = false;
+        return attestationStoreEvidence;
+    }
+
+    public void setAttestationStoreEvidence(Boolean attestationStoreEvidence) {
+        this.attestationStoreEvidence = attestationStoreEvidence;
+    }
+
+    public Boolean getAttestationStoreVerifierResult() {
+        if (attestationStoreVerifierResult == null) attestationStoreVerifierResult = true;
+        return attestationStoreVerifierResult;
+    }
+
+    public void setAttestationStoreVerifierResult(Boolean attestationStoreVerifierResult) {
+        this.attestationStoreVerifierResult = attestationStoreVerifierResult;
+    }
+
+    public Boolean getAttestationEchoVerifierResult() {
+        if (attestationEchoVerifierResult == null) attestationEchoVerifierResult = false;
+        return attestationEchoVerifierResult;
+    }
+
+    public void setAttestationEchoVerifierResult(Boolean attestationEchoVerifierResult) {
+        this.attestationEchoVerifierResult = attestationEchoVerifierResult;
+    }
+
+    public String getAttestationScriptName() {
+        return attestationScriptName;
+    }
+
+    public void setAttestationScriptName(String attestationScriptName) {
+        this.attestationScriptName = attestationScriptName;
+    }
+
+    public List<AttestationVerifierProfile> getAttestationVerifierProfiles() {
+        if (attestationVerifierProfiles == null) attestationVerifierProfiles = new ArrayList<>();
+        return attestationVerifierProfiles;
+    }
+
+    public void setAttestationVerifierProfiles(List<AttestationVerifierProfile> attestationVerifierProfiles) {
+        this.attestationVerifierProfiles = attestationVerifierProfiles;
+    }
+
+    public Integer getAttestationChallengeMaxRetries() {
+        if (attestationChallengeMaxRetries == null) attestationChallengeMaxRetries = 3;
+        return attestationChallengeMaxRetries;
+    }
+
+    public void setAttestationChallengeMaxRetries(Integer attestationChallengeMaxRetries) {
+        this.attestationChallengeMaxRetries = attestationChallengeMaxRetries;
+    }
+
+    public Integer getAttestationProcessingLeaseSeconds() {
+        if (attestationProcessingLeaseSeconds == null) attestationProcessingLeaseSeconds = 30;
+        return attestationProcessingLeaseSeconds;
+    }
+
+    public void setAttestationProcessingLeaseSeconds(Integer attestationProcessingLeaseSeconds) {
+        this.attestationProcessingLeaseSeconds = attestationProcessingLeaseSeconds;
+    }
+
+    public Integer getAttestationRetentionSeconds() {
+        if (attestationRetentionSeconds == null) attestationRetentionSeconds = 31536000;
+        return attestationRetentionSeconds;
+    }
+
+    public void setAttestationRetentionSeconds(Integer attestationRetentionSeconds) {
+        this.attestationRetentionSeconds = attestationRetentionSeconds;
+    }
+
+    public Boolean getAttestationRejectExperimentalProfiles() {
+        if (attestationRejectExperimentalProfiles == null) attestationRejectExperimentalProfiles = false;
+        return attestationRejectExperimentalProfiles;
+    }
+
+    public void setAttestationRejectExperimentalProfiles(Boolean attestationRejectExperimentalProfiles) {
+        this.attestationRejectExperimentalProfiles = attestationRejectExperimentalProfiles;
+    }
+
+    public Integer getAttestationClockSkewSeconds() {
+        if (attestationClockSkewSeconds == null) attestationClockSkewSeconds = 60;
+        return attestationClockSkewSeconds;
+    }
+
+    public void setAttestationClockSkewSeconds(Integer attestationClockSkewSeconds) {
+        this.attestationClockSkewSeconds = attestationClockSkewSeconds;
+    }
+
+    public Integer getAttestationVerifierMaxResponseSize() {
+        if (attestationVerifierMaxResponseSize == null) attestationVerifierMaxResponseSize = 1048576;
+        return attestationVerifierMaxResponseSize;
+    }
+
+    public void setAttestationVerifierMaxResponseSize(Integer attestationVerifierMaxResponseSize) {
+        this.attestationVerifierMaxResponseSize = attestationVerifierMaxResponseSize;
+    }
+
+    public Integer getAttestationVerifierCircuitBreakerThreshold() {
+        if (attestationVerifierCircuitBreakerThreshold == null) attestationVerifierCircuitBreakerThreshold = 5;
+        return attestationVerifierCircuitBreakerThreshold;
+    }
+
+    public void setAttestationVerifierCircuitBreakerThreshold(Integer attestationVerifierCircuitBreakerThreshold) {
+        this.attestationVerifierCircuitBreakerThreshold = attestationVerifierCircuitBreakerThreshold;
+    }
+
+    public Integer getAttestationVerifierCircuitBreakerOpenSeconds() {
+        if (attestationVerifierCircuitBreakerOpenSeconds == null) attestationVerifierCircuitBreakerOpenSeconds = 30;
+        return attestationVerifierCircuitBreakerOpenSeconds;
+    }
+
+    public void setAttestationVerifierCircuitBreakerOpenSeconds(Integer attestationVerifierCircuitBreakerOpenSeconds) {
+        this.attestationVerifierCircuitBreakerOpenSeconds = attestationVerifierCircuitBreakerOpenSeconds;
+    }
+
+    public Integer getAttestationChallengeRepairIntervalSeconds() {
+        if (attestationChallengeRepairIntervalSeconds == null) attestationChallengeRepairIntervalSeconds = 30;
+        return attestationChallengeRepairIntervalSeconds;
+    }
+
+    public void setAttestationChallengeRepairIntervalSeconds(Integer attestationChallengeRepairIntervalSeconds) {
+        this.attestationChallengeRepairIntervalSeconds = attestationChallengeRepairIntervalSeconds;
     }
 
 }
