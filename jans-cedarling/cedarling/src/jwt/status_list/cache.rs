@@ -23,7 +23,6 @@ use crate::{
         decode::{DecodeJwtError, DecodedJwtHeader, decode_jwt_header},
         key_service::{DecodingKeyInfo, KeyService},
         log_entry::JwtLogEntry,
-        token_cache::IndexKey,
         validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
     },
     log::Logger,
@@ -388,7 +387,7 @@ impl StatusListRegistry {
         let writer = StatusListWriter {
             list: list.clone(),
             // tokens of this `iss` are the only ones checked against this list
-            on_change: move || token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone())),
+            on_change: move || token_cache.invalidate_issuer(&iss),
         };
         let ctx = StatusListUpdateCtx {
             source,
