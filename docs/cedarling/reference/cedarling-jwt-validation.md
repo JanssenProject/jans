@@ -197,6 +197,8 @@ The bootstrap property `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps tha
 - `0` or an unset variable means the default, `300` seconds.
 - Non-zero values below `5` seconds are raised to `5` seconds.
 
+If the Status List cannot be loaded at startup, the issuer still loads: Cedarling logs an error naming the issuer and the cause, rejects only the tokens that reference that list, and retries in the background, at the `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` interval.
+
 If a background refresh fails (network error, 5xx response, or an invalid status list body), Cedarling logs an error and retries at the next interval. Until then:
 
 - A cached list that has not reached its `exp` plus the leeway stays in use.

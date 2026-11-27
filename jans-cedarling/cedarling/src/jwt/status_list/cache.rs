@@ -39,6 +39,7 @@ use super::{
 type StatusListUri = String;
 
 struct StatusListUpdateCtx {
+    source: StatusListSource,
     /// Interval until the next refresh: the JWT `ttl` capped by `refresh_interval_max`,
     /// see [`effective_refresh_interval`].
     refresh_interval: Duration,
@@ -48,19 +49,14 @@ struct StatusListUpdateCtx {
     /// claim is honored when present, but capped to this value; when the JWT omits
     /// `ttl`, this value is used directly.
     refresh_interval_max: Duration,
-    status_list_url: Url,
-    iss: IssClaim,
-    decoding_key: Option<Arc<DecodingKey>>,
-    validator: Arc<JwtValidator>,
     status_lists: Arc<RwLock<HashMap<String, StatusListState>>>,
     logger: Option<Logger>,
-    http_client: HttpClient,
     cancel_tkn: CancellationToken,
 }
 
-pub(crate) struct InitForIssArgs<'a> {
-    pub validators: &'a JwtValidatorCache,
-    pub key_service: &'a KeyService,
+pub(crate) struct InitForIssArgs {
+    pub validators: Arc<JwtValidatorCache>,
+    pub key_service: Arc<KeyService>,
     pub token_cache: TokenCache,
     pub logger: Option<Logger>,
     pub http_client: HttpClient,
@@ -245,15 +241,15 @@ impl StatusListCache {
         }
     }
 
-    /// Initializes the statuslist for the given issuer
+    /// Loads the status list of the given issuer and starts the task that keeps
+    /// it fresh.
     ///
-    /// An issuer with no `status_list_endpoint`, including every static-form
-    /// issuer, is skipped with a WARN log; its tokens carrying `status` are rejected.
-    pub(crate) async fn init_for_iss(
-        &self,
-        iss_config: &IssuerConfig,
-        args: InitForIssArgs<'_>,
-    ) -> Result<(), UpdateStatusListError> {
+    /// A list that cannot be loaded does not fail the issuer: it is recorded as
+    /// unavailable, so only the tokens that reference it are rejected, and the
+    /// task keeps retrying. An issuer with no `status_list_endpoint`, including
+    /// every static-form issuer, is skipped with a WARN log; its tokens carrying
+    /// `status` are rejected.
+    pub(crate) async fn init_for_iss(&self, iss_config: &IssuerConfig, args: InitForIssArgs) {
         let InitForIssArgs {
             validators,
             key_service,
@@ -283,49 +279,17 @@ impl StatusListCache {
                     Some(LogLevel::WARN),
                 ));
             }
-            return Ok(());
+            return;
         };
-        let status_list_jwt = StatusListJwtStr::get_from_url(status_list_url, &http_client)
-            .await
-            .map_err(UpdateStatusListError::GetStatusListJwt)?;
         let iss = iss_config.policy.iss_claim().clone();
-
-        let decoded_jwt = decode_jwt(&status_list_jwt.0)?;
-
-        // Get decoding key
-        let decoding_key_info = decoded_jwt.decoding_key_info();
-        let decoding_key = key_service.get_key(&decoding_key_info);
-
-        let decoded_jwt_iss = decoded_jwt.iss();
-        // The response must not pick another trusted issuer's validator.
-        if let Some(decoded) = decoded_jwt_iss.as_ref().filter(|decoded| **decoded != iss) {
-            return Err(UpdateStatusListError::UnboundStatusList {
-                url: status_list_url.to_string(),
-                reason: UnboundReason::Iss {
-                    found: decoded.clone(),
-                },
-            });
-        }
-        // get validator
-        let validator_key = ValidatorInfo {
-            iss: decoded_jwt_iss.as_ref(),
-            token_kind: TokenKind::StatusList,
-            algorithm: decoded_jwt.header.alg,
+        let source = StatusListSource {
+            url: status_list_url.clone(),
+            iss: iss.clone(),
+            validators,
+            key_service,
+            http_client,
         };
-        let validator =
-            validators
-                .get(&validator_key)
-                .ok_or(UpdateStatusListError::MissingValidator(
-                    status_list_url.to_string(),
-                ))?;
-
-        let parsed = parse_status_list_jwt(
-            &status_list_jwt,
-            &validator,
-            decoding_key.clone(),
-            &iss,
-            status_list_url,
-        )?;
+        let url = status_list_url.as_str();
 
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
@@ -333,20 +297,50 @@ impl StatusListCache {
         // always request a *more frequent* refresh, but never a less frequent one.
         // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let refresh_interval = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
-        let status_list = parsed.list;
+        let (refresh_interval, expiry) = match source.fetch().await {
+            Ok(parsed) => {
+                let loaded = (
+                    effective_refresh_interval(parsed.ttl_secs, refresh_interval_max),
+                    parsed.list.expiry(),
+                );
+                self.status_lists
+                    .write()
+                    .expect("acquire status_lists write lock")
+                    .insert(url.to_string(), StatusListState::Usable(parsed.list));
+                loaded
+            },
+            Err(err) => {
+                let err = Arc::new(err);
+                mark_unavailable(
+                    &mut self
+                        .status_lists
+                        .write()
+                        .expect("acquire status_lists write lock"),
+                    url,
+                    jsonwebtoken::get_current_timestamp(),
+                    err.clone(),
+                );
+                logger.log_any(JwtLogEntry::new(
+                    format!(
+                        "trusted issuer '{}': failed to load its status list from '{url}': \
+                         {err}; its tokens that carry a `status` claim are rejected until the \
+                         list loads; next attempt in {} s",
+                        iss_config.policy.name,
+                        refresh_interval_max.as_secs(),
+                    ),
+                    Some(LogLevel::ERROR),
+                ));
+                (refresh_interval_max, None)
+            },
+        };
 
         let ctx = StatusListUpdateCtx {
+            source,
             refresh_interval,
-            expiry: status_list.expiry(),
+            expiry,
             refresh_interval_max,
-            status_list_url: status_list_url.clone(),
-            iss: iss.clone(),
-            decoding_key,
-            validator,
             status_lists: self.status_lists.clone(),
             logger,
-            http_client: http_client.clone(),
             cancel_tkn,
         };
         crate::rt::spawn_task(keep_status_list_updated(
@@ -356,19 +350,6 @@ impl StatusListCache {
             },
             ctx,
         ));
-
-        {
-            let mut status_lists = self
-                .status_lists
-                .write()
-                .expect("acquire status_lists write lock");
-            status_lists.insert(
-                status_list_url.to_string(),
-                StatusListState::Usable(status_list),
-            );
-        }
-
-        Ok(())
     }
 }
 
@@ -410,18 +391,49 @@ fn mark_unavailable(
     was_usable
 }
 
-/// Fetches the list again and runs every check the first fetch ran.
-async fn refetch_status_list(
-    status_list_url: &Url,
-    http_client: &HttpClient,
-    validator: &JwtValidator,
-    decoding_key: Option<Arc<DecodingKey>>,
-    iss: &IssClaim,
-) -> Result<ParsedStatusList, UpdateStatusListError> {
-    let jwt = StatusListJwtStr::get_from_url(status_list_url, http_client)
-        .await
-        .map_err(UpdateStatusListError::GetStatusListJwt)?;
-    parse_status_list_jwt(&jwt, validator, decoding_key, iss, status_list_url)
+/// Where one issuer's status list comes from, and what checks it.
+struct StatusListSource {
+    url: Url,
+    iss: IssClaim,
+    validators: Arc<JwtValidatorCache>,
+    key_service: Arc<KeyService>,
+    http_client: HttpClient,
+}
+
+impl StatusListSource {
+    /// Fetches the list and runs every check on it. The validator and the key are
+    /// looked up on each fetch, so a list signed with a rotated key still loads.
+    async fn fetch(&self) -> Result<ParsedStatusList, UpdateStatusListError> {
+        let jwt = StatusListJwtStr::get_from_url(&self.url, &self.http_client)
+            .await
+            .map_err(UpdateStatusListError::GetStatusListJwt)?;
+        let decoded_jwt = decode_jwt(&jwt.0)?;
+        let decoding_key = self.key_service.get_key(&decoded_jwt.decoding_key_info());
+
+        let decoded_jwt_iss = decoded_jwt.iss();
+        // The response must not pick another trusted issuer's validator.
+        if let Some(decoded) = decoded_jwt_iss
+            .as_ref()
+            .filter(|decoded| **decoded != self.iss)
+        {
+            return Err(UpdateStatusListError::UnboundStatusList {
+                url: self.url.to_string(),
+                reason: UnboundReason::Iss {
+                    found: decoded.clone(),
+                },
+            });
+        }
+        let validator = self
+            .validators
+            .get(&ValidatorInfo {
+                iss: decoded_jwt_iss.as_ref(),
+                token_kind: TokenKind::StatusList,
+                algorithm: decoded_jwt.header.alg,
+            })
+            .ok_or_else(|| UpdateStatusListError::MissingValidator(self.url.to_string()))?;
+
+        parse_status_list_jwt(&jwt, &validator, decoding_key, &self.iss, &self.url)
+    }
 }
 
 /// Keeps the status list from the given URL updated, refreshing it every
@@ -432,19 +444,15 @@ where
     F: Fn(),
 {
     let StatusListUpdateCtx {
+        source,
         mut refresh_interval,
         mut expiry,
         refresh_interval_max,
-        status_list_url,
-        iss,
-        decoding_key,
-        validator,
         status_lists,
         logger,
-        http_client,
         cancel_tkn,
     } = ctx;
-    let url = status_list_url.as_str();
+    let url = source.url.as_str();
 
     loop {
         let wait = next_refresh_in(
@@ -473,15 +481,7 @@ where
             cb();
         }
 
-        let parsed = match refetch_status_list(
-            &status_list_url,
-            &http_client,
-            &validator,
-            decoding_key.clone(),
-            &iss,
-        )
-        .await
-        {
+        let parsed = match source.fetch().await {
             Ok(parsed) => parsed,
             Err(err) => {
                 let err = Arc::new(err);
@@ -885,8 +885,8 @@ mod test {
             .init_for_iss(
                 &iss_config,
                 InitForIssArgs {
-                    validators: &validators,
-                    key_service: &key_service,
+                    validators: Arc::new(validators),
+                    key_service: Arc::new(key_service),
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
@@ -896,8 +896,7 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await
-            .unwrap();
+            .await;
 
         let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
 
@@ -986,8 +985,8 @@ mod test {
             .init_for_iss(
                 &iss_config,
                 InitForIssArgs {
-                    validators: &validators,
-                    key_service: &key_service,
+                    validators: Arc::new(validators),
+                    key_service: Arc::new(key_service),
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
@@ -995,8 +994,7 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await
-            .unwrap();
+            .await;
 
         let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
 
@@ -1076,8 +1074,8 @@ mod test {
             .init_for_iss(
                 &iss_config,
                 InitForIssArgs {
-                    validators: &validators,
-                    key_service: &key_service,
+                    validators: Arc::new(validators),
+                    key_service: Arc::new(key_service),
                     token_cache: TokenCache::default(),
                     logger: None,
                     http_client,
@@ -1085,8 +1083,7 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await
-            .unwrap();
+            .await;
 
         let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
 

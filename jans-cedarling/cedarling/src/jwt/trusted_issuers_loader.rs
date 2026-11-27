@@ -399,8 +399,8 @@ async fn install_trusted_issuer(
             .init_for_iss(
                 &iss_config,
                 InitForIssArgs {
-                    validators: &loader.validators,
-                    key_service: &loader.key_service,
+                    validators: loader.validators.clone(),
+                    key_service: loader.key_service.clone(),
                     token_cache: loader.token_cache.clone(),
                     logger: loader.logger.clone(),
                     http_client,
@@ -412,7 +412,7 @@ async fn install_trusted_issuer(
                     cancel_tkn: loader.jwks_cancel_token.clone(),
                 },
             )
-            .await?;
+            .await;
     }
 
     if loader.jwt_config.jwt_sig_validation
@@ -607,6 +607,7 @@ mod test {
     use super::*;
     use crate::common::policy_store::{IssuerName, TokenEntityMetadata, TrustedIssuer};
     use crate::http::HttpClientConfig;
+    use crate::jwt::StatusCheckError;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
         MockServer, create_failing_trusted_issuer, create_unreachable_trusted_issuer,
@@ -1460,6 +1461,59 @@ mod test {
         assert!(
             status_lists.contains_key(&status_list_uri),
             "status list cache should contain the status list endpoint"
+        );
+    }
+
+    /// A status list that cannot be fetched at startup only affects the tokens
+    /// that reference it: the issuer still loads, the list is recorded as
+    /// unavailable with the cause, and the background task keeps retrying.
+    #[tokio::test]
+    async fn issuer_loads_when_its_status_list_is_unavailable() {
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let client = reqwest::Client::new();
+        let oidc_url = server.openid_config_endpoint().unwrap();
+        let _ = client.get(oidc_url.as_str()).send().await.unwrap();
+
+        // the issuer publishes a status list endpoint that answers 500
+        server.fail_status_list_endpoint();
+        server.update_openid_config_with_status_list_endpoint();
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: true,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            ..Default::default()
+        };
+        let trusted_issuers = HashMap::from([("test_issuer".to_string(), server.trusted_issuer())]);
+        let loader = create_loader(jwt_config, trusted_issuers.len());
+
+        loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await
+            .expect("an unavailable status list must not fail the issuer");
+
+        assert!(
+            loader.issuer_configs.contains_iss(&server.issuer()),
+            "the issuer is loaded, so its tokens without `status` still validate"
+        );
+        assert!(
+            loader.loading_state.failed_issuers().is_empty(),
+            "the issuer must not be reported as failed"
+        );
+        let status_list_uri = server.status_list_endpoint().unwrap().to_string();
+        let err = loader
+            .status_lists
+            .check_status(&status_list_uri, 0, jsonwebtoken::get_current_timestamp())
+            .expect_err("the list could not be loaded, so tokens that reference it are rejected");
+        assert!(
+            matches!(
+                &err,
+                StatusCheckError::Unavailable { uri, .. } if *uri == status_list_uri
+            ),
+            "the list must be recorded as unavailable, got: {err:?}"
         );
     }
 
