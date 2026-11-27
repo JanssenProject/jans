@@ -285,14 +285,16 @@ impl Cedarling {
         actions: Vec<String>,
         resources: Vec<EntityData>,
     ) -> Result<Vec<PolicyMetadata>, PyErr> {
-        let principal: Option<cedarling::EntityData> = principal.map(|p| p.into());
-        let resources: Vec<cedarling::EntityData> =
-            resources.into_iter().map(|r| r.into()).collect();
+        let principal: Option<cedarling::EntityData> = principal.map(std::convert::Into::into);
+        let resources: Vec<cedarling::EntityData> = resources
+            .into_iter()
+            .map(std::convert::Into::into)
+            .collect();
         let result = self
             .inner
             .get_matching_policies_unsigned(principal.as_ref(), &actions, &resources)
             .map_err(authorize_error_to_py)?;
-        Ok(result.into_iter().map(|pm| pm.into()).collect())
+        Ok(result.into_iter().map(std::convert::Into::into).collect())
     }
 
     /// Returns metadata for all policies whose scope constraints are compatible
@@ -311,14 +313,17 @@ impl Cedarling {
         actions: Vec<String>,
         resources: Vec<EntityData>,
     ) -> Result<Vec<PolicyMetadata>, PyErr> {
-        let tokens: Vec<cedarling::TokenInput> = tokens.into_iter().map(|t| t.into()).collect();
-        let resources: Vec<cedarling::EntityData> =
-            resources.into_iter().map(|r| r.into()).collect();
+        let tokens: Vec<cedarling::TokenInput> =
+            tokens.into_iter().map(std::convert::Into::into).collect();
+        let resources: Vec<cedarling::EntityData> = resources
+            .into_iter()
+            .map(std::convert::Into::into)
+            .collect();
         let result = self
             .inner
             .get_matching_policies_multi_issuer(&tokens, &actions, &resources)
             .map_err(authorize_error_to_py)?;
-        Ok(result.into_iter().map(|pm| pm.into()).collect())
+        Ok(result.into_iter().map(std::convert::Into::into).collect())
     }
 
     /// Merge the annotations (`@key("value")`) of the given policies into a single dict.
@@ -466,7 +471,7 @@ impl Cedarling {
         match self.inner.get_data_ctx(key).map_err(data_error_to_py)? {
             Some(value) => {
                 let py_obj = to_pyobject(py, &value)
-                    .map(|v| v.unbind())
+                    .map(pyo3::Bound::unbind)
                     .map_err(|err| err.0)?;
                 Ok(Some(py_obj))
             },
@@ -518,7 +523,7 @@ impl Cedarling {
     fn list_data_ctx(&self) -> PyResult<Vec<DataEntry>> {
         self.inner
             .list_data_ctx()
-            .map(|entries| entries.into_iter().map(|e| e.into()).collect())
+            .map(|entries| entries.into_iter().map(std::convert::Into::into).collect())
             .map_err(data_error_to_py)
     }
 
@@ -531,7 +536,7 @@ impl Cedarling {
     fn get_stats_ctx(&self) -> PyResult<DataStoreStats> {
         self.inner
             .get_stats_ctx()
-            .map(|stats| stats.into())
+            .map(std::convert::Into::into)
             .map_err(data_error_to_py)
     }
 
@@ -547,7 +552,7 @@ impl Cedarling {
     fn drain_metrics(&self) -> PyResult<MetricsSnapshot> {
         self.inner
             .drain_metrics()
-            .map(|snapshot| snapshot.into())
+            .map(std::convert::Into::into)
             .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
@@ -631,6 +636,6 @@ impl From<cedarling::MetricsSnapshot> for MetricsSnapshot {
 
 fn log_entry_to_py(gil: Python, entry: &serde_json::Value) -> PyResult<Py<PyAny>> {
     to_pyobject(gil, entry)
-        .map(|v| v.unbind())
+        .map(pyo3::Bound::unbind)
         .map_err(|err| err.0)
 }

@@ -14,13 +14,13 @@ impl Result {
         };
         Result {
             value,
-            error: "".to_string(),
+            error: String::new(),
         }
     }
 
     pub fn error<E: std::fmt::Display>(err: E) -> Self {
         Result {
-            value: "".to_string(),
+            value: String::new(),
             error: err.to_string(),
         }
     }
@@ -36,7 +36,7 @@ impl ResultInstance {
     pub fn new_instance(instance_id: usize) -> Self {
         ResultInstance {
             instance_id,
-            error: "".to_string(),
+            error: String::new(),
         }
     }
 

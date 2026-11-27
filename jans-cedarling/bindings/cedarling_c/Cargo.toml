@@ -20,3 +20,6 @@ cbindgen = "0.29.4"
 
 [package.metadata.cargo-machete]
 ignored = ["serde", "cbindgen"]
+
+[lints]
+workspace = true

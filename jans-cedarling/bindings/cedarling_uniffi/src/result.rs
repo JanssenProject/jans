@@ -51,8 +51,8 @@ impl From<cedar_policy::Decision> for Decision {
 impl From<&cedar_policy::Diagnostics> for Diagnostics {
     fn from(diag: &cedar_policy::Diagnostics) -> Self {
         Diagnostics {
-            reasons: diag.reason().map(|id| id.to_string()).collect(),
-            errors: diag.errors().map(|e| e.to_string()).collect(),
+            reasons: diag.reason().map(ToString::to_string).collect(),
+            errors: diag.errors().map(ToString::to_string).collect(),
         }
     }
 }
@@ -117,6 +117,7 @@ pub struct DropReasonInfo {
 #[uniffi::export]
 impl DropReasonInfo {
     /// Stable snake-case slug, e.g. `"jwt_validation_failed"`.
+    #[must_use]
     pub fn kind(&self) -> String {
         self.variant.slug().to_string()
     }
@@ -128,6 +129,7 @@ impl DropReasonInfo {
     }
 
     /// Claim-free human-readable message; non-empty for every reason.
+    #[must_use]
     pub fn message(&self) -> String {
         self.variant.message()
     }
@@ -139,7 +141,7 @@ impl DropReasonInfo {
 pub struct DroppedToken {
     pub mapping: String,
     // i64 (not u64) so the Kotlin/Java binding exposes a signed Long rather
-    // than a JVM-hostile ULong; usize casts fit trivially.
+    // than a JVM-hostile ULong; an index never reaches `i64::MAX`.
     pub index: i64,
     pub reason: DropReasonInfo,
 }
@@ -149,7 +151,7 @@ impl From<core::DroppedToken> for DroppedToken {
         Self {
             reason: DropReasonInfo { variant: d.reason },
             mapping: d.mapping,
-            index: d.index as i64,
+            index: i64::try_from(d.index).unwrap_or(i64::MAX),
         }
     }
 }
@@ -173,7 +175,7 @@ impl From<core::MultiIssuerAuthorizeResult> for MultiIssuerAuthorizeResult {
 pub struct BatchItemError {
     pub category: String,
     // i64 (not u64) so the Kotlin/Java binding exposes it as a signed Long
-    // rather than a JVM-hostile ULong. usize casts fit trivially.
+    // rather than a JVM-hostile ULong. An index never reaches `i64::MAX`.
     pub item_index: i64,
     pub message: String,
 }
@@ -183,7 +185,7 @@ impl From<core::BatchItemError> for BatchItemError {
         let message = e.to_string();
         Self {
             category: e.category().to_string(),
-            item_index: e.item_index() as i64,
+            item_index: i64::try_from(e.item_index()).unwrap_or(i64::MAX),
             message,
         }
     }
@@ -226,7 +228,7 @@ impl From<Result<core::MultiIssuerAuthorizeResult, core::BatchItemError>>
 }
 
 /// Result of `Cedarling.authorize_unsigned_batch`. Carries a shared `batch_id`
-/// (UUIDv7) alongside per-item outcomes. `results[i]` corresponds to the
+/// (`UUIDv7`) alongside per-item outcomes. `results[i]` corresponds to the
 /// `items[i]` supplied in the request.
 #[derive(Debug, uniffi::Record)]
 pub struct BatchAuthorizeUnsignedResponse {

@@ -7,7 +7,6 @@
 #![forbid(unsafe_code)]
 // Each error type documents its own variants; `# Errors` sections would repeat them (AGENTS.md
 // avoids Python-style doc sections). Same choice as `cedarling/src/lib.rs`.
-#![allow(clippy::missing_errors_doc)]
 
 pub mod assertion;
 mod digest;

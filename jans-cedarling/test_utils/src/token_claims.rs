@@ -47,7 +47,7 @@ pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
     // specify the header
     let header = jwt::Header {
         alg: jwt::Algorithm::ES256,
-        kid: Some(key_id.to_string()),
+        kid: Some(key_id.clone()),
         ..Default::default()
     };
 
@@ -97,8 +97,9 @@ pub fn generate_token_using_claims_and_keypair(
     jwt::encode(&header, &claims, &keypair.encoding_key).expect("should encode JWT")
 }
 
-/// Generates a JwkSet from the given keys
+/// Generates a `JwkSet` from the given keys
 #[track_caller]
+#[must_use]
 pub fn generate_jwks(keys: &[KeyPair]) -> jwt::jwk::JwkSet {
     let keys = keys
         .iter()

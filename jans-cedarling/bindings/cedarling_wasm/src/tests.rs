@@ -192,8 +192,10 @@ async fn test_init_conf_as_object() {
 /// Policy store from python example; principals provided as entity data.
 ///
 /// Policies used:
-///    permit(principal is Jans::Workload, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
-///    permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
+/// ```text
+/// permit(principal is Jans::Workload, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
+/// permit(principal is Jans::User, action in [Jans::Action::"Read"], resource is Jans::Application) when { resource.name == "Some Application" };
+/// ```
 #[wasm_bindgen_test]
 async fn test_run_cedarling() {
     let bootstrap_config_json = BOOTSTRAP_CONFIG.clone();
@@ -219,7 +221,7 @@ async fn test_run_cedarling() {
             .expect("Principal EntityData should be deserialized correctly"),
         ),
         context: json!({
-            "current_time": 1735349685,
+            "current_time": 1_735_349_685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -280,7 +282,7 @@ async fn test_authorize_unsigned_js_shaped_payload() {
             "sub": "qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0"
         },
         "context": {
-            "current_time": 1735349685,
+            "current_time": 1_735_349_685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -363,7 +365,7 @@ async fn test_memory_log_interface() {
             .expect("Principal EntityData should be deserialized correctly"),
         ),
         context: json!({
-            "current_time": 1735349685,
+            "current_time": 1_735_349_685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
@@ -440,7 +442,7 @@ async fn test_memory_log_interface() {
     );
 }
 
-/// Test authorize_unsigned with a concrete single principal satisfying the
+/// Test `authorize_unsigned` with a concrete single principal satisfying the
 /// `principal.is_ok` guard of policy 5 in `policy-store_no_trusted_issuers.yaml`.
 #[wasm_bindgen_test]
 async fn test_authorize_unsigned_single_principal_allow() {
@@ -698,9 +700,9 @@ async fn test_multi_issuer_authorize_single_token() {
         "x5t#S256": "",
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
-        "auth_time": 1724830746,
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "auth_time": 1_724_830_746,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
         "status": {
@@ -748,8 +750,9 @@ async fn test_multi_issuer_authorize_single_token() {
     );
 }
 
-/// Test multiple tokens from different issuers (matches Rust test_multiple_tokens_from_different_issuers)
+/// Test multiple tokens from different issuers (matches Rust `test_multiple_tokens_from_different_issuers`)
 #[wasm_bindgen_test]
+#[allow(clippy::too_many_lines, reason = "one end-to-end scenario")]
 async fn test_multi_issuer_authorize_multiple_tokens() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
@@ -773,9 +776,9 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "x5t#S256": "",
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
-        "auth_time": 1724830746,
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "auth_time": 1_724_830_746,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
         "status": {
@@ -790,8 +793,8 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "acr": "basic",
         "amr": "10",
         "aud": ["5b4487c4-8db1-409d-a653-f907b8094039"],
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
         "iss": "https://test.jans.org",
         "jti": "sk3T40NYSYuk5saHZNpkZw",
@@ -799,7 +802,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "sid": "6a7fe50a-d810-454d-be5d-549d29595a09",
         "jansOpenIDConnectVersion": "openidconnect-1.0",
         "c_hash": "pGoK6Y_RKcWHkUecM9uw6Q",
-        "auth_time": 1724830746,
+        "auth_time": 1_724_830_746,
         "grant": "authorization_code",
         "status": {
             "status_list": {
@@ -820,13 +823,13 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
         "middle_name": "Admin",
         "inum": "8d1cde6a-1447-4766-b3c8-16663e13b458",
         "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
-        "updated_at": 1724778591,
+        "updated_at": 1_724_778_591,
         "name": "Default Admin User",
         "nickname": "Admin",
         "family_name": "User",
         "jti": "faiYvaYIT0cDAT7Fow0pQw",
         "jansAdminUIRole": ["api-admin"],
-        "exp": 2000000000
+        "exp": 2_000_000_000
     }));
 
     let multi_issuer_request = AuthorizeMultiIssuerRequest {
@@ -868,7 +871,7 @@ async fn test_multi_issuer_authorize_multiple_tokens() {
 }
 
 /// Test validation - graceful degradation when invalid token is present
-/// (matches Rust test_validation_graceful_degradation_invalid_token)
+/// (matches Rust `test_validation_graceful_degradation_invalid_token`)
 #[wasm_bindgen_test]
 async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_token() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
@@ -893,9 +896,9 @@ async fn test_multi_issuer_authorize_validation_graceful_degradation_invalid_tok
         "x5t#S256": "",
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
-        "auth_time": 1724830746,
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "auth_time": 1_724_830_746,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
         "status": {
@@ -969,9 +972,9 @@ async fn test_multi_issuer_dropped_tokens_expose_core_values() {
         "x5t#S256": "",
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
-        "auth_time": 1724830746,
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "auth_time": 1_724_830_746,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
         "status": {
@@ -1055,7 +1058,7 @@ async fn test_multi_issuer_dropped_tokens_expose_core_values() {
     );
 }
 
-/// Test validation - empty token array (matches Rust test_validation_empty_token_array)
+/// Test validation - empty token array (matches Rust `test_validation_empty_token_array`)
 #[wasm_bindgen_test]
 async fn test_multi_issuer_authorize_validation_empty_token_array() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
@@ -1653,6 +1656,7 @@ async fn test_authorize_unsigned_batch_empty_items_rejected() {
 /// and 2 marshal through cleanly. Verifies per-item ordering across the WASM
 /// boundary.
 #[wasm_bindgen_test]
+#[allow(clippy::too_many_lines, reason = "one end-to-end scenario")]
 async fn test_authorize_multi_issuer_batch_ordered() {
     let bootstrap_config_json = MULTI_ISSUER_BOOTSTRAP_CONFIG.clone();
     let conf_map_js_value = serde_wasm_bindgen::to_value(&bootstrap_config_json)
@@ -1674,9 +1678,9 @@ async fn test_authorize_multi_issuer_batch_ordered() {
         "x5t#S256": "",
         "scope": ["openid", "profile"],
         "org_id": "some_long_id",
-        "auth_time": 1724830746,
-        "exp": 2000000000,
-        "iat": 1724832259,
+        "auth_time": 1_724_830_746,
+        "exp": 2_000_000_000,
+        "iat": 1_724_832_259,
         "jti": "lxTmCVRFTxOjJgvEEpozMQ",
         "name": "Default Admin User",
         "status": {
@@ -1822,7 +1826,7 @@ async fn test_drain_metrics_local_mode_snapshot_and_reset() {
             .expect("principal EntityData should be deserialized correctly"),
         ),
         context: json!({
-            "current_time": 1735349685,
+            "current_time": 1_735_349_685,
             "device_health": ["Healthy"],
             "fraud_indicators": ["Allowed"],
             "geolocation": ["America"],
