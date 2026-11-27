@@ -38,7 +38,9 @@ use super::{
 type StatusListUri = String;
 
 struct StatusListUpdateCtx {
-    ttl: Duration,
+    /// Interval until the next refresh: the JWT `ttl` capped by `refresh_interval_max`,
+    /// see [`effective_refresh_interval`].
+    refresh_interval: Duration,
     /// Expiry of the list cached at start.
     expiry: Option<StatusListExpiry>,
     /// Upper bound on the refresh interval. The Status List JWT's `ttl`
@@ -277,11 +279,11 @@ impl StatusListCache {
         // always request a *more frequent* refresh, but never a less frequent one.
         // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let ttl = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
+        let refresh_interval = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
         let status_list = parsed.list;
 
         let ctx = StatusListUpdateCtx {
-            ttl,
+            refresh_interval,
             expiry: status_list.expiry(),
             refresh_interval_max,
             status_list_url: status_list_url.clone(),
@@ -313,14 +315,15 @@ impl StatusListCache {
     }
 }
 
-/// Keeps the statuslist form the given URL updated based on the TTL
+/// Keeps the status list from the given URL updated, refreshing it every
+/// `refresh_interval` and no later than its expiry.
 /// `cb` will be called when status list updated
 async fn keep_status_list_updated<F>(cb: F, ctx: StatusListUpdateCtx)
 where
     F: Fn(),
 {
     let StatusListUpdateCtx {
-        mut ttl,
+        mut refresh_interval,
         mut expiry,
         refresh_interval_max,
         status_list_url,
@@ -363,8 +366,13 @@ where
     };
 
     loop {
+        let wait = next_refresh_in(
+            refresh_interval,
+            expiry,
+            jsonwebtoken::get_current_timestamp(),
+        );
         tokio::select! {
-            () = sleep(next_refresh_in(ttl, expiry, jsonwebtoken::get_current_timestamp())) => {},
+            () = sleep(wait) => {},
             () = cancel_tkn.cancelled() => break,
         }
 
@@ -412,7 +420,7 @@ where
         };
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
-        ttl = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
+        refresh_interval = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
         expiry = parsed.list.expiry();
         let updated_status_list = parsed.list;
 
