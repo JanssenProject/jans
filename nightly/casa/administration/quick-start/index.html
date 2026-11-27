@@ -77,9 +77,9 @@
 
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://pxdrop.lijit.com https://cdn.bolddesk.com https://unpkg.com;
   connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
-  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  frame-src 'self' https://help.gluu.org https://www.loom.com https://pxdrop.lijit.com;
   img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
     https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
     https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
@@ -2545,7 +2545,7 @@
 </div>
 <p>Use this guide to install and configure your Casa deployment.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>Jans Casa can be used with <a href="https://jans.io">Janssen Server</a> or <a href="https://gluu.org">Gluu Flex Server</a>. At <a href="https://docs.jans.io/nightly/admin/install/">installation</a> time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.</p>
+<p>Jans Casa can be used with <a href="https://jans.io">Janssen Server</a> or <a href="https://gluu.org">Gluu Flex Server</a>. At <a href="https://docs.jans.io/vreplace-janssen-version/admin/install/">installation</a> time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
 <h3 id="enable-authentication-methods">Enable authentication methods<a class="headerlink" href="#enable-authentication-methods" title="Permanent link">#</a></h3>
 <p>The "out-of-the-box" login experience in Casa consists of the usual username and password prompt. To start leveraging a stronger authentication login to Casa with an administrative account (visit <code>https://&lt;your-server-name&gt;/jans-casa</code>) and activate the <a href=".././admin-console/#authentication-methods">methods</a> you want to offer Casa users.</p>

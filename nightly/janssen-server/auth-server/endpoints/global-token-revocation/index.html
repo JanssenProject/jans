@@ -77,9 +77,9 @@
 
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://pxdrop.lijit.com https://cdn.bolddesk.com https://unpkg.com;
   connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
-  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  frame-src 'self' https://help.gluu.org https://www.loom.com https://pxdrop.lijit.com;
   img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
     https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
     https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
@@ -2687,7 +2687,7 @@ response:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/global-token-revocation
 </code></pre></div>
 <p>More information about request and response of the global token revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/nightly/jans-auth-server/docs/swagger.yaml">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml">jans-auth-server module</a>.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <p>A request to this endpoint can revoke all tokens and sessions of one particular user. Use the request parameters to specify
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.</p>

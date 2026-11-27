@@ -77,9 +77,9 @@
 
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://pxdrop.lijit.com https://cdn.bolddesk.com https://unpkg.com;
   connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
-  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  frame-src 'self' https://help.gluu.org https://www.loom.com https://pxdrop.lijit.com;
   img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
     https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
     https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
@@ -3521,7 +3521,7 @@
 
 
 <h1 id="persistence-script">Persistence Script<a class="headerlink" href="#persistence-script" title="Permanent link">#</a></h1>
-<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
+<p>By overriding the interface methods in <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/persistence/PersistenceType.java">PersistenceType</a> inside a custom script you can</p>
 <ol>
 <li>Load initialization data from DB or initialize services after the creation of Entry Manager. </li>
 <li>Release resources, terminate services etc. after the destruction of Entry Manager.</li>

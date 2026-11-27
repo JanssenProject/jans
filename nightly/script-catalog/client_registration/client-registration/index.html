@@ -77,9 +77,9 @@
 
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://cdn.bolddesk.com https://unpkg.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://help.gluu.org https://static.reo.dev https://cdn.sitelytics.tech https://pxdrop.lijit.com https://cdn.bolddesk.com https://unpkg.com;
   connect-src 'self' https://help.gluu.org https://*.reo.dev https://a.usbrowserspeed.com https://api.sitelytics.tech;
-  frame-src 'self' https://help.gluu.org https://www.loom.com;
+  frame-src 'self' https://help.gluu.org https://www.loom.com https://pxdrop.lijit.com;
   img-src 'self' data: blob: https://static.scarf.sh https://help.gluu.org https://cdn.bolddesk.com
     https://github.com https://raw.githubusercontent.com https://user-images.githubusercontent.com
     https://github-production-user-asset-6210df.s3.amazonaws.com https://cdn.jsdelivr.net https://cdn.loom.com;
@@ -3821,7 +3821,7 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
         <span class="k">return</span> <span class="kc">True</span>   
 
     <span class="c1"># Update client entry before persistent it</span>
-    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">createClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Client registration. CreateClient method&quot;</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">getClient</span><span class="p">()</span>
@@ -3851,7 +3851,7 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="c1"># Update client entry before persistent it</span>
-    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">updateClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s2">&quot;Client registration. UpdateClient method&quot;</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -3895,7 +3895,7 @@ Jans AS-&gt;&gt;RP: return client credentials</code></pre>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># cert - java.security.cert.X509Certificate</span>
-    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/nightly/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
+    <span class="c1"># context refers to io.jans.as.server.service.external.context.DynamicClientRegistrationContext - see https://github.com/JanssenProject/jans-auth-server/blob/vreplace-janssen-version/server/src/main/java/io/jans/as/server/service/external/context/DynamicClientRegistrationContext.java#L24</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">isCertValidForClient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cert</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
 
