@@ -42,11 +42,11 @@ DEFAULT_ARCHIVED_JWK_LIFETIME = 60 * 60 * 24 * 365
 # defaults of the `privkey-push-retries` (extra push rounds) and `privkey-push-retry-interval` (seconds) options
 DEFAULT_PRIVKEY_PUSH_RETRIES = 3
 DEFAULT_PRIVKEY_PUSH_RETRY_INTERVAL = 10
-# upper bound of `privkey-push-retries`; more extra rounds than that is certainly a mistake
-MAX_PRIVKEY_PUSH_RETRIES = 100
-# upper bound of `privkey-push-retry-interval` (one day); rejects values that are certainly a mistake,
-# including ones large enough to make time.sleep overflow
-MAX_PRIVKEY_PUSH_RETRY_INTERVAL = 86400
+# upper bounds of `privkey-push-retries` and `privkey-push-retry-interval` (seconds); the key rotation CronJob
+# forbids concurrent runs, so together they keep the wait between push rounds at 5 minutes or less, far below the
+# shortest rotation interval (`interval` is in whole hours)
+MAX_PRIVKEY_PUSH_RETRIES = 5
+MAX_PRIVKEY_PUSH_RETRY_INTERVAL = 60
 
 # length of a SHA-256 digest in hex characters
 SHA256_HEX_LENGTH = 64
@@ -473,11 +473,7 @@ class AuthHandler:
         return self._push_jks_to_pending(jks_fn, unlisted_containers, updated_names)
 
     def _retry_options_are_valid(self) -> bool:
-        """Log every error and return False when a retry option is not an integer or is above its upper bound.
-
-        Also False when, with both within bounds, their product (the longest wait between rounds, not counting
-        ``privkey-push-delay``) is not below the rotation interval (``interval`` hours).
-        """
+        """Log every error and return False when a retry option is not an integer or is above its upper bound."""
         if None in (self.privkey_push_retries, self.privkey_push_retry_interval):
             logger.error(
                 "privkey-push-retries and privkey-push-retry-interval must be integers; got %r and %r",
@@ -498,20 +494,6 @@ class AuthHandler:
                 MAX_PRIVKEY_PUSH_RETRY_INTERVAL, self.privkey_push_retry_interval,
             )
             is_valid = False
-
-        rotation_interval_hours = to_non_negative_int(self.rotation_interval)
-        # an `interval` that is not a positive integer is left to the code that uses it, as before
-        if is_valid and rotation_interval_hours:
-            rotation_interval_seconds = rotation_interval_hours * 3600
-            longest_wait_seconds = self.privkey_push_retries * self.privkey_push_retry_interval
-            if longest_wait_seconds >= rotation_interval_seconds:
-                logger.error(
-                    "privkey-push-retries x privkey-push-retry-interval must be less than the rotation interval "
-                    "(%s seconds); got %s x %s = %s seconds",
-                    rotation_interval_seconds, self.privkey_push_retries, self.privkey_push_retry_interval,
-                    longest_wait_seconds,
-                )
-                is_valid = False
         return is_valid
 
     def _log_failed_round(

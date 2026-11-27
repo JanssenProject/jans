@@ -90,7 +90,7 @@ spec:
               resources:
 {{- toYaml (index .Values "auth-server-key-rotation" "resources") | nindent 16 }}
               {{- end }}
-              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
+              args: ["certmanager", "patch", "auth", "--opts", "interval:{{ index .Values "auth-server-key-rotation" "keysLife" }}", "--opts", "key-strategy:{{ index .Values "auth-server-key-rotation" "keysStrategy" }}", "--opts", "privkey-push-delay:{{ index .Values "auth-server-key-rotation" "keysPushDelay" }}", "--opts", "privkey-push-retries:{{ index .Values "auth-server-key-rotation" "keysPushRetries" }}", "--opts", "privkey-push-retry-interval:{{ index .Values "auth-server-key-rotation" "keysPushRetryInterval" }}", "--opts", "privkey-push-strategy:{{ index .Values "auth-server-key-rotation" "keysPushStrategy" }}"]
           volumes:
           {{- with (index .Values "auth-server-key-rotation" "volumes") }}
 {{- toYaml . | nindent 12 }}

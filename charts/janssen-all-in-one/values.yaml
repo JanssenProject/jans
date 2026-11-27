@@ -300,6 +300,10 @@ auth-server-key-rotation:
   keysStrategy: NEWER
   # -- Delay (in seconds) before pushing private keys to Auth server
   keysPushDelay: 0
+  # -- Maximum number of extra rounds to push private keys to Auth server pods that failed (at most 5; only takes effect when keysPushDelay value is greater than 0)
+  keysPushRetries: 3
+  # -- Wait (in seconds) before each extra round of pushing private keys to Auth server (at most 60; only takes effect when keysPushDelay value is greater than 0)
+  keysPushRetryInterval: 10
   # -- Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0)
   keysPushStrategy: NEWER
   # -- Resource specs.

@@ -134,8 +134,7 @@ The following sub-commands are supported by the certmanager command:
         The two retry options have an effect only when `privkey-push-delay` is greater than `0`. Then:
 
         - both must be integers (a negative value counts as `0`);
-        - `privkey-push-retries` must be at most `100`, and `privkey-push-retry-interval` at most `86400` seconds;
-        - `privkey-push-retries` x `privkey-push-retry-interval` must be less than `interval` in seconds (for example below `172800` for `interval:48`). This limits the wait between the retry rounds; `privkey-push-delay` is not counted.
+        - `privkey-push-retries` must be at most `5`, and `privkey-push-retry-interval` at most `60` seconds.
 
         Otherwise the job stops with an error before any key is changed.
 

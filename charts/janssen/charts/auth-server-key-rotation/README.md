@@ -37,6 +37,8 @@ Kubernetes: `>=v1.22.0-0`
 | image.tag | string | `"0.0.0-nightly"` | Image  tag to use for deploying. |
 | keysLife | int | `48` | Auth server key rotation keys life in hours |
 | keysPushDelay | int | `0` | Delay (in seconds) before pushing private keys to Auth server |
+| keysPushRetries | int | `3` | Maximum number of extra rounds to push private keys to Auth server pods that failed (at most 5; only takes effect when keysPushDelay value is greater than 0) |
+| keysPushRetryInterval | int | `10` | Wait (in seconds) before each extra round of pushing private keys to Auth server (at most 60; only takes effect when keysPushDelay value is greater than 0) |
 | keysPushStrategy | string | `"NEWER"` | Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0) |
 | keysStrategy | string | `"NEWER"` | Set key selection strategy used by Auth server |
 | lifecycle | object | `{}` |  |

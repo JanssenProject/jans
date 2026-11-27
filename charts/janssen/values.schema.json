@@ -1421,6 +1421,18 @@
                                 "description": "Delay (in seconds) before pushing private keys to Auth server",
                                 "type": "integer"
                             },
+                            "keysPushRetries": {
+                                "description": "Maximum number of extra rounds to push private keys to Auth server pods that failed (at most 5; only takes effect when keysPushDelay value is greater than 0)",
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 5
+                            },
+                            "keysPushRetryInterval": {
+                                "description": "Wait (in seconds) before each extra round of pushing private keys to Auth server (at most 60; only takes effect when keysPushDelay value is greater than 0)",
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 60
+                            },
                             "keysPushStrategy": {
                                 "description": "Set key selection strategy after pushing private keys to Auth server",
                                 "type": "string"

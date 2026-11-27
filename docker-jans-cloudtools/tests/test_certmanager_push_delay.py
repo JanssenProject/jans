@@ -996,14 +996,13 @@ def test_invalid_retry_option_is_ignored_without_push_delay(handler, monkeypatch
 
 # each retry option with its upper bound
 BOUNDED_RETRY_OPTIONS = [
-    pytest.param("privkey-push-retries", 100, id="retries"),
-    pytest.param("privkey-push-retry-interval", 86400, id="interval"),
+    pytest.param("privkey-push-retries", 5, id="retries"),
+    pytest.param("privkey-push-retry-interval", 60, id="interval"),
 ]
-# the same, with the other options of the run and the waits of a job that has one failing pod while that option is at
-# its bound; with the interval at its bound one extra round keeps the total wait below the default 48 hours
+# the same, with the waits of a job that has one failing pod while that option is at its bound
 OPTIONS_AT_THEIR_MAXIMUM = [
-    pytest.param("privkey-push-retries", 100, {}, [60, 10], id="retries"),
-    pytest.param("privkey-push-retry-interval", 86400, {"privkey-push-retries": "1"}, [60, 86400], id="interval"),
+    pytest.param("privkey-push-retries", 5, [60, 10], id="retries"),
+    pytest.param("privkey-push-retry-interval", 60, [60, 60], id="interval"),
 ]
 
 
@@ -1027,7 +1026,7 @@ def test_retry_option_above_the_maximum_stops_patch_before_keys_are_rotated(
 
 def test_both_retry_options_above_their_maximum_log_both_errors_retries_first(handler, monkeypatch, caplog):
     """when both options are too big, one run reports both problems (retries, then interval) and changes nothing"""
-    options = {"privkey-push-delay": "60", "privkey-push-retries": "101", "privkey-push-retry-interval": "86401"}
+    options = {"privkey-push-delay": "60", "privkey-push-retries": "6", "privkey-push-retry-interval": "61"}
     too_big_handler = _handler_with_options(handler, options)
     _skip_sleeps(monkeypatch)
 
@@ -1039,16 +1038,16 @@ def test_both_retry_options_above_their_maximum_log_both_errors_retries_first(ha
     assert too_big_handler.backend.revisions == []
     assert handler.meta_client.jks_pushed == []
     assert len(errors) == 2
-    assert "privkey-push-retries" in errors[0] and "101" in errors[0]
-    assert "privkey-push-retry-interval" in errors[1] and "86401" in errors[1]
+    assert "privkey-push-retries" in errors[0] and errors[0].endswith("got 6")
+    assert "privkey-push-retry-interval" in errors[1] and errors[1].endswith("got 61")
 
 
-@pytest.mark.parametrize("option, maximum, other_options, sleeps_at_maximum", OPTIONS_AT_THEIR_MAXIMUM)
+@pytest.mark.parametrize("option, maximum, sleeps_at_maximum", OPTIONS_AT_THEIR_MAXIMUM)
 def test_retry_option_of_exactly_the_maximum_is_accepted(
-    handler, monkeypatch, option, maximum, other_options, sleeps_at_maximum,
+    handler, monkeypatch, option, maximum, sleeps_at_maximum,
 ):
     """a retry option equal to its maximum is allowed: the job runs (auth-b fails once, so the extra round runs)"""
-    options = {"privkey-push-delay": "60", option: str(maximum), **other_options}
+    options = {"privkey-push-delay": "60", option: str(maximum)}
     maximum_handler = _handler_with_options(handler, options)
     handler.meta_client.flaky["auth-b"] = 1
     sleeps = _record_sleeps(monkeypatch)
@@ -1152,79 +1151,3 @@ def test_restored_jks_keeps_its_modification_time_from_before_the_rotation(handl
 
     assert meta.files["auth-a"][jks] == b"old-jks"
     assert meta.mtimes.get(("auth-a", jks), 0) == 0
-
-
-@pytest.mark.parametrize(
-    ("options", "expected_seconds"),
-    [
-        pytest.param(
-            {"interval": "1", "privkey-push-retries": "1", "privkey-push-retry-interval": "3600"}, "3600",
-            id="equal-to-interval-option",
-        ),
-        pytest.param(
-            {"privkey-push-retries": "2", "privkey-push-retry-interval": "86400"}, "172800",
-            id="equal-to-default-48-hours",
-        ),
-    ],
-)
-def test_retry_total_of_at_least_the_rotation_interval_stops_patch_before_keys_are_rotated(
-    handler, monkeypatch, caplog, options, expected_seconds,
-):
-    """with a push delay, retries x retry interval that reaches the rotation interval stops the job with one error that
-    names both options and the limit in seconds, before anything changes"""
-    capped_handler = _handler_with_options(handler, {"privkey-push-delay": "60", **options})
-    _skip_sleeps(monkeypatch)
-
-    with caplog.at_level("ERROR"), pytest.raises(SystemExit) as exit_info:
-        capped_handler.patch()
-
-    errors = [record.getMessage() for record in caplog.records if record.levelname == "ERROR"]
-    assert exit_info.value.code == 1
-    assert capped_handler.backend.revisions == []
-    assert handler.meta_client.jks_pushed == []
-    assert len(errors) == 1
-    assert "privkey-push-retries" in errors[0] and "privkey-push-retry-interval" in errors[0]
-    assert f"({expected_seconds} seconds)" in errors[0]
-
-
-def test_retry_total_below_the_rotation_interval_is_accepted(handler, monkeypatch):
-    """one second below the rotation interval of 1 hour is allowed: the job runs (auth-b fails once, so the extra round
-    runs)"""
-    options = {
-        "privkey-push-delay": "60", "interval": "1", "privkey-push-retries": "1", "privkey-push-retry-interval": "3599",
-    }
-    accepted_handler = _handler_with_options(handler, options)
-    handler.meta_client.flaky["auth-b"] = 1
-    sleeps = _record_sleeps(monkeypatch)
-
-    accepted_handler.patch()
-
-    assert sleeps == [60, 3599]
-    assert handler.meta_client.jks_pushed == ["auth-a", "auth-c", "auth-b"]
-    assert accepted_handler.backend.revisions == [11, 12]
-
-
-@pytest.mark.parametrize("interval", ["0", "-3"])
-def test_rotation_interval_that_is_not_a_positive_integer_does_not_cap_the_retries(handler, monkeypatch, interval):
-    """an `interval` of 0 or a negative number leaves the retry options uncapped, as before: the job runs with the
-    default retries"""
-    uncapped_handler = _handler_with_options(handler, {"privkey-push-delay": "60", "interval": interval})
-    _skip_sleeps(monkeypatch)
-
-    uncapped_handler.patch()  # must not raise
-
-    assert uncapped_handler.backend.revisions == [11, 12]
-
-
-def test_rotation_interval_that_is_not_an_integer_is_left_to_the_code_that_uses_it(handler, monkeypatch):
-    """the retry check does not judge a non-integer `interval`; patch() then fails at int() as it did before, with no
-    key rotated and nothing pushed"""
-    text_handler = _handler_with_options(handler, {"privkey-push-delay": "60", "interval": "abc"})
-    _skip_sleeps(monkeypatch)
-
-    assert text_handler._retry_options_are_valid() is True
-    with pytest.raises(ValueError):
-        text_handler.patch()
-
-    assert text_handler.backend.revisions == []
-    assert handler.meta_client.jks_pushed == []
