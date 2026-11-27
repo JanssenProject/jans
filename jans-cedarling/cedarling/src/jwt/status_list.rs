@@ -293,28 +293,6 @@ impl From<StatusList> for CachedStatusList {
     }
 }
 
-impl TryFrom<ValidatedJwt> for StatusList {
-    type Error = ParseStatusListError;
-
-    fn try_from(jwt: ValidatedJwt) -> Result<Self, Self::Error> {
-        let list = jwt
-            .claims
-            .get("lst")
-            .ok_or(ParseStatusListError::JwtMissingListClaim)?
-            .to_string();
-
-        let bits = jwt
-            .claims
-            .get("bits")
-            .ok_or(ParseStatusListError::JwtMissingBitsClaim)?;
-        let bits = bits
-            .as_u64()
-            .ok_or(ParseStatusListError::JwtInvalidBitsType(bits.clone()))?;
-
-        Self::parse(&list, u8::try_from(bits)?)
-    }
-}
-
 /// A status value from a status list, as [draft-ietf-oauth-status-list-21 §7.1]
 /// defines them.
 ///

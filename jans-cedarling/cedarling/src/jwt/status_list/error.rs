@@ -18,16 +18,6 @@ pub enum ParseStatusListError {
     Decode(#[from] base64::DecodeError),
     #[error("failed to read status list: {0}")]
     Read(#[from] std::io::Error),
-    #[error("failed to deserialize status list JWT: {0}")]
-    DeserializeJwt(#[from] reqwest::Error),
-    #[error("the status list JWT is missing the 'lst' claim")]
-    JwtMissingListClaim,
-    #[error("the status list JWT is missing the 'bits' claim")]
-    JwtMissingBitsClaim,
-    #[error("the status list JWT's 'bits' claim is not a valid u64: {0:?}")]
-    JwtInvalidBitsType(serde_json::Value),
-    #[error("failed to convert bits value: {0}")]
-    BitsConversion(#[from] std::num::TryFromIntError),
     #[error("decompressed status list exceeds the maximum allowed size of {0} bytes")]
     DecompressedSizeExceeded(u64),
 }
