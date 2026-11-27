@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Yuriy Movchan
@@ -151,12 +152,31 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
     public List<T> getPoolsExpired() {
         final String baseDn = baseDn();
 
-        Date expirationDate = new Date(System.currentTimeMillis() - DELAY_AFTER_EXPIRATION);
+        Date expirationDate = new Date(System.currentTimeMillis() - getReuseDelay());
 
         Filter filter = Filter.createORFilter(Filter.createEqualityFilter("exp", null),
                 Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn, expirationDate)));
 
         return setIndexes(entryManager.findEntries(baseDn, getEntityClass(), filter));
+    }
+
+    /**
+     * Pool can be reused only after its expiration date ("exp") plus reuse delay. "exp" covers the latest
+     * expiration of tokens issued from the pool; the delay additionally covers tokens issued with globally
+     * configured lifetimes before "exp" was tracked.
+     *
+     * @return reuse delay in milliseconds
+     */
+    public long getReuseDelay() {
+        return Math.max(DELAY_AFTER_EXPIRATION, getMaxTokenLifetimeInSeconds() * 1000L);
+    }
+
+    public boolean isReusable(T pool) {
+        if (pool == null) {
+            return false;
+        }
+        final Date exp = pool.getExpirationDate();
+        return exp == null || !exp.after(new Date(System.currentTimeMillis() - getReuseDelay()));
     }
 
     protected void persist(T pool) {
@@ -184,9 +204,8 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
             loadedPool.setLockKey(LOCK_KEY);
             loadedPool.setData(statusList.getLst());
             loadedPool.setLastUpdate(new Date());
-            loadedPool.setExpirationDate(loadedPool.getExpirationDate());
 
-            update(loadedPool);
+            updateData(loadedPool);
 
             // reload and check lock
             loadedPool = getPoolByDn(loadedPool.getDn());
@@ -219,9 +238,15 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
         // expiration date of the pool is double of access token lifetime
         Date expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
 
-        for (T pool : expiredPools) {
+        for (T expiredPool : expiredPools) {
             // Do lock operation in try/catch for safety and do not throw error to upper levels
             try {
+                T pool = getPoolByDn(expiredPool.getDn());
+                if (!isReusable(pool)) {
+                    log.debug("{} Skip status index pool {} because it is not reusable anymore, exp: {}", logPrefix, expiredPool.getId(), pool != null ? pool.getExpirationDate() : null);
+                    continue;
+                }
+
                 pool.setLockKey(LOCK_KEY);
                 pool.setExpirationDate(expirationDate);
                 pool.setLastUpdate(new Date());
@@ -233,10 +258,11 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
                 T lockedPool = getPoolByDn(pool.getDn());
 
                 // If lock is ours reset entry and return it
-                if (LOCK_KEY.equals(lockedPool.getLockKey()) && lockedPool.getNodeId().equals(nodeId)) {
+                if (isLockedByNode(lockedPool, nodeId)) {
                     log.debug("{} Re-using existing status index pool {}, node {}, LOCK_KEY {}", logPrefix, lockedPool.getId(), nodeId, LOCK_KEY);
 
                     markAllIndexesAsValid(lockedPool.enumerateAllIndexes());
+                    lockedPool.setIssueUntil(expirationDate);
                     return lockedPool;
                 }
             } catch (EntryPersistenceException ex) {
@@ -291,8 +317,9 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
                 T lockedPool = getPoolByDn(pool.getDn());
 
                 // if lock is ours return it
-                if (LOCK_KEY.equals(lockedPool.getLockKey()) && lockedPool.getNodeId().equals(nodeId)) {
+                if (isLockedByNode(lockedPool, nodeId)) {
                     log.debug("{} Successfully created new status index pool {}, node {}", logPrefix, lockedPool.getId(), nodeId);
+                    lockedPool.setIssueUntil(expirationDate);
                     return setIndexes(lockedPool);
                 } else {
                     log.debug("{} Failed to create new status index pool {}, node {}", logPrefix, lockedPool.getId(), nodeId);
@@ -305,6 +332,10 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
 
         // This should not happens
         throw new EntryPersistenceException(String.format("%s Failed to allocate StatusIndexPool for node %s!!!", logPrefix, nodeId));
+    }
+
+    private static boolean isLockedByNode(AbstractIndexPool pool, int nodeId) {
+        return pool != null && LOCK_KEY.equals(pool.getLockKey()) && Objects.equals(pool.getNodeId(), nodeId);
     }
 
     private T setIndexes(T pool) {
@@ -329,6 +360,28 @@ public abstract class AbstractStatusIndexPoolService<T extends AbstractIndexPool
     public abstract Class<T> getEntityClass();
 
     public abstract void markAllIndexesAsValid(List<Integer> enumerateAllIndexes);
+
+    /**
+     * @return max lifetime (in seconds) of tokens that take indexes from pools, according to global configuration
+     */
+    public abstract long getMaxTokenLifetimeInSeconds();
+
+    /**
+     * Raises persisted expiration date ("exp") of the pool to the given date. Never lowers it.
+     *
+     * @param poolDn pool dn
+     * @param expirationDate new expiration date
+     * @return expiration date persisted for the pool after the call, or null if the pool is not found
+     */
+    public abstract Date extendExpiration(String poolDn, Date expirationDate);
+
+    /**
+     * Persists status list data ("dat"), lock key and last update of the pool. Does not write expiration date
+     * ("exp"), so a concurrent {@link #extendExpiration(String, Date)} is never overwritten.
+     *
+     * @param pool pool with updated data
+     */
+    public abstract void updateData(T pool);
 
     public abstract String logPrefix();
 

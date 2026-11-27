@@ -90,6 +90,19 @@ Accept: application/statuslist+json
 Logout Status JWT specifies `exp` which means that token must be considered expired when this time is reached independently from Token Status List response.
 If Token Status List has `INVALID` (`1` - at `idx` index for 2 bits) then RP must consider Logout Status JWT as invalid.
 
+## Status List Index Reuse
+
+Status list indexes are reserved by AS nodes in pools (blocks of `statusListIndexAllocationBlockSize` indexes).
+Access tokens, `id_token`s and Logout Status JWTs take indexes from the same pools.
+A pool is handed out again (and all its indexes are reset to `VALID`) only when every token that holds an index from it has expired:
+
+- each pool records the latest expiration of tokens issued from it (rounded up to the next hour);
+- additionally, the pool is kept for at least the longest globally configured lifetime
+  (`accessTokenLifetime`, `idTokenLifetime`, `logoutStatusJwtLifetime`) but not less than 3 hours after its expiration.
+
+This guarantees that a revoked token keeps `INVALID` status until it expires,
+even if its lifetime is overridden by client configuration or custom script.
+
 
 ## Disabling Logout Status JWT Using Feature Flag
 

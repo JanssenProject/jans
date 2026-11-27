@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @ApplicationScoped
 public class StatusListIndexService {
+
+    public static final long EXPIRATION_BUCKET_MILLIS = 60 * 60 * 1000L;
 
     @Inject
     private Logger log;
@@ -84,6 +87,56 @@ public class StatusListIndexService {
         } catch (Exception e) {
             log.error("Failed to persist status index pool " + pool.getId(), e);
         }
+    }
+
+    /**
+     * Makes sure the pool that holds the index is not reused before the token expires.
+     *
+     * @param index status list index of the token
+     * @param tokenExpiration token expiration date
+     */
+    public void registerTokenExpiration(Integer index, Date tokenExpiration) {
+        if (index == null || index < 0 || tokenExpiration == null) {
+            return;
+        }
+
+        try {
+            final Date target = roundUpToBucket(tokenExpiration);
+
+            final StatusIndexPool localPool = tokenPool;
+            if (localPool != null && localPool.containsIndex(index)) {
+                if (coversExpiration(localPool, target)) {
+                    return;
+                }
+                synchronized (localPool) {
+                    if (coversExpiration(localPool, target)) {
+                        return;
+                    }
+                    final Date persisted = statusTokenPoolService.extendExpiration(localPool.getDn(), target);
+                    if (persisted != null) {
+                        localPool.setExpirationDate(persisted);
+                    }
+                }
+                return;
+            }
+
+            final StatusIndexPool pool = statusTokenPoolService.getPoolByIndex(index);
+            if (pool != null) {
+                statusTokenPoolService.extendExpiration(pool.getDn(), target);
+            }
+        } catch (Exception e) {
+            log.error("Failed to register token expiration " + tokenExpiration + " for status list index " + index, e);
+        }
+    }
+
+    private static boolean coversExpiration(StatusIndexPool pool, Date expiration) {
+        final Date poolExpiration = pool.getExpirationDate();
+        return poolExpiration != null && !poolExpiration.before(expiration);
+    }
+
+    public static Date roundUpToBucket(Date date) {
+        final long time = date.getTime();
+        return new Date(((time + EXPIRATION_BUCKET_MILLIS - 1) / EXPIRATION_BUCKET_MILLIS) * EXPIRATION_BUCKET_MILLIS);
     }
 
     public Integer next() {

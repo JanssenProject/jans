@@ -94,6 +94,7 @@ public class LogoutStatusJwtService {
                 statusListIndex = statusListIndexService.next();
                 context.setStatusListIndex(statusListIndex);
                 logoutStatusJwt.setStatusListIndex(statusListIndex);
+                statusListIndexService.registerTokenExpiration(statusListIndex, logoutStatusJwt.getExpirationDate());
             }
 
             if (logoutStatusJwt.getExpiresIn() < 0) {
