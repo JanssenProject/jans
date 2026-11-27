@@ -287,10 +287,8 @@ impl MockServer {
         });
     }
 
-    /// Serves a status list JWT built from `spec`. The JWT is signed anew on every
-    /// request, so `iat` and `exp` follow the time of each fetch.
-    #[track_caller]
-    pub(crate) fn serve_status_list(&mut self, spec: MockStatusList<'_>) {
+    /// The status list endpoint mock for `spec`, not yet created.
+    fn status_list_mock(&mut self, spec: MockStatusList<'_>) -> Mock {
         let MockStatusList {
             bits,
             list,
@@ -336,15 +334,38 @@ impl MockServer {
                 .to_vec()
         };
 
-        let endpoint = self
-            .server
+        self.server
             .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
             .with_status(200)
             .with_header("content-type", "application/statuslist+jwt")
             .with_body_from_request(move |_| build_jwt_claims())
-            .expect_at_least(1)
-            .create();
+    }
+
+    /// Serves a status list JWT built from `spec`, fetched any number of times.
+    /// The JWT is signed anew on every request, so `iat` and `exp` follow the time
+    /// of each fetch.
+    #[track_caller]
+    pub(crate) fn serve_status_list(&mut self, spec: MockStatusList<'_>) {
+        let endpoint = self.status_list_mock(spec).expect_at_least(1).create();
         self.replace_status_list_endpoint(endpoint);
+    }
+
+    /// Like [`Self::serve_status_list`], but [`Self::assert_status_list_endpoint`]
+    /// fails unless it was fetched exactly `fetches` times.
+    #[track_caller]
+    pub(crate) fn serve_status_list_exactly(&mut self, spec: MockStatusList<'_>, fetches: usize) {
+        let endpoint = self.status_list_mock(spec).expect(fetches).create();
+        self.replace_status_list_endpoint(endpoint);
+    }
+
+    /// Panics unless the status list endpoint got the requests its mock expects.
+    #[track_caller]
+    pub(crate) fn assert_status_list_endpoint(&self) {
+        self.endpoints
+            .status_list
+            .as_ref()
+            .expect("the status list endpoint hasn't been generated yet")
+            .assert();
     }
 
     /// Makes `endpoint` the only status list mock. A dropped `Mock` stays on the

@@ -24,7 +24,7 @@ use crate::{
         GetFromUrl, IssuerConfig, IssuerIndex, JwtLogEntry, JwtServiceInitError, KeyService,
         OpenIdConfig, TokenCache,
         loading_state::TrustedIssuerLoadingState,
-        status_list::{InitForIssArgs, StatusListCache},
+        status_list::{InitForIssArgs, StatusListRegistry},
         validation::JwtValidatorCache,
     },
     jwt_config::{DEFAULT_JWKS_REFRESH_INTERVAL_SECS, TrustedIssuerLoaderConfig},
@@ -68,7 +68,7 @@ pub(crate) enum TrustedIssuerLoaderError {
 #[derive(Clone)]
 pub(super) struct TrustedIssuerLoader {
     pub(super) jwt_config: JwtConfig,
-    pub(super) status_lists: StatusListCache,
+    pub(super) status_lists: StatusListRegistry,
     pub(super) issuer_configs: Arc<IssuerIndex>,
     pub(super) validators: Arc<JwtValidatorCache>,
     pub(super) key_service: Arc<KeyService>,
@@ -386,17 +386,15 @@ async fn install_trusted_issuer(
             .await?;
     }
 
-    loader.validators.init_for_iss(
-        &iss_config,
-        &loader.jwt_config,
-        &loader.status_lists,
-        loader.logger.as_ref(),
-    );
-
-    if loader.jwt_config.jwt_status_validation {
+    // Loading the status list needs its validators; the token validators then
+    // check tokens against that list.
+    let status_list = if loader.jwt_config.jwt_status_validation {
+        loader
+            .validators
+            .init_status_list_validators(&iss_config, &loader.jwt_config);
         loader
             .status_lists
-            .init_for_iss(
+            .register(
                 &iss_config,
                 InitForIssArgs {
                     validators: loader.validators.clone(),
@@ -412,8 +410,16 @@ async fn install_trusted_issuer(
                     cancel_tkn: loader.jwks_cancel_token.clone(),
                 },
             )
-            .await;
-    }
+            .await
+    } else {
+        None
+    };
+    loader.validators.init_token_validators(
+        &iss_config,
+        &loader.jwt_config,
+        status_list.as_ref(),
+        loader.logger.as_ref(),
+    );
 
     if loader.jwt_config.jwt_sig_validation
         && let Some(jwks_uri) = jwks_uri
@@ -610,8 +616,8 @@ mod test {
     use crate::jwt::StatusCheckError;
     use crate::jwt::key_service::DecodingKeyInfo;
     use crate::jwt::test_utils::{
-        MockServer, create_failing_trusted_issuer, create_unreachable_trusted_issuer,
-        generate_jwks, generate_keypair_hs256,
+        MockServer, MockStatusList, create_failing_trusted_issuer,
+        create_unreachable_trusted_issuer, generate_jwks, generate_keypair_hs256,
     };
     use crate::{common::issuer_utils::IssClaim, jwt_config::WorkersCount};
     use jsonwebtoken::Algorithm;
@@ -680,7 +686,7 @@ mod test {
     fn create_loader(jwt_config: JwtConfig, issuer_count: usize) -> TrustedIssuerLoader {
         TrustedIssuerLoader {
             jwt_config,
-            status_lists: StatusListCache::default(),
+            status_lists: StatusListRegistry::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(KeyService::new()),
@@ -898,7 +904,7 @@ mod test {
                 jwt_status_validation: false,
                 ..Default::default()
             },
-            status_lists: StatusListCache::default(),
+            status_lists: StatusListRegistry::default(),
             issuer_configs: Arc::new(IssuerIndex::new()),
             validators: Arc::new(JwtValidatorCache::default()),
             key_service: Arc::new(key_service_with_keys),
@@ -1455,13 +1461,56 @@ mod test {
             "trusted issuer should be inserted into issuer index"
         );
 
-        // Verify status list cache contains the endpoint
-        let status_list_uri = server.status_list_endpoint().unwrap().to_string();
-        let status_lists = loader.status_lists.status_lists.read().unwrap();
+        // Verify the issuer's status list is registered
+        let status_list_uri = server.status_list_endpoint().unwrap();
         assert!(
-            status_lists.contains_key(&status_list_uri),
-            "status list cache should contain the status list endpoint"
+            loader
+                .status_lists
+                .list_for(&issuer_claim, &status_list_uri)
+                .is_some(),
+            "the issuer's status list should be registered"
         );
+    }
+
+    /// Trusted issuers that share an `iss` and its `status_list_endpoint` share one
+    /// status list and one refresh task, so the list is fetched once and no two
+    /// tasks overwrite each other's state.
+    #[tokio::test]
+    async fn issuers_sharing_iss_and_status_list_fetch_it_once() {
+        let mut server = MockServer::new_with_defaults()
+            .await
+            .expect("mock server should start");
+        let client = reqwest::Client::new();
+        let oidc_url = server.openid_config_endpoint().unwrap();
+        let _ = client.get(oidc_url.as_str()).send().await.unwrap();
+
+        server.serve_status_list_exactly(
+            MockStatusList {
+                list: &[0],
+                ..Default::default()
+            },
+            1,
+        );
+        server.update_openid_config_with_status_list_endpoint();
+
+        let jwt_config = JwtConfig {
+            jwt_sig_validation: true,
+            jwt_status_validation: true,
+            trusted_issuer_loader: TrustedIssuerLoaderConfig::default(),
+            signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            ..Default::default()
+        };
+        let trusted_issuers = HashMap::from([
+            ("Acme".to_string(), server.trusted_issuer()),
+            ("Beta".to_string(), server.trusted_issuer()),
+        ]);
+        let loader = create_loader(jwt_config, trusted_issuers.len());
+        loader
+            .load_trusted_issuers(&token_types(trusted_issuers))
+            .await
+            .expect("issuers sharing an iss and its endpoints should both load");
+
+        server.assert_status_list_endpoint();
     }
 
     /// A status list that cannot be fetched at startup only affects the tokens
@@ -1506,6 +1555,8 @@ mod test {
         let status_list_uri = server.status_list_endpoint().unwrap().to_string();
         let err = loader
             .status_lists
+            .list_for(&server.issuer(), &server.status_list_endpoint().unwrap())
+            .expect("an unavailable list is still registered for its issuer")
             .check_status(&status_list_uri, 0, jsonwebtoken::get_current_timestamp())
             .expect_err("the list could not be loaded, so tokens that reference it are rejected");
         assert!(

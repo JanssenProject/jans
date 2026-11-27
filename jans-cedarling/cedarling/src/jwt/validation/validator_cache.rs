@@ -5,7 +5,7 @@
 
 use crate::common::issuer_utils::IssClaim;
 use crate::jwt::log_entry::JwtLogEntry;
-use crate::jwt::{IssuerConfig, StatusListCache};
+use crate::jwt::{IssuerConfig, IssuerStatusList};
 use crate::log::Logger;
 use crate::{JwtConfig, LogLevel, LogWriter};
 
@@ -44,13 +44,39 @@ impl Default for JwtValidatorCache {
 }
 
 impl JwtValidatorCache {
-    /// Initializes the validators for the given [`IssuerConfig`] and the global settings
-    /// from [`JwtConfig`].
-    pub(crate) fn init_for_iss(
+    /// Creates the validators for the issuer's status list JWT, which loading its
+    /// status list needs.
+    pub(crate) fn init_status_list_validators(
         &self,
         iss_config: &IssuerConfig,
         jwt_config: &JwtConfig,
-        status_lists: &StatusListCache,
+    ) {
+        // The loader rejects a discovery document whose `issuer` differs from this.
+        let iss = iss_config.policy.iss_claim();
+        for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
+            let status_list_uri = iss_config
+                .openid_config
+                .as_ref()
+                .and_then(|conf| conf.status_list_endpoint.as_ref())
+                .map(std::string::ToString::to_string);
+            let (validator, key) = JwtValidator::new_status_list_tkn_validator(
+                Some(iss),
+                status_list_uri,
+                algorithm,
+                jwt_config.jwt_sig_validation,
+            );
+
+            self.insert(&key, validator);
+        }
+    }
+
+    /// Creates the validators for the issuer's tokens. With status validation on,
+    /// they check a token's `status` against `status_list`, the issuer's own list.
+    pub(crate) fn init_token_validators(
+        &self,
+        iss_config: &IssuerConfig,
+        jwt_config: &JwtConfig,
+        status_list: Option<&Arc<IssuerStatusList>>,
         logger: Option<&Logger>,
     ) {
         // The loader rejects a discovery document whose `issuer` differs from this.
@@ -71,27 +97,9 @@ impl JwtValidatorCache {
                     entity_type.as_str(),
                     tkn_metadata,
                     algorithm,
-                    status_lists.clone(),
+                    status_list.cloned(),
                     jwt_config.jwt_sig_validation,
                     jwt_config.jwt_status_validation,
-                );
-
-                self.insert(&key, validator);
-            }
-        }
-
-        if jwt_config.jwt_status_validation {
-            for algorithm in jwt_config.signature_algorithms_supported.iter().copied() {
-                let status_list_uri = iss_config
-                    .openid_config
-                    .as_ref()
-                    .and_then(|conf| conf.status_list_endpoint.as_ref())
-                    .map(std::string::ToString::to_string);
-                let (validator, key) = JwtValidator::new_status_list_tkn_validator(
-                    Some(iss),
-                    status_list_uri,
-                    algorithm,
-                    jwt_config.jwt_sig_validation,
                 );
 
                 self.insert(&key, validator);
@@ -318,7 +326,7 @@ mod test {
                 required_claims: HashSet::new(),
             },
             jsonwebtoken::Algorithm::HS256,
-            StatusListCache::default(),
+            None,
             true,
             false,
         );

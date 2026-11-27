@@ -6,7 +6,7 @@
 //! Checks Cedarling against the Relying Party rules of [draft-ietf-oauth-status-list-21].
 //!
 //! Each test serves a status list JWT from a mock issuer, loads it through
-//! [`StatusListCache::init_for_iss`] (fetch, signature and claim validation), then
+//! [`StatusListRegistry::register`] (fetch, signature and claim validation), then
 //! validates a Referenced Token against it with
 //! [`JwtValidator::validate_jwt`](crate::jwt::validation::JwtValidator::validate_jwt).
 //!
@@ -23,7 +23,7 @@ use serde_json::json;
 use tokio_util::sync::{CancellationToken, DropGuard};
 
 use super::{
-    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListCache,
+    InitForIssArgs, JwtStatus, StatusBitSize, StatusCheckError, StatusListRegistry,
     UpdateStatusListError,
 };
 use crate::JwtConfig;
@@ -143,24 +143,19 @@ impl Case {
             openid_config: Some(mock.openid_config()),
         };
 
-        let cache = StatusListCache::default();
+        let jwt_config = JwtConfig {
+            jwks: None,
+            jwt_sig_validation: true,
+            jwt_status_validation: true,
+            signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
+            ..Default::default()
+        };
         let validators = Arc::new(JwtValidatorCache::default());
-        validators.init_for_iss(
-            &iss_config,
-            &JwtConfig {
-                jwks: None,
-                jwt_sig_validation: true,
-                jwt_status_validation: true,
-                signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
-                ..Default::default()
-            },
-            &cache,
-            None,
-        );
+        validators.init_status_list_validators(&iss_config, &jwt_config);
 
         let cancel_tkn = CancellationToken::new();
-        cache
-            .init_for_iss(
+        let status_list = StatusListRegistry::default()
+            .register(
                 &iss_config,
                 InitForIssArgs {
                     validators: validators.clone(),
@@ -173,6 +168,7 @@ impl Case {
                 },
             )
             .await;
+        validators.init_token_validators(&iss_config, &jwt_config, status_list.as_ref(), None);
 
         Self {
             mock,
@@ -702,14 +698,16 @@ async fn drops_list_without_exp_when_refresh_fails() {
     );
 }
 
-/// The status list a token references is resolved from its `uri` ([§8.3] step 2);
-/// a URI no trusted issuer serves gives no statement about the token, which is
-/// rejected ([§8.3] closing paragraph), naming the URI it asked for.
+/// Cedarling checks a token only against its own issuer's status list. The draft
+/// allows a Status Issuer other than the token's issuer ([§1]), but Cedarling
+/// cannot tell whether the issuer authorized it, so a token that names another
+/// list is rejected, naming both lists ([§8.3] closing paragraph).
 ///
+/// [§1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-1
 /// [§8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
 #[tokio::test]
-async fn rejects_token_referencing_unknown_list() {
-    let mut case = Case::load(
+async fn rejects_token_referencing_another_issuers_list() {
+    let mut issuer = Case::load(
         MockStatusList {
             list: &[0],
             ..Default::default()
@@ -717,27 +715,36 @@ async fn rejects_token_referencing_unknown_list() {
         NO_REFRESH,
     )
     .await;
+    let other_issuer = Case::load(
+        MockStatusList {
+            list: &[0],
+            ..Default::default()
+        },
+        NO_REFRESH,
+    )
+    .await;
+    let other_list = other_issuer.list_uri();
 
-    let unknown_uri = "https://unknown.example.com/statuslist/1";
     let mut claims = json!({
         "sub": "some_user",
         "exp": chrono::Utc::now().timestamp() + 3600,
-        "status": {"status_list": {"idx": 0, "uri": unknown_uri}},
+        "status": {"status_list": {"idx": 0, "uri": other_list}},
     });
-    let token = case
+    let token = issuer
         .mock
         .generate_token_with_hs256sig(&mut claims, None)
         .expect("referenced token should be signed");
 
-    let err = case
+    let err = issuer
         .validate_token(&token)
-        .expect_err("no trusted issuer serves that list, so the token is rejected");
+        .expect_err("the token names another issuer's list, so it is rejected");
+    let own_list = issuer.list_uri();
     assert!(
         matches!(
             &err,
-            ValidateJwtError::Status(StatusCheckError::UnknownStatusList { uri })
-                if uri == unknown_uri
+            ValidateJwtError::Status(StatusCheckError::ForeignStatusList { expected, found })
+                if *expected == own_list && *found == other_list
         ),
-        "the rejection must name the unknown list, got: {err:?}"
+        "the rejection must name the issuer's list and the one the token named, got: {err:?}"
     );
 }

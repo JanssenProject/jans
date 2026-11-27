@@ -55,11 +55,16 @@ pub(super) enum StatusAtError {
 #[derive(Debug, Error)]
 pub enum StatusCheckError {
     #[error(
-        "the token references the status list '{uri}', which no trusted issuer serves; \
-         compare its `status.status_list.uri` claim with the issuer's \
-         `status_list_endpoint`"
+        "the token references the status list '{uri}', but its issuer publishes no \
+         `status_list_endpoint`, so there is no list to check it against"
     )]
-    UnknownStatusList { uri: String },
+    NoStatusList { uri: String },
+    #[error(
+        "the token references the status list '{found}', but its issuer publishes its \
+         status list at '{expected}'; Cedarling checks a token only against its own \
+         issuer's list"
+    )]
+    ForeignStatusList { expected: String, found: String },
     #[error(
         "the status list '{uri}' has been unavailable since {}: {}; tokens that reference \
          it are rejected until a refresh succeeds",

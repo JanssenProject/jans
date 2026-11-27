@@ -107,7 +107,7 @@ use issuer_index::IssuerIndex;
 use key_service::KeyService;
 use loading_state::TrustedIssuerLoadingState;
 use log_entry::JwtLogEntry;
-use status_list::StatusListCache;
+use status_list::{IssuerStatusList, StatusListRegistry};
 use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex};
@@ -387,7 +387,7 @@ impl JwtService {
 
         warn_if_jwt_validation_disabled(jwt_config, logger.as_ref());
 
-        let status_lists = StatusListCache::default();
+        let status_lists = StatusListRegistry::default();
         let issuer_configs = Arc::new(IssuerIndex::new());
         let validators = Arc::new(JwtValidatorCache::default());
         let key_service = Arc::new(KeyService::new());

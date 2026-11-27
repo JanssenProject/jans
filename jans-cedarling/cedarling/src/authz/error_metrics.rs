@@ -114,7 +114,9 @@ impl ErrorMetricKey for ValidateJwtError {
 impl ErrorMetricKey for StatusCheckError {
     fn metric_key(&self) -> &'static str {
         match self {
-            Self::UnknownStatusList { .. } | Self::Unavailable { .. } => "jwt.missing_status_list",
+            Self::NoStatusList { .. }
+            | Self::ForeignStatusList { .. }
+            | Self::Unavailable { .. } => "jwt.missing_status_list",
             Self::Rejected { .. } => "jwt.status_rejected",
             Self::Expired { .. }
             | Self::IdxOutOfBounds { .. }

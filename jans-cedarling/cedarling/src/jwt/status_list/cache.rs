@@ -4,11 +4,12 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use std::{
-    collections::HashMap,
-    sync::{Arc, RwLock},
+    collections::{HashMap, hash_map::Entry},
+    sync::{Arc, Mutex},
     time::Duration,
 };
 
+use arc_swap::ArcSwap;
 use jsonwebtoken::DecodingKey;
 use tokio_util::sync::CancellationToken;
 use url::Url;
@@ -35,21 +36,15 @@ use super::{
     UpdateStatusListError,
 };
 
-/// The value of the `status_list_uri` claim from a JWT
-type StatusListUri = String;
-
 struct StatusListUpdateCtx {
     source: StatusListSource,
     /// Interval until the next refresh: the JWT `ttl` capped by `refresh_interval_max`,
     /// see [`effective_refresh_interval`].
     refresh_interval: Duration,
-    /// Expiry of the list cached at start.
-    expiry: Option<StatusListExpiry>,
     /// Upper bound on the refresh interval. The Status List JWT's `ttl`
     /// claim is honored when present, but capped to this value; when the JWT omits
     /// `ttl`, this value is used directly.
     refresh_interval_max: Duration,
-    status_lists: Arc<RwLock<HashMap<String, StatusListState>>>,
     logger: Option<Logger>,
     cancel_tkn: CancellationToken,
 }
@@ -181,17 +176,38 @@ fn next_refresh_in(
     }
 }
 
-/// Contains an `Arc<RwLock<_>>` internally so clone should be fine
-#[derive(Debug, Default, Clone)]
-pub(crate) struct StatusListCache {
-    pub status_lists: Arc<RwLock<HashMap<StatusListUri, StatusListState>>>,
+/// One issuer's status list: its refresh task writes it and the validators of
+/// the issuer's tokens read it, so a token is only checked against the list of
+/// its own issuer.
+#[derive(Debug)]
+pub(crate) struct IssuerStatusList {
+    uri: Url,
+    state: ArcSwap<StatusListState>,
 }
 
-impl StatusListCache {
+impl IssuerStatusList {
+    fn new(uri: Url, state: StatusListState) -> Self {
+        Self {
+            uri,
+            state: ArcSwap::from_pointee(state),
+        }
+    }
+
+    /// Expiry of the list in use; `None` when there is none or it has no `exp`.
+    fn expiry(&self) -> Option<StatusListExpiry> {
+        match &**self.state.load() {
+            StatusListState::Usable(list) => list.expiry(),
+            StatusListState::Unavailable(_) => None,
+        }
+    }
+
     /// Checks the status of a token whose `status` claim points at entry `idx` of
     /// the list at `uri`. Only VALID passes; every other outcome names the list
     /// and why no statement about the token can be made
     /// ([draft-ietf-oauth-status-list-21 §8.3]).
+    ///
+    /// The token must reference this list: Cedarling does not check a token
+    /// against another party's list.
     ///
     /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
     pub(crate) fn check_status(
@@ -200,21 +216,20 @@ impl StatusListCache {
         idx: usize,
         now: u64,
     ) -> Result<(), StatusCheckError> {
-        let lists = self
-            .status_lists
-            .read()
-            .expect("obtain status list read lock");
-        let list = match lists.get(uri) {
-            Some(StatusListState::Usable(list)) => list,
-            Some(StatusListState::Unavailable(unavailable)) => {
+        if !Url::parse(uri).is_ok_and(|found| found == self.uri) {
+            return Err(StatusCheckError::ForeignStatusList {
+                expected: self.uri.to_string(),
+                found: uri.to_string(),
+            });
+        }
+        let uri = self.uri.as_str();
+        let state = self.state.load();
+        let list = match &**state {
+            StatusListState::Usable(list) => list,
+            StatusListState::Unavailable(unavailable) => {
                 return Err(StatusCheckError::Unavailable {
                     uri: uri.to_string(),
                     unavailable: unavailable.clone(),
-                });
-            },
-            None => {
-                return Err(StatusCheckError::UnknownStatusList {
-                    uri: uri.to_string(),
                 });
             },
         };
@@ -240,16 +255,38 @@ impl StatusListCache {
             })
         }
     }
+}
 
-    /// Loads the status list of the given issuer and starts the task that keeps
-    /// it fresh.
+/// Identifies one status list and its refresh task: the issuer and the URI it
+/// publishes the list at.
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+struct StatusListKey {
+    iss: IssClaim,
+    uri: Url,
+}
+
+/// The status lists of all trusted issuers, one per issuer and URI. Trusted
+/// issuers that share an `iss` and a `status_list_endpoint` share one list and
+/// one refresh task.
+#[derive(Debug, Default, Clone)]
+pub(crate) struct StatusListRegistry {
+    lists: Arc<Mutex<HashMap<StatusListKey, Arc<IssuerStatusList>>>>,
+}
+
+impl StatusListRegistry {
+    /// Returns the status list of the given issuer; the first time, loads it and
+    /// starts the task that keeps it fresh.
     ///
     /// A list that cannot be loaded does not fail the issuer: it is recorded as
     /// unavailable, so only the tokens that reference it are rejected, and the
     /// task keeps retrying. An issuer with no `status_list_endpoint`, including
-    /// every static-form issuer, is skipped with a WARN log; its tokens carrying
-    /// `status` are rejected.
-    pub(crate) async fn init_for_iss(&self, iss_config: &IssuerConfig, args: InitForIssArgs) {
+    /// every static-form issuer, has no list (`None`) and is logged as a WARN; its
+    /// tokens carrying `status` are rejected.
+    pub(crate) async fn register(
+        &self,
+        iss_config: &IssuerConfig,
+        args: InitForIssArgs,
+    ) -> Option<Arc<IssuerStatusList>> {
         let InitForIssArgs {
             validators,
             key_service,
@@ -279,9 +316,22 @@ impl StatusListCache {
                     Some(LogLevel::WARN),
                 ));
             }
-            return;
+            return None;
         };
         let iss = iss_config.policy.iss_claim().clone();
+        let key = StatusListKey {
+            iss: iss.clone(),
+            uri: status_list_url.clone(),
+        };
+        if let Some(list) = self
+            .lists
+            .lock()
+            .expect("status list registry lock")
+            .get(&key)
+        {
+            return Some(list.clone());
+        }
+
         let source = StatusListSource {
             url: status_list_url.clone(),
             iss: iss.clone(),
@@ -289,67 +339,82 @@ impl StatusListCache {
             key_service,
             http_client,
         };
-        let url = status_list_url.as_str();
+        let FirstLoad {
+            state,
+            refresh_interval,
+        } = first_load(&source, refresh_interval_max).await;
+        if let StatusListState::Unavailable(unavailable) = &state {
+            logger.log_any(JwtLogEntry::new(
+                format!(
+                    "trusted issuer '{}': failed to load its status list from '{}': {}; its \
+                     tokens that carry a `status` claim are rejected until the list loads; \
+                     next attempt in {} s",
+                    iss_config.policy.name,
+                    source.url,
+                    unavailable.cause(),
+                    refresh_interval.as_secs(),
+                ),
+                Some(LogLevel::ERROR),
+            ));
+        }
 
+        let list = {
+            let mut lists = self.lists.lock().expect("status list registry lock");
+            match lists.entry(key) {
+                // another trusted issuer with the same `iss` loaded it meanwhile
+                Entry::Occupied(registered) => return Some(registered.get().clone()),
+                Entry::Vacant(slot) => slot
+                    .insert(Arc::new(IssuerStatusList::new(
+                        status_list_url.clone(),
+                        state,
+                    )))
+                    .clone(),
+            }
+        };
+        let writer = StatusListWriter {
+            list: list.clone(),
+            // tokens of this `iss` are the only ones checked against this list
+            on_change: move || token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone())),
+        };
+        let ctx = StatusListUpdateCtx {
+            source,
+            refresh_interval,
+            refresh_interval_max,
+            logger,
+            cancel_tkn,
+        };
+        crate::rt::spawn_task(keep_status_list_updated(writer, ctx));
+        Some(list)
+    }
+}
+
+/// The state of a status list after its first fetch, and when to refresh it.
+struct FirstLoad {
+    state: StatusListState,
+    refresh_interval: Duration,
+}
+
+/// Fetches the list for the first time. A list that cannot be loaded starts as
+/// unavailable and is retried at `refresh_interval_max`.
+async fn first_load(source: &StatusListSource, refresh_interval_max: Duration) -> FirstLoad {
+    match source.fetch().await {
         // Per the IETF `oauth-status-list` spec, the JWT's `ttl` claim drives the
         // refresh cadence, but the bootstrap
         // `CEDARLING_JWT_STATUS_LIST_REFRESH_INTERVAL_MAX` caps it: the issuer can
         // always request a *more frequent* refresh, but never a less frequent one.
         // When the JWT omits `ttl`, the max is used directly so the cache never goes
         // stale forever.
-        let (refresh_interval, expiry) = match source.fetch().await {
-            Ok(parsed) => {
-                let loaded = (
-                    effective_refresh_interval(parsed.ttl_secs, refresh_interval_max),
-                    parsed.list.expiry(),
-                );
-                self.status_lists
-                    .write()
-                    .expect("acquire status_lists write lock")
-                    .insert(url.to_string(), StatusListState::Usable(parsed.list));
-                loaded
-            },
-            Err(err) => {
-                let err = Arc::new(err);
-                mark_unavailable(
-                    &mut self
-                        .status_lists
-                        .write()
-                        .expect("acquire status_lists write lock"),
-                    url,
-                    jsonwebtoken::get_current_timestamp(),
-                    err.clone(),
-                );
-                logger.log_any(JwtLogEntry::new(
-                    format!(
-                        "trusted issuer '{}': failed to load its status list from '{url}': \
-                         {err}; its tokens that carry a `status` claim are rejected until the \
-                         list loads; next attempt in {} s",
-                        iss_config.policy.name,
-                        refresh_interval_max.as_secs(),
-                    ),
-                    Some(LogLevel::ERROR),
-                ));
-                (refresh_interval_max, None)
-            },
-        };
-
-        let ctx = StatusListUpdateCtx {
-            source,
-            refresh_interval,
-            expiry,
-            refresh_interval_max,
-            status_lists: self.status_lists.clone(),
-            logger,
-            cancel_tkn,
-        };
-        crate::rt::spawn_task(keep_status_list_updated(
-            // callback is called on updated status list
-            move || {
-                token_cache.invalidate_by_index(&IndexKey::Iss(iss.clone()));
-            },
-            ctx,
-        ));
+        Ok(parsed) => FirstLoad {
+            state: StatusListState::Usable(parsed.list),
+            refresh_interval: effective_refresh_interval(parsed.ttl_secs, refresh_interval_max),
+        },
+        Err(err) => FirstLoad {
+            state: StatusListState::Unavailable(UnavailableStatusList::new(
+                jsonwebtoken::get_current_timestamp(),
+                Arc::new(err),
+            )),
+            refresh_interval: refresh_interval_max,
+        },
     }
 }
 
@@ -373,22 +438,42 @@ fn after_failed_refresh(expiry: Option<StatusListExpiry>, now: u64) -> AfterFail
     }
 }
 
-/// Records that the list at `uri` could not be refreshed, keeping the time it
-/// first became unavailable. Returns whether a usable list was replaced, so the
-/// caller knows to clear the tokens validated against it.
-fn mark_unavailable(
-    status_lists: &mut HashMap<StatusListUri, StatusListState>,
-    uri: &str,
-    now: u64,
-    cause: Arc<UpdateStatusListError>,
-) -> bool {
-    let (unavailable, was_usable) = match status_lists.get(uri) {
-        Some(StatusListState::Unavailable(unavailable)) => (unavailable.with_cause(cause), false),
-        Some(StatusListState::Usable(_)) => (UnavailableStatusList::new(now, cause), true),
-        None => (UnavailableStatusList::new(now, cause), false),
-    };
-    status_lists.insert(uri.to_string(), StatusListState::Unavailable(unavailable));
-    was_usable
+/// The refresh task's handle on a status list. Every change that makes earlier
+/// checks against the list stale also runs `on_change`, which clears the tokens
+/// validated against it from the token cache.
+struct StatusListWriter<F: Fn()> {
+    list: Arc<IssuerStatusList>,
+    on_change: F,
+}
+
+impl<F: Fn()> StatusListWriter<F> {
+    fn replace(&self, list: CachedStatusList) {
+        self.list
+            .state
+            .store(Arc::new(StatusListState::Usable(list)));
+        (self.on_change)();
+    }
+
+    /// Records that the list could not be refreshed, keeping the time it first
+    /// became unavailable and the latest cause.
+    fn mark_unavailable(&self, now: u64, cause: Arc<UpdateStatusListError>) {
+        let (unavailable, was_usable) = match &**self.list.state.load() {
+            StatusListState::Unavailable(unavailable) => (unavailable.with_cause(cause), false),
+            StatusListState::Usable(_) => (UnavailableStatusList::new(now, cause), true),
+        };
+        self.list
+            .state
+            .store(Arc::new(StatusListState::Unavailable(unavailable)));
+        if was_usable {
+            (self.on_change)();
+        }
+    }
+
+    /// The list in use has expired: tokens validated against it must be checked
+    /// again.
+    fn expired(&self) {
+        (self.on_change)();
+    }
 }
 
 /// Where one issuer's status list comes from, and what checks it.
@@ -436,19 +521,13 @@ impl StatusListSource {
     }
 }
 
-/// Keeps the status list from the given URL updated, refreshing it every
-/// `refresh_interval` and no later than its expiry. `cb` clears the token cache
-/// whenever the cached list changes or stops being usable.
-async fn keep_status_list_updated<F>(cb: F, ctx: StatusListUpdateCtx)
-where
-    F: Fn(),
-{
+/// Keeps the status list updated, refreshing it every `refresh_interval` and no
+/// later than its expiry.
+async fn keep_status_list_updated<F: Fn()>(writer: StatusListWriter<F>, ctx: StatusListUpdateCtx) {
     let StatusListUpdateCtx {
         source,
         mut refresh_interval,
-        mut expiry,
         refresh_interval_max,
-        status_lists,
         logger,
         cancel_tkn,
     } = ctx;
@@ -457,7 +536,7 @@ where
     loop {
         let wait = next_refresh_in(
             refresh_interval,
-            expiry,
+            writer.list.expiry(),
             jsonwebtoken::get_current_timestamp(),
         );
         tokio::select! {
@@ -468,8 +547,10 @@ where
         // The validator already rejects tokens against the expired list; clearing
         // the token cache stops tokens validated before it expired from being
         // served while the refresh below runs.
-        if let Some(expired) =
-            expiry.filter(|expiry| expiry.has_passed(jsonwebtoken::get_current_timestamp()))
+        if let Some(expired) = writer
+            .list
+            .expiry()
+            .filter(|expiry| expiry.has_passed(jsonwebtoken::get_current_timestamp()))
         {
             logger.log_any(JwtLogEntry::new(
                 format!(
@@ -478,7 +559,7 @@ where
                 ),
                 Some(LogLevel::WARN),
             ));
-            cb();
+            writer.expired();
         }
 
         let parsed = match source.fetch().await {
@@ -486,24 +567,13 @@ where
             Err(err) => {
                 let err = Arc::new(err);
                 let now = jsonwebtoken::get_current_timestamp();
-                let outcome = match after_failed_refresh(expiry, now) {
+                let outcome = match after_failed_refresh(writer.list.expiry(), now) {
                     AfterFailedRefresh::Keep(expiry) => format!(
                         "the cached list stays in use until its {expiry}; next attempt in {} s",
                         next_refresh_in(refresh_interval, Some(expiry), now).as_secs(),
                     ),
                     AfterFailedRefresh::Drop => {
-                        // the list is gone or never expires: later attempts follow
-                        // the refresh interval
-                        expiry = None;
-                        let was_usable = mark_unavailable(
-                            &mut status_lists.write().expect("obtain status list write lock"),
-                            url,
-                            now,
-                            err.clone(),
-                        );
-                        if was_usable {
-                            cb();
-                        }
+                        writer.mark_unavailable(now, err.clone());
                         format!(
                             "no usable list is cached, so tokens that reference it are \
                              rejected until it refreshes successfully; next attempt in {} s",
@@ -521,37 +591,33 @@ where
         // Honor the refreshed JWT's `ttl` but cap it at the configured max; if the
         // refreshed JWT no longer has `ttl`, use the max directly.
         refresh_interval = effective_refresh_interval(parsed.ttl_secs, refresh_interval_max);
-        expiry = parsed.list.expiry();
-
-        status_lists
-            .write()
-            .expect("obtain status list write lock")
-            // insert, not update: re-creates the entry if a failed refresh dropped it
-            .insert(url.to_string(), StatusListState::Usable(parsed.list));
-        cb();
+        writer.replace(parsed.list);
     }
 }
 
 #[cfg(test)]
-impl StatusListCache {
-    fn from_states(states: HashMap<StatusListUri, StatusListState>) -> Self {
-        Self {
-            status_lists: Arc::new(RwLock::new(states)),
-        }
+impl IssuerStatusList {
+    /// A list that never expires, for tests that check statuses only.
+    pub(crate) fn for_test(uri: &str, list: super::StatusList) -> Self {
+        Self::new(
+            Url::parse(uri).expect("test status list URI"),
+            StatusListState::Usable(list.into()),
+        )
     }
 }
 
-/// Caches lists that never expire, for tests that check statuses only.
 #[cfg(test)]
-impl From<HashMap<String, super::StatusList>> for StatusListCache {
-    fn from(status_lists: HashMap<String, super::StatusList>) -> Self {
-        let status_lists = status_lists
-            .into_iter()
-            .map(|(uri, list)| (uri, StatusListState::Usable(list.into())))
-            .collect();
-        Self {
-            status_lists: Arc::new(RwLock::new(status_lists)),
-        }
+impl StatusListRegistry {
+    /// The list registered for `iss` at `uri`.
+    pub(crate) fn list_for(&self, iss: &IssClaim, uri: &Url) -> Option<Arc<IssuerStatusList>> {
+        self.lists
+            .lock()
+            .expect("status list registry lock")
+            .get(&StatusListKey {
+                iss: iss.clone(),
+                uri: uri.clone(),
+            })
+            .cloned()
     }
 }
 
@@ -580,15 +646,12 @@ mod test {
         .expect("status list JWT claims should deserialize")
     }
 
-    /// The list cached for `uri`, which the test expects to be usable.
+    /// The list in use, which the test expects to be usable.
     #[track_caller]
-    fn usable_list(cache: &StatusListCache, uri: &str) -> StatusList {
-        cache
-            .status_lists
-            .read()
-            .expect("obtain status_lists read lock")
-            .get(uri)
-            .and_then(StatusListState::as_usable)
+    fn usable_list(list: &IssuerStatusList) -> StatusList {
+        list.state
+            .load()
+            .as_usable()
             .expect("a usable status list should be cached")
             .list
             .clone()
@@ -767,43 +830,76 @@ mod test {
         );
     }
 
+    fn usable_issuer_list() -> Arc<IssuerStatusList> {
+        Arc::new(IssuerStatusList::for_test(
+            BOUND_LIST_URL,
+            StatusList {
+                bit_size: 1u8.try_into().expect("valid bit size"),
+                list: vec![0],
+            },
+        ))
+    }
+
+    /// Every change that makes earlier checks against the list stale clears the
+    /// tokens validated against it, so a revoked or unchecked token is not served
+    /// from the token cache; a change that does not, leaves them.
+    #[test]
+    fn writer_clears_cached_tokens_when_checks_go_stale() {
+        let cleared = std::cell::Cell::new(0);
+        let writer = StatusListWriter {
+            list: usable_issuer_list(),
+            on_change: || cleared.set(cleared.get() + 1),
+        };
+        let cause = || Arc::new(UpdateStatusListError::MissingValidator("x".into()));
+
+        writer.mark_unavailable(1_000, cause());
+        assert_eq!(cleared.get(), 1, "a usable list became unavailable");
+        writer.mark_unavailable(1_001, cause());
+        assert_eq!(
+            cleared.get(),
+            1,
+            "the list was already unavailable, so no token was validated against it"
+        );
+        writer.replace(
+            StatusList {
+                bit_size: 1u8.try_into().expect("valid bit size"),
+                list: vec![1],
+            }
+            .into(),
+        );
+        assert_eq!(
+            cleared.get(),
+            2,
+            "a refreshed list may revoke cached tokens"
+        );
+        writer.expired();
+        assert_eq!(
+            cleared.get(),
+            3,
+            "an expired list no longer vouches for cached tokens"
+        );
+    }
+
     /// A list that could not be refreshed stays marked unavailable from its first
     /// failure, with the latest cause, so the admin sees since when and why.
     #[test]
     fn unavailable_list_keeps_first_failure_time_and_latest_cause() {
-        let uri = "https://idp.example.com/statuslist/1";
-        let usable = StatusListState::Usable(
-            StatusList {
-                bit_size: 1u8.try_into().expect("valid bit size"),
-                list: vec![0],
-            }
-            .into(),
-        );
-        let cache = StatusListCache::from_states(HashMap::from([(uri.to_string(), usable)]));
-
-        let replaced_usable = mark_unavailable(
-            &mut cache.status_lists.write().expect("write lock"),
-            uri,
+        let writer = StatusListWriter {
+            list: usable_issuer_list(),
+            on_change: || {},
+        };
+        writer.mark_unavailable(
             1_767_225_600,
             Arc::new(UpdateStatusListError::MissingValidator("first".into())),
         );
-        assert!(
-            replaced_usable,
-            "the usable list was replaced, so the token cache must be cleared"
-        );
-        let replaced_usable = mark_unavailable(
-            &mut cache.status_lists.write().expect("write lock"),
-            uri,
+        writer.mark_unavailable(
             1_767_225_900,
             Arc::new(UpdateStatusListError::MissingValidator("second".into())),
         );
-        assert!(
-            !replaced_usable,
-            "the list was already unavailable, nothing to clear"
-        );
 
-        let err = cache
-            .check_status(uri, 0, 1_767_226_000)
+        let err = writer
+            .list
+            .check_status(BOUND_LIST_URL, 0, 1_767_226_000)
             .expect_err("an unavailable list gives no statement about the token");
         assert_eq!(
             err.to_string(),
@@ -811,6 +907,24 @@ mod test {
              2026-01-01T00:00:00Z: missing validator for the statuslist JWT from 'second'; \
              tokens that reference it are rejected until a refresh succeeds",
             "the rejection names the list, the first failure time and the latest cause"
+        );
+    }
+
+    /// A token is checked only against its own issuer's list; a token that names
+    /// another list is rejected with both URIs, so the admin sees the mismatch.
+    #[test]
+    fn token_referencing_another_list_is_rejected() {
+        let other = "https://other.example.com/statuslist/1";
+        let err = usable_issuer_list()
+            .check_status(other, 0, 1_000)
+            .expect_err("the token names a list its issuer does not publish");
+        assert!(
+            matches!(
+                &err,
+                StatusCheckError::ForeignStatusList { expected, found }
+                    if expected == BOUND_LIST_URL && found == other
+            ),
+            "the rejection must name the issuer's list and the one the token named, got: {err:?}"
         );
     }
 
@@ -856,7 +970,7 @@ mod test {
             .unwrap();
         // we initialize the status list with a 1 sec ttl
         mock_server.generate_status_list_endpoint(1u8.try_into().unwrap(), &[0b1111_1110], Some(1));
-        let status_list = StatusListCache::default();
+        let registry = StatusListRegistry::default();
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss",
@@ -869,7 +983,7 @@ mod test {
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
-        validators.init_for_iss(
+        validators.init_status_list_validators(
             &iss_config,
             &JwtConfig {
                 jwks: None,
@@ -878,11 +992,9 @@ mod test {
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
                 ..Default::default()
             },
-            &status_list,
-            None,
         );
-        status_list
-            .init_for_iss(
+        let status_list = registry
+            .register(
                 &iss_config,
                 InitForIssArgs {
                     validators: Arc::new(validators),
@@ -896,13 +1008,12 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await;
-
-        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+            .await
+            .expect("the mock issuer publishes a status list");
 
         // Check if the status list is the same as we first generated
         assert_eq!(
-            usable_list(&status_list, &status_list_uri),
+            usable_list(&status_list),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b1111_1110],
@@ -918,7 +1029,7 @@ mod test {
 
         // Check if the status list got updated
         assert_eq!(
-            usable_list(&status_list, &status_list_uri),
+            usable_list(&status_list),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
@@ -955,7 +1066,7 @@ mod test {
         // initial JWT has no `ttl` claim - relies on the max to schedule a refresh
         mock_server
             .generate_status_list_endpoint_without_ttl(1u8.try_into().unwrap(), &[0b1111_1110]);
-        let status_list = StatusListCache::default();
+        let registry = StatusListRegistry::default();
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss",
@@ -968,7 +1079,7 @@ mod test {
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
-        validators.init_for_iss(
+        validators.init_status_list_validators(
             &iss_config,
             &JwtConfig {
                 jwks: None,
@@ -977,12 +1088,10 @@ mod test {
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
                 ..Default::default()
             },
-            &status_list,
-            None,
         );
         // 1-second max so the test runs fast
-        status_list
-            .init_for_iss(
+        let status_list = registry
+            .register(
                 &iss_config,
                 InitForIssArgs {
                     validators: Arc::new(validators),
@@ -994,9 +1103,8 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await;
-
-        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+            .await
+            .expect("the mock issuer publishes a status list");
 
         // Update server-side list (still without ttl) before refresh fires
         mock_server
@@ -1005,7 +1113,7 @@ mod test {
         tokio::time::sleep(Duration::from_millis(600)).await;
 
         assert_eq!(
-            usable_list(&status_list, &status_list_uri),
+            usable_list(&status_list),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
@@ -1045,7 +1153,7 @@ mod test {
             &[0b1111_1110],
             Some(10),
         );
-        let status_list = StatusListCache::default();
+        let registry = StatusListRegistry::default();
 
         let ti = TrustedIssuer::from_configuration(
             "some_iss",
@@ -1058,7 +1166,7 @@ mod test {
             tokens: HashMap::new(),
             openid_config: Some(mock_server.openid_config()),
         };
-        validators.init_for_iss(
+        validators.init_status_list_validators(
             &iss_config,
             &JwtConfig {
                 jwks: None,
@@ -1067,11 +1175,9 @@ mod test {
                 signature_algorithms_supported: HashSet::from([Algorithm::HS256]),
                 ..Default::default()
             },
-            &status_list,
-            None,
         );
-        status_list
-            .init_for_iss(
+        let status_list = registry
+            .register(
                 &iss_config,
                 InitForIssArgs {
                     validators: Arc::new(validators),
@@ -1083,9 +1189,8 @@ mod test {
                     cancel_tkn: CancellationToken::new(),
                 },
             )
-            .await;
-
-        let status_list_uri = mock_server.status_list_endpoint().unwrap().to_string();
+            .await
+            .expect("the mock issuer publishes a status list");
 
         // Update the server-side list before the cap-driven refresh fires.
         mock_server.generate_status_list_endpoint(
@@ -1099,7 +1204,7 @@ mod test {
         tokio::time::sleep(Duration::from_millis(600)).await;
 
         assert_eq!(
-            usable_list(&status_list, &status_list_uri),
+            usable_list(&status_list),
             StatusList {
                 bit_size: 1u8.try_into().unwrap(),
                 list: vec![0b0000_0001],
