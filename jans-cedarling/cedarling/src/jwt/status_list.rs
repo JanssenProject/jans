@@ -12,6 +12,8 @@
 //! in the JWT's status index (`idx`).
 
 mod cache;
+#[cfg(test)]
+mod conformance_tests;
 mod error;
 #[cfg(test)]
 mod ietf_test_samples;

@@ -162,6 +162,33 @@ impl From<TokenTypeHeader> for Option<String> {
     }
 }
 
+/// What [`MockServer::serve_status_list`] puts into the status list JWT.
+/// The default is a well-formed list: `typ: statuslist+jwt`, `iat`, `exp` one
+/// hour after the fetch and `ttl: 300`.
+pub(crate) struct MockStatusList<'a> {
+    pub bits: StatusBitSize,
+    pub list: &'a [u8],
+    pub typ: TokenTypeHeader,
+    /// `exp` relative to the time of the fetch; `None` omits the claim.
+    pub exp_offset_secs: Option<i64>,
+    /// `None` omits the claim.
+    pub ttl_secs: Option<u64>,
+    pub with_iat: bool,
+}
+
+impl Default for MockStatusList<'_> {
+    fn default() -> Self {
+        Self {
+            bits: StatusBitSize::try_from(1).expect("1 is a valid status bit size"),
+            list: &[],
+            typ: TokenTypeHeader::StatusListJwt,
+            exp_offset_secs: Some(3600),
+            ttl_secs: Some(300),
+            with_iat: true,
+        }
+    }
+}
+
 const MOCK_OIDC_ENDPOINT: &str = "/.well-known/openid-configuration";
 const MOCK_STATUS_LIST_ENDPOINT: &str = "/jans-auth/restv1/status_list";
 const MOCK_JWKS_URI: &str = "/jans-auth/restv1/jwks";
@@ -225,7 +252,7 @@ impl MockServer {
         issuer
     }
 
-    /// Use this to generate the status list JWT
+    /// Use this to generate the status list JWT. A `None` ttl serves `ttl: 300`.
     #[track_caller]
     pub(crate) fn generate_status_list_endpoint(
         &mut self,
@@ -233,50 +260,12 @@ impl MockServer {
         status_list: &[u8],
         ttl: Option<u64>,
     ) {
-        // building the status list JWT
-        let bits: u8 = status_list_bits.into();
-        let lst = status_list::compress_and_encode(status_list);
-        let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
-        let iss = self.server.url();
-        let header = jwt::Header {
-            alg: self.keys.alg,
-            kid: self.keys.kid.clone(),
-            typ: TokenTypeHeader::StatusListJwt.into(),
+        self.serve_status_list(MockStatusList {
+            bits: status_list_bits,
+            list: status_list,
+            ttl_secs: Some(ttl.unwrap_or(300)),
             ..Default::default()
-        };
-        let encoding_key = self.keys.encoding_key.clone();
-        let build_jwt_claims = move || {
-            let now = chrono::Utc::now().timestamp();
-            let exp = now + 3600; // defaults to 1 hour
-            let ttl_secs = ttl.unwrap_or(300); // defaults to 5 mins if the ttl is None
-            let claims = json!({
-                "sub": sub,
-                "status_list": {
-                  "bits": bits,
-                  "lst": lst,
-                },
-                "iss": iss,
-                "exp": exp,
-                "ttl": ttl_secs,
-                "iat": now,
-            });
-
-            jwt::encode(&header, &claims, &encoding_key)
-                .expect("encode status list JWT")
-                .as_bytes()
-                .to_vec()
-        };
-
-        let endpoint = Some(
-            self.server
-                .mock("GET", MOCK_STATUS_LIST_ENDPOINT)
-                .with_status(200)
-                .with_header("content-type", "application/statuslist+jwt")
-                .with_body_from_request(move |_| build_jwt_claims())
-                .expect(1)
-                .create(),
-        );
-        self.endpoints.status_list = endpoint;
+        });
     }
 
     /// Same as [`Self::generate_status_list_endpoint`] but produces a Status List JWT
@@ -288,30 +277,56 @@ impl MockServer {
         status_list_bits: StatusBitSize,
         status_list: &[u8],
     ) {
-        let bits: u8 = status_list_bits.into();
-        let lst = status_list::compress_and_encode(status_list);
+        self.serve_status_list(MockStatusList {
+            bits: status_list_bits,
+            list: status_list,
+            ttl_secs: None,
+            ..Default::default()
+        });
+    }
+
+    /// Serves a status list JWT built from `spec`. The JWT is signed anew on every
+    /// request, so `iat` and `exp` follow the time of each fetch.
+    #[track_caller]
+    pub(crate) fn serve_status_list(&mut self, spec: MockStatusList<'_>) {
+        let MockStatusList {
+            bits,
+            list,
+            typ,
+            exp_offset_secs,
+            ttl_secs,
+            with_iat,
+        } = spec;
+        let bits: u8 = bits.into();
+        let lst = status_list::compress_and_encode(list);
         let sub = format!("{}{}", self.server.url(), MOCK_STATUS_LIST_ENDPOINT);
         let iss = self.server.url();
         let header = jwt::Header {
             alg: self.keys.alg,
             kid: self.keys.kid.clone(),
-            typ: TokenTypeHeader::StatusListJwt.into(),
+            typ: typ.into(),
             ..Default::default()
         };
         let encoding_key = self.keys.encoding_key.clone();
         let build_jwt_claims = move || {
             let now = chrono::Utc::now().timestamp();
-            let exp = now + 3600;
-            let claims = json!({
+            let mut claims = json!({
                 "sub": sub,
                 "status_list": {
                   "bits": bits,
                   "lst": lst,
                 },
                 "iss": iss,
-                "exp": exp,
-                "iat": now,
             });
+            if let Some(offset) = exp_offset_secs {
+                claims["exp"] = json!(now + offset);
+            }
+            if let Some(ttl) = ttl_secs {
+                claims["ttl"] = json!(ttl);
+            }
+            if with_iat {
+                claims["iat"] = json!(now);
+            }
 
             jwt::encode(&header, &claims, &encoding_key)
                 .expect("encode status list JWT")
@@ -325,7 +340,7 @@ impl MockServer {
                 .with_status(200)
                 .with_header("content-type", "application/statuslist+jwt")
                 .with_body_from_request(move |_| build_jwt_claims())
-                .expect(1)
+                .expect_at_least(1)
                 .create(),
         );
         self.endpoints.status_list = endpoint;

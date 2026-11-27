@@ -65,6 +65,8 @@ pub(crate) enum UpdateStatusListError {
         "the status list JWT from '{url}' is not bound to that endpoint and its issuer: {reason}"
     )]
     UnboundStatusList { url: String, reason: UnboundReason },
+    #[error("the status list JWT from '{url}' has `typ` {found:?}, expected `statuslist+jwt`")]
+    UnexpectedTyp { url: String, found: Option<String> },
 }
 
 /// Which claim ties a status list JWT to another list or issuer.
