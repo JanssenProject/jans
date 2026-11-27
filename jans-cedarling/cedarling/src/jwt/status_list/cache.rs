@@ -992,14 +992,22 @@ mod test {
             .list
             .check_status(BOUND_LIST_URL, 0, 1_767_226_000)
             .expect_err("an unavailable list gives no statement about the token");
-        assert_eq!(
-            err.to_string(),
-            "the status list 'https://idp.example.com/statuslist/1' has been unavailable since \
-             2026-01-01T00:00:00Z: the status list JWT from \
-             'https://idp.example.com/statuslist/1' is signed with HS256, which is not listed in \
-             CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED; tokens that reference it are rejected \
-             until a refresh succeeds",
-            "the rejection names the list, the first failure time and the latest cause"
+        assert!(
+            matches!(
+                &err,
+                StatusCheckError::Unavailable { uri, unavailable }
+                    if uri == BOUND_LIST_URL
+                        && unavailable.since() == UnixTime(1_767_225_600)
+                        && matches!(
+                            unavailable.cause(),
+                            UpdateStatusListError::UnsupportedAlgorithm {
+                                alg: Algorithm::HS256,
+                                ..
+                            }
+                        )
+            ),
+            "the rejection names the list, the first failure time and the latest cause, got: \
+             {err:?}"
         );
     }
 

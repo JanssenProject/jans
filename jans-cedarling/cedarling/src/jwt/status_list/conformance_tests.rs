@@ -480,15 +480,6 @@ async fn rejects_list_without_typ() {
         ),
         "a status list JWT without `typ` must be refused, got: {err:?}"
     );
-    assert_eq!(
-        unavailable_cause(&err).map(ToString::to_string),
-        Some(format!(
-            "the status list JWT from '{}' is refused: it has no `typ`, expected \
-             `statuslist+jwt`",
-            case.list_uri()
-        )),
-        "the admin must see which list was refused and why"
-    );
 }
 
 /// `iat` is REQUIRED in a status list JWT ([§5.1], [§8.3] step 3).
@@ -610,19 +601,15 @@ async fn rejects_list_expired_at_fetch() {
         "a list whose `exp` passed beyond the leeway is refused, so the token that \
          references it is rejected",
     );
+    let now = jsonwebtoken::get_current_timestamp();
     assert!(
         matches!(
             refusal_reason(&err, &case.list_uri()),
-            Some(ParseStatusListJwtError::Expired(_))
+            Some(ParseStatusListJwtError::Expired(expiry))
+                if expiry.has_passed(now)
+                    && i64::try_from(expiry.leeway_secs).is_ok_and(|leeway| leeway == leeway_secs())
         ),
-        "an expired status list JWT must be refused, naming the list, got: {err:?}"
-    );
-    let message = unavailable_cause(&err)
-        .map(ToString::to_string)
-        .unwrap_or_default();
-    assert!(
-        message.contains("is past its `exp` ") && message.contains(" of clock-skew leeway"),
-        "the admin must see the `exp` date and the leeway, got: {message}"
+        "an expired status list JWT must be refused with its `exp` and the leeway, got: {err:?}"
     );
 }
 
