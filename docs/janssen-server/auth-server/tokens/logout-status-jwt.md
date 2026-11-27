@@ -113,9 +113,12 @@ The guarantee has these exceptions:
   The token is still issued. If its lifetime is longer than the globally configured lifetimes listed above,
   its index can be reused before it expires. AS logs an error when it gives up.
 - The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
-  Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above.
-  If such a token has a longer lifetime overridden by client configuration or custom script,
+  Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above,
+  using their current values. If such a token has a longer lifetime overridden by client configuration or custom script,
   its index can be reused before it expires, until that token expires.
+  The same applies if a global lifetime is reduced after the upgrade: pool reuse uses the reduced value,
+  so a pool can be reset before an existing token issued with the old lifetime expires.
+  Keep the old global lifetimes until all tokens issued before the upgrade have expired.
 
 
 ## Disabling Logout Status JWT Using Feature Flag
