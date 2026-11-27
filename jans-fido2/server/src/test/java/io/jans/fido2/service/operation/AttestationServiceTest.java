@@ -32,6 +32,7 @@ import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.trust.NativeFailureDiagnostic;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.audit.trace.TraceEmitter;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
@@ -97,6 +98,8 @@ class AttestationServiceTest {
 	private MetricService metricService;
 	@Mock
 	private LockAuditEventCollector lockAuditEventCollector;
+	@Mock
+	private TraceEmitter traceEmitter;
 	@Mock
 	private HttpServletRequest httpRequest;
 	@Mock

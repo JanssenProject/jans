@@ -32,6 +32,9 @@ import io.jans.fido2.service.RpPolicyService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.model.audit.LockAuditEvent;
 import io.jans.fido2.service.audit.LockAuditEventCollector;
+import io.jans.fido2.service.audit.trace.TraceEmitter;
+import io.jans.fido2.service.audit.trace.TraceCeremonyHook;
+import io.jans.fido2.service.audit.trace.TraceRecordBuilder;
 import io.jans.fido2.service.external.ExternalFido2Service;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -127,6 +130,9 @@ public class AttestationService {
 
 	@Inject
 	private LockAuditEventCollector lockAuditEventCollector;
+
+	@Inject
+	private TraceEmitter traceEmitter;
 
 	// @Context is only honoured for JAX-RS components; this is a plain CDI bean,
 	// so the request has to come from the CDI built-in request-scoped bean instead.
@@ -281,6 +287,8 @@ public class AttestationService {
 		// an unpersisted in-memory status as proof of persistence. This flag is set only once update()
 		// itself has returned, so it — not the in-memory status — is what the audit outcome trusts.
 		boolean persistedAsRegistered = false;
+		// Session of this ceremony, kept for the TRACE record: the success path clears it from the entry.
+		String traceSessionId = null;
 
 		try {
         // Apply external custom scripts
@@ -306,6 +314,8 @@ public class AttestationService {
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
 		registrationData = registrationEntry.getRegistrationData();
+		// Captured now, before any step that can fail: the success path clears the session from the entry.
+		traceSessionId = registrationEntry.getSessionStateId();
 
 		// Set username for metrics
 		username = registrationData.getUsername();
@@ -432,6 +442,7 @@ public class AttestationService {
 		recordRegistrationSuccessMetrics(username, httpRequest, startTime, authenticatorType, attestationResult.getTelemetry());
 
 		lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, null));
+		TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, null, traceSessionId);
 
 		return attestationResultResponse;
 
@@ -450,6 +461,7 @@ public class AttestationService {
 			// happened to set it in memory first.
 			Exception auditFailure = persistedAsRegistered ? null : e;
 			lockAuditEventCollector.collect(buildRegistrationAuditEvent(username, registrationData, authenticatorType, auditFailure));
+			TraceCeremonyHook.emit(traceEmitter, log, TraceRecordBuilder.CeremonyType.REGISTRATION, auditFailure, traceSessionId);
 
 			// Re-throw the original exception
 			throw e;
