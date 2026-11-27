@@ -1273,6 +1273,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#status-list-index-reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Status List Index Reuse
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disabling-logout-status-jwt-using-feature-flag" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -1902,6 +1913,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#status-list-index-reuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      <span class="md-typeset">
+        Status List Index Reuse
+      </span>
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disabling-logout-status-jwt-using-feature-flag" class="md-nav__link">
     <span class="md-ellipsis">
       <span class="md-typeset">
@@ -2175,6 +2197,34 @@ Location: https://janssen.server.host/jans-auth-rp/home.htm?code=03cb499b-a6fb-4
 <p><strong>Important</strong>
 Logout Status JWT specifies <code>exp</code> which means that token must be considered expired when this time is reached independently from Token Status List response.
 If Token Status List has <code>INVALID</code> (<code>1</code> - at <code>idx</code> index for 2 bits) then RP must consider Logout Status JWT as invalid.</p>
+<h2 id="status-list-index-reuse">Status List Index Reuse<a class="headerlink" href="#status-list-index-reuse" title="Permanent link">#</a></h2>
+<p>Status list indexes are reserved by AS nodes in pools (blocks of <code>statusListIndexAllocationBlockSize</code> indexes).
+Access tokens, <code>id_token</code>s and Logout Status JWTs take indexes from the same pools.
+A pool is handed out again (and all its indexes are reset to <code>VALID</code>) only when every token that holds an index from it has expired:</p>
+<ul>
+<li>each pool records the latest expiration of tokens issued from it (rounded up to the next hour);</li>
+<li>additionally, the pool is kept for at least the longest globally configured lifetime
+  (<code>accessTokenLifetime</code>, <code>idTokenLifetime</code>, <code>logoutStatusJwtLifetime</code>) but not less than 3 hours after its expiration.</li>
+</ul>
+<p>This guarantees that a revoked token keeps <code>INVALID</code> status until it expires,
+even if its lifetime (or its <code>exp</code> claim) is overridden by client configuration or custom script.
+Token issuance is not delayed by this: the pool expiration is updated asynchronously.
+If the update fails, AS retries it up to 6 attempts in total, with a delay that doubles after each attempt
+(1, 2, 4, 8 and 16 seconds). Pending retries are kept in memory only.</p>
+<p>The guarantee has these exceptions:</p>
+<ul>
+<li>If all attempts fail (for example, persistence is unavailable for longer than about 30 seconds) or the AS node
+  restarts before the update succeeds, the pool expiration is not extended for that token.
+  The token is still issued. If its lifetime is longer than the globally configured lifetimes listed above,
+  its index can be reused before it expires. AS logs an error when it gives up.</li>
+<li>The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
+  Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above,
+  using their current values. If such a token has a longer lifetime overridden by client configuration or custom script,
+  its index can be reused before it expires, until that token expires.
+  The same applies if a global lifetime is reduced after the upgrade: pool reuse uses the reduced value,
+  so a pool can be reset before an existing token issued with the old lifetime expires.
+  Keep the old global lifetimes until all tokens issued before the upgrade have expired.</li>
+</ul>
 <h2 id="disabling-logout-status-jwt-using-feature-flag">Disabling Logout Status JWT Using Feature Flag<a class="headerlink" href="#disabling-logout-status-jwt-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>Logout Status JWT</code> can be enabled or disabled using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#logout_status_jwt">logout_status_jwt feature flag</a>.
 Use <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/config-tools/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -2246,7 +2296,7 @@ disable <code>logout_status_jwt</code> flag as required.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    August 21, 2026
+    November 27, 2026
   </span>
 
     

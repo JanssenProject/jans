@@ -83,6 +83,36 @@ Accept: application/statuslist+json
 Logout Status JWT specifies `exp` which means that token must be considered expired when this time is reached independently from Token Status List response.
 If Token Status List has `INVALID` (`1` - at `idx` index for 2 bits) then RP must consider Logout Status JWT as invalid.
 
+## Status List Index Reuse
+
+Status list indexes are reserved by AS nodes in pools (blocks of `statusListIndexAllocationBlockSize` indexes).
+Access tokens, `id_token`s and Logout Status JWTs take indexes from the same pools.
+A pool is handed out again (and all its indexes are reset to `VALID`) only when every token that holds an index from it has expired:
+
+- each pool records the latest expiration of tokens issued from it (rounded up to the next hour);
+- additionally, the pool is kept for at least the longest globally configured lifetime
+  (`accessTokenLifetime`, `idTokenLifetime`, `logoutStatusJwtLifetime`) but not less than 3 hours after its expiration.
+
+This guarantees that a revoked token keeps `INVALID` status until it expires,
+even if its lifetime (or its `exp` claim) is overridden by client configuration or custom script.
+Token issuance is not delayed by this: the pool expiration is updated asynchronously.
+If the update fails, AS retries it up to 6 attempts in total, with a delay that doubles after each attempt
+(1, 2, 4, 8 and 16 seconds). Pending retries are kept in memory only.
+
+The guarantee has these exceptions:
+
+- If all attempts fail (for example, persistence is unavailable for longer than about 30 seconds) or the AS node
+  restarts before the update succeeds, the pool expiration is not extended for that token.
+  The token is still issued. If its lifetime is longer than the globally configured lifetimes listed above,
+  its index can be reused before it expires. AS logs an error when it gives up.
+- The guarantee applies to tokens issued after upgrade to a version that tracks pool expiration.
+  Tokens issued before the upgrade are covered only by the globally configured lifetimes listed above,
+  using their current values. If such a token has a longer lifetime overridden by client configuration or custom script,
+  its index can be reused before it expires, until that token expires.
+  The same applies if a global lifetime is reduced after the upgrade: pool reuse uses the reduced value,
+  so a pool can be reset before an existing token issued with the old lifetime expires.
+  Keep the old global lifetimes until all tokens issued before the upgrade have expired.
+
 
 ## Disabling Logout Status JWT Using Feature Flag
 
