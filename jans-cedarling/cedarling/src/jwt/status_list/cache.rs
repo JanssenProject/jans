@@ -20,11 +20,11 @@ use crate::{
     http::HttpClient,
     jwt::{
         IssuerConfig, TokenCache,
-        decode::decode_jwt,
+        decode::{DecodeJwtError, DecodedJwtHeader, decode_jwt_header},
         key_service::{DecodingKeyInfo, KeyService},
         log_entry::JwtLogEntry,
         token_cache::IndexKey,
-        validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidateJwtError, ValidatorInfo},
+        validation::{JwtValidator, JwtValidatorCache, TokenKind, ValidatorInfo},
     },
     log::Logger,
     rt::sleep,
@@ -126,6 +126,20 @@ struct ParsedStatusList {
     ttl_secs: Option<u64>,
 }
 
+/// A fetched status list JWT with its header, decoded once for the key and
+/// validator lookup and for the `typ` check.
+struct FetchedStatusListJwt {
+    jwt: StatusListJwtStr,
+    header: DecodedJwtHeader,
+}
+
+impl FetchedStatusListJwt {
+    fn decode(jwt: StatusListJwtStr) -> Result<Self, DecodeJwtError> {
+        let header = decode_jwt_header(&jwt.0)?;
+        Ok(Self { jwt, header })
+    }
+}
+
 /// Validates a fetched status list JWT and parses its list: signature and
 /// registered claims first, then `typ`, the binding to its URI and issuer, and
 /// `exp` against `now`, in the order of [draft-ietf-oauth-status-list-21 §8.3]
@@ -134,20 +148,18 @@ struct ParsedStatusList {
 ///
 /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
 fn parse_status_list_jwt(
-    jwt: &StatusListJwtStr,
+    fetched: &FetchedStatusListJwt,
     validator: &JwtValidator,
     decoding_key: Option<Arc<DecodingKey>>,
     iss: &IssClaim,
     status_list_url: &Url,
     now: u64,
 ) -> Result<ParsedStatusList, ParseStatusListJwtError> {
-    let validated_jwt = validator.validate_jwt(&jwt.0, decoding_key)?;
+    let validated_jwt = validator.validate_jwt(&fetched.jwt.0, decoding_key)?;
 
-    let typ = jsonwebtoken::decode_header(&jwt.0)
-        .map_err(ValidateJwtError::from)?
-        .typ;
+    let typ = &fetched.header.typ;
     if !typ.as_deref().is_some_and(is_status_list_typ) {
-        return Err(ParseStatusListJwtError::UnexpectedTyp { found: typ });
+        return Err(ParseStatusListJwtError::UnexpectedTyp { found: typ.clone() });
     }
 
     let status_list_jwt: StatusListJwt = validated_jwt
@@ -530,10 +542,11 @@ impl StatusListSource {
         let jwt = StatusListJwtStr::get_from_url(&self.url, &self.http_client)
             .await
             .map_err(UpdateStatusListError::GetStatusListJwt)?;
-        let header = decode_jwt(&jwt.0)?.header;
+        let fetched = FetchedStatusListJwt::decode(jwt)?;
+        let header = &fetched.header;
         let decoding_key = self.key_service.get_key(&DecodingKeyInfo {
             issuer: Some(self.iss.clone()),
-            kid: header.kid,
+            kid: header.kid.clone(),
             algorithm: header.alg,
         });
         let validator = self
@@ -549,7 +562,7 @@ impl StatusListSource {
             })?;
 
         parse_status_list_jwt(
-            &jwt,
+            &fetched,
             &validator,
             decoding_key,
             &self.iss,

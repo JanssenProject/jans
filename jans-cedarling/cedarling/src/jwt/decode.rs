@@ -39,24 +39,45 @@ pub(crate) struct DecodedJwtClaims {
 }
 
 pub(crate) fn decode_jwt(jwt: &str) -> Result<DecodedJwt, DecodeJwtError> {
-    let split = jwt.split('.').collect::<Vec<&str>>();
-    if split.len() != 3 {
-        return Err(DecodeJwtError::InvalidJwtFormat);
-    }
-
-    let decoded_header = BASE64_URL_SAFE_NO_PAD
-        .decode(split[0])
-        .map_err(DecodeJwtError::DecodeHeader)?;
-    let header = serde_json::from_slice::<DecodedJwtHeader>(&decoded_header)
-        .map_err(DecodeJwtError::DeserializeHeader)?;
+    let parts = EncodedJwtParts::split(jwt)?;
+    let header = decode_header_part(parts.header)?;
 
     let decoded_claims = BASE64_URL_SAFE_NO_PAD
-        .decode(split[1])
+        .decode(parts.claims)
         .map_err(DecodeJwtError::DecodeClaims)?;
     let claims = serde_json::from_slice::<DecodedJwtClaims>(&decoded_claims)
         .map_err(DecodeJwtError::DeserializeClaims)?;
 
     Ok(DecodedJwt { header, claims })
+}
+
+/// Decodes only the header, for a caller whose validator decodes the claims.
+pub(crate) fn decode_jwt_header(jwt: &str) -> Result<DecodedJwtHeader, DecodeJwtError> {
+    decode_header_part(EncodedJwtParts::split(jwt)?.header)
+}
+
+/// The encoded header and claims of a JWT in the form `header.payload.signature`.
+struct EncodedJwtParts<'a> {
+    header: &'a str,
+    claims: &'a str,
+}
+
+impl<'a> EncodedJwtParts<'a> {
+    fn split(jwt: &'a str) -> Result<Self, DecodeJwtError> {
+        let mut parts = jwt.split('.');
+        match (parts.next(), parts.next(), parts.next(), parts.next()) {
+            (Some(header), Some(claims), Some(_signature), None) => Ok(Self { header, claims }),
+            _ => Err(DecodeJwtError::InvalidJwtFormat),
+        }
+    }
+}
+
+fn decode_header_part(encoded_header: &str) -> Result<DecodedJwtHeader, DecodeJwtError> {
+    let decoded_header = BASE64_URL_SAFE_NO_PAD
+        .decode(encoded_header)
+        .map_err(DecodeJwtError::DecodeHeader)?;
+    serde_json::from_slice::<DecodedJwtHeader>(&decoded_header)
+        .map_err(DecodeJwtError::DeserializeHeader)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -111,15 +132,40 @@ mod test {
             "eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c.e30",
         ];
 
         for (i, jwt) in cases.into_iter().enumerate() {
             let err = decode_jwt(jwt).expect_err("should error while decoding jwt");
-
             assert!(
                 matches!(err, DecodeJwtError::InvalidJwtFormat),
                 "failed assertion in case: {i}"
             );
+
+            let err = decode_jwt_header(jwt).expect_err("should error while decoding the header");
+            assert!(
+                matches!(err, DecodeJwtError::InvalidJwtFormat),
+                "a header is only read from a JWT in the form header.payload.signature, case: {i}"
+            );
         }
+    }
+
+    /// The header is read without the claims, which the validator decodes later.
+    #[test]
+    fn decodes_header_without_claims() {
+        let jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.not-base64!.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+
+        let header = decode_jwt_header(jwt).expect("the header decodes on its own");
+
+        assert_eq!(
+            header,
+            DecodedJwtHeader {
+                typ: Some("JWT".into()),
+                alg: Algorithm::HS256,
+                cty: None,
+                kid: None,
+            },
+            "the header is decoded even though the claims are not"
+        );
     }
 }
