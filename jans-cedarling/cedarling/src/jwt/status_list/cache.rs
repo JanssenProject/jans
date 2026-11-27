@@ -50,13 +50,13 @@ struct StatusListUpdateCtx {
 }
 
 pub(crate) struct InitForIssArgs {
-    pub validators: Arc<JwtValidatorCache>,
-    pub key_service: Arc<KeyService>,
-    pub token_cache: TokenCache,
-    pub logger: Option<Logger>,
-    pub http_client: HttpClient,
-    pub refresh_interval_max: Duration,
-    pub cancel_tkn: CancellationToken,
+    pub(crate) validators: Arc<JwtValidatorCache>,
+    pub(crate) key_service: Arc<KeyService>,
+    pub(crate) token_cache: TokenCache,
+    pub(crate) logger: Option<Logger>,
+    pub(crate) http_client: HttpClient,
+    pub(crate) refresh_interval_max: Duration,
+    pub(crate) cancel_tkn: CancellationToken,
 }
 
 /// Floor for an issuer-requested `ttl` and for a retry while a list nears its

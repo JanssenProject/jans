@@ -11,7 +11,7 @@ use crate::common::issuer_utils::IssClaim;
 use crate::jwt::{decode::DecodeJwtError, fetch::HttpError, validation::ValidateJwtError};
 
 #[derive(Debug, Error)]
-pub enum ParseStatusListError {
+pub(crate) enum ParseStatusListError {
     #[error("invalid `bit` size in the status list. expected 1, 2, 4, or 8 but got: {0}")]
     InvalidBitSize(u8),
     #[error("failed to decode status list: {0}")]

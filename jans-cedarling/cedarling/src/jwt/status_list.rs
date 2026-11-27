@@ -36,9 +36,9 @@ use std::time::Duration;
 #[derive(Debug, PartialEq, Clone)]
 pub(super) struct StatusList {
     /// The number of bits used to encode a single status
-    pub bit_size: StatusBitSize,
+    pub(super) bit_size: StatusBitSize,
     /// The status list
-    pub list: Vec<u8>,
+    pub(super) list: Vec<u8>,
 }
 
 impl StatusList {
@@ -319,7 +319,7 @@ impl JwtStatus {
     /// is rejected ([draft-ietf-oauth-status-list-21 §8.3]).
     ///
     /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
-    pub fn is_valid(&self) -> bool {
+    fn is_valid(&self) -> bool {
         matches!(self, JwtStatus::Valid)
     }
 }
@@ -362,7 +362,7 @@ impl From<u8> for JwtStatus {
 ///
 /// [draft-ietf-oauth-status-list-21 §4.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-4.1
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum StatusBitSize {
+pub(crate) enum StatusBitSize {
     One,
     Two,
     Four,
