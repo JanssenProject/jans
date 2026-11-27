@@ -88,6 +88,12 @@ def _transform_api_dynamic_config(conf, seeded_dir_mappings=None):
             "logLevel": "INFO",
             "externalPolicyStoreUri": ""
         }),
+        # match setup template; absent keys otherwise fall back to Java defaults
+        ("userRolePermissionValidationEnabled", False),
+        ("validateUserInumInIntrospectionFlag", True),
+        ("fetchUserRoleInIntrospectionFlag", True),
+        ("userRolePermissionExcludedClients", []),
+        ("jwtIntrospectionEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

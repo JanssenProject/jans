@@ -189,6 +189,11 @@ impl LogStrategy {
         if let Some(mut lock_service) = lock {
             lock_service.shut_down().await;
         }
+
+        // Last, so entries logged while the Lock service shuts down are written too.
+        if let LogStrategyLogger::StdOut(logger) = &self.logger {
+            logger.shut_down().await;
+        }
     }
 }
 

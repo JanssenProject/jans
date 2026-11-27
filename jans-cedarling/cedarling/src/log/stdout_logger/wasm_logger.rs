@@ -4,8 +4,8 @@
 // Copyright (c) 2024, Gluu, Inc.
 
 use crate::log::LogLevel;
-use crate::log::err_log_entry::ErrorLogEntry;
 use crate::log::interface::{LogWriter, Loggable};
+use crate::log::log_json::LogJson;
 
 use web_sys::console;
 use web_sys::js_sys::Array;
@@ -29,6 +29,12 @@ impl StdOutLogger {
     pub(crate) fn new(log_level: LogLevel, _mode: StdOutLoggerMode) -> Self {
         Self { log_level }
     }
+
+    /// Matches the native logger; every entry is written when logged, so none is pending.
+    #[allow(clippy::unused_self)] // same signature as the native logger
+    pub(crate) fn shut_down(&self) -> std::future::Ready<()> {
+        std::future::ready(())
+    }
 }
 
 // Implementation of LogWriter
@@ -39,16 +45,7 @@ impl LogWriter for StdOutLogger {
             return;
         }
 
-        let json_string = match serde_json::to_value(&entry) {
-            Ok(json) => json.to_string(),
-            Err(err) => {
-                let err_msg = format!("failed to serialize log entry to JSON: {err}");
-                serde_json::to_value(ErrorLogEntry::from_loggable(&entry, err_msg.clone()))
-                    .expect(&err_msg)
-                    .to_string()
-            },
-        };
-        let js_string = JsValue::from(json_string);
+        let js_string = JsValue::from(LogJson::from_loggable(&entry).as_str());
 
         let js_array = Array::new();
         js_array.push(&js_string);

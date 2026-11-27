@@ -32,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +73,8 @@ public class LicenseDetailsService extends BaseService {
     //constants
     public static final String LICENSE_KEY = "licenseKey";
     public static final String HARDWARE_ID = "hardwareId";
+    public static final String PRODUCT_CODE = "productCode";
+    public static final String ADMIN_UI_001 = "adminui001";
     public static final String BEARER = "Bearer ";
     public static final String MESSAGE = "message";
     public static final String CODE = "code";
@@ -82,7 +85,7 @@ public class LicenseDetailsService extends BaseService {
     public static final String LICENSE_APIS_503 = "The requested license apis not available. Response Code: 503";
     public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
     public static final String HTTP_RESPONSE_IS_NULL = "HTTP request failed, no response received";
-
+    public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/license";
     /**
      * Validates the license configuration by checking for the presence of required parameters.
      * <p>
@@ -142,7 +145,7 @@ public class LicenseDetailsService extends BaseService {
             log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
             return syncLicenseDetailsFromAgamaLab(auiConfiguration, licenseConfigurationFromDB);
         }
-        long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
+        long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseDetailsLastUpdatedOn()), LocalDateTime.now());
         long intervalForSyncLicenseDetailsInDays = licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfigurationFromDB.getIntervalForSyncLicenseDetailsInDays();
         log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
         if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
@@ -150,12 +153,11 @@ public class LicenseDetailsService extends BaseService {
         }
         // Check if the 'licenseValidUpto' field is not null or empty
         if (!Strings.isNullOrEmpty(licConfigFromMemory.getLicenseValidUpto())) {
-            // Calculate the number of days between today and the license expiry date
-            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseValidUpto()));
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime licenseValidUpto = CommonUtils.convertStringToLocalDate(licConfigFromMemory.getLicenseValidUpto());
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(now, licenseValidUpto);
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
-            // If the license has already expired (daysDiffOfLicenseValidity < 0),
-            // sync the license OIDC client details to update or renew the license
-            if (daysDiffOfLicenseValidity < 0) {
+            if (licenseValidUpto.isBefore(now)) {
                 return syncLicenseOIDCClientDetails(licenseConfigurationFromDB);
             }
         }
@@ -310,16 +312,17 @@ public class LicenseDetailsService extends BaseService {
                 log.info(ErrorResponse.LICENSE_INFO_LAST_FETCHED_ON_ABSENT.getDescription());
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
-            long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()), LocalDate.now());
+            long daysDiffOfLicenseDetailsLastUpdated = ChronoUnit.DAYS.between(CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseDetailsLastUpdatedOn()), LocalDateTime.now());
             long intervalForSyncLicenseDetailsInDays = licenseConfiguration.getIntervalForSyncLicenseDetailsInDays() == null ? AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS : licenseConfiguration.getIntervalForSyncLicenseDetailsInDays();
             log.info("License details were last updated before {} days. The sync process will run after an interval of {} days.", daysDiffOfLicenseDetailsLastUpdated, intervalForSyncLicenseDetailsInDays);
             if (daysDiffOfLicenseDetailsLastUpdated > intervalForSyncLicenseDetailsInDays) {
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
-            //calculate if license is expired
-            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(LocalDate.now(), CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto()));
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime licenseValidUpto = CommonUtils.convertStringToLocalDate(licenseConfiguration.getLicenseValidUpto());
+            long daysDiffOfLicenseValidity = ChronoUnit.DAYS.between(now, licenseValidUpto);
             log.info("License will expire after {} days", daysDiffOfLicenseValidity);
-            if (daysDiffOfLicenseValidity < 0) {
+            if (licenseValidUpto.isBefore(now)) {
                 return syncLicenseDetailsFromAgamaLab(auiConfiguration);
             }
             if (licenseConfiguration.getLicenseMAUThreshold() == null) {
@@ -327,14 +330,11 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(false, 500, ErrorResponse.MAU_IS_NULL.getDescription());
             }
             ObjectMapper mapper = new ObjectMapper();
-            JSONArray customAttributes = new JSONArray();
             JSONObject mauDetails = new JSONObject();
-            mauDetails.put("name", "mau_threshold");
-            mauDetails.put("value", licenseConfiguration.getLicenseMAUThreshold());
+            mauDetails.put("mauThreshold", licenseConfiguration.getLicenseMAUThreshold());
+            mauDetails.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
 
-            customAttributes.put(mauDetails);
-
-            return CommonUtils.createGenericResponse(true, 200, "Valid license present.", mapper.readTree(customAttributes.toString()));
+            return CommonUtils.createGenericResponse(true, 200, "Valid license present.", mapper.readTree(mauDetails.toString()));
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
@@ -375,7 +375,7 @@ public class LicenseDetailsService extends BaseService {
             licenseConfiguration = auiConfiguration.getLicenseConfiguration();
             TokenResponse tokenResponse = tokenResult.tokenResponse;
 
-            String checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/isActive");
+            String checkLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/check");
 
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
                     TLS_ALLOWED_CIPHER_SUITES);
@@ -383,6 +383,7 @@ public class LicenseDetailsService extends BaseService {
             Map<String, String> body = new HashMap<>();
             body.put(LICENSE_KEY, licenseConfiguration.getLicenseKey());
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
+            body.put(PRODUCT_CODE, ADMIN_UI_001);
 
             HttpServiceResponse httpServiceResponse = httpService
                     .executePost(httpClient, checkLicenseUrl, tokenResponse.getAccessToken(), null, mapper.writeValueAsString(body), ContentType.APPLICATION_JSON,
@@ -408,14 +409,14 @@ public class LicenseDetailsService extends BaseService {
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
 
-                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_active", "is_expired");
+                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "active", "isExpired", "isUsable");
                         if (genericResOptional.isPresent()) {
                             return genericResOptional.get();
                         }
-                        if (!entity.getBoolean("license_active")) {
+                        if (!entity.getBoolean("active")) {
                             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
                         }
-                        if (entity.getBoolean("is_expired")) {
+                        if (entity.getBoolean("isExpired")) {
                             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_IS_EXPIRED.getDescription());
                         }
 
@@ -426,13 +427,9 @@ public class LicenseDetailsService extends BaseService {
                         adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseConfiguration.getLicenseKey());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
+                        adminConf.getMainSettings().getLicenseConfig().setLicenseUsable(licenseConfiguration.getLicenseUsable());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
-                        adminConf.getMainSettings().getLicenseConfig().setProductCode(licenseConfiguration.getProductCode());
-                        adminConf.getMainSettings().getLicenseConfig().setCompanyName(licenseConfiguration.getCompanyName());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerEmail(licenseConfiguration.getCustomerEmail());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerFirstName(licenseConfiguration.getCustomerFirstName());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerLastName(licenseConfiguration.getCustomerLastName());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseMAUThreshold(licenseConfiguration.getLicenseMAUThreshold());
                         if (adminConf.getMainSettings().getLicenseConfig().getIntervalForSyncLicenseDetailsInDays() == null) {
                             adminConf.getMainSettings().getLicenseConfig().setIntervalForSyncLicenseDetailsInDays((long) AppConstants.LICENSE_DETAILS_SYNC_INTERVAL_IN_DAYS);
@@ -441,8 +438,12 @@ public class LicenseDetailsService extends BaseService {
                         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
+                        JSONObject successJSONObject = new JSONObject();
+                        successJSONObject.put("mauThreshold", licenseConfiguration.getLicenseMAUThreshold());
+                        successJSONObject.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
+
                         return CommonUtils.createGenericResponse(true, 200, "Valid license present.",
-                                mapper.readTree(entity.getJSONArray("custom_fields").toString()));
+                                mapper.readTree(successJSONObject.toString()));
 
                     }
                     //getting error
@@ -611,7 +612,8 @@ public class LicenseDetailsService extends BaseService {
 
             Map<String, String> query = new HashMap<>();
             query.put("org_id", licenseConfiguration.getHardwareId());
-            String retriveLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/retrieve?") +
+            query.put(PRODUCT_CODE, ADMIN_UI_001);
+            String retriveLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/fetch?") +
                     CommonUtils.toUrlEncodedString(query);
             // Build the HttpClient
             CloseableHttpClient httpClient = httpService.createHttpsClientWithTlsPolicy(TLS_ENABLED_PROTOCOLS,
@@ -704,7 +706,7 @@ public class LicenseDetailsService extends BaseService {
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
             log.debug("Trying to activate License.");
-            String activateLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/activate");
+            String activateLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/activation");
 
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
             if (tokenResponse == null) {
@@ -718,7 +720,7 @@ public class LicenseDetailsService extends BaseService {
             Map<String, String> body = new HashMap<>();
             body.put(LICENSE_KEY, licenseRequest.getLicenseKey());
             body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
-
+            body.put(PRODUCT_CODE, ADMIN_UI_001);
             HttpServiceResponse httpServiceResponse = httpService
                     .executePost(httpClient, activateLicenseUrl, tokenResponse.getAccessToken(), null, mapper.writeValueAsString(body), ContentType.APPLICATION_JSON,
                             BEARER);
@@ -743,31 +745,32 @@ public class LicenseDetailsService extends BaseService {
                         JsonNode entityNode = mapper.readTree(jsonString);
                         JSONObject entity = new JSONObject(entityNode.toString());
 
-                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "license_key");
+                        Optional<GenericResponse> genericResOptional = handleMissingFieldsInResponse(entity, ErrorResponse.LICENSE_DATA_MISSING.getDescription(), "active", "isExpired");
                         if (genericResOptional.isPresent()) {
                             return genericResOptional.get();
                         }
+                        licenseConfiguration.setLicenseKey(licenseRequest.getLicenseKey());
                         //save in license configuration
                         setToLicenseConfiguration(entity, licenseConfiguration);
+
                         //save license spring credentials
                         AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                         adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseConfiguration.getLicenseKey());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseExpired(licenseConfiguration.getLicenseExpired());
+                        adminConf.getMainSettings().getLicenseConfig().setLicenseUsable(licenseConfiguration.getLicenseUsable());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseActive(licenseConfiguration.getLicenseActive());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseType(licenseConfiguration.getLicenseType());
                         adminConf.getMainSettings().getLicenseConfig().setProductName(licenseConfiguration.getProductName());
-                        adminConf.getMainSettings().getLicenseConfig().setProductCode(licenseConfiguration.getProductCode());
-                        adminConf.getMainSettings().getLicenseConfig().setCompanyName(licenseConfiguration.getCompanyName());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerEmail(licenseConfiguration.getCustomerEmail());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerFirstName(licenseConfiguration.getCustomerFirstName());
-                        adminConf.getMainSettings().getLicenseConfig().setCustomerLastName(licenseConfiguration.getCustomerLastName());
                         adminConf.getMainSettings().getLicenseConfig().setLicenseMAUThreshold(licenseConfiguration.getLicenseMAUThreshold());
                         entryManager.merge(adminConf);
                         auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                         auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
+                        ObjectNode jsonNode = mapper.createObjectNode();
+                        jsonNode.put("mauThreshold",licenseConfiguration.getLicenseMAUThreshold());
+                        jsonNode.put("isLicenseUsable", licenseConfiguration.getLicenseUsable());
                         return CommonUtils.createGenericResponse(true, 200, "License have been activated."
-                                , mapper.readTree(entity.getJSONArray("custom_fields").toString()));
+                                , mapper.readTree(jsonNode.toString()));
                     }
                     //getting error
                     jsonString = httpService.getContent(httpEntity);
@@ -812,55 +815,36 @@ public class LicenseDetailsService extends BaseService {
      */
     private void setToLicenseConfiguration(JSONObject entity, LicenseConfiguration licenseConfiguration) throws RuntimeException {
         try {
-            log.info("Inside setToLicenseConfiguration: the method to set licence configuration");
-            licenseConfiguration.setLicenseKey(entity.getString("license_key"));
-            licenseConfiguration.setLicenseType(entity.getString("license_type"));
-            licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
-            licenseConfiguration.setLicenseValidUpto(CommonUtils.convertIsoToDateString(entity.getString("validity_period")));
-            licenseConfiguration.setProductName(entity.getJSONObject("product_details").getString("product_name"));
-            licenseConfiguration.setProductCode(entity.getJSONObject("product_details").getString("short_code"));
-            JSONObject customer = entity.getJSONObject("customer");
-            if (customer != null) {
-                if (customer.get("company_name") != null) {
-                    licenseConfiguration.setCompanyName(customer.getString("company_name"));
-                }
-                if (customer.get("email") != null) {
-                    licenseConfiguration.setCustomerEmail(customer.getString("email"));
-                }
-                if (customer.get("first_name") != null) {
-                    licenseConfiguration.setCustomerFirstName(customer.getString("first_name"));
-                }
-                if (customer.get("last_name") != null) {
-                    licenseConfiguration.setCustomerLastName(customer.getString("last_name"));
-                }
+            log.info("Inside setToLicenseConfiguration: the method to set licence configuration"+entity.toString());
+            if(entity.has("licenseKey")) {
+                licenseConfiguration.setLicenseKey(entity.getString("licenseKey"));
             }
-            licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDate.now()));
-            if (!entity.has("custom_fields")) {
-                throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is missing");
-            }
-            JSONArray customFields = entity.getJSONArray("custom_fields");
-            Long mauThresholdValue = null;
-            for (Object obj : customFields) {
-                JSONObject jsonObject = (JSONObject) obj;
-                if ("mau_threshold".equals(jsonObject.getString("name"))) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(jsonObject.getString("name"));
-                        log.debug(jsonObject.getString("value"));
-                    }
-                    mauThresholdValue = Long.valueOf(!Strings.isNullOrEmpty(jsonObject.getString("value")) ? jsonObject.getString("value") : "0");
-                    break; // Exit loop once found
-                }
-            }
-            licenseConfiguration.setLicenseMAUThreshold(mauThresholdValue);
+            licenseConfiguration.setLicenseType(entity.getString("licenseType"));
+            licenseConfiguration.setLicenseDetailsLastUpdatedOn(CommonUtils.convertLocalDateToString(LocalDateTime.now()));
+            licenseConfiguration.setLicenseValidUpto(CommonUtils.convertIsoToDateString(entity.getString("validityPeriod")));
+            licenseConfiguration.setProductName(entity.getString("productName"));
             try {
-                licenseConfiguration.setLicenseExpired(entity.getBoolean("is_expired"));
-                licenseConfiguration.setLicenseActive(entity.getBoolean("license_active"));
+                licenseConfiguration.setLicenseMAUThreshold(entity.getLong("mauThreshold"));
+            } catch (Exception ex) {
+                throw new RuntimeException("Error in setting licence configuration from persistence: custom-fields containing MAU data is missing. " + ex.getMessage());
+            }
+            licenseConfiguration.setTrial(entity.getBoolean("isTrial"));
+            try {
+                licenseConfiguration.setLicenseExpired(entity.getBoolean("isExpired"));
+                licenseConfiguration.setLicenseActive(entity.getBoolean("active"));
             } catch (Exception ex) {
                 //when the method call from activateLicense method where is_expired and license_active fields are absent in response.
                 licenseConfiguration.setLicenseExpired(false);
                 licenseConfiguration.setLicenseActive(entity.getBoolean("active"));
             }
+            if(entity.has("isUsable")) {
+                licenseConfiguration.setLicenseUsable(entity.getBoolean("isUsable"));
+            } else {
+                licenseConfiguration.setLicenseUsable(licenseConfiguration.getLicenseActive() && !licenseConfiguration.getLicenseExpired());
+            }
+
         } catch (Exception ex) {
+            log.error(ex.getMessage());
             throw new RuntimeException("Error in setting licence configuration from persistence", ex);
         }
     }
@@ -884,7 +868,7 @@ public class LicenseDetailsService extends BaseService {
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
             log.debug("Trying to generate trial License.");
-            String trialLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/trial");
+            String trialLicenseUrl = formatApiUrl(licenseConfiguration.getScanApiHostname(), "/trial-license");
 
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
             if (tokenResponse == null) {
@@ -996,17 +980,12 @@ public class LicenseDetailsService extends BaseService {
             log.debug("Active license for admin-ui found : {}", licenseConfiguration.getProductName());
             licenseResponse.setLicenseEnabled(licenseConfiguration.getLicenseActive());
             licenseResponse.setProductName(licenseConfiguration.getProductName());
-            licenseResponse.setProductCode(licenseConfiguration.getProductCode());
             licenseResponse.setLicenseType(licenseConfiguration.getLicenseType());
             licenseResponse.setLicenseMAUThreshold(licenseConfiguration.getLicenseMAUThreshold());
             licenseResponse.setLicenseKey(licenseConfiguration.getLicenseKey());
             licenseResponse.setValidityPeriod(licenseConfiguration.getLicenseValidUpto());
             licenseResponse.setLicenseActive(licenseConfiguration.getLicenseActive());
             licenseResponse.setLicenseExpired(licenseConfiguration.getLicenseExpired());
-            licenseResponse.setCompanyName(licenseConfiguration.getCompanyName());
-            licenseResponse.setCustomerEmail(licenseConfiguration.getCustomerEmail());
-            licenseResponse.setCustomerFirstName(licenseConfiguration.getCustomerFirstName());
-            licenseResponse.setCustomerLastName(licenseConfiguration.getCustomerLastName());
             return licenseResponse;
 
         } catch (Exception e) {
@@ -1090,7 +1069,7 @@ public class LicenseDetailsService extends BaseService {
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
+            tokenRequest.setScope(SCOPE_LICENSE_READ);
 
             log.info("Trying to get access token from auth server.");
             String scanLicenseApiHostname = StringUtils.removeEnd(opHost, "/") +
