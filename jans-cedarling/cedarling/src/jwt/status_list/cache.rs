@@ -488,11 +488,21 @@ struct StatusListWriter<F: Fn()> {
 }
 
 impl<F: Fn()> StatusListWriter<F> {
+    /// Puts a refreshed list in use. Cached tokens are cleared only when it
+    /// changes a status: one with the same statuses passes every token the
+    /// previous list passed, and while no list was usable no token with a
+    /// `status` claim passed at all.
     fn replace(&self, list: CachedStatusList) {
+        let changes_statuses = match &**self.list.state.load() {
+            StatusListState::Usable(previous) => !previous.has_same_statuses(&list),
+            StatusListState::Unavailable(_) => false,
+        };
         self.list
             .state
             .store(Arc::new(StatusListState::Usable(list)));
-        (self.on_change)();
+        if changes_statuses {
+            (self.on_change)();
+        }
     }
 
     /// Records that the list could not be refreshed, keeping the time it first
@@ -912,6 +922,14 @@ mod test {
         ))
     }
 
+    fn list_of(statuses: Vec<u8>) -> CachedStatusList {
+        StatusList {
+            bit_size: 1u8.try_into().expect("valid bit size"),
+            list: statuses,
+        }
+        .into()
+    }
+
     /// Every change that makes earlier checks against the list stale clears the
     /// tokens validated against it, so a revoked or unchecked token is not served
     /// from the token cache; a change that does not, leaves them.
@@ -924,25 +942,31 @@ mod test {
         };
         let cause = || Arc::new(unsupported_algorithm(Algorithm::HS256));
 
-        writer.mark_unavailable(1_000, cause());
-        assert_eq!(cleared.get(), 1, "a usable list became unavailable");
-        writer.mark_unavailable(1_001, cause());
+        writer.replace(list_of(vec![0]));
+        assert_eq!(
+            cleared.get(),
+            0,
+            "a refresh with the same statuses passes every token the previous list passed"
+        );
+        writer.replace(list_of(vec![1]));
         assert_eq!(
             cleared.get(),
             1,
-            "the list was already unavailable, so no token was validated against it"
+            "a refreshed list may revoke cached tokens"
         );
-        writer.replace(
-            StatusList {
-                bit_size: 1u8.try_into().expect("valid bit size"),
-                list: vec![1],
-            }
-            .into(),
-        );
+        writer.mark_unavailable(1_000, cause());
+        assert_eq!(cleared.get(), 2, "a usable list became unavailable");
+        writer.mark_unavailable(1_001, cause());
         assert_eq!(
             cleared.get(),
             2,
-            "a refreshed list may revoke cached tokens"
+            "the list was already unavailable, so no token was validated against it"
+        );
+        writer.replace(list_of(vec![0]));
+        assert_eq!(
+            cleared.get(),
+            2,
+            "no token with a `status` claim passed while the list was unavailable"
         );
         writer.expired();
         assert_eq!(

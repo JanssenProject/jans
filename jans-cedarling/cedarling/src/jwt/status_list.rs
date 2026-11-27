@@ -268,6 +268,12 @@ pub(super) struct CachedStatusList {
 }
 
 impl CachedStatusList {
+    /// Whether both lists give every token the same status, whatever their
+    /// expiry: a token that passed one passes the other.
+    pub(super) fn has_same_statuses(&self, other: &Self) -> bool {
+        self.list == other.list
+    }
+
     pub(super) fn expiry(&self) -> Option<StatusListExpiry> {
         self.expiry
     }
