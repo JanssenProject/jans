@@ -119,9 +119,7 @@ impl ErrorMetricKey for StatusCheckError {
             // the issuer's list could not be loaded or refreshed in time
             Self::Unavailable { .. } | Self::Expired { .. } => "jwt.status_list_unavailable",
             Self::Rejected { .. } => "jwt.status_list_rejected",
-            Self::IdxOutOfBounds { .. } | Self::UnsupportedBitSize { .. } => {
-                "jwt.status_list_check_failed"
-            },
+            Self::IdxOutOfBounds { .. } => "jwt.status_list_check_failed",
         }
     }
 }

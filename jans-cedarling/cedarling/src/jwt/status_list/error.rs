@@ -32,13 +32,12 @@ pub enum ParseStatusListError {
     DecompressedSizeExceeded(u64),
 }
 
-/// Why [`StatusList::get_status`](super::StatusList::get_status) gave no status.
+/// [`StatusList::get_status`](super::StatusList::get_status) gives no status for
+/// an index past the end of the list.
 #[derive(Debug, PartialEq, Error)]
-pub(super) enum GetStatusError {
-    #[error("the index is outside the list, which holds {len} entries")]
-    IdxOutOfBounds { len: usize },
-    #[error("the list is cached with an unsupported bit size")]
-    UnsupportedBitSize,
+#[error("the index is outside the list, which holds {len} entries")]
+pub(super) struct IdxOutOfBounds {
+    pub(super) len: usize,
 }
 
 /// Why [`CachedStatusList::status_at`](super::CachedStatusList::status_at) gave
@@ -48,7 +47,7 @@ pub(super) enum StatusAtError {
     #[error("the list is past its {0}")]
     Expired(StatusListExpiry),
     #[error(transparent)]
-    Get(#[from] GetStatusError),
+    IdxOutOfBounds(#[from] IdxOutOfBounds),
 }
 
 /// Why a token with a `status` claim fails the status check. Each message names
@@ -89,8 +88,6 @@ pub enum StatusCheckError {
          entries"
     )]
     IdxOutOfBounds { uri: String, idx: usize, len: usize },
-    #[error("the status list '{uri}' is cached with an unsupported bit size")]
-    UnsupportedBitSize { uri: String },
     #[error("entry {idx} of the status list '{uri}' is {status}")]
     Rejected {
         uri: String,

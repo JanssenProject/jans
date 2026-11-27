@@ -72,18 +72,16 @@ impl StatusList {
     /// ([draft-ietf-oauth-status-list-21 §8.3] step 6).
     ///
     /// [draft-ietf-oauth-status-list-21 §8.3]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-8.3
-    fn get_status(&self, index: usize) -> Result<JwtStatus, GetStatusError> {
-        let scale = (8 / self.bit_size.0) as usize;
+    fn get_status(&self, index: usize) -> Result<JwtStatus, IdxOutOfBounds> {
+        let per_byte = self.bit_size.statuses_per_byte();
 
-        let byte = self
-            .list
-            .get(index / scale)
-            .ok_or(GetStatusError::IdxOutOfBounds {
-                len: self.list.len().saturating_mul(scale),
-            })?;
+        let byte = self.list.get(index / per_byte).ok_or(IdxOutOfBounds {
+            len: self.list.len().saturating_mul(per_byte),
+        })?;
 
-        let raw_status = get_status_from_byte(*byte, self.bit_size, index % scale)?;
-        Ok(JwtStatus::from(raw_status))
+        Ok(JwtStatus::from(
+            self.bit_size.status_in_byte(*byte, index % per_byte),
+        ))
     }
 }
 
@@ -317,41 +315,6 @@ impl TryFrom<ValidatedJwt> for StatusList {
     }
 }
 
-/// Retrieves the status nibble/byte value from the given list byte.
-///
-/// [`StatusBitSize`] is normally only constructed with `1`, `2`, `4`, or `8` via
-/// [`TryFrom`]. If the invariant is violated, this returns
-/// [`GetStatusError::UnsupportedBitSize`] so callers fail closed instead of
-/// treating corrupt data as valid.
-fn get_status_from_byte(
-    byte: u8,
-    bit_size: StatusBitSize,
-    bit_idx: usize,
-) -> Result<u8, GetStatusError> {
-    match bit_size {
-        StatusBitSize(8) => Ok(byte),
-        StatusBitSize(1) => {
-            let offset = bit_idx;
-            Ok((byte >> offset) & 0b0000_0001)
-        },
-        StatusBitSize(2) => {
-            let offset = bit_idx * 2;
-            Ok((byte >> offset) & 0b0000_0011)
-        },
-        StatusBitSize(4) => {
-            let offset = bit_idx * 4;
-            Ok((byte >> offset) & 0b0000_1111)
-        },
-        StatusBitSize(_) => {
-            debug_assert!(
-                false,
-                "status bit size can only be 1, 2, 4, or 8; see https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/10/"
-            );
-            Err(GetStatusError::UnsupportedBitSize)
-        },
-    }
-}
-
 /// A status value from a status list, as [draft-ietf-oauth-status-list-21 §7.1]
 /// defines them.
 ///
@@ -416,25 +379,61 @@ impl From<u8> for JwtStatus {
     }
 }
 
-/// Newtype that enforces valid status bit size.
+/// The number of bits that encode one status: the `bits` of a status list, which
+/// is 1, 2, 4 or 8 ([draft-ietf-oauth-status-list-21 §4.1]).
 ///
-/// Use [`StatusBitSize::try_from<u8>`] to initialize.
+/// [draft-ietf-oauth-status-list-21 §4.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-4.1
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct StatusBitSize(u8);
+pub enum StatusBitSize {
+    One,
+    Two,
+    Four,
+    Eight,
+}
+
+impl StatusBitSize {
+    fn bits(self) -> u8 {
+        match self {
+            Self::One => 1,
+            Self::Two => 2,
+            Self::Four => 4,
+            Self::Eight => 8,
+        }
+    }
+
+    fn statuses_per_byte(self) -> usize {
+        usize::from(8 / self.bits())
+    }
+
+    /// The status at `slot` of `byte`, counting from the least significant bits
+    /// ([draft-ietf-oauth-status-list-21 §4.1]).
+    ///
+    /// [draft-ietf-oauth-status-list-21 §4.1]: https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-21.html#section-4.1
+    fn status_in_byte(self, byte: u8, slot: usize) -> u8 {
+        let bits = self.bits();
+        let mask = u8::MAX >> (8 - bits);
+        // `slot` is below `statuses_per_byte`, so the shift stays below 8.
+        let shift = slot * usize::from(bits);
+        (byte >> shift) & mask
+    }
+}
 
 impl From<StatusBitSize> for u8 {
     fn from(value: StatusBitSize) -> Self {
-        value.0
+        value.bits()
     }
 }
 
 impl TryFrom<u8> for StatusBitSize {
     type Error = ParseStatusListError;
 
-    fn try_from(bit: u8) -> Result<Self, Self::Error> {
-        match bit {
-            1 | 2 | 4 | 8 => Ok(Self(bit)),
-            bit => Err(ParseStatusListError::InvalidBitSize(bit)),
+    fn try_from(bits: u8) -> Result<Self, Self::Error> {
+        match bits {
+            1 => Ok(Self::One),
+            2 => Ok(Self::Two),
+            4 => Ok(Self::Four),
+            8 => Ok(Self::Eight),
+            bits => Err(ParseStatusListError::InvalidBitSize(bits)),
         }
     }
 }

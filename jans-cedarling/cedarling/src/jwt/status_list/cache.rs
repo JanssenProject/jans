@@ -31,7 +31,7 @@ use crate::{
 };
 
 use super::{
-    CachedStatusList, GetStatusError, StatusAtError, StatusCheckError, StatusListExpiry,
+    CachedStatusList, IdxOutOfBounds, StatusAtError, StatusCheckError, StatusListExpiry,
     StatusListJwt, StatusListJwtStr, StatusListState, UnavailableStatusList, UnboundReason,
     UnixTime, UpdateStatusListError,
 };
@@ -252,11 +252,8 @@ impl IssuerStatusList {
             let uri = uri.to_string();
             match err {
                 StatusAtError::Expired(expiry) => StatusCheckError::Expired { uri, expiry },
-                StatusAtError::Get(GetStatusError::IdxOutOfBounds { len }) => {
+                StatusAtError::IdxOutOfBounds(IdxOutOfBounds { len }) => {
                     StatusCheckError::IdxOutOfBounds { uri, idx, len }
-                },
-                StatusAtError::Get(GetStatusError::UnsupportedBitSize) => {
-                    StatusCheckError::UnsupportedBitSize { uri }
                 },
             }
         })?;
