@@ -547,6 +547,9 @@ class Upgrade:
         if "inum=A44E-4F3D,ou=scripts,o=jans" in attrs["introspectionScripts"]:
             attrs["introspectionScripts"].remove("inum=A44E-4F3D,ou=scripts,o=jans")
             should_update = True
+        if "inum=1DAF-1A90,ou=scripts,o=jans" not in attrs["introspectionScripts"]:
+            attrs["introspectionScripts"].append("inum=1DAF-1A90,ou=scripts,o=jans")
+            should_update = True
         entry.attrs["jansAttrs"] = json.dumps(attrs)
 
         if should_update:
