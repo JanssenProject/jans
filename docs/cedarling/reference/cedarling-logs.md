@@ -202,6 +202,7 @@ In the multi-issuer flow, `principal` is empty (no principal entities are create
 * `pdp_id`: unique identifier for the Cedarling
 * `policystore_id`: What policystore this Cedarling instance is using
 * `policystore_version`: What version of the policystore the Cedarling is using
+* `bundle_hash`: SHA-256 digest of the `.cjar` policy archive used to evaluate the decision, formatted as `sha256:<64 lowercase hex digits>`. Omitted when the policy store was loaded without an archive.
 * `principal`: List of principal entity type names used in the authorization request (e.g. `["Jans::User"]` for unsigned; empty `[]` for multi-issuer)
 * `diagnostics`: Summary of policies that contributed to the decision and any evaluation errors
 * `lock_client_id`: If this Cedarling has registered with a Lock Server, what is the client_id it received (omitted if not registered)

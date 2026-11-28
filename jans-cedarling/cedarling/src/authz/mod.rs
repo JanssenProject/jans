@@ -1204,11 +1204,7 @@ impl Authz {
             base,
             policystore_id: self.config.policy_store.id.as_str().into(),
             policystore_version: self.config.policy_store.get_store_version().into(),
-            bundle_hash: self
-                .config
-                .policy_store
-                .bundle_hash()
-                .map(|hash| hash.to_string()),
+            bundle_hash: self.config.policy_store.bundle_hash(),
             principal: metadata.principal.clone(),
             lock_client_id: None,
             action: metadata.action.clone(),
@@ -2252,7 +2248,11 @@ mod trace_record_tests {
                 .into_iter()
                 .find(|entry| entry["log_kind"] == "Decision")
                 .expect("the decision should be logged");
-            assert_eq!(decision_log["bundle_hash"], json!(expected_hash.to_string()));
+            assert_eq!(
+                decision_log["bundle_hash"],
+                json!(expected_hash.to_string()),
+                "the decision should log the digest of the snapshot that evaluated it"
+            );
         }
     }
 
