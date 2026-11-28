@@ -408,6 +408,16 @@ async fn test_load_from_directory_and_authorize_success() {
         result.decision,
         "Read action should be allowed by the allow-read policy"
     );
+
+    let decision_log = cedarling
+        .pop_logs()
+        .into_iter()
+        .find(|entry| entry["log_kind"] == "Decision" && entry.get("decision").is_some())
+        .expect("Authorization decision should be logged");
+    assert!(
+        decision_log.get("bundle_hash").is_none(),
+        "Directory-backed decision logs should omit bundle_hash"
+    );
 }
 
 /// Test that the `TrustedIssuerLoadingInfo` trait works correctly on `Cedarling`.

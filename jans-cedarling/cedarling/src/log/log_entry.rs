@@ -18,6 +18,7 @@ use crate::lock::AuditPayload;
 use crate::log::loggable_fn::LoggableFn;
 use crate::trace::TraceRecordStatus;
 use cedar_policy::EntityUid;
+use jans_trace_core::Digest;
 use rand::Rng;
 use rand::{SeedableRng, rngs::StdRng};
 use smol_str::{SmolStr, ToSmolStr};
@@ -317,6 +318,16 @@ impl Diagnostics {
     }
 }
 
+fn serialize_bundle_hash<S>(hash: &Option<Digest>, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    match hash {
+        Some(hash) => serializer.collect_str(hash),
+        None => serializer.serialize_none(),
+    }
+}
+
 /// log entry for decision
 #[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub(crate) struct DecisionLogEntry {
@@ -328,6 +339,12 @@ pub(crate) struct DecisionLogEntry {
     pub policystore_id: SmolStr,
     /// version of policy store
     pub policystore_version: SmolStr,
+    /// SHA-256 digest of the policy archive used for this decision.
+    #[serde(
+        skip_serializing_if = "Option::is_none",
+        serialize_with = "serialize_bundle_hash"
+    )]
+    pub bundle_hash: Option<Digest>,
     /// describe what principal was active on authorization request
     pub principal: Vec<SmolStr>,
     /// If this Cedarling has registered with a Lock Server, what is the `client_id` it received

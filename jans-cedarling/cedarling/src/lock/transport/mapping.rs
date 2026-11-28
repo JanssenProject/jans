@@ -263,6 +263,7 @@ mod test {
             base,
             policystore_id: "test-store".into(),
             policystore_version: "1.0.0".into(),
+            bundle_hash: None,
             principal: vec!["Jans::User".into(), "Jans::Workload".into()],
             lock_client_id: Some("lock-client-123".to_string()),
             action: "Jans::Action::\"Update\"".to_string(),
