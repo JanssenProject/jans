@@ -17,3 +17,6 @@ serde_json = { workspace = true }
 
 [target.'cfg(not(target_arch = "wasm32"))'.build-dependencies]
 rust2go = { version = "0.4.3", features = ["build"] }
+
+[lints]
+workspace = true

@@ -29,3 +29,6 @@ rustls-platform-verifier = "0.7"
 
 [package.metadata.cargo-machete]
 ignored = ["uniffi_macros"]
+
+[lints]
+workspace = true

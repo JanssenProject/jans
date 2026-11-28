@@ -13,18 +13,22 @@ use cedarling::{
     blocking,
 };
 
-use crate::types::*;
+use crate::types::{
+    CedarlingErrorCode, CedarlingInstanceResult, CedarlingResult, CedarlingStringArray,
+    clear_last_error, set_last_error,
+};
 
 /// Map core [`DataError`] to the closest [`CedarlingErrorCode`] for C callers.
-fn cedarling_result_from_data_error(e: DataError) -> CedarlingResult {
+fn cedarling_result_from_data_error(e: &DataError) -> CedarlingResult {
     let msg = e.to_string();
-    let code = match &e {
-        DataError::InvalidKey => CedarlingErrorCode::InvalidArgument,
+    let code = match e {
+        DataError::InvalidKey | DataError::TTLExceeded { .. } | DataError::ValueTooLarge { .. } => {
+            CedarlingErrorCode::InvalidArgument
+        },
         DataError::KeyNotFound { .. } => CedarlingErrorCode::KeyNotFound,
-        DataError::StorageLimitExceeded { .. } => CedarlingErrorCode::Internal,
-        DataError::TTLExceeded { .. } => CedarlingErrorCode::InvalidArgument,
-        DataError::ValueTooLarge { .. } => CedarlingErrorCode::InvalidArgument,
-        DataError::SerializationError(_) => CedarlingErrorCode::Internal,
+        DataError::StorageLimitExceeded { .. } | DataError::SerializationError(_) => {
+            CedarlingErrorCode::Internal
+        },
     };
     CedarlingResult::error(code, &msg)
 }
@@ -55,10 +59,7 @@ impl CedarlingRuntime {
                 guard.insert(instance_id, instance);
                 Ok(instance_id)
             },
-            Err(e) => Err(format!(
-                "Internal lock failure while adding instance: {}",
-                e
-            )),
+            Err(e) => Err(format!("Internal lock failure while adding instance: {e}")),
         }
     }
 
@@ -74,8 +75,7 @@ impl CedarlingRuntime {
             },
             Err(e) => {
                 set_last_error(&format!(
-                    "Internal lock failure while dropping instance: {}",
-                    e
+                    "Internal lock failure while dropping instance: {e}"
                 ));
                 CedarlingErrorCode::Internal
             },
@@ -90,7 +90,7 @@ impl CedarlingRuntime {
             Ok(guard) => Ok(guard.get(&instance_id).cloned()),
             Err(e) => Err((
                 CedarlingErrorCode::Internal,
-                format!("Internal lock failure while getting instance: {}", e),
+                format!("Internal lock failure while getting instance: {e}"),
             )),
         }
     }
@@ -104,8 +104,7 @@ impl CedarlingRuntime {
             },
             Err(e) => {
                 set_last_error(&format!(
-                    "Internal lock failure while clearing instances: {}",
-                    e
+                    "Internal lock failure while clearing instances: {e}"
                 ));
                 return CedarlingErrorCode::Internal;
             },
@@ -143,7 +142,7 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
     let bootstrap_config_raw = match serde_json::from_str::<BootstrapConfigRaw>(config_json) {
         Ok(config) => config,
         Err(e) => {
-            let error_msg = format!("Failed to parse bootstrap config: {}", e);
+            let error_msg = format!("Failed to parse bootstrap config: {e}");
             return CedarlingInstanceResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
@@ -151,7 +150,7 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
     let bootstrap_config = match BootstrapConfig::from_raw_config(&bootstrap_config_raw) {
         Ok(config) => config,
         Err(e) => {
-            let error_msg = format!("Invalid bootstrap config: {}", e);
+            let error_msg = format!("Invalid bootstrap config: {e}");
             return CedarlingInstanceResult::error(
                 CedarlingErrorCode::ConfigurationError,
                 &error_msg,
@@ -164,7 +163,7 @@ pub fn create_instance(config_json: &str) -> CedarlingInstanceResult {
     let instance = match blocking::Cedarling::new(&bootstrap_config) {
         Ok(instance) => instance,
         Err(e) => {
-            let error_msg = format!("Failed to create Cedarling instance: {}", e);
+            let error_msg = format!("Failed to create Cedarling instance: {e}");
             return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &error_msg);
         },
     };
@@ -187,7 +186,7 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
         Some(json) => match serde_json::from_str::<Option<BootstrapConfigRaw>>(json) {
             Ok(config) => config,
             Err(e) => {
-                let error_msg = format!("Failed to parse bootstrap config: {}", e);
+                let error_msg = format!("Failed to parse bootstrap config: {e}");
                 return CedarlingInstanceResult::error(CedarlingErrorCode::JsonError, &error_msg);
             },
         },
@@ -199,7 +198,7 @@ pub fn create_instance_with_env(config_json: Option<&str>) -> CedarlingInstanceR
     let instance = match blocking::Cedarling::new_with_env(bootstrap_config_raw) {
         Ok(instance) => instance,
         Err(e) => {
-            let error_msg = format!("Failed to create Cedarling instance: {}", e);
+            let error_msg = format!("Failed to create Cedarling instance: {e}");
             return CedarlingInstanceResult::error(CedarlingErrorCode::Internal, &error_msg);
         },
     };
@@ -334,20 +333,20 @@ pub fn context_push(
     let value: serde_json::Value = match serde_json::from_str(value_json) {
         Ok(v) => v,
         Err(e) => {
-            let error_msg = format!("Failed to parse value JSON: {}", e);
+            let error_msg = format!("Failed to parse value JSON: {e}");
             return CedarlingResult::error(CedarlingErrorCode::JsonError, &error_msg);
         },
     };
 
-    let ttl = if ttl_secs > 0 {
-        Some(Duration::from_secs(ttl_secs as u64))
-    } else {
-        None
-    };
+    // Zero or negative means no TTL.
+    let ttl = u64::try_from(ttl_secs)
+        .ok()
+        .filter(|&secs| secs > 0)
+        .map(Duration::from_secs);
 
     match instance.push_data_ctx(key, value, ttl) {
         Ok(()) => CedarlingResult::success("{}".to_string()),
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -374,12 +373,12 @@ pub fn context_get(instance_id: u64, key: &str) -> CedarlingResult {
         Ok(Some(value)) => match serde_json::to_string(&value) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
-                let error_msg = format!("Failed to serialize value: {}", e);
+                let error_msg = format!("Failed to serialize value: {e}");
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Ok(None) => CedarlingResult::success("null".to_string()),
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -406,12 +405,12 @@ pub fn context_get_entry(instance_id: u64, key: &str) -> CedarlingResult {
         Ok(Some(entry)) => match serde_json::to_string(&entry) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
-                let error_msg = format!("Failed to serialize data entry: {}", e);
+                let error_msg = format!("Failed to serialize data entry: {e}");
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
         Ok(None) => CedarlingResult::success("null".to_string()),
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -439,7 +438,7 @@ pub fn context_remove(instance_id: u64, key: &str) -> CedarlingResult {
             let result = serde_json::json!({"removed": removed});
             CedarlingResult::success(result.to_string())
         },
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -464,7 +463,7 @@ pub fn context_clear(instance_id: u64) -> CedarlingResult {
 
     match instance.clear_data_ctx() {
         Ok(()) => CedarlingResult::success("{}".to_string()),
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -491,11 +490,11 @@ pub fn context_list(instance_id: u64) -> CedarlingResult {
         Ok(entries) => match serde_json::to_string(&entries) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
-                let error_msg = format!("Failed to serialize entries: {}", e);
+                let error_msg = format!("Failed to serialize entries: {e}");
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -522,11 +521,11 @@ pub fn context_stats(instance_id: u64) -> CedarlingResult {
         Ok(stats) => match serde_json::to_string(&stats) {
             Ok(json) => CedarlingResult::success(json),
             Err(e) => {
-                let error_msg = format!("Failed to serialize stats: {}", e);
+                let error_msg = format!("Failed to serialize stats: {e}");
                 CedarlingResult::error(CedarlingErrorCode::Internal, &error_msg)
             },
         },
-        Err(e) => cedarling_result_from_data_error(e),
+        Err(e) => cedarling_result_from_data_error(&e),
     }
 }
 
@@ -550,7 +549,7 @@ pub fn pop_logs(instance_id: u64) -> Result<CedarlingStringArray, CedarlingError
 
     let logs = instance.pop_logs();
 
-    let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
+    let log_strings: Vec<String> = logs.iter().map(ToString::to_string).collect();
 
     CedarlingStringArray::try_new(log_strings)
 }
@@ -600,7 +599,7 @@ pub fn get_log_ids(instance_id: u64) -> Result<CedarlingStringArray, CedarlingEr
 
     let logs = instance.get_log_ids();
 
-    let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
+    let log_strings: Vec<String> = logs.clone();
 
     CedarlingStringArray::try_new(log_strings)
 }
@@ -626,7 +625,7 @@ pub fn get_logs_by_tag(
     };
     let logs = instance.get_logs_by_tag(tag);
 
-    let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
+    let log_strings: Vec<String> = logs.iter().map(ToString::to_string).collect();
 
     CedarlingStringArray::try_new(log_strings)
 }
@@ -652,7 +651,7 @@ pub fn get_logs_by_request_id(
     };
     let logs = instance.get_logs_by_request_id(request_id);
 
-    let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
+    let log_strings: Vec<String> = logs.iter().map(ToString::to_string).collect();
 
     CedarlingStringArray::try_new(log_strings)
 }
@@ -678,7 +677,7 @@ pub fn get_logs_by_request_id_and_tag(
     };
     let logs = instance.get_logs_by_request_id_and_tag(request_id, tag);
 
-    let log_strings: Vec<String> = logs.iter().map(|log| log.to_string()).collect();
+    let log_strings: Vec<String> = logs.iter().map(ToString::to_string).collect();
 
     CedarlingStringArray::try_new(log_strings)
 }

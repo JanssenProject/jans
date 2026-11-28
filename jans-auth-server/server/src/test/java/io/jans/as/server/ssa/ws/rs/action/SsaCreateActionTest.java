@@ -152,7 +152,7 @@ public class SsaCreateActionTest {
         verify(ssaJsonService).jsonObjectToString(any());
 
         verifyNoInteractions(attributeService);
-        verify(appConfiguration).getSsaConfiguration();
+        verify(appConfiguration, atLeastOnce()).getSsaConfiguration();
 
         ArgumentCaptor<Ssa> ssaCaptor = ArgumentCaptor.forClass(Ssa.class);
         verify(ssaService).persist(ssaCaptor.capture());

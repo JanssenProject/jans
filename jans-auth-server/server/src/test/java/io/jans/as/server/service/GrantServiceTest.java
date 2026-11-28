@@ -5,6 +5,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
+import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
 import org.mockito.InjectMocks;
@@ -16,7 +17,10 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.testng.Assert.*;
 
@@ -129,5 +133,22 @@ public class GrantServiceTest {
 
         grantService.filterOutRefreshTokenFromDeletion(tokens);
         assertEquals(tokens.size(), 2);
+    }
+
+    @Test
+    public void removeSilently_whenStatusListIndexIsZero_shouldMarkIndexInvalid() throws InterruptedException {
+        TokenEntity token = new TokenEntity();
+        token.setTokenTypeEnum(TokenType.ID_TOKEN);
+        token.getAttributes().setStatusListIndex(0);
+        CountDownLatch updated = new CountDownLatch(1);
+        Mockito.doAnswer(invocation -> {
+            updated.countDown();
+            return null;
+        }).when(statusListIndexService).updateStatusAtIndexes(Mockito.anyList(), Mockito.any());
+
+        grantService.removeSilently(token);
+
+        assertTrue(updated.await(5, TimeUnit.SECONDS));
+        Mockito.verify(statusListIndexService).updateStatusAtIndexes(Collections.singletonList(0), TokenStatus.INVALID);
     }
 }

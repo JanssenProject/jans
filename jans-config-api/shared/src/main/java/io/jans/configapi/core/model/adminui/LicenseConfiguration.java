@@ -26,6 +26,8 @@ public class LicenseConfiguration {
     private String companyName;
     private Boolean licenseActive;
     private Boolean licenseExpired;
+    private Boolean isTrial;
+    private Boolean isLicenseUsable;
     private Long licenseMAUThreshold;
     private Long intervalForSyncLicenseDetailsInDays;
 
@@ -179,5 +181,21 @@ public class LicenseConfiguration {
 
     public void setIntervalForSyncLicenseDetailsInDays(Long intervalForSyncLicenseDetailsInDays) {
         this.intervalForSyncLicenseDetailsInDays = intervalForSyncLicenseDetailsInDays;
+    }
+
+    public Boolean getTrial() {
+        return isTrial;
+    }
+
+    public void setTrial(Boolean trial) {
+        isTrial = trial;
+    }
+
+    public Boolean getLicenseUsable() {
+        return isLicenseUsable;
+    }
+
+    public void setLicenseUsable(Boolean licenseUsable) {
+        isLicenseUsable = licenseUsable;
     }
 }

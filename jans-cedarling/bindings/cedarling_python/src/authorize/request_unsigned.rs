@@ -77,12 +77,12 @@ impl RequestUnsigned {
 
 impl RequestUnsigned {
     pub fn to_cedarling(&self) -> Result<cedarling::RequestUnsigned, PyErr> {
-        let principal = self.principal.clone().map(|p| p.into());
+        let principal = self.principal.clone().map(std::convert::Into::into);
 
         let context = Python::attach(|py| -> Result<serde_json::Value, PyErr> {
             let ctx = self.context.clone_ref(py).into_bound(py);
             from_pyobject(ctx).map_err(|err| {
-                PyRuntimeError::new_err(format!("Failed to convert context to json: {}", err))
+                PyRuntimeError::new_err(format!("Failed to convert context to json: {err}"))
             })
         })?;
 

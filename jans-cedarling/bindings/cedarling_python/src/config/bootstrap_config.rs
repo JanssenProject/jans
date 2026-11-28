@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use pyo3::exceptions::*;
+use pyo3::exceptions::{PyOSError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -84,7 +84,7 @@ impl BootstrapConfig {
     pub fn load_from_file(path: &str) -> PyResult<Self> {
         let inner = cedarling::BootstrapConfig::load_from_file(path).map_err(|e| match e {
             cedarling::BootstrapConfigLoadingError::ReadFile(file_name, e) => {
-                PyOSError::new_err(format!("Error reading file `{}`: {}", file_name, e))
+                PyOSError::new_err(format!("Error reading file `{file_name}`: {e}"))
             },
             err => PyValueError::new_err(err.to_string()),
         })?;

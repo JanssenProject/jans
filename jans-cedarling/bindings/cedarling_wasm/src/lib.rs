@@ -3,6 +3,11 @@
 //
 // Copyright (c) 2024, Gluu, Inc.
 
+#![allow(
+    clippy::needless_pass_by_value,
+    reason = "wasm_bindgen passes JS arguments as owned values"
+)]
+
 use cedarling::bindings::cedar_policy;
 use cedarling::{
     AuthorizeMultiIssuerRequest, BatchAuthorizeMultiIssuerRequest,
@@ -61,6 +66,7 @@ pub struct MultiIssuerAuthorizeResult {
 impl MultiIssuerAuthorizeResult {
     /// Convert `MultiIssuerAuthorizeResult` to json string value
     #[wasm_bindgen(js_name = jsonString)]
+    #[must_use]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -88,18 +94,21 @@ pub struct DroppedToken {
 impl DroppedToken {
     /// Cedar entity-type mapping of the dropped input.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn mapping(&self) -> String {
         self.inner.mapping.clone()
     }
 
     /// Zero-based position of the token in the request's `tokens` array.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn index(&self) -> usize {
         self.inner.index
     }
 
     /// Why the token was dropped.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn reason(&self) -> DropReason {
         DropReason {
             inner: self.inner.reason.clone(),
@@ -130,6 +139,7 @@ pub struct DropReason {
 impl DropReason {
     /// Stable snake-case slug, e.g. `jwt_validation_failed`.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn kind(&self) -> String {
         self.inner.slug().to_string()
     }
@@ -143,6 +153,7 @@ impl DropReason {
 
     /// Claim-free human-readable message; non-empty for every reason.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn message(&self) -> String {
         self.inner.message()
     }
@@ -208,7 +219,7 @@ pub async fn init(config: JsValue) -> Result<Cedarling, Error> {
 ///   source property. The archive bytes provide the policy store. With
 ///   `CEDARLING_POLICY_STORE_SIGSTORE_MODE: "enforce"`, also set
 ///   `CEDARLING_POLICY_STORE_SIGSTORE_BUNDLE_URI` to the bundle's URL.
-/// * `archive_bytes` - The .cjar archive bytes (Uint8Array)
+/// * `archive_bytes` - The .cjar archive bytes (`Uint8Array`)
 ///
 /// # Example
 /// ```javascript
@@ -572,6 +583,7 @@ impl Cedarling {
     /// const ids = cedarling.getLogIds();
     /// ```
     #[wasm_bindgen(js_name = getLogIds)]
+    #[must_use]
     pub fn get_log_ids(&self) -> Array {
         let result = Array::new();
         for log_id in self.instance.get_log_ids() {
@@ -794,7 +806,7 @@ impl Cedarling {
     }
 
     /// List all entries with their metadata.
-    /// Returns an array of DataEntry objects.
+    /// Returns an array of `DataEntry` objects.
     ///
     /// # Arguments
     ///
@@ -837,7 +849,7 @@ impl Cedarling {
     pub fn get_stats_ctx(&self) -> Result<DataStoreStats, Error> {
         self.instance
             .get_stats_ctx()
-            .map(|stats| stats.into())
+            .map(std::convert::Into::into)
             .map_err(Error::new)
     }
 
@@ -878,6 +890,7 @@ impl Cedarling {
     /// const id = cedarling.policyStoreId();
     /// ```
     #[wasm_bindgen(js_name = policyStoreId)]
+    #[must_use]
     pub fn policy_store_id(&self) -> Option<String> {
         self.instance.policy_store_id()
     }
@@ -894,6 +907,7 @@ impl Cedarling {
     /// const ok = cedarling.isTrustedIssuerLoadedByName("Acme");
     /// ```
     #[wasm_bindgen(js_name = isTrustedIssuerLoadedByName)]
+    #[must_use]
     pub fn is_trusted_issuer_loaded_by_name(&self, issuer_name: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_name(issuer_name)
     }
@@ -910,6 +924,7 @@ impl Cedarling {
     /// const ok = cedarling.isTrustedIssuerLoadedByIss("https://issuer.example.org");
     /// ```
     #[wasm_bindgen(js_name = isTrustedIssuerLoadedByIss)]
+    #[must_use]
     pub fn is_trusted_issuer_loaded_by_iss(&self, iss_claim: &str) -> bool {
         self.instance.is_trusted_issuer_loaded_by_iss(iss_claim)
     }
@@ -926,6 +941,7 @@ impl Cedarling {
     /// const total = cedarling.totalIssuers();
     /// ```
     #[wasm_bindgen(js_name = totalIssuers)]
+    #[must_use]
     pub fn total_issuers(&self) -> usize {
         self.instance.total_issuers()
     }
@@ -942,6 +958,7 @@ impl Cedarling {
     /// const loadedCount = cedarling.loadedTrustedIssuersCount();
     /// ```
     #[wasm_bindgen(js_name = loadedTrustedIssuersCount)]
+    #[must_use]
     pub fn loaded_trusted_issuers_count(&self) -> usize {
         self.instance.loaded_trusted_issuers_count()
     }
@@ -958,6 +975,7 @@ impl Cedarling {
     /// const ids = cedarling.loadedTrustedIssuerIds();
     /// ```
     #[wasm_bindgen(js_name = loadedTrustedIssuerIds)]
+    #[must_use]
     pub fn loaded_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.loaded_trusted_issuer_ids() {
@@ -978,6 +996,7 @@ impl Cedarling {
     /// const ids = cedarling.failedTrustedIssuerIds();
     /// ```
     #[wasm_bindgen(js_name = failedTrustedIssuerIds)]
+    #[must_use]
     pub fn failed_trusted_issuer_ids(&self) -> Array {
         let result = Array::new();
         for id in self.instance.failed_trusted_issuer_ids() {
@@ -999,7 +1018,7 @@ fn to_object_recursive(value: JsValue) -> Result<JsValue, Error> {
         // Convert the Map into an Object where keys and values are recursively processed
         let map = Map::from(value);
         let obj = Object::new();
-        for entry in map.entries().into_iter() {
+        for entry in map.entries() {
             let entry = Array::unchecked_from_js(entry?);
             let key = entry.get(0);
             let val = to_object_recursive(entry.get(1))?;
@@ -1055,6 +1074,7 @@ pub struct AuthorizeResult {
 impl AuthorizeResult {
     /// Convert `AuthorizeResult` to json string value
     #[wasm_bindgen(js_name = jsonString)]
+    #[must_use]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -1086,18 +1106,21 @@ impl BatchItemError {
     /// `principal_build`, `schema_validation`, `multi_issuer_entity`,
     /// `request_validation`.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn category(&self) -> String {
         self.inner.category().to_string()
     }
 
     /// Position of the failing item in the original `items` vector.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn item_index(&self) -> usize {
         self.inner.item_index()
     }
 
     /// Human-readable diagnostic. Safe to log.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn message(&self) -> String {
         self.inner.to_string()
     }
@@ -1122,6 +1145,7 @@ impl BatchItemUnsignedResult {
     /// `true` when Cedar evaluated this item (Allow or Deny); `false` when it
     /// failed to build.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn is_ok(&self) -> bool {
         self.inner.is_ok()
     }
@@ -1136,6 +1160,7 @@ impl BatchItemUnsignedResult {
 
     /// The per-item error if `!is_ok()`; `undefined` otherwise.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn error(&self) -> Option<BatchItemError> {
         self.inner.as_ref().err().cloned()
     }
@@ -1160,6 +1185,7 @@ pub struct BatchItemMultiIssuerResult {
 impl BatchItemMultiIssuerResult {
     /// `true` when Cedar evaluated this item.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn is_ok(&self) -> bool {
         self.inner.is_ok()
     }
@@ -1174,6 +1200,7 @@ impl BatchItemMultiIssuerResult {
 
     /// The per-item error if `!is_ok()`; `undefined` otherwise.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn error(&self) -> Option<BatchItemError> {
         self.inner.as_ref().err().cloned()
     }
@@ -1191,7 +1218,7 @@ impl From<Result<cedarling::MultiIssuerAuthorizeResult, CedarBatchItemError>>
 
 /// WASM wrapper for `cedarling::BatchAuthorizeResponse<Result<AuthorizeResult, BatchItemError>>`.
 ///
-/// Carries a shared `batch_id` (UUIDv7) alongside per-item results. Each result
+/// Carries a shared `batch_id` (`UUIDv7`) alongside per-item results. Each result
 /// is a [`BatchItemUnsignedResult`] — Cedar decision on `is_ok()`, per-item
 /// build failure on `error`. `results[i]` corresponds to `items[i]`.
 #[wasm_bindgen]
@@ -1205,6 +1232,7 @@ pub struct BatchAuthorizeUnsignedResponse {
 impl BatchAuthorizeUnsignedResponse {
     /// Shared correlation id stamped on every per-item decision log entry.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn batch_id(&self) -> String {
         self.inner_batch_id.clone()
     }
@@ -1212,6 +1240,7 @@ impl BatchAuthorizeUnsignedResponse {
     /// Per-item results in input order — each slot is a
     /// [`BatchItemUnsignedResult`].
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn results(&self) -> Vec<BatchItemUnsignedResult> {
         self.inner_results.clone()
     }
@@ -1244,6 +1273,7 @@ pub struct BatchAuthorizeMultiIssuerResponse {
 impl BatchAuthorizeMultiIssuerResponse {
     /// Shared correlation id stamped on every per-item decision log entry.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn batch_id(&self) -> String {
         self.inner_batch_id.clone()
     }
@@ -1251,6 +1281,7 @@ impl BatchAuthorizeMultiIssuerResponse {
     /// Per-item results in input order — each slot is a
     /// [`BatchItemMultiIssuerResult`].
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn results(&self) -> Vec<BatchItemMultiIssuerResult> {
         self.inner_results.clone()
     }
@@ -1288,12 +1319,14 @@ pub struct AuthorizeResultResponse {
 impl AuthorizeResultResponse {
     /// Authorization decision
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn decision(&self) -> bool {
         self.inner.decision() == cedar_policy::Decision::Allow
     }
 
     /// Diagnostics providing more information on how this decision was reached
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn diagnostics(&self) -> Diagnostics {
         Diagnostics {
             inner: self.inner.diagnostics().clone(),
@@ -1329,13 +1362,15 @@ impl Diagnostics {
     ///
     /// The ids should be treated as unordered,
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn reason(&self) -> Vec<String> {
-        self.inner.reason().map(|v| v.to_string()).collect()
+        self.inner.reason().map(ToString::to_string).collect()
     }
 
     /// Errors that occurred during authorization. The errors should be
     /// treated as unordered, since policies may be evaluated in any order.
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn errors(&self) -> Vec<PolicyEvaluationError> {
         self.inner
             .errors()
@@ -1361,7 +1396,7 @@ impl Serialize for Diagnostics {
     }
 }
 
-/// PolicyEvaluationError
+/// `PolicyEvaluationError`
 /// =====================
 ///
 /// Represents an error that occurred when evaluating a Cedar policy.
@@ -1374,12 +1409,14 @@ pub struct PolicyEvaluationError {
 impl PolicyEvaluationError {
     /// Id of the policy with an error
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn id(&self) -> String {
         self.inner.id.clone()
     }
 
     /// Underlying evaluation error string representation
     #[wasm_bindgen(getter)]
+    #[must_use]
     pub fn error(&self) -> String {
         self.inner.error.clone()
     }
@@ -1398,7 +1435,7 @@ impl Serialize for PolicyEvaluationError {
 }
 
 /// A WASM wrapper for the Rust `cedarling::DataEntry` struct.
-/// Represents a data entry in the DataStore with value and metadata.
+/// Represents a data entry in the `DataStore` with value and metadata.
 #[wasm_bindgen]
 #[derive(serde::Serialize)]
 pub struct DataEntry {
@@ -1431,6 +1468,7 @@ impl DataEntry {
 
     /// Convert `DataEntry` to json string value
     #[wasm_bindgen(js_name = jsonString)]
+    #[must_use]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -1453,7 +1491,7 @@ impl From<CedarDataEntry> for DataEntry {
 }
 
 /// A WASM wrapper for the Rust `cedarling::DataStoreStats` struct.
-/// Statistics about the DataStore.
+/// Statistics about the `DataStore`.
 #[wasm_bindgen]
 #[derive(serde::Serialize)]
 pub struct DataStoreStats {
@@ -1481,6 +1519,7 @@ pub struct DataStoreStats {
 impl DataStoreStats {
     /// Convert `DataStoreStats` to json string value
     #[wasm_bindgen(js_name = jsonString)]
+    #[must_use]
     pub fn json_string(&self) -> String {
         json!(self).to_string()
     }
@@ -1561,6 +1600,10 @@ impl From<CedarMetricsSnapshot> for MetricsSnapshot {
         fn to_map(counters: HashMap<String, i64>) -> Map {
             let map = Map::new();
             for (key, counter) in counters {
+                #[allow(
+                    clippy::cast_precision_loss,
+                    reason = "a JS number is an f64; counters stay far below 2^53"
+                )]
                 map.set(&JsValue::from(key), &JsValue::from_f64(counter as f64));
             }
             map

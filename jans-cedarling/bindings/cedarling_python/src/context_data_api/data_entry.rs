@@ -45,7 +45,7 @@ impl DataEntry {
     #[getter]
     fn value(&self, py: Python) -> PyResult<Py<PyAny>> {
         to_pyobject(py, &self.inner.value)
-            .map(|v| v.unbind())
+            .map(pyo3::Bound::unbind)
             .map_err(|err| err.0)
     }
 
